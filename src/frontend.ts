@@ -144,7 +144,7 @@ export function renderPage(locale: Locale): string {
       flex-wrap: wrap;
     }
 
-    .date-nav button, .date-nav input[type="date"] {
+    .date-nav button {
       padding: 0.5rem 1.125rem;
       border: 1.5px solid var(--border);
       background: var(--surface);
@@ -157,7 +157,7 @@ export function renderPage(locale: Locale): string {
       transition: border-color 0.2s, background 0.2s, color 0.2s;
     }
 
-    .date-nav button:hover, .date-nav input[type="date"]:hover {
+    .date-nav button:hover {
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -168,15 +168,50 @@ export function renderPage(locale: Locale): string {
       border-color: var(--accent);
     }
 
-    .date-nav button:focus-visible, .date-nav input[type="date"]:focus-visible {
+    .date-nav button:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
 
-    .date-nav input[type="date"].active {
+    .date-picker-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 0.875rem;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      border-radius: 100px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      position: relative;
+    }
+
+    .date-picker-label:hover { border-color: var(--accent); color: var(--accent); }
+
+    .date-picker-label input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+
+    .date-picker-label.active {
       border-color: var(--accent);
       background: var(--accent-light);
       color: var(--accent);
+    }
+
+    .date-picker-label:focus-within {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     #content { min-height: 60vh; }
@@ -540,7 +575,10 @@ export function renderPage(locale: Locale): string {
       <button id="btn-tomorrow">${escHtml(tr.tomorrow)}</button>
       <button id="btn-weekend">${escHtml(tr.saturday)}</button>
       <button id="btn-sunday">${escHtml(tr.sunday)}</button>
-      <input type="date" id="date-picker" aria-label="${escHtml(tr.pickDate)}" min="" max="">
+      <label class="date-picker-label" aria-label="${escHtml(tr.pickDate)}">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="date" id="date-picker" min="" max="">
+      </label>
     </nav>
 
     <p class="date-label" id="date-label" aria-live="polite"></p>
@@ -598,9 +636,9 @@ export function renderPage(locale: Locale): string {
 
     function setActive(btn) {
       allBtns.forEach(b => b.classList.remove('active'));
-      datePicker.classList.remove('active');
+      datePicker.parentElement.classList.remove('active');
       if (btn) btn.classList.add('active');
-      else datePicker.classList.add('active');
+      else datePicker.parentElement.classList.add('active');
     }
 
     function updateNavVisibility() {
@@ -727,17 +765,10 @@ export function renderPage(locale: Locale): string {
         ? '<a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">' + titleText + '</a>'
         : titleText;
 
-      const calBtn = '<button class="card-ical" onclick="downloadIcs(this)" '
-        + 'data-title="' + escAttr(ev.title) + '" '
-        + 'data-date="' + escAttr(ev.date) + '" '
-        + 'data-time="' + escAttr(ev.time || '') + '" '
-        + 'data-end-time="' + escAttr(ev.end_time || '') + '" '
-        + 'data-end-date="' + escAttr(ev.end_date || '') + '" '
-        + 'data-location="' + escAttr(ev.museum_name || '') + '" '
-        + 'data-url="' + escAttr(ev.detail_url || ev.url || '') + '" '
+      const calBtn = '<a class="card-ical" href="/api/event/' + ev.id + '.ics" '
         + 'aria-label="' + escAttr(T.calendarAria) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
-        + escHtml(T.calendar) + '</button>';
+        + escHtml(T.calendar) + '</a>';
 
       const meta = [timeTag, priceTag, calBtn].filter(Boolean).join(' ');
 
@@ -767,61 +798,6 @@ export function renderPage(locale: Locale): string {
 
     function escAttr(s) {
       return escHtml(s).replace(/"/g, '&quot;');
-    }
-
-    function downloadIcs(btn) {
-      const title = btn.dataset.title;
-      const date = btn.dataset.date;
-      const time = btn.dataset.time;
-      const endTime = btn.dataset.endTime;
-      const endDate = btn.dataset.endDate;
-      const location = btn.dataset.location;
-      const url = btn.dataset.url;
-
-      const dtDate = date.replace(/-/g, '');
-      let dtStart, dtEnd;
-      if (time) {
-        dtStart = dtDate + 'T' + time.replace(':', '') + '00';
-        if (endTime) {
-          const endDtDate = endDate ? endDate.replace(/-/g, '') : dtDate;
-          dtEnd = endDtDate + 'T' + endTime.replace(':', '') + '00';
-        } else {
-          const endH = (parseInt(time.split(':')[0]) + 1) % 24;
-          dtEnd = dtDate + 'T' + endH.toString().padStart(2,'0') + time.split(':')[1] + '00';
-        }
-      } else {
-        dtStart = dtDate;
-        dtEnd = dtDate;
-      }
-
-      const now = new Date().toISOString().replace(/[-:]/g, '').replace(/\\.\\d+/, '').slice(0, 15) + 'Z';
-      const uid = dtStart + '-' + Math.random().toString(36).slice(2, 8) + '@museumsufer';
-
-      let ics = 'BEGIN:VCALENDAR\\r\\nVERSION:2.0\\r\\nPRODID:-//Museumsufer//DE\\r\\nBEGIN:VEVENT\\r\\n';
-      if (time) {
-        ics += 'DTSTART;TZID=Europe/Berlin:' + dtStart + '\\r\\n';
-        ics += 'DTEND;TZID=Europe/Berlin:' + dtEnd + '\\r\\n';
-      } else {
-        ics += 'DTSTART;VALUE=DATE:' + dtStart + '\\r\\n';
-        ics += 'DTEND;VALUE=DATE:' + dtEnd + '\\r\\n';
-      }
-      ics += 'SUMMARY:' + icsEscape(title) + '\\r\\n';
-      ics += 'LOCATION:' + icsEscape(location) + '\\r\\n';
-      if (url) ics += 'URL:' + url + '\\r\\n';
-      ics += 'UID:' + uid + '\\r\\n';
-      ics += 'DTSTAMP:' + now + '\\r\\n';
-      ics += 'END:VEVENT\\r\\nEND:VCALENDAR';
-
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = title.replace(/[^a-zA-Z0-9äöüÄÖÜß ]/g, '').trim().replace(/\\s+/g, '-').slice(0, 50) + '.ics';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-
-    function icsEscape(s) {
-      return s.replace(/\\\\/g, '\\\\\\\\').replace(/;/g, '\\\\;').replace(/,/g, '\\\\,').replace(/\\n/g, '\\\\n');
     }
 
     function escHtml(s) {

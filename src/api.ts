@@ -36,6 +36,22 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
     return json({ date, exhibitions, events }, 200, CACHE_EVENTS);
   }
 
+  const eventIcsMatch = path.match(/^\/api\/event\/(\d+)\.ics$/);
+  if (eventIcsMatch) {
+    const id = parseInt(eventIcsMatch[1]);
+    const ev = await env.DB.prepare(
+      "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?"
+    ).bind(id).first<Event & { museum_name: string }>();
+    if (!ev) return json({ error: "not found" }, 404);
+    return new Response(buildIcs([ev]), {
+      headers: {
+        "Content-Type": "text/calendar; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
+        "Cache-Control": CACHE_EVENTS,
+      },
+    });
+  }
+
   return json({ error: "not found" }, 404);
 }
 
