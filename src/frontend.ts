@@ -302,6 +302,18 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       background: var(--border-light);
     }
 
+    .card-img-placeholder {
+      width: 72px;
+      height: 54px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      background: var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--border);
+    }
+
     .card-body {
       min-width: 0;
       display: flex;
@@ -544,7 +556,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     @media (max-width: 480px) {
       .container { padding: 2rem 1rem 3rem; }
       header h1 { font-size: 1.625rem; }
-      .card-img { width: 56px; height: 42px; }
+      .card-img, .card-img-placeholder { width: 56px; height: 42px; }
       .github-corner svg { width: 60px; height: 60px; }
       .date-label { font-size: 1.0625rem; }
     }
@@ -730,7 +742,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     function renderExhibition(ex) {
       const img = ex.image_url
         ? '<img class="card-img" src="' + escHtml(ex.image_url) + '" alt="' + escHtml(ex.title) + '" loading="lazy">'
-        : '';
+        : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const dates = [
         ex.start_date ? formatDateShort(ex.start_date) : '',
         ex.end_date ? formatDateShort(ex.end_date) : ''
