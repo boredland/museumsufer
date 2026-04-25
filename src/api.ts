@@ -6,7 +6,7 @@ const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-rev
 const CACHE_MUSEUMS = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
 const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 
-const BASE_URL = "https://museumsufer.jonas-strassel.de";
+const BASE_URL = "https://museumsufer.app";
 
 export async function handleApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
@@ -191,7 +191,7 @@ function buildIcs(events: (Event & { museum_name: string })[]): string {
       dtEnd = `DTEND;VALUE=DATE:${dtDate}`;
     }
 
-    const uid = `museumsufer-${ev.id}@museumsufer.jonas-strassel.de`;
+    const uid = `museumsufer-${ev.id}@museumsufer.app`;
     const summary = icsEsc(ev.title);
     const location = icsEsc(ev.museum_name);
     const desc = ev.description ? `DESCRIPTION:${icsEsc(ev.description)}\r\n` : "";

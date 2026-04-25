@@ -6,7 +6,7 @@ This document helps AI agents understand and work on this codebase.
 
 A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt's Museumsufer into a single page. It collects data from museumsufer.de, museum JSON APIs, and AI-scraped museum websites, stores everything in D1, and serves a frontend + JSON API.
 
-**Production URL:** https://museumsufer.jonas-strassel.de
+**Production URL:** https://museumsufer.app
 
 ## Tech stack
 
@@ -102,10 +102,10 @@ wrangler d1 execute museumsufer-db --remote --file=./migrations/NNNN_name.sql
 ### Manually triggering scrapes
 
 ```bash
-curl -X POST https://museumsufer.jonas-strassel.de/scrape \
+curl -X POST https://museumsufer.app/scrape \
   -H "Authorization: Bearer $SCRAPE_SECRET"
 
-curl -X POST https://museumsufer.jonas-strassel.de/scrape/events \
+curl -X POST https://museumsufer.app/scrape/events \
   -H "Authorization: Bearer $SCRAPE_SECRET"
 ```
 
