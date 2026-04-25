@@ -20,10 +20,8 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchJuedisches(config.endpoint);
     case "staedel":
       return fetchStaedel(config.endpoint);
-    case "schirn":
-      return fetchSchirn(config.endpoint);
-    case "wp-events":
-      return fetchWpEvents(config.endpoint);
+    case "senckenberg":
+      return fetchSenckenberg(config.endpoint);
   }
 }
 
@@ -105,12 +103,12 @@ interface HistorischesEvent {
 async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
-  const wrapper = await res.json() as { data?: JuedischesEvent[] } | JuedischesEvent[];
-  const data = Array.isArray(wrapper) ? wrapper : wrapper.data || [];
+  const wrapper = await res.json() as { items?: JuedischesItem[] };
+  const items = wrapper.items || [];
 
-  return data.flatMap((item): ApiEvent[] => {
-    const ev = item.data || item;
-    if (!ev.headline || !ev.dateTime) return [];
+  return items.flatMap((item): ApiEvent[] => {
+    const ev = item.data;
+    if (!ev?.headline || !ev.dateTime) return [];
     const start = new Date(ev.dateTime * 1000);
     const date = start.toISOString().slice(0, 10);
     if (date < todayIso()) return [];
@@ -138,17 +136,23 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
   });
 }
 
-interface JuedischesEvent {
-  data?: JuedischesEventData;
-  headline?: string;
-  dateTime?: number;
-  subline?: string;
-  copy?: string;
-  image?: { src?: string };
-  detailPageLink?: { href?: string };
+interface JuedischesItem {
+  type: string;
+  id: number;
+  data: {
+    headline?: string;
+    dateTime?: number;
+    duration?: number;
+    category?: string;
+    subline?: string;
+    copy?: string;
+    image?: { src?: string };
+    detailPageLink?: { href?: string };
+    location?: string;
+    locationAlt?: string;
+    iCalUrl?: string;
+  };
 }
-
-type JuedischesEventData = Omit<JuedischesEvent, "data">;
 
 async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
@@ -194,80 +198,55 @@ interface StaedelEvent {
   status?: string;
 }
 
-async function fetchSchirn(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint);
-  if (!res.ok) return [];
-  const posts = await res.json() as SchirnOffer[];
-  if (!Array.isArray(posts)) return [];
-
-  const events: ApiEvent[] = [];
-
-  for (const post of posts) {
-    const eventData = post.meta?.ho_event_data;
-    if (!eventData || !Array.isArray(eventData)) continue;
-
-    for (const ed of eventData) {
-      if (!ed.date) continue;
-      const date = ed.date;
-      if (date < todayIso()) continue;
-
-      events.push({
-        title: stripHtml(post.title?.rendered || ""),
-        date,
-        time: ed.startTime || null,
-        description: stripHtml(post.excerpt?.rendered || "").slice(0, 300) || null,
-        detail_url: post.link || null,
-        image_url: null,
-        price: null,
-      });
-    }
-  }
-
-  return events;
-}
-
-interface SchirnOffer {
-  title?: { rendered?: string };
-  excerpt?: { rendered?: string };
-  link?: string;
-  meta?: {
-    ho_event_data?: Array<{
-      date?: string;
-      startTime?: string;
-      endTime?: string;
-    }>;
-  };
-}
-
-async function fetchWpEvents(endpoint: string): Promise<ApiEvent[]> {
+async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
     headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
   });
   if (!res.ok) return [];
-  const posts = await res.json() as WpEvent[];
+  const posts = await res.json() as SenckenbergEvent[];
   if (!Array.isArray(posts)) return [];
 
   return posts.flatMap((post): ApiEvent[] => {
-    const date = post.date?.slice(0, 10);
-    if (!date || date < todayIso()) return [];
+    const acf = post.acf;
+    if (!acf) return [];
+    if (acf.event_canceled) return [];
+    if (acf.hide_event) return [];
+
+    const startTime = acf.event_start_time;
+    if (!startTime) return [];
+
+    const date = startTime.slice(0, 10);
+    if (date < todayIso()) return [];
+    const time = startTime.slice(11, 16);
+
+    const title = acf.event_title || stripHtml(post.title?.rendered || "");
+    if (!title) return [];
 
     return [{
-      title: stripHtml(post.title?.rendered || ""),
+      title,
       date,
-      time: post.date?.slice(11, 16) || null,
-      description: stripHtml(post.excerpt?.rendered || "").slice(0, 300) || null,
+      time: time !== "00:00" ? time : null,
+      description: stripHtml(acf.event_decription || "").slice(0, 300) || null,
       detail_url: post.link || null,
       image_url: null,
       price: null,
     }];
-  }).filter(ev => ev.title);
+  });
 }
 
-interface WpEvent {
+interface SenckenbergEvent {
   title?: { rendered?: string };
-  excerpt?: { rendered?: string };
-  date?: string;
   link?: string;
+  acf?: {
+    event_start_time?: string;
+    event_stop_time?: string;
+    event_title?: string;
+    event_subtitle?: string;
+    event_canceled?: boolean;
+    event_sold_out?: boolean;
+    hide_event?: boolean;
+    event_decription?: string;
+  };
 }
 
 function stripHtml(text: string): string {

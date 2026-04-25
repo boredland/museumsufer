@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "wp-events" | "schirn";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -15,7 +15,7 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
   {
     slug: "juedisches-museum-frankfurt",
     type: "juedisches",
-    endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records[L]=0&records[uid]=329",
+    endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records%5BL%5D=0&records%5Buid%5D=329",
   },
   {
     slug: "staedel-museum",
@@ -33,19 +33,9 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     endpoint: "https://www.dff.film/wp-json/tribe/events/v1/events",
   },
   {
-    slug: "schirn-kunsthalle-frankfurt",
-    type: "schirn",
-    endpoint: "https://www.schirn.de/wp-json/wp/v2/offer?per_page=100",
-  },
-  {
     slug: "senckenberg-naturmuseum",
-    type: "wp-events",
+    type: "senckenberg",
     endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/events?per_page=100",
-  },
-  {
-    slug: "frankfurter-kunstverein",
-    type: "wp-events",
-    endpoint: "https://www.fkv.de/wp-json/wp/v2/events?per_page=100",
   },
 ];
 
