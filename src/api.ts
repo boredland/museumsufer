@@ -69,7 +69,7 @@ async function getMuseums(env: Env): Promise<Museum[]> {
 }
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
 }
 
 function json(data: unknown, status = 200, cacheControl?: string): Response {

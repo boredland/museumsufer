@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -56,6 +56,11 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "institut-fuer-stadtgeschichte",
     type: "stadtgeschichte-rss",
     endpoint: "https://www.stadtgeschichte-ffm.de/rss/isg_rss.php?L=de",
+  },
+  {
+    slug: "dommuseum-frankfurt",
+    type: "dommuseum",
+    endpoint: "https://dommuseum-frankfurt.de/besuchen/kalender",
   },
 ];
 
