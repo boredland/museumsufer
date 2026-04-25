@@ -1,21 +1,25 @@
 import { Env, Exhibition, Event, Museum } from "./types";
 
+const CACHE_EVENTS = "public, max-age=3600, s-maxage=3600";
+const CACHE_EXHIBITIONS = "public, max-age=21600, s-maxage=21600";
+const CACHE_MUSEUMS = "public, max-age=86400, s-maxage=86400";
+
 export async function handleApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname;
 
   if (path === "/api/events") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(await getEventsForDate(env, date));
+    return json(await getEventsForDate(env, date), 200, CACHE_EVENTS);
   }
 
   if (path === "/api/exhibitions") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(await getExhibitionsForDate(env, date));
+    return json(await getExhibitionsForDate(env, date), 200, CACHE_EXHIBITIONS);
   }
 
   if (path === "/api/museums") {
-    return json(await getMuseums(env));
+    return json(await getMuseums(env), 200, CACHE_MUSEUMS);
   }
 
   if (path === "/api/day") {
@@ -24,7 +28,7 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       getExhibitionsForDate(env, date),
       getEventsForDate(env, date),
     ]);
-    return json({ date, exhibitions, events });
+    return json({ date, exhibitions, events }, 200, CACHE_EVENTS);
   }
 
   return json({ error: "not found" }, 404);
@@ -68,9 +72,11 @@ function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function json(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-  });
+function json(data: unknown, status = 200, cacheControl?: string): Response {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+  };
+  if (cacheControl) headers["Cache-Control"] = cacheControl;
+  return new Response(JSON.stringify(data), { status, headers });
 }

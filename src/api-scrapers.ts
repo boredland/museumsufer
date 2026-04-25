@@ -23,6 +23,8 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchStaedel(config.endpoint);
     case "senckenberg":
       return fetchSenckenberg(config.endpoint);
+    case "my-calendar":
+      return fetchMyCalendar(config.endpoint);
   }
 }
 
@@ -257,6 +259,67 @@ interface SenckenbergEvent {
     hide_event?: boolean;
     event_decription?: string;
   };
+}
+
+async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
+  const today = todayIso();
+  const weekAhead = dateOffset(30);
+  const url = `${endpoint}?from=${today}&to=${weekAhead}`;
+  const res = await fetch(url);
+  if (!res.ok) return [];
+  const data = await res.json() as Record<string, MyCalendarEvent[]>;
+  if (typeof data !== "object" || Array.isArray(data)) return [];
+
+  const events: ApiEvent[] = [];
+  for (const [, dayEvents] of Object.entries(data)) {
+    if (!Array.isArray(dayEvents)) continue;
+    for (const ev of dayEvents) {
+      if (!ev.event_title || !ev.occur_begin) continue;
+      if (ev.event_title.startsWith("ENTFÄLLT")) continue;
+
+      const date = ev.occur_begin.slice(0, 10);
+      if (date < today) continue;
+
+      const time = ev.event_time && ev.event_time !== "00:00:00"
+        ? ev.event_time.slice(0, 5)
+        : null;
+
+      const detailUrl = ev.event_post
+        ? `https://www.mfk-frankfurt.de/?p=${ev.event_post}`
+        : null;
+
+      events.push({
+        title: ev.event_title,
+        date,
+        time,
+        description: stripHtml(ev.event_short || "").slice(0, 300) || null,
+        detail_url: detailUrl,
+        image_url: ev.event_image || null,
+        price: null,
+      });
+    }
+  }
+
+  return events;
+}
+
+interface MyCalendarEvent {
+  event_title?: string;
+  event_short?: string;
+  event_desc?: string;
+  event_time?: string;
+  event_endtime?: string;
+  event_image?: string;
+  event_post?: string;
+  event_url?: string;
+  occur_begin?: string;
+  occur_end?: string;
+}
+
+function dateOffset(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
 }
 
 function stripHtml(text: string): string {

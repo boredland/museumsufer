@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -36,6 +36,11 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "senckenberg-naturmuseum",
     type: "senckenberg",
     endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/events?per_page=100",
+  },
+  {
+    slug: "museum-fuer-kommunikation-frankfurt",
+    type: "my-calendar",
+    endpoint: "https://www.mfk-frankfurt.de/wp-json/my-calendar/v1/events",
   },
 ];
 
