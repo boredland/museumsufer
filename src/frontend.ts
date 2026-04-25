@@ -383,6 +383,28 @@ export function renderPage(locale: Locale): string {
 
     .github-corner:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 
+    .card-desc {
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      margin-top: 0.375rem;
+      padding-top: 0.375rem;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .card details summary {
+      font-size: 0.6875rem;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      list-style: none;
+      margin-top: 0.25rem;
+    }
+
+    .card details summary::-webkit-details-marker { display: none; }
+    .card details summary::before { content: '+ '; }
+    .card details[open] summary::before { content: '- '; }
+    .card details summary:hover { color: var(--accent); }
+
     .site-footer {
       margin-top: 1.5rem;
       padding-top: 1rem;
@@ -655,11 +677,16 @@ export function renderPage(locale: Locale): string {
         ? '<a href="' + escHtml(ex.detail_url) + '" target="_blank" rel="noopener">' + escHtml(ex.title) + '</a>'
         : escHtml(ex.title);
 
+      const desc = ex.description
+        ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
+        : '';
+
       return '<div class="card">'
         + img
         + '<div class="card-body">'
         + '<div class="card-title">' + titleHtml + '</div>'
         + (dates ? '<div class="card-meta"><span class="card-dates">' + dates + '</span></div>' : '')
+        + desc
         + '</div></div>';
     }
 
@@ -692,12 +719,17 @@ export function renderPage(locale: Locale): string {
 
       const meta = [timeTag, priceTag, calBtn].filter(Boolean).join(' ');
 
+      const desc = ev.description
+        ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
+        : '';
+
       return '<div class="card">'
         + img
         + '<div class="card-body">'
         + '<div class="card-title">' + titleHtml + '</div>'
         + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
         + '<div class="card-meta">' + meta + '</div>'
+        + desc
         + '</div></div>';
     }
 
