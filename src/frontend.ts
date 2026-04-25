@@ -853,10 +853,14 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
         : '';
 
-      const visitedCls = isVisited(ex.id) ? ' is-visited' : '';
-      const visitedBtn = '<button class="card-visited-btn' + visitedCls + '" onclick="onToggleVisited(' + ex.id + ')">'
-        + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-        + escHtml(T.visited) + '</button>';
+      const v = isVisited(ex.id);
+      const visitedBtn = v
+        ? '<button class="card-visited-btn is-visited" onclick="onToggleVisited(' + ex.id + ')">'
+          + '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+          + '</button>'
+        : '<button class="card-visited-btn" onclick="onToggleVisited(' + ex.id + ')">'
+          + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          + escHtml(T.visited) + '</button>';
 
       return '<div class="card">'
         + img
