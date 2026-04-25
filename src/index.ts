@@ -1,6 +1,7 @@
 import { Env } from "./types";
 import { handleApi } from "./api";
 import { scrape } from "./scraper";
+import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage } from "./frontend";
 
 export default {
@@ -18,12 +19,21 @@ export default {
       });
     }
 
+    if (url.pathname === "/scrape/events" && request.method === "POST") {
+      const result = await scrapeMuseumWebsites(env);
+      return new Response(JSON.stringify(result), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(renderPage(), {
       headers: { "Content-Type": "text/html; charset=utf-8" },
     });
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(scrape(env));
+    ctx.waitUntil(
+      scrape(env).then(() => scrapeMuseumWebsites(env))
+    );
   },
 } satisfies ExportedHandler<Env>;
