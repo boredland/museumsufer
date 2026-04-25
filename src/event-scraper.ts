@@ -195,9 +195,10 @@ Text content from ${museum.name} (${eventsUrl}):
 ${truncated}`,
       },
     ],
-  }) as { response: string };
+  }) as { response?: string };
 
-  const events = extractJson<ScrapedEvent[]>(result.response);
+  const responseText = result.response || "";
+  const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
   let count = 0;
@@ -339,10 +340,10 @@ Page content:
 ${textContent}`,
       },
     ],
-  }) as { response: string };
+  }) as { response?: string };
 
   let price: string | null = null;
-  const parsed = extractJsonObject<{ price: string | null }>(result.response);
+  const parsed = extractJsonObject<{ price: string | null }>(result.response || "");
   if (parsed?.price && parsed.price !== "null") {
     price = parsed.price;
   }
