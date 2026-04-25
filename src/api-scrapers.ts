@@ -31,6 +31,8 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchMak(config.endpoint);
     case "stadtgeschichte-rss":
       return fetchStadtgeschichteRss(config.endpoint);
+    case "dommuseum":
+      return fetchDommuseum(config.endpoint);
   }
 }
 
@@ -78,7 +80,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
     if (!ev.title || !ev.dateStart) return [];
     if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title!.toLowerCase().includes(b))) return [];
     const start = new Date(ev.dateStart * 1000);
-    const date = start.toISOString().slice(0, 10);
+    const date = toBerlinDate(start);
     if (date < todayIso()) return [];
 
     const timeMatch = ev.time?.match(/(\d{1,2}:\d{2})/);
@@ -124,12 +126,10 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
     const ev = item.data;
     if (!ev?.headline || !ev.dateTime) return [];
     const start = new Date(ev.dateTime * 1000);
-    const date = start.toISOString().slice(0, 10);
+    const date = toBerlinDate(start);
     if (date < todayIso()) return [];
 
-    const hours = start.getUTCHours().toString().padStart(2, "0");
-    const mins = start.getUTCMinutes().toString().padStart(2, "0");
-    const time = `${hours}:${mins}`;
+    const time = toBerlinTime(start);
 
     let imageUrl: string | null = null;
     if (ev.image?.src) {
@@ -365,6 +365,45 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
+async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+  });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const events: ApiEvent[] = [];
+  const blockRe = /<div class="event-image">([\s\S]*?)(?=<div class="event-image">|<div class="pagination|$)/g;
+  let match;
+
+  while ((match = blockRe.exec(html)) !== null) {
+    const block = match[1];
+    if (block.includes("event-canceled")) continue;
+
+    const dtMatch = block.match(/datetime="([^"]+)"/);
+    const titleMatch = block.match(/class="event-title">([^<]+)/);
+    if (!dtMatch || !titleMatch) continue;
+
+    const date = dtMatch[1];
+    if (date < todayIso()) continue;
+
+    const linkMatch = block.match(/href="(https:\/\/dommuseum-frankfurt\.de\/[^"]+)"/);
+    const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
+
+    events.push({
+      title: titleMatch[1].trim(),
+      date,
+      time: null,
+      description: null,
+      detail_url: linkMatch ? linkMatch[1] : null,
+      image_url: imgMatch ? `https://dommuseum-frankfurt.de${imgMatch[1]}` : null,
+      price: null,
+    });
+  }
+
+  return events;
+}
+
 const GERMAN_MONTHS_SHORT: Record<string, string> = {
   jan: "01", feb: "02", "mär": "03", mar: "03", apr: "04",
   mai: "05", jun: "06", jul: "07", aug: "08",
@@ -490,7 +529,7 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
 function dateOffset(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return toBerlinDate(d);
 }
 
 function stripHtml(text: string): string {
@@ -506,6 +545,14 @@ function stripHtml(text: string): string {
     .trim();
 }
 
+function toBerlinDate(d: Date): string {
+  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+}
+
+function toBerlinTime(d: Date): string {
+  return d.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit", hour12: false });
+}
+
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toBerlinDate(new Date());
 }

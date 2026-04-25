@@ -501,12 +501,16 @@ function extractJsonObject<T>(text: string): T | null {
   }
 }
 
+function toBerlinDate(d: Date): string {
+  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+}
+
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toBerlinDate(new Date());
 }
 
 function dateOffset(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return toBerlinDate(d);
 }
