@@ -349,6 +349,15 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       flex-wrap: wrap;
     }
 
+    .card-ending-soon {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: #b91c1c;
+      background: #fef2f2;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+    }
+
     .card-dates {
       font-size: 0.6875rem;
       color: var(--text-tertiary);
@@ -752,6 +761,13 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         ? '<a href="' + escHtml(ex.detail_url) + '" target="_blank" rel="noopener">' + escHtml(ex.title) + '</a>'
         : escHtml(ex.title);
 
+      let endingTag = '';
+      if (ex.end_date) {
+        const daysLeft = Math.ceil((new Date(ex.end_date + 'T00:00:00') - new Date(toIso(today()) + 'T00:00:00')) / 86400000);
+        if (daysLeft <= 3) endingTag = '<span class="card-ending-soon">' + escHtml(T.lastDays) + '</span>';
+        else if (daysLeft <= 14) endingTag = '<span class="card-ending-soon">' + escHtml(T.endingSoon) + '</span>';
+      }
+
       const desc = ex.description
         ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
         : '';
@@ -760,7 +776,10 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         + img
         + '<div class="card-body">'
         + '<div class="card-title">' + titleHtml + '</div>'
-        + (dates ? '<div class="card-meta"><span class="card-dates">' + dates + '</span></div>' : '')
+        + '<div class="card-meta">'
+        + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
+        + endingTag
+        + '</div>'
         + desc
         + '</div></div>';
     }
