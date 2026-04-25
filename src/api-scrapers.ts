@@ -134,7 +134,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
     const isJudengasse = location.toLowerCase().includes("judengasse");
 
     return [{
-      title: ev.headline,
+      title: ev.headline.trim(),
       date,
       time: time !== "00:00" ? time : null,
       description: stripHtml(ev.copy || ev.subline || "").slice(0, 300) || null,
