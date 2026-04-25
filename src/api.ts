@@ -1,4 +1,5 @@
 import { Env, Exhibition, Event } from "./types";
+import { todayIso, dateOffset, berlinHourMinute } from "./date";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -90,10 +91,8 @@ async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
 }
 
 function filterPastEvents(events: Event[]): Event[] {
-  const now = new Date();
-  const berlinTime = now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour12: false });
-  const [bh, bm] = berlinTime.split(":").map(Number);
-  const nowMinutes = bh * 60 + bm;
+  const { hour, minute } = berlinHourMinute();
+  const nowMinutes = hour * 60 + minute;
 
   return events.filter((ev) => {
     if (!ev.time) return true;
@@ -194,16 +193,6 @@ function icsEsc(s: string): string {
 
 function escXml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-function todayIso(): string {
-  return new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
-}
-
-function dateOffset(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
 }
 
 function json(data: unknown, status = 200, cacheControl?: string): Response {

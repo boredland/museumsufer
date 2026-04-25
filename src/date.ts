@@ -1,0 +1,33 @@
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+const TZ = "Europe/Berlin";
+
+export function berlinNow(): dayjs.Dayjs {
+  return dayjs().tz(TZ);
+}
+
+export function toBerlinDate(d: Date | number): string {
+  return dayjs(d).tz(TZ).format("YYYY-MM-DD");
+}
+
+export function toBerlinTime(d: Date | number): string {
+  return dayjs(d).tz(TZ).format("HH:mm");
+}
+
+export function todayIso(): string {
+  return berlinNow().format("YYYY-MM-DD");
+}
+
+export function dateOffset(days: number): string {
+  return berlinNow().add(days, "day").format("YYYY-MM-DD");
+}
+
+export function berlinHourMinute(): { hour: number; minute: number } {
+  const now = berlinNow();
+  return { hour: now.hour(), minute: now.minute() };
+}

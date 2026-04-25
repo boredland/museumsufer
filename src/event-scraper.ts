@@ -1,6 +1,7 @@
 import { Env } from "./types";
 import { getApiConfig } from "./museum-apis";
 import { fetchEventsFromApi } from "./api-scrapers";
+import { todayIso, dateOffset } from "./date";
 
 const BASE_URL = "https://www.museumsufer.de";
 
@@ -504,16 +505,3 @@ function extractJsonObject<T>(text: string): T | null {
   }
 }
 
-function toBerlinDate(d: Date): string {
-  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
-}
-
-function todayIso(): string {
-  return toBerlinDate(new Date());
-}
-
-function dateOffset(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return toBerlinDate(d);
-}
