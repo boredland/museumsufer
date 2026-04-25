@@ -359,27 +359,46 @@ ${textContent}`,
 
 function extractImageFromHtml(html: string, pageUrl: string): string | null {
   const baseUrl = new URL(pageUrl).origin;
+  const pageDomain = new URL(pageUrl).hostname;
 
-  // Look for og:image first (most reliable)
   const ogMatch = html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i)
     || html.match(/content="([^"]+)"\s+(?:property|name)="og:image"/i);
   if (ogMatch) {
-    return normalizeUrl(ogMatch[1], baseUrl);
+    const ogUrl = normalizeUrl(ogMatch[1], baseUrl);
+    if (ogUrl && isSameDomain(ogUrl, pageDomain)) return ogUrl;
   }
 
-  // Look for a prominent image in the main content area
   const mainContent = html.match(/<main[\s\S]*?<\/main>/i)?.[0]
     || html.match(/<article[\s\S]*?<\/article>/i)?.[0]
     || html;
 
-  const imgMatch = mainContent.match(/<img[^>]+src="(https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i)
-    || mainContent.match(/<img[^>]+src="(\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
-
-  if (imgMatch) {
-    return normalizeUrl(imgMatch[1], baseUrl);
+  const imgRe = /<img[^>]+src="([^"]+)"/gi;
+  let match;
+  while ((match = imgRe.exec(mainContent)) !== null) {
+    const src = match[1];
+    if (!isContentImage(src)) continue;
+    const url = normalizeUrl(src, baseUrl);
+    if (url && isSameDomain(url, pageDomain)) return url;
   }
 
   return null;
+}
+
+function isContentImage(src: string): boolean {
+  const lower = src.toLowerCase();
+  if (!/\.(jpg|jpeg|png|webp)/.test(lower)) return false;
+  if (/logo|icon|favicon|sprite|banner|partner|sponsor|social|button|badge/i.test(lower)) return false;
+  if (/1x1|pixel|tracking|spacer/i.test(lower)) return false;
+  return true;
+}
+
+function isSameDomain(url: string, pageDomain: string): boolean {
+  try {
+    const imgDomain = new URL(url).hostname;
+    return imgDomain === pageDomain || imgDomain.endsWith("." + pageDomain) || pageDomain.endsWith("." + imgDomain);
+  } catch {
+    return true;
+  }
 }
 
 function normalizeUrl(url: string | null | undefined, baseUrl: string): string | null {
