@@ -1,4 +1,5 @@
 import { MuseumApiConfig } from "./museum-apis";
+import { toBerlinDate, toBerlinTime, todayIso, dateOffset } from "./date";
 
 export interface ApiEvent {
   title: string;
@@ -633,12 +634,6 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-function dateOffset(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return toBerlinDate(d);
-}
-
 function stripHtml(text: string): string {
   return text
     .replace(/<[^>]+>/g, " ")
@@ -652,14 +647,3 @@ function stripHtml(text: string): string {
     .trim();
 }
 
-function toBerlinDate(d: Date): string {
-  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
-}
-
-function toBerlinTime(d: Date): string {
-  return d.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour: "2-digit", minute: "2-digit", hour12: false });
-}
-
-function todayIso(): string {
-  return toBerlinDate(new Date());
-}
