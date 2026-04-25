@@ -515,6 +515,14 @@ export function renderPage(locale: Locale): string {
       ).join("")}</div>
     </header>
 
+    <details class="llm-tip">
+      <summary>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        ${escHtml(tr.llmTip)}
+      </summary>
+      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()">Copy</button></div>
+    </details>
+
     <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
       <button id="btn-today" class="active">${escHtml(tr.today)}</button>
       <button id="btn-tomorrow">${escHtml(tr.tomorrow)}</button>
@@ -528,14 +536,6 @@ export function renderPage(locale: Locale): string {
     <main id="content">
       <div class="loading">${escHtml(tr.loading)}</div>
     </main>
-
-    <details class="llm-tip">
-      <summary>
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        ${escHtml(tr.llmTip)}
-      </summary>
-      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()">Copy</button></div>
-    </details>
 
     <footer class="site-footer">
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
