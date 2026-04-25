@@ -8,4 +8,4 @@ crons = ["0 6 * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "museumsufer-db"
-database_id = "local"
+database_id = "46e70d95-264e-4a5f-bf8e-51f925e47658"
