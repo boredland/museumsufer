@@ -7,9 +7,10 @@ export function renderPage(): string {
   <title>Museumsufer Frankfurt</title>
   <meta name="description" content="Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
@@ -24,7 +25,6 @@ export function renderPage(): string {
       --border-light: #f5f5f4;
       --radius: 12px;
       --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-lg: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
     }
 
     body {
@@ -35,10 +35,24 @@ export function renderPage(): string {
       -webkit-font-smoothing: antialiased;
     }
 
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      background: var(--accent);
+      color: white;
+      padding: 0.5rem 1rem;
+      z-index: 200;
+      border-radius: 0 0 var(--radius) 0;
+      font-size: 0.875rem;
+    }
+
+    .skip-link:focus { left: 0; }
+
     .container {
       max-width: 680px;
       margin: 0 auto;
-      padding: 3rem 1.25rem 4rem;
+      padding: 3rem 1rem 4rem;
     }
 
     header {
@@ -79,22 +93,25 @@ export function renderPage(): string {
     }
 
     .date-label {
-      font-size: 1.125rem;
-      font-weight: 500;
+      font-size: 1.25rem;
+      font-weight: 600;
       color: var(--text);
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
     }
 
     .date-nav {
       display: flex;
       align-items: center;
       gap: 0.375rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
       justify-content: center;
       flex-wrap: wrap;
     }
 
-    .date-nav button {
+    .date-nav button, .date-nav input[type="date"] {
       padding: 0.5rem 1.125rem;
       border: 1.5px solid var(--border);
       background: var(--surface);
@@ -104,10 +121,10 @@ export function renderPage(): string {
       font-weight: 500;
       font-family: inherit;
       color: var(--text-secondary);
-      transition: all 0.2s ease;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
     }
 
-    .date-nav button:hover {
+    .date-nav button:hover, .date-nav input[type="date"]:hover {
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -118,21 +135,18 @@ export function renderPage(): string {
       border-color: var(--accent);
     }
 
-    .date-nav input[type="date"] {
-      padding: 0.5rem 0.875rem;
-      border: 1.5px solid var(--border);
-      border-radius: 100px;
-      font-size: 0.8125rem;
-      font-family: inherit;
-      color: var(--text-secondary);
-      background: var(--surface);
-      cursor: pointer;
+    .date-nav button:focus-visible, .date-nav input[type="date"]:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
-    .date-nav input[type="date"]:focus {
-      outline: none;
+    .date-nav input[type="date"].active {
       border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
     }
+
+    #content { min-height: 60vh; }
 
     .section { margin-bottom: 2.5rem; }
 
@@ -148,6 +162,8 @@ export function renderPage(): string {
       height: 20px;
       flex-shrink: 0;
     }
+
+    .section-icon path { stroke: var(--text-tertiary); }
 
     .section-title {
       font-size: 0.6875rem;
@@ -173,8 +189,23 @@ export function renderPage(): string {
       overflow: hidden;
     }
 
+    .museum-group-header {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      padding: 0.625rem 1rem 0.375rem;
+      border-bottom: 1px solid var(--border-light);
+      border-left: 3px solid var(--accent);
+      background: var(--border-light);
+    }
+
+    .museum-group-header:first-child { border-top: none; }
+
     .card {
       display: flex;
+      align-items: flex-start;
       gap: 0.875rem;
       padding: 0.875rem 1rem;
       border-bottom: 1px solid var(--border-light);
@@ -182,7 +213,7 @@ export function renderPage(): string {
     }
 
     .card:last-child { border-bottom: none; }
-    .card:hover { background: #fafaf9; }
+    .card:hover { background: var(--accent-light); }
 
     .card-img {
       width: 72px;
@@ -197,7 +228,6 @@ export function renderPage(): string {
       min-width: 0;
       display: flex;
       flex-direction: column;
-      justify-content: center;
     }
 
     .card-title {
@@ -210,11 +240,11 @@ export function renderPage(): string {
     .card-title a {
       color: inherit;
       text-decoration: none;
+      display: block;
     }
 
-    .card-title a:hover {
-      color: var(--accent);
-    }
+    .card-title a:hover { color: var(--accent); }
+    .card-title a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
     .card-museum {
       font-size: 0.75rem;
@@ -274,9 +304,7 @@ export function renderPage(): string {
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .github-corner:hover .octo-arm {
-      animation: octocat-wave 560ms ease-in-out;
-    }
+    .github-corner:hover .octo-arm { animation: octocat-wave 560ms ease-in-out; }
 
     @keyframes octocat-wave {
       0%, 100% { transform: rotate(0); }
@@ -294,15 +322,24 @@ export function renderPage(): string {
       z-index: 100;
     }
 
+    .github-corner:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading::after, .octo-arm { animation: none !important; }
+    }
+
     @media (max-width: 480px) {
-      .container { padding: 2rem 0.875rem 3rem; }
+      .container { padding: 2rem 1rem 3rem; }
       header h1 { font-size: 1.625rem; }
       .card-img { width: 56px; height: 42px; }
       .github-corner svg { width: 60px; height: 60px; }
+      .date-label { font-size: 1.0625rem; }
     }
   </style>
 </head>
 <body>
+  <a href="#content" class="skip-link">Zum Inhalt</a>
+
   <a href="https://github.com/boredland/museumsufer" class="github-corner" aria-label="View source on GitHub" target="_blank" rel="noopener"><svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin:130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
 
   <div class="container">
@@ -316,19 +353,19 @@ export function renderPage(): string {
       <p class="subtitle">Ausstellungen &amp; Veranstaltungen</p>
     </header>
 
-    <nav class="date-nav">
+    <nav class="date-nav" aria-label="Datum">
       <button id="btn-today" class="active">Heute</button>
       <button id="btn-tomorrow">Morgen</button>
-      <button id="btn-weekend">Sa</button>
-      <button id="btn-sunday">So</button>
-      <input type="date" id="date-picker">
+      <button id="btn-weekend">Samstag</button>
+      <button id="btn-sunday">Sonntag</button>
+      <input type="date" id="date-picker" aria-label="Datum auswählen">
     </nav>
 
-    <p class="date-label" id="date-label"></p>
+    <p class="date-label" id="date-label" aria-live="polite"></p>
 
-    <div id="content">
+    <main id="content">
       <div class="loading">Laden</div>
-    </div>
+    </main>
   </div>
 
   <script>
@@ -368,7 +405,16 @@ export function renderPage(): string {
 
     function setActive(btn) {
       allBtns.forEach(b => b.classList.remove('active'));
+      datePicker.classList.remove('active');
       if (btn) btn.classList.add('active');
+      else datePicker.classList.add('active');
+    }
+
+    function updateNavVisibility() {
+      const todayIso = toIso(today());
+      const todayDay = today().getDay();
+      btnWeekend.style.display = (todayDay === 6) ? 'none' : '';
+      btnSunday.style.display = (todayDay === 0) ? 'none' : '';
     }
 
     async function loadDay(date, btn) {
@@ -387,33 +433,26 @@ export function renderPage(): string {
     function render(data) {
       let html = '';
 
-      if (data.events.length > 0) {
-        html += '<div class="section">';
-        html += '<div class="section-header">'
-          + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="' + 'var(--text-tertiary)' + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
-          + '<h2 class="section-title">Veranstaltungen</h2>'
-          + '<span class="section-count">' + data.events.length + '</span>'
-          + '</div>';
+      html += '<div class="section">';
+      html += sectionHeader('Veranstaltungen', data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
+      if (data.events.length === 0) {
+        html += '<div class="empty">Keine Veranstaltungen an diesem Tag.</div>';
+      } else {
         html += '<div class="card-list">';
         for (const ev of data.events) {
           html += renderEvent(ev);
         }
-        html += '</div></div>';
+        html += '</div>';
       }
+      html += '</div>';
 
       html += '<div class="section">';
-      html += '<div class="section-header">'
-        + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12" stroke="' + 'var(--text-tertiary)' + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
-        + '<h2 class="section-title">Ausstellungen</h2>'
-        + '<span class="section-count">' + data.exhibitions.length + '</span>'
-        + '</div>';
+      html += sectionHeader('Ausstellungen', data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
       if (data.exhibitions.length === 0) {
         html += '<div class="empty">Keine Ausstellungen gefunden.</div>';
       } else {
         html += '<div class="card-list">';
-        for (const ex of data.exhibitions) {
-          html += renderExhibition(ex);
-        }
+        html += renderExhibitionsGrouped(data.exhibitions);
         html += '</div>';
       }
       html += '</div>';
@@ -421,9 +460,31 @@ export function renderPage(): string {
       content.innerHTML = html;
     }
 
+    function sectionHeader(title, count, iconPath) {
+      return '<div class="section-header">'
+        + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="' + iconPath + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
+        + '<h2 class="section-title">' + title + '</h2>'
+        + '<span class="section-count">' + count + '</span>'
+        + '</div>';
+    }
+
+    function renderExhibitionsGrouped(exhibitions) {
+      let html = '';
+      let currentMuseum = '';
+      for (const ex of exhibitions) {
+        const museum = ex.museum_name || '';
+        if (museum !== currentMuseum) {
+          currentMuseum = museum;
+          html += '<div class="museum-group-header">' + escHtml(museum) + '</div>';
+        }
+        html += renderExhibition(ex);
+      }
+      return html;
+    }
+
     function renderExhibition(ex) {
       const img = ex.image_url
-        ? '<img class="card-img" src="' + escHtml(ex.image_url) + '" alt="" loading="lazy">'
+        ? '<img class="card-img" src="' + escHtml(ex.image_url) + '" alt="' + escHtml(ex.title) + '" loading="lazy">'
         : '';
       const dates = [
         ex.start_date ? formatDateShort(ex.start_date) : '',
@@ -438,7 +499,6 @@ export function renderPage(): string {
         + img
         + '<div class="card-body">'
         + '<div class="card-title">' + titleHtml + '</div>'
-        + '<div class="card-museum">' + escHtml(ex.museum_name || '') + '</div>'
         + (dates ? '<div class="card-meta"><span class="card-dates">' + dates + '</span></div>' : '')
         + '</div></div>';
     }
@@ -448,9 +508,14 @@ export function renderPage(): string {
         ? '<span class="card-time">' + escHtml(ev.time) + '</span>'
         : '';
 
+      const titleText = escHtml(ev.title);
+      const titleHtml = ev.url
+        ? '<a href="' + escHtml(ev.url) + '" target="_blank" rel="noopener">' + titleText + '</a>'
+        : titleText;
+
       return '<div class="card">'
         + '<div class="card-body">'
-        + '<div class="card-title">' + escHtml(ev.title) + '</div>'
+        + '<div class="card-title">' + titleHtml + '</div>'
         + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
         + (timeTag ? '<div class="card-meta">' + timeTag + '</div>' : '')
         + '</div></div>';
@@ -468,6 +533,7 @@ export function renderPage(): string {
     btnSunday.addEventListener('click', () => { datePicker.value = ''; loadDay(toIso(nextDay(0)), btnSunday); });
     datePicker.addEventListener('change', (e) => { loadDay(e.target.value, null); });
 
+    updateNavVisibility();
     loadDay(toIso(today()), btnToday);
   </script>
 </body>
