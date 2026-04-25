@@ -1,0 +1,54 @@
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "wp-events" | "schirn";
+
+export interface MuseumApiConfig {
+  slug: string;
+  type: ApiType;
+  endpoint: string;
+}
+
+export const MUSEUM_APIS: MuseumApiConfig[] = [
+  {
+    slug: "historisches-museum-frankfurt",
+    type: "historisches",
+    endpoint: "https://historisches-museum-frankfurt.de/api/calendar",
+  },
+  {
+    slug: "juedisches-museum-frankfurt",
+    type: "juedisches",
+    endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records[L]=0&records[uid]=329",
+  },
+  {
+    slug: "staedel-museum",
+    type: "staedel",
+    endpoint: "https://www.staedelmuseum.de/de/api/finder",
+  },
+  {
+    slug: "deutsches-architekturmuseum",
+    type: "tribe-events",
+    endpoint: "https://dam-online.de/wp-json/tribe/events/v1/events",
+  },
+  {
+    slug: "dff-deutsches-filminstitut-filmmuseum",
+    type: "tribe-events",
+    endpoint: "https://www.dff.film/wp-json/tribe/events/v1/events",
+  },
+  {
+    slug: "schirn-kunsthalle-frankfurt",
+    type: "schirn",
+    endpoint: "https://www.schirn.de/wp-json/wp/v2/offer?per_page=100",
+  },
+  {
+    slug: "senckenberg-naturmuseum",
+    type: "wp-events",
+    endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/events?per_page=100",
+  },
+  {
+    slug: "frankfurter-kunstverein",
+    type: "wp-events",
+    endpoint: "https://www.fkv.de/wp-json/wp/v2/events?per_page=100",
+  },
+];
+
+export function getApiConfig(slug: string): MuseumApiConfig | undefined {
+  return MUSEUM_APIS.find((c) => c.slug === slug);
+}
