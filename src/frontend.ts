@@ -6,6 +6,7 @@ export function renderPage(): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museumsufer Frankfurt</title>
   <meta name="description" content="Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap');
 
