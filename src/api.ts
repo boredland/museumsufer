@@ -1,19 +1,20 @@
 import { Env, Exhibition, Event } from "./types";
 import { todayIso, dateOffset, berlinHourMinute } from "./date";
+import { escHtml, APP_URL } from "./shared";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
 const CACHE_MUSEUMS = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
 const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 
-const BASE_URL = "https://museumsufer.app";
+const BASE_URL = APP_URL;
 
 function proxyImageUrl(url: string | null): string | null {
   if (!url || !url.startsWith("https://")) return url;
   return `/img/${encodeURIComponent(url)}`;
 }
 
-function proxyImages<T extends { image_url?: string | null }>(items: T[]): T[] {
+export function proxyImages<T extends { image_url?: string | null }>(items: T[]): T[] {
   return items.map((item) => ({
     ...item,
     image_url: proxyImageUrl(item.image_url ?? null),
@@ -87,7 +88,7 @@ export async function handleFeeds(request: Request, env: Env): Promise<Response 
   return null;
 }
 
-async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
+export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
   const { results } = await env.DB.prepare(
     `SELECT e.*, m.name as museum_name
      FROM exhibitions e
@@ -101,7 +102,7 @@ async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition
   return results;
 }
 
-async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
+export async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
   const { results } = await env.DB.prepare(
     `SELECT ev.*, m.name as museum_name
      FROM events ev
@@ -158,14 +159,14 @@ async function getUpcomingEvents(env: Env, days: number): Promise<(Event & { mus
 function buildRss(events: (Event & { museum_name: string })[]): string {
   const items = events.map((ev) => {
     const timeStr = ev.time ? `, ${ev.time} Uhr` : "";
-    const desc = ev.description ? escXml(ev.description) : "";
+    const desc = ev.description ? escHtml(ev.description) : "";
     const link = ev.detail_url || ev.url || BASE_URL;
     return `    <item>
-      <title>${escXml(ev.title)} — ${escXml(ev.museum_name)}</title>
-      <link>${escXml(link)}</link>
+      <title>${escHtml(ev.title)} — ${escHtml(ev.museum_name)}</title>
+      <link>${escHtml(link)}</link>
       <guid isPermaLink="false">museumsufer-${ev.id}</guid>
-      <pubDate>${new Date(ev.date + "T" + (ev.time || "12:00") + ":00+02:00").toUTCString()}</pubDate>
-      <description>${escXml(ev.date + timeStr + ". " + ev.museum_name + ". " + desc)}</description>
+      <pubDate>${new Date(ev.date + "T" + (ev.time || "12:00") + ":00").toUTCString()}</pubDate>
+      <description>${escHtml(ev.date + timeStr + ". " + ev.museum_name + ". " + desc)}</description>
     </item>`;
   });
 
@@ -217,10 +218,6 @@ function buildIcs(events: (Event & { museum_name: string })[]): string {
 
 function icsEsc(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
-}
-
-function escXml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function json(data: unknown, status = 200, cacheControl?: string): Response {

@@ -1,5 +1,5 @@
 import { Env } from "./types";
-import { handleApi, handleFeeds } from "./api";
+import { handleApi, handleFeeds, getEventsForDate, getExhibitionsForDate, proxyImages } from "./api";
 import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage, type InitialData } from "./frontend";
@@ -120,8 +120,12 @@ export default {
     const locale = detectLocale(request);
     let initialData: InitialData | undefined;
     try {
-      const dayRes = await handleApi(new Request(`${url.origin}/api/day?date=${todayIso()}`), env);
-      initialData = await dayRes.json() as InitialData;
+      const date = todayIso();
+      const [exhibitions, events] = await Promise.all([
+        getExhibitionsForDate(env, date),
+        getEventsForDate(env, date),
+      ]);
+      initialData = { date, exhibitions: proxyImages(exhibitions), events: proxyImages(events) };
     } catch {}
 
     return new Response(renderPage(locale, initialData), {
