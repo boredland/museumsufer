@@ -55,6 +55,10 @@ interface TribeEvent {
   image?: { url?: string };
 }
 
+const HISTORISCHES_TITLE_BLOCKLIST = [
+  "bibliothek der generationen",
+];
+
 async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
@@ -63,6 +67,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
 
   return data.flatMap((ev): ApiEvent[] => {
     if (!ev.title || !ev.dateStart) return [];
+    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title!.toLowerCase().includes(b))) return [];
     const start = new Date(ev.dateStart * 1000);
     const date = start.toISOString().slice(0, 10);
     if (date < todayIso()) return [];
