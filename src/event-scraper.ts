@@ -255,11 +255,15 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
     }>();
 
   let enriched = 0;
+  console.log(`Enrichment: ${events.length} candidates`);
 
   for (const event of events) {
     try {
       const details = await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
-      if (!details) continue;
+      if (!details) {
+        console.log(`Enrichment: fetch failed for event ${event.id} (${event.detail_url})`);
+        continue;
+      }
 
       const updates: string[] = [];
       const values: (string | null)[] = [];
