@@ -5,6 +5,48 @@ import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage } from "./frontend";
 import { detectLocale } from "./i18n";
 
+const LLMS_TXT = `# Museumsufer Frankfurt
+
+> Aggregated exhibitions and events from ~40 museums along Frankfurt's Museumsufer (Museum Embankment).
+
+This site provides a JSON API for querying museum exhibitions and events in Frankfurt am Main, Germany.
+
+## API
+
+Base URL: https://museumsufer.jonas-strassel.de
+
+### Get events and exhibitions for a date
+
+GET /api/day?date=YYYY-MM-DD
+
+Returns JSON: { date, exhibitions[], events[] }
+Each exhibition has: title, museum_name, start_date, end_date, image_url, detail_url
+Each event has: title, museum_name, date, time, description, detail_url, image_url, price
+
+### Get events only
+
+GET /api/events?date=YYYY-MM-DD
+
+### Get exhibitions only
+
+GET /api/exhibitions?date=YYYY-MM-DD
+
+### Get all museums
+
+GET /api/museums
+
+Returns: name, slug, museumsufer_url, website_url
+
+## Notes
+
+- Event content (titles, descriptions) is in German
+- Dates use ISO 8601 format (YYYY-MM-DD)
+- Times are in 24h format (HH:MM), timezone Europe/Berlin
+- Events are available for the next 7 days with the most detail (images, prices, deep links)
+- Exhibitions are available for any date (they span weeks/months)
+- Data is refreshed daily at 6am UTC
+`;
+
 function checkScrapeAuth(request: Request, env: Env): Response | null {
   if (!env.SCRAPE_SECRET) return null;
   const auth = request.headers.get("Authorization");
@@ -38,6 +80,12 @@ export default {
       const result = await scrapeMuseumWebsites(env);
       return new Response(JSON.stringify(result), {
         headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.pathname === "/llms.txt" || url.pathname === "/.well-known/llms.txt") {
+      return new Response(LLMS_TXT, {
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
       });
     }
 
