@@ -201,7 +201,6 @@ ${truncated}`,
   const responseText = typeof result.response === "string"
     ? result.response
     : JSON.stringify(result);
-  console.log(`AI response for ${museum.name}: ${responseText.slice(0, 200)}`);
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
@@ -260,15 +259,11 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
     }>();
 
   let enriched = 0;
-  console.log(`Enrichment: ${events.length} candidates`);
 
   for (const event of events) {
     try {
       const details = await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
-      if (!details) {
-        console.log(`Enrichment: fetch failed for event ${event.id} (${event.detail_url})`);
-        continue;
-      }
+      if (!details) continue;
 
       const updates: string[] = [];
       const values: (string | null)[] = [];
