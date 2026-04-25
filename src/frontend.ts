@@ -694,8 +694,11 @@ export function renderPage(locale: Locale): string {
       const img = ev.image_url
         ? '<img class="card-img" src="' + escHtml(ev.image_url) + '" alt="' + escHtml(ev.title) + '" loading="lazy">'
         : '';
-      const timeTag = ev.time
-        ? '<span class="card-time">' + escHtml(ev.time) + '</span>'
+      const timeStr = ev.time
+        ? (ev.end_time ? ev.time + '–' + ev.end_time : ev.time)
+        : '';
+      const timeTag = timeStr
+        ? '<span class="card-time">' + escHtml(timeStr) + '</span>'
         : '';
       const priceTag = ev.price
         ? '<span class="card-price">' + escHtml(ev.price) + '</span>'
@@ -711,6 +714,8 @@ export function renderPage(locale: Locale): string {
         + 'data-title="' + escAttr(ev.title) + '" '
         + 'data-date="' + escAttr(ev.date) + '" '
         + 'data-time="' + escAttr(ev.time || '') + '" '
+        + 'data-end-time="' + escAttr(ev.end_time || '') + '" '
+        + 'data-end-date="' + escAttr(ev.end_date || '') + '" '
         + 'data-location="' + escAttr(ev.museum_name || '') + '" '
         + 'data-url="' + escAttr(ev.detail_url || ev.url || '') + '" '
         + 'aria-label="' + escAttr(T.calendarAria) + '">'
@@ -751,6 +756,8 @@ export function renderPage(locale: Locale): string {
       const title = btn.dataset.title;
       const date = btn.dataset.date;
       const time = btn.dataset.time;
+      const endTime = btn.dataset.endTime;
+      const endDate = btn.dataset.endDate;
       const location = btn.dataset.location;
       const url = btn.dataset.url;
 
@@ -758,8 +765,13 @@ export function renderPage(locale: Locale): string {
       let dtStart, dtEnd;
       if (time) {
         dtStart = dtDate + 'T' + time.replace(':', '') + '00';
-        const endH = (parseInt(time.split(':')[0]) + 1) % 24;
-        dtEnd = dtDate + 'T' + endH.toString().padStart(2,'0') + time.split(':')[1] + '00';
+        if (endTime) {
+          const endDtDate = endDate ? endDate.replace(/-/g, '') : dtDate;
+          dtEnd = endDtDate + 'T' + endTime.replace(':', '') + '00';
+        } else {
+          const endH = (parseInt(time.split(':')[0]) + 1) % 24;
+          dtEnd = dtDate + 'T' + endH.toString().padStart(2,'0') + time.split(':')[1] + '00';
+        }
       } else {
         dtStart = dtDate;
         dtEnd = dtDate;

@@ -31,6 +31,8 @@ export interface Event {
   title: string;
   date: string;
   time: string | null;
+  end_time: string | null;
+  end_date: string | null;
   description: string | null;
   url: string | null;
   detail_url: string | null;
