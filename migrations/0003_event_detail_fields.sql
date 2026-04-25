@@ -1,0 +1,3 @@
+ALTER TABLE events ADD COLUMN detail_url TEXT;
+ALTER TABLE events ADD COLUMN image_url TEXT;
+ALTER TABLE events ADD COLUMN price TEXT;
