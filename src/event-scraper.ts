@@ -17,7 +17,7 @@ const EVENT_PAGE_PATHS = [
   "/de/besuch/programm",
 ];
 
-export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number; events: number }> {
+export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number; events: number; enriched: number }> {
   await discoverWebsiteUrls(env);
 
   const { results: museums } = await env.DB.prepare(
@@ -39,7 +39,9 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
     }
   }
 
-  return { updated, events: totalEvents };
+  const enriched = await enrichUpcomingEvents(env);
+
+  return { updated, events: totalEvents, enriched };
 }
 
 async function discoverWebsiteUrls(env: Env): Promise<void> {
@@ -70,6 +72,14 @@ async function discoverWebsiteUrls(env: Env): Promise<void> {
   }
 }
 
+interface ScrapedEvent {
+  title: string;
+  date: string;
+  time: string | null;
+  description: string | null;
+  detail_url: string | null;
+}
+
 async function scrapeMuseumEvents(
   env: Env,
   museum: { id: number; name: string; website_url: string }
@@ -96,7 +106,6 @@ async function scrapeMuseumEvents(
   }
 
   if (!eventsHtml || !eventsUrl) {
-    // Try fetching the homepage and looking for an events link
     try {
       const res = await fetch(baseUrl, { redirect: "follow" });
       if (res.ok) {
@@ -126,11 +135,13 @@ async function scrapeMuseumEvents(
     messages: [
       {
         role: "user",
-        content: `Extract upcoming events from this museum's program page. Today is ${new Date().toISOString().slice(0, 10)}.
+        content: `Extract upcoming events from this museum's program page. Today is ${todayIso()}.
 
 Only extract concrete events with specific dates (not permanent exhibitions or general descriptions).
 Return ONLY a JSON array, nothing else. Each element:
-{"title": "Event Title", "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": "brief description" or null}
+{"title": "Event Title", "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": "brief description" or null, "detail_url": "relative or absolute URL to the event detail page" or null}
+
+For detail_url: extract the href of the link wrapping each event title/card. Use the exact href value from the page, whether relative or absolute.
 
 If there are no events with specific dates, return an empty array: []
 
@@ -140,23 +151,23 @@ ${truncated}`,
     ],
   }) as { response: string };
 
-  const events = extractJson<Array<{
-    title: string;
-    date: string;
-    time: string | null;
-    description: string | null;
-  }>>(result.response);
-
+  const events = extractJson<ScrapedEvent[]>(result.response);
   if (!events || events.length === 0) return 0;
 
   let count = 0;
   for (const event of events) {
     if (!event.title || !event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) continue;
 
+    const detailUrl = normalizeUrl(event.detail_url, baseUrl);
+
     await env.DB.prepare(
-      `INSERT INTO events (museum_id, title, date, time, description, url)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT DO NOTHING`
+      `INSERT INTO events (museum_id, title, date, time, description, url, detail_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(museum_id, title, date) DO UPDATE SET
+         time = excluded.time,
+         description = excluded.description,
+         detail_url = COALESCE(excluded.detail_url, events.detail_url),
+         updated_at = datetime('now')`
     )
       .bind(
         museum.id,
@@ -164,13 +175,163 @@ ${truncated}`,
         event.date,
         event.time,
         event.description,
-        eventsUrl
+        eventsUrl,
+        detailUrl
       )
       .run();
     count++;
   }
 
   return count;
+}
+
+async function enrichUpcomingEvents(env: Env): Promise<number> {
+  const today = todayIso();
+  const weekAhead = dateOffset(7);
+
+  const { results: events } = await env.DB.prepare(
+    `SELECT ev.id, ev.detail_url, ev.price, ev.image_url, m.name as museum_name, m.website_url
+     FROM events ev
+     JOIN museums m ON ev.museum_id = m.id
+     WHERE ev.date >= ? AND ev.date <= ?
+       AND ev.detail_url IS NOT NULL
+       AND (ev.price IS NULL AND ev.image_url IS NULL)
+     LIMIT 30`
+  )
+    .bind(today, weekAhead)
+    .all<{
+      id: number;
+      detail_url: string;
+      price: string | null;
+      image_url: string | null;
+      museum_name: string;
+      website_url: string;
+    }>();
+
+  let enriched = 0;
+
+  for (const event of events) {
+    try {
+      const details = await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
+      if (!details) continue;
+
+      const updates: string[] = [];
+      const values: (string | null)[] = [];
+
+      if (details.price) {
+        updates.push("price = ?");
+        values.push(details.price);
+      }
+      if (details.image_url) {
+        updates.push("image_url = ?");
+        values.push(details.image_url);
+      }
+
+      if (updates.length === 0) {
+        // Mark as checked so we don't re-fetch
+        await env.DB.prepare("UPDATE events SET price = '', updated_at = datetime('now') WHERE id = ?")
+          .bind(event.id)
+          .run();
+        continue;
+      }
+
+      updates.push("updated_at = datetime('now')");
+      await env.DB.prepare(
+        `UPDATE events SET ${updates.join(", ")} WHERE id = ?`
+      )
+        .bind(...values, event.id)
+        .run();
+      enriched++;
+    } catch (e) {
+      console.error(`Failed to enrich event ${event.id}:`, e);
+    }
+  }
+
+  return enriched;
+}
+
+async function fetchEventDetails(
+  env: Env,
+  detailUrl: string,
+  museumName: string,
+  websiteUrl: string
+): Promise<{ price: string | null; image_url: string | null } | null> {
+  let html: string;
+  try {
+    const res = await fetch(detailUrl, { redirect: "follow" });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+    html = await res.text();
+  } catch {
+    return null;
+  }
+
+  const imageUrl = extractImageFromHtml(html, detailUrl);
+
+  const textContent = stripHtmlToText(html).slice(0, 6000);
+  if (textContent.length < 50) return { price: null, image_url: imageUrl };
+
+  const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+    messages: [
+      {
+        role: "user",
+        content: `Extract price/cost information from this event detail page for "${museumName}".
+
+Look for: admission price, ticket cost, "Eintritt", "€", "kostenlos", "kostenfrei", "frei", "inklusive Museumseintritt", etc.
+
+Return ONLY a JSON object, nothing else:
+{"price": "the price text exactly as shown, e.g. '8 €', 'Eintritt frei', 'kostenlos', '12 € / 8 € ermäßigt'" or null}
+
+If no price information is found, return: {"price": null}
+
+Page content:
+${textContent}`,
+      },
+    ],
+  }) as { response: string };
+
+  let price: string | null = null;
+  const parsed = extractJsonObject<{ price: string | null }>(result.response);
+  if (parsed?.price && parsed.price !== "null") {
+    price = parsed.price;
+  }
+
+  return { price, image_url: imageUrl };
+}
+
+function extractImageFromHtml(html: string, pageUrl: string): string | null {
+  const baseUrl = new URL(pageUrl).origin;
+
+  // Look for og:image first (most reliable)
+  const ogMatch = html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i)
+    || html.match(/content="([^"]+)"\s+(?:property|name)="og:image"/i);
+  if (ogMatch) {
+    return normalizeUrl(ogMatch[1], baseUrl);
+  }
+
+  // Look for a prominent image in the main content area
+  const mainContent = html.match(/<main[\s\S]*?<\/main>/i)?.[0]
+    || html.match(/<article[\s\S]*?<\/article>/i)?.[0]
+    || html;
+
+  const imgMatch = mainContent.match(/<img[^>]+src="(https?:\/\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i)
+    || mainContent.match(/<img[^>]+src="(\/[^"]+\.(?:jpg|jpeg|png|webp)[^"]*)"/i);
+
+  if (imgMatch) {
+    return normalizeUrl(imgMatch[1], baseUrl);
+  }
+
+  return null;
+}
+
+function normalizeUrl(url: string | null | undefined, baseUrl: string): string | null {
+  if (!url) return null;
+  url = url.trim();
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("//")) return `https:${url}`;
+  if (url.startsWith("/")) return `${baseUrl.replace(/\/$/, "")}${url}`;
+  return `${baseUrl.replace(/\/$/, "")}/${url}`;
 }
 
 function findEventLink(html: string, baseUrl: string): string | null {
@@ -209,4 +370,24 @@ function extractJson<T>(text: string): T | null {
   } catch {
     return null;
   }
+}
+
+function extractJsonObject<T>(text: string): T | null {
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    return JSON.parse(match[0]) as T;
+  } catch {
+    return null;
+  }
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function dateOffset(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
 }

@@ -272,6 +272,15 @@ export function renderPage(): string {
       border-radius: 4px;
     }
 
+    .card-price {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: #166534;
+      background: #dcfce7;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+    }
+
     .empty {
       color: var(--text-tertiary);
       font-size: 0.875rem;
@@ -358,7 +367,7 @@ export function renderPage(): string {
       <button id="btn-tomorrow">Morgen</button>
       <button id="btn-weekend">Samstag</button>
       <button id="btn-sunday">Sonntag</button>
-      <input type="date" id="date-picker" aria-label="Datum auswählen">
+      <input type="date" id="date-picker" aria-label="Datum auswählen" min="" max="">
     </nav>
 
     <p class="date-label" id="date-label" aria-live="polite"></p>
@@ -411,10 +420,13 @@ export function renderPage(): string {
     }
 
     function updateNavVisibility() {
-      const todayIso = toIso(today());
       const todayDay = today().getDay();
       btnWeekend.style.display = (todayDay === 6) ? 'none' : '';
       btnSunday.style.display = (todayDay === 0) ? 'none' : '';
+      datePicker.min = toIso(today());
+      const maxDate = new Date();
+      maxDate.setDate(maxDate.getDate() + 7);
+      datePicker.max = toIso(maxDate);
     }
 
     async function loadDay(date, btn) {
@@ -504,20 +516,30 @@ export function renderPage(): string {
     }
 
     function renderEvent(ev) {
+      const img = ev.image_url
+        ? '<img class="card-img" src="' + escHtml(ev.image_url) + '" alt="' + escHtml(ev.title) + '" loading="lazy">'
+        : '';
       const timeTag = ev.time
         ? '<span class="card-time">' + escHtml(ev.time) + '</span>'
         : '';
+      const priceTag = ev.price
+        ? '<span class="card-price">' + escHtml(ev.price) + '</span>'
+        : '';
 
       const titleText = escHtml(ev.title);
-      const titleHtml = ev.url
-        ? '<a href="' + escHtml(ev.url) + '" target="_blank" rel="noopener">' + titleText + '</a>'
+      const linkUrl = ev.detail_url || ev.url;
+      const titleHtml = linkUrl
+        ? '<a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">' + titleText + '</a>'
         : titleText;
 
+      const meta = [timeTag, priceTag].filter(Boolean).join(' ');
+
       return '<div class="card">'
+        + img
         + '<div class="card-body">'
         + '<div class="card-title">' + titleHtml + '</div>'
         + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
-        + (timeTag ? '<div class="card-meta">' + timeTag + '</div>' : '')
+        + (meta ? '<div class="card-meta">' + meta + '</div>' : '')
         + '</div></div>';
     }
 
