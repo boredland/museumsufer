@@ -349,6 +349,51 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       flex-wrap: wrap;
     }
 
+    .card-visited-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .card-visited-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .card-visited-btn.is-visited { color: #166534; background: #dcfce7; border-color: #dcfce7; }
+    .card-visited-btn svg { width: 12px; height: 12px; }
+
+    .visited-section {
+      margin-top: 1rem;
+    }
+
+    .visited-section summary {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .visited-section summary::-webkit-details-marker { display: none; }
+    .visited-section summary::before { content: '+ '; font-family: monospace; }
+    .visited-section[open] summary::before { content: '- '; }
+
+    .visited-section .card { opacity: 0.6; }
+    .visited-section .card:hover { opacity: 1; }
+
     .card-ending-soon {
       font-size: 0.6875rem;
       font-weight: 500;
@@ -629,6 +674,24 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     const CURRENT_LANG = '${locale}';
     const __INITIAL_DATA__ = ${initialDataJson};
 
+    let lastRenderData = null;
+
+    function onToggleVisited(id) {
+      toggleVisited(id);
+      if (lastRenderData) render(lastRenderData);
+    }
+
+    function getVisited() {
+      try { return JSON.parse(localStorage.getItem('visited') || '[]'); } catch { return []; }
+    }
+    function isVisited(id) { return getVisited().includes(id); }
+    function toggleVisited(id) {
+      const v = getVisited();
+      const idx = v.indexOf(id);
+      if (idx >= 0) v.splice(idx, 1); else v.push(id);
+      localStorage.setItem('visited', JSON.stringify(v));
+    }
+
     const content = document.getElementById('content');
     const dateLabel = document.getElementById('date-label');
     const btnToday = document.getElementById('btn-today');
@@ -694,6 +757,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     }
 
     function render(data) {
+      lastRenderData = data;
       let html = '';
 
       html += '<div class="section">';
@@ -735,6 +799,23 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     }
 
     function renderExhibitionsGrouped(exhibitions) {
+      const active = exhibitions.filter(ex => !isVisited(ex.id));
+      const visited = exhibitions.filter(ex => isVisited(ex.id));
+
+      let html = renderExhibitionList(active);
+
+      if (visited.length > 0) {
+        html += '<details class="visited-section"><summary>'
+          + escHtml(T.alreadyVisited) + ' <span class="section-count">' + visited.length + '</span>'
+          + '</summary><div class="card-list">'
+          + renderExhibitionList(visited)
+          + '</div></details>';
+      }
+
+      return html;
+    }
+
+    function renderExhibitionList(exhibitions) {
       let html = '';
       let currentMuseum = '';
       for (const ex of exhibitions) {
@@ -772,6 +853,11 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
         : '';
 
+      const visitedCls = isVisited(ex.id) ? ' is-visited' : '';
+      const visitedBtn = '<button class="card-visited-btn' + visitedCls + '" onclick="onToggleVisited(' + ex.id + ')">'
+        + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        + escHtml(T.visited) + '</button>';
+
       return '<div class="card">'
         + img
         + '<div class="card-body">'
@@ -779,6 +865,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         + '<div class="card-meta">'
         + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
         + endingTag
+        + visitedBtn
         + '</div>'
         + desc
         + '</div></div>';

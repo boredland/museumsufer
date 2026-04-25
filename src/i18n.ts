@@ -59,6 +59,8 @@ const de: Translations = {
   rssFeed: "RSS-Feed",
   endingSoon: "Endet bald",
   lastDays: "Letzte Tage",
+  visited: "Besucht",
+  alreadyVisited: "Bereits besucht",
 };
 
 const en: Translations = {
@@ -88,6 +90,8 @@ const en: Translations = {
   rssFeed: "RSS feed",
   endingSoon: "Ending soon",
   lastDays: "Last days",
+  visited: "Visited",
+  alreadyVisited: "Already visited",
 };
 
 const fr: Translations = {
@@ -117,6 +121,8 @@ const fr: Translations = {
   rssFeed: "Flux RSS",
   endingSoon: "Se termine bientot",
   lastDays: "Derniers jours",
+  visited: "Visite",
+  alreadyVisited: "Deja visite",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
