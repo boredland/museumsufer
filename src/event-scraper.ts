@@ -1,4 +1,6 @@
 import { Env } from "./types";
+import { getApiConfig } from "./museum-apis";
+import { fetchEventsFromApi } from "./api-scrapers";
 
 const BASE_URL = "https://www.museumsufer.de";
 
@@ -17,19 +19,56 @@ const EVENT_PAGE_PATHS = [
   "/de/besuch/programm",
 ];
 
-export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number; events: number; enriched: number }> {
+export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number; events: number; enriched: number; api: number }> {
   await discoverWebsiteUrls(env);
 
   const { results: museums } = await env.DB.prepare(
-    "SELECT id, name, website_url FROM museums WHERE website_url IS NOT NULL"
-  ).all<{ id: number; name: string; website_url: string }>();
+    "SELECT id, name, slug, website_url FROM museums"
+  ).all<{ id: number; name: string; slug: string; website_url: string | null }>();
 
   let totalEvents = 0;
   let updated = 0;
+  let apiCount = 0;
 
   for (const museum of museums) {
     try {
-      const count = await scrapeMuseumEvents(env, museum);
+      const apiConfig = getApiConfig(museum.slug);
+
+      if (apiConfig) {
+        const events = await fetchEventsFromApi(apiConfig);
+        let count = 0;
+        for (const event of events) {
+          if (!event.title || !event.date) continue;
+          await env.DB.prepare(
+            `INSERT INTO events (museum_id, title, date, time, description, url, detail_url, image_url, price)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(museum_id, title, date) DO UPDATE SET
+               time = COALESCE(excluded.time, events.time),
+               description = COALESCE(excluded.description, events.description),
+               detail_url = COALESCE(excluded.detail_url, events.detail_url),
+               image_url = COALESCE(excluded.image_url, events.image_url),
+               price = COALESCE(excluded.price, events.price),
+               updated_at = datetime('now')`
+          )
+            .bind(
+              museum.id, event.title, event.date, event.time,
+              event.description, apiConfig.endpoint, event.detail_url,
+              event.image_url, event.price
+            )
+            .run();
+          count++;
+        }
+        if (count > 0) {
+          totalEvents += count;
+          updated++;
+          apiCount++;
+        }
+        continue;
+      }
+
+      if (!museum.website_url) continue;
+
+      const count = await scrapeMuseumEvents(env, museum as { id: number; name: string; website_url: string });
       if (count > 0) {
         totalEvents += count;
         updated++;
@@ -41,7 +80,7 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
 
   const enriched = await enrichUpcomingEvents(env);
 
-  return { updated, events: totalEvents, enriched };
+  return { updated, events: totalEvents, enriched, api: apiCount };
 }
 
 async function discoverWebsiteUrls(env: Env): Promise<void> {
@@ -77,7 +116,6 @@ interface ScrapedEvent {
   date: string;
   time: string | null;
   description: string | null;
-  detail_url: string | null;
 }
 
 async function scrapeMuseumEvents(
@@ -126,6 +164,7 @@ async function scrapeMuseumEvents(
 
   if (!eventsHtml) return 0;
 
+  const pageLinks = extractPageLinks(eventsHtml, baseUrl);
   const textContent = stripHtmlToText(eventsHtml);
   if (textContent.length < 100) return 0;
 
@@ -139,9 +178,7 @@ async function scrapeMuseumEvents(
 
 Only extract concrete events with specific dates (not permanent exhibitions or general descriptions).
 Return ONLY a JSON array, nothing else. Each element:
-{"title": "Event Title", "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": "brief description" or null, "detail_url": "relative or absolute URL to the event detail page" or null}
-
-For detail_url: extract the href of the link wrapping each event title/card. Use the exact href value from the page, whether relative or absolute.
+{"title": "Event Title", "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": "brief description" or null}
 
 If there are no events with specific dates, return an empty array: []
 
@@ -158,7 +195,7 @@ ${truncated}`,
   for (const event of events) {
     if (!event.title || !event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) continue;
 
-    const detailUrl = normalizeUrl(event.detail_url, baseUrl);
+    const detailUrl = matchLinkForTitle(event.title, pageLinks);
 
     await env.DB.prepare(
       `INSERT INTO events (museum_id, title, date, time, description, url, detail_url)
@@ -332,6 +369,72 @@ function normalizeUrl(url: string | null | undefined, baseUrl: string): string |
   if (url.startsWith("//")) return `https:${url}`;
   if (url.startsWith("/")) return `${baseUrl.replace(/\/$/, "")}${url}`;
   return `${baseUrl.replace(/\/$/, "")}/${url}`;
+}
+
+interface PageLink {
+  text: string;
+  href: string;
+}
+
+function extractPageLinks(html: string, baseUrl: string): PageLink[] {
+  const links: PageLink[] = [];
+  const re = /<a\s[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+  while ((match = re.exec(html)) !== null) {
+    const href = match[1];
+    const text = match[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    if (!text || text.length < 3 || text.length > 200) continue;
+    if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:")) continue;
+    const normalized = normalizeUrl(href, baseUrl);
+    if (normalized) links.push({ text, href: normalized });
+  }
+  return links;
+}
+
+function matchLinkForTitle(title: string, links: PageLink[]): string | null {
+  const titleLower = title.toLowerCase().trim();
+  const titleWords = titleLower.split(/\s+/).filter(w => w.length > 2);
+
+  let bestMatch: { href: string; score: number } | null = null;
+
+  for (const link of links) {
+    const linkText = link.text.toLowerCase();
+
+    if (linkText === titleLower) return link.href;
+
+    if (titleLower.includes(linkText) || linkText.includes(titleLower)) {
+      const score = Math.min(titleLower.length, linkText.length);
+      if (!bestMatch || score > bestMatch.score) {
+        bestMatch = { href: link.href, score };
+      }
+      continue;
+    }
+
+    let matchingWords = 0;
+    for (const word of titleWords) {
+      if (linkText.includes(word)) matchingWords++;
+    }
+    if (titleWords.length > 0 && matchingWords / titleWords.length >= 0.6) {
+      const score = matchingWords;
+      if (!bestMatch || score > bestMatch.score) {
+        bestMatch = { href: link.href, score };
+      }
+    }
+
+    const slugFromUrl = link.href.split("/").pop()?.replace(/-/g, " ").toLowerCase() || "";
+    let slugWords = 0;
+    for (const word of titleWords) {
+      if (slugFromUrl.includes(word)) slugWords++;
+    }
+    if (titleWords.length > 0 && slugWords / titleWords.length >= 0.5) {
+      const score = slugWords + 0.5;
+      if (!bestMatch || score > bestMatch.score) {
+        bestMatch = { href: link.href, score };
+      }
+    }
+  }
+
+  return bestMatch ? bestMatch.href : null;
 }
 
 function findEventLink(html: string, baseUrl: string): string | null {
