@@ -14,6 +14,10 @@ export function renderPage(locale: Locale): string {
   <title>Museumsufer Frankfurt</title>
   <meta name="description" content="${escHtml(tr.meta)}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+  <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#f5f0eb">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
@@ -411,6 +415,10 @@ export function renderPage(locale: Locale): string {
       border-top: 1px solid var(--border);
       text-align: center;
       font-size: 0.75rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .site-footer a {
@@ -538,6 +546,8 @@ export function renderPage(locale: Locale): string {
     </main>
 
     <footer class="site-footer">
+      <a href="/feed.ics">${escHtml(tr.subscribeCal)}</a>
+      <a href="/feed.xml">${escHtml(tr.rssFeed)}</a>
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
     </footer>
   </div>
