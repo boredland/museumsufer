@@ -1,27 +1,29 @@
-const ALLOWED_ORIGINS = [
-  "museumsufer.de",
-  "museumfrankfurt.senckenberg.de",
-  "www.staedelmuseum.de",
-  "www.liebieghaus.de",
-  "www.juedischesmuseum.de",
-  "dam-online.de",
-  "www.dam-online.de",
-  "www.dff.film",
-  "www.schirn.de",
-  "www.mfk-frankfurt.de",
-  "www.historisches-museum-frankfurt.de",
-  "historisches-museum-frankfurt.de",
-  "dommuseum-frankfurt.de",
-  "www.stadtgeschichte-ffm.de",
-  "www.museumangewandtekunst.de",
-  "caricatura-museum.de",
-  "www.mmk.art",
-  "weltkulturenmuseum.de",
-  "www.fkv.de",
-  "archaeologisches-museum-frankfurt.de",
-];
+import { Env } from "./types";
 
-export async function handleImageProxy(request: Request): Promise<Response | null> {
+let allowedDomains: Set<string> | null = null;
+
+async function getAllowedDomains(env: Env): Promise<Set<string>> {
+  if (allowedDomains) return allowedDomains;
+
+  const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
+  const { results } = await env.DB.prepare(
+    "SELECT website_url FROM museums WHERE website_url IS NOT NULL"
+  ).all<{ website_url: string }>();
+
+  for (const row of results) {
+    try {
+      const hostname = new URL(row.website_url).hostname;
+      domains.add(hostname);
+      if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
+      else domains.add("www." + hostname);
+    } catch {}
+  }
+
+  allowedDomains = domains;
+  return domains;
+}
+
+export async function handleImageProxy(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
   if (!url.pathname.startsWith("/img/")) return null;
 
@@ -31,9 +33,11 @@ export async function handleImageProxy(request: Request): Promise<Response | nul
   let imageUrl: string;
   try {
     imageUrl = decodeURIComponent(encodedUrl);
-    if (!imageUrl.startsWith("https://")) return null;
+    if (!imageUrl.startsWith("https://") && !imageUrl.startsWith("http://")) return null;
+
     const origin = new URL(imageUrl).hostname;
-    if (!ALLOWED_ORIGINS.some((o) => origin === o || origin.endsWith("." + o))) {
+    const allowed = await getAllowedDomains(env);
+    if (!allowed.has(origin)) {
       return new Response("Forbidden origin", { status: 403 });
     }
   } catch {
