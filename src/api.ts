@@ -91,24 +91,25 @@ async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
 
 function filterPastEvents(events: Event[]): Event[] {
   const now = new Date();
-  const berlinHour = parseInt(now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour: "2-digit", hour12: false }));
-  const berlinMin = parseInt(now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", minute: "2-digit", hour12: false }).split(":")[1]);
-  const nowMinutes = berlinHour * 60 + berlinMin;
+  const berlinTime = now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour12: false });
+  const [bh, bm] = berlinTime.split(":").map(Number);
+  const nowMinutes = bh * 60 + bm;
 
   return events.filter((ev) => {
     if (!ev.time) return true;
 
-    const endTimeStr = ev.end_time || null;
-    if (endTimeStr) {
-      const [eh, em] = endTimeStr.split(":").map(Number);
+    if (ev.end_time) {
+      const [eh, em] = ev.end_time.split(":").map(Number);
       let endMinutes = eh * 60 + em;
+      // Treat end times before 06:00 as next-day (e.g. "02:00" for Nacht der Museen)
       if (endMinutes < 360) endMinutes += 24 * 60;
       return nowMinutes < endMinutes;
     }
 
+    // No end_time: assume 3 hours duration
     const [h, m] = ev.time.split(":").map(Number);
-    const eventEnd = h * 60 + m + 60;
-    return nowMinutes < eventEnd;
+    const assumedEnd = h * 60 + m + 180;
+    return nowMinutes < assumedEnd;
   });
 }
 
