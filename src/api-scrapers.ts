@@ -4,6 +4,8 @@ export interface ApiEvent {
   title: string;
   date: string;
   time: string | null;
+  end_time: string | null;
+  end_date: string | null;
   description: string | null;
   detail_url: string | null;
   image_url: string | null;
@@ -44,15 +46,21 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
   const data = await res.json() as { events?: TribeEvent[] };
   if (!data.events) return [];
 
-  return data.events.map((ev): ApiEvent => ({
-    title: stripHtml(ev.title || ""),
-    date: ev.start_date?.slice(0, 10) || "",
-    time: ev.start_date?.slice(11, 16) || null,
-    description: stripHtml(ev.excerpt || ev.description || "").slice(0, 300) || null,
-    detail_url: ev.url || null,
-    image_url: ev.image?.url || null,
-    price: ev.cost || null,
-  })).filter(ev => ev.title && ev.date);
+  return data.events.map((ev): ApiEvent => {
+    const endDate = ev.end_date?.slice(0, 10) || null;
+    const startDate = ev.start_date?.slice(0, 10) || "";
+    return {
+      title: stripHtml(ev.title || ""),
+      date: startDate,
+      time: ev.start_date?.slice(11, 16) || null,
+      end_time: ev.end_date?.slice(11, 16) || null,
+      end_date: endDate !== startDate ? endDate : null,
+      description: stripHtml(ev.excerpt || ev.description || "").slice(0, 300) || null,
+      detail_url: ev.url || null,
+      image_url: ev.image?.url || null,
+      price: ev.cost || null,
+    };
+  }).filter(ev => ev.title && ev.date);
 }
 
 interface TribeEvent {
@@ -85,6 +93,16 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
 
     const timeMatch = ev.time?.match(/(\d{1,2}:\d{2})/);
 
+    let endTime: string | null = null;
+    let endDate: string | null = null;
+    if (ev.dateEnd) {
+      const end = new Date(ev.dateEnd * 1000);
+      const ed = toBerlinDate(end);
+      endTime = toBerlinTime(end);
+      if (ed !== date) endDate = ed;
+      if (endTime === "00:00") endTime = null;
+    }
+
     let price: string | null = null;
     if (ev.isFree) price = "Eintritt frei";
     else {
@@ -96,6 +114,8 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       title: ev.title,
       date,
       time: timeMatch?.[1] || null,
+      end_time: endTime,
+      end_date: endDate,
       description: stripHtml(ev.summary || "").slice(0, 300) || null,
       detail_url: ev.url || null,
       image_url: ev.image || null,
@@ -141,10 +161,18 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
     const location = ev.locationAlt || ev.location || "";
     const isJudengasse = location.toLowerCase().includes("judengasse");
 
+    let endTime: string | null = null;
+    if (ev.duration && ev.duration > 0) {
+      const endMs = (ev.dateTime + ev.duration * 60) * 1000;
+      endTime = toBerlinTime(new Date(endMs));
+    }
+
     return [{
       title: ev.headline.trim(),
       date,
       time: time !== "00:00" ? time : null,
+      end_time: endTime,
+      end_date: null,
       description: stripHtml(ev.copy || ev.subline || "").slice(0, 300) || null,
       detail_url: ev.detailPageLink?.href || null,
       image_url: imageUrl,
@@ -193,10 +221,21 @@ async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
     let thumb = ev.thumbnail || null;
     if (thumb?.startsWith("@images")) thumb = thumb.replace("@images", imgBase);
 
+    let endTime: string | null = null;
+    let endDate: string | null = null;
+    if (ev.end) {
+      const et = ev.end.slice(11, 16);
+      const ed = ev.end.slice(0, 10);
+      if (et !== "00:00") endTime = et;
+      if (ed !== date) endDate = ed;
+    }
+
     return [{
       title: ev.title || ev.description || "",
       date,
       time: time !== "00:00" ? time : null,
+      end_time: endTime,
+      end_date: endDate,
       description: ev.description?.slice(0, 300) || null,
       detail_url: url,
       image_url: thumb,
@@ -240,10 +279,21 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
     const title = acf.event_title || stripHtml(post.title?.rendered || "");
     if (!title) return [];
 
+    let endTime: string | null = null;
+    let endDate: string | null = null;
+    if (acf.event_stop_time) {
+      const ed = acf.event_stop_time.slice(0, 10);
+      const et = acf.event_stop_time.slice(11, 16);
+      if (et !== "00:00") endTime = et;
+      if (ed !== date) endDate = ed;
+    }
+
     return [{
       title,
       date,
       time: time !== "00:00" ? time : null,
+      end_time: endTime,
+      end_date: endDate,
       description: stripHtml(acf.event_decription || "").slice(0, 300) || null,
       detail_url: post.link || null,
       image_url: null,
@@ -294,10 +344,16 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
         ? `https://www.mfk-frankfurt.de/?p=${ev.event_post}`
         : null;
 
+      const endTime = ev.event_endtime && ev.event_endtime !== "00:00:00"
+        ? ev.event_endtime.slice(0, 5)
+        : null;
+
       events.push({
         title: ev.event_title,
         date,
         time,
+        end_time: endTime,
+        end_date: null,
         description: stripHtml(ev.event_short || "").slice(0, 300) || null,
         detail_url: detailUrl,
         image_url: ev.event_image || null,
@@ -351,10 +407,20 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
     const imgMatch = block.match(/data-src-set="([^ ]+)/);
     const priceMatch = block.match(/(?:Kosten|Eintritt|Preis)[^<]*?(\d+[.,]?\d*\s*(?:Euro|€)[^<]*)/i);
 
+    const durationMatch = block.match(/itemprop="duration" datetime="P[^"]*T(\d+)H(?:(\d+)M)?/);
+    let endTime: string | null = null;
+    if (durationMatch && time !== "00:00") {
+      const h = parseInt(time.split(":")[0]) + parseInt(durationMatch[1]);
+      const m = time.split(":")[1];
+      endTime = `${(h % 24).toString().padStart(2, "0")}:${m}`;
+    }
+
     events.push({
       title,
       date,
       time: time !== "00:00" ? time : null,
+      end_time: endTime,
+      end_date: null,
       description: null,
       detail_url: detailMatch ? `https://www.liebieghaus.de${detailMatch[1]}` : null,
       image_url: imgMatch ? `https://www.liebieghaus.de${imgMatch[1]}` : null,
@@ -394,6 +460,8 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
       title: titleMatch[1].trim(),
       date,
       time: null,
+      end_time: null,
+      end_date: null,
       description: null,
       detail_url: linkMatch ? linkMatch[1] : null,
       image_url: imgMatch ? `https://dommuseum-frankfurt.de${imgMatch[1]}` : null,
@@ -447,13 +515,18 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     const date = `${currentYear}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
-    const timeMatch = heading.match(/^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–[^–]*?)?\s*Uhr\s*–\s*/);
+    const timeRangeMatch = heading.match(/^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*–\s*/);
     let time: string | null = null;
+    let endTime: string | null = null;
     let title = heading;
-    if (timeMatch) {
-      const raw = timeMatch[1].replace(".", ":");
-      time = raw.includes(":") ? raw : `${raw}:00`;
-      title = heading.slice(timeMatch[0].length).trim();
+    if (timeRangeMatch) {
+      const rawStart = timeRangeMatch[1].replace(".", ":");
+      time = rawStart.includes(":") ? rawStart : `${rawStart}:00`;
+      if (timeRangeMatch[2]) {
+        const rawEnd = timeRangeMatch[2].replace(".", ":");
+        endTime = rawEnd.includes(":") ? rawEnd : `${rawEnd}:00`;
+      }
+      title = heading.slice(timeRangeMatch[0].length).trim();
     }
 
     const subMatch = block.match(/class="mak-event-subheading">([^<]+)/);
@@ -463,6 +536,8 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
       title: title || heading,
       date,
       time,
+      end_time: endTime,
+      end_date: null,
       description: subMatch ? subMatch[1].trim() : null,
       detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
       image_url: null,
@@ -502,6 +577,7 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
     if (date < todayIso()) continue;
 
     const timeMatch = desc.match(/(\d{1,2}:\d{2})\s*Uhr/);
+    const endTimeMatch = desc.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/);
     const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
     const priceMatch = desc.match(/(\d+\s*€[^<,]*(?:,\s*ermäßigt\s*\d+\s*€)?)/i);
 
@@ -516,6 +592,8 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
       title,
       date,
       time: timeMatch ? timeMatch[1] : null,
+      end_time: endTimeMatch ? endTimeMatch[1] : null,
+      end_date: null,
       description: stripHtml(desc).slice(0, 300) || null,
       detail_url: linkMatch ? linkMatch[1].trim() : null,
       image_url,

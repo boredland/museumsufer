@@ -49,10 +49,12 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
           }
 
           await env.DB.prepare(
-            `INSERT INTO events (museum_id, title, date, time, description, url, detail_url, image_url, price)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
              ON CONFLICT(museum_id, title, date) DO UPDATE SET
                time = COALESCE(excluded.time, events.time),
+               end_time = COALESCE(excluded.end_time, events.end_time),
+               end_date = COALESCE(excluded.end_date, events.end_date),
                description = COALESCE(excluded.description, events.description),
                detail_url = COALESCE(excluded.detail_url, events.detail_url),
                image_url = COALESCE(excluded.image_url, events.image_url),
@@ -61,6 +63,7 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
           )
             .bind(
               targetMuseumId, event.title, event.date, event.time,
+              event.end_time, event.end_date,
               event.description, apiConfig.endpoint, event.detail_url,
               event.image_url, event.price
             )
