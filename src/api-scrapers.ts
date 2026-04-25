@@ -8,6 +8,7 @@ export interface ApiEvent {
   detail_url: string | null;
   image_url: string | null;
   price: string | null;
+  museum_slug_override?: string;
 }
 
 export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEvent[]> {
@@ -129,6 +130,9 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
         : `https://www.juedischesmuseum.de${ev.image.src}`;
     }
 
+    const location = ev.locationAlt || ev.location || "";
+    const isJudengasse = location.toLowerCase().includes("judengasse");
+
     return [{
       title: ev.headline,
       date,
@@ -137,6 +141,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
       detail_url: ev.detailPageLink?.href || null,
       image_url: imageUrl,
       price: null,
+      museum_slug_override: isJudengasse ? "juedisches-museum-museum-judengasse-frankfurt" : undefined,
     }];
   });
 }

@@ -39,6 +39,15 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
         let count = 0;
         for (const event of events) {
           if (!event.title || !event.date) continue;
+
+          let targetMuseumId = museum.id;
+          if (event.museum_slug_override) {
+            const override = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
+              .bind(event.museum_slug_override)
+              .first<{ id: number }>();
+            if (override) targetMuseumId = override.id;
+          }
+
           await env.DB.prepare(
             `INSERT INTO events (museum_id, title, date, time, description, url, detail_url, image_url, price)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -51,7 +60,7 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
                updated_at = datetime('now')`
           )
             .bind(
-              museum.id, event.title, event.date, event.time,
+              targetMuseumId, event.title, event.date, event.time,
               event.description, apiConfig.endpoint, event.detail_url,
               event.image_url, event.price
             )
