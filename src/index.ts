@@ -63,7 +63,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith("/img/")) {
-      const imgResponse = await handleImageProxy(request);
+      const imgResponse = await handleImageProxy(request, env);
       if (imgResponse) return imgResponse;
     }
 
