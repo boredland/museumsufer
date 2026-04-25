@@ -57,6 +57,8 @@ const de: Translations = {
   missingEvent: "Veranstaltung fehlt?",
   subscribeCal: "Kalender abonnieren",
   rssFeed: "RSS-Feed",
+  endingSoon: "Endet bald",
+  lastDays: "Letzte Tage",
 };
 
 const en: Translations = {
@@ -84,6 +86,8 @@ const en: Translations = {
   missingEvent: "Event missing?",
   subscribeCal: "Subscribe to calendar",
   rssFeed: "RSS feed",
+  endingSoon: "Ending soon",
+  lastDays: "Last days",
 };
 
 const fr: Translations = {
@@ -111,6 +115,8 @@ const fr: Translations = {
   missingEvent: "Evenement manquant ?",
   subscribeCal: "S'abonner au calendrier",
   rssFeed: "Flux RSS",
+  endingSoon: "Se termine bientot",
+  lastDays: "Derniers jours",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
