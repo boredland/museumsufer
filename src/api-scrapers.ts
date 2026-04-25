@@ -25,6 +25,8 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchSenckenberg(config.endpoint);
     case "my-calendar":
       return fetchMyCalendar(config.endpoint);
+    case "liebieghaus":
+      return fetchLiebieghaus(config.endpoint);
   }
 }
 
@@ -314,6 +316,49 @@ interface MyCalendarEvent {
   event_url?: string;
   occur_begin?: string;
   occur_end?: string;
+}
+
+async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+  });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const events: ApiEvent[] = [];
+  const blockRe = /itemtype="http:\/\/schema\.org\/Event"([\s\S]*?)(?=itemtype="http:\/\/schema\.org\/Event"|<\/main)/g;
+  let match;
+
+  while ((match = blockRe.exec(html)) !== null) {
+    const block = match[1];
+
+    const startMatch = block.match(/itemprop="startDate" datetime="([^"]+)"/);
+    const nameMatch = block.match(/itemprop="name">([^<]+)/);
+    if (!startMatch || !nameMatch) continue;
+
+    const dt = startMatch[1];
+    const date = dt.slice(0, 10);
+    if (date < todayIso()) continue;
+
+    const time = dt.slice(11, 16);
+    const title = nameMatch[1].trim();
+
+    const detailMatch = block.match(/href="(\/de\/angebote\/[^"]+)"[^>]*>Mehr zu diesem Angebot/);
+    const imgMatch = block.match(/data-src-set="([^ ]+)/);
+    const priceMatch = block.match(/(?:Kosten|Eintritt|Preis)[^<]*?(\d+[.,]?\d*\s*(?:Euro|€)[^<]*)/i);
+
+    events.push({
+      title,
+      date,
+      time: time !== "00:00" ? time : null,
+      description: null,
+      detail_url: detailMatch ? `https://www.liebieghaus.de${detailMatch[1]}` : null,
+      image_url: imgMatch ? `https://www.liebieghaus.de${imgMatch[1]}` : null,
+      price: priceMatch ? priceMatch[0].trim() : null,
+    });
+  }
+
+  return events;
 }
 
 function dateOffset(days: number): string {

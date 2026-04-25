@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -41,6 +41,11 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "museum-fuer-kommunikation-frankfurt",
     type: "my-calendar",
     endpoint: "https://www.mfk-frankfurt.de/wp-json/my-calendar/v1/events",
+  },
+  {
+    slug: "liebieghaus-skulpturensammlung",
+    type: "liebieghaus",
+    endpoint: "https://www.liebieghaus.de/de/kalender",
   },
 ];
 
