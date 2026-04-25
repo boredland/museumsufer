@@ -1,4 +1,5 @@
 import { Env } from "./types";
+import { USER_AGENT } from "./shared";
 
 let allowedDomains: Set<string> | null = null;
 
@@ -37,8 +38,12 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
     const origin = new URL(imageUrl).hostname;
     const allowed = await getAllowedDomains(env);
-    const isAllowed = allowed.has(origin) ||
-      [...allowed].some((d) => origin.endsWith("." + d));
+    let isAllowed = allowed.has(origin);
+    if (!isAllowed) {
+      for (const d of allowed) {
+        if (origin.endsWith("." + d)) { isAllowed = true; break; }
+      }
+    }
     if (!isAllowed) {
       return new Response("Forbidden origin", { status: 403 });
     }
@@ -54,7 +59,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
   try {
     const res = await fetch(imageUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+      headers: { "User-Agent": USER_AGENT },
     });
 
     if (!res.ok) {

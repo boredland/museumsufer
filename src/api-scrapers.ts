@@ -1,5 +1,6 @@
 import { MuseumApiConfig } from "./museum-apis";
 import { toBerlinDate, toBerlinTime, todayIso, dateOffset } from "./date";
+import { stripHtml, truncateHtml, nullIfMidnight, normalizeUrl, USER_AGENT, GERMAN_MONTHS_SHORT, GERMAN_MONTHS } from "./shared";
 
 export interface ApiEvent {
   title: string;
@@ -36,6 +37,10 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchStadtgeschichteRss(config.endpoint);
     case "dommuseum":
       return fetchDommuseum(config.endpoint);
+    default: {
+      const _exhaustive: never = config.type;
+      return [];
+    }
   }
 }
 
@@ -56,7 +61,7 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
       time: ev.start_date?.slice(11, 16) || null,
       end_time: ev.end_date?.slice(11, 16) || null,
       end_date: endDate !== startDate ? endDate : null,
-      description: stripHtml(ev.excerpt || ev.description || "").slice(0, 300) || null,
+      description: truncateHtml(ev.excerpt || ev.description || ""),
       detail_url: ev.url || null,
       image_url: ev.image?.url || null,
       price: ev.cost || null,
@@ -117,7 +122,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       time: timeMatch?.[1] || null,
       end_time: endTime,
       end_date: endDate,
-      description: stripHtml(ev.summary || "").slice(0, 300) || null,
+      description: truncateHtml(ev.summary || ""),
       detail_url: ev.url || null,
       image_url: ev.image || null,
       price,
@@ -174,7 +179,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
       time: time !== "00:00" ? time : null,
       end_time: endTime,
       end_date: null,
-      description: stripHtml(ev.copy || ev.subline || "").slice(0, 300) || null,
+      description: truncateHtml(ev.copy || ev.subline || ""),
       detail_url: ev.detailPageLink?.href || null,
       image_url: imageUrl,
       price: null,
@@ -258,7 +263,7 @@ interface StaedelEvent {
 
 async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+    headers: { "User-Agent": USER_AGENT },
   });
   if (!res.ok) return [];
   const posts = await res.json() as SenckenbergEvent[];
@@ -295,7 +300,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
       time: time !== "00:00" ? time : null,
       end_time: endTime,
       end_date: endDate,
-      description: stripHtml(acf.event_decription || "").slice(0, 300) || null,
+      description: truncateHtml(acf.event_decription || ""),
       detail_url: post.link || null,
       image_url: null,
       price: null,
@@ -355,7 +360,7 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
         time,
         end_time: endTime,
         end_date: null,
-        description: stripHtml(ev.event_short || "").slice(0, 300) || null,
+        description: truncateHtml(ev.event_short || ""),
         detail_url: detailUrl,
         image_url: ev.event_image || null,
         price: null,
@@ -381,7 +386,7 @@ interface MyCalendarEvent {
 
 async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+    headers: { "User-Agent": USER_AGENT },
   });
   if (!res.ok) return [];
   const html = await res.text();
@@ -433,7 +438,7 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
 }
 
 async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
-  const ua = { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" };
+  const ua = { "User-Agent": USER_AGENT };
   const res = await fetch(endpoint, { headers: ua });
   if (!res.ok) return [];
   const html = await res.text();
@@ -502,21 +507,10 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-const GERMAN_MONTHS_SHORT: Record<string, string> = {
-  jan: "01", feb: "02", "mär": "03", mar: "03", apr: "04",
-  mai: "05", jun: "06", jul: "07", aug: "08",
-  sep: "09", okt: "10", nov: "11", dez: "12",
-};
-
-const GERMAN_MONTHS_LONG: Record<string, string> = {
-  januar: "01", februar: "02", "märz": "03", april: "04",
-  mai: "05", juni: "06", juli: "07", august: "08",
-  september: "09", oktober: "10", november: "11", dezember: "12",
-};
 
 async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+    headers: { "User-Agent": USER_AGENT },
   });
   if (!res.ok) return [];
   const html = await res.text();
@@ -601,7 +595,7 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
     const dateMatch = desc.match(/(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
     if (!dateMatch) continue;
     const [, day, monthName, year] = dateMatch;
-    const monthNum = GERMAN_MONTHS_LONG[monthName.toLowerCase()];
+    const monthNum = GERMAN_MONTHS[monthName.toLowerCase()];
     if (!monthNum) continue;
     const date = `${year}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
@@ -624,7 +618,7 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
       time: timeMatch ? timeMatch[1] : null,
       end_time: endTimeMatch ? endTimeMatch[1] : null,
       end_date: null,
-      description: stripHtml(desc).slice(0, 300) || null,
+      description: truncateHtml(desc),
       detail_url: linkMatch ? linkMatch[1].trim() : null,
       image_url,
       price: priceMatch ? priceMatch[1].trim() : null,
@@ -634,16 +628,4 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-function stripHtml(text: string): string {
-  return text
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#\d+;/g, "")
-    .replace(/&[a-z]+;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 

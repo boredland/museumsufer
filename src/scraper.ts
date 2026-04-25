@@ -1,14 +1,9 @@
 import { Env } from "./types";
+import { MUSEUMSUFER_DE, GERMAN_MONTHS } from "./shared";
 
-const BASE_URL = "https://www.museumsufer.de";
+const BASE_URL = MUSEUMSUFER_DE;
 const EXHIBITIONS_URL = `${BASE_URL}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`;
 const MUSEUMS_URL = `${BASE_URL}/de/museen/`;
-
-const GERMAN_MONTHS: Record<string, string> = {
-  januar: "01", februar: "02", "märz": "03", april: "04",
-  mai: "05", juni: "06", juli: "07", august: "08",
-  september: "09", oktober: "10", november: "11", dezember: "12",
-};
 
 export async function scrape(env: Env): Promise<{ exhibitions: number; museums: number }> {
   const museumsCount = await scrapeMuseums(env);
@@ -102,18 +97,15 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
   const slug = slugify(museumName);
   const nameNorm = museumName.toLowerCase().trim();
 
-  // Try exact slug match
   const bySlug = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
     .bind(slug)
     .first<{ id: number }>();
   if (bySlug) return bySlug.id;
 
-  // Load all museums and find the best match
   const { results: allMuseums } = await env.DB.prepare(
     "SELECT id, name, slug FROM museums"
   ).all<{ id: number; name: string; slug: string }>();
 
-  // Score each museum by how many leading slug segments match
   let bestMatch: { id: number; score: number } | null = null;
   const slugParts = slug.split("-");
 
@@ -121,10 +113,8 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
     const mSlugParts = m.slug.split("-");
     const mNameNorm = m.name.toLowerCase().trim();
 
-    // Exact name match (case-insensitive)
     if (mNameNorm === nameNorm) return m.id;
 
-    // One name contains the other
     if (mNameNorm.includes(nameNorm) || nameNorm.includes(mNameNorm)) {
       const score = Math.min(nameNorm.length, mNameNorm.length);
       if (!bestMatch || score > bestMatch.score) {
@@ -133,7 +123,6 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
       continue;
     }
 
-    // Count matching leading slug segments (normalizing German case endings)
     let matching = 0;
     for (let i = 0; i < Math.min(slugParts.length, mSlugParts.length); i++) {
       if (slugParts[i] === mSlugParts[i] || normalizeStem(slugParts[i]) === normalizeStem(mSlugParts[i])) matching++;
@@ -146,7 +135,6 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
 
   if (bestMatch) return bestMatch.id;
 
-  // Fallback: create a new museum entry
   const inserted = await env.DB.prepare(
     `INSERT INTO museums (name, slug, museumsufer_url) VALUES (?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET updated_at = datetime('now')

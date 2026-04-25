@@ -61,6 +61,8 @@ const de: Translations = {
   lastDays: "Letzte Tage",
   visited: "Besucht",
   alreadyVisited: "Bereits besucht",
+  details: "Details",
+  copyPrompt: "Kopieren",
 };
 
 const en: Translations = {
@@ -92,6 +94,8 @@ const en: Translations = {
   lastDays: "Last days",
   visited: "Visited",
   alreadyVisited: "Already visited",
+  details: "Details",
+  copyPrompt: "Copy",
 };
 
 const fr: Translations = {
@@ -123,6 +127,8 @@ const fr: Translations = {
   lastDays: "Derniers jours",
   visited: "Visite",
   alreadyVisited: "Deja visite",
+  details: "Details",
+  copyPrompt: "Copier",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };

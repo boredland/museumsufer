@@ -1,4 +1,5 @@
 import { type Locale, SUPPORTED_LOCALES, getTranslations, dateLocale } from "./i18n";
+import { escHtml as escHtmlShared } from "./shared";
 
 export interface InitialData {
   date: string;
@@ -20,6 +21,14 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museumsufer Frankfurt</title>
   <meta name="description" content="${escHtml(tr.meta)}">
+  <meta property="og:title" content="Museumsufer Frankfurt">
+  <meta property="og:description" content="${escHtml(tr.meta)}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://museumsufer.app">
+  <meta property="og:locale" content="${locale}">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Museumsufer Frankfurt">
+  <meta name="twitter:description" content="${escHtml(tr.meta)}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml">
@@ -631,7 +640,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <h1>Museumsufer Frankfurt</h1>
       <p class="subtitle">${escHtml(tr.subtitle)}</p>
       <div class="lang-switch" role="navigation" aria-label="Language">${SUPPORTED_LOCALES.map(
-        (l) => `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="true"' : ""}>${l.toUpperCase()}</a>`
+        (l) => `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="page"' : ""}>${l.toUpperCase()}</a>`
       ).join("")}</div>
     </header>
 
@@ -640,7 +649,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         ${escHtml(tr.llmTip)}
       </summary>
-      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()">Copy</button></div>
+      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()" aria-label="${escHtml(tr.copyPrompt)}">${escHtml(tr.copyPrompt)}</button></div>
     </details>
 
     <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
@@ -650,7 +659,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <button id="btn-sunday">${escHtml(tr.sunday)}</button>
       <label class="date-picker-label" aria-label="${escHtml(tr.pickDate)}">
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="date" id="date-picker" min="" max="">
+        <input type="date" id="date-picker" aria-label="${escHtml(tr.pickDate)}" min="" max="">
       </label>
     </nav>
 
@@ -794,7 +803,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return '<div class="section-header">'
         + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="' + iconPath + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
         + '<h2 class="section-title">' + escHtml(title) + '</h2>'
-        + '<span class="section-count">' + count + '</span>'
+        + '<span class="section-count" aria-label="' + count + ' ' + title + '">' + count + '</span>'
         + '</div>';
     }
 
@@ -850,15 +859,15 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       }
 
       const desc = ex.description
-        ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
+        ? '<details><summary>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
         : '';
 
       const v = isVisited(ex.id);
       const visitedBtn = v
-        ? '<button class="card-visited-btn is-visited" onclick="onToggleVisited(' + ex.id + ')">'
+        ? '<button class="card-visited-btn is-visited" aria-pressed="true" aria-label="' + escAttr(T.visited) + '" onclick="onToggleVisited(' + ex.id + ')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
           + '</button>'
-        : '<button class="card-visited-btn" onclick="onToggleVisited(' + ex.id + ')">'
+        : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.visited) + '" onclick="onToggleVisited(' + ex.id + ')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           + escHtml(T.visited) + '</button>';
 
@@ -903,7 +912,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       const meta = [timeTag, priceTag, calBtn].filter(Boolean).join(' ');
 
       const desc = ev.description
-        ? '<details><summary>Details</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
+        ? '<details><summary>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
         : '';
 
       return '<div class="card">'
@@ -954,6 +963,4 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 </html>`;
 }
 
-function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
+const escHtml = escHtmlShared;

@@ -2,8 +2,9 @@ import { Env } from "./types";
 import { getApiConfig } from "./museum-apis";
 import { fetchEventsFromApi } from "./api-scrapers";
 import { todayIso, dateOffset } from "./date";
+import { MUSEUMSUFER_DE, normalizeUrl, USER_AGENT } from "./shared";
 
-const BASE_URL = "https://www.museumsufer.de";
+const BASE_URL = MUSEUMSUFER_DE;
 
 const EVENT_PAGE_PATHS = [
   "/programm",
@@ -399,15 +400,6 @@ function isSameDomain(url: string, pageDomain: string): boolean {
   } catch {
     return true;
   }
-}
-
-function normalizeUrl(url: string | null | undefined, baseUrl: string): string | null {
-  if (!url) return null;
-  url = url.trim();
-  if (url.startsWith("http")) return url;
-  if (url.startsWith("//")) return `https:${url}`;
-  if (url.startsWith("/")) return `${baseUrl.replace(/\/$/, "")}${url}`;
-  return `${baseUrl.replace(/\/$/, "")}/${url}`;
 }
 
 interface PageLink {
