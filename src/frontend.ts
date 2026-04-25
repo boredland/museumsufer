@@ -67,7 +67,7 @@ export function renderPage(locale: Locale): string {
     }
 
     header {
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
       text-align: center;
     }
 
@@ -75,23 +75,23 @@ export function renderPage(locale: Locale): string {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
     }
 
     .logo-icon {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       background: var(--accent);
-      border-radius: 6px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .logo-icon svg { width: 16px; height: 16px; fill: white; }
+    .logo-icon svg { width: 18px; height: 18px; fill: white; }
 
     header h1 {
-      font-size: 2rem;
+      font-size: 1.875rem;
       font-weight: 700;
       letter-spacing: -0.03em;
       line-height: 1.2;
@@ -99,8 +99,9 @@ export function renderPage(locale: Locale): string {
 
     header .subtitle {
       color: var(--text-secondary);
-      margin-top: 0.375rem;
-      font-size: 0.9375rem;
+      margin-top: 0.25rem;
+      font-size: 0.875rem;
+      letter-spacing: 0.01em;
     }
 
     .lang-switch {
@@ -180,6 +181,9 @@ export function renderPage(locale: Locale): string {
 
     #content { min-height: 60vh; }
 
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
     .section { margin-bottom: 2.5rem; }
 
     .section-header {
@@ -241,11 +245,11 @@ export function renderPage(locale: Locale): string {
       gap: 0.875rem;
       padding: 0.875rem 1rem;
       border-bottom: 1px solid var(--border-light);
-      transition: background 0.15s;
+      transition: background 0.2s ease;
     }
 
     .card:last-child { border-bottom: none; }
-    .card:hover { background: var(--accent-light); }
+    .card:hover { background: #fdf8f0; }
 
     .card-img {
       width: 72px;
@@ -429,8 +433,8 @@ export function renderPage(locale: Locale): string {
     .site-footer a:hover { color: var(--accent); text-decoration: underline; }
 
     .llm-tip {
-      margin-top: 2rem;
-      padding: 1rem;
+      margin-bottom: 1.5rem;
+      padding: 0.625rem 1rem;
       background: var(--surface);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -492,7 +496,7 @@ export function renderPage(locale: Locale): string {
     .llm-tip-copy:hover { border-color: var(--accent); color: var(--accent); }
 
     @media (prefers-reduced-motion: reduce) {
-      .loading::after, .octo-arm { animation: none !important; }
+      .loading::after, .octo-arm, .fade-in { animation: none !important; }
     }
 
     @media (max-width: 480px) {
@@ -650,6 +654,9 @@ export function renderPage(locale: Locale): string {
       html += '</div>';
 
       content.innerHTML = html;
+      content.classList.remove('fade-in');
+      void content.offsetWidth;
+      content.classList.add('fade-in');
     }
 
     function sectionHeader(title, count, iconPath) {
