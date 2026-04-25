@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -46,6 +46,16 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "liebieghaus-skulpturensammlung",
     type: "liebieghaus",
     endpoint: "https://www.liebieghaus.de/de/kalender",
+  },
+  {
+    slug: "museum-angewandte-kunst",
+    type: "mak",
+    endpoint: "https://www.museumangewandtekunst.de/de/kalender/",
+  },
+  {
+    slug: "institut-fuer-stadtgeschichte",
+    type: "stadtgeschichte-rss",
+    endpoint: "https://www.stadtgeschichte-ffm.de/rss/isg_rss.php?L=de",
   },
 ];
 

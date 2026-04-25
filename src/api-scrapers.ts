@@ -27,6 +27,10 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchMyCalendar(config.endpoint);
     case "liebieghaus":
       return fetchLiebieghaus(config.endpoint);
+    case "mak":
+      return fetchMak(config.endpoint);
+    case "stadtgeschichte-rss":
+      return fetchStadtgeschichteRss(config.endpoint);
   }
 }
 
@@ -355,6 +359,128 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
       detail_url: detailMatch ? `https://www.liebieghaus.de${detailMatch[1]}` : null,
       image_url: imgMatch ? `https://www.liebieghaus.de${imgMatch[1]}` : null,
       price: priceMatch ? priceMatch[0].trim() : null,
+    });
+  }
+
+  return events;
+}
+
+const GERMAN_MONTHS_SHORT: Record<string, string> = {
+  jan: "01", feb: "02", "mär": "03", mar: "03", apr: "04",
+  mai: "05", jun: "06", jul: "07", aug: "08",
+  sep: "09", okt: "10", nov: "11", dez: "12",
+};
+
+const GERMAN_MONTHS_LONG: Record<string, string> = {
+  januar: "01", februar: "02", "märz": "03", april: "04",
+  mai: "05", juni: "06", juli: "07", august: "08",
+  september: "09", oktober: "10", november: "11", dezember: "12",
+};
+
+async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, {
+    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
+  });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const currentYear = new Date().getFullYear();
+  const events: ApiEvent[] = [];
+  const articleRe = /<article[^>]*class="[^"]*mak-event-item[^"]*"[^>]*>([\s\S]*?)<\/article>/g;
+  let match;
+
+  while ((match = articleRe.exec(html)) !== null) {
+    const block = match[1];
+
+    const dayMatch = block.match(/class="mak-event-day">([^<]+)/);
+    const headingMatch = block.match(/class="mak-event-heading">([^<]+)/);
+    if (!dayMatch || !headingMatch) continue;
+
+    const dayStr = dayMatch[1].trim();
+    const heading = headingMatch[1].trim();
+
+    const dateMatch = dayStr.match(/(\d{1,2})\s+(\w+)/);
+    if (!dateMatch) continue;
+    const [, day, monthName] = dateMatch;
+    const monthNum = GERMAN_MONTHS_SHORT[monthName.toLowerCase().slice(0, 3)];
+    if (!monthNum) continue;
+
+    const date = `${currentYear}-${monthNum}-${day.padStart(2, "0")}`;
+    if (date < todayIso()) continue;
+
+    const timeMatch = heading.match(/^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–[^–]*?)?\s*Uhr\s*–\s*/);
+    let time: string | null = null;
+    let title = heading;
+    if (timeMatch) {
+      const raw = timeMatch[1].replace(".", ":");
+      time = raw.includes(":") ? raw : `${raw}:00`;
+      title = heading.slice(timeMatch[0].length).trim();
+    }
+
+    const subMatch = block.match(/class="mak-event-subheading">([^<]+)/);
+    const linkMatch = block.match(/href="(\/de\/veranstaltungen\/[^"]+)"/);
+
+    events.push({
+      title: title || heading,
+      date,
+      time,
+      description: subMatch ? subMatch[1].trim() : null,
+      detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
+      image_url: null,
+      price: null,
+    });
+  }
+
+  return events;
+}
+
+async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint);
+  if (!res.ok) return [];
+  const xml = await res.text();
+
+  const events: ApiEvent[] = [];
+  const itemRe = /<item>([\s\S]*?)<\/item>/g;
+  let match;
+
+  while ((match = itemRe.exec(xml)) !== null) {
+    const item = match[1];
+
+    const titleMatch = item.match(/<title>([^<]+)/);
+    const linkMatch = item.match(/<link>([^<]+)/);
+    const descMatch = item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]>/);
+    if (!titleMatch || !descMatch) continue;
+
+    const desc = descMatch[1];
+    const title = titleMatch[1].trim();
+
+    const dateMatch = desc.match(/(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
+    if (!dateMatch) continue;
+    const [, day, monthName, year] = dateMatch;
+    const monthNum = GERMAN_MONTHS_LONG[monthName.toLowerCase()];
+    if (!monthNum) continue;
+    const date = `${year}-${monthNum}-${day.padStart(2, "0")}`;
+    if (date < todayIso()) continue;
+
+    const timeMatch = desc.match(/(\d{1,2}:\d{2})\s*Uhr/);
+    const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
+    const priceMatch = desc.match(/(\d+\s*€[^<,]*(?:,\s*ermäßigt\s*\d+\s*€)?)/i);
+
+    let image_url: string | null = null;
+    if (imgMatch) {
+      image_url = imgMatch[1].startsWith("http")
+        ? imgMatch[1]
+        : `https://www.stadtgeschichte-ffm.de${imgMatch[1]}`;
+    }
+
+    events.push({
+      title,
+      date,
+      time: timeMatch ? timeMatch[1] : null,
+      description: stripHtml(desc).slice(0, 300) || null,
+      detail_url: linkMatch ? linkMatch[1].trim() : null,
+      image_url,
+      price: priceMatch ? priceMatch[1].trim() : null,
     });
   }
 
