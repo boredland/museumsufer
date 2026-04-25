@@ -13,7 +13,7 @@ This site provides a JSON API for querying museum exhibitions and events in Fran
 
 ## API
 
-Base URL: https://museumsufer.jonas-strassel.de
+Base URL: https://museumsufer.app
 
 ### Get events and exhibitions for a date
 

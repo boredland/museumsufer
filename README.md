@@ -2,7 +2,7 @@
 
 A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Museumsufer](https://www.museumsufer.de) museums into a single page with date-based navigation.
 
-**Live:** https://museumsufer.jonas-strassel.de
+**Live:** https://museumsufer.app
 
 ## What it does
 
