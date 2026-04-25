@@ -2,8 +2,9 @@ import { Env } from "./types";
 import { handleApi, handleFeeds } from "./api";
 import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
-import { renderPage } from "./frontend";
+import { renderPage, type InitialData } from "./frontend";
 import { detectLocale } from "./i18n";
+import { todayIso } from "./date";
 import { handleImageProxy } from "./image-proxy";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
@@ -117,7 +118,13 @@ export default {
     }
 
     const locale = detectLocale(request);
-    return new Response(renderPage(locale), {
+    let initialData: InitialData | undefined;
+    try {
+      const dayRes = await handleApi(new Request(`${url.origin}/api/day?date=${todayIso()}`), env);
+      initialData = await dayRes.json() as InitialData;
+    } catch {}
+
+    return new Response(renderPage(locale, initialData), {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Content-Language": locale,

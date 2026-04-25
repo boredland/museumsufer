@@ -1,10 +1,17 @@
 import { type Locale, SUPPORTED_LOCALES, getTranslations, dateLocale } from "./i18n";
 
-export function renderPage(locale: Locale): string {
+export interface InitialData {
+  date: string;
+  exhibitions: unknown[];
+  events: unknown[];
+}
+
+export function renderPage(locale: Locale, initialData?: InitialData): string {
   const tr = getTranslations(locale);
   const trJson = JSON.stringify(tr);
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
+  const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -584,7 +591,7 @@ export function renderPage(locale: Locale): string {
     <p class="date-label" id="date-label" aria-live="polite"></p>
 
     <main id="content">
-      <div class="loading">${escHtml(tr.loading)}</div>
+      ${initialData ? "" : `<div class="loading">${escHtml(tr.loading)}</div>`}
     </main>
 
     <footer class="site-footer">
@@ -599,6 +606,7 @@ export function renderPage(locale: Locale): string {
     const DATE_LOCALE = ${dlJson};
     const LOCALES = ${localesJson};
     const CURRENT_LANG = '${locale}';
+    const __INITIAL_DATA__ = ${initialDataJson};
 
     const content = document.getElementById('content');
     const dateLabel = document.getElementById('date-label');
@@ -813,7 +821,12 @@ export function renderPage(locale: Locale): string {
     datePicker.addEventListener('change', (e) => { loadDay(e.target.value, null); });
 
     updateNavVisibility();
-    loadDay(toIso(today()), btnToday);
+    if (__INITIAL_DATA__) {
+      dateLabel.textContent = formatDateFull(__INITIAL_DATA__.date);
+      render(__INITIAL_DATA__);
+    } else {
+      loadDay(toIso(today()), btnToday);
+    }
   </script>
 </body>
 </html>`;
