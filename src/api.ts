@@ -8,18 +8,30 @@ const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate
 
 const BASE_URL = "https://museumsufer.app";
 
+function proxyImageUrl(url: string | null): string | null {
+  if (!url || !url.startsWith("https://")) return url;
+  return `/img/${encodeURIComponent(url)}`;
+}
+
+function proxyImages<T extends { image_url?: string | null }>(items: T[]): T[] {
+  return items.map((item) => ({
+    ...item,
+    image_url: proxyImageUrl(item.image_url ?? null),
+  }));
+}
+
 export async function handleApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname;
 
   if (path === "/api/events") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(await getEventsForDate(env, date), 200, CACHE_EVENTS);
+    return json(proxyImages(await getEventsForDate(env, date)), 200, CACHE_EVENTS);
   }
 
   if (path === "/api/exhibitions") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(await getExhibitionsForDate(env, date), 200, CACHE_EXHIBITIONS);
+    return json(proxyImages(await getExhibitionsForDate(env, date)), 200, CACHE_EXHIBITIONS);
   }
 
   if (path === "/api/museums") {
@@ -33,7 +45,7 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       getExhibitionsForDate(env, date),
       getEventsForDate(env, date),
     ]);
-    return json({ date, exhibitions, events }, 200, CACHE_EVENTS);
+    return json({ date, exhibitions: proxyImages(exhibitions), events: proxyImages(events) }, 200, CACHE_EVENTS);
   }
 
   const eventIcsMatch = path.match(/^\/api\/event\/(\d+)\.ics$/);

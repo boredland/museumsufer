@@ -4,6 +4,7 @@ import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage } from "./frontend";
 import { detectLocale } from "./i18n";
+import { handleImageProxy } from "./image-proxy";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
 
@@ -60,6 +61,11 @@ function checkScrapeAuth(request: Request, env: Env): Response | null {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith("/img/")) {
+      const imgResponse = await handleImageProxy(request);
+      if (imgResponse) return imgResponse;
+    }
 
     if (url.pathname.startsWith("/api/")) {
       return handleApi(request, env);
