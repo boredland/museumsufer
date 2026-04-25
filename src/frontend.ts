@@ -1,11 +1,18 @@
-export function renderPage(): string {
+import { type Locale, SUPPORTED_LOCALES, getTranslations, dateLocale } from "./i18n";
+
+export function renderPage(locale: Locale): string {
+  const tr = getTranslations(locale);
+  const trJson = JSON.stringify(tr);
+  const dlJson = JSON.stringify(dateLocale(locale));
+  const localesJson = JSON.stringify(SUPPORTED_LOCALES);
+
   return `<!DOCTYPE html>
-<html lang="de">
+<html lang="${locale}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museumsufer Frankfurt</title>
-  <meta name="description" content="Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer">
+  <meta name="description" content="${escHtml(tr.meta)}">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -91,6 +98,27 @@ export function renderPage(): string {
       margin-top: 0.375rem;
       font-size: 0.9375rem;
     }
+
+    .lang-switch {
+      display: flex;
+      justify-content: center;
+      gap: 0.25rem;
+      margin-top: 0.75rem;
+    }
+
+    .lang-switch a {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+
+    .lang-switch a:hover { color: var(--accent); }
+    .lang-switch a.active { color: var(--text); font-weight: 700; }
+    .lang-switch a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .date-label {
       font-size: 1.25rem;
@@ -256,6 +284,7 @@ export function renderPage(): string {
       align-items: center;
       gap: 0.375rem;
       margin-top: 0.125rem;
+      flex-wrap: wrap;
     }
 
     .card-dates {
@@ -368,9 +397,9 @@ export function renderPage(): string {
   </style>
 </head>
 <body>
-  <a href="#content" class="skip-link">Zum Inhalt</a>
+  <a href="#content" class="skip-link">${escHtml(tr.skipLink)}</a>
 
-  <a href="https://github.com/boredland/museumsufer" class="github-corner" aria-label="View source on GitHub" target="_blank" rel="noopener"><svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin:130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+  <a href="https://github.com/boredland/museumsufer" class="github-corner" aria-label="${escHtml(tr.githubAria)}" target="_blank" rel="noopener"><svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin:130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
 
   <div class="container">
     <header>
@@ -380,25 +409,33 @@ export function renderPage(): string {
         </div>
       </div>
       <h1>Museumsufer Frankfurt</h1>
-      <p class="subtitle">Ausstellungen &amp; Veranstaltungen</p>
+      <p class="subtitle">${escHtml(tr.subtitle)}</p>
+      <div class="lang-switch" role="navigation" aria-label="Language">${SUPPORTED_LOCALES.map(
+        (l) => `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="true"' : ""}>${l.toUpperCase()}</a>`
+      ).join("")}</div>
     </header>
 
-    <nav class="date-nav" aria-label="Datum">
-      <button id="btn-today" class="active">Heute</button>
-      <button id="btn-tomorrow">Morgen</button>
-      <button id="btn-weekend">Samstag</button>
-      <button id="btn-sunday">Sonntag</button>
-      <input type="date" id="date-picker" aria-label="Datum auswählen" min="" max="">
+    <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
+      <button id="btn-today" class="active">${escHtml(tr.today)}</button>
+      <button id="btn-tomorrow">${escHtml(tr.tomorrow)}</button>
+      <button id="btn-weekend">${escHtml(tr.saturday)}</button>
+      <button id="btn-sunday">${escHtml(tr.sunday)}</button>
+      <input type="date" id="date-picker" aria-label="${escHtml(tr.pickDate)}" min="" max="">
     </nav>
 
     <p class="date-label" id="date-label" aria-live="polite"></p>
 
     <main id="content">
-      <div class="loading">Laden</div>
+      <div class="loading">${escHtml(tr.loading)}</div>
     </main>
   </div>
 
   <script>
+    const T = ${trJson};
+    const DATE_LOCALE = ${dlJson};
+    const LOCALES = ${localesJson};
+    const CURRENT_LANG = '${locale}';
+
     const content = document.getElementById('content');
     const dateLabel = document.getElementById('date-label');
     const btnToday = document.getElementById('btn-today');
@@ -422,15 +459,15 @@ export function renderPage(): string {
     function formatDateFull(iso) {
       if (!iso) return '';
       const d = new Date(iso + 'T00:00:00');
-      const weekday = d.toLocaleDateString('de-DE', { weekday: 'long' });
-      const rest = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+      const weekday = d.toLocaleDateString(DATE_LOCALE, { weekday: 'long' });
+      const rest = d.toLocaleDateString(DATE_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
       return weekday + ', ' + rest;
     }
 
     function formatDateShort(iso) {
       if (!iso) return '';
       const d = new Date(iso + 'T00:00:00');
-      return d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+      return d.toLocaleDateString(DATE_LOCALE, { day: 'numeric', month: 'short' });
     }
 
     function setActive(btn) {
@@ -453,13 +490,13 @@ export function renderPage(): string {
     async function loadDay(date, btn) {
       setActive(btn);
       dateLabel.textContent = formatDateFull(date);
-      content.innerHTML = '<div class="loading">Laden</div>';
+      content.innerHTML = '<div class="loading">' + escHtml(T.loading) + '</div>';
       try {
         const res = await fetch('/api/day?date=' + date);
         const data = await res.json();
         render(data);
       } catch (e) {
-        content.innerHTML = '<div class="empty">Fehler beim Laden.</div>';
+        content.innerHTML = '<div class="empty">' + escHtml(T.loadError) + '</div>';
       }
     }
 
@@ -467,9 +504,9 @@ export function renderPage(): string {
       let html = '';
 
       html += '<div class="section">';
-      html += sectionHeader('Veranstaltungen', data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
+      html += sectionHeader(T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
       if (data.events.length === 0) {
-        html += '<div class="empty">Keine Veranstaltungen an diesem Tag.</div>';
+        html += '<div class="empty">' + escHtml(T.noEvents) + '</div>';
       } else {
         html += '<div class="card-list">';
         for (const ev of data.events) {
@@ -480,9 +517,9 @@ export function renderPage(): string {
       html += '</div>';
 
       html += '<div class="section">';
-      html += sectionHeader('Ausstellungen', data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
+      html += sectionHeader(T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
       if (data.exhibitions.length === 0) {
-        html += '<div class="empty">Keine Ausstellungen gefunden.</div>';
+        html += '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
         html += '<div class="card-list">';
         html += renderExhibitionsGrouped(data.exhibitions);
@@ -496,7 +533,7 @@ export function renderPage(): string {
     function sectionHeader(title, count, iconPath) {
       return '<div class="section-header">'
         + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="' + iconPath + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
-        + '<h2 class="section-title">' + title + '</h2>'
+        + '<h2 class="section-title">' + escHtml(title) + '</h2>'
         + '<span class="section-count">' + count + '</span>'
         + '</div>';
     }
@@ -559,9 +596,9 @@ export function renderPage(): string {
         + 'data-time="' + escAttr(ev.time || '') + '" '
         + 'data-location="' + escAttr(ev.museum_name || '') + '" '
         + 'data-url="' + escAttr(ev.detail_url || ev.url || '') + '" '
-        + 'aria-label="Zum Kalender hinzufügen">'
+        + 'aria-label="' + escAttr(T.calendarAria) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
-        + 'Kalender</button>';
+        + escHtml(T.calendar) + '</button>';
 
       const meta = [timeTag, priceTag, calBtn].filter(Boolean).join(' ');
 
@@ -643,4 +680,8 @@ export function renderPage(): string {
   </script>
 </body>
 </html>`;
+}
+
+function escHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

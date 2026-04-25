@@ -1,0 +1,102 @@
+export type Locale = "de" | "en" | "fr";
+
+export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
+
+const LOCALE_DATE_FORMATS: Record<Locale, string> = {
+  de: "de-DE",
+  en: "en-GB",
+  fr: "fr-FR",
+};
+
+export function dateLocale(locale: Locale): string {
+  return LOCALE_DATE_FORMATS[locale];
+}
+
+export function detectLocale(request: Request): Locale {
+  const url = new URL(request.url);
+  const param = url.searchParams.get("lang");
+  if (param && isLocale(param)) return param;
+
+  const accept = request.headers.get("Accept-Language") || "";
+  for (const part of accept.split(",")) {
+    const tag = part.split(";")[0].trim().slice(0, 2).toLowerCase();
+    if (isLocale(tag)) return tag;
+  }
+
+  return "de";
+}
+
+function isLocale(v: string): v is Locale {
+  return SUPPORTED_LOCALES.includes(v as Locale);
+}
+
+type Translations = Record<string, string>;
+
+const de: Translations = {
+  subtitle: "Ausstellungen & Veranstaltungen",
+  today: "Heute",
+  tomorrow: "Morgen",
+  saturday: "Samstag",
+  sunday: "Sonntag",
+  pickDate: "Datum auswählen",
+  dateNav: "Datum",
+  skipLink: "Zum Inhalt",
+  loading: "Laden",
+  events: "Veranstaltungen",
+  exhibitions: "Ausstellungen",
+  noEvents: "Keine Veranstaltungen an diesem Tag.",
+  noExhibitions: "Keine Ausstellungen gefunden.",
+  loadError: "Fehler beim Laden.",
+  calendar: "Kalender",
+  calendarAria: "Zum Kalender hinzufügen",
+  githubAria: "Quellcode auf GitHub",
+  meta: "Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer",
+};
+
+const en: Translations = {
+  subtitle: "Exhibitions & Events",
+  today: "Today",
+  tomorrow: "Tomorrow",
+  saturday: "Saturday",
+  sunday: "Sunday",
+  pickDate: "Pick a date",
+  dateNav: "Date",
+  skipLink: "Skip to content",
+  loading: "Loading",
+  events: "Events",
+  exhibitions: "Exhibitions",
+  noEvents: "No events on this day.",
+  noExhibitions: "No exhibitions found.",
+  loadError: "Failed to load.",
+  calendar: "Calendar",
+  calendarAria: "Add to calendar",
+  githubAria: "View source on GitHub",
+  meta: "Current exhibitions and events at Frankfurt's Museumsufer",
+};
+
+const fr: Translations = {
+  subtitle: "Expositions & Événements",
+  today: "Aujourd'hui",
+  tomorrow: "Demain",
+  saturday: "Samedi",
+  sunday: "Dimanche",
+  pickDate: "Choisir une date",
+  dateNav: "Date",
+  skipLink: "Aller au contenu",
+  loading: "Chargement",
+  events: "Événements",
+  exhibitions: "Expositions",
+  noEvents: "Aucun événement ce jour.",
+  noExhibitions: "Aucune exposition trouvée.",
+  loadError: "Erreur de chargement.",
+  calendar: "Calendrier",
+  calendarAria: "Ajouter au calendrier",
+  githubAria: "Voir le code source sur GitHub",
+  meta: "Expositions et événements actuels au Museumsufer de Francfort",
+};
+
+const ALL: Record<Locale, Translations> = { de, en, fr };
+
+export function getTranslations(locale: Locale): Translations {
+  return ALL[locale];
+}

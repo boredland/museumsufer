@@ -3,6 +3,7 @@ import { handleApi } from "./api";
 import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage } from "./frontend";
+import { detectLocale } from "./i18n";
 
 function checkScrapeAuth(request: Request, env: Env): Response | null {
   if (!env.SCRAPE_SECRET) return null;
@@ -40,8 +41,13 @@ export default {
       });
     }
 
-    return new Response(renderPage(), {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
+    const locale = detectLocale(request);
+    return new Response(renderPage(locale), {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Language": locale,
+        "Vary": "Accept-Language",
+      },
     });
   },
 
