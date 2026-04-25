@@ -383,6 +383,84 @@ export function renderPage(locale: Locale): string {
 
     .github-corner:focus-visible { outline: 2px solid var(--accent); outline-offset: -4px; }
 
+    .site-footer {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    .site-footer a {
+      color: var(--text-tertiary);
+      text-decoration: none;
+    }
+
+    .site-footer a:hover { color: var(--accent); text-decoration: underline; }
+
+    .llm-tip {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .llm-tip summary {
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .llm-tip summary::-webkit-details-marker { display: none; }
+
+    .llm-tip summary svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .llm-tip[open] summary { margin-bottom: 0.75rem; }
+
+    .llm-tip-prompt {
+      position: relative;
+      background: var(--border-light);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .llm-tip-copy {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.6875rem;
+      font-family: inherit;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .llm-tip-copy:hover { border-color: var(--accent); color: var(--accent); }
+
     @media (prefers-reduced-motion: reduce) {
       .loading::after, .octo-arm { animation: none !important; }
     }
@@ -428,6 +506,18 @@ export function renderPage(locale: Locale): string {
     <main id="content">
       <div class="loading">${escHtml(tr.loading)}</div>
     </main>
+
+    <details class="llm-tip">
+      <summary>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        ${escHtml(tr.llmTip)}
+      </summary>
+      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()">Copy</button></div>
+    </details>
+
+    <footer class="site-footer">
+      <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
+    </footer>
   </div>
 
   <script>
@@ -609,6 +699,16 @@ export function renderPage(locale: Locale): string {
         + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
         + '<div class="card-meta">' + meta + '</div>'
         + '</div></div>';
+    }
+
+    function copyPrompt() {
+      const el = document.getElementById('llm-prompt');
+      navigator.clipboard.writeText(el.dataset.prompt).then(() => {
+        const btn = document.querySelector('.llm-tip-copy');
+        const orig = btn.textContent;
+        btn.textContent = T.llmCopied;
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      });
     }
 
     function escAttr(s) {

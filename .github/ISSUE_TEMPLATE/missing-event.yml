@@ -1,0 +1,44 @@
+name: Missing Event
+description: Report an event or exhibition that's not showing up on museumsufer.jonas-strassel.de
+title: "Missing event: "
+labels: ["missing-event"]
+body:
+  - type: input
+    id: museum
+    attributes:
+      label: Museum
+      description: Which museum is the event at?
+      placeholder: e.g. Städel Museum
+    validations:
+      required: true
+  - type: input
+    id: event-name
+    attributes:
+      label: Event name
+      description: What is the event called?
+      placeholder: e.g. Nacht der Museen
+    validations:
+      required: true
+  - type: input
+    id: event-date
+    attributes:
+      label: Date
+      description: When does it take place?
+      placeholder: e.g. 2026-05-01
+    validations:
+      required: true
+  - type: input
+    id: event-url
+    attributes:
+      label: Link to event
+      description: URL to the event page on the museum's website
+      placeholder: https://...
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Anything else (time, price, image URL, etc.)
+    validations:
+      required: false

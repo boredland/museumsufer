@@ -51,6 +51,10 @@ const de: Translations = {
   calendarAria: "Zum Kalender hinzufügen",
   githubAria: "Quellcode auf GitHub",
   meta: "Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer",
+  llmTip: "Frag dein LLM",
+  llmPrompt: "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.jonas-strassel.de/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",
+  llmCopied: "Kopiert!",
+  missingEvent: "Veranstaltung fehlt?",
 };
 
 const en: Translations = {
@@ -72,6 +76,10 @@ const en: Translations = {
   calendarAria: "Add to calendar",
   githubAria: "View source on GitHub",
   meta: "Current exhibitions and events at Frankfurt's Museumsufer",
+  llmTip: "Ask your LLM",
+  llmPrompt: "What's on at Frankfurt's Museumsufer today? Read https://museumsufer.jonas-strassel.de/llms.txt and use the API to get current exhibitions and events.",
+  llmCopied: "Copied!",
+  missingEvent: "Event missing?",
 };
 
 const fr: Translations = {
@@ -93,6 +101,10 @@ const fr: Translations = {
   calendarAria: "Ajouter au calendrier",
   githubAria: "Voir le code source sur GitHub",
   meta: "Expositions et événements actuels au Museumsufer de Francfort",
+  llmTip: "Demandez a votre LLM",
+  llmPrompt: "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.jonas-strassel.de/llms.txt et utilise l'API pour obtenir les expositions et evenements actuels.",
+  llmCopied: "Copie !",
+  missingEvent: "Evenement manquant ?",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
