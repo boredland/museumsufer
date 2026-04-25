@@ -37,7 +37,9 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
     const origin = new URL(imageUrl).hostname;
     const allowed = await getAllowedDomains(env);
-    if (!allowed.has(origin)) {
+    const isAllowed = allowed.has(origin) ||
+      [...allowed].some((d) => origin.endsWith("." + d));
+    if (!isAllowed) {
       return new Response("Forbidden origin", { status: 403 });
     }
   } catch {
