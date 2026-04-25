@@ -179,7 +179,7 @@ async function scrapeMuseumEvents(
 
   const truncated = textContent.slice(0, 8000);
 
-  const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+  const result = await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     messages: [
       {
         role: "user",
@@ -318,7 +318,7 @@ async function fetchEventDetails(
   const textContent = stripHtmlToText(html).slice(0, 6000);
   if (textContent.length < 50) return { price: null, image_url: imageUrl };
 
-  const result = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", {
+  const result = await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     messages: [
       {
         role: "user",
