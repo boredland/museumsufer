@@ -180,6 +180,7 @@ async function scrapeMuseumEvents(
   const truncated = textContent.slice(0, 8000);
 
   const result = await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
+    max_tokens: 2048,
     messages: [
       {
         role: "user",
@@ -195,9 +196,12 @@ Text content from ${museum.name} (${eventsUrl}):
 ${truncated}`,
       },
     ],
-  }) as { response?: string };
+  }) as Record<string, unknown>;
 
-  const responseText = result.response || "";
+  const responseText = typeof result.response === "string"
+    ? result.response
+    : JSON.stringify(result);
+  console.log(`AI response for ${museum.name}: ${responseText.slice(0, 200)}`);
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
@@ -340,10 +344,13 @@ Page content:
 ${textContent}`,
       },
     ],
-  }) as { response?: string };
+  }) as Record<string, unknown>;
 
   let price: string | null = null;
-  const parsed = extractJsonObject<{ price: string | null }>(result.response || "");
+  const priceResponseText = typeof result.response === "string"
+    ? result.response
+    : JSON.stringify(result);
+  const parsed = extractJsonObject<{ price: string | null }>(priceResponseText);
   if (parsed?.price && parsed.price !== "null") {
     price = parsed.price;
   }
