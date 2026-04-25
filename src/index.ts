@@ -1,5 +1,5 @@
 import { Env } from "./types";
-import { handleApi } from "./api";
+import { handleApi, handleFeeds } from "./api";
 import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage } from "./frontend";
@@ -82,6 +82,27 @@ export default {
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    if (url.pathname === "/manifest.json") {
+      return new Response(JSON.stringify({
+        name: "Museumsufer Frankfurt",
+        short_name: "Museumsufer",
+        start_url: "/",
+        display: "standalone",
+        background_color: "#f5f0eb",
+        theme_color: "#f5f0eb",
+        icons: [{
+          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
+          sizes: "any",
+          type: "image/svg+xml",
+        }],
+      }), {
+        headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
+      });
+    }
+
+    const feedResponse = await handleFeeds(request, env);
+    if (feedResponse) return feedResponse;
 
     if (url.pathname === "/llms.txt" || url.pathname === "/.well-known/llms.txt") {
       return new Response(LLMS_TXT, {

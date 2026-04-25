@@ -1,8 +1,11 @@
-import { Env, Exhibition, Event, Museum } from "./types";
+import { Env, Exhibition, Event } from "./types";
 
-const CACHE_EVENTS = "public, max-age=3600, s-maxage=3600";
-const CACHE_EXHIBITIONS = "public, max-age=21600, s-maxage=21600";
-const CACHE_MUSEUMS = "public, max-age=86400, s-maxage=86400";
+const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
+const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
+const CACHE_MUSEUMS = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
+const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
+
+const BASE_URL = "https://museumsufer.jonas-strassel.de";
 
 export async function handleApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
@@ -19,7 +22,8 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
   }
 
   if (path === "/api/museums") {
-    return json(await getMuseums(env), 200, CACHE_MUSEUMS);
+    const { results } = await env.DB.prepare("SELECT * FROM museums ORDER BY name").all();
+    return json(results, 200, CACHE_MUSEUMS);
   }
 
   if (path === "/api/day") {
@@ -32,6 +36,26 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
   }
 
   return json({ error: "not found" }, 404);
+}
+
+export async function handleFeeds(request: Request, env: Env): Promise<Response | null> {
+  const url = new URL(request.url);
+
+  if (url.pathname === "/feed.xml" || url.pathname === "/rss.xml") {
+    const events = await getUpcomingEvents(env, 7);
+    return new Response(buildRss(events), {
+      headers: { "Content-Type": "application/rss+xml; charset=utf-8", "Cache-Control": CACHE_FEEDS },
+    });
+  }
+
+  if (url.pathname === "/feed.ics" || url.pathname === "/calendar.ics") {
+    const events = await getUpcomingEvents(env, 7);
+    return new Response(buildIcs(events), {
+      headers: { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": CACHE_FEEDS },
+    });
+  }
+
+  return null;
 }
 
 async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
@@ -58,18 +82,127 @@ async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
   )
     .bind(date)
     .all<Event>();
+
+  if (date === todayIso()) {
+    return filterPastEvents(results);
+  }
   return results;
 }
 
-async function getMuseums(env: Env): Promise<Museum[]> {
+function filterPastEvents(events: Event[]): Event[] {
+  const now = new Date();
+  const berlinHour = parseInt(now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", hour: "2-digit", hour12: false }));
+  const berlinMin = parseInt(now.toLocaleTimeString("en-GB", { timeZone: "Europe/Berlin", minute: "2-digit", hour12: false }).split(":")[1]);
+  const nowMinutes = berlinHour * 60 + berlinMin;
+
+  return events.filter((ev) => {
+    if (!ev.time) return true;
+
+    const endTimeStr = ev.end_time || null;
+    if (endTimeStr) {
+      const [eh, em] = endTimeStr.split(":").map(Number);
+      let endMinutes = eh * 60 + em;
+      if (endMinutes < 360) endMinutes += 24 * 60;
+      return nowMinutes < endMinutes;
+    }
+
+    const [h, m] = ev.time.split(":").map(Number);
+    const eventEnd = h * 60 + m + 60;
+    return nowMinutes < eventEnd;
+  });
+}
+
+async function getUpcomingEvents(env: Env, days: number): Promise<(Event & { museum_name: string })[]> {
+  const today = todayIso();
+  const end = dateOffset(days);
   const { results } = await env.DB.prepare(
-    "SELECT * FROM museums ORDER BY name"
-  ).all<Museum>();
+    `SELECT ev.*, m.name as museum_name
+     FROM events ev
+     JOIN museums m ON ev.museum_id = m.id
+     WHERE ev.date >= ? AND ev.date <= ?
+     ORDER BY ev.date, ev.time, m.name`
+  )
+    .bind(today, end)
+    .all<Event & { museum_name: string }>();
   return results;
+}
+
+function buildRss(events: (Event & { museum_name: string })[]): string {
+  const items = events.map((ev) => {
+    const timeStr = ev.time ? `, ${ev.time} Uhr` : "";
+    const desc = ev.description ? escXml(ev.description) : "";
+    const link = ev.detail_url || ev.url || BASE_URL;
+    return `    <item>
+      <title>${escXml(ev.title)} — ${escXml(ev.museum_name)}</title>
+      <link>${escXml(link)}</link>
+      <guid isPermaLink="false">museumsufer-${ev.id}</guid>
+      <pubDate>${new Date(ev.date + "T" + (ev.time || "12:00") + ":00+02:00").toUTCString()}</pubDate>
+      <description>${escXml(ev.date + timeStr + ". " + ev.museum_name + ". " + desc)}</description>
+    </item>`;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Museumsufer Frankfurt</title>
+    <link>${BASE_URL}</link>
+    <description>Veranstaltungen am Frankfurter Museumsufer</description>
+    <language>de</language>
+    <atom:link href="${BASE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+${items.join("\n")}
+  </channel>
+</rss>`;
+}
+
+function buildIcs(events: (Event & { museum_name: string })[]): string {
+  const vevents = events.map((ev) => {
+    const dtDate = ev.date.replace(/-/g, "");
+    let dtStart: string;
+    let dtEnd: string;
+
+    if (ev.time) {
+      dtStart = `DTSTART;TZID=Europe/Berlin:${dtDate}T${ev.time.replace(":", "")}00`;
+      if (ev.end_time) {
+        const endDtDate = ev.end_date ? ev.end_date.replace(/-/g, "") : dtDate;
+        dtEnd = `DTEND;TZID=Europe/Berlin:${endDtDate}T${ev.end_time.replace(":", "")}00`;
+      } else {
+        const h = (parseInt(ev.time.split(":")[0]) + 1) % 24;
+        dtEnd = `DTEND;TZID=Europe/Berlin:${dtDate}T${h.toString().padStart(2, "0")}${ev.time.split(":")[1]}00`;
+      }
+    } else {
+      dtStart = `DTSTART;VALUE=DATE:${dtDate}`;
+      dtEnd = `DTEND;VALUE=DATE:${dtDate}`;
+    }
+
+    const uid = `museumsufer-${ev.id}@museumsufer.jonas-strassel.de`;
+    const summary = icsEsc(ev.title);
+    const location = icsEsc(ev.museum_name);
+    const desc = ev.description ? `DESCRIPTION:${icsEsc(ev.description)}\r\n` : "";
+    const url = ev.detail_url || ev.url ? `URL:${ev.detail_url || ev.url}\r\n` : "";
+
+    return `BEGIN:VEVENT\r\n${dtStart}\r\n${dtEnd}\r\nSUMMARY:${summary}\r\nLOCATION:${location}\r\n${desc}${url}UID:${uid}\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "").slice(0, 15)}Z\r\nEND:VEVENT`;
+  });
+
+  return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Museumsufer Frankfurt//DE\r\nX-WR-CALNAME:Museumsufer Frankfurt\r\nX-WR-TIMEZONE:Europe/Berlin\r\nMETHOD:PUBLISH\r\n${vevents.join("\r\n")}\r\nEND:VCALENDAR`;
+}
+
+function icsEsc(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+}
+
+function escXml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function todayIso(): string {
   return new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
+}
+
+function dateOffset(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" });
 }
 
 function json(data: unknown, status = 200, cacheControl?: string): Response {
