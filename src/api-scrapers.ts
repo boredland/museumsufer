@@ -432,9 +432,8 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
 }
 
 async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" },
-  });
+  const ua = { "User-Agent": "Mozilla/5.0 (compatible; Museumsufer/1.0)" };
+  const res = await fetch(endpoint, { headers: ua });
   if (!res.ok) return [];
   const html = await res.text();
 
@@ -446,27 +445,57 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
     const block = match[1];
     if (block.includes("event-canceled")) continue;
 
-    const dtMatch = block.match(/datetime="([^"]+)"/);
-    const titleMatch = block.match(/class="event-title">([^<]+)/);
-    if (!dtMatch || !titleMatch) continue;
-
-    const date = dtMatch[1];
-    if (date < todayIso()) continue;
-
-    const linkMatch = block.match(/href="(https:\/\/dommuseum-frankfurt\.de\/[^"]+)"/);
+    const icsMatch = block.match(/href="([^"]*format%5D=ics[^"]*)"/);
     const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
+    const linkMatch = block.match(/href="(\/besuchen\/kalender\/[^?"]+)"/);
+    if (!icsMatch) continue;
 
-    events.push({
-      title: titleMatch[1].trim(),
-      date,
-      time: null,
-      end_time: null,
-      end_date: null,
-      description: null,
-      detail_url: linkMatch ? linkMatch[1] : null,
-      image_url: imgMatch ? `https://dommuseum-frankfurt.de${imgMatch[1]}` : null,
-      price: null,
-    });
+    const icsUrl = `https://dommuseum-frankfurt.de${icsMatch[1].replace(/&amp;/g, "&")}`;
+    try {
+      const icsRes = await fetch(icsUrl, { headers: ua });
+      if (!icsRes.ok) continue;
+      const ics = await icsRes.text();
+
+      const summary = ics.match(/SUMMARY:(.+)/)?.[1]?.trim();
+      const dtStart = ics.match(/DTSTART:(\d{8}T\d{6})/)?.[1];
+      const dtEnd = ics.match(/DTEND:(\d{8}T\d{6})/)?.[1];
+      const desc = ics.match(/DESCRIPTION:(.+)/)?.[1]?.trim();
+      if (!summary || !dtStart) continue;
+
+      const startDate = new Date(
+        `${dtStart.slice(0,4)}-${dtStart.slice(4,6)}-${dtStart.slice(6,8)}T${dtStart.slice(9,11)}:${dtStart.slice(11,13)}:${dtStart.slice(13,15)}Z`
+      );
+      const date = toBerlinDate(startDate);
+      if (date < todayIso()) continue;
+      const time = toBerlinTime(startDate);
+
+      let endTime: string | null = null;
+      let endDate: string | null = null;
+      if (dtEnd) {
+        const endD = new Date(
+          `${dtEnd.slice(0,4)}-${dtEnd.slice(4,6)}-${dtEnd.slice(6,8)}T${dtEnd.slice(9,11)}:${dtEnd.slice(11,13)}:${dtEnd.slice(13,15)}Z`
+        );
+        endTime = toBerlinTime(endD);
+        const ed = toBerlinDate(endD);
+        if (ed !== date) endDate = ed;
+      }
+
+      const detailPath = linkMatch ? linkMatch[1] : null;
+
+      events.push({
+        title: summary,
+        date,
+        time: time !== "00:00" ? time : null,
+        end_time: endTime !== "00:00" ? endTime : null,
+        end_date: endDate,
+        description: desc ? stripHtml(desc).slice(0, 300) : null,
+        detail_url: detailPath ? `https://dommuseum-frankfurt.de${detailPath}` : null,
+        image_url: imgMatch ? `https://dommuseum-frankfurt.de${imgMatch[1]}` : null,
+        price: null,
+      });
+    } catch {
+      continue;
+    }
   }
 
   return events;
