@@ -53,7 +53,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -61,8 +61,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       --bg: #f5f0eb;
       --surface: #ffffff;
       --text: #1c1917;
-      --text-secondary: #78716c;
-      --text-tertiary: #a8a29e;
+      --text-secondary: #6b6560;
+      --text-tertiary: #8a8380;
       --accent: #b45309;
       --accent-light: #fef3c7;
       --border: #e7e5e4;
@@ -513,6 +513,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .card-ical:hover { border-color: var(--accent); color: var(--accent); }
     .card-ical:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     .card-ical svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .card-ical { min-width: 28px; min-height: 28px; justify-content: center; }
 
     .empty {
       color: var(--text-tertiary);
@@ -877,7 +878,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     </main>
 
     <footer class="site-footer">
-      <a href="/feed.ics">${escHtml(tr.subscribeCal)}</a>
+      <a href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics" target="_blank" rel="noopener">${escHtml(tr.subscribeCal)}</a>
       <a href="/feed.xml">${escHtml(tr.rssFeed)}</a>
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
     </footer>
