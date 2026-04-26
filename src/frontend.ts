@@ -206,6 +206,11 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       outline-offset: 2px;
     }
 
+    .date-nav button.loading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
     .date-picker-label {
       display: inline-flex;
       align-items: center;
@@ -1258,7 +1263,9 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       if (sortByDistance) {
         sortByDistance = false;
         btnNear.classList.remove('active');
+        btnNear.classList.remove('loading');
         btnNear.setAttribute('aria-pressed', 'false');
+        btnNear.textContent = T.nearMe;
         if (lastRenderData) render(lastRenderData);
         return;
       }
@@ -1268,15 +1275,24 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         btnNear.setAttribute('aria-pressed', 'true');
         if (lastRenderData) render(lastRenderData);
       } else if ('geolocation' in navigator) {
+        btnNear.classList.add('loading');
+        btnNear.textContent = '...';
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             sortByDistance = true;
+            btnNear.classList.remove('loading');
             btnNear.classList.add('active');
             btnNear.setAttribute('aria-pressed', 'true');
+            btnNear.textContent = T.nearMe;
             if (lastRenderData) render(lastRenderData);
           },
-          () => { btnNear.style.display = 'none'; }
+          () => {
+            btnNear.classList.remove('loading');
+            btnNear.textContent = T.nearMe;
+            btnNear.style.display = 'none';
+          },
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
         );
       }
     });
