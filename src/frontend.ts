@@ -15,7 +15,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
   const geoJson = JSON.stringify(MUSEUM_LOCATIONS);
-  const eventSchemaJson = initialData ? buildEventSchema(initialData) : "";
+  const berlinOffset = getBerlinUtcOffset();
+  const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -1031,7 +1032,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       html += '<div class="section">';
       html += sectionHeader(T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
-      const sortedEvents = sortItemsByDistance(data.events);
+      const sortedEvents = sortItemsByDistance(data.events).map((e, i) => ({...e, _idx: i}));
       if (sortedEvents.length === 0) {
         html += '<div class="empty">' + escHtml(T.noEvents) + '</div>';
       } else {
@@ -1045,7 +1046,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       html += '<div class="section">';
       html += sectionHeader(T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
-      const sortedExhibitions = sortItemsByDistance(data.exhibitions);
+      const sortedExhibitions = sortItemsByDistance(data.exhibitions).map((e, i) => ({...e, _idx: i}));
       if (sortedExhibitions.length === 0) {
         html += '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
@@ -1102,7 +1103,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
     function renderExhibition(ex) {
       const img = ex.image_url
-        ? '<img class="card-img" src="' + escHtml(ex.image_url) + '" alt="' + escHtml(ex.title) + '" loading="lazy">'
+        ? '<img class="card-img" src="' + escHtml(ex.image_url) + '" alt="' + escHtml(ex.title) + '"' + (ex._idx > 2 ? ' loading="lazy"' : '') + '>'
         : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const dates = [
         ex.start_date ? formatDateShort(ex.start_date) : '',
@@ -1150,7 +1151,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
     function renderEvent(ev) {
       const img = ev.image_url
-        ? '<img class="card-img" src="' + escHtml(ev.image_url) + '" alt="' + escHtml(ev.title) + '" loading="lazy">'
+        ? '<img class="card-img" src="' + escHtml(ev.image_url) + '" alt="' + escHtml(ev.title) + '"' + (ev._idx > 2 ? ' loading="lazy"' : '') + '>'
         : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const timeStr = ev.time
         ? (ev.end_time ? ev.time + '–' + ev.end_time : ev.time)
@@ -1385,7 +1386,15 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 </html>`;
 }
 
-function buildEventSchema(data: InitialData): string {
+function getBerlinUtcOffset(): string {
+  const now = new Date();
+  const utc = now.toLocaleString("en-US", { timeZone: "UTC" });
+  const berlin = now.toLocaleString("en-US", { timeZone: "Europe/Berlin" });
+  const diff = (new Date(berlin).getTime() - new Date(utc).getTime()) / 3600000;
+  return `+${String(Math.floor(diff)).padStart(2, "0")}:00`;
+}
+
+function buildEventSchema(data: InitialData, tz: string): string {
   const events = data.events as Array<Record<string, unknown>>;
   if (!events || events.length === 0) return "";
 
@@ -1398,14 +1407,16 @@ function buildEventSchema(data: InitialData): string {
     const slug = ev.museum_slug as string || "";
     const geo = MUSEUM_LOCATIONS[slug];
 
-    const startIso = time ? `${date}T${time}:00+02:00` : date;
-    let endIso: string | undefined;
+    const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
+    let endIso: string;
     if (endTime) {
       const ed = endDate || date;
-      endIso = `${ed}T${endTime}:00+02:00`;
+      endIso = `${ed}T${endTime}:00${tz}`;
     } else if (time) {
       const h = (parseInt(time.split(":")[0]) + 1) % 24;
-      endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00+02:00`;
+      endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00${tz}`;
+    } else {
+      endIso = `${date}T18:00:00${tz}`;
     }
 
     const schema: Record<string, unknown> = {
@@ -1414,7 +1425,7 @@ function buildEventSchema(data: InitialData): string {
       startDate: startIso,
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     };
-    if (endIso) schema.endDate = endIso;
+    schema.endDate = endIso;
     if (ev.description) schema.description = ev.description;
     if (ev.detail_url) schema.url = ev.detail_url;
     if (ev.image_url) schema.image = ev.image_url;
