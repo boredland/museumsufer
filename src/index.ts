@@ -210,8 +210,11 @@ export default {
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil(
       scrape(env)
+        .catch((e) => console.error("scrape failed:", e))
         .then(() => scrapeMuseumWebsites(env))
-        .then(() => translateEvents(env)),
+        .catch((e) => console.error("event scrape failed:", e))
+        .then(() => translateEvents(env))
+        .catch((e) => console.error("translation failed:", e)),
     );
   },
 } satisfies ExportedHandler<Env>;

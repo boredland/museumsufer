@@ -974,7 +974,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       const v = getVisited();
       const idx = v.indexOf(id);
       if (idx >= 0) v.splice(idx, 1); else v.push(id);
-      localStorage.setItem('visited', JSON.stringify(v));
+      try { localStorage.setItem('visited', JSON.stringify(v)); } catch {}
     }
 
     const content = document.getElementById('content');
