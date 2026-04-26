@@ -252,14 +252,29 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .fade-in { animation: fadeIn 0.25s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
-    .section { margin-bottom: 2.5rem; }
+    details.section { margin-bottom: 2.5rem; }
+    details.section > summary { list-style: none; }
+    details.section > summary::-webkit-details-marker { display: none; }
 
     .section-header {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 1rem;
+      cursor: pointer;
+      user-select: none;
     }
+
+    .section-header:hover .section-title { color: var(--text-secondary); }
+
+    .section-chevron {
+      margin-left: auto;
+      color: var(--text-tertiary);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    details.section[open] > .section-header .section-chevron { transform: rotate(180deg); }
 
     .section-icon {
       width: 20px;
@@ -1026,49 +1041,63 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       }
     }
 
+    function isSectionOpen(key) {
+      try { return localStorage.getItem('section-' + key) !== 'closed'; } catch { return true; }
+    }
+
+    function toggleSection(key) {
+      const open = isSectionOpen(key);
+      try { localStorage.setItem('section-' + key, open ? 'closed' : 'open'); } catch {}
+    }
+
+    function renderSection(key, title, count, iconPath, innerHtml) {
+      const open = isSectionOpen(key);
+      return '<details class="section" data-section="' + key + '"' + (open ? ' open' : '') + '>'
+        + '<summary class="section-header">'
+        + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="' + iconPath + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
+        + '<h2 class="section-title">' + escHtml(title) + '</h2>'
+        + '<span class="section-count" aria-label="' + count + ' ' + title + '">' + count + '</span>'
+        + '<svg class="section-chevron" viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        + '</summary>'
+        + innerHtml
+        + '</details>';
+    }
+
     function render(data) {
       lastRenderData = data;
       let html = '';
 
-      html += '<div class="section">';
-      html += sectionHeader(T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
       const sortedEvents = sortItemsByDistance(data.events).map((e, i) => ({...e, _idx: i}));
+      let eventsInner;
       if (sortedEvents.length === 0) {
-        html += '<div class="empty">' + escHtml(T.noEvents) + '</div>';
+        eventsInner = '<div class="empty">' + escHtml(T.noEvents) + '</div>';
       } else {
-        html += '<div class="card-list">';
-        for (const ev of sortedEvents) {
-          html += renderEvent(ev);
-        }
-        html += '</div>';
+        eventsInner = '<div class="card-list">';
+        for (const ev of sortedEvents) eventsInner += renderEvent(ev);
+        eventsInner += '</div>';
       }
-      html += '</div>';
+      html += renderSection('events', T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z', eventsInner);
 
-      html += '<div class="section">';
-      html += sectionHeader(T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
       const sortedExhibitions = sortItemsByDistance(data.exhibitions).map((e, i) => ({...e, _idx: i}));
+      let exhInner;
       if (sortedExhibitions.length === 0) {
-        html += '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
+        exhInner = '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
-        html += '<div class="card-list">';
-        html += renderExhibitionsGrouped(sortedExhibitions);
-        html += '</div>';
+        exhInner = '<div class="card-list">';
+        exhInner += renderExhibitionsGrouped(sortedExhibitions);
+        exhInner += '</div>';
       }
-      html += '</div>';
+      html += renderSection('exhibitions', T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
 
       content.innerHTML = html;
+      content.querySelectorAll('details.section').forEach(d => {
+        d.addEventListener('toggle', () => toggleSection(d.dataset.section));
+      });
       content.classList.remove('fade-in');
       void content.offsetWidth;
       content.classList.add('fade-in');
     }
 
-    function sectionHeader(title, count, iconPath) {
-      return '<div class="section-header">'
-        + '<svg class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="' + iconPath + '" stroke-width="1.5" stroke-linecap="round"/></svg>'
-        + '<h2 class="section-title">' + escHtml(title) + '</h2>'
-        + '<span class="section-count" aria-label="' + count + ' ' + title + '">' + count + '</span>'
-        + '</div>';
-    }
 
     function renderExhibitionsGrouped(exhibitions) {
       const active = exhibitions.filter(ex => !isVisited(ex.id));
