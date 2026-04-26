@@ -954,7 +954,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     function renderEvent(ev) {
       const img = ev.image_url
         ? '<img class="card-img" src="' + escHtml(ev.image_url) + '" alt="' + escHtml(ev.title) + '" loading="lazy">'
-        : '';
+        : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const timeStr = ev.time
         ? (ev.end_time ? ev.time + '–' + ev.end_time : ev.time)
         : '';
