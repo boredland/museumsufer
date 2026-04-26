@@ -36,6 +36,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f5f0eb">
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
@@ -624,6 +625,27 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
     .llm-tip-copy:hover { border-color: var(--accent); color: var(--accent); }
 
+    .search-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.5rem 0.875rem;
+      margin-bottom: 1rem;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 100px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+      transition: border-color 0.2s;
+    }
+
+    .search-trigger:hover { border-color: var(--accent); }
+    .search-trigger:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .search-trigger span { flex: 1; text-align: left; }
+
     .search-overlay {
       position: fixed;
       inset: 0;
@@ -724,6 +746,34 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       text-overflow: ellipsis;
     }
 
+    .search-result-desc {
+      font-size: 0.6875rem;
+      color: var(--text-tertiary);
+      margin-top: 0.125rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .search-result-time {
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0 0.25rem;
+      border-radius: 3px;
+      vertical-align: middle;
+    }
+
+    .search-result mark {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 2px;
+      padding: 0 1px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .loading::after, .octo-arm, .fade-in { animation: none !important; }
     }
@@ -755,6 +805,12 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         (l) => `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="page"' : ""}>${l.toUpperCase()}</a>`
       ).join("")}</div>
     </header>
+
+    <button class="search-trigger" id="search-trigger" onclick="openSearch()">
+      <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span>${escHtml(tr.searchPlaceholder)}</span>
+      <kbd class="search-kbd">Ctrl K</kbd>
+    </button>
 
     <details class="llm-tip">
       <summary>
@@ -1173,8 +1229,27 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     const searchInput = document.getElementById('search-input');
     const searchResults = document.getElementById('search-results');
     let searchIdx = -1;
+    let fuse = null;
+
+    function buildSearchIndex() {
+      if (!lastRenderData || typeof Fuse === 'undefined') return;
+      const items = [];
+      for (const ev of lastRenderData.events) {
+        items.push({ type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, time: ev.time || '' });
+      }
+      for (const ex of lastRenderData.exhibitions) {
+        items.push({ type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, time: '' });
+      }
+      fuse = new Fuse(items, {
+        keys: [{ name: 'title', weight: 3 }, { name: 'museum', weight: 2 }, { name: 'desc', weight: 1 }],
+        includeMatches: true,
+        threshold: 0.4,
+        minMatchCharLength: 2,
+      });
+    }
 
     function openSearch() {
+      buildSearchIndex();
       searchOverlay.classList.add('open');
       searchInput.value = '';
       searchInput.focus();
@@ -1186,49 +1261,60 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       searchIdx = -1;
     }
 
-    function fuzzyMatch(query, text) {
-      const q = query.toLowerCase();
-      const t = text.toLowerCase();
-      if (t.includes(q)) return true;
-      let qi = 0;
-      for (let ti = 0; ti < t.length && qi < q.length; ti++) {
-        if (t[ti] === q[qi]) qi++;
+    function highlight(text, matches, key) {
+      if (!matches) return escHtml(text);
+      const m = matches.find(m => m.key === key);
+      if (!m || !m.indices.length) return escHtml(text);
+      let result = '';
+      let last = 0;
+      for (const [start, end] of m.indices) {
+        result += escHtml(text.slice(last, start));
+        result += '<mark>' + escHtml(text.slice(start, end + 1)) + '</mark>';
+        last = end + 1;
       }
-      return qi === q.length;
-    }
-
-    function getSearchItems() {
-      if (!lastRenderData) return [];
-      const items = [];
-      for (const ev of lastRenderData.events) {
-        items.push({ type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, raw: ev });
-      }
-      for (const ex of lastRenderData.exhibitions) {
-        items.push({ type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, raw: ex });
-      }
-      return items;
+      result += escHtml(text.slice(last));
+      return result;
     }
 
     function updateSearch() {
       const q = searchInput.value.trim();
-      const items = getSearchItems();
-      const filtered = q.length === 0 ? items.slice(0, 20) : items.filter(i =>
-        fuzzyMatch(q, i.title) || fuzzyMatch(q, i.museum) || fuzzyMatch(q, i.desc)
-      ).slice(0, 20);
       searchIdx = -1;
+      let results;
 
-      if (filtered.length === 0 && q.length > 0) {
+      if (!fuse || q.length === 0) {
+        const items = [];
+        if (lastRenderData) {
+          for (const ev of lastRenderData.events) items.push({ item: { type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, time: ev.time || '' }, matches: null });
+          for (const ex of lastRenderData.exhibitions) items.push({ item: { type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, time: '' }, matches: null });
+        }
+        results = items.slice(0, 15);
+      } else {
+        results = fuse.search(q).slice(0, 15);
+      }
+
+      if (results.length === 0) {
         searchResults.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-tertiary);font-size:0.8125rem">' + escHtml(T.noResults) + '</div>';
         return;
       }
 
-      searchResults.innerHTML = filtered.map((item, i) =>
-        '<div class="search-result" data-idx="' + i + '"'
-        + (item.url ? ' data-url="' + escAttr(item.url) + '"' : '')
-        + '><div class="search-result-type">' + escHtml(item.type.slice(0, 5)) + '</div>'
-        + '<div class="search-result-body"><div class="search-result-title">' + escHtml(item.title) + '</div>'
-        + '<div class="search-result-museum">' + escHtml(item.museum) + '</div></div></div>'
-      ).join('');
+      searchResults.innerHTML = results.map((r, i) => {
+        const item = r.item;
+        const titleHtml = highlight(item.title, r.matches, 'title');
+        const museumHtml = highlight(item.museum, r.matches, 'museum');
+        const descSnippet = item.desc && r.matches && r.matches.some(m => m.key === 'desc')
+          ? '<div class="search-result-desc">' + highlight(item.desc.slice(0, 120), r.matches, 'desc') + '</div>'
+          : '';
+        const timeStr = item.time ? '<span class="search-result-time">' + escHtml(item.time) + '</span>' : '';
+
+        return '<div class="search-result" data-idx="' + i + '"'
+          + (item.url ? ' data-url="' + escAttr(item.url) + '"' : '')
+          + '><div class="search-result-type">' + escHtml(item.type.slice(0, 6)) + '</div>'
+          + '<div class="search-result-body">'
+          + '<div class="search-result-title">' + titleHtml + ' ' + timeStr + '</div>'
+          + '<div class="search-result-museum">' + museumHtml + '</div>'
+          + descSnippet
+          + '</div></div>';
+      }).join('');
     }
 
     searchInput.addEventListener('input', updateSearch);
