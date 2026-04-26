@@ -588,6 +588,53 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .card details[open] summary::before { content: '- '; }
     .card details summary:hover { color: var(--accent); }
 
+    .pass-promo {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.75rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .pass-promo-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pass-promo-links {
+      display: flex;
+      gap: 0.375rem;
+      flex-shrink: 0;
+    }
+
+    .pass-promo-links a {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.625rem;
+      border-radius: 999px;
+      text-decoration: none;
+      white-space: nowrap;
+      border: 1px solid var(--border);
+      color: var(--text);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .pass-promo-links a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    @media (max-width: 480px) {
+      .pass-promo { flex-direction: column; align-items: stretch; gap: 0.375rem; }
+      .pass-promo-links { justify-content: stretch; }
+      .pass-promo-links a { flex: 1; text-align: center; }
+    }
+
     .site-footer {
       margin-top: 1.5rem;
       padding-top: 1rem;
@@ -857,6 +904,15 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <span>${escHtml(tr.searchPlaceholder)}</span>
       <kbd class="search-kbd">Ctrl K</kbd>
     </button>
+
+    <div class="pass-promo">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true"><path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><path d="M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="pass-promo-text">${escHtml(tr.passPromo)}</span>
+      <span class="pass-promo-links">
+        <a href="https://www.museumsufer.de/${locale === "de" ? "de" : "en"}/eintritt-und-tickets/dauerkarten/museumsufercard/" target="_blank" rel="noopener">Museumsufercard</a>
+        <a href="https://www.museumsufer.de/${locale === "de" ? "de" : "en"}/eintritt-und-tickets/dauerkarten/museumsuferticket/" target="_blank" rel="noopener">Museumsuferticket</a>
+      </span>
+    </div>
 
     <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
       <button id="btn-today" class="active">${escHtml(tr.today)}</button>
