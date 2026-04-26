@@ -5,6 +5,7 @@ import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage, type InitialData } from "./frontend";
 import { detectLocale } from "./i18n";
 import { todayIso } from "./date";
+import { SERVICE_WORKER_JS } from "./service-worker";
 import { handleImageProxy } from "./image-proxy";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
@@ -87,6 +88,12 @@ export default {
       const result = await scrapeMuseumWebsites(env);
       return new Response(JSON.stringify(result), {
         headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.pathname === "/sw.js") {
+      return new Response(SERVICE_WORKER_JS, {
+        headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
       });
     }
 
