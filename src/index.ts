@@ -92,6 +92,29 @@ export default {
       );
     }
 
+    if (url.pathname === "/screenshot-wide.svg" || url.pathname === "/screenshot-mobile.svg") {
+      const wide = url.pathname.includes("wide");
+      const w = wide ? 1280 : 390;
+      const h = wide ? 720 : 844;
+      return new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect width="${w}" height="${h}" fill="#f5f0eb"/>
+  <rect width="${w}" height="4" fill="#b45309"/>
+  <text x="${w / 2}" y="${h * 0.15}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${wide ? 36 : 24}" font-weight="700" fill="#1c1917">Museumsufer Frankfurt</text>
+  <text x="${w / 2}" y="${h * 0.15 + (wide ? 30 : 22)}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${wide ? 16 : 13}" fill="#78716c">Ausstellungen &amp; Veranstaltungen</text>
+  <rect x="${w * 0.08}" y="${h * 0.28}" width="${w * 0.84}" height="${wide ? 36 : 32}" rx="18" fill="white" stroke="#e7e5e4" stroke-width="1.5"/>
+  <text x="${w * 0.15}" y="${h * 0.28 + (wide ? 23 : 21)}" font-family="system-ui,sans-serif" font-size="${wide ? 14 : 12}" fill="#a8a29e">Museum, Ausstellung oder Veranstaltung suchen...</text>
+  ${[0, 1, 2, 3].map((i) => `<rect x="${w * 0.08}" y="${h * 0.38 + i * (h * 0.13)}" width="${w * 0.84}" height="${h * 0.11}" rx="12" fill="white"/>`).join("\n  ")}
+  <text x="${w * 0.13}" y="${h * 0.44}" font-family="system-ui,sans-serif" font-size="${wide ? 15 : 13}" font-weight="500" fill="#1c1917">Nacht der Museen</text>
+  <text x="${w * 0.13}" y="${h * 0.44 + 18}" font-family="system-ui,sans-serif" font-size="${wide ? 12 : 11}" fill="#78716c">Städel Museum</text>
+  <text x="${w * 0.13}" y="${h * 0.57}" font-family="system-ui,sans-serif" font-size="${wide ? 15 : 13}" font-weight="500" fill="#1c1917">Öffentliche Führung</text>
+  <text x="${w * 0.13}" y="${h * 0.57 + 18}" font-family="system-ui,sans-serif" font-size="${wide ? 12 : 11}" fill="#78716c">Historisches Museum Frankfurt</text>
+  <text x="${w / 2}" y="${h * 0.95}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" fill="#b45309">museumsufer.app</text>
+</svg>`,
+        { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } },
+      );
+    }
+
     if (url.pathname.startsWith("/img/")) {
       const imgResponse = await handleImageProxy(request, env);
       if (imgResponse) return imgResponse;
@@ -147,22 +170,19 @@ export default {
           background_color: "#f5f0eb",
           theme_color: "#f5f0eb",
           icons: [
+            { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+            { src: "/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+            { src: "/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+          ],
+          screenshots: [
             {
-              src: "/icon.svg",
-              sizes: "any",
+              src: "/screenshot-wide.svg",
+              sizes: "1280x720",
               type: "image/svg+xml",
-              purpose: "any",
+              form_factor: "wide",
+              label: "Museumsufer Frankfurt",
             },
-            {
-              src: "/icon-192.svg",
-              sizes: "192x192",
-              type: "image/svg+xml",
-            },
-            {
-              src: "/icon-512.svg",
-              sizes: "512x512",
-              type: "image/svg+xml",
-            },
+            { src: "/screenshot-mobile.svg", sizes: "390x844", type: "image/svg+xml", label: "Museumsufer Frankfurt" },
           ],
         }),
         {
@@ -172,13 +192,25 @@ export default {
     }
 
     if (url.pathname === "/icon.svg" || url.pathname === "/icon-192.svg" || url.pathname === "/icon-512.svg") {
-      const size = url.pathname.includes("512") ? 512 : url.pathname.includes("192") ? 192 : 100;
-      const fontSize = Math.round(size * 0.8);
+      const s = url.pathname.includes("512") ? 512 : url.pathname.includes("192") ? 192 : 100;
+      const r = Math.round(s * 0.15);
+      const cx = s / 2;
+      const top = s * 0.25;
+      const bot = s * 0.78;
+      const colW = s * 0.06;
+      const colGap = s * 0.12;
+      const cols = [-1.5, -0.5, 0.5, 1.5].map((i) => cx + i * colGap);
+      const roofY = top - s * 0.02;
+      const baseY = bot + s * 0.02;
       return new Response(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  <rect width="${size}" height="${size}" rx="${Math.round(size * 0.15)}" fill="#f5f0eb"/>
-  <rect width="${size}" height="${Math.round(size * 0.04)}" fill="#b45309"/>
-  <text x="${size / 2}" y="${size * 0.65}" text-anchor="middle" font-size="${fontSize}">🏛️</text>
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}">
+  <rect width="${s}" height="${s}" rx="${r}" fill="#f5f0eb"/>
+  <rect width="${s}" height="${Math.round(s * 0.02)}" fill="#b45309"/>
+  <polygon points="${cx},${top * 0.6} ${cx - s * 0.3},${roofY} ${cx + s * 0.3},${roofY}" fill="#b45309"/>
+  <rect x="${cx - s * 0.3}" y="${roofY}" width="${s * 0.6}" height="${s * 0.04}" fill="#b45309"/>
+  ${cols.map((x) => `<rect x="${x - colW / 2}" y="${top}" width="${colW}" height="${bot - top}" rx="${colW * 0.2}" fill="#b45309"/>`).join("\n  ")}
+  <rect x="${cx - s * 0.32}" y="${baseY}" width="${s * 0.64}" height="${s * 0.04}" fill="#b45309"/>
+  <rect x="${cx - s * 0.28}" y="${baseY + s * 0.05}" width="${s * 0.56}" height="${s * 0.03}" fill="#b45309"/>
 </svg>`,
         { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } },
       );
