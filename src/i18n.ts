@@ -76,6 +76,7 @@ const de: Translations = {
   search: "Suchen",
   searchPlaceholder: "Museum, Ausstellung oder Veranstaltung suchen...",
   noResults: "Keine Ergebnisse.",
+  passPromo: "Alle 39 Museen entdecken",
 };
 
 const en: Translations = {
@@ -122,6 +123,7 @@ const en: Translations = {
   search: "Search",
   searchPlaceholder: "Search museums, exhibitions or events...",
   noResults: "No results.",
+  passPromo: "Access all 39 museums",
 };
 
 const fr: Translations = {
@@ -168,6 +170,7 @@ const fr: Translations = {
   search: "Rechercher",
   searchPlaceholder: "Rechercher musees, expositions ou evenements...",
   noResults: "Aucun resultat.",
+  passPromo: "Accédez aux 39 musées",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
