@@ -1,11 +1,13 @@
 import { Env } from "./types";
 import { handleApi, handleFeeds, getEventsForDate, getExhibitionsForDate, proxyImages } from "./api";
+import { translateFields } from "./translate";
 import { scrape } from "./scraper";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { renderPage, type InitialData } from "./frontend";
 import { detectLocale } from "./i18n";
 import { todayIso } from "./date";
 import { SERVICE_WORKER_JS } from "./service-worker";
+import { translateEvents } from "./translate";
 import { handleImageProxy } from "./image-proxy";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
@@ -98,7 +100,8 @@ export default {
     }
 
     if (url.pathname.startsWith("/api/")) {
-      return handleApi(request, env);
+      const locale = detectLocale(request);
+      return handleApi(request, env, locale);
     }
 
     if (url.pathname === "/scrape" && request.method === "POST") {
@@ -114,6 +117,15 @@ export default {
       const denied = checkScrapeAuth(request, env);
       if (denied) return denied;
       const result = await scrapeMuseumWebsites(env);
+      return new Response(JSON.stringify(result), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.pathname === "/scrape/translate" && request.method === "POST") {
+      const denied = checkScrapeAuth(request, env);
+      if (denied) return denied;
+      const result = await translateEvents(env);
       return new Response(JSON.stringify(result), {
         headers: { "Content-Type": "application/json" },
       });
@@ -156,11 +168,19 @@ export default {
     let initialData: InitialData | undefined;
     try {
       const date = todayIso();
-      const [exhibitions, events] = await Promise.all([
+      const [rawExhibitions, rawEvents] = await Promise.all([
         getExhibitionsForDate(env, date),
         getEventsForDate(env, date),
       ]);
-      initialData = { date, exhibitions: proxyImages(exhibitions), events: proxyImages(events) };
+      const exhibitions = proxyImages(rawExhibitions);
+      const events = proxyImages(rawEvents);
+      const [trExh, trEv] = locale !== "de"
+        ? await Promise.all([
+            translateFields(env, exhibitions, ["title"], locale),
+            translateFields(env, events, ["title", "description"], locale),
+          ])
+        : [exhibitions, events];
+      initialData = { date, exhibitions: trExh, events: trEv };
     } catch {}
 
     return new Response(renderPage(locale, initialData), {
@@ -174,7 +194,9 @@ export default {
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
     ctx.waitUntil(
-      scrape(env).then(() => scrapeMuseumWebsites(env))
+      scrape(env)
+        .then(() => scrapeMuseumWebsites(env))
+        .then(() => translateEvents(env))
     );
   },
 } satisfies ExportedHandler<Env>;

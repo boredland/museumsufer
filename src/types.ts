@@ -2,6 +2,7 @@ export interface Env {
   DB: D1Database;
   AI: Ai;
   SCRAPE_SECRET?: string;
+  DEEPL_API_KEY?: string;
 }
 
 export interface Museum {
