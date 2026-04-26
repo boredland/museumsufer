@@ -62,7 +62,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       --surface: #ffffff;
       --text: #1c1917;
       --text-secondary: #6b6560;
-      --text-tertiary: #787270;
+      --text-tertiary: #706a68;
       --accent: #b45309;
       --accent-light: #fef3c7;
       --border: #e7e5e4;
