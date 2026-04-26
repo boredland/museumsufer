@@ -1,5 +1,5 @@
-import { Env } from "./types";
 import { USER_AGENT } from "./shared";
+import type { Env } from "./types";
 
 let allowedDomains: Set<string> | null = null;
 
@@ -7,16 +7,16 @@ async function getAllowedDomains(env: Env): Promise<Set<string>> {
   if (allowedDomains) return allowedDomains;
 
   const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
-  const { results } = await env.DB.prepare(
-    "SELECT website_url FROM museums WHERE website_url IS NOT NULL"
-  ).all<{ website_url: string }>();
+  const { results } = await env.DB.prepare("SELECT website_url FROM museums WHERE website_url IS NOT NULL").all<{
+    website_url: string;
+  }>();
 
   for (const row of results) {
     try {
       const hostname = new URL(row.website_url).hostname;
       domains.add(hostname);
       if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
-      else domains.add("www." + hostname);
+      else domains.add(`www.${hostname}`);
     } catch {}
   }
 
@@ -41,7 +41,10 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     let isAllowed = allowed.has(origin);
     if (!isAllowed) {
       for (const d of allowed) {
-        if (origin.endsWith("." + d)) { isAllowed = true; break; }
+        if (origin.endsWith(`.${d}`)) {
+          isAllowed = true;
+          break;
+        }
       }
     }
     if (!isAllowed) {

@@ -24,25 +24,25 @@ export const MUSEUM_LOCATIONS: Record<string, MuseumLocation> = {
   "hindemith-kabinett": { lat: 50.1059, lng: 8.6969 },
   "historisches-museum-frankfurt": { lat: 50.1092, lng: 8.6819 },
   "ikonenmuseum-frankfurt": { lat: 50.1058, lng: 8.6961 },
-  "institut-fuer-stadtgeschichte": { lat: 50.1088, lng: 8.6730 },
-  "juedisches-museum-frankfurt": { lat: 50.1040, lng: 8.6649 },
+  "institut-fuer-stadtgeschichte": { lat: 50.1088, lng: 8.673 },
+  "juedisches-museum-frankfurt": { lat: 50.104, lng: 8.6649 },
   "juedisches-museum-museum-judengasse-frankfurt": { lat: 50.1143, lng: 8.6922 },
-  "junges-museum-frankfurt": { lat: 50.1090, lng: 8.6830 },
-  "klingspor-museum-of": { lat: 50.0988, lng: 8.7700 },
-  "liebieghaus-skulpturensammlung": { lat: 50.0996, lng: 8.6600 },
-  "momem-museum-of-modern-electronic-music": { lat: 50.1140, lng: 8.6727 },
-  "museum-angewandte-kunst": { lat: 50.1056, lng: 8.6800 },
+  "junges-museum-frankfurt": { lat: 50.109, lng: 8.683 },
+  "klingspor-museum-of": { lat: 50.0988, lng: 8.77 },
+  "liebieghaus-skulpturensammlung": { lat: 50.0996, lng: 8.66 },
+  "momem-museum-of-modern-electronic-music": { lat: 50.114, lng: 8.6727 },
+  "museum-angewandte-kunst": { lat: 50.1056, lng: 8.68 },
   "museum-fuer-kommunikation-frankfurt": { lat: 50.1038, lng: 8.6702 },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": { lat: 50.1126, lng: 8.6878 },
   "museum-giersch-der-goethe-universitaet": { lat: 50.0986, lng: 8.6545 },
   "museum-sinclair-haus-bad-homburg": { lat: 50.2267, lng: 8.6124 },
-  "portikus": { lat: 50.1077, lng: 8.6891 },
+  portikus: { lat: 50.1077, lng: 8.6891 },
   "porzellan-museum-frankfurt": { lat: 50.0999, lng: 8.5476 },
-  "schirn-kunsthalle-frankfurt": { lat: 50.1102, lng: 8.6590 },
+  "schirn-kunsthalle-frankfurt": { lat: 50.1102, lng: 8.659 },
   "senckenberg-naturmuseum": { lat: 50.1175, lng: 8.6522 },
   "staedel-museum": { lat: 50.1016, lng: 8.6721 },
-  "stoltze-museum": { lat: 50.1110, lng: 8.6846 },
-  "struwwelpeter-museum": { lat: 50.1112, lng: 8.6840 },
+  "stoltze-museum": { lat: 50.111, lng: 8.6846 },
+  "struwwelpeter-museum": { lat: 50.1112, lng: 8.684 },
   "tower-mmk-museum-mmk-fuer-moderne-kunst": { lat: 50.1105, lng: 8.6698 },
   "weltkulturen-museum": { lat: 50.1042, lng: 8.6779 },
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": { lat: 50.1122, lng: 8.6855 },
@@ -50,9 +50,11 @@ export const MUSEUM_LOCATIONS: Record<string, MuseumLocation> = {
 
 export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
@@ -67,5 +69,5 @@ export function walkingDistanceKm(userLat: number, userLng: number, museum: Muse
 }
 
 export function walkingMinutes(km: number): number {
-  return Math.round(km / 5 * 60);
+  return Math.round((km / 5) * 60);
 }

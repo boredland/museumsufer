@@ -1,6 +1,6 @@
-import { type Locale, SUPPORTED_LOCALES, getTranslations, dateLocale } from "./i18n";
-import { escHtml as escHtmlShared } from "./shared";
+import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { MUSEUM_LOCATIONS } from "./museum-geo";
+import { escHtml as escHtmlShared } from "./shared";
 
 export interface InitialData {
   date: string;
@@ -842,7 +842,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <h1>Museumsufer Frankfurt</h1>
       <p class="subtitle">${escHtml(tr.subtitle)}</p>
       <div class="lang-switch" role="navigation" aria-label="Language">${SUPPORTED_LOCALES.map(
-        (l) => `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="page"' : ""}>${l.toUpperCase()}</a>`
+        (l) =>
+          `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="page"' : ""}>${l.toUpperCase()}</a>`,
       ).join("")}</div>
     </header>
 
@@ -1432,8 +1433,8 @@ function buildEventSchema(data: InitialData, tz: string): string {
     const time = ev.time as string | null;
     const endTime = ev.end_time as string | null;
     const endDate = ev.end_date as string | null;
-    const museum = ev.museum_name as string || "";
-    const slug = ev.museum_slug as string || "";
+    const museum = (ev.museum_name as string) || "";
+    const slug = (ev.museum_slug as string) || "";
     const geo = MUSEUM_LOCATIONS[slug];
 
     const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
@@ -1442,7 +1443,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const ed = endDate || date;
       endIso = `${ed}T${endTime}:00${tz}`;
     } else if (time) {
-      const h = (parseInt(time.split(":")[0]) + 1) % 24;
+      const h = (parseInt(time.split(":")[0], 10) + 1) % 24;
       endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00${tz}`;
     } else {
       endIso = `${date}T18:00:00${tz}`;

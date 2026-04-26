@@ -1,5 +1,5 @@
 import { MUSEUM_APIS } from "./museum-apis";
-import { USER_AGENT, MUSEUMSUFER_DE } from "./shared";
+import { MUSEUMSUFER_DE, USER_AGENT } from "./shared";
 
 interface CheckResult {
   name: string;
@@ -16,10 +16,7 @@ const CHECKS: Array<{
   {
     name: "museumsufer.de — museums (museumMapConfig)",
     url: `${MUSEUMSUFER_DE}/de/museen/`,
-    validate: (body) =>
-      body.includes("museumMapConfig")
-        ? null
-        : "museumMapConfig not found in page",
+    validate: (body) => (body.includes("museumMapConfig") ? null : "museumMapConfig not found in page"),
   },
   {
     name: "museumsufer.de — exhibitions (teaserBox)",
@@ -43,37 +40,23 @@ const CHECKS: Array<{
         case "tribe-events":
           return body.includes('"events"') ? null : 'Missing "events" key';
         case "historisches":
-          return body.includes('"title"') && body.includes('"dateStart"')
-            ? null
-            : 'Missing "title"/"dateStart" fields';
+          return body.includes('"title"') && body.includes('"dateStart"') ? null : 'Missing "title"/"dateStart" fields';
         case "juedisches":
           return body.includes('"items"') ? null : 'Missing "items" key';
         case "staedel":
           return body.includes('"events"') ? null : 'Missing "events" key';
         case "senckenberg":
-          return body.includes('"event_start_time"')
-            ? null
-            : 'Missing "event_start_time" ACF field';
+          return body.includes('"event_start_time"') ? null : 'Missing "event_start_time" ACF field';
         case "my-calendar":
-          return body.startsWith("{") || body.startsWith("[")
-            ? null
-            : "Response is not JSON";
+          return body.startsWith("{") || body.startsWith("[") ? null : "Response is not JSON";
         case "liebieghaus":
-          return body.includes('itemtype="http://schema.org/Event"')
-            ? null
-            : "Missing schema.org Event markup";
+          return body.includes('itemtype="http://schema.org/Event"') ? null : "Missing schema.org Event markup";
         case "mak":
-          return body.includes("mak-event-item")
-            ? null
-            : "Missing mak-event-item elements";
+          return body.includes("mak-event-item") ? null : "Missing mak-event-item elements";
         case "stadtgeschichte-rss":
-          return body.includes("<rss") && body.includes("<item>")
-            ? null
-            : "Not a valid RSS feed";
+          return body.includes("<rss") && body.includes("<item>") ? null : "Not a valid RSS feed";
         case "dommuseum":
-          return body.includes("event-date-day")
-            ? null
-            : "Missing event-date-day elements";
+          return body.includes("event-date-day") ? null : "Missing event-date-day elements";
         case "junges-museum":
           return body.includes("view-calendar") && body.includes("<h2>")
             ? null
@@ -83,17 +66,13 @@ const CHECKS: Array<{
             ? null
             : "Missing li.quarter event items";
         case "bibelhaus":
-          return body.includes("bmBase--eventsItem")
-            ? null
-            : "Missing bmBase--eventsItem elements";
+          return body.includes("bmBase--eventsItem") ? null : "Missing bmBase--eventsItem elements";
         case "fkv":
           return body.includes("archive-title") && body.includes("subtitle")
             ? null
             : "Missing archive-title/subtitle elements";
         case "fdh":
-          return body.includes("o-program-link")
-            ? null
-            : "Missing o-program-link elements";
+          return body.includes("o-program-link") ? null : "Missing o-program-link elements";
         default:
           return null;
       }

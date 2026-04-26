@@ -1,14 +1,13 @@
-import { Env } from "./types";
-import { handleApi, handleFeeds, getEventsForDate, getExhibitionsForDate, proxyImages } from "./api";
-import { translateFields } from "./translate";
-import { scrape } from "./scraper";
-import { scrapeMuseumWebsites } from "./event-scraper";
-import { renderPage, type InitialData } from "./frontend";
-import { detectLocale } from "./i18n";
+import { getEventsForDate, getExhibitionsForDate, handleApi, handleFeeds, proxyImages } from "./api";
 import { todayIso } from "./date";
-import { SERVICE_WORKER_JS } from "./service-worker";
-import { translateEvents } from "./translate";
+import { scrapeMuseumWebsites } from "./event-scraper";
+import { type InitialData, renderPage } from "./frontend";
+import { detectLocale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
+import { scrape } from "./scraper";
+import { SERVICE_WORKER_JS } from "./service-worker";
+import { translateEvents, translateFields } from "./translate";
+import type { Env } from "./types";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
 
@@ -76,21 +75,20 @@ export default {
   <text x="600" y="400" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#b45309">museumsufer.app</text>
   <path d="M564 470 L554 475v2h20V475L564 470zm0 2.26L570.47 475H557.53L564 472.26zM554 487v2h20v-2H554zm2-8v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" fill="#b45309"/>
 </svg>`,
-        { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } }
+        { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } },
       );
     }
 
     if (url.pathname === "/robots.txt") {
-      return new Response(
-        `User-agent: *\nAllow: /\n\nSitemap: https://museumsufer.app/sitemap.xml\n`,
-        { headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=86400" } }
-      );
+      return new Response(`User-agent: *\nAllow: /\n\nSitemap: https://museumsufer.app/sitemap.xml\n`, {
+        headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=86400" },
+      });
     }
 
     if (url.pathname === "/sitemap.xml") {
       return new Response(
         `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://museumsufer.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n  <url><loc>https://museumsufer.app/?lang=de</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/?lang=en</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/?lang=fr</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/feed.xml</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/feed.ics</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/llms.txt</loc><changefreq>weekly</changefreq></url>\n</urlset>`,
-        { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } }
+        { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } },
       );
     }
 
@@ -138,21 +136,26 @@ export default {
     }
 
     if (url.pathname === "/manifest.json") {
-      return new Response(JSON.stringify({
-        name: "Museumsufer Frankfurt",
-        short_name: "Museumsufer",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#f5f0eb",
-        theme_color: "#f5f0eb",
-        icons: [{
-          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
-          sizes: "any",
-          type: "image/svg+xml",
-        }],
-      }), {
-        headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
-      });
+      return new Response(
+        JSON.stringify({
+          name: "Museumsufer Frankfurt",
+          short_name: "Museumsufer",
+          start_url: "/",
+          display: "standalone",
+          background_color: "#f5f0eb",
+          theme_color: "#f5f0eb",
+          icons: [
+            {
+              src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
+              sizes: "any",
+              type: "image/svg+xml",
+            },
+          ],
+        }),
+        {
+          headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
+        },
+      );
     }
 
     const feedResponse = await handleFeeds(request, env);
@@ -189,7 +192,7 @@ export default {
         finalEv = trEv.map((item, i) => {
           const orig = events[i] as unknown as Record<string, unknown>;
           const cur = item as unknown as Record<string, unknown>;
-          return (cur.title !== orig.title || cur.description !== orig.description) ? { ...cur, translated: true } : cur;
+          return cur.title !== orig.title || cur.description !== orig.description ? { ...cur, translated: true } : cur;
         });
       }
       initialData = { date, exhibitions: finalExh, events: finalEv };
@@ -199,7 +202,7 @@ export default {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Content-Language": locale,
-        "Vary": "Accept-Language",
+        Vary: "Accept-Language",
       },
     });
   },
@@ -208,7 +211,7 @@ export default {
     ctx.waitUntil(
       scrape(env)
         .then(() => scrapeMuseumWebsites(env))
-        .then(() => translateEvents(env))
+        .then(() => translateEvents(env)),
     );
   },
 } satisfies ExportedHandler<Env>;
