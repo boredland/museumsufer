@@ -974,7 +974,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       const calBtn = '<a class="card-ical" href="/api/event/' + ev.id + '.ics" '
         + 'aria-label="' + escAttr(T.calendarAria) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
-        + escHtml(T.calendar) + '</a>';
+        + '</a>';
 
       const meta = [timeTag, priceTag, distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
 
