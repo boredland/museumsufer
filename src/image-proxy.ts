@@ -88,7 +88,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     const response = new Response(body, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=604800, s-maxage=604800",
+        "Cache-Control": "public, max-age=2592000, s-maxage=2592000",
         "Access-Control-Allow-Origin": "*",
       },
     });
