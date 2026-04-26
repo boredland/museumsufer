@@ -624,6 +624,106 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
     .llm-tip-copy:hover { border-color: var(--accent); color: var(--accent); }
 
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      display: none;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 15vh;
+    }
+
+    .search-overlay.open { display: flex; }
+
+    .search-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 520px;
+      max-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .search-input-wrap svg { width: 18px; height: 18px; color: var(--text-tertiary); flex-shrink: 0; }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .search-input::placeholder { color: var(--text-tertiary); }
+
+    .search-kbd {
+      font-size: 0.6875rem;
+      color: var(--text-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.125rem 0.375rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .search-results {
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+
+    .search-result {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      align-items: center;
+      transition: background 0.1s;
+    }
+
+    .search-result:hover, .search-result.active { background: var(--accent-light); }
+
+    .search-result-type {
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+      width: 3rem;
+      flex-shrink: 0;
+    }
+
+    .search-result-body { min-width: 0; }
+
+    .search-result-title {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .search-result-museum {
+      font-size: 0.6875rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .loading::after, .octo-arm, .fade-in { animation: none !important; }
     }
@@ -687,6 +787,17 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <a href="/feed.xml">${escHtml(tr.rssFeed)}</a>
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
     </footer>
+  </div>
+
+  <div class="search-overlay" id="search-overlay" role="dialog" aria-label="${escHtml(tr.search)}">
+    <div class="search-box">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input class="search-input" id="search-input" type="text" placeholder="${escHtml(tr.searchPlaceholder)}" autocomplete="off">
+        <span class="search-kbd">Esc</span>
+      </div>
+      <div class="search-results" id="search-results"></div>
+    </div>
   </div>
 
   <script>
@@ -1056,6 +1167,99 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     } else {
       loadDay(toIso(today()), btnToday);
     }
+
+    // Search
+    const searchOverlay = document.getElementById('search-overlay');
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    let searchIdx = -1;
+
+    function openSearch() {
+      searchOverlay.classList.add('open');
+      searchInput.value = '';
+      searchInput.focus();
+      updateSearch();
+    }
+
+    function closeSearch() {
+      searchOverlay.classList.remove('open');
+      searchIdx = -1;
+    }
+
+    function fuzzyMatch(query, text) {
+      const q = query.toLowerCase();
+      const t = text.toLowerCase();
+      if (t.includes(q)) return true;
+      let qi = 0;
+      for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+        if (t[ti] === q[qi]) qi++;
+      }
+      return qi === q.length;
+    }
+
+    function getSearchItems() {
+      if (!lastRenderData) return [];
+      const items = [];
+      for (const ev of lastRenderData.events) {
+        items.push({ type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, raw: ev });
+      }
+      for (const ex of lastRenderData.exhibitions) {
+        items.push({ type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, raw: ex });
+      }
+      return items;
+    }
+
+    function updateSearch() {
+      const q = searchInput.value.trim();
+      const items = getSearchItems();
+      const filtered = q.length === 0 ? items.slice(0, 20) : items.filter(i =>
+        fuzzyMatch(q, i.title) || fuzzyMatch(q, i.museum) || fuzzyMatch(q, i.desc)
+      ).slice(0, 20);
+      searchIdx = -1;
+
+      if (filtered.length === 0 && q.length > 0) {
+        searchResults.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-tertiary);font-size:0.8125rem">' + escHtml(T.noResults) + '</div>';
+        return;
+      }
+
+      searchResults.innerHTML = filtered.map((item, i) =>
+        '<div class="search-result" data-idx="' + i + '"'
+        + (item.url ? ' data-url="' + escAttr(item.url) + '"' : '')
+        + '><div class="search-result-type">' + escHtml(item.type.slice(0, 5)) + '</div>'
+        + '<div class="search-result-body"><div class="search-result-title">' + escHtml(item.title) + '</div>'
+        + '<div class="search-result-museum">' + escHtml(item.museum) + '</div></div></div>'
+      ).join('');
+    }
+
+    searchInput.addEventListener('input', updateSearch);
+
+    searchResults.addEventListener('click', (e) => {
+      const row = e.target.closest('.search-result');
+      if (row && row.dataset.url) {
+        window.open(row.dataset.url, '_blank');
+        closeSearch();
+      }
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      const rows = searchResults.querySelectorAll('.search-result');
+      if (e.key === 'ArrowDown') { e.preventDefault(); searchIdx = Math.min(searchIdx + 1, rows.length - 1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); searchIdx = Math.max(searchIdx - 1, -1); }
+      else if (e.key === 'Enter' && searchIdx >= 0 && rows[searchIdx]) {
+        const url = rows[searchIdx].dataset.url;
+        if (url) { window.open(url, '_blank'); closeSearch(); }
+      }
+      else if (e.key === 'Escape') { closeSearch(); return; }
+      else return;
+      rows.forEach((r, i) => r.classList.toggle('active', i === searchIdx));
+      if (searchIdx >= 0 && rows[searchIdx]) rows[searchIdx].scrollIntoView({ block: 'nearest' });
+    });
+
+    searchOverlay.addEventListener('click', (e) => { if (e.target === searchOverlay) closeSearch(); });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+    });
 
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
