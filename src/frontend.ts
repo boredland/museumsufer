@@ -21,21 +21,32 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Museumsufer Frankfurt</title>
-  <meta name="description" content="${escHtml(tr.meta)}">
-  <meta property="og:title" content="Museumsufer Frankfurt">
-  <meta property="og:description" content="${escHtml(tr.meta)}">
+  <title>${escHtml(tr.pageTitle)}</title>
+  <meta name="description" content="${escHtml(tr.metaLong)}">
+  <link rel="canonical" href="https://museumsufer.app/">
+  <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de">
+  <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en">
+  <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr">
+  <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/">
+  <meta property="og:title" content="${escHtml(tr.pageTitle)}">
+  <meta property="og:description" content="${escHtml(tr.metaLong)}">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://museumsufer.app">
+  <meta property="og:url" content="https://museumsufer.app/">
   <meta property="og:locale" content="${locale}">
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Museumsufer Frankfurt">
-  <meta name="twitter:description" content="${escHtml(tr.meta)}">
+  <meta property="og:site_name" content="Museumsufer Frankfurt">
+  <meta property="og:image" content="https://museumsufer.app/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escHtml(tr.pageTitle)}">
+  <meta name="twitter:description" content="${escHtml(tr.metaLong)}">
+  <meta name="twitter:image" content="https://museumsufer.app/og-image.svg">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
   <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f5f0eb">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Museumsufer Frankfurt","url":"https://museumsufer.app/","description":"${escHtml(tr.metaLong)}","inLanguage":["de","en","fr"]}</script>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

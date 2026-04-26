@@ -64,6 +64,34 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
+    if (url.pathname === "/og-image.svg") {
+      return new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f5f0eb"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#b45309"/>
+  <text x="600" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="72" font-weight="700" fill="#1c1917" letter-spacing="-2">Museumsufer Frankfurt</text>
+  <text x="600" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="32" fill="#78716c">Ausstellungen &amp; Veranstaltungen</text>
+  <text x="600" y="400" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#b45309">museumsufer.app</text>
+  <path d="M564 470 L554 475v2h20V475L564 470zm0 2.26L570.47 475H557.53L564 472.26zM554 487v2h20v-2H554zm2-8v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" fill="#b45309"/>
+</svg>`,
+        { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } }
+      );
+    }
+
+    if (url.pathname === "/robots.txt") {
+      return new Response(
+        `User-agent: *\nAllow: /\n\nSitemap: https://museumsufer.app/sitemap.xml\n`,
+        { headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=86400" } }
+      );
+    }
+
+    if (url.pathname === "/sitemap.xml") {
+      return new Response(
+        `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://museumsufer.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>\n  <url><loc>https://museumsufer.app/?lang=de</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/?lang=en</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/?lang=fr</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/feed.xml</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/feed.ics</loc><changefreq>daily</changefreq></url>\n  <url><loc>https://museumsufer.app/llms.txt</loc><changefreq>weekly</changefreq></url>\n</urlset>`,
+        { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } }
+      );
+    }
+
     if (url.pathname.startsWith("/img/")) {
       const imgResponse = await handleImageProxy(request, env);
       if (imgResponse) return imgResponse;
