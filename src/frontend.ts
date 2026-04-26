@@ -15,6 +15,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
   const geoJson = JSON.stringify(MUSEUM_LOCATIONS);
+  const eventSchemaJson = initialData ? buildEventSchema(initialData) : "";
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -47,6 +48,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f5f0eb">
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Museumsufer Frankfurt","url":"https://museumsufer.app/","description":"${escHtml(tr.metaLong)}","inLanguage":["de","en","fr"]}</script>
+  ${eventSchemaJson}
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1381,6 +1383,58 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   </script>
 </body>
 </html>`;
+}
+
+function buildEventSchema(data: InitialData): string {
+  const events = data.events as Array<Record<string, unknown>>;
+  if (!events || events.length === 0) return "";
+
+  const schemas = events.slice(0, 20).map((ev) => {
+    const date = ev.date as string;
+    const time = ev.time as string | null;
+    const endTime = ev.end_time as string | null;
+    const endDate = ev.end_date as string | null;
+    const museum = ev.museum_name as string || "";
+    const slug = ev.museum_slug as string || "";
+    const geo = MUSEUM_LOCATIONS[slug];
+
+    const startIso = time ? `${date}T${time}:00+02:00` : date;
+    let endIso: string | undefined;
+    if (endTime) {
+      const ed = endDate || date;
+      endIso = `${ed}T${endTime}:00+02:00`;
+    } else if (time) {
+      const h = (parseInt(time.split(":")[0]) + 1) % 24;
+      endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00+02:00`;
+    }
+
+    const schema: Record<string, unknown> = {
+      "@type": "Event",
+      name: ev.title,
+      startDate: startIso,
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    };
+    if (endIso) schema.endDate = endIso;
+    if (ev.description) schema.description = ev.description;
+    if (ev.detail_url) schema.url = ev.detail_url;
+    if (ev.image_url) schema.image = ev.image_url;
+
+    const location: Record<string, unknown> = { "@type": "Place", name: museum };
+    if (geo) {
+      location.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
+      location.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
+    }
+    schema.location = location;
+
+    if (ev.price) {
+      schema.offers = { "@type": "Offer", price: 0, priceCurrency: "EUR", description: ev.price };
+    }
+
+    return schema;
+  });
+
+  const wrapper = { "@context": "https://schema.org", "@graph": schemas };
+  return `<script type="application/ld+json">${JSON.stringify(wrapper)}</script>`;
 }
 
 const escHtml = escHtmlShared;
