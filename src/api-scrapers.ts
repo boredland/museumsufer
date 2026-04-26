@@ -347,10 +347,14 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
         : null;
 
       if (!time && ev.event_desc) {
-        const descTimes = ev.event_desc.match(/(\d{1,2})[.:]\d{2}\s*(?:Uhr|h\b)/g);
-        if (descTimes && descTimes.length > 0) {
-          const first = descTimes[0].match(/(\d{1,2})[.:](\d{2})/);
-          if (first) time = first[1].padStart(2, "0") + ":" + first[2];
+        const withMinutes = ev.event_desc.match(/(\d{1,2})[.:](\d{2})\s*(?:Uhr|h\b)/);
+        if (withMinutes) {
+          time = withMinutes[1].padStart(2, "0") + ":" + withMinutes[2];
+        } else {
+          const hourOnly = ev.event_desc.match(/(?:ab\s+)?(\d{1,2})\s*Uhr/);
+          if (hourOnly) {
+            time = hourOnly[1].padStart(2, "0") + ":00";
+          }
         }
       }
 
