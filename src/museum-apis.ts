@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum" | "junges-museum";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -61,6 +61,11 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "dommuseum-frankfurt",
     type: "dommuseum",
     endpoint: "https://dommuseum-frankfurt.de/besuchen/kalender",
+  },
+  {
+    slug: "junges-museum-frankfurt",
+    type: "junges-museum",
+    endpoint: "https://junges-museum-frankfurt.de/kalender",
   },
 ];
 

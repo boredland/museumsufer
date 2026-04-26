@@ -8,7 +8,7 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 - Scrapes **~40 museums** from museumsufer.de (extracted from the embedded map config JSON)
 - Scrapes **current exhibitions** with date ranges from the central exhibitions listing page
-- Fetches **events** from 11 museums via structured APIs, and from ~27 more via AI-assisted HTML scraping
+- Fetches **events** from 12 museums via structured APIs, and from ~26 more via AI-assisted HTML scraping
 - **Enriches** events in the next 7 days with prices, images, and deep links from detail pages
 - Serves a **frontend** with i18n (DE/EN/FR), fuzzy search (Fuse.js), distance sorting, calendar downloads
 - Provides **RSS** (`/feed.xml`) and **ICS** (`/feed.ics`) feeds for the next 7 days
@@ -18,7 +18,7 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 ## Museums & event sources
 
-### Structured API (11 museums)
+### Structured API (12 museums)
 
 | Museum | Website | API type | Endpoint |
 |---|---|---|---|
@@ -33,8 +33,9 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 | Museum Angewandte Kunst | museumangewandtekunst.de | Structured HTML | `/de/kalender/` (mak-event-item elements) |
 | Institut für Stadtgeschichte | stadtgeschichte-ffm.de | RSS feed | `/rss/isg_rss.php` |
 | Dommuseum Frankfurt | dommuseum-frankfurt.de | TYPO3 Calendarize ICS | `/besuchen/kalender` (per-event ICS files) |
+| Junges Museum Frankfurt | junges-museum-frankfurt.de | Drupal Views HTML | `/kalender` (h2/h3 structure with dates) |
 
-### AI-scraped (~27 museums)
+### AI-scraped (~26 museums)
 
 These museums have a `website_url` but no structured API. Events are extracted by fetching their program page and using Workers AI (Llama 4 Scout 17B).
 
@@ -53,7 +54,6 @@ These museums have a `website_url` but no structured API. Events are extracted b
 | Haus der Stadtgeschichte (Offenbach) | haus-der-stadtgeschichte.de | |
 | Hindemith Kabinett | hindemith.info/de/kabinett | |
 | Ikonenmuseum Frankfurt | museumangewandtekunst.de | Managed by Museum Angewandte Kunst |
-| Junges Museum Frankfurt | junges-museum-frankfurt.de | |
 | Klingspor Museum (Offenbach) | klingspormuseum.de | |
 | MGGU – Museum Giersch | mggu.de | |
 | MMK (Museum, Tower, Zollamt) | mmk.art | Nuxt.js SPA, CMS has no events endpoint |
