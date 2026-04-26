@@ -174,13 +174,25 @@ export default {
       ]);
       const exhibitions = proxyImages(rawExhibitions);
       const events = proxyImages(rawEvents);
-      const [trExh, trEv] = locale !== "de"
-        ? await Promise.all([
-            translateFields(env, exhibitions, ["title"], locale),
-            translateFields(env, events, ["title", "description"], locale),
-          ])
-        : [exhibitions, events];
-      initialData = { date, exhibitions: trExh, events: trEv };
+      let finalExh: unknown[] = exhibitions;
+      let finalEv: unknown[] = events;
+      if (locale !== "de") {
+        const [trExh, trEv] = await Promise.all([
+          translateFields(env, exhibitions, ["title"], locale),
+          translateFields(env, events, ["title", "description"], locale),
+        ]);
+        finalExh = trExh.map((item, i) => {
+          const orig = exhibitions[i] as unknown as Record<string, unknown>;
+          const cur = item as unknown as Record<string, unknown>;
+          return cur.title !== orig.title ? { ...cur, translated: true } : cur;
+        });
+        finalEv = trEv.map((item, i) => {
+          const orig = events[i] as unknown as Record<string, unknown>;
+          const cur = item as unknown as Record<string, unknown>;
+          return (cur.title !== orig.title || cur.description !== orig.description) ? { ...cur, translated: true } : cur;
+        });
+      }
+      initialData = { date, exhibitions: finalExh, events: finalEv };
     } catch {}
 
     return new Response(renderPage(locale, initialData), {
