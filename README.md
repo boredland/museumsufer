@@ -8,7 +8,7 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 - Scrapes **~40 museums** from museumsufer.de (extracted from the embedded map config JSON)
 - Scrapes **current exhibitions** with date ranges from the central exhibitions listing page
-- Fetches **events** from 12 museums via structured APIs, and from ~26 more via AI-assisted HTML scraping
+- Fetches **events** from 16 museums via structured APIs, and from ~22 more via AI-assisted HTML scraping
 - **Enriches** events in the next 7 days with prices, images, and deep links from detail pages
 - Serves a **frontend** with i18n (DE/EN/FR), fuzzy search (Fuse.js), distance sorting, calendar downloads
 - Provides **RSS** (`/feed.xml`) and **ICS** (`/feed.ics`) feeds for the next 7 days
@@ -18,7 +18,7 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 ## Museums & event sources
 
-### Structured API (12 museums)
+### Structured API (16 museums)
 
 | Museum | Website | API type | Endpoint |
 |---|---|---|---|
@@ -34,22 +34,21 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 | Institut für Stadtgeschichte | stadtgeschichte-ffm.de | RSS feed | `/rss/isg_rss.php` |
 | Dommuseum Frankfurt | dommuseum-frankfurt.de | TYPO3 Calendarize ICS | `/besuchen/kalender` (per-event ICS files) |
 | Junges Museum Frankfurt | junges-museum-frankfurt.de | Drupal Views HTML | `/kalender` (h2/h3 structure with dates) |
+| Deutsches Ledermuseum (Offenbach) | ledermuseum.de | Kirby CMS HTML | `/programm` (li.quarter with div.date) |
+| Bibelhaus ErlebnisMuseum | bibelhaus-frankfurt.de | BEM HTML | `/de/programm` (bmBase--eventsItem elements) |
+| Frankfurter Kunstverein | fkv.de | WP HTML | `/current-events/` (article with DD.MM.YYYY subtitle) |
+| Deutsches Romantik-Museum + Goethe-Haus | deutsches-romantik-museum.de, goethehaus-frankfurt.de | FDH CMS (two-step) | `/programm/` → detail pages with c-event-item dates |
 
-### AI-scraped (~26 museums)
+### AI-scraped (~22 museums)
 
 These museums have a `website_url` but no structured API. Events are extracted by fetching their program page and using Workers AI (Llama 4 Scout 17B).
 
 | Museum | Website | Notes |
 |---|---|---|
 | Archäologisches Museum Frankfurt | archaeologisches-museum-frankfurt.de | Joomla, no feeds |
-| Bibelhaus ErlebnisMuseum | bibelhaus-frankfurt.de | |
 | Caricatura Museum Frankfurt | caricatura-museum.de | REDAXO CMS, no feeds |
-| Deutsches Ledermuseum (Offenbach) | ledermuseum.de | |
-| Deutsches Romantik-Museum | deutsches-romantik-museum.de | |
 | Eintracht Frankfurt Museum | museum.eintracht.de | Gatsby, RSS is news only |
 | Fotografie Forum Frankfurt | fffrankfurt.org | |
-| Frankfurter Goethe-Haus | goethehaus-frankfurt.de | |
-| Frankfurter Kunstverein | fkv.de | WP, but no event date fields exposed |
 | Geldmuseum der Deutschen Bundesbank | bundesbank.de/geldmuseum | RSS is institutional press only |
 | Haus der Stadtgeschichte (Offenbach) | haus-der-stadtgeschichte.de | |
 | Hindemith Kabinett | hindemith.info/de/kabinett | |

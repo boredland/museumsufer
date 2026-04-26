@@ -39,6 +39,14 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
       return fetchDommuseum(config.endpoint);
     case "junges-museum":
       return fetchJungesMuseum(config.endpoint);
+    case "ledermuseum":
+      return fetchLedermuseum(config.endpoint);
+    case "bibelhaus":
+      return fetchBibelhaus(config.endpoint);
+    case "fkv":
+      return fetchFkv(config.endpoint);
+    case "fdh":
+      return fetchFdh(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -695,6 +703,207 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
       image_url,
       price: priceMatch ? priceMatch[1].trim() : null,
     });
+  }
+
+  return events;
+}
+
+async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const currentYear = new Date().getFullYear();
+  const events: ApiEvent[] = [];
+  const itemRe = /<li class="quarter[^"]*">([\s\S]*?)<\/li>/g;
+  let match;
+
+  while ((match = itemRe.exec(html)) !== null) {
+    const block = match[1];
+    const titleMatch = block.match(/<h4>([^<]+)/);
+    const dateSpans = block.match(/<div class="date">([\s\S]*?)<\/div>/);
+    const linkMatch = block.match(/<a\s+href="([^"]+)"/);
+    const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
+    const subtitleMatch = block.match(/<p>([^<]+)/);
+    if (!titleMatch || !dateSpans) continue;
+
+    const dateText = stripHtml(dateSpans[1]);
+    const dayMonth = dateText.match(/(\d{1,2})\.\s*(\w+)/);
+    if (!dayMonth) continue;
+    const monthNum = GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
+    if (!monthNum) continue;
+    const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
+    if (date < today) continue;
+
+    const timeMatch = dateText.match(/(\d{1,2}:\d{2})/);
+
+    events.push({
+      title: titleMatch[1].trim(),
+      date,
+      time: nullIfMidnight(timeMatch ? timeMatch[1] : null),
+      end_time: null,
+      end_date: null,
+      description: subtitleMatch ? subtitleMatch[1].trim() : null,
+      detail_url: linkMatch ? normalizeUrl(linkMatch[1], "https://www.ledermuseum.de") : null,
+      image_url: imgMatch ? normalizeUrl(imgMatch[1], "https://www.ledermuseum.de") : null,
+      price: null,
+    });
+  }
+
+  return events;
+}
+
+async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const currentYear = new Date().getFullYear();
+  const events: ApiEvent[] = [];
+  const itemRe = /<li[^>]*class="bmBase--eventsItem"[^>]*>([\s\S]*?)<\/li>/g;
+  let match;
+
+  while ((match = itemRe.exec(html)) !== null) {
+    const block = match[1];
+    const titleMatch = block.match(/bmBase--eventsLabelTitle[^>]*>([^<]+)/);
+    const dateDay = block.match(/bmBase--eventsDateDay[^>]*>([^<]+)/);
+    const dateTime = block.match(/bmBase--eventsDateTime[^>]*>([^<]+)/);
+    const linkMatch = block.match(/<a[^>]+href="([^"]+)"/);
+    if (!titleMatch || !dateDay) continue;
+
+    const dayText = dateDay[1].trim();
+    const dayMonth = dayText.match(/(\d{1,2})\.\s*(\w+)/);
+    if (!dayMonth) continue;
+    const monthNum = GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
+    if (!monthNum) continue;
+    const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
+    if (date < today) continue;
+
+    let time: string | null = null;
+    if (dateTime) {
+      const tm = dateTime[1].match(/(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
+      if (tm) {
+        const raw = tm[1].replace(".", ":");
+        time = raw.includes(":") ? raw : raw + ":00";
+      }
+    }
+
+    events.push({
+      title: titleMatch[1].trim(),
+      date,
+      time: nullIfMidnight(time),
+      end_time: null,
+      end_date: null,
+      description: null,
+      detail_url: linkMatch ? normalizeUrl(linkMatch[1], "https://www.bibelhaus-frankfurt.de") : null,
+      image_url: null,
+      price: null,
+    });
+  }
+
+  return events;
+}
+
+async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const events: ApiEvent[] = [];
+  const itemRe = /<article[^>]*>([\s\S]*?)<\/article>/g;
+  let match;
+
+  while ((match = itemRe.exec(html)) !== null) {
+    const block = match[1];
+    const titleMatch = block.match(/archive-title[^>]*>([^<]+)/);
+    const subtitleMatch = block.match(/<p class="subtitle">([^<]+)/);
+    const linkMatch = block.match(/<a[^>]+href="([^"]+)"[^>]*class="tile-link"/);
+    const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
+    if (!titleMatch || !subtitleMatch) continue;
+
+    const dm = subtitleMatch[1].match(/(\d{2})\.(\d{2})\.(\d{4})/);
+    if (!dm) continue;
+    const date = `${dm[3]}-${dm[2]}-${dm[1]}`;
+    if (date < today) continue;
+
+    events.push({
+      title: titleMatch[1].trim(),
+      date,
+      time: null,
+      end_time: null,
+      end_date: null,
+      description: null,
+      detail_url: linkMatch ? normalizeUrl(linkMatch[1], "https://www.fkv.de") : null,
+      image_url: imgMatch ? normalizeUrl(imgMatch[1], "https://www.fkv.de") : null,
+      price: null,
+    });
+  }
+
+  return events;
+}
+
+async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
+  const baseUrl = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const events: ApiEvent[] = [];
+
+  const linkRe = /<a[^>]+class="o-program-link"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  const detailUrls: string[] = [];
+  let linkMatch;
+  while ((linkMatch = linkRe.exec(html)) !== null) {
+    const url = normalizeUrl(linkMatch[1], baseUrl);
+    if (url) detailUrls.push(url);
+  }
+
+  for (const url of detailUrls) {
+    try {
+      const detailRes = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+      if (!detailRes.ok) continue;
+      const detailHtml = await detailRes.text();
+
+      const eventRe = /c-event-item__date__title[^>]*>([^<]+)[\s\S]*?c-event-item__date__subtitle[^>]*>([^<]+)/g;
+      let eventMatch;
+      while ((eventMatch = eventRe.exec(detailHtml)) !== null) {
+        const dateStr = eventMatch[1].trim();
+        const timeStr = eventMatch[2].trim();
+
+        const dm = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+        if (!dm) continue;
+        const date = `${dm[3]}-${dm[2]}-${dm[1]}`;
+        if (date < today) continue;
+
+        const tm = timeStr.match(/(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
+        let time: string | null = null;
+        if (tm) {
+          const raw = tm[1].replace(".", ":");
+          time = raw.includes(":") ? raw : raw + ":00";
+        }
+
+        const titleMatch = detailHtml.match(/c-event-detail__title[^>]*>([^<]+)/);
+        const imgMatch = detailHtml.match(/c-event-detail__image[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/);
+
+        events.push({
+          title: titleMatch ? titleMatch[1].trim() : "",
+          date,
+          time: nullIfMidnight(time),
+          end_time: null,
+          end_date: null,
+          description: null,
+          detail_url: url,
+          image_url: imgMatch ? normalizeUrl(imgMatch[1], baseUrl) : null,
+          price: null,
+        });
+      }
+    } catch {
+      continue;
+    }
   }
 
   return events;
