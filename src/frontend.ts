@@ -1028,16 +1028,22 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       datePicker.max = toIso(maxDate);
     }
 
+    let loadSeq = 0;
+
     async function loadDay(date, btn) {
+      const seq = ++loadSeq;
       setActive(btn);
       dateLabel.textContent = formatDateFull(date);
       content.innerHTML = '<div class="loading">' + escHtml(T.loading) + '</div>';
       try {
         const langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
         const res = await fetch('/api/day?date=' + date + langParam);
+        if (seq !== loadSeq) return;
         const data = await res.json();
+        if (seq !== loadSeq) return;
         render(data);
       } catch (e) {
+        if (seq !== loadSeq) return;
         content.innerHTML = '<div class="empty">' + escHtml(T.loadError) + '</div>';
       }
     }

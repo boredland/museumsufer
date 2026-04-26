@@ -1,4 +1,4 @@
-import { dateOffset, toBerlinDate, toBerlinTime, todayIso } from "./date";
+import { dateOffset, inferYear, toBerlinDate, toBerlinTime, todayIso } from "./date";
 import type { MuseumApiConfig } from "./museum-apis";
 import {
   GERMAN_MONTHS,
@@ -544,7 +544,6 @@ async function fetchJungesMuseum(endpoint: string): Promise<ApiEvent[]> {
   const html = await res.text();
 
   const today = todayIso();
-  const currentYear = new Date().getFullYear();
   const events: ApiEvent[] = [];
 
   const entryRe = /<h2>([\s\S]*?)<\/h2>[\s\S]*?<h3>([\s\S]*?)<\/h3>[\s\S]*?(?:<p>([\s\S]*?)<\/p>)?/g;
@@ -563,7 +562,7 @@ async function fetchJungesMuseum(endpoint: string): Promise<ApiEvent[]> {
     const monthNum = GERMAN_MONTHS[monthName.toLowerCase()];
     if (!monthNum) continue;
 
-    const date = `${currentYear}-${monthNum}-${day.padStart(2, "0")}`;
+    const date = `${inferYear(monthNum, day)}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < today) continue;
 
     const timeMatch = dateInfo.match(/(\d{1,2}(?:[.:]\d{2})?)\s*[-–]\s*(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
@@ -601,7 +600,6 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
   if (!res.ok) return [];
   const html = await res.text();
 
-  const currentYear = new Date().getFullYear();
   const events: ApiEvent[] = [];
   const articleRe = /<article[^>]*class="[^"]*mak-event-item[^"]*"[^>]*>([\s\S]*?)<\/article>/g;
   let match;
@@ -622,7 +620,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     const monthNum = GERMAN_MONTHS_SHORT[monthName.toLowerCase().slice(0, 3)];
     if (!monthNum) continue;
 
-    const date = `${currentYear}-${monthNum}-${day.padStart(2, "0")}`;
+    const date = `${inferYear(monthNum, day)}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
     const timeRangeMatch = heading.match(
@@ -720,7 +718,6 @@ async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
   const html = await res.text();
 
   const today = todayIso();
-  const currentYear = new Date().getFullYear();
   const events: ApiEvent[] = [];
   const itemRe = /<li class="quarter[^"]*">([\s\S]*?)<\/li>/g;
   let match;
@@ -740,7 +737,7 @@ async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
     const monthNum =
       GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
     if (!monthNum) continue;
-    const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
+    const date = `${inferYear(monthNum, dayMonth[1])}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
     if (date < today) continue;
 
     const timeMatch = dateText.match(/(\d{1,2}:\d{2})/);
@@ -767,7 +764,6 @@ async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
   const html = await res.text();
 
   const today = todayIso();
-  const currentYear = new Date().getFullYear();
   const events: ApiEvent[] = [];
   const itemRe = /<li[^>]*class="bmBase--eventsItem"[^>]*>([\s\S]*?)<\/li>/g;
   let match;
@@ -786,7 +782,7 @@ async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
     const monthNum =
       GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
     if (!monthNum) continue;
-    const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
+    const date = `${inferYear(monthNum, dayMonth[1])}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
     if (date < today) continue;
 
     let time: string | null = null;
