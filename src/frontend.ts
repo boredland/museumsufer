@@ -453,7 +453,6 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .card-translated {
       font-size: 0.5625rem;
       color: var(--text-tertiary);
-      opacity: 0.7;
       display: inline-flex;
       align-items: center;
       gap: 0.1875rem;
