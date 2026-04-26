@@ -27,6 +27,21 @@ export function dateOffset(days: number): string {
   return berlinNow().add(days, "day").format("YYYY-MM-DD");
 }
 
+export function inferYear(month: string, day: string): number {
+  const now = berlinNow();
+  const currentYear = now.year();
+  const currentMonth = now.month() + 1;
+  const m = parseInt(month, 10);
+  const d = parseInt(day, 10);
+  if (currentMonth >= 11 && m <= 2) return currentYear + 1;
+  const candidate = `${currentYear}-${month}-${day.padStart(2, "0")}`;
+  if (candidate < todayIso()) {
+    const nextYear = `${currentYear + 1}-${month}-${day.padStart(2, "0")}`;
+    if (nextYear >= todayIso()) return currentYear + 1;
+  }
+  return currentYear;
+}
+
 export function berlinHourMinute(): { hour: number; minute: number } {
   const now = berlinNow();
   return { hour: now.hour(), minute: now.minute() };
