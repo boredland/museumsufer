@@ -69,6 +69,9 @@ const de: Translations = {
   addToCalendar: "Zum Kalender hinzufügen",
   markVisited: "Als besucht markieren",
   unmarkVisited: "Markierung entfernen",
+  search: "Suchen",
+  searchPlaceholder: "Museum, Ausstellung oder Veranstaltung suchen...",
+  noResults: "Keine Ergebnisse.",
 };
 
 const en: Translations = {
@@ -108,6 +111,9 @@ const en: Translations = {
   addToCalendar: "Add to calendar",
   markVisited: "Mark as visited",
   unmarkVisited: "Remove visited mark",
+  search: "Search",
+  searchPlaceholder: "Search museums, exhibitions or events...",
+  noResults: "No results.",
 };
 
 const fr: Translations = {
@@ -147,6 +153,9 @@ const fr: Translations = {
   addToCalendar: "Ajouter au calendrier",
   markVisited: "Marquer comme visite",
   unmarkVisited: "Retirer le marquage",
+  search: "Rechercher",
+  searchPlaceholder: "Rechercher musees, expositions ou evenements...",
+  noResults: "Aucun resultat.",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
