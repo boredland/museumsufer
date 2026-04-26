@@ -110,7 +110,7 @@ export async function handleFeeds(request: Request, env: Env): Promise<Response 
 
 export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
   const { results } = await env.DB.prepare(
-    `SELECT e.*, m.name as museum_name, m.slug as museum_slug, m.website_url as museum_website_url
+    `SELECT e.*, m.name as museum_name, m.slug as museum_slug
      FROM exhibitions e
      JOIN museums m ON e.museum_id = m.id
      WHERE (e.start_date IS NULL OR e.start_date <= ?)
@@ -124,7 +124,7 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
 
 export async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
   const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.website_url as museum_website_url
+    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date = ?
@@ -165,7 +165,7 @@ async function getUpcomingEvents(env: Env, days: number): Promise<(Event & { mus
   const today = todayIso();
   const end = dateOffset(days);
   const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.website_url as museum_website_url
+    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date >= ? AND ev.date <= ?
