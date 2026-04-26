@@ -726,13 +726,13 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     function distanceBadge(slug) {
       const min = walkMin(slug);
       if (min === null) return '';
-      return '<span class="card-distance">' + min + ' ' + T.minWalk + '</span>';
+      return '<span class="card-distance" title="~' + min + ' ' + T.minWalk + ' ' + T.nearMe + '">' + min + ' ' + T.minWalk + '</span>';
     }
 
     function navButton(slug) {
       if (!MUSEUM_GEO[slug]) return '';
       const m = MUSEUM_GEO[slug];
-      return '<a class="card-ical" href="https://www.google.com/maps/dir/?api=1&destination=' + m.lat + ',' + m.lng + '&travelmode=walking" target="_blank" rel="noopener" aria-label="Navigate">'
+      return '<a class="card-ical" href="https://www.google.com/maps/dir/?api=1&destination=' + m.lat + ',' + m.lng + '&travelmode=walking" target="_blank" rel="noopener" aria-label="' + escAttr(T.navigate) + '" title="' + escAttr(T.navigate) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z" stroke="currentColor" stroke-width="1.5"/></svg>'
         + '</a>';
     }
@@ -919,8 +919,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       let endingTag = '';
       if (ex.end_date) {
         const daysLeft = Math.ceil((new Date(ex.end_date + 'T00:00:00') - new Date(toIso(today()) + 'T00:00:00')) / 86400000);
-        if (daysLeft <= 3) endingTag = '<span class="card-ending-soon">' + escHtml(T.lastDays) + '</span>';
-        else if (daysLeft <= 14) endingTag = '<span class="card-ending-soon">' + escHtml(T.endingSoon) + '</span>';
+        if (daysLeft <= 3) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + (daysLeft === 1 ? 'Tag' : 'Tage') + '">' + escHtml(T.lastDays) + '</span>';
+        else if (daysLeft <= 14) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + (daysLeft === 1 ? 'Tag' : 'Tage') + '">' + escHtml(T.endingSoon) + '</span>';
       }
 
       const desc = ex.description
@@ -929,10 +929,10 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       const v = isVisited(ex.id);
       const visitedBtn = v
-        ? '<button class="card-visited-btn is-visited" aria-pressed="true" aria-label="' + escAttr(T.visited) + '" onclick="onToggleVisited(' + ex.id + ')">'
+        ? '<button class="card-visited-btn is-visited" aria-pressed="true" aria-label="' + escAttr(T.unmarkVisited) + '" title="' + escAttr(T.unmarkVisited) + '" onclick="onToggleVisited(' + ex.id + ')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
           + '</button>'
-        : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.visited) + '" onclick="onToggleVisited(' + ex.id + ')">'
+        : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.markVisited) + '" title="' + escAttr(T.markVisited) + '" onclick="onToggleVisited(' + ex.id + ')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           + escHtml(T.visited) + '</button>';
 
@@ -972,7 +972,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         : titleText;
 
       const calBtn = '<a class="card-ical" href="/api/event/' + ev.id + '.ics" '
-        + 'aria-label="' + escAttr(T.calendarAria) + '">'
+        + 'aria-label="' + escAttr(T.addToCalendar) + '" title="' + escAttr(T.addToCalendar) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
         + '</a>';
 

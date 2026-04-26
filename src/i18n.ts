@@ -65,6 +65,10 @@ const de: Translations = {
   copyPrompt: "Kopieren",
   nearMe: "In der Nähe",
   minWalk: "min",
+  navigate: "Navigation starten",
+  addToCalendar: "Zum Kalender hinzufügen",
+  markVisited: "Als besucht markieren",
+  unmarkVisited: "Markierung entfernen",
 };
 
 const en: Translations = {
@@ -100,6 +104,10 @@ const en: Translations = {
   copyPrompt: "Copy",
   nearMe: "Near me",
   minWalk: "min",
+  navigate: "Get directions",
+  addToCalendar: "Add to calendar",
+  markVisited: "Mark as visited",
+  unmarkVisited: "Remove visited mark",
 };
 
 const fr: Translations = {
@@ -135,6 +143,10 @@ const fr: Translations = {
   copyPrompt: "Copier",
   nearMe: "Pres de moi",
   minWalk: "min",
+  navigate: "Itineraire",
+  addToCalendar: "Ajouter au calendrier",
+  markVisited: "Marquer comme visite",
+  unmarkVisited: "Retirer le marquage",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
