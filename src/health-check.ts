@@ -74,6 +74,10 @@ const CHECKS: Array<{
           return body.includes("event-date-day")
             ? null
             : "Missing event-date-day elements";
+        case "junges-museum":
+          return body.includes("view-calendar") && body.includes("<h2>")
+            ? null
+            : "Missing Drupal calendar view structure";
         default:
           return null;
       }
