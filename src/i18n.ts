@@ -63,6 +63,8 @@ const de: Translations = {
   alreadyVisited: "Bereits besucht",
   details: "Details",
   copyPrompt: "Kopieren",
+  nearMe: "In der Nahe",
+  minWalk: "min",
 };
 
 const en: Translations = {
@@ -96,6 +98,8 @@ const en: Translations = {
   alreadyVisited: "Already visited",
   details: "Details",
   copyPrompt: "Copy",
+  nearMe: "Near me",
+  minWalk: "min",
 };
 
 const fr: Translations = {
@@ -129,6 +133,8 @@ const fr: Translations = {
   alreadyVisited: "Deja visite",
   details: "Details",
   copyPrompt: "Copier",
+  nearMe: "Pres de moi",
+  minWalk: "min",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
