@@ -43,8 +43,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   <meta name="twitter:title" content="${escHtml(tr.pageTitle)}">
   <meta name="twitter:description" content="${escHtml(tr.metaLong)}">
   <meta name="twitter:image" content="https://museumsufer.app/og-image.svg">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+  <link rel="icon" href="/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#f5f0eb">

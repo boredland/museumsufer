@@ -13,6 +13,10 @@
       "database_id": "46e70d95-264e-4a5f-bf8e-51f925e47658"
     }
   ],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
   "ai": {
     "binding": "AI"
   },
