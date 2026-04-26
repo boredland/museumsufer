@@ -941,6 +941,33 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return '<span class="card-translated" title="Translated by DeepL"><svg viewBox="0 0 24 24" fill="none"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="currentColor"/></svg>DeepL</span>';
     }
 
+    function buildCalendarUrl(ev) {
+      const date = ev.date.replace(/-/g, '');
+      let startDt, endDt;
+      if (ev.time) {
+        startDt = date + 'T' + ev.time.replace(':', '') + '00';
+        if (ev.end_time) {
+          const endDate = ev.end_date ? ev.end_date.replace(/-/g, '') : date;
+          endDt = endDate + 'T' + ev.end_time.replace(':', '') + '00';
+        } else {
+          const h = (parseInt(ev.time.split(':')[0]) + 1) % 24;
+          endDt = date + 'T' + h.toString().padStart(2, '0') + ev.time.split(':')[1] + '00';
+        }
+      } else {
+        startDt = date;
+        endDt = date;
+      }
+      const params = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: ev.title,
+        dates: startDt + '/' + endDt,
+        location: ev.museum_name || '',
+        details: (ev.description || '') + (ev.detail_url ? '\\n' + ev.detail_url : ''),
+      });
+      if (ev.time) params.set('ctz', 'Europe/Berlin');
+      return 'https://calendar.google.com/calendar/render?' + params.toString();
+    }
+
     function distanceBadge(slug) {
       const min = walkMin(slug);
       if (min === null) return '';
@@ -1210,7 +1237,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         ? '<a href="' + escHtml(linkUrl) + '" target="_blank" rel="noopener">' + titleText + '</a>'
         : titleText;
 
-      const calBtn = '<a class="card-ical" href="/api/event/' + ev.id + '.ics" '
+      const calUrl = buildCalendarUrl(ev);
+      const calBtn = '<a class="card-ical" href="' + escAttr(calUrl) + '" target="_blank" rel="noopener" '
         + 'aria-label="' + escAttr(T.addToCalendar) + '" title="' + escAttr(T.addToCalendar) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
         + '</a>';
