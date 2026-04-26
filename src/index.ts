@@ -138,16 +138,29 @@ export default {
     if (url.pathname === "/manifest.json") {
       return new Response(
         JSON.stringify({
+          id: "/",
           name: "Museumsufer Frankfurt",
           short_name: "Museumsufer",
+          description: "Ausstellungen & Veranstaltungen am Frankfurter Museumsufer",
           start_url: "/",
           display: "standalone",
           background_color: "#f5f0eb",
           theme_color: "#f5f0eb",
           icons: [
             {
-              src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>",
+              src: "/icon.svg",
               sizes: "any",
+              type: "image/svg+xml",
+              purpose: "any",
+            },
+            {
+              src: "/icon-192.svg",
+              sizes: "192x192",
+              type: "image/svg+xml",
+            },
+            {
+              src: "/icon-512.svg",
+              sizes: "512x512",
               type: "image/svg+xml",
             },
           ],
@@ -155,6 +168,19 @@ export default {
         {
           headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
         },
+      );
+    }
+
+    if (url.pathname === "/icon.svg" || url.pathname === "/icon-192.svg" || url.pathname === "/icon-512.svg") {
+      const size = url.pathname.includes("512") ? 512 : url.pathname.includes("192") ? 192 : 100;
+      const fontSize = Math.round(size * 0.8);
+      return new Response(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+  <rect width="${size}" height="${size}" rx="${Math.round(size * 0.15)}" fill="#f5f0eb"/>
+  <rect width="${size}" height="${Math.round(size * 0.04)}" fill="#b45309"/>
+  <text x="${size / 2}" y="${size * 0.65}" text-anchor="middle" font-size="${fontSize}">🏛️</text>
+</svg>`,
+        { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } },
       );
     }
 
