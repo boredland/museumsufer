@@ -1,5 +1,6 @@
 import { type Locale, SUPPORTED_LOCALES, getTranslations, dateLocale } from "./i18n";
 import { escHtml as escHtmlShared } from "./shared";
+import { MUSEUM_LOCATIONS } from "./museum-geo";
 
 export interface InitialData {
   date: string;
@@ -13,6 +14,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
+  const geoJson = JSON.stringify(MUSEUM_LOCATIONS);
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -403,6 +405,16 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .visited-section .card { opacity: 0.6; }
     .visited-section .card:hover { opacity: 1; }
 
+    .card-distance {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
     .card-ending-soon {
       font-size: 0.6875rem;
       font-weight: 500;
@@ -661,6 +673,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <input type="date" id="date-picker" aria-label="${escHtml(tr.pickDate)}" min="" max="">
       </label>
+      <button id="btn-near" aria-pressed="false">${escHtml(tr.nearMe)}</button>
     </nav>
 
     <p class="date-label" id="date-label" aria-live="polite"></p>
@@ -682,6 +695,56 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     const LOCALES = ${localesJson};
     const CURRENT_LANG = '${locale}';
     const __INITIAL_DATA__ = ${initialDataJson};
+    const MUSEUM_GEO = ${geoJson};
+    const RIVER_LAT = 50.107;
+    const BRIDGE_PENALTY = 0.8;
+
+    let userPos = null;
+    let sortByDistance = false;
+
+    function haversine(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function walkKm(slug) {
+      if (!userPos || !MUSEUM_GEO[slug]) return null;
+      const m = MUSEUM_GEO[slug];
+      let km = haversine(userPos.lat, userPos.lng, m.lat, m.lng);
+      if ((userPos.lat < RIVER_LAT) !== (m.lat < RIVER_LAT)) km += BRIDGE_PENALTY;
+      return km;
+    }
+
+    function walkMin(slug) {
+      const km = walkKm(slug);
+      return km !== null ? Math.round(km / 5 * 60) : null;
+    }
+
+    function distanceBadge(slug) {
+      const min = walkMin(slug);
+      if (min === null) return '';
+      return '<span class="card-distance">' + min + ' ' + T.minWalk + '</span>';
+    }
+
+    function navButton(slug) {
+      if (!MUSEUM_GEO[slug]) return '';
+      const m = MUSEUM_GEO[slug];
+      return '<a class="card-ical" href="https://www.google.com/maps/dir/?api=1&destination=' + m.lat + ',' + m.lng + '&travelmode=walking" target="_blank" rel="noopener" aria-label="Navigate">'
+        + '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z" stroke="currentColor" stroke-width="1.5"/></svg>'
+        + '</a>';
+    }
+
+    function sortItemsByDistance(items) {
+      if (!userPos || !sortByDistance) return items;
+      return [...items].sort((a, b) => {
+        const da = walkKm(a.museum_slug) ?? 999;
+        const db = walkKm(b.museum_slug) ?? 999;
+        return da - db;
+      });
+    }
 
     let lastRenderData = null;
 
@@ -771,11 +834,12 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       html += '<div class="section">';
       html += sectionHeader(T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z');
-      if (data.events.length === 0) {
+      const sortedEvents = sortItemsByDistance(data.events);
+      if (sortedEvents.length === 0) {
         html += '<div class="empty">' + escHtml(T.noEvents) + '</div>';
       } else {
         html += '<div class="card-list">';
-        for (const ev of data.events) {
+        for (const ev of sortedEvents) {
           html += renderEvent(ev);
         }
         html += '</div>';
@@ -784,11 +848,12 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       html += '<div class="section">';
       html += sectionHeader(T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12');
-      if (data.exhibitions.length === 0) {
+      const sortedExhibitions = sortItemsByDistance(data.exhibitions);
+      if (sortedExhibitions.length === 0) {
         html += '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
         html += '<div class="card-list">';
-        html += renderExhibitionsGrouped(data.exhibitions);
+        html += renderExhibitionsGrouped(sortedExhibitions);
         html += '</div>';
       }
       html += '</div>';
@@ -878,6 +943,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         + '<div class="card-meta">'
         + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
         + endingTag
+        + distanceBadge(ex.museum_slug)
+        + navButton(ex.museum_slug)
         + visitedBtn
         + '</div>'
         + desc
@@ -909,7 +976,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
         + escHtml(T.calendar) + '</a>';
 
-      const meta = [timeTag, priceTag, calBtn].filter(Boolean).join(' ');
+      const meta = [timeTag, priceTag, distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
 
       const desc = ev.description
         ? '<details><summary>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
@@ -945,11 +1012,42 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return div.innerHTML;
     }
 
+    const btnNear = document.getElementById('btn-near');
+
     btnToday.addEventListener('click', () => { datePicker.value = ''; loadDay(toIso(today()), btnToday); });
     btnTomorrow.addEventListener('click', () => { datePicker.value = ''; loadDay(toIso(tomorrow()), btnTomorrow); });
     btnWeekend.addEventListener('click', () => { datePicker.value = ''; loadDay(toIso(nextDay(6)), btnWeekend); });
     btnSunday.addEventListener('click', () => { datePicker.value = ''; loadDay(toIso(nextDay(0)), btnSunday); });
     datePicker.addEventListener('change', (e) => { loadDay(e.target.value, null); });
+
+    btnNear.addEventListener('click', () => {
+      if (sortByDistance) {
+        sortByDistance = false;
+        btnNear.classList.remove('active');
+        btnNear.setAttribute('aria-pressed', 'false');
+        if (lastRenderData) render(lastRenderData);
+        return;
+      }
+      if (userPos) {
+        sortByDistance = true;
+        btnNear.classList.add('active');
+        btnNear.setAttribute('aria-pressed', 'true');
+        if (lastRenderData) render(lastRenderData);
+      } else if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            sortByDistance = true;
+            btnNear.classList.add('active');
+            btnNear.setAttribute('aria-pressed', 'true');
+            if (lastRenderData) render(lastRenderData);
+          },
+          () => { btnNear.style.display = 'none'; }
+        );
+      }
+    });
+
+    if (!('geolocation' in navigator)) btnNear.style.display = 'none';
 
     updateNavVisibility();
     if (__INITIAL_DATA__) {
