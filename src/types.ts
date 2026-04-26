@@ -24,6 +24,8 @@ export interface Exhibition {
   image_url: string | null;
   detail_url: string | null;
   museum_name?: string;
+  museum_slug?: string;
+  museum_website_url?: string | null;
 }
 
 export interface Event {
@@ -40,4 +42,6 @@ export interface Event {
   image_url: string | null;
   price: string | null;
   museum_name?: string;
+  museum_slug?: string;
+  museum_website_url?: string | null;
 }
