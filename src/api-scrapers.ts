@@ -641,6 +641,19 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
 
     const subMatch = block.match(/class="mak-event-subheading">([^<]+)/);
     const linkMatch = block.match(/href="(\/de\/veranstaltungen\/[^"]+)"/);
+    const accordionMatch = block.match(/class="mak-accordion-content[^"]*"[^>]*>([\s\S]*?)$/);
+    const accordionText = accordionMatch ? truncateHtml(accordionMatch[1]) : null;
+
+    const sub = subMatch ? subMatch[1].trim() : null;
+    const description = accordionText ? (sub ? `${sub} – ${accordionText}` : accordionText) : sub;
+
+    let price: string | null = null;
+    if (accordionText) {
+      const priceMatch = accordionText.match(
+        /(?:Im Eintrittspreis inbegriffen|Eintritt frei|kostenlos|kostenfrei|\d+[\s,.]?\d*\s*€)/i,
+      );
+      if (priceMatch) price = priceMatch[0];
+    }
 
     events.push({
       title: title || heading,
@@ -648,10 +661,10 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
       time,
       end_time: endTime,
       end_date: null,
-      description: subMatch ? subMatch[1].trim() : null,
+      description,
       detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
       image_url: null,
-      price: null,
+      price,
     });
   }
 
