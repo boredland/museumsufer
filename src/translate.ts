@@ -66,7 +66,7 @@ async function getUntranslatedTexts(env: Env, targetLang: string): Promise<Array
   for (const row of allTexts) {
     if (!row.text || row.text.length < 3 || seen.has(row.text)) continue;
     seen.add(row.text);
-    const hash = await sha256(row.text);
+    const hash = fnv1a(row.text);
     candidates.push({ hash, text: row.text });
   }
 
@@ -117,7 +117,7 @@ export async function getTranslation(env: Env, text: string | null, targetLang: 
   if (!text) return null;
   if (targetLang === "de") return text;
 
-  const hash = await sha256(text);
+  const hash = fnv1a(text);
   const row = await env.DB.prepare("SELECT translated_text FROM translations WHERE source_hash = ? AND target_lang = ?")
     .bind(hash, targetLang)
     .first<{ translated_text: string }>();
@@ -136,7 +136,7 @@ export async function translateFields<T>(env: Env, items: T[], fields: string[],
     for (const field of fields) {
       const text = rec[idx][field] as string | null;
       if (!text) continue;
-      const hash = await sha256(text);
+      const hash = fnv1a(text);
       hashes.set(`${field}-${idx}`, hash);
       toFetch.add(hash);
     }
@@ -176,8 +176,11 @@ export async function translateFields<T>(env: Env, items: T[], fields: string[],
   });
 }
 
-async function sha256(text: string): Promise<string> {
-  const data = new TextEncoder().encode(text);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(hashBuffer)].map((b) => b.toString(16).padStart(2, "0")).join("");
+function fnv1a(text: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i++) {
+    hash ^= text.charCodeAt(i);
+    hash = (hash * 0x01000193) >>> 0;
+  }
+  return hash.toString(16).padStart(8, "0");
 }

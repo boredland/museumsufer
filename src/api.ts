@@ -8,8 +8,6 @@ const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-rev
 const CACHE_MUSEUMS = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
 const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 
-const BASE_URL = APP_URL;
-
 function proxyImageUrl(url: string | null): string | null {
   if (!url?.startsWith("https://")) return url;
   return `/img/${encodeURIComponent(url)}`;
@@ -182,7 +180,7 @@ function buildRss(events: (Event & { museum_name: string })[]): string {
   const items = events.map((ev) => {
     const timeStr = ev.time ? `, ${ev.time} Uhr` : "";
     const desc = ev.description ? escHtml(ev.description) : "";
-    const link = ev.detail_url || ev.url || BASE_URL;
+    const link = ev.detail_url || ev.url || APP_URL;
     return `    <item>
       <title>${escHtml(ev.title)} — ${escHtml(ev.museum_name)}</title>
       <link>${escHtml(link)}</link>
@@ -196,10 +194,10 @@ function buildRss(events: (Event & { museum_name: string })[]): string {
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Museumsufer Frankfurt</title>
-    <link>${BASE_URL}</link>
+    <link>${APP_URL}</link>
     <description>Veranstaltungen am Frankfurter Museumsufer</description>
     <language>de</language>
-    <atom:link href="${BASE_URL}/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${APP_URL}/feed.xml" rel="self" type="application/rss+xml"/>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items.join("\n")}
   </channel>

@@ -122,9 +122,8 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
     if (ev.dateEnd) {
       const end = new Date(ev.dateEnd * 1000);
       const ed = toBerlinDate(end);
-      endTime = toBerlinTime(end);
+      endTime = nullIfMidnight(toBerlinTime(end));
       if (ed !== date) endDate = ed;
-      if (endTime === "00:00") endTime = null;
     }
 
     let price: string | null = null;
@@ -195,7 +194,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
       {
         title: ev.headline.trim(),
         date,
-        time: time !== "00:00" ? time : null,
+        time: nullIfMidnight(time),
         end_time: endTime,
         end_date: null,
         description: truncateHtml(ev.copy || ev.subline || ""),
@@ -253,7 +252,7 @@ async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
       if (ev.end) {
         const et = ev.end.slice(11, 16);
         const ed = ev.end.slice(0, 10);
-        if (et !== "00:00") endTime = et;
+        endTime = nullIfMidnight(et);
         if (ed !== date) endDate = ed;
       }
 
@@ -261,7 +260,7 @@ async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
         {
           title: ev.title || ev.description || "",
           date,
-          time: time !== "00:00" ? time : null,
+          time: nullIfMidnight(time),
           end_time: endTime,
           end_date: endDate,
           description: ev.description?.slice(0, 300) || null,
@@ -314,7 +313,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
     if (acf.event_stop_time) {
       const ed = acf.event_stop_time.slice(0, 10);
       const et = acf.event_stop_time.slice(11, 16);
-      if (et !== "00:00") endTime = et;
+      endTime = nullIfMidnight(et);
       if (ed !== date) endDate = ed;
     }
 
@@ -322,7 +321,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
       {
         title,
         date,
-        time: time !== "00:00" ? time : null,
+        time: nullIfMidnight(time),
         end_time: endTime,
         end_date: endDate,
         description: truncateHtml(acf.event_decription || ""),
@@ -523,7 +522,7 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
       events.push({
         title: summary,
         date,
-        time: time !== "00:00" ? time : null,
+        time: nullIfMidnight(time),
         end_time: endTime !== "00:00" ? endTime : null,
         end_date: endDate,
         description: desc ? stripHtml(desc).slice(0, 300) : null,

@@ -1,10 +1,8 @@
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { getApiConfig } from "./museum-apis";
-import { MUSEUMSUFER_DE, normalizeUrl } from "./shared";
+import { normalizeUrl } from "./shared";
 import type { Env } from "./types";
-
-const _BASE_URL = MUSEUMSUFER_DE;
 
 const EVENT_PAGE_PATHS = [
   "/programm",
