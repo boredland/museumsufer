@@ -63,7 +63,7 @@ const de: Translations = {
   alreadyVisited: "Bereits besucht",
   details: "Details",
   copyPrompt: "Kopieren",
-  nearMe: "In der Nahe",
+  nearMe: "In der Nähe",
   minWalk: "min",
 };
 
