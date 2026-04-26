@@ -1,7 +1,7 @@
-import { Env, Exhibition, Event } from "./types";
-import { todayIso, dateOffset, berlinHourMinute } from "./date";
-import { escHtml, APP_URL } from "./shared";
+import { berlinHourMinute, dateOffset, todayIso } from "./date";
+import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
+import type { Env, Event, Exhibition } from "./types";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -11,7 +11,7 @@ const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate
 const BASE_URL = APP_URL;
 
 function proxyImageUrl(url: string | null): string | null {
-  if (!url || !url.startsWith("https://")) return url;
+  if (!url?.startsWith("https://")) return url;
   return `/img/${encodeURIComponent(url)}`;
 }
 
@@ -58,19 +58,25 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
       translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], lang),
       translateFields(env, events, ["title", "description"] as (keyof Event)[], lang),
     ]);
-    return json({
-      date,
-      exhibitions: markTranslated(exhibitions, trExh, lang),
-      events: markTranslated(events, trEv, lang),
-    }, 200, CACHE_EVENTS);
+    return json(
+      {
+        date,
+        exhibitions: markTranslated(exhibitions, trExh, lang),
+        events: markTranslated(events, trEv, lang),
+      },
+      200,
+      CACHE_EVENTS,
+    );
   }
 
   const eventIcsMatch = path.match(/^\/api\/event\/(\d+)\.ics$/);
   if (eventIcsMatch) {
-    const id = parseInt(eventIcsMatch[1]);
+    const id = parseInt(eventIcsMatch[1], 10);
     const ev = await env.DB.prepare(
-      "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?"
-    ).bind(id).first<Event & { museum_name: string }>();
+      "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?",
+    )
+      .bind(id)
+      .first<Event & { museum_name: string }>();
     if (!ev) return json({ error: "not found" }, 404);
     return new Response(buildIcs([ev]), {
       headers: {
@@ -111,7 +117,7 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
      JOIN museums m ON e.museum_id = m.id
      WHERE (e.start_date IS NULL OR e.start_date <= ?)
        AND (e.end_date IS NULL OR e.end_date >= ?)
-     ORDER BY m.slug, e.title`
+     ORDER BY m.slug, e.title`,
   )
     .bind(date, date)
     .all<Exhibition>();
@@ -124,7 +130,7 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date = ?
-     ORDER BY ev.time, m.name`
+     ORDER BY ev.time, m.name`,
   )
     .bind(date)
     .all<Event>();
@@ -165,7 +171,7 @@ async function getUpcomingEvents(env: Env, days: number): Promise<(Event & { mus
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date >= ? AND ev.date <= ?
-     ORDER BY ev.date, ev.time, m.name`
+     ORDER BY ev.date, ev.time, m.name`,
   )
     .bind(today, end)
     .all<Event & { museum_name: string }>();
@@ -181,8 +187,8 @@ function buildRss(events: (Event & { museum_name: string })[]): string {
       <title>${escHtml(ev.title)} — ${escHtml(ev.museum_name)}</title>
       <link>${escHtml(link)}</link>
       <guid isPermaLink="false">museumsufer-${ev.id}</guid>
-      <pubDate>${new Date(ev.date + "T" + (ev.time || "12:00") + ":00").toUTCString()}</pubDate>
-      <description>${escHtml(ev.date + timeStr + ". " + ev.museum_name + ". " + desc)}</description>
+      <pubDate>${new Date(`${ev.date}T${ev.time || "12:00"}:00`).toUTCString()}</pubDate>
+      <description>${escHtml(`${ev.date + timeStr}. ${ev.museum_name}. ${desc}`)}</description>
     </item>`;
   });
 
@@ -212,7 +218,7 @@ function buildIcs(events: (Event & { museum_name: string })[]): string {
         const endDtDate = ev.end_date ? ev.end_date.replace(/-/g, "") : dtDate;
         dtEnd = `DTEND;TZID=Europe/Berlin:${endDtDate}T${ev.end_time.replace(":", "")}00`;
       } else {
-        const h = (parseInt(ev.time.split(":")[0]) + 1) % 24;
+        const h = (parseInt(ev.time.split(":")[0], 10) + 1) % 24;
         dtEnd = `DTEND;TZID=Europe/Berlin:${dtDate}T${h.toString().padStart(2, "0")}${ev.time.split(":")[1]}00`;
       }
     } else {
@@ -242,7 +248,7 @@ function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {
     const orig = originals[i] as Record<string, unknown>;
     const cur = item as Record<string, unknown>;
     const changed = Object.keys(cur).some((k) => cur[k] !== orig[k]);
-    return changed ? { ...item, translated: true } as T : item;
+    return changed ? ({ ...item, translated: true } as T) : item;
   });
 }
 

@@ -1,6 +1,14 @@
-import { MuseumApiConfig } from "./museum-apis";
-import { toBerlinDate, toBerlinTime, todayIso, dateOffset } from "./date";
-import { stripHtml, truncateHtml, nullIfMidnight, normalizeUrl, USER_AGENT, GERMAN_MONTHS_SHORT, GERMAN_MONTHS } from "./shared";
+import { dateOffset, toBerlinDate, toBerlinTime, todayIso } from "./date";
+import type { MuseumApiConfig } from "./museum-apis";
+import {
+  GERMAN_MONTHS,
+  GERMAN_MONTHS_SHORT,
+  normalizeUrl,
+  nullIfMidnight,
+  stripHtml,
+  truncateHtml,
+  USER_AGENT,
+} from "./shared";
 
 export interface ApiEvent {
   title: string;
@@ -59,24 +67,26 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
   const url = `${endpoint}?per_page=50&start_date=${today}`;
   const res = await fetch(url);
   if (!res.ok) return [];
-  const data = await res.json() as { events?: TribeEvent[] };
+  const data = (await res.json()) as { events?: TribeEvent[] };
   if (!data.events) return [];
 
-  return data.events.map((ev): ApiEvent => {
-    const endDate = ev.end_date?.slice(0, 10) || null;
-    const startDate = ev.start_date?.slice(0, 10) || "";
-    return {
-      title: stripHtml(ev.title || ""),
-      date: startDate,
-      time: ev.start_date?.slice(11, 16) || null,
-      end_time: ev.end_date?.slice(11, 16) || null,
-      end_date: endDate !== startDate ? endDate : null,
-      description: truncateHtml(ev.excerpt || ev.description || ""),
-      detail_url: ev.url || null,
-      image_url: ev.image?.url || null,
-      price: ev.cost || null,
-    };
-  }).filter(ev => ev.title && ev.date);
+  return data.events
+    .map((ev): ApiEvent => {
+      const endDate = ev.end_date?.slice(0, 10) || null;
+      const startDate = ev.start_date?.slice(0, 10) || "";
+      return {
+        title: stripHtml(ev.title || ""),
+        date: startDate,
+        time: ev.start_date?.slice(11, 16) || null,
+        end_time: ev.end_date?.slice(11, 16) || null,
+        end_date: endDate !== startDate ? endDate : null,
+        description: truncateHtml(ev.excerpt || ev.description || ""),
+        detail_url: ev.url || null,
+        image_url: ev.image?.url || null,
+        price: ev.cost || null,
+      };
+    })
+    .filter((ev) => ev.title && ev.date);
 }
 
 interface TribeEvent {
@@ -90,19 +100,17 @@ interface TribeEvent {
   image?: { url?: string };
 }
 
-const HISTORISCHES_TITLE_BLOCKLIST = [
-  "bibliothek der generationen",
-];
+const HISTORISCHES_TITLE_BLOCKLIST = ["bibliothek der generationen"];
 
 async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
-  const data = await res.json() as HistorischesEvent[];
+  const data = (await res.json()) as HistorischesEvent[];
   if (!Array.isArray(data)) return [];
 
   return data.flatMap((ev): ApiEvent[] => {
     if (!ev.title || !ev.dateStart) return [];
-    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title!.toLowerCase().includes(b))) return [];
+    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title?.toLowerCase().includes(b))) return [];
     const start = new Date(ev.dateStart * 1000);
     const date = toBerlinDate(start);
     if (date < todayIso()) return [];
@@ -126,17 +134,19 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       if (priceMatch) price = priceMatch[1];
     }
 
-    return [{
-      title: ev.title,
-      date,
-      time: timeMatch?.[1] || null,
-      end_time: endTime,
-      end_date: endDate,
-      description: truncateHtml(ev.summary || ""),
-      detail_url: ev.url || null,
-      image_url: ev.image || null,
-      price,
-    }];
+    return [
+      {
+        title: ev.title,
+        date,
+        time: timeMatch?.[1] || null,
+        end_time: endTime,
+        end_date: endDate,
+        description: truncateHtml(ev.summary || ""),
+        detail_url: ev.url || null,
+        image_url: ev.image || null,
+        price,
+      },
+    ];
   });
 }
 
@@ -155,7 +165,7 @@ interface HistorischesEvent {
 async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
-  const wrapper = await res.json() as { items?: JuedischesItem[] };
+  const wrapper = (await res.json()) as { items?: JuedischesItem[] };
   const items = wrapper.items || [];
 
   return items.flatMap((item): ApiEvent[] => {
@@ -169,9 +179,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
 
     let imageUrl: string | null = null;
     if (ev.image?.src) {
-      imageUrl = ev.image.src.startsWith("http")
-        ? ev.image.src
-        : `https://www.juedischesmuseum.de${ev.image.src}`;
+      imageUrl = ev.image.src.startsWith("http") ? ev.image.src : `https://www.juedischesmuseum.de${ev.image.src}`;
     }
 
     const location = ev.locationAlt || ev.location || "";
@@ -183,18 +191,20 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
       endTime = toBerlinTime(new Date(endMs));
     }
 
-    return [{
-      title: ev.headline.trim(),
-      date,
-      time: time !== "00:00" ? time : null,
-      end_time: endTime,
-      end_date: null,
-      description: truncateHtml(ev.copy || ev.subline || ""),
-      detail_url: ev.detailPageLink?.href || null,
-      image_url: imageUrl,
-      price: null,
-      museum_slug_override: isJudengasse ? "juedisches-museum-museum-judengasse-frankfurt" : undefined,
-    }];
+    return [
+      {
+        title: ev.headline.trim(),
+        date,
+        time: time !== "00:00" ? time : null,
+        end_time: endTime,
+        end_date: null,
+        description: truncateHtml(ev.copy || ev.subline || ""),
+        detail_url: ev.detailPageLink?.href || null,
+        image_url: imageUrl,
+        price: null,
+        museum_slug_override: isJudengasse ? "juedisches-museum-museum-judengasse-frankfurt" : undefined,
+      },
+    ];
   });
 }
 
@@ -219,45 +229,49 @@ interface JuedischesItem {
 async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
-  const data = await res.json() as { events?: StaedelEvent[]; aliases?: Record<string, string> };
+  const data = (await res.json()) as { events?: StaedelEvent[]; aliases?: Record<string, string> };
   if (!data.events) return [];
 
   const webBase = data.aliases?.["@web"] || "https://www.staedelmuseum.de";
   const imgBase = data.aliases?.["@images"] || "https://www.staedelmuseum.de";
 
-  return data.events.flatMap((ev): ApiEvent[] => {
-    if (!ev.start) return [];
-    const date = ev.start.slice(0, 10);
-    if (date < todayIso()) return [];
-    const time = ev.start.slice(11, 16);
+  return data.events
+    .flatMap((ev): ApiEvent[] => {
+      if (!ev.start) return [];
+      const date = ev.start.slice(0, 10);
+      if (date < todayIso()) return [];
+      const time = ev.start.slice(11, 16);
 
-    let url = ev.url || null;
-    if (url?.startsWith("@web")) url = url.replace("@web", webBase);
+      let url = ev.url || null;
+      if (url?.startsWith("@web")) url = url.replace("@web", webBase);
 
-    let thumb = ev.thumbnail || null;
-    if (thumb?.startsWith("@images")) thumb = thumb.replace("@images", imgBase);
+      let thumb = ev.thumbnail || null;
+      if (thumb?.startsWith("@images")) thumb = thumb.replace("@images", imgBase);
 
-    let endTime: string | null = null;
-    let endDate: string | null = null;
-    if (ev.end) {
-      const et = ev.end.slice(11, 16);
-      const ed = ev.end.slice(0, 10);
-      if (et !== "00:00") endTime = et;
-      if (ed !== date) endDate = ed;
-    }
+      let endTime: string | null = null;
+      let endDate: string | null = null;
+      if (ev.end) {
+        const et = ev.end.slice(11, 16);
+        const ed = ev.end.slice(0, 10);
+        if (et !== "00:00") endTime = et;
+        if (ed !== date) endDate = ed;
+      }
 
-    return [{
-      title: ev.title || ev.description || "",
-      date,
-      time: time !== "00:00" ? time : null,
-      end_time: endTime,
-      end_date: endDate,
-      description: ev.description?.slice(0, 300) || null,
-      detail_url: url,
-      image_url: thumb,
-      price: null,
-    }];
-  }).filter(ev => ev.title);
+      return [
+        {
+          title: ev.title || ev.description || "",
+          date,
+          time: time !== "00:00" ? time : null,
+          end_time: endTime,
+          end_date: endDate,
+          description: ev.description?.slice(0, 300) || null,
+          detail_url: url,
+          image_url: thumb,
+          price: null,
+        },
+      ];
+    })
+    .filter((ev) => ev.title);
 }
 
 interface StaedelEvent {
@@ -276,7 +290,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
     headers: { "User-Agent": USER_AGENT },
   });
   if (!res.ok) return [];
-  const posts = await res.json() as SenckenbergEvent[];
+  const posts = (await res.json()) as SenckenbergEvent[];
   if (!Array.isArray(posts)) return [];
 
   return posts.flatMap((post): ApiEvent[] => {
@@ -304,17 +318,19 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
       if (ed !== date) endDate = ed;
     }
 
-    return [{
-      title,
-      date,
-      time: time !== "00:00" ? time : null,
-      end_time: endTime,
-      end_date: endDate,
-      description: truncateHtml(acf.event_decription || ""),
-      detail_url: post.link || null,
-      image_url: null,
-      price: null,
-    }];
+    return [
+      {
+        title,
+        date,
+        time: time !== "00:00" ? time : null,
+        end_time: endTime,
+        end_date: endDate,
+        description: truncateHtml(acf.event_decription || ""),
+        detail_url: post.link || null,
+        image_url: null,
+        price: null,
+      },
+    ];
   });
 }
 
@@ -339,7 +355,7 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
   const url = `${endpoint}?from=${today}&to=${weekAhead}`;
   const res = await fetch(url);
   if (!res.ok) return [];
-  const data = await res.json() as Record<string, MyCalendarEvent[]>;
+  const data = (await res.json()) as Record<string, MyCalendarEvent[]>;
   if (typeof data !== "object" || Array.isArray(data)) return [];
 
   const events: ApiEvent[] = [];
@@ -352,29 +368,23 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
       const date = ev.occur_begin.slice(0, 10);
       if (date < today) continue;
 
-      let time = ev.event_time && ev.event_time !== "00:00:00"
-        ? ev.event_time.slice(0, 5)
-        : null;
+      let time = ev.event_time && ev.event_time !== "00:00:00" ? ev.event_time.slice(0, 5) : null;
 
       if (!time && ev.event_desc) {
         const withMinutes = ev.event_desc.match(/(\d{1,2})[.:](\d{2})\s*(?:Uhr|h\b)/);
         if (withMinutes) {
-          time = withMinutes[1].padStart(2, "0") + ":" + withMinutes[2];
+          time = `${withMinutes[1].padStart(2, "0")}:${withMinutes[2]}`;
         } else {
           const hourOnly = ev.event_desc.match(/(?:ab\s+)?(\d{1,2})\s*Uhr/);
           if (hourOnly) {
-            time = hourOnly[1].padStart(2, "0") + ":00";
+            time = `${hourOnly[1].padStart(2, "0")}:00`;
           }
         }
       }
 
-      const detailUrl = ev.event_post
-        ? `https://www.mfk-frankfurt.de/?p=${ev.event_post}`
-        : null;
+      const detailUrl = ev.event_post ? `https://www.mfk-frankfurt.de/?p=${ev.event_post}` : null;
 
-      const endTime = ev.event_endtime && ev.event_endtime !== "00:00:00"
-        ? ev.event_endtime.slice(0, 5)
-        : null;
+      const endTime = ev.event_endtime && ev.event_endtime !== "00:00:00" ? ev.event_endtime.slice(0, 5) : null;
 
       events.push({
         title: ev.event_title,
@@ -438,7 +448,7 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
     const durationMatch = block.match(/itemprop="duration" datetime="P[^"]*T(\d+)H(?:(\d+)M)?/);
     let endTime: string | null = null;
     if (durationMatch && time !== "00:00") {
-      const h = parseInt(time.split(":")[0]) + parseInt(durationMatch[1]);
+      const h = parseInt(time.split(":")[0], 10) + parseInt(durationMatch[1], 10);
       const m = time.split(":")[1];
       endTime = `${(h % 24).toString().padStart(2, "0")}:${m}`;
     }
@@ -491,7 +501,7 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
       if (!summary || !dtStart) continue;
 
       const startDate = new Date(
-        `${dtStart.slice(0,4)}-${dtStart.slice(4,6)}-${dtStart.slice(6,8)}T${dtStart.slice(9,11)}:${dtStart.slice(11,13)}:${dtStart.slice(13,15)}Z`
+        `${dtStart.slice(0, 4)}-${dtStart.slice(4, 6)}-${dtStart.slice(6, 8)}T${dtStart.slice(9, 11)}:${dtStart.slice(11, 13)}:${dtStart.slice(13, 15)}Z`,
       );
       const date = toBerlinDate(startDate);
       if (date < todayIso()) continue;
@@ -501,7 +511,7 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
       let endDate: string | null = null;
       if (dtEnd) {
         const endD = new Date(
-          `${dtEnd.slice(0,4)}-${dtEnd.slice(4,6)}-${dtEnd.slice(6,8)}T${dtEnd.slice(9,11)}:${dtEnd.slice(11,13)}:${dtEnd.slice(13,15)}Z`
+          `${dtEnd.slice(0, 4)}-${dtEnd.slice(4, 6)}-${dtEnd.slice(6, 8)}T${dtEnd.slice(9, 11)}:${dtEnd.slice(11, 13)}:${dtEnd.slice(13, 15)}Z`,
         );
         endTime = toBerlinTime(endD);
         const ed = toBerlinDate(endD);
@@ -521,14 +531,11 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
         image_url: imgMatch ? `https://dommuseum-frankfurt.de${imgMatch[1]}` : null,
         price: null,
       });
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return events;
 }
-
 
 async function fetchJungesMuseum(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
@@ -565,9 +572,9 @@ async function fetchJungesMuseum(endpoint: string): Promise<ApiEvent[]> {
     let endTime: string | null = null;
     if (timeMatch) {
       const s = timeMatch[1].replace(".", ":");
-      time = s.includes(":") ? s : s + ":00";
+      time = s.includes(":") ? s : `${s}:00`;
       const e = timeMatch[2].replace(".", ":");
-      endTime = e.includes(":") ? e : e + ":00";
+      endTime = e.includes(":") ? e : `${e}:00`;
     }
 
     const imgMatch = calSection.slice(match.index - 500, match.index).match(/<img[^>]+src="([^"]+)"/);
@@ -619,7 +626,9 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     const date = `${currentYear}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
-    const timeRangeMatch = heading.match(/^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*–\s*/);
+    const timeRangeMatch = heading.match(
+      /^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*–\s*/,
+    );
     let time: string | null = null;
     let endTime: string | null = null;
     let title = heading;
@@ -687,9 +696,7 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
 
     let image_url: string | null = null;
     if (imgMatch) {
-      image_url = imgMatch[1].startsWith("http")
-        ? imgMatch[1]
-        : `https://www.stadtgeschichte-ffm.de${imgMatch[1]}`;
+      image_url = imgMatch[1].startsWith("http") ? imgMatch[1] : `https://www.stadtgeschichte-ffm.de${imgMatch[1]}`;
     }
 
     events.push({
@@ -731,7 +738,8 @@ async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
     const dateText = stripHtml(dateSpans[1]);
     const dayMonth = dateText.match(/(\d{1,2})\.\s*(\w+)/);
     if (!dayMonth) continue;
-    const monthNum = GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
+    const monthNum =
+      GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
     if (!monthNum) continue;
     const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
     if (date < today) continue;
@@ -776,7 +784,8 @@ async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
     const dayText = dateDay[1].trim();
     const dayMonth = dayText.match(/(\d{1,2})\.\s*(\w+)/);
     if (!dayMonth) continue;
-    const monthNum = GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
+    const monthNum =
+      GERMAN_MONTHS_SHORT[dayMonth[2].toLowerCase().slice(0, 3)] || GERMAN_MONTHS[dayMonth[2].toLowerCase()];
     if (!monthNum) continue;
     const date = `${currentYear}-${monthNum}-${dayMonth[1].padStart(2, "0")}`;
     if (date < today) continue;
@@ -786,7 +795,7 @@ async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
       const tm = dateTime[1].match(/(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
       if (tm) {
         const raw = tm[1].replace(".", ":");
-        time = raw.includes(":") ? raw : raw + ":00";
+        time = raw.includes(":") ? raw : `${raw}:00`;
       }
     }
 
@@ -883,7 +892,7 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
         let time: string | null = null;
         if (tm) {
           const raw = tm[1].replace(".", ":");
-          time = raw.includes(":") ? raw : raw + ":00";
+          time = raw.includes(":") ? raw : `${raw}:00`;
         }
 
         const titleMatch = detailHtml.match(/c-event-detail__title[^>]*>([^<]+)/);
@@ -901,12 +910,8 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
           price: null,
         });
       }
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   return events;
 }
-
-

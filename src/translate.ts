@@ -1,4 +1,4 @@
-import { Env } from "./types";
+import type { Env } from "./types";
 
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
 const BATCH_SIZE = 50;
@@ -35,8 +35,8 @@ async function translateUntranslated(env: Env, targetLang: string): Promise<numb
           `INSERT INTO translations (source_hash, target_lang, source_text, translated_text)
            VALUES (?, ?, ?, ?)
            ON CONFLICT(source_hash, target_lang) DO UPDATE SET
-             translated_text = excluded.translated_text`
-        ).bind(t.hash, targetLang.toLowerCase(), t.text, translations[j])
+             translated_text = excluded.translated_text`,
+        ).bind(t.hash, targetLang.toLowerCase(), t.text, translations[j]),
       );
 
       await env.DB.batch(stmts);
@@ -50,16 +50,13 @@ async function translateUntranslated(env: Env, targetLang: string): Promise<numb
   return count;
 }
 
-async function getUntranslatedTexts(
-  env: Env,
-  targetLang: string
-): Promise<Array<{ hash: string; text: string }>> {
+async function getUntranslatedTexts(env: Env, targetLang: string): Promise<Array<{ hash: string; text: string }>> {
   const { results: eventTexts } = await env.DB.prepare(
-    "SELECT DISTINCT title as text FROM events WHERE title != '' UNION SELECT DISTINCT description as text FROM events WHERE description IS NOT NULL AND description != ''"
+    "SELECT DISTINCT title as text FROM events WHERE title != '' UNION SELECT DISTINCT description as text FROM events WHERE description IS NOT NULL AND description != ''",
   ).all<{ text: string }>();
 
   const { results: exhibTexts } = await env.DB.prepare(
-    "SELECT DISTINCT title as text FROM exhibitions WHERE title != ''"
+    "SELECT DISTINCT title as text FROM exhibitions WHERE title != ''",
   ).all<{ text: string }>();
 
   const allTexts = [...eventTexts, ...exhibTexts];
@@ -80,19 +77,17 @@ async function getUntranslatedTexts(
     const batch = candidates.slice(i, i + 50);
     const placeholders = batch.map(() => "?").join(",");
     const { results } = await env.DB.prepare(
-      `SELECT source_hash FROM translations WHERE source_hash IN (${placeholders}) AND target_lang = ?`
-    ).bind(...batch.map((c) => c.hash), targetLang.toLowerCase()).all<{ source_hash: string }>();
+      `SELECT source_hash FROM translations WHERE source_hash IN (${placeholders}) AND target_lang = ?`,
+    )
+      .bind(...batch.map((c) => c.hash), targetLang.toLowerCase())
+      .all<{ source_hash: string }>();
     for (const r of results) existing.add(r.source_hash);
   }
 
   return candidates.filter((c) => !existing.has(c.hash)).slice(0, 200);
 }
 
-async function callDeepL(
-  apiKey: string,
-  texts: string[],
-  targetLang: string
-): Promise<string[]> {
+async function callDeepL(apiKey: string, texts: string[], targetLang: string): Promise<string[]> {
   const params = new URLSearchParams();
   for (const text of texts) {
     params.append("text", text);
@@ -103,7 +98,7 @@ async function callDeepL(
   const res = await fetch(DEEPL_FREE_URL, {
     method: "POST",
     headers: {
-      "Authorization": `DeepL-Auth-Key ${apiKey}`,
+      Authorization: `DeepL-Auth-Key ${apiKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: params.toString(),
@@ -114,34 +109,23 @@ async function callDeepL(
     throw new Error(`DeepL API error ${res.status}: ${body}`);
   }
 
-  const data = await res.json() as { translations: Array<{ text: string }> };
+  const data = (await res.json()) as { translations: Array<{ text: string }> };
   return data.translations.map((t) => t.text);
 }
 
-export async function getTranslation(
-  env: Env,
-  text: string | null,
-  targetLang: string
-): Promise<string | null> {
+export async function getTranslation(env: Env, text: string | null, targetLang: string): Promise<string | null> {
   if (!text) return null;
   if (targetLang === "de") return text;
 
   const hash = await sha256(text);
-  const row = await env.DB.prepare(
-    "SELECT translated_text FROM translations WHERE source_hash = ? AND target_lang = ?"
-  )
+  const row = await env.DB.prepare("SELECT translated_text FROM translations WHERE source_hash = ? AND target_lang = ?")
     .bind(hash, targetLang)
     .first<{ translated_text: string }>();
 
   return row?.translated_text ?? text;
 }
 
-export async function translateFields<T>(
-  env: Env,
-  items: T[],
-  fields: string[],
-  targetLang: string
-): Promise<T[]> {
+export async function translateFields<T>(env: Env, items: T[], fields: string[], targetLang: string): Promise<T[]> {
   if (targetLang === "de") return items;
 
   const hashes = new Map<string, string>();
@@ -168,7 +152,7 @@ export async function translateFields<T>(
     const placeholders = batch.map(() => "?").join(",");
     const { results } = await env.DB.prepare(
       `SELECT source_hash, translated_text FROM translations
-       WHERE source_hash IN (${placeholders}) AND target_lang = ?`
+       WHERE source_hash IN (${placeholders}) AND target_lang = ?`,
     )
       .bind(...batch, targetLang)
       .all<{ source_hash: string; translated_text: string }>();

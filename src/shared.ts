@@ -3,15 +3,34 @@ export const APP_URL = "https://museumsufer.app";
 export const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
 export const GERMAN_MONTHS_SHORT: Record<string, string> = {
-  jan: "01", feb: "02", "mär": "03", mar: "03", apr: "04",
-  mai: "05", jun: "06", jul: "07", aug: "08",
-  sep: "09", okt: "10", nov: "11", dez: "12",
+  jan: "01",
+  feb: "02",
+  mär: "03",
+  mar: "03",
+  apr: "04",
+  mai: "05",
+  jun: "06",
+  jul: "07",
+  aug: "08",
+  sep: "09",
+  okt: "10",
+  nov: "11",
+  dez: "12",
 };
 
 export const GERMAN_MONTHS: Record<string, string> = {
-  januar: "01", februar: "02", "märz": "03", april: "04",
-  mai: "05", juni: "06", juli: "07", august: "08",
-  september: "09", oktober: "10", november: "11", dezember: "12",
+  januar: "01",
+  februar: "02",
+  märz: "03",
+  april: "04",
+  mai: "05",
+  juni: "06",
+  juli: "07",
+  august: "08",
+  september: "09",
+  oktober: "10",
+  november: "11",
+  dezember: "12",
 };
 
 export function escHtml(s: string): string {
@@ -36,7 +55,7 @@ export function truncateHtml(text: string, maxLen = 500): string | null {
   if (stripped.length === 0) return null;
   if (stripped.length <= maxLen) return stripped;
   const cut = stripped.lastIndexOf(" ", maxLen);
-  return stripped.slice(0, cut > 0 ? cut : maxLen) + "…";
+  return `${stripped.slice(0, cut > 0 ? cut : maxLen)}…`;
 }
 
 export function nullIfMidnight(time: string | null | undefined): string | null {

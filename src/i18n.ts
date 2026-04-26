@@ -52,9 +52,11 @@ const de: Translations = {
   githubAria: "Quellcode auf GitHub",
   meta: "Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer",
   pageTitle: "Museumsufer Frankfurt — Ausstellungen & Veranstaltungen heute",
-  metaLong: "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr fur 40 Museen.",
+  metaLong:
+    "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr fur 40 Museen.",
   llmTip: "Frag dein LLM",
-  llmPrompt: "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.app/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",
+  llmPrompt:
+    "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.app/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",
   llmCopied: "Kopiert!",
   missingEvent: "Veranstaltung fehlt?",
   subscribeCal: "Kalender abonnieren",
@@ -96,9 +98,11 @@ const en: Translations = {
   githubAria: "View source on GitHub",
   meta: "Current exhibitions and events at Frankfurt's Museumsufer",
   pageTitle: "Museumsufer Frankfurt — Exhibitions & Events Today",
-  metaLong: "All exhibitions and events at Frankfurt's Museumsufer at a glance. Calendar, prices, directions and more for 40 museums.",
+  metaLong:
+    "All exhibitions and events at Frankfurt's Museumsufer at a glance. Calendar, prices, directions and more for 40 museums.",
   llmTip: "Ask your LLM",
-  llmPrompt: "What's on at Frankfurt's Museumsufer today? Read https://museumsufer.app/llms.txt and use the API to get current exhibitions and events.",
+  llmPrompt:
+    "What's on at Frankfurt's Museumsufer today? Read https://museumsufer.app/llms.txt and use the API to get current exhibitions and events.",
   llmCopied: "Copied!",
   missingEvent: "Event missing?",
   subscribeCal: "Subscribe to calendar",
@@ -140,9 +144,11 @@ const fr: Translations = {
   githubAria: "Voir le code source sur GitHub",
   meta: "Expositions et événements actuels au Museumsufer de Francfort",
   pageTitle: "Museumsufer Frankfurt — Expositions & Evenements du jour",
-  metaLong: "Toutes les expositions et evenements au Museumsufer de Francfort. Calendrier, prix, itineraire et plus pour 40 musees.",
+  metaLong:
+    "Toutes les expositions et evenements au Museumsufer de Francfort. Calendrier, prix, itineraire et plus pour 40 musees.",
   llmTip: "Demandez a votre LLM",
-  llmPrompt: "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et evenements actuels.",
+  llmPrompt:
+    "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et evenements actuels.",
   llmCopied: "Copie !",
   missingEvent: "Evenement manquant ?",
   subscribeCal: "S'abonner au calendrier",

@@ -1,5 +1,5 @@
-import { Env } from "./types";
-import { MUSEUMSUFER_DE, GERMAN_MONTHS } from "./shared";
+import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
+import type { Env } from "./types";
 
 const BASE_URL = MUSEUMSUFER_DE;
 const EXHIBITIONS_URL = `${BASE_URL}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`;
@@ -37,7 +37,7 @@ async function scrapeMuseums(env: Env): Promise<number> {
 
   const stmt = env.DB.prepare(
     `INSERT INTO museums (name, slug, museumsufer_url) VALUES (?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, updated_at = datetime('now')`
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, updated_at = datetime('now')`,
   );
 
   const ops = museums.map((m) => {
@@ -77,16 +77,9 @@ async function scrapeExhibitions(env: Env): Promise<number> {
          end_date = excluded.end_date,
          image_url = excluded.image_url,
          detail_url = excluded.detail_url,
-         updated_at = datetime('now')`
+         updated_at = datetime('now')`,
     )
-      .bind(
-        museumId,
-        ex.title,
-        ex.start_date,
-        ex.end_date,
-        ex.image_url,
-        ex.detail_url
-      )
+      .bind(museumId, ex.title, ex.start_date, ex.end_date, ex.image_url, ex.detail_url)
       .run();
   }
 
@@ -97,14 +90,14 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
   const slug = slugify(museumName);
   const nameNorm = museumName.toLowerCase().trim();
 
-  const bySlug = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
-    .bind(slug)
-    .first<{ id: number }>();
+  const bySlug = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?").bind(slug).first<{ id: number }>();
   if (bySlug) return bySlug.id;
 
-  const { results: allMuseums } = await env.DB.prepare(
-    "SELECT id, name, slug FROM museums"
-  ).all<{ id: number; name: string; slug: string }>();
+  const { results: allMuseums } = await env.DB.prepare("SELECT id, name, slug FROM museums").all<{
+    id: number;
+    name: string;
+    slug: string;
+  }>();
 
   let bestMatch: { id: number; score: number } | null = null;
   const slugParts = slug.split("-");
@@ -138,17 +131,19 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
   const inserted = await env.DB.prepare(
     `INSERT INTO museums (name, slug, museumsufer_url) VALUES (?, ?, ?)
      ON CONFLICT(slug) DO UPDATE SET updated_at = datetime('now')
-     RETURNING id`
+     RETURNING id`,
   )
     .bind(museumName, slug, `${BASE_URL}/de/museen/${slug}/`)
     .first<{ id: number }>();
-  return inserted!.id;
+  if (!inserted) throw new Error(`Failed to insert museum: ${museumName}`);
+  return inserted.id;
 }
 
 function parseExhibitions(html: string): ParsedExhibition[] {
   const results: ParsedExhibition[] = [];
 
-  const blockRe = /<a\s+href="(\/de\/ausstellungen-und-veranstaltungen\/ausstellungen\/[^"]+)">\s*<div class="teaserBox">([\s\S]*?)<\/div>\s*<\/a>/g;
+  const blockRe =
+    /<a\s+href="(\/de\/ausstellungen-und-veranstaltungen\/ausstellungen\/[^"]+)">\s*<div class="teaserBox">([\s\S]*?)<\/div>\s*<\/a>/g;
   let blockMatch;
   while ((blockMatch = blockRe.exec(html)) !== null) {
     const detailUrl = blockMatch[1];
@@ -183,14 +178,15 @@ function parseExhibitions(html: string): ParsedExhibition[] {
 }
 
 function parseGermanDateRange(text: string): { start: string | null; end: string | null } {
-  const cleaned = text.replace(/&ndash;/g, "–").replace(/\s+/g, " ").trim();
+  const cleaned = text
+    .replace(/&ndash;/g, "–")
+    .replace(/\s+/g, " ")
+    .trim();
 
   // "DD. Month YYYY" (single date)
   // "DD. Month - DD. Month YYYY"
   // "DD. Month YYYY - DD. Month YYYY"
-  const rangeMatch = cleaned.match(
-    /(\d{1,2})\.\s*(\w+)\s*(?:(\d{4}))?\s*[-–]\s*(\d{1,2})\.\s*(\w+)\s*(\d{4})/
-  );
+  const rangeMatch = cleaned.match(/(\d{1,2})\.\s*(\w+)\s*(?:(\d{4}))?\s*[-–]\s*(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
 
   if (rangeMatch) {
     const [, startDay, startMonthName, startYearStr, endDay, endMonthName, endYear] = rangeMatch;
@@ -239,11 +235,7 @@ function decodeHtmlEntities(text: string): string {
 }
 
 function normalizeStem(word: string): string {
-  return word
-    .replace(/en$/, "")
-    .replace(/es$/, "")
-    .replace(/er$/, "")
-    .replace(/em$/, "");
+  return word.replace(/en$/, "").replace(/es$/, "").replace(/er$/, "").replace(/em$/, "");
 }
 
 function slugify(text: string): string {

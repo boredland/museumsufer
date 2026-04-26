@@ -1,10 +1,10 @@
-import { Env } from "./types";
-import { getApiConfig } from "./museum-apis";
 import { fetchEventsFromApi } from "./api-scrapers";
-import { todayIso, dateOffset } from "./date";
-import { MUSEUMSUFER_DE, normalizeUrl, USER_AGENT } from "./shared";
+import { dateOffset, todayIso } from "./date";
+import { getApiConfig } from "./museum-apis";
+import { MUSEUMSUFER_DE, normalizeUrl } from "./shared";
+import type { Env } from "./types";
 
-const BASE_URL = MUSEUMSUFER_DE;
+const _BASE_URL = MUSEUMSUFER_DE;
 
 const EVENT_PAGE_PATHS = [
   "/programm",
@@ -21,12 +21,17 @@ const EVENT_PAGE_PATHS = [
   "/de/besuch/programm",
 ];
 
-export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number; events: number; enriched: number; api: number }> {
+export async function scrapeMuseumWebsites(
+  env: Env,
+): Promise<{ updated: number; events: number; enriched: number; api: number }> {
   await discoverWebsiteUrls(env);
 
-  const { results: museums } = await env.DB.prepare(
-    "SELECT id, name, slug, website_url FROM museums"
-  ).all<{ id: number; name: string; slug: string; website_url: string | null }>();
+  const { results: museums } = await env.DB.prepare("SELECT id, name, slug, website_url FROM museums").all<{
+    id: number;
+    name: string;
+    slug: string;
+    website_url: string | null;
+  }>();
 
   let totalEvents = 0;
   let updated = 0;
@@ -61,13 +66,20 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
                detail_url = COALESCE(excluded.detail_url, events.detail_url),
                image_url = COALESCE(excluded.image_url, events.image_url),
                price = COALESCE(excluded.price, events.price),
-               updated_at = datetime('now')`
+               updated_at = datetime('now')`,
           )
             .bind(
-              targetMuseumId, event.title, event.date, event.time,
-              event.end_time, event.end_date,
-              event.description, apiConfig.endpoint, event.detail_url,
-              event.image_url, event.price
+              targetMuseumId,
+              event.title,
+              event.date,
+              event.time,
+              event.end_time,
+              event.end_date,
+              event.description,
+              apiConfig.endpoint,
+              event.detail_url,
+              event.image_url,
+              event.price,
             )
             .run();
           count++;
@@ -99,7 +111,7 @@ export async function scrapeMuseumWebsites(env: Env): Promise<{ updated: number;
 
 async function discoverWebsiteUrls(env: Env): Promise<void> {
   const { results: museums } = await env.DB.prepare(
-    "SELECT id, museumsufer_url FROM museums WHERE website_url IS NULL AND museumsufer_url LIKE '%museumsufer.de%'"
+    "SELECT id, museumsufer_url FROM museums WHERE website_url IS NULL AND museumsufer_url LIKE '%museumsufer.de%'",
   ).all<{ id: number; museumsufer_url: string }>();
 
   for (const museum of museums) {
@@ -108,9 +120,7 @@ async function discoverWebsiteUrls(env: Env): Promise<void> {
       if (!res.ok) continue;
       const html = await res.text();
 
-      const match = html.match(
-        /href="(https?:\/\/[^"]+)"[^>]*class="[^"]*margRight15\s+externelLink/
-      );
+      const match = html.match(/href="(https?:\/\/[^"]+)"[^>]*class="[^"]*margRight15\s+externelLink/);
       if (!match) continue;
 
       const websiteUrl = match[1];
@@ -134,7 +144,7 @@ interface ScrapedEvent {
 
 async function scrapeMuseumEvents(
   env: Env,
-  museum: { id: number; name: string; website_url: string }
+  museum: { id: number; name: string; website_url: string },
 ): Promise<number> {
   const baseUrl = museum.website_url.replace(/\/$/, "");
   let eventsHtml: string | null = null;
@@ -152,9 +162,7 @@ async function scrapeMuseumEvents(
           break;
         }
       }
-    } catch {
-      continue;
-    }
+    } catch {}
   }
 
   if (!eventsHtml || !eventsUrl) {
@@ -184,7 +192,7 @@ async function scrapeMuseumEvents(
 
   const truncated = textContent.slice(0, 8000);
 
-  const result = await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
+  const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     max_tokens: 2048,
     messages: [
       {
@@ -201,11 +209,9 @@ Text content from ${museum.name} (${eventsUrl}):
 ${truncated}`,
       },
     ],
-  }) as Record<string, unknown>;
+  })) as Record<string, unknown>;
 
-  const responseText = typeof result.response === "string"
-    ? result.response
-    : JSON.stringify(result);
+  const responseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
@@ -222,17 +228,9 @@ ${truncated}`,
          time = excluded.time,
          description = excluded.description,
          detail_url = COALESCE(excluded.detail_url, events.detail_url),
-         updated_at = datetime('now')`
+         updated_at = datetime('now')`,
     )
-      .bind(
-        museum.id,
-        event.title,
-        event.date,
-        event.time,
-        event.description,
-        eventsUrl,
-        detailUrl
-      )
+      .bind(museum.id, event.title, event.date, event.time, event.description, eventsUrl, detailUrl)
       .run();
     count++;
   }
@@ -251,7 +249,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
      WHERE ev.date >= ? AND ev.date <= ?
        AND ev.detail_url IS NOT NULL
        AND (ev.price IS NULL AND ev.image_url IS NULL)
-     LIMIT 30`
+     LIMIT 30`,
   )
     .bind(today, weekAhead)
     .all<{
@@ -291,9 +289,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       }
 
       updates.push("updated_at = datetime('now')");
-      await env.DB.prepare(
-        `UPDATE events SET ${updates.join(", ")} WHERE id = ?`
-      )
+      await env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`)
         .bind(...values, event.id)
         .run();
       enriched++;
@@ -309,7 +305,7 @@ async function fetchEventDetails(
   env: Env,
   detailUrl: string,
   museumName: string,
-  websiteUrl: string
+  _websiteUrl: string,
 ): Promise<{ price: string | null; image_url: string | null } | null> {
   let html: string;
   try {
@@ -327,7 +323,7 @@ async function fetchEventDetails(
   const textContent = stripHtmlToText(html).slice(0, 6000);
   if (textContent.length < 50) return { price: null, image_url: imageUrl };
 
-  const result = await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
+  const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     messages: [
       {
         role: "user",
@@ -344,12 +340,10 @@ Page content:
 ${textContent}`,
       },
     ],
-  }) as Record<string, unknown>;
+  })) as Record<string, unknown>;
 
   let price: string | null = null;
-  const priceResponseText = typeof result.response === "string"
-    ? result.response
-    : JSON.stringify(result);
+  const priceResponseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
   const parsed = extractJsonObject<{ price: string | null }>(priceResponseText);
   if (parsed?.price && parsed.price !== "null") {
     price = parsed.price;
@@ -362,16 +356,16 @@ function extractImageFromHtml(html: string, pageUrl: string): string | null {
   const baseUrl = new URL(pageUrl).origin;
   const pageDomain = new URL(pageUrl).hostname;
 
-  const ogMatch = html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i)
-    || html.match(/content="([^"]+)"\s+(?:property|name)="og:image"/i);
+  const ogMatch =
+    html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i) ||
+    html.match(/content="([^"]+)"\s+(?:property|name)="og:image"/i);
   if (ogMatch) {
     const ogUrl = normalizeUrl(ogMatch[1], baseUrl);
     if (ogUrl && isSameDomain(ogUrl, pageDomain)) return ogUrl;
   }
 
-  const mainContent = html.match(/<main[\s\S]*?<\/main>/i)?.[0]
-    || html.match(/<article[\s\S]*?<\/article>/i)?.[0]
-    || html;
+  const mainContent =
+    html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
 
   const imgRe = /<img[^>]+src="([^"]+)"/gi;
   let match;
@@ -396,7 +390,7 @@ function isContentImage(src: string): boolean {
 function isSameDomain(url: string, pageDomain: string): boolean {
   try {
     const imgDomain = new URL(url).hostname;
-    return imgDomain === pageDomain || imgDomain.endsWith("." + pageDomain) || pageDomain.endsWith("." + imgDomain);
+    return imgDomain === pageDomain || imgDomain.endsWith(`.${pageDomain}`) || pageDomain.endsWith(`.${imgDomain}`);
   } catch {
     return true;
   }
@@ -413,7 +407,10 @@ function extractPageLinks(html: string, baseUrl: string): PageLink[] {
   let match;
   while ((match = re.exec(html)) !== null) {
     const href = match[1];
-    const text = match[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    const text = match[2]
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     if (!text || text.length < 3 || text.length > 200) continue;
     if (href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("javascript:")) continue;
     const normalized = normalizeUrl(href, baseUrl);
@@ -424,7 +421,7 @@ function extractPageLinks(html: string, baseUrl: string): PageLink[] {
 
 function matchLinkForTitle(title: string, links: PageLink[]): string | null {
   const titleLower = title.toLowerCase().trim();
-  const titleWords = titleLower.split(/\s+/).filter(w => w.length > 2);
+  const titleWords = titleLower.split(/\s+/).filter((w) => w.length > 2);
 
   let bestMatch: { href: string; score: number } | null = null;
 
@@ -469,9 +466,7 @@ function matchLinkForTitle(title: string, links: PageLink[]): string | null {
 }
 
 function findEventLink(html: string, baseUrl: string): string | null {
-  const patterns = [
-    /href="([^"]*(?:programm|veranstaltung|kalender|events)[^"]*)"/gi,
-  ];
+  const patterns = [/href="([^"]*(?:programm|veranstaltung|kalender|events)[^"]*)"/gi];
   for (const pattern of patterns) {
     const match = pattern.exec(html);
     if (match) {
@@ -515,4 +510,3 @@ function extractJsonObject<T>(text: string): T | null {
     return null;
   }
 }
-

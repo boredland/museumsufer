@@ -1,4 +1,19 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum" | "junges-museum" | "ledermuseum" | "bibelhaus" | "fkv" | "fdh";
+export type ApiType =
+  | "tribe-events"
+  | "historisches"
+  | "juedisches"
+  | "staedel"
+  | "senckenberg"
+  | "my-calendar"
+  | "liebieghaus"
+  | "mak"
+  | "stadtgeschichte-rss"
+  | "dommuseum"
+  | "junges-museum"
+  | "ledermuseum"
+  | "bibelhaus"
+  | "fkv"
+  | "fdh";
 
 export interface MuseumApiConfig {
   slug: string;

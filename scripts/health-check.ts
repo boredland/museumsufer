@@ -1,4 +1,4 @@
-import { runHealthChecks, formatResults } from "../src/health-check";
+import { formatResults, runHealthChecks } from "../src/health-check";
 
 async function main() {
   console.log("Running health checks...\n");
