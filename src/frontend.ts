@@ -1133,8 +1133,9 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         d.addEventListener('toggle', () => persistSectionState(d));
       });
       content.classList.remove('fade-in');
-      void content.offsetWidth;
-      content.classList.add('fade-in');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { content.classList.add('fade-in'); });
+      });
     }
 
 
