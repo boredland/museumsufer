@@ -32,7 +32,6 @@ export function inferYear(month: string, day: string): number {
   const currentYear = now.year();
   const currentMonth = now.month() + 1;
   const m = parseInt(month, 10);
-  const d = parseInt(day, 10);
   if (currentMonth >= 11 && m <= 2) return currentYear + 1;
   const candidate = `${currentYear}-${month}-${day.padStart(2, "0")}`;
   if (candidate < todayIso()) {
