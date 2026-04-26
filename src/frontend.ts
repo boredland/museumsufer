@@ -1045,9 +1045,9 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       try { return localStorage.getItem('section-' + key) !== 'closed'; } catch { return true; }
     }
 
-    function toggleSection(key) {
-      const open = isSectionOpen(key);
-      try { localStorage.setItem('section-' + key, open ? 'closed' : 'open'); } catch {}
+    function persistSectionState(el) {
+      const key = el.dataset.section;
+      try { localStorage.setItem('section-' + key, el.open ? 'open' : 'closed'); } catch {}
     }
 
     function renderSection(key, title, count, iconPath, innerHtml) {
@@ -1091,7 +1091,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
 
       content.innerHTML = html;
       content.querySelectorAll('details.section').forEach(d => {
-        d.addEventListener('toggle', () => toggleSection(d.dataset.section));
+        d.addEventListener('toggle', () => persistSectionState(d));
       });
       content.classList.remove('fade-in');
       void content.offsetWidth;
