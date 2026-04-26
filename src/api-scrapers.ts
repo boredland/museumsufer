@@ -342,9 +342,17 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
       const date = ev.occur_begin.slice(0, 10);
       if (date < today) continue;
 
-      const time = ev.event_time && ev.event_time !== "00:00:00"
+      let time = ev.event_time && ev.event_time !== "00:00:00"
         ? ev.event_time.slice(0, 5)
         : null;
+
+      if (!time && ev.event_desc) {
+        const descTimes = ev.event_desc.match(/(\d{1,2})[.:]\d{2}\s*(?:Uhr|h\b)/g);
+        if (descTimes && descTimes.length > 0) {
+          const first = descTimes[0].match(/(\d{1,2})[.:](\d{2})/);
+          if (first) time = first[1].padStart(2, "0") + ":" + first[2];
+        }
+      }
 
       const detailUrl = ev.event_post
         ? `https://www.mfk-frankfurt.de/?p=${ev.event_post}`
