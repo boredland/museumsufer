@@ -958,6 +958,10 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     } else {
       loadDay(toIso(today()), btnToday);
     }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
   </script>
 </body>
 </html>`;
