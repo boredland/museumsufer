@@ -20,50 +20,52 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 ### Structured API (16 museums)
 
-| Museum | Website | API type | Endpoint |
-|---|---|---|---|
-| Städel Museum | staedelmuseum.de | Custom JSON | `/de/api/finder` |
-| Historisches Museum Frankfurt | historisches-museum-frankfurt.de | Custom JSON | `/api/calendar` |
-| Jüdisches Museum + Museum Judengasse | juedischesmuseum.de | TYPO3 feed.json | `/besuch/feed.json?records[uid]=329` |
-| Deutsches Architekturmuseum (DAM) | dam-online.de | Tribe Events (WP) | `/wp-json/tribe/events/v1/events` |
-| DFF – Deutsches Filminstitut & Filmmuseum | dff.film | Tribe Events (WP) | `/wp-json/tribe/events/v1/events` |
-| Senckenberg Naturmuseum | museumfrankfurt.senckenberg.de | WP REST + ACF | `/wp-json/wp/v2/events` |
-| Museum für Kommunikation Frankfurt | mfk-frankfurt.de | My Calendar (WP) | `/wp-json/my-calendar/v1/events` |
-| Liebieghaus Skulpturensammlung | liebieghaus.de | schema.org HTML | `/de/kalender` (parsed via regex) |
-| Museum Angewandte Kunst | museumangewandtekunst.de | Structured HTML | `/de/kalender/` (mak-event-item elements) |
-| Institut für Stadtgeschichte | stadtgeschichte-ffm.de | RSS feed | `/rss/isg_rss.php` |
-| Dommuseum Frankfurt | dommuseum-frankfurt.de | TYPO3 Calendarize ICS | `/besuchen/kalender` (per-event ICS files) |
-| Junges Museum Frankfurt | junges-museum-frankfurt.de | Drupal Views HTML | `/kalender` (h2/h3 structure with dates) |
-| Deutsches Ledermuseum (Offenbach) | ledermuseum.de | Kirby CMS HTML | `/programm` (li.quarter with div.date) |
-| Bibelhaus ErlebnisMuseum | bibelhaus-frankfurt.de | BEM HTML | `/de/programm` (bmBase--eventsItem elements) |
-| Frankfurter Kunstverein | fkv.de | WP HTML | `/current-events/` (article with DD.MM.YYYY subtitle) |
-| Deutsches Romantik-Museum + Goethe-Haus | deutsches-romantik-museum.de, goethehaus-frankfurt.de | FDH CMS (two-step) | `/programm/` → detail pages with c-event-item dates |
+| Museum | Website | API type | Endpoint | i18n |
+|---|---|---|---|---|
+| Städel Museum | staedelmuseum.de | Custom JSON | `/de/api/finder` | de, en |
+| Historisches Museum Frankfurt | historisches-museum-frankfurt.de | Custom JSON | `/api/calendar` | de, en |
+| Jüdisches Museum + Museum Judengasse | juedischesmuseum.de | TYPO3 feed.json | `/besuch/feed.json?records[uid]=329` | de, en |
+| Deutsches Architekturmuseum (DAM) | dam-online.de | Tribe Events (WP) | `/wp-json/tribe/events/v1/events` | de, en* |
+| DFF – Deutsches Filminstitut & Filmmuseum | dff.film | Tribe Events (WP) | `/wp-json/tribe/events/v1/events` | de, en* |
+| Senckenberg Naturmuseum | museumfrankfurt.senckenberg.de | WP REST + ACF | `/wp-json/wp/v2/events` | de, en |
+| Museum für Kommunikation Frankfurt | mfk-frankfurt.de | My Calendar (WP) | `/wp-json/my-calendar/v1/events` | de |
+| Liebieghaus Skulpturensammlung | liebieghaus.de | schema.org HTML | `/de/kalender` (parsed via regex) | de, en |
+| Museum Angewandte Kunst | museumangewandtekunst.de | Structured HTML | `/de/kalender/` (mak-event-item elements) | de, en |
+| Institut für Stadtgeschichte | stadtgeschichte-ffm.de | RSS feed | `/rss/isg_rss.php` | de, en |
+| Dommuseum Frankfurt | dommuseum-frankfurt.de | TYPO3 Calendarize ICS | `/besuchen/kalender` (per-event ICS files) | de |
+| Junges Museum Frankfurt | junges-museum-frankfurt.de | Drupal Views HTML | `/kalender` (h2/h3 structure with dates) | de, en |
+| Deutsches Ledermuseum (Offenbach) | ledermuseum.de | Kirby CMS HTML | `/programm` (li.quarter with div.date) | de, en |
+| Bibelhaus ErlebnisMuseum | bibelhaus-frankfurt.de | BEM HTML | `/de/programm` (bmBase--eventsItem elements) | de, en* |
+| Frankfurter Kunstverein | fkv.de | WP HTML | `/current-events/` (article with DD.MM.YYYY subtitle) | de, en |
+| Deutsches Romantik-Museum + Goethe-Haus | deutsches-romantik-museum.de, goethehaus-frankfurt.de | FDH CMS (two-step) | `/programm/` → detail pages with c-event-item dates | de, en* |
+
+*\* = partial (general info in English, events may be incomplete)*
 
 ### AI-scraped (~22 museums)
 
 These museums have a `website_url` but no structured API. Events are extracted by fetching their program page and using Workers AI (Llama 4 Scout 17B).
 
-| Museum | Website | Notes |
-|---|---|---|
-| Archäologisches Museum Frankfurt | archaeologisches-museum-frankfurt.de | Joomla, no feeds |
-| Caricatura Museum Frankfurt | caricatura-museum.de | REDAXO CMS, no feeds |
-| Eintracht Frankfurt Museum | museum.eintracht.de | Gatsby, RSS is news only |
-| Fotografie Forum Frankfurt | fffrankfurt.org | |
-| Geldmuseum der Deutschen Bundesbank | bundesbank.de/geldmuseum | RSS is institutional press only |
-| Haus der Stadtgeschichte (Offenbach) | haus-der-stadtgeschichte.de | |
-| Hindemith Kabinett | hindemith.info/de/kabinett | |
-| Ikonenmuseum Frankfurt | museumangewandtekunst.de | Managed by Museum Angewandte Kunst |
-| Klingspor Museum (Offenbach) | klingspormuseum.de | |
-| MGGU – Museum Giersch | mggu.de | |
-| MMK (Museum, Tower, Zollamt) | mmk.art | Nuxt.js SPA, CMS has no events endpoint |
-| MOMEM | momem.org | |
-| Museum Sinclair-Haus (Bad Homburg) | museum-sinclair-haus.de | |
-| Portikus | portikus.de | |
-| Porzellan Museum Frankfurt | porzellan-museum-frankfurt.de | |
-| SCHIRN Kunsthalle Frankfurt | schirn.de | WP API exists but event data corrupted |
-| Stoltze-Museum | frankfurter-sparkasse.de | |
-| Struwwelpeter Museum | struwwelpeter-museum.de | |
-| Weltkulturen Museum | weltkulturenmuseum.de | Domain changed from weltkulturen-museum.de |
+| Museum | Website | Notes | i18n |
+|---|---|---|---|
+| Archäologisches Museum Frankfurt | archaeologisches-museum-frankfurt.de | Joomla, no feeds | de, en* |
+| Caricatura Museum Frankfurt | caricatura-museum.de | REDAXO CMS, no feeds | de |
+| Eintracht Frankfurt Museum | museum.eintracht.de | Gatsby, RSS is news only | de |
+| Fotografie Forum Frankfurt | fffrankfurt.org | | de |
+| Geldmuseum der Deutschen Bundesbank | bundesbank.de/geldmuseum | RSS is institutional press only | de, en |
+| Haus der Stadtgeschichte (Offenbach) | haus-der-stadtgeschichte.de | | de |
+| Hindemith Kabinett | hindemith.info/de/kabinett | | de, en |
+| Ikonenmuseum Frankfurt | museumangewandtekunst.de | Managed by Museum Angewandte Kunst | de, en |
+| Klingspor Museum (Offenbach) | klingspormuseum.de | | de |
+| MGGU – Museum Giersch | mggu.de | | de, en |
+| MMK (Museum, Tower, Zollamt) | mmk.art | Nuxt.js SPA, CMS has no events endpoint | de, en |
+| MOMEM | momem.org | | de, en |
+| Museum Sinclair-Haus (Bad Homburg) | museum-sinclair-haus.de | | de, en |
+| Portikus | portikus.de | No events page | de, en |
+| Porzellan Museum Frankfurt | porzellan-museum-frankfurt.de | | de |
+| SCHIRN Kunsthalle Frankfurt | schirn.de | WP API exists but event data corrupted | de, en |
+| Stoltze-Museum | frankfurter-sparkasse.de | | de |
+| Struwwelpeter Museum | struwwelpeter-museum.de | | de, en, fr |
+| Weltkulturen Museum | weltkulturenmuseum.de | Domain changed from weltkulturen-museum.de | de, en |
 
 ### No event source (1 museum)
 
@@ -160,3 +162,23 @@ wrangler secret put SCRAPE_SECRET
 # Deploy (automated on git push)
 npm run deploy
 ```
+
+## Content translation strategy
+
+Currently, event and exhibition content is served in the original language (German). The UI chrome is translated to DE/EN/FR.
+
+### Museum-side translations
+
+13 of 16 structured-API museums offer English event content on their websites. Some have `/en/` paths or WPML-translated endpoints. These could be scraped in parallel with the German content to provide native English translations for most events.
+
+### Machine translation for the rest
+
+For museums without English content (Dommuseum, MFK, Caricatura, and all AI-scraped museums), machine translation options:
+
+| Option | Quality | Cost | Notes |
+|---|---|---|---|
+| DeepL API Free | Best | $0 (500K chars/month) | With D1 caching of translations, daily deltas fit within free tier |
+| DeepL API Pro | Best | ~$7-25/month | Only needed if volume exceeds free tier |
+| Workers AI m2m100 | Good | $0 (free tier) | Already available via AI binding, lower quality for cultural vocabulary |
+
+**Recommended:** DeepL API Free + hash-based caching in D1. Translate only new/changed text. Store translations keyed by `sha256(source_text)` + `target_lang`. Initial bulk: ~200K chars. Daily delta: ~5-20K chars. No French translations available from any museum — always needs machine translation.
