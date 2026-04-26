@@ -54,6 +54,8 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     return new Response("Bad URL", { status: 400 });
   }
 
+  const width = Math.min(parseInt(url.searchParams.get("w") || "", 10) || 0, 2000);
+
   const cache = caches.default;
   const cacheKey = new Request(url.toString(), request);
 
@@ -61,9 +63,17 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
   if (cached) return cached;
 
   try {
-    const res = await fetch(imageUrl, {
+    const fetchInit: RequestInit = {
       headers: { "User-Agent": USER_AGENT },
-    });
+    };
+
+    if (width > 0) {
+      (fetchInit as RequestInit & { cf: object }).cf = {
+        image: { width, fit: "cover", format: "webp", quality: 80 },
+      };
+    }
+
+    const res = await fetch(imageUrl, fetchInit);
 
     if (!res.ok) {
       return new Response("Upstream error", { status: 502 });
