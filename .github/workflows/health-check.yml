@@ -1,0 +1,58 @@
+name: Source Health Check
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: npm ci
+
+      - name: Run health checks
+        id: health
+        run: npx tsx scripts/health-check.ts > report.txt 2>&1 || echo "failed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Show report
+        run: cat report.txt
+
+      - name: Create issue on failure
+        if: steps.health.outputs.failed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('report.txt', 'utf8');
+            const today = new Date().toISOString().slice(0, 10);
+
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'health-check',
+              state: 'open',
+            });
+
+            if (existing.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body: `## ${today}\n\n${report}`,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Source health check failures — ${today}`,
+                body: report,
+                labels: ['health-check'],
+              });
+            }

@@ -1,0 +1,134 @@
+import { MUSEUM_APIS } from "./museum-apis";
+import { USER_AGENT, MUSEUMSUFER_DE } from "./shared";
+
+interface CheckResult {
+  name: string;
+  url: string;
+  ok: boolean;
+  error?: string;
+}
+
+const CHECKS: Array<{
+  name: string;
+  url: string;
+  validate: (body: string, status: number) => string | null;
+}> = [
+  {
+    name: "museumsufer.de — museums (museumMapConfig)",
+    url: `${MUSEUMSUFER_DE}/de/museen/`,
+    validate: (body) =>
+      body.includes("museumMapConfig")
+        ? null
+        : "museumMapConfig not found in page",
+  },
+  {
+    name: "museumsufer.de — exhibitions (teaserBox)",
+    url: `${MUSEUMSUFER_DE}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`,
+    validate: (body) =>
+      body.includes("teaserBox") && body.includes("teaserHeadline")
+        ? null
+        : "teaserBox/teaserHeadline elements not found",
+  },
+  ...MUSEUM_APIS.map((api) => ({
+    name: `API: ${api.slug} (${api.type})`,
+    url: api.endpoint.includes("?")
+      ? api.endpoint
+      : api.type === "tribe-events"
+        ? `${api.endpoint}?per_page=1`
+        : api.endpoint,
+    validate: (body: string, status: number): string | null => {
+      if (status >= 400) return `HTTP ${status}`;
+
+      switch (api.type) {
+        case "tribe-events":
+          return body.includes('"events"') ? null : 'Missing "events" key';
+        case "historisches":
+          return body.includes('"title"') && body.includes('"dateStart"')
+            ? null
+            : 'Missing "title"/"dateStart" fields';
+        case "juedisches":
+          return body.includes('"items"') ? null : 'Missing "items" key';
+        case "staedel":
+          return body.includes('"events"') ? null : 'Missing "events" key';
+        case "senckenberg":
+          return body.includes('"event_start_time"')
+            ? null
+            : 'Missing "event_start_time" ACF field';
+        case "my-calendar":
+          return body.startsWith("{") || body.startsWith("[")
+            ? null
+            : "Response is not JSON";
+        case "liebieghaus":
+          return body.includes('itemtype="http://schema.org/Event"')
+            ? null
+            : "Missing schema.org Event markup";
+        case "mak":
+          return body.includes("mak-event-item")
+            ? null
+            : "Missing mak-event-item elements";
+        case "stadtgeschichte-rss":
+          return body.includes("<rss") && body.includes("<item>")
+            ? null
+            : "Not a valid RSS feed";
+        case "dommuseum":
+          return body.includes("event-date-day")
+            ? null
+            : "Missing event-date-day elements";
+        default:
+          return null;
+      }
+    },
+  })),
+];
+
+export async function runHealthChecks(): Promise<CheckResult[]> {
+  const results: CheckResult[] = [];
+
+  for (const check of CHECKS) {
+    try {
+      const res = await fetch(check.url, {
+        headers: { "User-Agent": USER_AGENT },
+        redirect: "follow",
+      });
+      const body = await res.text();
+      const error = check.validate(body, res.status);
+      results.push({
+        name: check.name,
+        url: check.url,
+        ok: error === null,
+        error: error ?? undefined,
+      });
+    } catch (e) {
+      results.push({
+        name: check.name,
+        url: check.url,
+        ok: false,
+        error: `Fetch failed: ${e instanceof Error ? e.message : String(e)}`,
+      });
+    }
+  }
+
+  return results;
+}
+
+export function formatResults(results: CheckResult[]): string {
+  const passed = results.filter((r) => r.ok).length;
+  const failed = results.filter((r) => !r.ok);
+
+  let out = `# Health Check Results\n\n`;
+  out += `**${passed}/${results.length} passed**\n\n`;
+
+  if (failed.length > 0) {
+    out += `## Failures\n\n`;
+    for (const r of failed) {
+      out += `- **${r.name}**\n  URL: ${r.url}\n  Error: ${r.error}\n\n`;
+    }
+  }
+
+  out += `## All checks\n\n`;
+  for (const r of results) {
+    out += `- ${r.ok ? "pass" : "FAIL"} ${r.name}\n`;
+  }
+
+  return out;
+}
