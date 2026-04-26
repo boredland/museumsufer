@@ -1,4 +1,4 @@
-export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum" | "junges-museum";
+export type ApiType = "tribe-events" | "historisches" | "juedisches" | "staedel" | "senckenberg" | "my-calendar" | "liebieghaus" | "mak" | "stadtgeschichte-rss" | "dommuseum" | "junges-museum" | "ledermuseum" | "bibelhaus" | "fkv" | "fdh";
 
 export interface MuseumApiConfig {
   slug: string;
@@ -66,6 +66,31 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "junges-museum-frankfurt",
     type: "junges-museum",
     endpoint: "https://junges-museum-frankfurt.de/kalender",
+  },
+  {
+    slug: "deutsches-ledermuseum-of",
+    type: "ledermuseum",
+    endpoint: "https://www.ledermuseum.de/programm",
+  },
+  {
+    slug: "bibelhaus-erlebnismuseum",
+    type: "bibelhaus",
+    endpoint: "https://www.bibelhaus-frankfurt.de/de/programm",
+  },
+  {
+    slug: "frankfurter-kunstverein",
+    type: "fkv",
+    endpoint: "https://www.fkv.de/current-events/",
+  },
+  {
+    slug: "deutsches-romantik-museum",
+    type: "fdh",
+    endpoint: "https://deutsches-romantik-museum.de/programm/",
+  },
+  {
+    slug: "frankfurter-goethe-haus",
+    type: "fdh",
+    endpoint: "https://www.goethehaus-frankfurt.de/programm/",
   },
 ];
 

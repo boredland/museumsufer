@@ -31,9 +31,12 @@ export function stripHtml(text: string): string {
     .trim();
 }
 
-export function truncateHtml(text: string, maxLen = 300): string | null {
+export function truncateHtml(text: string, maxLen = 500): string | null {
   const stripped = stripHtml(text);
-  return stripped.length > 0 ? stripped.slice(0, maxLen) : null;
+  if (stripped.length === 0) return null;
+  if (stripped.length <= maxLen) return stripped;
+  const cut = stripped.lastIndexOf(" ", maxLen);
+  return stripped.slice(0, cut > 0 ? cut : maxLen) + "…";
 }
 
 export function nullIfMidnight(time: string | null | undefined): string | null {

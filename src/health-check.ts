@@ -78,6 +78,22 @@ const CHECKS: Array<{
           return body.includes("view-calendar") && body.includes("<h2>")
             ? null
             : "Missing Drupal calendar view structure";
+        case "ledermuseum":
+          return body.includes("quarter") && body.includes('<div class="date">')
+            ? null
+            : "Missing li.quarter event items";
+        case "bibelhaus":
+          return body.includes("bmBase--eventsItem")
+            ? null
+            : "Missing bmBase--eventsItem elements";
+        case "fkv":
+          return body.includes("archive-title") && body.includes("subtitle")
+            ? null
+            : "Missing archive-title/subtitle elements";
+        case "fdh":
+          return body.includes("o-program-link")
+            ? null
+            : "Missing o-program-link elements";
         default:
           return null;
       }
