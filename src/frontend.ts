@@ -1241,6 +1241,10 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       const calBtn = '<a class="card-ical" href="' + escAttr(calUrl) + '" target="_blank" rel="noopener" '
         + 'aria-label="' + escAttr(T.addToCalendar) + '" title="' + escAttr(T.addToCalendar) + '">'
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5 9h2v2H5z" fill="currentColor"/></svg>'
+        + '</a>'
+        + '<a class="card-ical" href="/api/event/' + ev.id + '.ics" download="event.ics" '
+        + 'aria-label="iCal" title="iCal (.ics)">'
+        + '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         + '</a>';
 
       const meta = [timeTag, priceTag, distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
