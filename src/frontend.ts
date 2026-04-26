@@ -1227,9 +1227,12 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     }
 
     function renderExhibition(ex) {
-      const img = ex.image_url
+      const imgTag = ex.image_url
         ? '<img class="card-img" src="' + escHtml(ex.image_url + '?w=120') + '" srcset="' + escHtml(ex.image_url + '?w=120') + ' 120w, ' + escHtml(ex.image_url + '?w=200') + ' 200w" sizes="(max-width: 480px) 56px, 72px" alt="' + escHtml(ex.title) + '"' + (ex._idx > 2 ? ' loading="lazy"' : '') + '>'
         : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+      const img = ex.museum_website_url
+        ? '<a href="' + escHtml(ex.museum_website_url) + '" target="_blank" rel="noopener" aria-label="' + escAttr(ex.museum_name || '') + '">' + imgTag + '</a>'
+        : imgTag;
       const dates = [
         ex.start_date ? formatDateShort(ex.start_date) : '',
         ex.end_date ? formatDateShort(ex.end_date) : ''
@@ -1275,9 +1278,12 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     }
 
     function renderEvent(ev) {
-      const img = ev.image_url
+      const imgTag = ev.image_url
         ? '<img class="card-img" src="' + escHtml(ev.image_url + '?w=120') + '" srcset="' + escHtml(ev.image_url + '?w=120') + ' 120w, ' + escHtml(ev.image_url + '?w=200') + ' 200w" sizes="(max-width: 480px) 56px, 72px" alt="' + escHtml(ev.title) + '"' + (ev._idx > 2 ? ' loading="lazy"' : '') + '>'
         : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+      const img = ev.museum_website_url
+        ? '<a href="' + escHtml(ev.museum_website_url) + '" target="_blank" rel="noopener" aria-label="' + escAttr(ev.museum_name || '') + '">' + imgTag + '</a>'
+        : imgTag;
       const timeStr = ev.time
         ? (ev.end_time ? ev.time + '–' + ev.end_time : ev.time)
         : '';
