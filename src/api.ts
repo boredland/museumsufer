@@ -1,6 +1,7 @@
 import { Env, Exhibition, Event } from "./types";
 import { todayIso, dateOffset, berlinHourMinute } from "./date";
 import { escHtml, APP_URL } from "./shared";
+import { translateFields } from "./translate";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -21,18 +22,23 @@ export function proxyImages<T extends { image_url?: string | null }>(items: T[])
   }));
 }
 
-export async function handleApi(request: Request, env: Env): Promise<Response> {
+export async function handleApi(request: Request, env: Env, locale = "de"): Promise<Response> {
   const url = new URL(request.url);
   const path = url.pathname;
+  const lang = url.searchParams.get("lang") || locale;
 
   if (path === "/api/events") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(proxyImages(await getEventsForDate(env, date)), 200, CACHE_EVENTS);
+    const events = proxyImages(await getEventsForDate(env, date));
+    const translated = await translateFields(env, events, ["title", "description"] as (keyof Event)[], lang);
+    return json(markTranslated(events, translated, lang), 200, CACHE_EVENTS);
   }
 
   if (path === "/api/exhibitions") {
     const date = url.searchParams.get("date") || todayIso();
-    return json(proxyImages(await getExhibitionsForDate(env, date)), 200, CACHE_EXHIBITIONS);
+    const exhibitions = proxyImages(await getExhibitionsForDate(env, date));
+    const translated = await translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], lang);
+    return json(markTranslated(exhibitions, translated, lang), 200, CACHE_EXHIBITIONS);
   }
 
   if (path === "/api/museums") {
@@ -42,11 +48,21 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
 
   if (path === "/api/day") {
     const date = url.searchParams.get("date") || todayIso();
-    const [exhibitions, events] = await Promise.all([
+    const [rawExhibitions, rawEvents] = await Promise.all([
       getExhibitionsForDate(env, date),
       getEventsForDate(env, date),
     ]);
-    return json({ date, exhibitions: proxyImages(exhibitions), events: proxyImages(events) }, 200, CACHE_EVENTS);
+    const exhibitions = proxyImages(rawExhibitions);
+    const events = proxyImages(rawEvents);
+    const [trExh, trEv] = await Promise.all([
+      translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], lang),
+      translateFields(env, events, ["title", "description"] as (keyof Event)[], lang),
+    ]);
+    return json({
+      date,
+      exhibitions: markTranslated(exhibitions, trExh, lang),
+      events: markTranslated(events, trEv, lang),
+    }, 200, CACHE_EVENTS);
   }
 
   const eventIcsMatch = path.match(/^\/api\/event\/(\d+)\.ics$/);
@@ -218,6 +234,16 @@ function buildIcs(events: (Event & { museum_name: string })[]): string {
 
 function icsEsc(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+}
+
+function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {
+  if (lang === "de") return originals;
+  return translated.map((item, i) => {
+    const orig = originals[i] as Record<string, unknown>;
+    const cur = item as Record<string, unknown>;
+    const changed = Object.keys(cur).some((k) => cur[k] !== orig[k]);
+    return changed ? { ...item, translated: true } as T : item;
+  });
 }
 
 function json(data: unknown, status = 200, cacheControl?: string): Response {

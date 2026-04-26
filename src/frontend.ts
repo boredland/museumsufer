@@ -427,6 +427,17 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       white-space: nowrap;
     }
 
+    .card-translated {
+      font-size: 0.5625rem;
+      color: var(--text-tertiary);
+      opacity: 0.7;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.1875rem;
+    }
+
+    .card-translated svg { width: 10px; height: 10px; }
+
     .card-ending-soon {
       font-size: 0.6875rem;
       font-weight: 500;
@@ -901,6 +912,11 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return km !== null ? Math.round(km / 5 * 60) : null;
     }
 
+    function translatedBadge(item) {
+      if (!item.translated) return '';
+      return '<span class="card-translated" title="Translated by DeepL"><svg viewBox="0 0 24 24" fill="none"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="currentColor"/></svg>DeepL</span>';
+    }
+
     function distanceBadge(slug) {
       const min = walkMin(slug);
       if (min === null) return '';
@@ -998,7 +1014,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       dateLabel.textContent = formatDateFull(date);
       content.innerHTML = '<div class="loading">' + escHtml(T.loading) + '</div>';
       try {
-        const res = await fetch('/api/day?date=' + date);
+        const langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
+        const res = await fetch('/api/day?date=' + date + langParam);
         const data = await res.json();
         render(data);
       } catch (e) {
@@ -1117,7 +1134,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return '<div class="card">'
         + img
         + '<div class="card-body">'
-        + '<div class="card-title">' + titleHtml + '</div>'
+        + '<div class="card-title">' + titleHtml + ' ' + translatedBadge(ex) + '</div>'
         + '<div class="card-meta">'
         + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
         + endingTag
@@ -1163,7 +1180,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return '<div class="card">'
         + img
         + '<div class="card-body">'
-        + '<div class="card-title">' + titleHtml + '</div>'
+        + '<div class="card-title">' + titleHtml + ' ' + translatedBadge(ev) + '</div>'
         + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
         + '<div class="card-meta">' + meta + '</div>'
         + desc
