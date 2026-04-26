@@ -158,7 +158,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       display: flex;
       align-items: center;
       gap: 0.375rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       justify-content: center;
       flex-wrap: wrap;
     }
@@ -563,7 +563,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     .site-footer a:hover { color: var(--accent); text-decoration: underline; }
 
     .llm-tip {
-      margin-bottom: 1.5rem;
+      margin-top: 1rem;
       padding: 0.625rem 1rem;
       background: var(--surface);
       border-radius: var(--radius);
@@ -631,7 +631,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       gap: 0.5rem;
       width: 100%;
       padding: 0.5rem 0.875rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       background: var(--surface);
       border: 1.5px solid var(--border);
       border-radius: 100px;
@@ -812,14 +812,6 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <kbd class="search-kbd">Ctrl K</kbd>
     </button>
 
-    <details class="llm-tip">
-      <summary>
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        ${escHtml(tr.llmTip)}
-      </summary>
-      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()" aria-label="${escHtml(tr.copyPrompt)}">${escHtml(tr.copyPrompt)}</button></div>
-    </details>
-
     <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
       <button id="btn-today" class="active">${escHtml(tr.today)}</button>
       <button id="btn-tomorrow">${escHtml(tr.tomorrow)}</button>
@@ -843,6 +835,14 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <a href="/feed.xml">${escHtml(tr.rssFeed)}</a>
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
     </footer>
+
+    <details class="llm-tip">
+      <summary>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        ${escHtml(tr.llmTip)}
+      </summary>
+      <div class="llm-tip-prompt" id="llm-prompt" data-prompt="${escHtml(tr.llmPrompt)}">${escHtml(tr.llmPrompt)}<button class="llm-tip-copy" onclick="copyPrompt()" aria-label="${escHtml(tr.copyPrompt)}">${escHtml(tr.copyPrompt)}</button></div>
+    </details>
   </div>
 
   <div class="search-overlay" id="search-overlay" role="dialog" aria-label="${escHtml(tr.search)}">
