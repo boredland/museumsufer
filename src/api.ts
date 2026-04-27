@@ -1,4 +1,5 @@
 import { berlinHourMinute, dateOffset, todayIso } from "./date";
+import { MUSEUMS } from "./museum-config";
 import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
 import type { Env, Event, Exhibition, MuseumInfo } from "./types";
@@ -147,7 +148,10 @@ export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>
   }>();
   const map: Record<string, MuseumInfo> = {};
   for (const m of results) {
-    map[m.slug] = { name: m.name, website: m.website_url };
+    const config = MUSEUMS[m.slug];
+    const info: MuseumInfo = { name: m.name, website: m.website_url };
+    if (config?.name) info.museumsufer = false;
+    map[m.slug] = info;
   }
   return map;
 }

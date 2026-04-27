@@ -334,6 +334,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .museum-group-header:first-child { border-top: none; }
     .museum-link { color: var(--text-tertiary); margin-left: 0.25rem; vertical-align: baseline; }
     .museum-link:hover { color: var(--accent); }
+    .not-museumsufer { color: var(--text-tertiary); margin-left: 0.25rem; vertical-align: baseline; opacity: 0.6; }
     .museum-no-exhibition { display: flex; justify-content: space-between; align-items: center; opacity: 0.7; border-left-color: var(--border-light); }
     .museum-permanent { font-weight: 400; font-size: 0.625rem; letter-spacing: 0; text-transform: none; color: var(--text-tertiary); }
 
@@ -1238,8 +1239,10 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     function museumHeader(name, slug) {
       const info = slug && MUSEUMS[slug];
       const url = info && info.website;
-      if (url) return escHtml(name) + ' <a class="museum-link" href="' + escHtml(url) + '" target="_blank" rel="noopener" aria-label="' + escAttr(name) + '"><svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
-      return escHtml(name);
+      let html = escHtml(name);
+      if (url) html += ' <a class="museum-link" href="' + escHtml(url) + '" target="_blank" rel="noopener" aria-label="' + escAttr(name) + '"><svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+      if (info && info.museumsufer === false) html += ' <span class="not-museumsufer" title="' + escAttr(T.notMuseumsufer) + '"><svg viewBox="0 0 16 16" fill="none" width="12" height="12"><path d="M8 2L2 6v1h12V6L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 9v4M8 9v4M12 9v4M3 13h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span>';
+      return html;
     }
 
     function renderExhibitionList(exhibitions) {

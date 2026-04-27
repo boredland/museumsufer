@@ -80,6 +80,7 @@ const de: Translations = {
   passCard: "Museumsufercard",
   passTicket: "Museumsuferticket",
   permanentCollection: "Ständige Sammlung",
+  notMuseumsufer: "Nicht in der Museumsufercard enthalten",
 };
 
 const en: Translations = {
@@ -130,6 +131,7 @@ const en: Translations = {
   passCard: "Annual Pass",
   passTicket: "2-Day Pass",
   permanentCollection: "Permanent collection",
+  notMuseumsufer: "Not included in Museumsufercard",
 };
 
 const fr: Translations = {
@@ -180,6 +182,7 @@ const fr: Translations = {
   passCard: "Carte annuelle",
   passTicket: "Pass 2 jours",
   permanentCollection: "Collection permanente",
+  notMuseumsufer: "Non inclus dans la Museumsufercard",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
