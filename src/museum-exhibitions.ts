@@ -9,6 +9,7 @@ export const MUSEUM_EXHIBITION_URLS: Record<string, ExhibitionPageConfig> = {
   },
   "bibelhaus-erlebnismuseum": {
     url: "https://www.bibelhaus-frankfurt.de/de/ausstellungen",
+    js: true,
   },
   "caricatura-museum-frankfurt": {
     url: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
