@@ -288,6 +288,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "frankfurter-feldbahnmuseum": {
     name: "Frankfurter Feldbahnmuseum",
     description: "Historische Feldbahnen und Schmalspurlokomotiven zum Anfassen und Mitfahren.",
+    image: "https://www.feldbahn-ffm.de/wp-content/uploads/2021/11/ffm_aktuelles_21-10_20.jpg",
     website: "https://www.feldbahnmuseum.de/",
     lat: 50.1069,
     lng: 8.6119,
@@ -295,6 +296,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "verkehrsmuseum-frankfurt": {
     name: "Verkehrsmuseum Frankfurt am Main",
     description: "Verkehrsgeschichte mit historischen Straßenbahnen, Bussen und Schienenfahrzeugen.",
+    image: "https://hsf-ffm.com/wp-content/uploads/2025/10/LinusWambach_23.03.2025-scaled.webp",
     website: "https://hsf-ffm.com/de/",
     lat: 50.0822,
     lng: 8.5816,
@@ -330,6 +332,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "frankfurter-buergerstiftung": {
     name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
     description: "Kulturelle Veranstaltungen und Ausstellungen im historischen Holzhausenschlösschen.",
+    image:
+      "https://www.frankfurter-buergerstiftung.de/db/image/text/1120x630/76_holzhausenschloesschen-c-barbara-staubach.jpg",
     website: "https://www.frankfurter-buergerstiftung.de/",
     lat: 50.1262,
     lng: 8.6792,
