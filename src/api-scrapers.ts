@@ -791,6 +791,8 @@ async function fetchBibelhaus(endpoint: string, proxy?: ProxyConfig): Promise<Ap
 
   while ((match = itemRe.exec(html)) !== null) {
     const block = match[1];
+    if (/geschlossen|Schließzeit/i.test(block)) continue;
+
     const titleMatch = block.match(/bmBase--eventsLabelTitle[^>]*>([^<]+)/);
     const dateDay = block.match(/bmBase--eventsDateDay[^>]*>([^<]+)/);
     const dateTime = block.match(/bmBase--eventsDateTime[^>]*>([^<]+)/);
