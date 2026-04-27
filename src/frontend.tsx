@@ -1,11 +1,13 @@
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { CLIENT_SCRIPT } from "./client-script";
+import { ContentBody } from "./components";
+import { todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
-import { escHtml } from "./shared";
+import { escHtml, formatDateFull } from "./shared";
 import { PAGE_STYLES } from "./styles";
-import type { MuseumInfo } from "./types";
+import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 export type { MuseumInfo };
 
@@ -301,9 +303,24 @@ export function renderPage(
           <PassPromo locale={locale} tr={tr} />
           <DateNav tr={tr} />
 
-          <p class="date-label" id="date-label" aria-live="polite" />
+          <p class="date-label" id="date-label" aria-live="polite">
+            {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
+          </p>
 
-          <main id="content">{initialData ? null : <div class="loading">{tr.loading}</div>}</main>
+          <main id="content">
+            {initialData ? (
+              <ContentBody
+                events={initialData.events as EventWithLikes[]}
+                exhibitions={initialData.exhibitions as ExhibitionWithLikes[]}
+                museums={museums || {}}
+                tr={tr}
+                locale={locale}
+                todayIso={todayIso()}
+              />
+            ) : (
+              <div class="loading">{tr.loading}</div>
+            )}
+          </main>
 
           <footer class="site-footer">
             <a

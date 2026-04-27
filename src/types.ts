@@ -36,6 +36,11 @@ export interface Exhibition {
   museum_slug?: string;
 }
 
+export interface ExhibitionWithLikes extends Exhibition {
+  like_count: number;
+  translated?: boolean;
+}
+
 export interface Event {
   id: number;
   museum_id: number;
@@ -51,4 +56,9 @@ export interface Event {
   price: string | null;
   museum_name?: string;
   museum_slug?: string;
+}
+
+export interface EventWithLikes extends Event {
+  like_count: number;
+  translated?: boolean;
 }

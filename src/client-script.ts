@@ -543,13 +543,58 @@ export const CLIENT_SCRIPT = `
 
     if (!('geolocation' in navigator)) btnNear.style.display = 'none';
 
+    function hydrateVisited() {
+      const visited = getVisited();
+      if (visited.length === 0) return;
+      const visitedSection = document.getElementById('visited-section');
+      const visitedList = document.getElementById('visited-list');
+      const visitedCount = document.getElementById('visited-count');
+      if (!visitedSection || !visitedList || !visitedCount) return;
+
+      const cards = content.querySelectorAll('article.card[data-item-id]');
+      let count = 0;
+      cards.forEach(card => {
+        const id = parseInt(card.getAttribute('data-item-id'), 10);
+        if (!visited.includes(id)) return;
+        const li = card.parentElement;
+        if (!li) return;
+        card.querySelector('.card-visited-btn').classList.add('is-visited');
+        card.querySelector('.card-visited-btn').setAttribute('aria-pressed', 'true');
+        card.querySelector('.card-visited-btn').setAttribute('aria-label', T.unmarkVisited);
+        card.querySelector('.card-visited-btn').setAttribute('title', T.unmarkVisited);
+        const svg = card.querySelector('.card-visited-btn svg');
+        if (svg) svg.innerHTML = '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+        visitedList.appendChild(li);
+        count++;
+      });
+
+      if (count > 0) {
+        visitedCount.textContent = count;
+        visitedSection.style.display = '';
+      }
+    }
+
+    function hydrateSectionStates() {
+      content.querySelectorAll('details.section').forEach(d => {
+        const key = d.dataset.section;
+        if (key) {
+          try {
+            const state = localStorage.getItem('section-' + key);
+            if (state === 'closed') d.removeAttribute('open');
+          } catch {}
+        }
+        d.addEventListener('toggle', () => persistSectionState(d));
+      });
+    }
+
     updateNavVisibility();
     const urlDate = new URLSearchParams(location.search).get('date');
     if (urlDate && /^\d{4}-\d{2}-\d{2}$/.test(urlDate) && urlDate !== toIso(today())) {
       loadDay(urlDate, null);
     } else if (__INITIAL_DATA__) {
-      dateLabel.textContent = formatDateFull(__INITIAL_DATA__.date);
-      render(__INITIAL_DATA__);
+      lastRenderData = __INITIAL_DATA__;
+      hydrateVisited();
+      hydrateSectionStates();
     } else {
       loadDay(toIso(today()), btnToday);
     }
