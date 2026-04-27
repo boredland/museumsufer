@@ -38,6 +38,53 @@ app.get("/img/*", async (c) => {
   return c.notFound();
 });
 
+app.post("/api/transit", async (c) => {
+  const body = await c.req.json<{ lat: number; lng: number }>().catch(() => null);
+  if (!body?.lat || !body?.lng) return c.json({ error: "invalid" }, 400);
+
+  const ox = Math.round(body.lng * 1e6);
+  const oy = Math.round(body.lat * 1e6);
+  const { getMuseumLocations: getLocs } = await import("./museum-config");
+  const geo = getLocs();
+  const slugs = Object.keys(geo);
+  const result: Record<string, number> = {};
+
+  for (let i = 0; i < slugs.length; i += 5) {
+    const batch = slugs.slice(i, i + 5);
+    const svcReqL = batch.map((slug) => ({
+      meth: "TripSearch",
+      req: {
+        depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
+        arrLocL: [{ type: "C", crd: { x: Math.round(geo[slug].lng * 1e6), y: Math.round(geo[slug].lat * 1e6) } }],
+        numF: 1,
+        getPolyline: false,
+      },
+    }));
+    try {
+      const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        cf: { cacheTtl: 300, cacheEverything: true },
+        body: JSON.stringify({
+          auth: { type: "AID", aid: "x0k4ZR33ICN9CWmj" },
+          client: { type: "WEB", id: "RMV", name: "webapp" },
+          ver: "1.44",
+          ext: "RMV.1",
+          lang: "de",
+          svcReqL,
+        }),
+      });
+      const data = (await res.json()) as { svcResL?: Array<{ res?: { outConL?: Array<{ dur?: string }> } }> };
+      (data.svcResL || []).forEach((r, j) => {
+        const dur = r.res?.outConL?.[0]?.dur;
+        if (dur) result[batch[j]] = parseInt(dur.slice(0, 2), 10) * 60 + parseInt(dur.slice(2, 4), 10);
+      });
+    } catch {}
+  }
+
+  return c.json(result, { headers: { "Cache-Control": "public, max-age=300" } });
+});
+
 app.all("/api/*", (c) => {
   const locale = detectLocale(c.req.raw);
   return handleApi(c.req.raw, c.env, locale);
