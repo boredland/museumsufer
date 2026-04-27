@@ -258,7 +258,8 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         popovertarget={popId}
-        onclick={`var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'`}
+        style={`anchor-name:--${popId}`}
+        onclick={`if(!CSS.supports('anchor-name','--a')){var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'}`}
       >
         <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
           <path
@@ -273,6 +274,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
       <div
         id={popId}
         popover="auto"
+        style={`position-anchor:--${popId};position-area:bottom span-right`}
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
         <a href={googleUrl} target="_blank" rel="noopener" class={calLinkClass}>
