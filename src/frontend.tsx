@@ -173,7 +173,7 @@ function DateNav({ tr }: { tr: Record<string, string> }) {
         aria-label={tr.pickDate}
         min=""
         max=""
-        class="py-2 px-3 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+        class="py-2 px-3 max-[480px]:px-2 max-[480px]:w-10 max-[480px]:overflow-hidden border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
       />
       <button
         type="button"
