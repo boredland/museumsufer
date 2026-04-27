@@ -1,7 +1,7 @@
 export const cardClass =
   "card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0";
 
-export const cardListClass = "card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0";
+export const cardListClass = "card-list bg-surface rounded-xl shadow-card list-none p-0";
 
 export const iconBtnClass =
   "inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
