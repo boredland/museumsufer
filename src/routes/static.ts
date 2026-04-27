@@ -11,17 +11,6 @@ const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="6
   <path d="M564 470 L554 475v2h20V475L564 470zm0 2.26L570.47 475H557.53L564 472.26zM554 487v2h20v-2H554zm2-8v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" fill="#b45309"/>
 </svg>`;
 
-const SITEMAP = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://museumsufer.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://museumsufer.app/?lang=de</loc><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/?lang=en</loc><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/?lang=fr</loc><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/feed.xml</loc><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/feed.ics</loc><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/llms.txt</loc><changefreq>weekly</changefreq></url>
-</urlset>`;
-
 const MANIFEST = JSON.stringify({
   id: "/",
   name: "Museumsufer Frankfurt",
@@ -95,9 +84,20 @@ app.get("/robots.txt", (c) =>
   }),
 );
 
-app.get("/sitemap.xml", (c) =>
-  c.body(SITEMAP, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } }),
-);
+app.get("/sitemap.xml", (c) => {
+  const today = new Date().toISOString().slice(0, 10);
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://museumsufer.app/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://museumsufer.app/?lang=de</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
+  <url><loc>https://museumsufer.app/?lang=en</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
+  <url><loc>https://museumsufer.app/?lang=fr</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
+  <url><loc>https://museumsufer.app/feed.xml</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
+  <url><loc>https://museumsufer.app/feed.ics</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
+  <url><loc>https://museumsufer.app/llms.txt</loc><changefreq>weekly</changefreq></url>
+</urlset>`;
+  return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
+});
 
 app.get("/sw.js", (c) =>
   c.body(SERVICE_WORKER_JS, {

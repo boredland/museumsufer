@@ -283,7 +283,19 @@ export function renderPage(
   const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
-  const websiteSchema = `{"@context":"https://schema.org","@type":"WebSite","name":"Museumsufer Frankfurt","url":"https://museumsufer.app/","description":"${escHtml(tr.metaLong)}","inLanguage":["de","en","fr"]}`;
+  const websiteSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Museumsufer Frankfurt",
+    url: "https://museumsufer.app/",
+    description: tr.metaLong,
+    inLanguage: ["de", "en", "fr"],
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://museumsufer.app/?q={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  });
 
   const dataInit = `const T = ${trJson};
     const DATE_LOCALE = ${dlJson};
@@ -445,58 +457,90 @@ function getBerlinUtcOffset(): string {
 }
 
 function buildEventSchema(data: InitialData, tz: string): string {
+  const schemas: Record<string, unknown>[] = [];
+
+  const exhibitions = data.exhibitions as Array<Record<string, unknown>>;
+  if (exhibitions) {
+    for (const ex of exhibitions.slice(0, 20)) {
+      const museum = (ex.museum_name as string) || "";
+      const slug = (ex.museum_slug as string) || "";
+      const geo = MUSEUM_LOCATIONS[slug];
+      const exSchema: Record<string, unknown> = {
+        "@type": "ExhibitionEvent",
+        name: ex.title,
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      };
+      if (ex.start_date) exSchema.startDate = ex.start_date;
+      if (ex.end_date) exSchema.endDate = ex.end_date;
+      if (ex.description) exSchema.description = ex.description;
+      if (ex.detail_url) exSchema.url = ex.detail_url;
+      if (ex.image_url) {
+        const img = ex.image_url as string;
+        exSchema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
+      }
+      const loc: Record<string, unknown> = { "@type": "Place", name: museum };
+      if (geo) {
+        loc.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
+        loc.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
+      }
+      exSchema.location = loc;
+      schemas.push(exSchema);
+    }
+  }
+
   const events = data.events as Array<Record<string, unknown>>;
-  if (!events || events.length === 0) return "";
+  if (events) {
+    events.slice(0, 20).forEach((ev) => {
+      const date = ev.date as string;
+      const time = ev.time as string | null;
+      const endTime = ev.end_time as string | null;
+      const endDate = ev.end_date as string | null;
+      const museum = (ev.museum_name as string) || "";
+      const slug = (ev.museum_slug as string) || "";
+      const geo = MUSEUM_LOCATIONS[slug];
 
-  const schemas = events.slice(0, 20).map((ev) => {
-    const date = ev.date as string;
-    const time = ev.time as string | null;
-    const endTime = ev.end_time as string | null;
-    const endDate = ev.end_date as string | null;
-    const museum = (ev.museum_name as string) || "";
-    const slug = (ev.museum_slug as string) || "";
-    const geo = MUSEUM_LOCATIONS[slug];
+      const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
+      let endIso: string;
+      if (endTime) {
+        const ed = endDate || date;
+        endIso = `${ed}T${endTime}:00${tz}`;
+      } else if (time) {
+        const h = (parseInt(time.split(":")[0], 10) + 1) % 24;
+        endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00${tz}`;
+      } else {
+        endIso = `${date}T18:00:00${tz}`;
+      }
 
-    const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
-    let endIso: string;
-    if (endTime) {
-      const ed = endDate || date;
-      endIso = `${ed}T${endTime}:00${tz}`;
-    } else if (time) {
-      const h = (parseInt(time.split(":")[0], 10) + 1) % 24;
-      endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00${tz}`;
-    } else {
-      endIso = `${date}T18:00:00${tz}`;
-    }
+      const schema: Record<string, unknown> = {
+        "@type": "Event",
+        name: ev.title,
+        startDate: startIso,
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      };
+      schema.endDate = endIso;
+      if (ev.description) schema.description = ev.description;
+      if (ev.detail_url) schema.url = ev.detail_url;
+      if (ev.image_url) {
+        const img = ev.image_url as string;
+        schema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
+      }
 
-    const schema: Record<string, unknown> = {
-      "@type": "Event",
-      name: ev.title,
-      startDate: startIso,
-      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    };
-    schema.endDate = endIso;
-    if (ev.description) schema.description = ev.description;
-    if (ev.detail_url) schema.url = ev.detail_url;
-    if (ev.image_url) {
-      const img = ev.image_url as string;
-      schema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
-    }
+      const location: Record<string, unknown> = { "@type": "Place", name: museum };
+      if (geo) {
+        location.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
+        location.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
+      }
+      schema.location = location;
 
-    const location: Record<string, unknown> = { "@type": "Place", name: museum };
-    if (geo) {
-      location.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
-      location.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
-    }
-    schema.location = location;
+      if (ev.price) {
+        schema.offers = { "@type": "Offer", price: 0, priceCurrency: "EUR", description: ev.price };
+      }
 
-    if (ev.price) {
-      schema.offers = { "@type": "Offer", price: 0, priceCurrency: "EUR", description: ev.price };
-    }
+      schemas.push(schema);
+    });
+  }
 
-    return schema;
-  });
-
+  if (schemas.length === 0) return "";
   const wrapper = { "@context": "https://schema.org", "@graph": schemas };
   return `<script type="application/ld+json">${JSON.stringify(wrapper)}</script>`;
 }
