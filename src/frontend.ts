@@ -1131,10 +1131,18 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
 
     let loadSeq = 0;
 
+    function pushDateToUrl(date) {
+      const url = new URL(location.href);
+      if (date === toIso(today())) url.searchParams.delete('date');
+      else url.searchParams.set('date', date);
+      history.replaceState(null, '', url.toString());
+    }
+
     async function loadDay(date, btn) {
       const seq = ++loadSeq;
       setActive(btn);
       dateLabel.textContent = formatDateFull(date);
+      pushDateToUrl(date);
       content.innerHTML = '<div class="loading">' + escHtml(T.loading) + '</div>';
       try {
         const langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
@@ -1430,7 +1438,10 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     if (!('geolocation' in navigator)) btnNear.style.display = 'none';
 
     updateNavVisibility();
-    if (__INITIAL_DATA__) {
+    const urlDate = new URLSearchParams(location.search).get('date');
+    if (urlDate && /^\d{4}-\d{2}-\d{2}$/.test(urlDate) && urlDate !== toIso(today())) {
+      loadDay(urlDate, null);
+    } else if (__INITIAL_DATA__) {
       dateLabel.textContent = formatDateFull(__INITIAL_DATA__.date);
       render(__INITIAL_DATA__);
     } else {
