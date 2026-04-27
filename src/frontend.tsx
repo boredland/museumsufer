@@ -395,7 +395,7 @@ export function renderPage(
               {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
             </p>
 
-            <main id="content" class="min-h-[60vh]">
+            <main id="content">
               {initialData ? (
                 <ContentBody
                   events={initialData.events as EventWithLikes[]}
