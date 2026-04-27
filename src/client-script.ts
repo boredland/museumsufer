@@ -254,10 +254,10 @@ export const CLIENT_SCRIPT = `
       lists.forEach(function(list) {
         var items = Array.from(list.querySelectorAll(':scope > li'));
         items.sort(function(a, b) {
-          var cardA = a.querySelector('article[data-museum-slug]');
-          var cardB = b.querySelector('article[data-museum-slug]');
-          var da = cardA ? (walkKm(cardA.dataset.museumSlug) || 999) : 999;
-          var db = cardB ? (walkKm(cardB.dataset.museumSlug) || 999) : 999;
+          var elA = a.querySelector('[data-museum-slug]');
+          var elB = b.querySelector('[data-museum-slug]');
+          var da = elA ? (walkKm(elA.dataset.museumSlug) || 999) : 999;
+          var db = elB ? (walkKm(elB.dataset.museumSlug) || 999) : 999;
           return da - db;
         });
         items.forEach(function(item) { list.appendChild(item); });
