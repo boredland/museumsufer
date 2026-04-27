@@ -2,7 +2,7 @@ import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { CLIENT_SCRIPT } from "./client-script";
 import { ContentBody, MuseumsSection } from "./components";
-import { todayIso } from "./date";
+import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { escHtml, formatDateFull } from "./shared";
@@ -154,20 +154,16 @@ const dateBtnClass =
 
 function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
   const dl = dateLocale(locale);
-  const days: { iso: string; weekday: string; day: string; isToday: boolean }[] = [];
-  const today = todayIso();
-  const base = new Date(`${today}T12:00:00`);
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(base);
-    d.setDate(d.getDate() + i);
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    days.push({
-      iso,
-      weekday: i === 0 ? tr.today : d.toLocaleDateString(dl, { weekday: "short" }),
-      day: String(d.getDate()),
+  const now = berlinNow();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = now.add(i, "day");
+    return {
+      iso: d.format("YYYY-MM-DD"),
+      weekday: i === 0 ? tr.today : d.toDate().toLocaleDateString(dl, { weekday: "short" }),
+      day: String(d.date()),
       isToday: i === 0,
-    });
-  }
+    };
+  });
 
   return (
     <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
