@@ -42,7 +42,7 @@ export const CLIENT_SCRIPT = `
         btn.setAttribute('aria-pressed', 'false');
         btn.setAttribute('aria-label', T.markVisited);
         btn.setAttribute('title', T.markVisited);
-        btn.querySelector('svg').innerHTML = '<path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+        btn.querySelector('svg').innerHTML = '<path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>';
         var activeList = content.querySelector('[data-section="exhibitions"] .card-list');
         if (activeList && li) activeList.appendChild(li);
         updateVisitedCount();
@@ -83,7 +83,7 @@ export const CLIENT_SCRIPT = `
       btn.setAttribute('aria-pressed', 'true');
       btn.setAttribute('aria-label', T.unmarkVisited);
       btn.setAttribute('title', T.unmarkVisited);
-      btn.querySelector('svg').innerHTML = '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+      btn.querySelector('svg').innerHTML = '<path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 14L14 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
       var visitedList = document.getElementById('visited-list');
       var visitedSection = document.getElementById('visited-section');
       var li = card.parentElement;
@@ -175,7 +175,7 @@ export const CLIENT_SCRIPT = `
         dataEl.remove();
         buildSearchIndex();
       }
-      hydrateVisited();
+      hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
       if (sortByDistance && userPos) { injectDistanceBadges(); injectReachability(); }
     });
@@ -205,7 +205,7 @@ export const CLIENT_SCRIPT = `
       return div.innerHTML;
     }
 
-    var pinSvg = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" style="width:12px;height:12px;flex-shrink:0"><path d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z" stroke="currentColor" stroke-width="1.5"/></svg>';
+    var pinSvg = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" style="width:12px;height:12px;flex-shrink:0"><rect x="3.2" y="3.2" width="6.8" height="6.8" rx="1" transform="rotate(45 8 8)" stroke="currentColor" stroke-width="1.5"/><path d="M7 9.5L9.5 7M9.5 7H7M9.5 7V9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
@@ -361,7 +361,7 @@ export const CLIENT_SCRIPT = `
           btn.setAttribute('aria-label', T.unmarkVisited);
           btn.setAttribute('title', T.unmarkVisited);
           var svg = btn.querySelector('svg');
-          if (svg) svg.innerHTML = '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+          if (svg) svg.innerHTML = '<path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M2 14L14 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>';
         }
         visitedList.appendChild(li);
         count++;
@@ -371,6 +371,18 @@ export const CLIENT_SCRIPT = `
         visitedCount.textContent = count;
         visitedSection.removeAttribute('hidden');
       }
+    }
+
+    function hydrateMyLikes() {
+      var likes = getMyLikes();
+      document.querySelectorAll('.card-likes').forEach(function(badge) {
+        var card = badge.closest('article[data-item-id]');
+        if (!card) return;
+        var id = card.getAttribute('data-item-id');
+        if (likes[id]) {
+          badge.classList.add('!text-red-500', '!border-red-200');
+        }
+      });
     }
 
     function hydrateSectionStates() {
@@ -397,7 +409,7 @@ export const CLIENT_SCRIPT = `
       location.replace('/?lang=' + CURRENT_LANG + '&_r=1');
     } else if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
-      hydrateVisited();
+      hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
     } else {
       loadDay(clientToday);
