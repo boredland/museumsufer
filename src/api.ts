@@ -9,6 +9,38 @@ const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-rev
 const CACHE_MUSEUMS = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400";
 const CACHE_FEEDS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 
+async function visitorHash(request: Request): Promise<string> {
+  const ip = request.headers.get("CF-Connecting-IP") || "unknown";
+  const day = todayIso();
+  const data = new TextEncoder().encode(`${ip}:${day}`);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash).slice(0, 8))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function getLikeCounts(env: Env, itemType: string, itemIds: number[]): Promise<Record<number, number>> {
+  if (itemIds.length === 0) return {};
+  const placeholders = itemIds.map(() => "?").join(",");
+  const { results } = await env.DB.prepare(
+    `SELECT item_id, COUNT(*) as like_count FROM likes
+     WHERE item_type = ? AND item_id IN (${placeholders})
+     GROUP BY item_id`,
+  )
+    .bind(itemType, ...itemIds)
+    .all<{ item_id: number; like_count: number }>();
+  const counts: Record<number, number> = {};
+  for (const r of results) counts[r.item_id] = r.like_count;
+  return counts;
+}
+
+export function attachLikeCounts<T extends { id: number }>(
+  items: T[],
+  counts: Record<number, number>,
+): (T & { like_count: number })[] {
+  return items.map((item) => ({ ...item, like_count: counts[item.id] || 0 }));
+}
+
 function proxyImageUrl(url: string | null): string | null {
   if (!url?.startsWith("https://")) return url;
   return `/img/${encodeURIComponent(url)}`;
@@ -26,18 +58,34 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
   const path = url.pathname;
   const lang = url.searchParams.get("lang") || locale;
 
+  if (path === "/api/like" && request.method === "POST") {
+    return handleLike(request, env);
+  }
+
   if (path === "/api/events") {
     const date = url.searchParams.get("date") || todayIso();
     const events = proxyImages(await getEventsForDate(env, date));
-    const translated = await translateFields(env, events, ["title", "description"] as (keyof Event)[], lang);
-    return json(markTranslated(events, translated, lang), 200, CACHE_EVENTS);
+    const counts = await getLikeCounts(
+      env,
+      "event",
+      events.map((e) => e.id),
+    );
+    const withLikes = attachLikeCounts(events, counts);
+    const translated = await translateFields(env, withLikes, ["title", "description"] as (keyof Event)[], lang);
+    return json(markTranslated(withLikes, translated, lang), 200, CACHE_EVENTS);
   }
 
   if (path === "/api/exhibitions") {
     const date = url.searchParams.get("date") || todayIso();
     const exhibitions = proxyImages(await getExhibitionsForDate(env, date));
-    const translated = await translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], lang);
-    return json(markTranslated(exhibitions, translated, lang), 200, CACHE_EXHIBITIONS);
+    const counts = await getLikeCounts(
+      env,
+      "exhibition",
+      exhibitions.map((e) => e.id),
+    );
+    const withLikes = attachLikeCounts(exhibitions, counts);
+    const translated = await translateFields(env, withLikes, ["title"] as (keyof Exhibition)[], lang);
+    return json(markTranslated(withLikes, translated, lang), 200, CACHE_EXHIBITIONS);
   }
 
   if (path === "/api/museums") {
@@ -53,15 +101,29 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
     ]);
     const exhibitions = proxyImages(rawExhibitions);
     const events = proxyImages(rawEvents);
+    const [exhCounts, evCounts] = await Promise.all([
+      getLikeCounts(
+        env,
+        "exhibition",
+        exhibitions.map((e) => e.id),
+      ),
+      getLikeCounts(
+        env,
+        "event",
+        events.map((e) => e.id),
+      ),
+    ]);
+    const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
+    const evWithLikes = attachLikeCounts(events, evCounts);
     const [trExh, trEv] = await Promise.all([
-      translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], lang),
-      translateFields(env, events, ["title", "description"] as (keyof Event)[], lang),
+      translateFields(env, exhWithLikes, ["title"] as (keyof Exhibition)[], lang),
+      translateFields(env, evWithLikes, ["title", "description"] as (keyof Event)[], lang),
     ]);
     return json(
       {
         date,
-        exhibitions: markTranslated(exhibitions, trExh, lang),
-        events: markTranslated(events, trEv, lang),
+        exhibitions: markTranslated(exhWithLikes, trExh, lang),
+        events: markTranslated(evWithLikes, trEv, lang),
       },
       200,
       CACHE_EVENTS,
@@ -107,6 +169,28 @@ export async function handleFeeds(request: Request, env: Env): Promise<Response 
   }
 
   return null;
+}
+
+async function handleLike(request: Request, env: Env): Promise<Response> {
+  const body = await request
+    .json<{ item_type?: string; item_id?: number }>()
+    .catch((): { item_type?: string; item_id?: number } => ({}));
+  const { item_type, item_id } = body;
+  if (!item_type || !item_id || !["exhibition", "event"].includes(item_type)) {
+    return json({ error: "invalid request" }, 400);
+  }
+  const hash = await visitorHash(request);
+  try {
+    await env.DB.prepare("INSERT OR IGNORE INTO likes (item_type, item_id, visitor_hash) VALUES (?, ?, ?)")
+      .bind(item_type, item_id, hash)
+      .run();
+  } catch {
+    return json({ error: "failed" }, 500);
+  }
+  const row = await env.DB.prepare("SELECT COUNT(*) as c FROM likes WHERE item_type = ? AND item_id = ?")
+    .bind(item_type, item_id)
+    .first<{ c: number }>();
+  return json({ ok: true, like_count: row?.c ?? 1 });
 }
 
 export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
