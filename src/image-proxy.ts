@@ -96,6 +96,9 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
       res = await fetch(imageUrl, fetchInit);
     }
 
+    if (!res.ok && width > 0 && !env.FETCH_PROXY_URL) {
+      res = await fetch(imageUrl, { headers: { "User-Agent": USER_AGENT } });
+    }
     if (!res.ok) {
       return new Response("Upstream error", { status: 502 });
     }
