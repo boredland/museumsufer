@@ -241,24 +241,35 @@ export const CLIENT_SCRIPT = `
       history.replaceState(null, '', url.toString());
     }
 
-    async function loadDay(date, btn) {
-      const seq = ++loadSeq;
+    function loadDay(date, btn) {
       setActive(btn);
-      dateLabel.textContent = formatDateFull(date);
       pushDateToUrl(date);
-      content.innerHTML = '<div class="loading">' + escHtml(T.loading) + '</div>';
-      try {
-        const langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
-        const res = await fetch('/api/day?date=' + date + langParam);
-        if (seq !== loadSeq) return;
-        const data = await res.json();
-        if (seq !== loadSeq) return;
-        render(data);
-      } catch (e) {
-        if (seq !== loadSeq) return;
-        content.innerHTML = '<div class="empty">' + escHtml(T.loadError) + '</div>';
-      }
+      const langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
+      htmx.ajax('GET', '/partial/content?date=' + date + langParam, {
+        target: '#content',
+        swap: 'innerHTML',
+        indicator: '#content',
+      });
     }
+
+    document.body.addEventListener('htmx:afterSwap', function(e) {
+      if (e.detail.target.id !== 'content') return;
+      var xhr = e.detail.xhr;
+      var label = xhr.getResponseHeader('X-Date-Label');
+      if (label) dateLabel.textContent = label;
+      var dataEl = content.querySelector('#partial-data');
+      if (dataEl) {
+        lastRenderData = JSON.parse(dataEl.textContent);
+        dataEl.remove();
+        buildSearchIndex();
+      }
+      hydrateVisited();
+      hydrateSectionStates();
+      content.classList.remove('fade-in');
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { content.classList.add('fade-in'); });
+      });
+    });
 
     function isSectionOpen(key) {
       try { return localStorage.getItem('section-' + key) !== 'closed'; } catch { return true; }

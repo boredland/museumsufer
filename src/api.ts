@@ -1,8 +1,9 @@
 import { berlinHourMinute, dateOffset, todayIso } from "./date";
+import type { Locale } from "./i18n";
 import { MUSEUMS } from "./museum-config";
 import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
-import type { Env, Event, Exhibition, MuseumInfo } from "./types";
+import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -191,6 +192,54 @@ async function handleLike(request: Request, env: Env): Promise<Response> {
     .bind(item_type, item_id)
     .first<{ c: number }>();
   return json({ ok: true, like_count: row?.c ?? 1 });
+}
+
+export async function fetchDayData(
+  env: Env,
+  date: string,
+  locale: Locale,
+): Promise<{ date: string; exhibitions: ExhibitionWithLikes[]; events: EventWithLikes[] }> {
+  const [rawExhibitions, rawEvents] = await Promise.all([
+    getExhibitionsForDate(env, date),
+    getEventsForDate(env, date),
+  ]);
+  const exhibitions = proxyImages(rawExhibitions);
+  const events = proxyImages(rawEvents);
+  const [exhCounts, evCounts] = await Promise.all([
+    getLikeCounts(
+      env,
+      "exhibition",
+      exhibitions.map((e) => e.id),
+    ),
+    getLikeCounts(
+      env,
+      "event",
+      events.map((e) => e.id),
+    ),
+  ]);
+  const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
+  const evWithLikes = attachLikeCounts(events, evCounts);
+  let finalExh: ExhibitionWithLikes[] = exhWithLikes;
+  let finalEv: EventWithLikes[] = evWithLikes;
+  if (locale !== "de") {
+    const [trExh, trEv] = await Promise.all([
+      translateFields(env, exhWithLikes, ["title"] as (keyof Exhibition)[], locale),
+      translateFields(env, evWithLikes, ["title", "description"] as (keyof Event)[], locale),
+    ]);
+    finalExh = trExh.map((item, i) => {
+      const orig = exhWithLikes[i] as unknown as Record<string, unknown>;
+      const cur = item as unknown as Record<string, unknown>;
+      return (cur.title !== orig.title ? { ...cur, translated: true } : cur) as unknown as ExhibitionWithLikes;
+    });
+    finalEv = trEv.map((item, i) => {
+      const orig = evWithLikes[i] as unknown as Record<string, unknown>;
+      const cur = item as unknown as Record<string, unknown>;
+      return (cur.title !== orig.title || cur.description !== orig.description
+        ? { ...cur, translated: true }
+        : cur) as unknown as EventWithLikes;
+    });
+  }
+  return { date, exhibitions: finalExh, events: finalEv };
 }
 
 export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {

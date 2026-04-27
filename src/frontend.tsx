@@ -269,6 +269,7 @@ export function renderPage(
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
         {eventSchemaJson ? raw(eventSchemaJson) : null}
         <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer />
+        <script src="https://unpkg.com/htmx.org@2.0.4" defer />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
         <link
