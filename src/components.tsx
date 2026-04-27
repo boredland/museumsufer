@@ -63,7 +63,7 @@ function CardImage({
 
   if (detailUrl) {
     return (
-      <a href={detailUrl} target="_blank" rel="noopener" tabindex={-1}>
+      <a href={detailUrl} target="_blank" rel="noopener" tabindex={-1} class="shrink-0">
         {inner}
       </a>
     );
