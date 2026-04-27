@@ -280,7 +280,6 @@ export function renderPage(
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
-  const geoJson = JSON.stringify(MUSEUM_LOCATIONS);
   const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
@@ -291,7 +290,6 @@ export function renderPage(
     const LOCALES = ${localesJson};
     const CURRENT_LANG = '${locale}';
     const __INITIAL_DATA__ = ${initialDataJson};
-    const MUSEUM_GEO = ${geoJson};
     const MUSEUMS = ${museumsJson};`;
 
   return (
