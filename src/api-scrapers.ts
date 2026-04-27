@@ -1,5 +1,6 @@
 import { dateOffset, inferYear, toBerlinDate, toBerlinTime, todayIso } from "./date";
-import type { MuseumApiConfig, ProxyConfig } from "./museum-apis";
+import { proxyFetch } from "./fetch-utils";
+import type { EventApiType, ProxyConfig } from "./museum-config";
 import {
   GERMAN_MONTHS,
   GERMAN_MONTHS_SHORT,
@@ -9,13 +10,6 @@ import {
   truncateHtml,
   USER_AGENT,
 } from "./shared";
-
-export function proxyFetch(url: string, proxy: ProxyConfig): Promise<Response> {
-  const proxyUrl = `${proxy.url}?url=${encodeURIComponent(url)}`;
-  const headers: Record<string, string> = {};
-  if (proxy.token) headers.Authorization = `Bearer ${proxy.token}`;
-  return fetch(proxyUrl, { headers });
-}
 
 export interface ApiEvent {
   title: string;
@@ -30,7 +24,12 @@ export interface ApiEvent {
   museum_slug_override?: string;
 }
 
-export async function fetchEventsFromApi(config: MuseumApiConfig, proxy?: ProxyConfig): Promise<ApiEvent[]> {
+export interface EventApiConfig {
+  type: EventApiType;
+  endpoint: string;
+}
+
+export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyConfig): Promise<ApiEvent[]> {
   switch (config.type) {
     case "tribe-events":
       return fetchTribeEvents(config.endpoint);
@@ -57,7 +56,7 @@ export async function fetchEventsFromApi(config: MuseumApiConfig, proxy?: ProxyC
     case "ledermuseum":
       return fetchLedermuseum(config.endpoint);
     case "bibelhaus":
-      return fetchBibelhaus(config.endpoint, config.proxy ? proxy : undefined);
+      return fetchBibelhaus(config.endpoint, proxy);
     case "fkv":
       return fetchFkv(config.endpoint);
     case "fdh":

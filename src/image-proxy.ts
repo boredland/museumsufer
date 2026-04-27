@@ -1,12 +1,8 @@
-import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
+import { getProxyDomains } from "./museum-config";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
-const proxyDomains = new Set(
-  Object.values(MUSEUM_EXHIBITION_URLS)
-    .filter((c) => c.proxy)
-    .map((c) => new URL(c.url).hostname),
-);
+const proxyDomains = getProxyDomains();
 
 function shouldProxy(imageUrl: string): boolean {
   try {

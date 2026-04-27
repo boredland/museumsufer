@@ -6,8 +6,8 @@ import {
   matchLinkForTitle,
   stripHtmlToText,
 } from "./event-scraper";
-import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
-import { USER_AGENT } from "./shared";
+import { fetchPage } from "./fetch-utils";
+import { MUSEUMS } from "./museum-config";
 import type { Env } from "./types";
 
 interface ScrapedExhibition {
@@ -37,11 +37,11 @@ export async function scrapeMuseumExhibitions(
   const errors: string[] = [];
 
   for (const museum of museums) {
-    const config = MUSEUM_EXHIBITION_URLS[museum.slug];
-    if (!config) continue;
+    const config = MUSEUMS[museum.slug];
+    if (!config?.exhibitionUrl) continue;
 
     try {
-      const count = await scrapeExhibitionsForMuseum(env, museum, config.url, config);
+      const count = await scrapeExhibitionsForMuseum(env, museum, config.exhibitionUrl, config);
       exhibitions += count;
       scraped++;
     } catch (e) {
@@ -58,24 +58,10 @@ async function scrapeExhibitionsForMuseum(
   env: Env,
   museum: { id: number; name: string; slug: string },
   pageUrl: string,
-  opts?: { js?: true; proxy?: true },
+  opts?: { spa?: true; proxy?: true },
 ): Promise<number> {
-  let html: string;
-
-  if (opts?.js && env.BROWSER) {
-    html = await fetchWithBrowser(env, pageUrl);
-  } else if (opts?.proxy && env.FETCH_PROXY_URL) {
-    html = await fetchViaProxy(env, pageUrl);
-  } else if (opts?.js || opts?.proxy) {
-    return 0;
-  } else {
-    const res = await fetch(pageUrl, {
-      headers: { "User-Agent": USER_AGENT },
-      redirect: "follow",
-    });
-    if (!res.ok) return 0;
-    html = await res.text();
-  }
+  const html = await fetchPage(env, pageUrl, opts);
+  if (!html) return 0;
 
   const pageLinks = extractPageLinks(html, new URL(pageUrl).origin);
   const textContent = stripHtmlToText(html);
@@ -94,7 +80,7 @@ async function scrapeExhibitionsForMuseum(
 Only extract Sonderausstellungen/Wechselausstellungen (temporary or special exhibitions).
 Do NOT include permanent exhibitions (Dauerausstellungen, Sammlung, ständige Ausstellung).
 Return ONLY a JSON array, nothing else. Each element:
-{"title": "Exhibition Title", "start_date": "YYYY-MM-DD" or null, "end_date": "YYYY-MM-DD" or null, "description": "brief description" or null}
+{"title": "Exhibition Title", "start_date": "YYYY-MM-DD" or null, "end_date": "YYYY-MM-DD" or null, "description": "..." or null}
 
 If there are no temporary exhibitions, return an empty array: []
 
@@ -142,25 +128,4 @@ ${truncated}`,
   }
 
   return count;
-}
-
-async function fetchViaProxy(env: Env, url: string): Promise<string> {
-  const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(url)}`;
-  const headers: Record<string, string> = {};
-  if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
-  const res = await fetch(proxyUrl, { headers });
-  if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-  return res.text();
-}
-
-export async function fetchWithBrowser(env: Env, url: string): Promise<string> {
-  const puppeteer = await import("@cloudflare/puppeteer");
-  const browser = await puppeteer.default.launch(env.BROWSER!);
-  try {
-    const page = await browser.newPage();
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 15000 });
-    return await page.content();
-  } finally {
-    await browser.close();
-  }
 }

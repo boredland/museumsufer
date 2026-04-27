@@ -1,5 +1,4 @@
-import { MUSEUM_APIS } from "./museum-apis";
-import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
+import { type EventApiType, MUSEUMS } from "./museum-config";
 import { MUSEUMSUFER_DE, USER_AGENT } from "./shared";
 
 interface CheckResult {
@@ -7,6 +6,45 @@ interface CheckResult {
   url: string;
   ok: boolean;
   error?: string;
+}
+
+function validateEventApi(type: EventApiType, body: string): string | null {
+  switch (type) {
+    case "tribe-events":
+      return body.includes('"events"') ? null : 'Missing "events" key';
+    case "historisches":
+      return body.includes('"title"') && body.includes('"dateStart"') ? null : 'Missing "title"/"dateStart" fields';
+    case "juedisches":
+      return body.includes('"items"') ? null : 'Missing "items" key';
+    case "staedel":
+      return body.includes('"events"') ? null : 'Missing "events" key';
+    case "senckenberg":
+      return body.includes('"event_start_time"') ? null : 'Missing "event_start_time" ACF field';
+    case "my-calendar":
+      return body.startsWith("{") || body.startsWith("[") ? null : "Response is not JSON";
+    case "liebieghaus":
+      return body.includes('itemtype="http://schema.org/Event"') ? null : "Missing schema.org Event markup";
+    case "mak":
+      return body.includes("mak-event-item") ? null : "Missing mak-event-item elements";
+    case "stadtgeschichte-rss":
+      return body.includes("<rss") && body.includes("<item>") ? null : "Not a valid RSS feed";
+    case "dommuseum":
+      return body.includes("event-date-day") ? null : "Missing event-date-day elements";
+    case "junges-museum":
+      return body.includes("view-calendar") && body.includes("<h2>") ? null : "Missing Drupal calendar view structure";
+    case "ledermuseum":
+      return body.includes("quarter") && body.includes('<div class="date">') ? null : "Missing li.quarter event items";
+    case "bibelhaus":
+      return body.includes("bmBase--eventsItem") ? null : "Missing bmBase--eventsItem elements";
+    case "fkv":
+      return body.includes("archive-title") && body.includes("subtitle")
+        ? null
+        : "Missing archive-title/subtitle elements";
+    case "fdh":
+      return body.includes("o-program-link") ? null : "Missing o-program-link elements";
+    default:
+      return null;
+  }
 }
 
 const CHECKS: Array<{
@@ -27,68 +65,30 @@ const CHECKS: Array<{
         ? null
         : "teaserBox/teaserHeadline elements not found",
   },
-  ...Object.entries(MUSEUM_EXHIBITION_URLS)
-    .filter(([, config]) => !config.js)
-    .map(([slug, config]) => ({
+  ...Object.entries(MUSEUMS)
+    .filter(([, c]) => c.exhibitionUrl && !c.spa && !c.proxy)
+    .map(([slug, c]) => ({
       name: `Exhibition page: ${slug}`,
-      url: config.url,
+      url: c.exhibitionUrl!,
       validate: (_body: string, status: number): string | null => {
         if (status >= 400) return `HTTP ${status}`;
         return null;
       },
     })),
-  ...MUSEUM_APIS.map((api) => ({
-    name: `API: ${api.slug} (${api.type})`,
-    url: api.endpoint.includes("?")
-      ? api.endpoint
-      : api.type === "tribe-events"
-        ? `${api.endpoint}?per_page=1`
-        : api.endpoint,
-    validate: (body: string, status: number): string | null => {
-      if (status >= 400) return `HTTP ${status}`;
-
-      switch (api.type) {
-        case "tribe-events":
-          return body.includes('"events"') ? null : 'Missing "events" key';
-        case "historisches":
-          return body.includes('"title"') && body.includes('"dateStart"') ? null : 'Missing "title"/"dateStart" fields';
-        case "juedisches":
-          return body.includes('"items"') ? null : 'Missing "items" key';
-        case "staedel":
-          return body.includes('"events"') ? null : 'Missing "events" key';
-        case "senckenberg":
-          return body.includes('"event_start_time"') ? null : 'Missing "event_start_time" ACF field';
-        case "my-calendar":
-          return body.startsWith("{") || body.startsWith("[") ? null : "Response is not JSON";
-        case "liebieghaus":
-          return body.includes('itemtype="http://schema.org/Event"') ? null : "Missing schema.org Event markup";
-        case "mak":
-          return body.includes("mak-event-item") ? null : "Missing mak-event-item elements";
-        case "stadtgeschichte-rss":
-          return body.includes("<rss") && body.includes("<item>") ? null : "Not a valid RSS feed";
-        case "dommuseum":
-          return body.includes("event-date-day") ? null : "Missing event-date-day elements";
-        case "junges-museum":
-          return body.includes("view-calendar") && body.includes("<h2>")
-            ? null
-            : "Missing Drupal calendar view structure";
-        case "ledermuseum":
-          return body.includes("quarter") && body.includes('<div class="date">')
-            ? null
-            : "Missing li.quarter event items";
-        case "bibelhaus":
-          return body.includes("bmBase--eventsItem") ? null : "Missing bmBase--eventsItem elements";
-        case "fkv":
-          return body.includes("archive-title") && body.includes("subtitle")
-            ? null
-            : "Missing archive-title/subtitle elements";
-        case "fdh":
-          return body.includes("o-program-link") ? null : "Missing o-program-link elements";
-        default:
-          return null;
-      }
-    },
-  })),
+  ...Object.entries(MUSEUMS)
+    .filter(([, c]) => c.eventApi && !c.proxy)
+    .map(([slug, c]) => ({
+      name: `Event API: ${slug} (${c.eventApi!.type})`,
+      url: c.eventApi!.endpoint.includes("?")
+        ? c.eventApi!.endpoint
+        : c.eventApi!.type === "tribe-events"
+          ? `${c.eventApi!.endpoint}?per_page=1`
+          : c.eventApi!.endpoint,
+      validate: (body: string, status: number): string | null => {
+        if (status >= 400) return `HTTP ${status}`;
+        return validateEventApi(c.eventApi!.type, body);
+      },
+    })),
 ];
 
 export async function runHealthChecks(): Promise<CheckResult[]> {

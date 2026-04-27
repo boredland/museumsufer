@@ -1,8 +1,7 @@
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
-import { fetchWithBrowser } from "./exhibition-scraper";
-import { getApiConfig } from "./museum-apis";
-import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
+import { fetchPage } from "./fetch-utils";
+import { getMuseumConfig, MUSEUMS } from "./museum-config";
 import { normalizeUrl } from "./shared";
 import type { Env } from "./types";
 
@@ -39,14 +38,14 @@ export async function scrapeMuseumWebsites(
 
   for (const museum of museums) {
     try {
-      const apiConfig = getApiConfig(museum.slug);
+      const museumConfig = getMuseumConfig(museum.slug);
 
-      if (apiConfig) {
+      if (museumConfig?.eventApi) {
         const proxy =
-          apiConfig.proxy && env.FETCH_PROXY_URL
+          museumConfig.proxy && env.FETCH_PROXY_URL
             ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
             : undefined;
-        const events = await fetchEventsFromApi(apiConfig, proxy);
+        const events = await fetchEventsFromApi(museumConfig.eventApi, proxy);
         let count = 0;
         for (const event of events) {
           if (!event.title || !event.date) continue;
@@ -80,7 +79,7 @@ export async function scrapeMuseumWebsites(
               event.end_time,
               event.end_date,
               event.description,
-              apiConfig.endpoint,
+              museumConfig.eventApi.endpoint,
               event.detail_url,
               event.image_url,
               event.price,
@@ -154,51 +153,30 @@ async function scrapeMuseumEvents(
   museum: { id: number; name: string; slug: string; website_url: string },
 ): Promise<number> {
   const baseUrl = museum.website_url.replace(/\/$/, "");
-  const exhConfig = MUSEUM_EXHIBITION_URLS[museum.slug];
-  const needsJs = exhConfig?.js && env.BROWSER;
+  const config = MUSEUMS[museum.slug];
+  const fetchOpts = config ? { spa: config.spa, proxy: config.proxy } : undefined;
   let eventsHtml: string | null = null;
   let eventsUrl: string | null = null;
 
-  if (needsJs) {
-    for (const path of EVENT_PAGE_PATHS) {
-      try {
-        const url = `${baseUrl}${path}`;
-        eventsHtml = await fetchWithBrowser(env, url);
-        eventsUrl = url;
-        break;
-      } catch {}
-    }
-  } else {
-    for (const path of EVENT_PAGE_PATHS) {
-      try {
-        const url = `${baseUrl}${path}`;
-        const res = await fetch(url, { redirect: "follow" });
-        if (res.ok) {
-          const contentType = res.headers.get("content-type") || "";
-          if (contentType.includes("text/html")) {
-            eventsHtml = await res.text();
-            eventsUrl = url;
-            break;
-          }
-        }
-      } catch {}
+  for (const path of EVENT_PAGE_PATHS) {
+    const url = `${baseUrl}${path}`;
+    const html = await fetchPage(env, url, fetchOpts);
+    if (html) {
+      eventsHtml = html;
+      eventsUrl = url;
+      break;
     }
   }
 
   if (!eventsHtml || !eventsUrl) {
     try {
-      const html = needsJs
-        ? await fetchWithBrowser(env, baseUrl)
-        : await fetch(baseUrl, { redirect: "follow" }).then((r) => (r.ok ? r.text() : ""));
-      const eventLink = findEventLink(html, baseUrl);
-      if (eventLink) {
-        if (needsJs) {
-          eventsHtml = await fetchWithBrowser(env, eventLink);
-        } else {
-          const eventRes = await fetch(eventLink, { redirect: "follow" });
-          if (eventRes.ok) eventsHtml = await eventRes.text();
+      const html = await fetchPage(env, baseUrl, fetchOpts);
+      if (html) {
+        const eventLink = findEventLink(html, baseUrl);
+        if (eventLink) {
+          eventsHtml = await fetchPage(env, eventLink, fetchOpts);
+          eventsUrl = eventLink;
         }
-        eventsUrl = eventLink;
       }
     } catch {
       return 0;
