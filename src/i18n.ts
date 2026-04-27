@@ -79,6 +79,7 @@ const de: Translations = {
   passPromo: "Alle 39 Museen entdecken",
   passCard: "Museumsufercard",
   passTicket: "Museumsuferticket",
+  permanentCollection: "Ständige Sammlung",
 };
 
 const en: Translations = {
@@ -128,6 +129,7 @@ const en: Translations = {
   passPromo: "Explore all 39 museums",
   passCard: "Annual Pass",
   passTicket: "2-Day Pass",
+  permanentCollection: "Permanent collection",
 };
 
 const fr: Translations = {
@@ -177,6 +179,7 @@ const fr: Translations = {
   passPromo: "Découvrez les 39 musées",
   passCard: "Carte annuelle",
   passTicket: "Pass 2 jours",
+  permanentCollection: "Collection permanente",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };

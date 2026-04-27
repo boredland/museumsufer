@@ -1,4 +1,4 @@
-import { getEventsForDate, getExhibitionsForDate, handleApi, handleFeeds, proxyImages } from "./api";
+import { getEventsForDate, getExhibitionsForDate, getMuseumMap, handleApi, handleFeeds, proxyImages } from "./api";
 import { todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { type InitialData, renderPage } from "./frontend";
@@ -178,6 +178,7 @@ export default {
 
     const locale = detectLocale(request);
     let initialData: InitialData | undefined;
+    const museums = await getMuseumMap(env).catch(() => ({}));
     try {
       const date = todayIso();
       const [rawExhibitions, rawEvents] = await Promise.all([
@@ -207,7 +208,7 @@ export default {
       initialData = { date, exhibitions: finalExh, events: finalEv };
     } catch {}
 
-    return new Response(renderPage(locale, initialData), {
+    return new Response(renderPage(locale, initialData, museums), {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Content-Language": locale,
