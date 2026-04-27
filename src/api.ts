@@ -1,7 +1,7 @@
 import { berlinHourMinute, dateOffset, todayIso } from "./date";
 import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
-import type { Env, Event, Exhibition } from "./types";
+import type { Env, Event, Exhibition, MuseumInfo } from "./types";
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -137,6 +137,19 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
     return filterPastEvents(results);
   }
   return results;
+}
+
+export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>> {
+  const { results } = await env.DB.prepare("SELECT slug, name, website_url FROM museums ORDER BY name").all<{
+    slug: string;
+    name: string;
+    website_url: string | null;
+  }>();
+  const map: Record<string, MuseumInfo> = {};
+  for (const m of results) {
+    map[m.slug] = { name: m.name, website: m.website_url };
+  }
+  return map;
 }
 
 function filterPastEvents(events: Event[]): Event[] {

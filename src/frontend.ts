@@ -1,6 +1,9 @@
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { MUSEUM_LOCATIONS } from "./museum-geo";
 import { escHtml as escHtmlShared } from "./shared";
+import type { MuseumInfo } from "./types";
+
+export type { MuseumInfo };
 
 export interface InitialData {
   date: string;
@@ -8,13 +11,14 @@ export interface InitialData {
   events: unknown[];
 }
 
-export function renderPage(locale: Locale, initialData?: InitialData): string {
+export function renderPage(locale: Locale, initialData?: InitialData, museums?: Record<string, MuseumInfo>): string {
   const tr = getTranslations(locale);
   const trJson = JSON.stringify(tr);
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
   const geoJson = JSON.stringify(MUSEUM_LOCATIONS);
+  const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
 
@@ -326,6 +330,10 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     }
 
     .museum-group-header:first-child { border-top: none; }
+    .museum-link { color: var(--text-tertiary); margin-left: 0.25rem; vertical-align: baseline; }
+    .museum-link:hover { color: var(--accent); }
+    .museum-no-exhibition { display: flex; justify-content: space-between; align-items: center; opacity: 0.7; border-left-color: var(--border-light); }
+    .museum-permanent { font-weight: 400; font-size: 0.625rem; letter-spacing: 0; text-transform: none; color: var(--text-tertiary); }
 
     .card {
       display: flex;
@@ -965,6 +973,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
     const CURRENT_LANG = '${locale}';
     const __INITIAL_DATA__ = ${initialDataJson};
     const MUSEUM_GEO = ${geoJson};
+    const MUSEUMS = ${museumsJson};
     const RIVER_LAT = 50.107;
     const BRIDGE_PENALTY = 0.8;
 
@@ -1174,15 +1183,28 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       html += renderSection('events', T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z', eventsInner);
 
       const sortedExhibitions = sortItemsByDistance(data.exhibitions).map((e, i) => ({...e, _idx: i}));
+      const museumsWithExhibitions = new Set(sortedExhibitions.map(ex => ex.museum_slug));
+      const museumsWithout = Object.keys(MUSEUMS)
+        .filter(slug => !museumsWithExhibitions.has(slug))
+        .sort((a, b) => MUSEUMS[a].name.localeCompare(MUSEUMS[b].name));
+      const totalMuseums = Object.keys(MUSEUMS).length;
+
       let exhInner;
-      if (sortedExhibitions.length === 0) {
+      if (sortedExhibitions.length === 0 && museumsWithout.length === 0) {
         exhInner = '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
         exhInner = '<div class="card-list">';
         exhInner += renderExhibitionsGrouped(sortedExhibitions);
+        for (const slug of museumsWithout) {
+          const m = MUSEUMS[slug];
+          exhInner += '<div class="museum-group-header museum-no-exhibition">'
+            + museumHeader(m.name, slug)
+            + '<span class="museum-permanent">' + escHtml(T.permanentCollection) + '</span>'
+            + '</div>';
+        }
         exhInner += '</div>';
       }
-      html += renderSection('exhibitions', T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
+      html += renderSection('exhibitions', T.exhibitions, totalMuseums, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
 
       content.innerHTML = html;
       content.querySelectorAll('details.section').forEach(d => {
@@ -1212,6 +1234,13 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       return html;
     }
 
+    function museumHeader(name, slug) {
+      const info = slug && MUSEUMS[slug];
+      const url = info && info.website;
+      if (url) return escHtml(name) + ' <a class="museum-link" href="' + escHtml(url) + '" target="_blank" rel="noopener" aria-label="' + escAttr(name) + '"><svg viewBox="0 0 16 16" fill="none" width="11" height="11"><path d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+      return escHtml(name);
+    }
+
     function renderExhibitionList(exhibitions) {
       let html = '';
       let currentMuseum = '';
@@ -1219,7 +1248,7 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
         const museum = ex.museum_name || '';
         if (museum !== currentMuseum) {
           currentMuseum = museum;
-          html += '<div class="museum-group-header">' + escHtml(museum) + '</div>';
+          html += '<div class="museum-group-header">' + museumHeader(museum, ex.museum_slug) + '</div>';
         }
         html += renderExhibition(ex);
       }

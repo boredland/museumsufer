@@ -5,6 +5,11 @@ export interface Env {
   DEEPL_API_KEY?: string;
 }
 
+export interface MuseumInfo {
+  name: string;
+  website: string | null;
+}
+
 export interface Museum {
   id: number;
   name: string;
