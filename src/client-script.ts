@@ -81,8 +81,10 @@ export const CLIENT_SCRIPT = `
       btn.setAttribute('title', T.unmarkVisited);
       btn.querySelector('svg').innerHTML = '<path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
       var visitedList = document.getElementById('visited-list');
+      var visitedSection = document.getElementById('visited-section');
       var li = card.parentElement;
       if (visitedList && li) visitedList.appendChild(li);
+      if (visitedSection) visitedSection.removeAttribute('hidden');
       updateVisitedCount();
     }
 
@@ -397,6 +399,7 @@ export const CLIENT_SCRIPT = `
 
       if (count > 0) {
         visitedCount.textContent = count;
+        visitedSection.removeAttribute('hidden');
       }
     }
 
