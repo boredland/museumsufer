@@ -45,7 +45,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
   let imageUrl: string;
   try {
-    imageUrl = decodeURIComponent(encodedUrl).split(/\s+/)[0].trim();
+    imageUrl = decodeURIComponent(encodedUrl).split(/\s+/)[0].trim().replace(/&amp;/g, "&");
     if (!imageUrl.startsWith("https://") && !imageUrl.startsWith("http://")) return null;
 
     const origin = new URL(imageUrl).hostname;
