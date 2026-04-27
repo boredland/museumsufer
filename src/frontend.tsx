@@ -1,7 +1,7 @@
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { CLIENT_SCRIPT } from "./client-script";
-import { ContentBody } from "./components";
+import { ContentBody, MuseumsSection } from "./components";
 import { todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
@@ -378,7 +378,6 @@ export function renderPage(
               <ContentBody
                 events={initialData.events as EventWithLikes[]}
                 exhibitions={initialData.exhibitions as ExhibitionWithLikes[]}
-                museums={museums || {}}
                 tr={tr}
                 locale={locale}
                 todayIso={todayIso()}
@@ -387,6 +386,8 @@ export function renderPage(
               <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>
             )}
           </main>
+
+          <MuseumsSection museums={museums || {}} tr={tr} />
 
           <footer class="mt-6 pt-4 border-t border-border text-center text-xs flex justify-center gap-4 flex-wrap">
             <a

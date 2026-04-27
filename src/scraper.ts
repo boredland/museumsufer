@@ -16,10 +16,10 @@ export async function scrape(env: Env): Promise<{ exhibitions: number; museums: 
 
 async function syncManualMuseums(env: Env): Promise<void> {
   const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url, website_url) VALUES (?, ?, '', ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url, updated_at = datetime('now')`,
+    `INSERT INTO museums (name, slug, museumsufer_url, website_url, description) VALUES (?, ?, '', ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url, description = COALESCE(excluded.description, museums.description), updated_at = datetime('now')`,
   );
-  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website));
+  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website, m.description));
   if (ops.length > 0) await env.DB.batch(ops);
 }
 
@@ -48,13 +48,14 @@ async function scrapeMuseums(env: Env): Promise<number> {
   const museums = config.museums;
 
   const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url) VALUES (?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, updated_at = datetime('now')`,
+    `INSERT INTO museums (name, slug, museumsufer_url, description) VALUES (?, ?, ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, description = excluded.description, updated_at = datetime('now')`,
   );
 
   const ops = museums.map((m) => {
     const slug = m.url.replace(/^\/de\/museen\//, "").replace(/\/$/, "");
-    return stmt.bind(m.name.trim(), slug, `${BASE_URL}${m.url}`);
+    const desc = m.description?.trim() || null;
+    return stmt.bind(m.name.trim(), slug, `${BASE_URL}${m.url}`, desc);
   });
 
   await env.DB.batch(ops);

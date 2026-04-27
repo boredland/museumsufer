@@ -181,19 +181,12 @@ app.get("/calendar.ics", async (c) => {
 app.get("/partial/content", async (c) => {
   const locale = (c.req.query("lang") || detectLocale(c.req.raw)) as Locale;
   const date = c.req.query("date") || todayIso();
-  const [data, museums] = await Promise.all([fetchDayData(c.env, date, locale), getMuseumMap(c.env).catch(() => ({}))]);
+  const data = await fetchDayData(c.env, date, locale);
   const tr = getTranslations(locale);
 
   const html = (
     <>
-      <ContentBody
-        events={data.events}
-        exhibitions={data.exhibitions}
-        museums={museums}
-        tr={tr}
-        locale={locale}
-        todayIso={todayIso()}
-      />
+      <ContentBody events={data.events} exhibitions={data.exhibitions} tr={tr} locale={locale} todayIso={todayIso()} />
       <script type="application/json" id="partial-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
     </>
   );
