@@ -165,9 +165,9 @@ export const CLIENT_SCRIPT = `
 
     function setActive(btn) {
       allBtns.forEach(function(b) { b.classList.remove('active'); });
-      datePicker.classList.remove('active');
+      datePicker.parentElement.classList.remove('active');
       if (btn) btn.classList.add('active');
-      else datePicker.classList.add('active');
+      else datePicker.parentElement.classList.add('active');
     }
 
     function updateNavVisibility() {
