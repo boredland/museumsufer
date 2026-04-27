@@ -168,7 +168,7 @@ function DateNav({ tr }: { tr: Record<string, string> }) {
         {tr.sunday}
       </button>
       <label class="date-btn relative inline-flex items-center justify-center min-w-9 min-h-9 p-2 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-text-secondary transition-colors hover:border-accent hover:text-accent">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true" class="pointer-events-none">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
           <path
             d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
             stroke="currentColor"
