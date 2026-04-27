@@ -6,7 +6,6 @@ import { todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { escHtml, formatDateFull } from "./shared";
-import { PAGE_STYLES } from "./styles";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 export type { MuseumInfo };
@@ -38,13 +37,19 @@ function GithubCorner({ label }: { label: string }) {
   return (
     <a
       href="https://github.com/boredland/museumsufer"
-      class="github-corner"
+      class="github-corner fixed top-0 right-0 z-50 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-4px]"
       aria-label={label}
       target="_blank"
       rel="noopener"
     >
-      <span class="skip-link">{label}</span>
-      <svg width="72" height="72" viewBox="0 0 250 250" aria-hidden="true">
+      <span class="sr-only">{label}</span>
+      <svg
+        width="72"
+        height="72"
+        viewBox="0 0 250 250"
+        aria-hidden="true"
+        class="fill-accent text-bg max-[480px]:w-[60px] max-[480px]:h-[60px]"
+      >
         <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" />
         <path
           d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
@@ -64,11 +69,11 @@ function GithubCorner({ label }: { label: string }) {
 
 function LangSwitch({ locale }: { locale: Locale }) {
   return (
-    <nav class="lang-switch" aria-label="Language">
+    <nav class="flex justify-center gap-1 mt-3" aria-label="Language">
       {SUPPORTED_LOCALES.map((l) => (
         <a
           href={`?lang=${l}`}
-          class={l === locale ? "active" : undefined}
+          class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
           aria-current={l === locale ? "page" : undefined}
         >
           {l.toUpperCase()}
@@ -80,13 +85,18 @@ function LangSwitch({ locale }: { locale: Locale }) {
 
 function SearchTrigger({ tr }: { tr: Record<string, string> }) {
   return (
-    <button type="button" class="search-trigger" id="search-trigger" onclick="openSearch()">
+    <button
+      type="button"
+      class="flex items-center gap-2 w-full py-2 px-3.5 mb-3 bg-surface border-[1.5px] border-border rounded-full cursor-pointer font-sans text-[0.8125rem] text-text-tertiary transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+      id="search-trigger"
+      onclick="openSearch()"
+    >
       <svg viewBox="0 0 20 20" fill="none" width="14" height="14" aria-hidden="true">
         <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
         <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
       </svg>
-      <span>{tr.searchPlaceholder}</span>
-      <kbd class="search-kbd">
+      <span class="flex-1 text-left">{tr.searchPlaceholder}</span>
+      <kbd class="text-[0.6875rem] text-text-tertiary border border-border rounded px-1.5 py-0.5 font-mono">
         <kbd>Ctrl</kbd>+<kbd>K</kbd>
       </kbd>
     </button>
@@ -97,7 +107,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   const urls = PASS_URLS[locale];
   const utm = "?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=";
   return (
-    <aside class="pass-promo">
+    <aside class="flex items-center gap-2.5 py-2 px-3 mb-3 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary max-[480px]:flex-col max-[480px]:items-stretch max-[480px]:gap-1.5">
       <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
         <path
           d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"
@@ -109,12 +119,22 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
         <circle cx="15.5" cy="15.5" r="1" fill="currentColor" />
         <path d="M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
       </svg>
-      <span class="pass-promo-text">{tr.passPromo}</span>
-      <span class="pass-promo-links">
-        <a href={`https://www.museumsufer.de/${urls.card}${utm}card`} target="_blank" rel="noopener">
+      <span class="flex-1 min-w-0">{tr.passPromo}</span>
+      <span class="flex gap-1.5 shrink-0 max-[480px]:justify-stretch">
+        <a
+          href={`https://www.museumsufer.de/${urls.card}${utm}card`}
+          target="_blank"
+          rel="noopener"
+          class="text-xs font-medium py-1 px-2.5 rounded-full no-underline whitespace-nowrap border border-border text-text-primary transition-colors hover:border-accent hover:text-accent max-[480px]:flex-1 max-[480px]:text-center"
+        >
           {tr.passCard}
         </a>
-        <a href={`https://www.museumsufer.de/${urls.ticket}${utm}ticket`} target="_blank" rel="noopener">
+        <a
+          href={`https://www.museumsufer.de/${urls.ticket}${utm}ticket`}
+          target="_blank"
+          rel="noopener"
+          class="text-xs font-medium py-1 px-2.5 rounded-full no-underline whitespace-nowrap border border-border text-text-primary transition-colors hover:border-accent hover:text-accent max-[480px]:flex-1 max-[480px]:text-center"
+        >
           {tr.passTicket}
         </a>
       </span>
@@ -122,33 +142,42 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   );
 }
 
+const dateBtnClass =
+  "py-2 px-4.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
+const dateBtnActiveClass =
+  "py-2 px-4.5 border-[1.5px] border-accent bg-accent text-white rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
+
 function DateNav({ tr }: { tr: Record<string, string> }) {
   return (
-    <nav class="date-nav" aria-label={tr.dateNav}>
-      <button type="button" id="btn-today" class="active">
+    <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
+      <button type="button" id="btn-today" class={dateBtnActiveClass}>
         {tr.today}
       </button>
-      <button type="button" id="btn-tomorrow">
+      <button type="button" id="btn-tomorrow" class={dateBtnClass}>
         {tr.tomorrow}
       </button>
-      <button type="button" id="btn-weekend">
+      <button type="button" id="btn-weekend" class={dateBtnClass}>
         {tr.saturday}
       </button>
-      <button type="button" id="btn-sunday">
+      <button type="button" id="btn-sunday" class={dateBtnClass}>
         {tr.sunday}
       </button>
-      <label class="date-picker-label">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
-          <path
-            d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-        <input type="date" id="date-picker" aria-label={tr.pickDate} min="" max="" />
-      </label>
-      <button type="button" id="btn-near" aria-pressed="false" aria-label={tr.nearMe} title={tr.nearMe}>
+      <input
+        type="date"
+        id="date-picker"
+        aria-label={tr.pickDate}
+        min=""
+        max=""
+        class="py-2 px-3 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+      />
+      <button
+        type="button"
+        id="btn-near"
+        aria-pressed="false"
+        aria-label={tr.nearMe}
+        title={tr.nearMe}
+        class="inline-flex items-center justify-center min-w-9 min-h-9 p-2 border-[1.5px] border-border bg-surface rounded-full cursor-pointer transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+      >
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
           <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" />
           <circle cx="8" cy="8" r="1" fill="currentColor" />
@@ -161,15 +190,19 @@ function DateNav({ tr }: { tr: Record<string, string> }) {
 
 function SearchDialog({ tr }: { tr: Record<string, string> }) {
   return (
-    <dialog class="search-overlay" id="search-overlay" aria-label={tr.search}>
-      <div class="search-box">
-        <div class="search-input-wrap">
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+    <dialog
+      class="border-none bg-transparent p-0 max-w-screen max-h-screen w-full h-full overflow-visible open:flex open:items-start open:justify-center open:pt-[15vh]"
+      id="search-overlay"
+      aria-label={tr.search}
+    >
+      <div class="bg-surface rounded-xl shadow-search w-[90%] max-w-[520px] max-h-[70vh] flex flex-col overflow-hidden">
+        <div class="flex items-center py-3 px-4 gap-2 border-b border-border">
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="w-[18px] h-[18px] text-text-tertiary shrink-0">
             <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
             <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
           <input
-            class="search-input"
+            class="flex-1 border-none outline-none text-[0.9375rem] font-sans text-text-primary bg-transparent placeholder:text-text-tertiary"
             id="search-input"
             type="text"
             placeholder={tr.searchPlaceholder}
@@ -180,19 +213,30 @@ function SearchDialog({ tr }: { tr: Record<string, string> }) {
             aria-autocomplete="list"
             aria-activedescendant={undefined}
           />
-          <span class="search-kbd">Esc</span>
+          <span class="text-[0.6875rem] text-text-tertiary border border-border rounded px-1.5 py-0.5 font-mono">
+            Esc
+          </span>
         </div>
-        <div class="search-results" id="search-results" role="listbox" aria-label={tr.search} />
+        <div class="overflow-y-auto py-2" id="search-results" role="listbox" aria-label={tr.search} />
       </div>
     </dialog>
   );
 }
 
+function InfoSection({ summary, children }: { summary: string; children: unknown }) {
+  return (
+    <details class="mt-4 py-2.5 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary">
+      <summary class="cursor-pointer font-medium text-text-tertiary text-xs uppercase tracking-wide">{summary}</summary>
+      <p class="mt-2 leading-relaxed">{children}</p>
+    </details>
+  );
+}
+
 function LlmTip({ tr }: { tr: Record<string, string> }) {
   return (
-    <details class="llm-tip">
-      <summary>
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <details class="mt-4 py-2.5 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary open:[&>summary]:mb-3">
+      <summary class="cursor-pointer font-medium text-text-tertiary text-xs uppercase tracking-wide flex items-center gap-1.5">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="w-3.5 h-3.5 shrink-0">
           <path
             d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13"
             stroke="currentColor"
@@ -202,9 +246,18 @@ function LlmTip({ tr }: { tr: Record<string, string> }) {
         </svg>
         {tr.llmTip}
       </summary>
-      <div class="llm-tip-prompt" id="llm-prompt" data-prompt={tr.llmPrompt}>
+      <div
+        class="relative bg-border-light rounded-lg p-3 font-mono text-xs leading-relaxed text-text-primary whitespace-pre-wrap break-words"
+        id="llm-prompt"
+        data-prompt={tr.llmPrompt}
+      >
         {tr.llmPrompt}
-        <button type="button" class="llm-tip-copy" onclick="copyPrompt()" aria-label={tr.copyPrompt}>
+        <button
+          type="button"
+          class="absolute top-2 right-2 bg-surface border border-border rounded px-2 py-1 text-[0.6875rem] font-sans cursor-pointer text-text-secondary transition-colors hover:border-accent hover:text-accent"
+          onclick="copyPrompt()"
+          aria-label={tr.copyPrompt}
+        >
           {tr.copyPrompt}
         </button>
       </div>
@@ -278,25 +331,35 @@ export function renderPage(
           media="print"
           onload="this.media='all'"
         />
-        <style dangerouslySetInnerHTML={{ __html: PAGE_STYLES }} />
+        <link rel="stylesheet" href="/styles.css" />
       </head>
       <body>
-        <a href="#content" class="skip-link">
+        <a
+          href="#content"
+          class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-accent focus:text-white focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
+        >
           {tr.skipLink}
         </a>
         <GithubCorner label={tr.githubAria} />
 
-        <div class="container">
-          <header>
-            <div class="logo">
-              <div class="logo-icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <div class="max-w-[680px] mx-auto pt-12 pb-16 px-4 max-[480px]:pt-8 max-[480px]:pb-12">
+          <header class="mb-8 text-center">
+            <div class="inline-flex items-center gap-2 mb-1">
+              <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                <svg
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                  class="w-[18px] h-[18px] fill-white"
+                >
                   <path d="M12 2L2 7v2h20V7L12 2zm0 2.26L18.47 7H5.53L12 4.26zM2 19v2h20v-2H2zm2-8v8h2v-8H6zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" />
                 </svg>
               </div>
             </div>
-            <h1>Museumsufer Frankfurt</h1>
-            <p class="subtitle">{tr.subtitle}</p>
+            <h1 class="text-3xl max-[480px]:text-[1.625rem] font-bold tracking-tight leading-tight">
+              Museumsufer Frankfurt
+            </h1>
+            <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
             <LangSwitch locale={locale} />
           </header>
 
@@ -304,11 +367,15 @@ export function renderPage(
           <PassPromo locale={locale} tr={tr} />
           <DateNav tr={tr} />
 
-          <p class="date-label" id="date-label" aria-live="polite">
+          <p
+            class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
+            id="date-label"
+            aria-live="polite"
+          >
             {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
           </p>
 
-          <main id="content">
+          <main id="content" class="min-h-[60vh]">
             {initialData ? (
               <ContentBody
                 events={initialData.events as EventWithLikes[]}
@@ -319,38 +386,34 @@ export function renderPage(
                 todayIso={todayIso()}
               />
             ) : (
-              <div class="loading">{tr.loading}</div>
+              <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>
             )}
           </main>
 
-          <footer class="site-footer">
+          <footer class="mt-6 pt-4 border-t border-border text-center text-xs flex justify-center gap-4 flex-wrap">
             <a
               href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
               target="_blank"
               rel="noopener"
+              class="text-text-tertiary no-underline hover:text-accent hover:underline"
             >
               {tr.subscribeCal}
             </a>
-            <a href="/feed.xml">{tr.rssFeed}</a>
+            <a href="/feed.xml" class="text-text-tertiary no-underline hover:text-accent hover:underline">
+              {tr.rssFeed}
+            </a>
             <a
               href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
               target="_blank"
               rel="noopener"
+              class="text-text-tertiary no-underline hover:text-accent hover:underline"
             >
               {tr.missingEvent}
             </a>
           </footer>
 
-          <details class="why-section">
-            <summary>{tr.whyTitle}</summary>
-            <p>{tr.whyText}</p>
-          </details>
-
-          <details class="why-section">
-            <summary>{tr.privacyNote}</summary>
-            <p>{tr.privacyText}</p>
-          </details>
-
+          <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
+          <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
           <LlmTip tr={tr} />
         </div>
 

@@ -7,7 +7,10 @@ const MUSEUM_LOCATIONS = getMuseumLocations();
 
 function ImagePlaceholder() {
   return (
-    <div class="card-img-placeholder" aria-hidden="true">
+    <div
+      class="w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border"
+      aria-hidden="true"
+    >
       <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path
           d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
@@ -33,7 +36,7 @@ function CardImage({
 }) {
   const imgTag = src ? (
     <img
-      class="card-img"
+      class="w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] object-cover rounded-lg shrink-0 bg-border-light overflow-hidden"
       src={`${src}?w=120`}
       srcset={`${src}?w=120 120w, ${src}?w=200 200w`}
       sizes="(max-width: 480px) 56px, 72px"
@@ -57,8 +60,8 @@ function CardImage({
 function TranslatedBadge({ translated }: { translated?: boolean }) {
   if (!translated) return null;
   return (
-    <span class="card-translated" title="Translated by DeepL">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+    <span class="text-[0.5625rem] text-text-tertiary inline-flex items-center gap-0.5" title="Translated by DeepL">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" class="w-2.5 h-2.5">
         <path
           d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"
           fill="currentColor"
@@ -72,8 +75,8 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class="card-likes">
-      <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor">
+    <span class="card-likes text-[0.6875rem] font-medium text-red-600 bg-red-50 px-1.5 rounded inline-flex items-center gap-0.5">
+      <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-2.5 h-2.5 shrink-0">
         <path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z" />
       </svg>
       {count}
@@ -86,14 +89,14 @@ function NavButton({ slug, tr }: { slug: string | undefined; tr: Record<string, 
   const m = MUSEUM_LOCATIONS[slug];
   return (
     <a
-      class="card-ical"
+      class="inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
       href={`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=walking`}
       target="_blank"
       rel="noopener"
       aria-label={tr.navigate}
       title={tr.navigate}
     >
-      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
+      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
         <path
           d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z"
           stroke="currentColor"
@@ -101,6 +104,20 @@ function NavButton({ slug, tr }: { slug: string | undefined; tr: Record<string, 
         />
       </svg>
     </a>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="11" height="11" class="align-[-1px]">
+      <path
+        d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -119,24 +136,22 @@ function MuseumGroupHeader({
   const url = info?.website;
   return (
     <li>
-      <h3 class="museum-group-header">
+      <h3 class="museum-group-header text-[0.6875rem] font-bold uppercase tracking-wide text-text-secondary py-2.5 pr-4 pl-4 border-b border-border-light border-l-[3px] border-l-accent bg-border-light m-0">
         {name}
         {url && (
-          <a class="museum-link" href={url} target="_blank" rel="noopener" aria-label={name}>
-            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="11" height="11">
-              <path
-                d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+          <a
+            class="text-text-tertiary ml-1 hover:text-accent"
+            href={url}
+            target="_blank"
+            rel="noopener"
+            aria-label={name}
+          >
+            <ExternalLinkIcon />
           </a>
         )}
         {info?.museumsufer === false && (
-          <span class="not-museumsufer" title={tr.notMuseumsufer}>
-            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="12" height="12">
+          <span class="text-text-tertiary ml-1 opacity-60" title={tr.notMuseumsufer}>
+            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="12" height="12" class="align-[-1px]">
               <path d="M8 2L2 6v1h12V6L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
               <path d="M4 9v4M8 9v4M12 9v4M3 13h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
               <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -165,11 +180,14 @@ function EndingBadge({
   const daysUnit = daysLeft === 1 ? tr.daysSingular : tr.daysPlural;
   const label = daysLeft <= 3 ? tr.lastDays : tr.endingSoon;
   return (
-    <span class="card-ending-soon" title={`${daysLeft} ${daysUnit}`}>
+    <span class="text-[0.6875rem] font-medium text-red-700 bg-red-50 px-1.5 rounded" title={`${daysLeft} ${daysUnit}`}>
       {label}
     </span>
   );
 }
+
+const calBtnClass =
+  "inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
 
 function ExhibitionCard({
   ex,
@@ -191,9 +209,13 @@ function ExhibitionCard({
   ]
     .filter(Boolean)
     .join(" – ");
-
   const titleContent = ex.detail_url ? (
-    <a href={ex.detail_url} target="_blank" rel="noopener">
+    <a
+      href={ex.detail_url}
+      target="_blank"
+      rel="noopener"
+      class="text-inherit no-underline block hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm"
+    >
       {ex.title}
     </a>
   ) : (
@@ -202,27 +224,31 @@ function ExhibitionCard({
 
   return (
     <li>
-      <article class="card" data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
+      <article
+        class="card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0"
+        data-item-id={ex.id}
+        data-museum-slug={ex.museum_slug}
+      >
         <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
-        <div class="card-body">
-          <p class="card-title">
+        <div class="min-w-0 flex flex-col">
+          <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
-          <div class="card-meta">
-            {dates && <span class="card-dates">{dates}</span>}
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            {dates && <span class="text-[0.6875rem] text-text-tertiary leading-7">{dates}</span>}
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} tr={tr} />
             <button
               type="button"
-              class="card-visited-btn"
+              class="card-visited-btn inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary bg-transparent border border-border p-0 rounded cursor-pointer font-sans transition-colors hover:border-accent hover:text-accent"
               aria-pressed="false"
               aria-label={tr.markVisited}
               title={tr.markVisited}
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3">
                 <path
                   d="M3 8.5l3.5 3.5 7-7"
                   stroke="currentColor"
@@ -234,12 +260,14 @@ function ExhibitionCard({
             </button>
           </div>
           {ex.description && (
-            <details>
-              <summary>
+            <details class="mt-1">
+              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-accent">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class="card-desc">{ex.description}</div>
+              <div class="text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light">
+                {ex.description}
+              </div>
             </details>
           )}
         </div>
@@ -252,38 +280,50 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
   const linkUrl = ev.detail_url || ev.url;
   const titleContent = linkUrl ? (
-    <a href={linkUrl} target="_blank" rel="noopener">
+    <a
+      href={linkUrl}
+      target="_blank"
+      rel="noopener"
+      class="text-inherit no-underline block hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm"
+    >
       {ev.title}
     </a>
   ) : (
     ev.title
   );
-
   const calUrl = buildCalendarUrl(ev);
 
   return (
     <li>
-      <article class="card" data-item-id={ev.id} data-museum-slug={ev.museum_slug}>
+      <article
+        class="card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0"
+        data-item-id={ev.id}
+        data-museum-slug={ev.museum_slug}
+      >
         <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
-        <div class="card-body">
-          <p class="card-title">
+        <div class="min-w-0 flex flex-col">
+          <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
-          <p class="card-museum">{ev.museum_name || ""}</p>
-          <div class="card-meta">
-            {timeStr && <span class="card-time">{timeStr}</span>}
-            {ev.price && <span class="card-price">{ev.price}</span>}
+          <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
+          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            {timeStr && (
+              <span class="text-[0.6875rem] font-medium text-accent bg-accent-light px-1.5 rounded">{timeStr}</span>
+            )}
+            {ev.price && (
+              <span class="text-[0.6875rem] font-medium text-green-800 bg-green-100 px-1.5 rounded">{ev.price}</span>
+            )}
             <LikeBadge count={ev.like_count} />
             <NavButton slug={ev.museum_slug} tr={tr} />
             <a
-              class="card-ical"
+              class={calBtnClass}
               href={calUrl}
               target="_blank"
               rel="noopener"
               aria-label={tr.addToCalendar}
               title={tr.addToCalendar}
             >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
                 <path
                   d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
                   stroke="currentColor"
@@ -294,13 +334,13 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
               </svg>
             </a>
             <a
-              class="card-ical"
+              class={calBtnClass}
               href={`/api/event/${ev.id}.ics`}
               download="event.ics"
               aria-label="iCal"
               title="iCal (.ics)"
             >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none">
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
                 <path
                   d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
                   stroke="currentColor"
@@ -312,12 +352,14 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
             </a>
           </div>
           {ev.description && (
-            <details>
-              <summary>
+            <details class="mt-1">
+              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-accent">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class="card-desc">{ev.description}</div>
+              <div class="text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light">
+                {ev.description}
+              </div>
             </details>
           )}
         </div>
@@ -340,16 +382,32 @@ function Section({
   children: unknown;
 }) {
   return (
-    <details class="section" data-section={sectionKey} open>
-      <summary class="section-header">
-        <svg aria-hidden="true" class="section-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <details class="section mb-10" data-section={sectionKey} open>
+      <summary class="section-header flex items-center gap-2 mb-4 cursor-pointer select-none hover:[&_.section-title]:text-text-secondary">
+        <svg
+          aria-hidden="true"
+          class="section-icon w-5 h-5 shrink-0 [&_path]:stroke-text-tertiary"
+          viewBox="0 0 20 20"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path d={iconPath} stroke-width="1.5" stroke-linecap="round" />
         </svg>
-        <h2 class="section-title">{title}</h2>
-        <span class="section-count" title={`${count} ${title}`}>
+        <h2 class="section-title text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">{title}</h2>
+        <span
+          class="text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
+          title={`${count} ${title}`}
+        >
           {count}
         </span>
-        <svg aria-hidden="true" class="section-chevron" viewBox="0 0 16 16" fill="none" width="14" height="14">
+        <svg
+          aria-hidden="true"
+          class="section-chevron ml-auto text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
+          viewBox="0 0 16 16"
+          fill="none"
+          width="14"
+          height="14"
+        >
           <path
             d="M4 6l4 4 4-4"
             stroke="currentColor"
@@ -382,7 +440,6 @@ export function ContentBody({
 }) {
   const sortedEvents = sortByPopularity(events);
   const sortedExhibitions = sortByPopularity(exhibitions);
-
   const museumsWithExhibitions = new Set(sortedExhibitions.map((ex) => ex.museum_slug));
   const museumsWithout = Object.keys(museums)
     .filter((slug) => !museumsWithExhibitions.has(slug))
@@ -397,9 +454,11 @@ export function ContentBody({
         iconPath="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
       >
         {sortedEvents.length === 0 ? (
-          <div class="empty">{tr.noEvents}</div>
+          <div class="text-text-tertiary text-sm py-8 px-4 text-center bg-surface rounded-xl shadow-card">
+            {tr.noEvents}
+          </div>
         ) : (
-          <ul class="card-list">
+          <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
             {sortedEvents.map((ev, i) => (
               <EventCard ev={ev} idx={i} tr={tr} />
             ))}
@@ -414,9 +473,11 @@ export function ContentBody({
         iconPath="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12"
       >
         {sortedExhibitions.length === 0 && museumsWithout.length === 0 ? (
-          <div class="empty">{tr.noExhibitions}</div>
+          <div class="text-text-tertiary text-sm py-8 px-4 text-center bg-surface rounded-xl shadow-card">
+            {tr.noExhibitions}
+          </div>
         ) : (
-          <ul class="card-list">
+          <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
             <ExhibitionList
               exhibitions={sortedExhibitions}
               todayIso={todayIso}
@@ -425,43 +486,48 @@ export function ContentBody({
               museums={museums}
             />
             <li>
-              <details class="visited-section" id="visited-section">
-                <summary>
+              <details class="visited-section mt-4" id="visited-section">
+                <summary class="text-[0.6875rem] font-bold uppercase tracking-wide text-text-tertiary cursor-pointer flex items-center gap-2 mb-3">
                   <span aria-hidden="true" class="disclosure-icon" />
                   {tr.alreadyVisited}{" "}
-                  <span class="section-count" id="visited-count">
+                  <span
+                    class="text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
+                    id="visited-count"
+                  >
                     0
                   </span>
                 </summary>
-                <ul class="card-list" id="visited-list" />
+                <ul
+                  class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0"
+                  id="visited-list"
+                />
               </details>
             </li>
             {museumsWithout.map((slug) => (
               <li>
-                <h3 class="museum-group-header museum-no-exhibition">
+                <h3 class="museum-group-header museum-no-exhibition text-[0.6875rem] font-bold uppercase tracking-wide text-text-secondary py-2.5 pr-4 pl-4 border-b border-border-light border-l-[3px] border-l-border-light bg-border-light m-0 flex items-center gap-2 opacity-70">
                   {museums[slug].name}
                   {museums[slug].website && (
                     <a
-                      class="museum-link"
+                      class="text-text-tertiary ml-1 hover:text-accent"
                       href={museums[slug].website!}
                       target="_blank"
                       rel="noopener"
                       aria-label={museums[slug].name}
                     >
-                      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="11" height="11">
-                        <path
-                          d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9"
-                          stroke="currentColor"
-                          stroke-width="1.5"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
+                      <ExternalLinkIcon />
                     </a>
                   )}
                   {museums[slug].museumsufer === false && (
-                    <span class="not-museumsufer" title={tr.notMuseumsufer}>
-                      <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="12" height="12">
+                    <span class="text-text-tertiary ml-1 opacity-60" title={tr.notMuseumsufer}>
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        width="12"
+                        height="12"
+                        class="align-[-1px]"
+                      >
                         <path
                           d="M8 2L2 6v1h12V6L8 2z"
                           stroke="currentColor"
@@ -478,7 +544,9 @@ export function ContentBody({
                       </svg>
                     </span>
                   )}
-                  <span class="museum-permanent">{tr.permanentCollection}</span>
+                  <span class="ml-auto shrink-0 font-normal text-[0.625rem] tracking-normal normal-case text-text-tertiary">
+                    {tr.permanentCollection}
+                  </span>
                 </h3>
               </li>
             ))}
