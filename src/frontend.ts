@@ -332,10 +332,11 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     }
 
     .museum-group-header:first-child { border-top: none; }
-    .museum-link { color: var(--text-tertiary); margin-left: 0.25rem; vertical-align: baseline; }
+    .museum-link { color: var(--text-tertiary); margin-left: 0.25rem; }
     .museum-link:hover { color: var(--accent); }
-    .not-museumsufer { color: var(--text-tertiary); margin-left: 0.25rem; vertical-align: baseline; opacity: 0.6; }
-    .museum-no-exhibition { display: flex; justify-content: space-between; align-items: center; opacity: 0.7; border-left-color: var(--border-light); }
+    .museum-link svg, .not-museumsufer svg { vertical-align: -1px; }
+    .not-museumsufer { color: var(--text-tertiary); margin-left: 0.25rem; opacity: 0.6; }
+    .museum-no-exhibition { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; opacity: 0.7; border-left-color: var(--border-light); }
     .museum-permanent { font-weight: 400; font-size: 0.625rem; letter-spacing: 0; text-transform: none; color: var(--text-tertiary); }
 
     .card {
@@ -484,6 +485,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .card-dates {
       font-size: 0.6875rem;
       color: var(--text-tertiary);
+      line-height: 28px;
     }
 
     .card-time {
