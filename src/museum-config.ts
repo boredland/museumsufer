@@ -271,6 +271,34 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6696,
     exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
   },
+  experiminta: {
+    name: "EXPERIMINTA ScienceCenter",
+    website: "https://www.experiminta.de/",
+    lat: 50.1154,
+    lng: 8.6478,
+    exhibitionUrl: "https://www.experiminta.de/ausstellungen/sonderausstellungen/",
+  },
+  atelierfrankfurt: {
+    name: "Atelierfrankfurt",
+    website: "https://www.atelierfrankfurt.de/",
+    lat: 50.1132,
+    lng: 8.7197,
+    exhibitionUrl: "https://www.atelierfrankfurt.de/ausstellungen/",
+  },
+  "frankfurter-buergerstiftung": {
+    name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
+    website: "https://www.frankfurter-buergerstiftung.de/",
+    lat: 50.1262,
+    lng: 8.6792,
+    exhibitionUrl: "https://www.frankfurter-buergerstiftung.de/programm/ausstellungen",
+  },
+  palmengarten: {
+    name: "Palmengarten",
+    website: "https://www.palmengarten.de/",
+    lat: 50.1237,
+    lng: 8.656,
+    exhibitionUrl: "https://www.palmengarten.de/de/aktuelles.html",
+  },
 };
 
 export function getMuseumConfig(slug: string): MuseumConfig | undefined {
