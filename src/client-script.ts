@@ -28,6 +28,64 @@ export const CLIENT_SCRIPT = `
       return km !== null ? Math.round(km / 5 * 60) : null;
     }
 
+    var transitTimes = {};
+
+    function fetchTransitTimes() {
+      if (!userPos) return Promise.resolve();
+      var cacheKey = 'transit_' + Math.round(userPos.lat * 100) + '_' + Math.round(userPos.lng * 100);
+      var cached = sessionStorage.getItem(cacheKey);
+      if (cached) { transitTimes = JSON.parse(cached); return Promise.resolve(); }
+
+      var ox = Math.round(userPos.lng * 1e6);
+      var oy = Math.round(userPos.lat * 1e6);
+      var slugs = Object.keys(MUSEUM_GEO);
+      var batches = [];
+      for (var i = 0; i < slugs.length; i += 5) { batches.push(slugs.slice(i, i + 5)); }
+
+      return batches.reduce(function(chain, batch) {
+        return chain.then(function() {
+          var svcReqL = batch.map(function(slug) {
+            var m = MUSEUM_GEO[slug];
+            return {
+              meth: 'TripSearch',
+              req: {
+                depLocL: [{ type: 'C', crd: { x: ox, y: oy } }],
+                arrLocL: [{ type: 'C', crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } }],
+                numF: 1,
+                getPolyline: false
+              }
+            };
+          });
+          return fetch('https://www.rmv.de/auskunft/bin/jp/mgate.exe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              auth: { type: 'AID', aid: 'x0k4ZR33ICN9CWmj' },
+              client: { type: 'WEB', id: 'RMV', name: 'webapp' },
+              ver: '1.44', ext: 'RMV.1', lang: 'de',
+              svcReqL: svcReqL
+            })
+          }).then(function(r) { return r.json(); }).then(function(data) {
+            (data.svcResL || []).forEach(function(res, j) {
+              var trip = res.res && res.res.outConL && res.res.outConL[0];
+              if (trip && trip.dur) {
+                var h = parseInt(trip.dur.slice(0, 2), 10);
+                var m = parseInt(trip.dur.slice(2, 4), 10);
+                transitTimes[batch[j]] = h * 60 + m;
+              }
+            });
+          }).catch(function() {});
+        });
+      }, Promise.resolve()).then(function() {
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(transitTimes)); } catch(e) {}
+      });
+    }
+
+    function travelMin(slug) {
+      if (transitTimes[slug] !== undefined) return transitTimes[slug];
+      return walkMin(slug);
+    }
+
     let lastRenderData = null;
 
     function onToggleVisited(id, itemType) {
@@ -212,7 +270,7 @@ export const CLIENT_SCRIPT = `
         var slug = el.dataset.museumSlug;
         var geo = MUSEUM_GEO[slug];
         if (!geo) return;
-        var min = walkMin(slug);
+        var min = travelMin(slug);
         if (min === null) return;
         var navBtn = el.querySelector('a[href*="google.com/maps"]');
         if (navBtn && !navBtn.dataset.distanced) {
@@ -243,12 +301,12 @@ export const CLIENT_SCRIPT = `
         var eventTime = card.dataset.eventTime;
         if (!eventTime) return;
         var slug = card.dataset.museumSlug;
-        var walk = walkMin(slug);
-        if (walk === null) return;
+        var travel = travelMin(slug);
+        if (travel === null) return;
 
         var parts = eventTime.split(':');
         var eventMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        var margin = eventMin - nowMin - walk;
+        var margin = eventMin - nowMin - travel;
 
         timeEl.dataset.reachColored = '1';
         timeDefault.split(' ').forEach(function(c) { timeEl.classList.remove(c); });
@@ -285,8 +343,8 @@ export const CLIENT_SCRIPT = `
         items.sort(function(a, b) {
           var elA = a.querySelector('[data-museum-slug]');
           var elB = b.querySelector('[data-museum-slug]');
-          var da = elA ? (walkKm(elA.dataset.museumSlug) || 999) : 999;
-          var db = elB ? (walkKm(elB.dataset.museumSlug) || 999) : 999;
+          var da = elA ? (travelMin(elA.dataset.museumSlug) || 999) : 999;
+          var db = elB ? (travelMin(elB.dataset.museumSlug) || 999) : 999;
           return da - db;
         });
         items.forEach(function(item) { list.appendChild(item); });
@@ -304,27 +362,29 @@ export const CLIENT_SCRIPT = `
         pushStateToUrl(currentDate, false);
         return;
       }
-      if (userPos) {
+      function activateNearMe() {
         sortByDistance = true;
         btnNear.classList.add('active');
         btnNear.setAttribute('aria-pressed', 'true');
-        injectDistanceBadges(); injectReachability();
-        sortCardsByDistance();
-        pushStateToUrl(currentDate, true);
+        btnNear.classList.add('loading');
+        btnNear.setAttribute('aria-busy', 'true');
+        fetchTransitTimes().then(function() {
+          btnNear.classList.remove('loading');
+          btnNear.removeAttribute('aria-busy');
+          injectDistanceBadges(); injectReachability();
+          sortCardsByDistance();
+          pushStateToUrl(currentDate, true);
+        });
+      }
+      if (userPos) {
+        activateNearMe();
       } else if ('geolocation' in navigator) {
         btnNear.classList.add('loading');
         btnNear.setAttribute('aria-busy', 'true');
         navigator.geolocation.getCurrentPosition(
           function(pos) {
             userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            sortByDistance = true;
-            btnNear.classList.remove('loading');
-            btnNear.removeAttribute('aria-busy');
-            btnNear.classList.add('active');
-            btnNear.setAttribute('aria-pressed', 'true');
-            injectDistanceBadges(); injectReachability();
-            sortCardsByDistance();
-            pushStateToUrl(currentDate, true);
+            activateNearMe();
           },
           function() {
             btnNear.classList.remove('loading');
