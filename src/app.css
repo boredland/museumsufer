@@ -179,14 +179,7 @@ dialog::backdrop {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
-/* Calendar dropdown: show menu and backdrop when .open */
-.cal-dropdown.open > div { display: block; }
-.cal-dropdown.open::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 5;
-}
+/* Popover backdrop is handled natively */
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

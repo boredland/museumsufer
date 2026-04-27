@@ -249,14 +249,15 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
   const yahooUrl = buildYahooUrl(ev);
   const icsUrl = `/api/event/${ev.id}.ics`;
 
+  const popId = `cal-${ev.id}`;
   return (
-    <div class="relative inline-block cal-dropdown">
+    <span class="relative inline-block">
       <button
         type="button"
         class={iconBtnClass}
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
-        onclick="this.parentElement.classList.toggle('open')"
+        popovertarget={popId}
       >
         <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
           <path
@@ -268,7 +269,11 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
           <path d="M5 9h2v2H5z" fill="currentColor" />
         </svg>
       </button>
-      <div class="hidden absolute right-0 top-full mt-1 z-10 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]">
+      <div
+        id={popId}
+        popover="auto"
+        class="m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
+      >
         <a href={googleUrl} target="_blank" rel="noopener" class={calLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
             <path d="M8 1a7 7 0 110 14A7 7 0 018 1z" stroke="currentColor" stroke-width="1.2" />
@@ -315,7 +320,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
           .ics (Apple, Proton, ...)
         </a>
       </div>
-    </div>
+    </span>
   );
 }
 
