@@ -244,6 +244,8 @@ export const CLIENT_SCRIPT = `
       return div.innerHTML;
     }
 
+    var walkIcon = '<svg viewBox="0 0 16 16" fill="none" style="width:10px;height:10px;display:inline;vertical-align:-1px" aria-hidden="true"><circle cx="8" cy="2.5" r="1.5" fill="currentColor"/><path d="M6.5 5.5L8 4l2 2-1 3.5-2 1v3m-1-6.5L5 9l1 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
         if (el.querySelector('.card-distance')) return;
@@ -253,12 +255,12 @@ export const CLIENT_SCRIPT = `
         var badge = document.createElement('span');
         badge.className = 'card-distance';
         badge.title = '~' + min + ' ' + T.minWalk;
-        badge.textContent = min + ' ' + T.minWalk;
+        badge.innerHTML = walkIcon + ' ' + min + ' ' + escHtml(T.minWalk);
         var meta = el.querySelector('.card-meta');
         if (meta) { meta.insertBefore(badge, meta.firstChild); return; }
-        badge.style.marginTop = '0.25rem';
+        badge.style.marginLeft = '0.5rem';
         var nameEl = el.querySelector('p');
-        if (nameEl) nameEl.after(badge);
+        if (nameEl) nameEl.appendChild(badge);
       });
     }
 
