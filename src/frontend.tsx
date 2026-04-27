@@ -67,18 +67,23 @@ function GithubCorner({ label }: { label: string }) {
   );
 }
 
-function LangSwitch({ locale }: { locale: Locale }) {
+function LangSwitch({ locale, date }: { locale: Locale; date?: string }) {
   return (
     <nav class="flex justify-center gap-1 mt-3" aria-label="Language">
-      {SUPPORTED_LOCALES.map((l) => (
-        <a
-          href={`?lang=${l}`}
-          class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
-          aria-current={l === locale ? "page" : undefined}
-        >
-          {l.toUpperCase()}
-        </a>
-      ))}
+      {SUPPORTED_LOCALES.map((l) => {
+        const params = new URLSearchParams();
+        params.set("lang", l);
+        if (date) params.set("date", date);
+        return (
+          <a
+            href={`?${params.toString()}`}
+            class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
+            aria-current={l === locale ? "page" : undefined}
+          >
+            {l.toUpperCase()}
+          </a>
+        );
+      })}
     </nav>
   );
 }
@@ -358,7 +363,7 @@ export function renderPage(
               Museumsufer Frankfurt
             </h1>
             <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
-            <LangSwitch locale={locale} />
+            <LangSwitch locale={locale} date={initialData?.date !== todayIso() ? initialData?.date : undefined} />
           </header>
 
           <SearchTrigger tr={tr} />
