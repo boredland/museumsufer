@@ -215,7 +215,11 @@ app.get("*", async (c) => {
   } catch {}
 
   return c.html(renderPage(locale, initialData, museums), {
-    headers: { "Content-Language": locale, Vary: "Accept-Language" },
+    headers: {
+      "Content-Language": locale,
+      Vary: "Accept-Language",
+      "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+    },
   });
 });
 
