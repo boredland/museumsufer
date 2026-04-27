@@ -256,8 +256,9 @@ export const CLIENT_SCRIPT = `
         badge.textContent = min + ' ' + T.minWalk;
         var meta = el.querySelector('.card-meta');
         if (meta) { meta.insertBefore(badge, meta.firstChild); return; }
-        var name = el.querySelector('p');
-        if (name) name.parentElement.appendChild(badge);
+        badge.style.marginTop = '0.25rem';
+        var nameEl = el.querySelector('p');
+        if (nameEl) nameEl.after(badge);
       });
     }
 
