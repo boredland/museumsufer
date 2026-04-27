@@ -11,6 +11,7 @@ export interface Env {
 export interface MuseumInfo {
   name: string;
   website: string | null;
+  museumsufer?: false;
 }
 
 export interface Museum {
