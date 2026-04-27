@@ -190,7 +190,7 @@ function ExhibitionCard({
     <li>
       <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
         <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
-        <div class="min-w-0 flex flex-col">
+        <div class="card-body min-w-0 flex flex-col">
           <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
@@ -335,7 +335,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
             </span>
           )}
         </div>
-        <div class="min-w-0 flex flex-col">
+        <div class="card-body min-w-0 flex flex-col">
           <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>

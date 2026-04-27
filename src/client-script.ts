@@ -195,8 +195,7 @@ export const CLIENT_SCRIPT = `
       currentDate = date;
       setActive(btn || btnForDate(date));
       datePicker.value = btnForDate(date) ? '' : date;
-      var langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
-      htmx.ajax('GET', '/partial/content?date=' + date + langParam, {
+      htmx.ajax('GET', '/partial/content?date=' + date + '&lang=' + CURRENT_LANG, {
         target: '#content',
         swap: 'innerHTML',
       });
