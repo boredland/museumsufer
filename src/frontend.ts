@@ -1484,11 +1484,12 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         : '';
 
       const v = isVisited(ex.id);
+      const exType = 'exhibition';
       const visitedBtn = v
-        ? "<button class=\"card-visited-btn is-visited\" aria-pressed=\"true\" aria-label=\"" + escAttr(T.unmarkVisited) + "\" title=\"" + escAttr(T.unmarkVisited) + "\" onclick=\"onToggleVisited(" + ex.id + ",'exhibition')\">"
+        ? '<button class="card-visited-btn is-visited" aria-pressed="true" aria-label="' + escAttr(T.unmarkVisited) + '" title="' + escAttr(T.unmarkVisited) + '" onclick="onToggleVisited(' + ex.id + ',\'' + exType + '\')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
           + '</button>'
-        : "<button class=\"card-visited-btn\" aria-pressed=\"false\" aria-label=\"" + escAttr(T.markVisited) + "\" title=\"" + escAttr(T.markVisited) + "\" onclick=\"onToggleVisited(" + ex.id + ",'exhibition')\">"
+        : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.markVisited) + '" title="' + escAttr(T.markVisited) + '" onclick="onToggleVisited(' + ex.id + ',\'' + exType + '\')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           + '</button>';
 
