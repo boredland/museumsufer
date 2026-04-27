@@ -440,6 +440,58 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .card-visited-btn.is-visited { color: #166534; background: #dcfce7; border-color: #dcfce7; }
     .card-visited-btn svg { width: 12px; height: 12px; }
 
+    .heart-prompt {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--accent-light);
+      border-radius: 8px;
+      margin-top: 0.375rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .heart-prompt-text {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      flex: 1;
+    }
+
+    .heart-prompt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.625rem;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .heart-prompt-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .heart-prompt-btn.heart { color: #dc2626; border-color: #fecaca; }
+    .heart-prompt-btn.heart:hover { background: #fef2f2; border-color: #dc2626; }
+    .heart-prompt-btn svg { width: 12px; height: 12px; }
+
+    .card-likes {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: #dc2626;
+      background: #fef2f2;
+      padding: 0.0625rem 0.375rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.1875rem;
+    }
+
+    .card-likes svg { width: 10px; height: 10px; flex-shrink: 0; }
+
     .visited-section {
       margin-top: 1rem;
     }
@@ -997,6 +1049,11 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       <p>${escHtml(tr.whyText)}</p>
     </details>
 
+    <details class="why-section">
+      <summary>${escHtml(tr.privacyNote)}</summary>
+      <p>${escHtml(tr.privacyText)}</p>
+    </details>
+
     <details class="llm-tip">
       <summary>
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1098,6 +1155,33 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         + '</a>';
     }
 
+    function likeBadge(item) {
+      const count = item.like_count || 0;
+      if (count <= 0) return '';
+      return '<span class="card-likes"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z"/></svg>' + count + '</span>';
+    }
+
+    function museumPopularity(items) {
+      const pop = {};
+      for (const item of items) {
+        const slug = item.museum_slug;
+        if (!slug) continue;
+        const count = item.like_count || 0;
+        if (!pop[slug] || count > pop[slug]) pop[slug] = count;
+      }
+      return pop;
+    }
+
+    function sortByPopularity(items) {
+      const pop = museumPopularity(items);
+      return [...items].sort((a, b) => {
+        const pa = pop[a.museum_slug] || 0;
+        const pb = pop[b.museum_slug] || 0;
+        if (pa !== pb) return pb - pa;
+        return (a.museum_name || '').localeCompare(b.museum_name || '');
+      });
+    }
+
     function sortItemsByDistance(items) {
       if (!userPos || !sortByDistance) return items;
       return [...items].sort((a, b) => {
@@ -1107,11 +1191,66 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       });
     }
 
+    function sortItems(items) {
+      if (userPos && sortByDistance) return sortItemsByDistance(items);
+      return sortByPopularity(items);
+    }
+
     let lastRenderData = null;
 
-    function onToggleVisited(id) {
+    function onToggleVisited(id, itemType) {
+      if (isVisited(id)) {
+        toggleVisited(id);
+        if (lastRenderData) render(lastRenderData);
+        return;
+      }
       toggleVisited(id);
-      if (lastRenderData) render(lastRenderData);
+      showHeartPrompt(id, itemType);
+    }
+
+    function showHeartPrompt(id, itemType) {
+      const card = document.querySelector('[data-item-id="' + id + '"]');
+      if (!card) { if (lastRenderData) render(lastRenderData); return; }
+      const existing = card.querySelector('.heart-prompt');
+      if (existing) return;
+      const prompt = document.createElement('div');
+      prompt.className = 'heart-prompt';
+      prompt.innerHTML = '<span class="heart-prompt-text">' + escHtml(T.heartPrompt) + '</span>'
+        + '<button class="heart-prompt-btn heart" data-action="like">'
+        + '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z"/></svg>'
+        + escHtml(T.heartYes) + '</button>'
+        + '<button class="heart-prompt-btn" data-action="dismiss">' + escHtml(T.heartDismiss) + '</button>';
+      prompt.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        if (btn.dataset.action === 'like') {
+          submitLike(id, itemType);
+        }
+        if (lastRenderData) render(lastRenderData);
+      });
+      card.querySelector('.card-body').appendChild(prompt);
+    }
+
+    function getMyLikes() {
+      try { return JSON.parse(localStorage.getItem('my_likes') || '{}'); } catch { return {}; }
+    }
+
+    function isLikedByMe(id) { return !!getMyLikes()[id]; }
+
+    function submitLike(id, itemType) {
+      const likes = getMyLikes();
+      likes[id] = true;
+      try { localStorage.setItem('my_likes', JSON.stringify(likes)); } catch {}
+      if (lastRenderData) {
+        const all = [...(lastRenderData.exhibitions || []), ...(lastRenderData.events || [])];
+        const item = all.find(i => i.id === id);
+        if (item) item.like_count = (item.like_count || 0) + 1;
+      }
+      fetch('/api/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item_type: itemType, item_id: id }),
+      }).catch(() => {});
     }
 
     function getVisited() {
@@ -1230,7 +1369,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       lastRenderData = data;
       let html = '';
 
-      const sortedEvents = sortItemsByDistance(data.events).map((e, i) => ({...e, _idx: i}));
+      const sortedEvents = sortItems(data.events).map((e, i) => ({...e, _idx: i}));
       let eventsInner;
       if (sortedEvents.length === 0) {
         eventsInner = '<div class="empty">' + escHtml(T.noEvents) + '</div>';
@@ -1241,7 +1380,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       }
       html += renderSection('events', T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z', eventsInner);
 
-      const sortedExhibitions = sortItemsByDistance(data.exhibitions).map((e, i) => ({...e, _idx: i}));
+      const sortedExhibitions = sortItems(data.exhibitions).map((e, i) => ({...e, _idx: i}));
       const museumsWithExhibitions = new Set(sortedExhibitions.map(ex => ex.museum_slug));
       const museumsWithout = Object.keys(MUSEUMS)
         .filter(slug => !museumsWithExhibitions.has(slug))
@@ -1346,20 +1485,21 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
 
       const v = isVisited(ex.id);
       const visitedBtn = v
-        ? '<button class="card-visited-btn is-visited" aria-pressed="true" aria-label="' + escAttr(T.unmarkVisited) + '" title="' + escAttr(T.unmarkVisited) + '" onclick="onToggleVisited(' + ex.id + ')">'
+        ? "<button class=\"card-visited-btn is-visited\" aria-pressed=\"true\" aria-label=\"" + escAttr(T.unmarkVisited) + "\" title=\"" + escAttr(T.unmarkVisited) + "\" onclick=\"onToggleVisited(" + ex.id + ",'exhibition')\">"
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
           + '</button>'
-        : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.markVisited) + '" title="' + escAttr(T.markVisited) + '" onclick="onToggleVisited(' + ex.id + ')">'
+        : "<button class=\"card-visited-btn\" aria-pressed=\"false\" aria-label=\"" + escAttr(T.markVisited) + "\" title=\"" + escAttr(T.markVisited) + "\" onclick=\"onToggleVisited(" + ex.id + ",'exhibition')\">"
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           + '</button>';
 
-      return '<li><article class="card">'
+      return '<li><article class="card" data-item-id="' + ex.id + '">'
         + img
         + '<div class="card-body">'
         + '<p class="card-title">' + titleHtml + ' ' + translatedBadge(ex) + '</p>'
         + '<div class="card-meta">'
         + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
         + endingTag
+        + likeBadge(ex)
         + distanceBadge(ex.museum_slug)
         + navButton(ex.museum_slug)
         + visitedBtn
@@ -1402,13 +1542,13 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         + '<svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
         + '</a>';
 
-      const meta = [timeTag, priceTag, distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
+      const meta = [timeTag, priceTag, likeBadge(ev), distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
 
       const desc = ev.description
         ? '<details><summary><span aria-hidden="true" class="disclosure-icon"></span>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
         : '';
 
-      return '<li><article class="card">'
+      return '<li><article class="card" data-item-id="' + ev.id + '">'
         + img
         + '<div class="card-body">'
         + '<p class="card-title">' + titleHtml + ' ' + translatedBadge(ev) + '</p>'

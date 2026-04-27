@@ -1,4 +1,13 @@
-import { getEventsForDate, getExhibitionsForDate, getMuseumMap, handleApi, handleFeeds, proxyImages } from "./api";
+import {
+  attachLikeCounts,
+  getEventsForDate,
+  getExhibitionsForDate,
+  getLikeCounts,
+  getMuseumMap,
+  handleApi,
+  handleFeeds,
+  proxyImages,
+} from "./api";
 import { todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { scrapeMuseumExhibitions } from "./exhibition-scraper";
@@ -197,20 +206,34 @@ export default {
       ]);
       const exhibitions = proxyImages(rawExhibitions);
       const events = proxyImages(rawEvents);
-      let finalExh: unknown[] = exhibitions;
-      let finalEv: unknown[] = events;
+      const [exhCounts, evCounts] = await Promise.all([
+        getLikeCounts(
+          env,
+          "exhibition",
+          exhibitions.map((e) => e.id),
+        ),
+        getLikeCounts(
+          env,
+          "event",
+          events.map((e) => e.id),
+        ),
+      ]);
+      const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
+      const evWithLikes = attachLikeCounts(events, evCounts);
+      let finalExh: unknown[] = exhWithLikes;
+      let finalEv: unknown[] = evWithLikes;
       if (locale !== "de") {
         const [trExh, trEv] = await Promise.all([
-          translateFields(env, exhibitions, ["title"], locale),
-          translateFields(env, events, ["title", "description"], locale),
+          translateFields(env, exhWithLikes, ["title"], locale),
+          translateFields(env, evWithLikes, ["title", "description"], locale),
         ]);
         finalExh = trExh.map((item, i) => {
-          const orig = exhibitions[i] as unknown as Record<string, unknown>;
+          const orig = exhWithLikes[i] as unknown as Record<string, unknown>;
           const cur = item as unknown as Record<string, unknown>;
           return cur.title !== orig.title ? { ...cur, translated: true } : cur;
         });
         finalEv = trEv.map((item, i) => {
-          const orig = events[i] as unknown as Record<string, unknown>;
+          const orig = evWithLikes[i] as unknown as Record<string, unknown>;
           const cur = item as unknown as Record<string, unknown>;
           return cur.title !== orig.title || cur.description !== orig.description ? { ...cur, translated: true } : cur;
         });
