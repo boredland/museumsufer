@@ -8,7 +8,9 @@ export const CLIENT_SCRIPT = `
 
     function fetchTransitTimes() {
       if (!userPos) return Promise.resolve();
-      var cacheKey = 'transit_' + Math.round(userPos.lat * 100) + '_' + Math.round(userPos.lng * 100);
+      var snapLat = Math.round(userPos.lat * 300) / 300;
+      var snapLng = Math.round(userPos.lng * 300) / 300;
+      var cacheKey = 'transit_' + snapLat + '_' + snapLng;
       var cached = sessionStorage.getItem(cacheKey);
       if (cached) { transitTimes = JSON.parse(cached); return Promise.resolve(); }
 
