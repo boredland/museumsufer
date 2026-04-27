@@ -205,7 +205,7 @@ export const CLIENT_SCRIPT = `
       return div.innerHTML;
     }
 
-    var pinSvg = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" style="width:12px;height:12px;flex-shrink:0"><rect x="3.2" y="3.2" width="6.8" height="6.8" rx="1" transform="rotate(45 8 8)" stroke="currentColor" stroke-width="1.5"/><path d="M7 9.5L9.5 7M9.5 7H7M9.5 7V9.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var pinSvg = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0"><path d="M8 1.3L3 13.5l.47.47L8 12l4.53 2 .47-.47z"/></svg>';
 
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
