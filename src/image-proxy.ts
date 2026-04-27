@@ -19,20 +19,27 @@ async function getAllowedDomains(env: Env): Promise<Set<string>> {
   if (allowedDomains) return allowedDomains;
 
   const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
-  const { results } = await env.DB.prepare(
-    "SELECT website_url, image_url FROM museums WHERE website_url IS NOT NULL OR image_url IS NOT NULL",
-  ).all<{ website_url: string | null; image_url: string | null }>();
+  const [museumRows, imageRows] = await Promise.all([
+    env.DB.prepare(
+      "SELECT website_url, image_url FROM museums WHERE website_url IS NOT NULL OR image_url IS NOT NULL",
+    ).all<{ website_url: string | null; image_url: string | null }>(),
+    env.DB.prepare(
+      "SELECT DISTINCT image_url FROM events WHERE image_url IS NOT NULL UNION SELECT DISTINCT image_url FROM exhibitions WHERE image_url IS NOT NULL",
+    ).all<{ image_url: string | null }>(),
+  ]);
 
-  for (const row of results) {
-    for (const url of [row.website_url, row.image_url]) {
-      if (!url) continue;
-      try {
-        const hostname = new URL(url).hostname;
-        domains.add(hostname);
-        if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
-        else domains.add(`www.${hostname}`);
-      } catch {}
-    }
+  const urls = [
+    ...museumRows.results.flatMap((r) => [r.website_url, r.image_url]),
+    ...imageRows.results.map((r) => r.image_url),
+  ];
+  for (const url of urls) {
+    if (!url) continue;
+    try {
+      const hostname = new URL(url).hostname;
+      domains.add(hostname);
+      if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
+      else domains.add(`www.${hostname}`);
+    } catch {}
   }
 
   allowedDomains = domains;
