@@ -186,7 +186,10 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
   // "DD. Month YYYY" (single date)
   // "DD. Month - DD. Month YYYY"
   // "DD. Month YYYY - DD. Month YYYY"
-  const rangeMatch = cleaned.match(/(\d{1,2})\.\s*(\w+)\s*(?:(\d{4}))?\s*[-–]\s*(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
+  const M = "[\\wäöüÄÖÜß]+";
+  const rangeMatch = cleaned.match(
+    new RegExp(`(\\d{1,2})\\.\\s*(${M})\\s*(?:(\\d{4}))?\\s*[-–]\\s*(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`),
+  );
 
   if (rangeMatch) {
     const [, startDay, startMonthName, startYearStr, endDay, endMonthName, endYear] = rangeMatch;
@@ -201,8 +204,17 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
     };
   }
 
+  // Open-ended: "Ab DD. Month YYYY"
+  const openMatch = cleaned.match(new RegExp(`^[Aa]b\\s+(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`));
+  if (openMatch) {
+    const [, day, monthName, year] = openMatch;
+    const month = GERMAN_MONTHS[monthName.toLowerCase()];
+    if (!month) return { start: null, end: null };
+    return { start: `${year}-${month}-${day.padStart(2, "0")}`, end: null };
+  }
+
   // Single date: "DD. Month YYYY"
-  const singleMatch = cleaned.match(/(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
+  const singleMatch = cleaned.match(new RegExp(`(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`));
   if (singleMatch) {
     const [, day, monthName, year] = singleMatch;
     const month = GERMAN_MONTHS[monthName.toLowerCase()];
