@@ -327,16 +327,20 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
         data-event-time={ev.time || undefined}
         data-event-date={ev.date}
       >
-        <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
+        <div class="shrink-0 flex flex-col items-center gap-1">
+          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
+          {timeStr && (
+            <span class="text-[0.6875rem] font-medium text-accent bg-accent-light px-1.5 py-0.5 rounded text-center whitespace-nowrap">
+              {timeStr}
+            </span>
+          )}
+        </div>
         <div class="min-w-0 flex flex-col">
           <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {timeStr && (
-              <span class="text-[0.6875rem] font-medium text-accent bg-accent-light px-1.5 rounded">{timeStr}</span>
-            )}
             {ev.price && (
               <span class="text-[0.6875rem] font-medium text-green-800 bg-green-100 px-1.5 rounded">{ev.price}</span>
             )}
