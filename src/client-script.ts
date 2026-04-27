@@ -129,77 +129,39 @@ export const CLIENT_SCRIPT = `
 
     var content = document.getElementById('content');
     var dateLabel = document.getElementById('date-label');
-    var btnToday = document.getElementById('btn-today');
-    var btnTomorrow = document.getElementById('btn-tomorrow');
-    var btnWeekend = document.getElementById('btn-weekend');
-    var btnSunday = document.getElementById('btn-sunday');
-    var datePicker = document.getElementById('date-picker');
-    var allBtns = [btnToday, btnTomorrow, btnWeekend, btnSunday];
 
     function toIso(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
-    function today() { return new Date(); }
-    function tomorrow() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
-    function nextDay(dayOfWeek) {
-      var d = new Date();
-      var current = d.getDay();
-      var diff = current <= dayOfWeek ? dayOfWeek - current : 7 - current + dayOfWeek;
-      d.setDate(d.getDate() + (diff === 0 ? 0 : diff));
-      return d;
-    }
-
-    function formatDateFull(iso) {
-      if (!iso) return '';
-      var d = new Date(iso + 'T00:00:00');
-      var weekday = d.toLocaleDateString(DATE_LOCALE, { weekday: 'long' });
-      var rest = d.toLocaleDateString(DATE_LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
-      return weekday + ', ' + rest;
-    }
-
-    function btnForDate(date) {
-      if (date === toIso(today())) return btnToday;
-      if (date === toIso(tomorrow())) return btnTomorrow;
-      if (date === toIso(nextDay(6))) return btnWeekend;
-      if (date === toIso(nextDay(0))) return btnSunday;
-      return null;
-    }
-
-    function setActive(btn) {
-      allBtns.forEach(function(b) { b.classList.remove('active'); });
-      datePicker.parentElement.classList.remove('active');
-      if (btn) btn.classList.add('active');
-      else datePicker.parentElement.classList.add('active');
-    }
-
-    function updateNavVisibility() {
-      var todayDay = today().getDay();
-      btnWeekend.style.display = (todayDay === 6) ? 'none' : '';
-      btnSunday.style.display = (todayDay === 0) ? 'none' : '';
-      datePicker.min = toIso(today());
-      var maxDate = new Date();
-      maxDate.setDate(maxDate.getDate() + 7);
-      datePicker.max = toIso(maxDate);
-    }
 
     function pushStateToUrl(date, near) {
       var url = new URL(location.href);
-      if (date === toIso(today())) url.searchParams.delete('date');
+      if (date === toIso(new Date())) url.searchParams.delete('date');
       else url.searchParams.set('date', date);
       if (near) url.searchParams.set('sort', 'near');
       else url.searchParams.delete('sort');
       history.replaceState(null, '', url.toString());
     }
 
-    function loadDay(date, btn) {
+    function setActiveDate(date) {
+      document.querySelectorAll('[data-date]').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.date === date);
+      });
+    }
+
+    function loadDay(date) {
       currentDate = date;
-      setActive(btn || btnForDate(date));
-      datePicker.value = btnForDate(date) ? '' : date;
+      setActiveDate(date);
       htmx.ajax('GET', '/partial/content?date=' + date + '&lang=' + CURRENT_LANG, {
         target: '#content',
         swap: 'innerHTML',
       });
     }
+
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-date]');
+      if (btn) loadDay(btn.dataset.date);
+    });
 
     document.body.addEventListener('htmx:afterSwap', function(e) {
       if (e.detail.target.id !== 'content') return;
@@ -330,12 +292,6 @@ export const CLIENT_SCRIPT = `
 
     var btnNear = document.getElementById('btn-near');
 
-    btnToday.addEventListener('click', function() { datePicker.value = ''; loadDay(toIso(today()), btnToday); });
-    btnTomorrow.addEventListener('click', function() { datePicker.value = ''; loadDay(toIso(tomorrow()), btnTomorrow); });
-    btnWeekend.addEventListener('click', function() { datePicker.value = ''; loadDay(toIso(nextDay(6)), btnWeekend); });
-    btnSunday.addEventListener('click', function() { datePicker.value = ''; loadDay(toIso(nextDay(0)), btnSunday); });
-    datePicker.addEventListener('change', function(e) { loadDay(e.target.value, null); });
-
     btnNear.addEventListener('click', function() {
       if (sortByDistance) {
         sortByDistance = false;
@@ -426,17 +382,14 @@ export const CLIENT_SCRIPT = `
       });
     }
 
-    updateNavVisibility();
-    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : toIso(today());
-    setActive(btnForDate(currentDate));
-    if (!btnForDate(currentDate)) datePicker.value = currentDate;
+    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : toIso(new Date());
 
     if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited();
       hydrateSectionStates();
     } else {
-      loadDay(toIso(today()), btnToday);
+      loadDay(toIso(new Date()));
     }
 
     var urlSort = new URLSearchParams(location.search).get('sort');

@@ -86,10 +86,6 @@ dialog::backdrop {
   @apply bg-accent text-white border-accent;
 }
 
-#date-picker ~ .date-btn.active,
-label.date-btn.active {
-  @apply border-accent bg-accent-light text-accent;
-}
 
 .loading {
   pointer-events: none;
@@ -196,10 +192,6 @@ article.card:has(.card-started) {
   from { opacity: 1; }
   to { opacity: 0; transform: translateY(-4px); }
 }
-
-/* Date picker label: force pointer cursor over the hidden input */
-label.date-btn { cursor: pointer !important; }
-label.date-btn input { cursor: pointer !important; }
 
 /* Close calendar dropdowns on outside click (backdrop trick) */
 details.relative[open] > summary::before {
