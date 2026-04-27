@@ -303,7 +303,8 @@ export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>
 
 function filterPastEvents(events: Event[]): Event[] {
   const { hour, minute } = berlinHourMinute();
-  const nowMinutes = hour * 60 + minute;
+  let nowMinutes = hour * 60 + minute;
+  if (nowMinutes < 360) nowMinutes += 24 * 60;
 
   return events.filter((ev) => {
     if (!ev.time) return true;
@@ -311,12 +312,10 @@ function filterPastEvents(events: Event[]): Event[] {
     if (ev.end_time) {
       const [eh, em] = ev.end_time.split(":").map(Number);
       let endMinutes = eh * 60 + em;
-      // Treat end times before 06:00 as next-day (e.g. "02:00" for Nacht der Museen)
       if (endMinutes < 360) endMinutes += 24 * 60;
       return nowMinutes < endMinutes;
     }
 
-    // No end_time: assume 3 hours duration
     const [h, m] = ev.time.split(":").map(Number);
     const assumedEnd = h * 60 + m + 180;
     return nowMinutes < assumedEnd;
