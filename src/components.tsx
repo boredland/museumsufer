@@ -246,7 +246,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
 
   return (
     <details class="relative inline-block">
-      <summary class={`${iconBtnClass} list-none`} aria-label={tr.addToCalendar} title={tr.addToCalendar}>
+      <summary role="button" class={`${iconBtnClass} list-none`} aria-label={tr.addToCalendar} title={tr.addToCalendar}>
         <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
           <path
             d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
