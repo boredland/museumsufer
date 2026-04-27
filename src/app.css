@@ -200,6 +200,14 @@ article.card:has(.card-started) {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
+/* Close calendar dropdowns on outside click (backdrop trick) */
+details.relative[open] > summary::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .loading::after, .octo-arm, .fade-in { animation: none !important; }
