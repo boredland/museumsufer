@@ -182,6 +182,7 @@ export const PAGE_STYLES = `
     }
 
     .date-picker-label:hover { border-color: var(--accent); color: var(--accent); }
+    .date-picker-label svg { pointer-events: none; }
 
     .date-picker-label input {
       position: absolute;
