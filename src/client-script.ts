@@ -1,32 +1,8 @@
 export const CLIENT_SCRIPT = `
     if (typeof htmx !== 'undefined') htmx.config.globalViewTransitions = true;
 
-    const RIVER_LAT = 50.107;
-    const BRIDGE_PENALTY = 0.8;
-
     let userPos = null;
     let sortByDistance = false;
-
-    function haversine(lat1, lng1, lat2, lng2) {
-      const R = 6371;
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function walkKm(slug) {
-      if (!userPos || !MUSEUM_GEO[slug]) return null;
-      const m = MUSEUM_GEO[slug];
-      let km = haversine(userPos.lat, userPos.lng, m.lat, m.lng);
-      if ((userPos.lat < RIVER_LAT) !== (m.lat < RIVER_LAT)) km += BRIDGE_PENALTY;
-      return km;
-    }
-
-    function walkMin(slug) {
-      const km = walkKm(slug);
-      return km !== null ? Math.round(km / 5 * 60) : null;
-    }
 
     var transitTimes = {};
 
@@ -47,8 +23,7 @@ export const CLIENT_SCRIPT = `
     }
 
     function travelMin(slug) {
-      if (transitTimes[slug] !== undefined) return transitTimes[slug];
-      return walkMin(slug);
+      return transitTimes[slug] !== undefined ? transitTimes[slug] : null;
     }
 
     let lastRenderData = null;
@@ -233,8 +208,6 @@ export const CLIENT_SCRIPT = `
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
         var slug = el.dataset.museumSlug;
-        var geo = MUSEUM_GEO[slug];
-        if (!geo) return;
         var min = travelMin(slug);
         if (min === null) return;
         var navBtn = el.querySelector('a[href*="rmv.de/c/"]');
