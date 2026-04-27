@@ -27,6 +27,7 @@ interface MuseumMapEntry {
   id: number;
   name: string;
   description: string;
+  teaser_img: string;
   url: string;
   tags: string;
 }
@@ -48,14 +49,15 @@ async function scrapeMuseums(env: Env): Promise<number> {
   const museums = config.museums;
 
   const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url, description) VALUES (?, ?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, description = excluded.description, updated_at = datetime('now')`,
+    `INSERT INTO museums (name, slug, museumsufer_url, description, image_url) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, description = excluded.description, image_url = excluded.image_url, updated_at = datetime('now')`,
   );
 
   const ops = museums.map((m) => {
     const slug = m.url.replace(/^\/de\/museen\//, "").replace(/\/$/, "");
     const desc = m.description?.trim() || null;
-    return stmt.bind(m.name.trim(), slug, `${BASE_URL}${m.url}`, desc);
+    const img = m.teaser_img ? `${BASE_URL}/media/sliderimages/${m.teaser_img}` : null;
+    return stmt.bind(m.name.trim(), slug, `${BASE_URL}${m.url}`, desc, img);
   });
 
   await env.DB.batch(ops);
