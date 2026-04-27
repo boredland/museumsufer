@@ -150,7 +150,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
 }
 
 const dateBtnClass =
-  "date-btn py-1.5 px-3 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
+  "date-btn w-12 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
 
 function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
   const dl = dateLocale(locale);
@@ -163,7 +163,7 @@ function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string
     days.push({
       iso,
       weekday: i === 0 ? tr.today : d.toLocaleDateString(dl, { weekday: "short" }),
-      day: i === 0 ? "" : String(d.getDate()),
+      day: String(d.getDate()),
       isToday: i === 0,
     });
   }
@@ -173,7 +173,7 @@ function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string
       {days.map((d) => (
         <button type="button" data-date={d.iso} class={`${dateBtnClass}${d.iso === activeDate ? " active" : ""}`}>
           <span class="text-[0.6875rem]">{d.weekday}</span>
-          {d.day && <span class="text-[0.625rem] opacity-60">{d.day}</span>}
+          <span class="text-[0.625rem] opacity-60">{d.day}</span>
         </button>
       ))}
       <button
