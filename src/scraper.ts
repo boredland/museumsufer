@@ -1,3 +1,4 @@
+import { getManualMuseums } from "./museum-config";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 import type { Env } from "./types";
 
@@ -7,8 +8,18 @@ const MUSEUMS_URL = `${BASE_URL}/de/museen/`;
 
 export async function scrape(env: Env): Promise<{ exhibitions: number; museums: number }> {
   const museumsCount = await scrapeMuseums(env);
+  await syncManualMuseums(env);
   const exhibitionsCount = await scrapeExhibitions(env);
   return { exhibitions: exhibitionsCount, museums: museumsCount };
+}
+
+async function syncManualMuseums(env: Env): Promise<void> {
+  const stmt = env.DB.prepare(
+    `INSERT INTO museums (name, slug, museumsufer_url, website_url) VALUES (?, ?, '', ?)
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url, updated_at = datetime('now')`,
+  );
+  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website));
+  if (ops.length > 0) await env.DB.batch(ops);
 }
 
 interface MuseumMapEntry {

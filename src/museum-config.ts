@@ -21,6 +21,8 @@ export interface ProxyConfig {
 }
 
 export interface MuseumConfig {
+  name?: string;
+  website?: string;
   lat: number;
   lng: number;
   spa?: true;
@@ -259,6 +261,16 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
   },
+
+  // --- Manual additions (not on museumsufer.de) ---
+
+  "kunststiftung-dz-bank": {
+    name: "Kunststiftung DZ BANK",
+    website: "https://kunststiftungdzbank.de/",
+    lat: 50.1134,
+    lng: 8.6696,
+    exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
+  },
 };
 
 export function getMuseumConfig(slug: string): MuseumConfig | undefined {
@@ -271,6 +283,12 @@ export function getMuseumLocations(): Record<string, { lat: number; lng: number 
     locations[slug] = { lat: config.lat, lng: config.lng };
   }
   return locations;
+}
+
+export function getManualMuseums(): Array<{ slug: string; name: string; website: string | null }> {
+  return Object.entries(MUSEUMS)
+    .filter(([, c]) => c.name)
+    .map(([slug, c]) => ({ slug, name: c.name!, website: c.website ?? null }));
 }
 
 export function getProxyDomains(): Set<string> {
