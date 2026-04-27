@@ -161,6 +161,28 @@ dialog::backdrop {
   @apply text-[0.6875rem] font-medium text-blue-800 bg-blue-100 px-1.5 rounded whitespace-nowrap;
 }
 
+/* View transitions */
+#content {
+  view-transition-name: content;
+}
+
+#date-label {
+  view-transition-name: date-label;
+}
+
+::view-transition-old(content) {
+  animation: fadeOut 0.15s ease-out;
+}
+
+::view-transition-new(content) {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateY(-4px); }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .loading::after, .octo-arm, .fade-in { animation: none !important; }

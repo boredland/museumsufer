@@ -1,4 +1,6 @@
 export const CLIENT_SCRIPT = `
+    if (typeof htmx !== 'undefined') htmx.config.globalViewTransitions = true;
+
     const RIVER_LAT = 50.107;
     const BRIDGE_PENALTY = 0.8;
 
@@ -200,10 +202,6 @@ export const CLIENT_SCRIPT = `
       hydrateVisited();
       hydrateSectionStates();
       if (sortByDistance && userPos) injectDistanceBadges();
-      content.classList.remove('fade-in');
-      requestAnimationFrame(function() {
-        requestAnimationFrame(function() { content.classList.add('fade-in'); });
-      });
     });
 
     function persistSectionState(el) {
