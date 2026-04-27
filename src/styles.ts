@@ -191,7 +191,6 @@ export const PAGE_STYLES = `
       top: 0;
       left: 0;
       cursor: pointer;
-      -webkit-appearance: none;
     }
 
     .date-picker-label.active {
