@@ -394,10 +394,11 @@ export const CLIENT_SCRIPT = `
     var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : clientToday;
 
     var firstBtn = document.querySelector('[data-date]');
-    var serverStale = firstBtn && firstBtn.dataset.date !== clientToday;
+    var alreadyRefreshed = new URLSearchParams(location.search).has('_r');
+    var serverStale = !alreadyRefreshed && firstBtn && firstBtn.dataset.date !== clientToday;
 
     if (serverStale) {
-      location.replace('/?lang=' + CURRENT_LANG);
+      location.replace('/?lang=' + CURRENT_LANG + '&_r=1');
     } else if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited();
