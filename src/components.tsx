@@ -538,7 +538,6 @@ export function ContentBody({
   locale,
   todayIso,
 }: {
-  date?: string;
   events: EventWithLikes[];
   exhibitions: ExhibitionWithLikes[];
   tr: Record<string, string>;

@@ -53,7 +53,7 @@ const de: Translations = {
   meta: "Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer",
   pageTitle: "Museumsufer Frankfurt — Ausstellungen & Veranstaltungen heute",
   metaLong:
-    "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr fur 40 Museen.",
+    "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr für 40 Museen.",
   llmTip: "Frag dein LLM",
   llmPrompt:
     "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.app/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",

@@ -478,7 +478,10 @@ function buildEventSchema(data: InitialData, tz: string): string {
     schema.endDate = endIso;
     if (ev.description) schema.description = ev.description;
     if (ev.detail_url) schema.url = ev.detail_url;
-    if (ev.image_url) schema.image = ev.image_url;
+    if (ev.image_url) {
+      const img = ev.image_url as string;
+      schema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
+    }
 
     const location: Record<string, unknown> = { "@type": "Place", name: museum };
     if (geo) {
