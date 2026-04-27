@@ -134,13 +134,9 @@ export const CLIENT_SCRIPT = `
     var content = document.getElementById('content');
     var dateLabel = document.getElementById('date-label');
 
-    function toIso(d) {
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-
     function pushStateToUrl(date, near) {
       var url = new URL(location.href);
-      if (date === toIso(new Date())) url.searchParams.delete('date');
+      if (date === BERLIN_TODAY) url.searchParams.delete('date');
       else url.searchParams.set('date', date);
       if (near) url.searchParams.set('sort', 'near');
       else url.searchParams.delete('sort');
@@ -235,7 +231,7 @@ export const CLIENT_SCRIPT = `
 
     function injectReachability() {
       var now = new Date();
-      var todayStr = toIso(now);
+      var todayStr = BERLIN_TODAY;
       var nowMin = now.getHours() * 60 + now.getMinutes();
 
       content.querySelectorAll('article.card[data-event-time][data-event-date]').forEach(function(card) {
@@ -390,7 +386,7 @@ export const CLIENT_SCRIPT = `
       });
     }
 
-    var clientToday = toIso(new Date());
+    var clientToday = BERLIN_TODAY;
     var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : clientToday;
 
     var firstBtn = document.querySelector('[data-date]');
