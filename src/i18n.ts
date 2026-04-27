@@ -81,6 +81,8 @@ const de: Translations = {
   passTicket: "Museumsuferticket",
   permanentCollection: "Ständige Sammlung",
   notMuseumsufer: "Nicht in der Museumsufercard enthalten",
+  daysSingular: "Tag",
+  daysPlural: "Tage",
   whyTitle: "Warum diese App?",
   whyText:
     "Frankfurt hat über 40 Museen — und die verdienen einen besseren Überblick als den, den sie haben. Diese App bündelt die Ausstellungen und Veranstaltungen aller Museen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.",
@@ -135,6 +137,8 @@ const en: Translations = {
   passTicket: "2-Day Pass",
   permanentCollection: "Permanent collection",
   notMuseumsufer: "Not included in Museumsufercard",
+  daysSingular: "day",
+  daysPlural: "days",
   whyTitle: "Why this app?",
   whyText:
     "Frankfurt has over 40 museums — and they deserve a better overview than the one they got. This app pulls exhibitions and events from every museum into one fast, searchable page. No app store, no account, no fuss.",
@@ -189,6 +193,8 @@ const fr: Translations = {
   passTicket: "Pass 2 jours",
   permanentCollection: "Collection permanente",
   notMuseumsufer: "Non inclus dans la Museumsufercard",
+  daysSingular: "jour",
+  daysPlural: "jours",
   whyTitle: "Pourquoi cette application ?",
   whyText:
     "Francfort compte plus de 40 musées — et ils méritent une meilleure vue d'ensemble que celle qu'ils ont. Cette application rassemble les expositions et les événements de chaque musée en une seule page rapide et consultable. Pas de magasin d'applications, pas de compte, pas d'ennuis.",
