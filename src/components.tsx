@@ -89,7 +89,7 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class={`card-likes ${iconBtnClass} gap-1 px-1.5`}>
+    <span class={`card-likes ${iconBtnClass} gap-1 px-1.5 !cursor-default`}>
       <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3 shrink-0">
         <path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z" />
       </svg>
