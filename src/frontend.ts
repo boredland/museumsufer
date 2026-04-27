@@ -1,9 +1,11 @@
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
-import { MUSEUM_LOCATIONS } from "./museum-geo";
+import { getMuseumLocations } from "./museum-config";
 import { escHtml as escHtmlShared } from "./shared";
 import type { MuseumInfo } from "./types";
 
 export type { MuseumInfo };
+
+const MUSEUM_LOCATIONS = getMuseumLocations();
 
 export interface InitialData {
   date: string;
