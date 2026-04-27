@@ -98,13 +98,18 @@ function LikeBadge({ count }: { count: number }) {
   );
 }
 
-function NavButton({ slug, tr }: { slug: string | undefined; tr: Record<string, string> }) {
+function rmvUrl(name: string, lat: number, lng: number): string {
+  const zid = `A=2@O=${name}@X=${Math.round(lng * 1e6)}@Y=${Math.round(lat * 1e6)}@`;
+  return `https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=${encodeURIComponent(zid)}`;
+}
+
+function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
   const m = MUSEUM_LOCATIONS[slug];
   return (
     <a
       class={iconBtnClass}
-      href={`https://www.rmv.de/auskunft/bin/jp/query.exe/dn?REQ0JourneyStopsZ0G=${m.lat},${m.lng}&start=1`}
+      href={rmvUrl(name, m.lat, m.lng)}
       target="_blank"
       rel="noopener"
       aria-label={tr.navigate}
@@ -199,7 +204,7 @@ function ExhibitionCard({
             {dates && <span class="text-[0.6875rem] text-text-tertiary leading-7">{dates}</span>}
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
-            <NavButton slug={ex.museum_slug} tr={tr} />
+            <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
               class="card-visited-btn inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary bg-transparent border border-border p-0 rounded cursor-pointer font-sans transition-colors hover:border-accent hover:text-accent"
@@ -347,7 +352,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
               </span>
             )}
             <LikeBadge count={ev.like_count} />
-            <NavButton slug={ev.museum_slug} tr={tr} />
+            <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
           </div>
           {ev.description && (
@@ -491,7 +496,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
           {geo && (
             <a
               class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
-              href={`https://www.rmv.de/auskunft/bin/jp/query.exe/dn?REQ0JourneyStopsZ0G=${geo.lat},${geo.lng}&start=1`}
+              href={rmvUrl(museum.name, geo.lat, geo.lng)}
               target="_blank"
               rel="noopener"
               aria-label={tr.navigate}

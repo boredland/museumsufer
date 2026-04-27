@@ -237,7 +237,7 @@ export const CLIENT_SCRIPT = `
         if (!geo) return;
         var min = travelMin(slug);
         if (min === null) return;
-        var navBtn = el.querySelector('a[href*="rmv.de"]');
+        var navBtn = el.querySelector('a[href*="rmv.de/c/"]');
         if (navBtn && !navBtn.dataset.distanced) {
           navBtn.dataset.distanced = '1';
           navBtn.innerHTML = pinSvg + ' ' + min + ' ' + escHtml(T.minWalk);
