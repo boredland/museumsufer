@@ -909,8 +909,8 @@ export function renderPage(locale: Locale, initialData?: InitialData): string {
       <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true"><path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><path d="M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span class="pass-promo-text">${escHtml(tr.passPromo)}</span>
       <span class="pass-promo-links">
-        <a href="https://www.museumsufer.de/${locale === "de" ? "de" : "en"}/eintritt-und-tickets/dauerkarten/museumsufercard/?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=card" target="_blank" rel="noopener">Museumsufercard</a>
-        <a href="https://www.museumsufer.de/${locale === "de" ? "de" : "en"}/eintritt-und-tickets/dauerkarten/museumsuferticket/?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=ticket" target="_blank" rel="noopener">Museumsuferticket</a>
+        <a href="https://www.museumsufer.de/${{ de: "de/eintritt-und-tickets/dauerkarten/museumsufercard/", en: "en/admission-tickets/season-tickets/museumsufercard/", fr: "fr/tickets/tickets-permanentes/museumsufercard/" }[locale]}?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=card" target="_blank" rel="noopener">${escHtml(tr.passCard)}</a>
+        <a href="https://www.museumsufer.de/${{ de: "de/eintritt-und-tickets/dauerkarten/museumsuferticket/", en: "en/admission-tickets/season-tickets/museumsuferticket/", fr: "fr/tickets/tickets-permanentes/museumsufer-ticket/" }[locale]}?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=ticket" target="_blank" rel="noopener">${escHtml(tr.passTicket)}</a>
       </span>
     </div>
 
