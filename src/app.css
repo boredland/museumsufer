@@ -200,6 +200,10 @@ article.card:has(.card-started) {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
+/* Date picker label: force pointer cursor over the hidden input */
+label.date-btn { cursor: pointer !important; }
+label.date-btn input { cursor: pointer !important; }
+
 /* Close calendar dropdowns on outside click (backdrop trick) */
 details.relative[open] > summary::before {
   content: '';
