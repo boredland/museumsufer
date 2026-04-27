@@ -20,13 +20,17 @@ interface ScrapedExhibition {
 export async function scrapeMuseumExhibitions(
   env: Env,
 ): Promise<{ scraped: number; exhibitions: number; errors: string[] }> {
+  const today = todayIso();
   const { results: museums } = await env.DB.prepare(
     `SELECT m.id, m.name, m.slug
      FROM museums m
      LEFT JOIN exhibitions e ON e.museum_id = m.id
+       AND (e.end_date IS NULL OR e.end_date >= ?)
      GROUP BY m.id
      HAVING COUNT(e.id) = 0`,
-  ).all<{ id: number; name: string; slug: string }>();
+  )
+    .bind(today)
+    .all<{ id: number; name: string; slug: string }>();
 
   let scraped = 0;
   let exhibitions = 0;
