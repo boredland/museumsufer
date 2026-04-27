@@ -65,7 +65,7 @@ export function nullIfMidnight(time: string | null | undefined): string | null {
 
 export function sanitizeImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
-  const cleaned = url.split(/\s+/)[0].trim();
+  const cleaned = url.split(/\s+/)[0].trim().replace(/&amp;/g, "&");
   if (!cleaned.startsWith("http")) return null;
   try {
     new URL(cleaned);
