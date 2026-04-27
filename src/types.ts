@@ -4,6 +4,8 @@ export interface Env {
   BROWSER?: Fetcher;
   SCRAPE_SECRET?: string;
   DEEPL_API_KEY?: string;
+  FETCH_PROXY_URL?: string;
+  FETCH_PROXY_TOKEN?: string;
 }
 
 export interface MuseumInfo {
