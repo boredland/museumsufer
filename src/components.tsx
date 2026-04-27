@@ -89,7 +89,7 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class="card-likes text-[0.6875rem] font-medium text-red-600 bg-red-50 px-1.5 rounded inline-flex items-center gap-0.5">
+    <span class="card-likes text-[0.6875rem] font-medium text-text-secondary bg-border-light px-1.5 rounded inline-flex items-center gap-0.5">
       <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-2.5 h-2.5 shrink-0">
         <path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z" />
       </svg>
@@ -104,7 +104,7 @@ function NavButton({ slug, tr }: { slug: string | undefined; tr: Record<string, 
   return (
     <a
       class={iconBtnClass}
-      href={`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=walking`}
+      href={`https://www.rmv.de/auskunft/bin/jp/query.exe/dn?REQ0JourneyStopsZ0G=${m.lat},${m.lng}&start=1`}
       target="_blank"
       rel="noopener"
       aria-label={tr.navigate}
@@ -342,7 +342,9 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
             {ev.price && (
-              <span class="text-[0.6875rem] font-medium text-green-800 bg-green-100 px-1.5 rounded">{ev.price}</span>
+              <span class="text-[0.6875rem] font-medium text-text-secondary bg-border-light px-1.5 rounded">
+                {ev.price}
+              </span>
             )}
             <LikeBadge count={ev.like_count} />
             <NavButton slug={ev.museum_slug} tr={tr} />
@@ -489,7 +491,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
           {geo && (
             <a
               class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
-              href={`https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}&travelmode=walking`}
+              href={`https://www.rmv.de/auskunft/bin/jp/query.exe/dn?REQ0JourneyStopsZ0G=${geo.lat},${geo.lng}&start=1`}
               target="_blank"
               rel="noopener"
               aria-label={tr.navigate}

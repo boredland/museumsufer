@@ -36,49 +36,14 @@ export const CLIENT_SCRIPT = `
       var cached = sessionStorage.getItem(cacheKey);
       if (cached) { transitTimes = JSON.parse(cached); return Promise.resolve(); }
 
-      var ox = Math.round(userPos.lng * 1e6);
-      var oy = Math.round(userPos.lat * 1e6);
-      var slugs = Object.keys(MUSEUM_GEO);
-      var batches = [];
-      for (var i = 0; i < slugs.length; i += 5) { batches.push(slugs.slice(i, i + 5)); }
-
-      return batches.reduce(function(chain, batch) {
-        return chain.then(function() {
-          var svcReqL = batch.map(function(slug) {
-            var m = MUSEUM_GEO[slug];
-            return {
-              meth: 'TripSearch',
-              req: {
-                depLocL: [{ type: 'C', crd: { x: ox, y: oy } }],
-                arrLocL: [{ type: 'C', crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } }],
-                numF: 1,
-                getPolyline: false
-              }
-            };
-          });
-          return fetch('https://www.rmv.de/auskunft/bin/jp/mgate.exe', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              auth: { type: 'AID', aid: 'x0k4ZR33ICN9CWmj' },
-              client: { type: 'WEB', id: 'RMV', name: 'webapp' },
-              ver: '1.44', ext: 'RMV.1', lang: 'de',
-              svcReqL: svcReqL
-            })
-          }).then(function(r) { return r.json(); }).then(function(data) {
-            (data.svcResL || []).forEach(function(res, j) {
-              var trip = res.res && res.res.outConL && res.res.outConL[0];
-              if (trip && trip.dur) {
-                var h = parseInt(trip.dur.slice(0, 2), 10);
-                var m = parseInt(trip.dur.slice(2, 4), 10);
-                transitTimes[batch[j]] = h * 60 + m;
-              }
-            });
-          }).catch(function() {});
-        });
-      }, Promise.resolve()).then(function() {
+      return fetch('/api/transit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: userPos.lat, lng: userPos.lng })
+      }).then(function(r) { return r.json(); }).then(function(data) {
+        transitTimes = data;
         try { sessionStorage.setItem(cacheKey, JSON.stringify(transitTimes)); } catch(e) {}
-      });
+      }).catch(function() {});
     }
 
     function travelMin(slug) {
@@ -272,7 +237,7 @@ export const CLIENT_SCRIPT = `
         if (!geo) return;
         var min = travelMin(slug);
         if (min === null) return;
-        var navBtn = el.querySelector('a[href*="google.com/maps"]');
+        var navBtn = el.querySelector('a[href*="rmv.de"]');
         if (navBtn && !navBtn.dataset.distanced) {
           navBtn.dataset.distanced = '1';
           navBtn.innerHTML = pinSvg + ' ' + min + ' ' + escHtml(T.minWalk);
