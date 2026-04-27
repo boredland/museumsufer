@@ -245,17 +245,19 @@ export const CLIENT_SCRIPT = `
     }
 
     function injectDistanceBadges() {
-      content.querySelectorAll('article.card[data-museum-slug]').forEach(function(card) {
-        if (card.querySelector('.card-distance')) return;
-        var slug = card.dataset.museumSlug;
+      document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
+        if (el.querySelector('.card-distance')) return;
+        var slug = el.dataset.museumSlug;
         var min = walkMin(slug);
         if (min === null) return;
         var badge = document.createElement('span');
         badge.className = 'card-distance';
         badge.title = '~' + min + ' ' + T.minWalk;
         badge.textContent = min + ' ' + T.minWalk;
-        var meta = card.querySelector('.card-meta');
-        if (meta) meta.insertBefore(badge, meta.firstChild);
+        var meta = el.querySelector('.card-meta');
+        if (meta) { meta.insertBefore(badge, meta.firstChild); return; }
+        var name = el.querySelector('p');
+        if (name) name.parentElement.appendChild(badge);
       });
     }
 
