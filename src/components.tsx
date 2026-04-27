@@ -1,6 +1,6 @@
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
-import { buildCalendarUrl, formatDateShort, sortByPopularity } from "./shared";
+import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
@@ -276,6 +276,79 @@ function ExhibitionCard({
   );
 }
 
+const calLinkClass =
+  "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
+
+function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, string> }) {
+  const googleUrl = buildCalendarUrl(ev);
+  const outlookUrl = buildOutlookUrl(ev);
+  const yahooUrl = buildYahooUrl(ev);
+  const icsUrl = `/api/event/${ev.id}.ics`;
+
+  return (
+    <details class="relative inline-block">
+      <summary class={`${calBtnClass} list-none`} aria-label={tr.addToCalendar} title={tr.addToCalendar}>
+        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
+          <path
+            d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <path d="M5 9h2v2H5z" fill="currentColor" />
+        </svg>
+      </summary>
+      <div class="absolute right-0 bottom-full mb-1 z-10 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]">
+        <a href={googleUrl} target="_blank" rel="noopener" class={calLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
+            <path d="M8 1a7 7 0 110 14A7 7 0 018 1z" stroke="currentColor" stroke-width="1.2" />
+            <path
+              d="M5.5 8l2 2 3-4"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Google
+        </a>
+        <a href={outlookUrl} target="_blank" rel="noopener" class={calLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
+            <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2" />
+            <path d="M2 6l6 3.5L14 6" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+          Outlook
+        </a>
+        <a href={yahooUrl} target="_blank" rel="noopener" class={calLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
+            <path
+              d="M3 3l5 6v4M13 3L8 9"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Yahoo
+        </a>
+        <hr class="my-1 border-border-light" />
+        <a href={icsUrl} download="event.ics" class={calLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
+            <path
+              d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
+              stroke="currentColor"
+              stroke-width="1.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          .ics (Apple, Proton, ...)
+        </a>
+      </div>
+    </details>
+  );
+}
+
 function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Record<string, string> }) {
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
   const linkUrl = ev.detail_url || ev.url;
@@ -291,8 +364,6 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   ) : (
     ev.title
   );
-  const calUrl = buildCalendarUrl(ev);
-
   return (
     <li>
       <article
@@ -315,41 +386,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
             )}
             <LikeBadge count={ev.like_count} />
             <NavButton slug={ev.museum_slug} tr={tr} />
-            <a
-              class={calBtnClass}
-              href={calUrl}
-              target="_blank"
-              rel="noopener"
-              aria-label={tr.addToCalendar}
-              title={tr.addToCalendar}
-            >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
-                <path
-                  d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                />
-                <path d="M5 9h2v2H5z" fill="currentColor" />
-              </svg>
-            </a>
-            <a
-              class={calBtnClass}
-              href={`/api/event/${ev.id}.ics`}
-              download="event.ics"
-              aria-label="iCal"
-              title="iCal (.ics)"
-            >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
-                <path
-                  d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </a>
+            <CalendarDropdown ev={ev} tr={tr} />
           </div>
           {ev.description && (
             <details class="mt-1">

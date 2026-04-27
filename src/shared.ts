@@ -114,6 +114,71 @@ export function buildCalendarUrl(ev: {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
+export interface CalendarEvent {
+  date: string;
+  time: string | null;
+  end_time: string | null;
+  end_date: string | null;
+  title: string;
+  museum_name?: string;
+  description: string | null;
+  detail_url: string | null;
+}
+
+export function buildOutlookUrl(ev: CalendarEvent): string {
+  const desc = (ev.description || "") + (ev.detail_url ? `\n${ev.detail_url}` : "");
+  const startIso = ev.time ? `${ev.date}T${ev.time}:00` : ev.date;
+  let endIso: string;
+  if (ev.time && ev.end_time) {
+    endIso = `${ev.end_date || ev.date}T${ev.end_time}:00`;
+  } else if (ev.time) {
+    const h = (parseInt(ev.time.split(":")[0], 10) + 1) % 24;
+    endIso = `${ev.date}T${h.toString().padStart(2, "0")}:${ev.time.split(":")[1]}:00`;
+  } else {
+    endIso = ev.date;
+  }
+  const params = new URLSearchParams({
+    path: "/calendar/action/compose",
+    rru: "addevent",
+    subject: ev.title,
+    startdt: startIso,
+    enddt: endIso,
+    location: ev.museum_name || "",
+    body: desc,
+  });
+  return `https://outlook.live.com/calendar/0/action/compose?${params.toString()}`;
+}
+
+export function buildYahooUrl(ev: CalendarEvent): string {
+  const date = ev.date.replace(/-/g, "");
+  const desc = (ev.description || "") + (ev.detail_url ? `\n${ev.detail_url}` : "");
+  let st: string;
+  let dur: string;
+  if (ev.time) {
+    st = `${date}T${ev.time.replace(":", "")}00`;
+    if (ev.end_time) {
+      const startMin = parseInt(ev.time.split(":")[0], 10) * 60 + parseInt(ev.time.split(":")[1], 10);
+      const endMin = parseInt(ev.end_time.split(":")[0], 10) * 60 + parseInt(ev.end_time.split(":")[1], 10);
+      const diff = endMin > startMin ? endMin - startMin : 60;
+      dur = `${String(Math.floor(diff / 60)).padStart(2, "0")}${String(diff % 60).padStart(2, "0")}`;
+    } else {
+      dur = "0100";
+    }
+  } else {
+    st = date;
+    dur = "allday";
+  }
+  const params = new URLSearchParams({
+    v: "60",
+    title: ev.title,
+    st,
+    dur,
+    in_loc: ev.museum_name || "",
+    desc,
+  });
+  return `https://calendar.yahoo.com/?${params.toString()}`;
+}
+
 export function sortByPopularity<T extends { museum_slug?: string; museum_name?: string; like_count?: number }>(
   items: T[],
 ): T[] {
