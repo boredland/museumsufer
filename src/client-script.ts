@@ -244,7 +244,13 @@ export const CLIENT_SCRIPT = `
       return div.innerHTML;
     }
 
-    var walkIcon = '<svg viewBox="0 0 16 16" fill="none" style="width:10px;height:10px;display:inline;vertical-align:-1px" aria-hidden="true"><circle cx="8" cy="2.5" r="1.5" fill="currentColor"/><path d="M6.5 5.5L8 4l2 2-1 3.5-2 1v3m-1-6.5L5 9l1 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    function makeBadge(min) {
+      var badge = document.createElement('span');
+      badge.className = 'card-distance';
+      badge.title = '~' + min + ' ' + T.minWalk;
+      badge.innerHTML = '<svg viewBox="0 0 12 12" fill="none" style="width:10px;height:10px;display:inline;vertical-align:-1px" aria-hidden="true"><path d="M6 1v8m0 0L3 6.5m3 2.5l3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="11" r="0.8" fill="currentColor"/></svg> ' + min + ' ' + escHtml(T.minWalk);
+      return badge;
+    }
 
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
@@ -252,15 +258,12 @@ export const CLIENT_SCRIPT = `
         var slug = el.dataset.museumSlug;
         var min = walkMin(slug);
         if (min === null) return;
-        var badge = document.createElement('span');
-        badge.className = 'card-distance';
-        badge.title = '~' + min + ' ' + T.minWalk;
-        badge.innerHTML = walkIcon + ' ' + min + ' ' + escHtml(T.minWalk);
+        var badge = makeBadge(min);
         var meta = el.querySelector('.card-meta');
         if (meta) { meta.insertBefore(badge, meta.firstChild); return; }
-        badge.style.marginLeft = '0.5rem';
-        var nameEl = el.querySelector('p');
-        if (nameEl) nameEl.appendChild(badge);
+        var desc = el.querySelector('.text-text-tertiary');
+        if (desc) { desc.after(badge); return; }
+        el.querySelector('p').after(badge);
       });
     }
 
