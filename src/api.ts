@@ -149,6 +149,7 @@ export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>
   const map: Record<string, MuseumInfo> = {};
   for (const m of results) {
     const config = MUSEUMS[m.slug];
+    if (config?.hidden) continue;
     const info: MuseumInfo = { name: m.name, website: m.website_url };
     if (config?.name) info.museumsufer = false;
     map[m.slug] = info;

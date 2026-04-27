@@ -27,6 +27,7 @@ export interface MuseumConfig {
   lng: number;
   spa?: true;
   proxy?: true;
+  hidden?: true;
   exhibitionUrl?: string;
   eventApi?: {
     type: EventApiType;
@@ -94,6 +95,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "frankfurter-goethe-haus": {
     lat: 50.1113,
     lng: 8.6776,
+    hidden: true,
     exhibitionUrl: "https://frankfurter-goethe-haus.de/ausstellungen/",
     eventApi: { type: "fdh", endpoint: "https://www.goethehaus-frankfurt.de/programm/" },
   },
