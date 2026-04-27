@@ -668,6 +668,29 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
 
     .site-footer a:hover { color: var(--accent); text-decoration: underline; }
 
+    .why-section {
+      margin-top: 1rem;
+      padding: 0.625rem 1rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .why-section summary {
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      list-style: none;
+    }
+
+    .why-section summary::-webkit-details-marker { display: none; }
+    .why-section p { margin-top: 0.5rem; line-height: 1.5; }
+
     .llm-tip {
       margin-top: 1rem;
       padding: 0.625rem 1rem;
@@ -951,6 +974,11 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       <a href="/feed.xml">${escHtml(tr.rssFeed)}</a>
       <a href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml" target="_blank" rel="noopener">${escHtml(tr.missingEvent)}</a>
     </footer>
+
+    <details class="why-section">
+      <summary>${escHtml(tr.whyTitle)}</summary>
+      <p>${escHtml(tr.whyText)}</p>
+    </details>
 
     <details class="llm-tip">
       <summary>
