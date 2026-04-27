@@ -17,7 +17,9 @@ interface ScrapedExhibition {
   description: string | null;
 }
 
-export async function scrapeMuseumExhibitions(env: Env): Promise<{ scraped: number; exhibitions: number }> {
+export async function scrapeMuseumExhibitions(
+  env: Env,
+): Promise<{ scraped: number; exhibitions: number; errors: string[] }> {
   const { results: museums } = await env.DB.prepare(
     `SELECT m.id, m.name, m.slug
      FROM museums m
@@ -28,6 +30,7 @@ export async function scrapeMuseumExhibitions(env: Env): Promise<{ scraped: numb
 
   let scraped = 0;
   let exhibitions = 0;
+  const errors: string[] = [];
 
   for (const museum of museums) {
     const config = MUSEUM_EXHIBITION_URLS[museum.slug];
@@ -38,11 +41,13 @@ export async function scrapeMuseumExhibitions(env: Env): Promise<{ scraped: numb
       exhibitions += count;
       scraped++;
     } catch (e) {
-      console.error(`Exhibition scrape failed for ${museum.slug}:`, e);
+      const msg = `${museum.slug}: ${e instanceof Error ? e.message : String(e)}`;
+      console.error(`Exhibition scrape failed for ${msg}`);
+      errors.push(msg);
     }
   }
 
-  return { scraped, exhibitions };
+  return { scraped, exhibitions, errors };
 }
 
 async function scrapeExhibitionsForMuseum(
