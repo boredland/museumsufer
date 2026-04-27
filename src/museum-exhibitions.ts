@@ -28,7 +28,6 @@ export const MUSEUM_EXHIBITION_URLS: Record<string, ExhibitionPageConfig> = {
   },
   "dommuseum-frankfurt": {
     url: "https://dommuseum-frankfurt.de/",
-    js: true,
   },
   "fotografie-forum-frankfurt": {
     url: "https://www.fffrankfurt.org/aktuell/",
