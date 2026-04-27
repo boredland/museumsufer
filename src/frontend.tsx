@@ -143,14 +143,12 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
 }
 
 const dateBtnClass =
-  "py-2 px-4.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
-const dateBtnActiveClass =
-  "py-2 px-4.5 border-[1.5px] border-accent bg-accent text-white rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
+  "date-btn py-2 px-4.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
 
 function DateNav({ tr }: { tr: Record<string, string> }) {
   return (
     <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
-      <button type="button" id="btn-today" class={dateBtnActiveClass}>
+      <button type="button" id="btn-today" class={`${dateBtnClass} active`}>
         {tr.today}
       </button>
       <button type="button" id="btn-tomorrow" class={dateBtnClass}>
