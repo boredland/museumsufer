@@ -271,6 +271,24 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6696,
     exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
   },
+  "feuerwehrmuseum-frankfurt": {
+    name: "Feuerwehrmuseum Frankfurt am Main",
+    website: "https://www.feuerwehrmuseum-frankfurt.de/",
+    lat: 50.178,
+    lng: 8.6608,
+  },
+  "frankfurter-feldbahnmuseum": {
+    name: "Frankfurter Feldbahnmuseum",
+    website: "https://www.feldbahnmuseum.de/",
+    lat: 50.1069,
+    lng: 8.6119,
+  },
+  "verkehrsmuseum-frankfurt": {
+    name: "Verkehrsmuseum Frankfurt am Main",
+    website: "https://hsf-ffm.com/de/",
+    lat: 50.0822,
+    lng: 8.5816,
+  },
   dialogmuseum: {
     name: "Dialogmuseum",
     website: "https://www.dialogmuseum.de/",
