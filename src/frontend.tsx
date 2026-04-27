@@ -298,6 +298,7 @@ export function renderPage(
     const DATE_LOCALE = ${dlJson};
     const LOCALES = ${localesJson};
     const CURRENT_LANG = '${locale}';
+    const BERLIN_TODAY = '${todayIso()}';
     const __INITIAL_DATA__ = ${initialDataJson};
     const MUSEUMS = ${museumsJson};`;
 
