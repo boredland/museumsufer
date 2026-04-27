@@ -155,9 +155,10 @@ const dateBtnClass =
 function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
   const dl = dateLocale(locale);
   const days: { iso: string; weekday: string; day: string; isToday: boolean }[] = [];
-  const now = new Date();
+  const today = todayIso();
+  const base = new Date(`${today}T12:00:00`);
   for (let i = 0; i < 7; i++) {
-    const d = new Date(now);
+    const d = new Date(base);
     d.setDate(d.getDate() + i);
     const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     days.push({
