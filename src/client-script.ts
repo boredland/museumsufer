@@ -171,16 +171,18 @@ export const CLIENT_SCRIPT = `
       datePicker.max = toIso(maxDate);
     }
 
-    function pushDateToUrl(date) {
+    function pushStateToUrl(date, near) {
       var url = new URL(location.href);
       if (date === toIso(today())) url.searchParams.delete('date');
       else url.searchParams.set('date', date);
+      if (near) url.searchParams.set('sort', 'near');
+      else url.searchParams.delete('sort');
       history.replaceState(null, '', url.toString());
     }
 
     function loadDay(date, btn) {
       setActive(btn);
-      pushDateToUrl(date);
+      pushStateToUrl(date, sortByDistance);
       var langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
       htmx.ajax('GET', '/partial/content?date=' + date + langParam, {
         target: '#content',
@@ -277,7 +279,7 @@ export const CLIENT_SCRIPT = `
         btnNear.classList.remove('active');
         btnNear.setAttribute('aria-pressed', 'false');
         removeDistanceBadges();
-        loadDay(toIso(today()), btnToday);
+        pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), false);
         return;
       }
       if (userPos) {
@@ -286,6 +288,7 @@ export const CLIENT_SCRIPT = `
         btnNear.setAttribute('aria-pressed', 'true');
         injectDistanceBadges();
         sortCardsByDistance();
+        pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
       } else if ('geolocation' in navigator) {
         btnNear.classList.add('loading');
         btnNear.setAttribute('aria-busy', 'true');
@@ -299,6 +302,7 @@ export const CLIENT_SCRIPT = `
             btnNear.setAttribute('aria-pressed', 'true');
             injectDistanceBadges();
             sortCardsByDistance();
+            pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
           },
           function() {
             btnNear.classList.remove('loading');
@@ -371,7 +375,9 @@ export const CLIENT_SCRIPT = `
     }
 
     updateNavVisibility();
-    var urlDate = new URLSearchParams(location.search).get('date');
+    var urlParams = new URLSearchParams(location.search);
+    var urlDate = urlParams.get('date');
+    var urlSort = urlParams.get('sort');
     if (urlDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(urlDate) && urlDate !== toIso(today())) {
       loadDay(urlDate, null);
     } else if (__INITIAL_DATA__) {
@@ -381,6 +387,7 @@ export const CLIENT_SCRIPT = `
     } else {
       loadDay(toIso(today()), btnToday);
     }
+    if (urlSort === 'near') btnNear.click();
 
     // Search
     var searchOverlay = document.getElementById('search-overlay');
