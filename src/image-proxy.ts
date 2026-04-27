@@ -1,5 +1,21 @@
+import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
+
+const proxyDomains = new Set(
+  Object.values(MUSEUM_EXHIBITION_URLS)
+    .filter((c) => c.proxy)
+    .map((c) => new URL(c.url).hostname),
+);
+
+function shouldProxy(imageUrl: string): boolean {
+  try {
+    const host = new URL(imageUrl).hostname;
+    return proxyDomains.has(host) || [...proxyDomains].some((d) => host.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+}
 
 let allowedDomains: Set<string> | null = null;
 
@@ -63,17 +79,26 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
   if (cached) return cached;
 
   try {
-    const fetchInit: RequestInit = {
-      headers: { "User-Agent": USER_AGENT },
-    };
+    let res: Response;
 
-    if (width > 0) {
-      (fetchInit as RequestInit & { cf: object }).cf = {
-        image: { width, fit: "cover", format: "webp", quality: 80 },
+    if (env.FETCH_PROXY_URL && shouldProxy(imageUrl)) {
+      const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(imageUrl)}`;
+      const headers: Record<string, string> = {};
+      if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
+      res = await fetch(proxyUrl, { headers });
+    } else {
+      const fetchInit: RequestInit = {
+        headers: { "User-Agent": USER_AGENT },
       };
-    }
 
-    const res = await fetch(imageUrl, fetchInit);
+      if (width > 0) {
+        (fetchInit as RequestInit & { cf: object }).cf = {
+          image: { width, fit: "cover", format: "webp", quality: 80 },
+        };
+      }
+
+      res = await fetch(imageUrl, fetchInit);
+    }
 
     if (!res.ok) {
       return new Response("Upstream error", { status: 502 });
