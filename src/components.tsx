@@ -116,10 +116,22 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
       title={tr.navigate}
     >
       <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
-        <path
-          d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z"
+        <rect
+          x="3.2"
+          y="3.2"
+          width="6.8"
+          height="6.8"
+          rx="1"
+          transform="rotate(45 8 8)"
           stroke="currentColor"
           stroke-width="1.5"
+        />
+        <path
+          d="M7 9.5L9.5 7M9.5 7H7M9.5 7V9.5"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
         />
       </svg>
     </a>
@@ -221,13 +233,8 @@ function ExhibitionCard({
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
               <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3">
-                <path
-                  d="M3 8.5l3.5 3.5 7-7"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
+                <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5" />
+                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" />
               </svg>
             </button>
           </div>
@@ -523,10 +530,22 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               title={tr.navigate}
             >
               <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3">
-                <path
-                  d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z"
+                <rect
+                  x="3.2"
+                  y="3.2"
+                  width="6.8"
+                  height="6.8"
+                  rx="1"
+                  transform="rotate(45 8 8)"
                   stroke="currentColor"
                   stroke-width="1.5"
+                />
+                <path
+                  d="M7 9.5L9.5 7M9.5 7H7M9.5 7V9.5"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
                 />
               </svg>
             </a>
