@@ -244,26 +244,23 @@ export const CLIENT_SCRIPT = `
       return div.innerHTML;
     }
 
-    function makeBadge(min) {
-      var badge = document.createElement('span');
-      badge.className = 'card-distance';
-      badge.title = '~' + min + ' ' + T.minWalk;
-      badge.innerHTML = '<svg viewBox="0 0 12 12" fill="none" style="width:10px;height:10px;display:inline;vertical-align:-1px" aria-hidden="true"><path d="M6 1v8m0 0L3 6.5m3 2.5l3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="11" r="0.8" fill="currentColor"/></svg> ' + min + ' ' + escHtml(T.minWalk);
-      return badge;
-    }
+    var pinSvg = '<svg aria-hidden="true" viewBox="0 0 16 16" fill="none" style="width:12px;height:12px;flex-shrink:0"><path d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z" stroke="currentColor" stroke-width="1.5"/></svg>';
 
     function injectDistanceBadges() {
       document.querySelectorAll('[data-museum-slug]').forEach(function(el) {
-        if (el.querySelector('.card-distance')) return;
         var slug = el.dataset.museumSlug;
+        var geo = MUSEUM_GEO[slug];
+        if (!geo) return;
         var min = walkMin(slug);
         if (min === null) return;
-        var badge = makeBadge(min);
-        var meta = el.querySelector('.card-meta');
-        if (meta) { meta.insertBefore(badge, meta.firstChild); return; }
-        var desc = el.querySelector('.text-text-tertiary');
-        if (desc) { desc.after(badge); return; }
-        el.querySelector('p').after(badge);
+        var navBtn = el.querySelector('a[href*="google.com/maps"]');
+        if (navBtn && !navBtn.dataset.distanced) {
+          navBtn.dataset.distanced = '1';
+          navBtn.innerHTML = pinSvg + ' ' + min + ' ' + escHtml(T.minWalk);
+          navBtn.style.padding = '1px 6px';
+          navBtn.style.gap = '4px';
+          navBtn.title = '~' + min + ' ' + T.minWalk + ' – ' + T.navigate;
+        }
       });
     }
 
@@ -307,7 +304,13 @@ export const CLIENT_SCRIPT = `
     }
 
     function removeDistanceBadges() {
-      content.querySelectorAll('.card-distance').forEach(function(el) { el.remove(); });
+      document.querySelectorAll('a[data-distanced]').forEach(function(btn) {
+        delete btn.dataset.distanced;
+        btn.innerHTML = pinSvg;
+        btn.style.padding = '';
+        btn.style.gap = '';
+        btn.title = T.navigate;
+      });
       removeReachabilityBadges();
     }
 
