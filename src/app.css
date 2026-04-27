@@ -179,8 +179,9 @@ dialog::backdrop {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
-/* Close calendar dropdowns on outside click (backdrop trick) */
-details.relative[open] > summary::before {
+/* Calendar dropdown: show menu and backdrop when .open */
+.cal-dropdown.open > div { display: block; }
+.cal-dropdown.open::before {
   content: '';
   position: fixed;
   inset: 0;
