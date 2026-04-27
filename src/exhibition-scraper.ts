@@ -153,7 +153,7 @@ async function fetchViaProxy(env: Env, url: string): Promise<string> {
   return res.text();
 }
 
-async function fetchWithBrowser(env: Env, url: string): Promise<string> {
+export async function fetchWithBrowser(env: Env, url: string): Promise<string> {
   const puppeteer = await import("@cloudflare/puppeteer");
   const browser = await puppeteer.default.launch(env.BROWSER!);
   try {

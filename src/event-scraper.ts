@@ -1,6 +1,8 @@
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
+import { fetchWithBrowser } from "./exhibition-scraper";
 import { getApiConfig } from "./museum-apis";
+import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
 import { normalizeUrl } from "./shared";
 import type { Env } from "./types";
 
@@ -96,7 +98,10 @@ export async function scrapeMuseumWebsites(
 
       if (!museum.website_url) continue;
 
-      const count = await scrapeMuseumEvents(env, museum as { id: number; name: string; website_url: string });
+      const count = await scrapeMuseumEvents(
+        env,
+        museum as { id: number; name: string; slug: string; website_url: string },
+      );
       if (count > 0) {
         totalEvents += count;
         updated++;
@@ -146,40 +151,54 @@ interface ScrapedEvent {
 
 async function scrapeMuseumEvents(
   env: Env,
-  museum: { id: number; name: string; website_url: string },
+  museum: { id: number; name: string; slug: string; website_url: string },
 ): Promise<number> {
   const baseUrl = museum.website_url.replace(/\/$/, "");
+  const exhConfig = MUSEUM_EXHIBITION_URLS[museum.slug];
+  const needsJs = exhConfig?.js && env.BROWSER;
   let eventsHtml: string | null = null;
   let eventsUrl: string | null = null;
 
-  for (const path of EVENT_PAGE_PATHS) {
-    try {
-      const url = `${baseUrl}${path}`;
-      const res = await fetch(url, { redirect: "follow" });
-      if (res.ok) {
-        const contentType = res.headers.get("content-type") || "";
-        if (contentType.includes("text/html")) {
-          eventsHtml = await res.text();
-          eventsUrl = url;
-          break;
+  if (needsJs) {
+    for (const path of EVENT_PAGE_PATHS) {
+      try {
+        const url = `${baseUrl}${path}`;
+        eventsHtml = await fetchWithBrowser(env, url);
+        eventsUrl = url;
+        break;
+      } catch {}
+    }
+  } else {
+    for (const path of EVENT_PAGE_PATHS) {
+      try {
+        const url = `${baseUrl}${path}`;
+        const res = await fetch(url, { redirect: "follow" });
+        if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (contentType.includes("text/html")) {
+            eventsHtml = await res.text();
+            eventsUrl = url;
+            break;
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }
   }
 
   if (!eventsHtml || !eventsUrl) {
     try {
-      const res = await fetch(baseUrl, { redirect: "follow" });
-      if (res.ok) {
-        const html = await res.text();
-        const eventLink = findEventLink(html, baseUrl);
-        if (eventLink) {
+      const html = needsJs
+        ? await fetchWithBrowser(env, baseUrl)
+        : await fetch(baseUrl, { redirect: "follow" }).then((r) => (r.ok ? r.text() : ""));
+      const eventLink = findEventLink(html, baseUrl);
+      if (eventLink) {
+        if (needsJs) {
+          eventsHtml = await fetchWithBrowser(env, eventLink);
+        } else {
           const eventRes = await fetch(eventLink, { redirect: "follow" });
-          if (eventRes.ok) {
-            eventsHtml = await eventRes.text();
-            eventsUrl = eventLink;
-          }
+          if (eventRes.ok) eventsHtml = await eventRes.text();
         }
+        eventsUrl = eventLink;
       }
     } catch {
       return 0;
