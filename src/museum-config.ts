@@ -271,6 +271,13 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6696,
     exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
   },
+  dialogmuseum: {
+    name: "Dialogmuseum",
+    website: "https://www.dialogmuseum.de/",
+    lat: 50.1131,
+    lng: 8.6787,
+    exhibitionUrl: "https://www.dialogmuseum.de/",
+  },
   experiminta: {
     name: "EXPERIMINTA ScienceCenter",
     website: "https://www.experiminta.de/",
