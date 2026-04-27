@@ -212,6 +212,15 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       outline-offset: 2px;
     }
 
+    #btn-near {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      min-height: 36px;
+      padding: 0.5rem;
+    }
+
     .date-nav button.loading {
       pointer-events: none;
       opacity: 0.6;
@@ -317,6 +326,8 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
+      list-style: none;
+      padding: 0;
     }
 
     .museum-group-header {
@@ -329,6 +340,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       border-bottom: 1px solid var(--border-light);
       border-left: 3px solid var(--accent);
       background: var(--border-light);
+      margin: 0;
     }
 
     .museum-group-header:first-child { border-top: none; }
@@ -348,7 +360,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       transition: background 0.2s ease;
     }
 
-    .card:last-child { border-bottom: none; }
+    li:last-child > .card { border-bottom: none; }
     .card:hover { background: #fdf8f0; }
 
     .card-img {
@@ -447,8 +459,8 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     }
 
     .visited-section summary::-webkit-details-marker { display: none; }
-    .visited-section summary::before { content: '+ '; font-family: monospace; }
-    .visited-section[open] summary::before { content: '- '; }
+    .disclosure-icon::before { content: '+'; font-family: monospace; margin-right: 0.25rem; }
+    [open] > summary .disclosure-icon::before { content: '-'; }
 
     .visited-section .card { opacity: 0.6; }
     .visited-section .card:hover { opacity: 1; }
@@ -598,8 +610,6 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     }
 
     .card details summary::-webkit-details-marker { display: none; }
-    .card details summary::before { content: '+ '; }
-    .card details[open] summary::before { content: '- '; }
     .card details summary:hover { color: var(--accent); }
 
     .pass-promo {
@@ -776,17 +786,24 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .search-trigger span { flex: 1; text-align: left; }
 
     .search-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 200;
-      display: none;
+      border: none;
+      background: transparent;
+      padding: 0;
+      max-width: 100vw;
+      max-height: 100vh;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .search-overlay::backdrop { background: rgba(0,0,0,0.4); }
+
+    .search-overlay[open] {
+      display: flex;
       align-items: flex-start;
       justify-content: center;
       padding-top: 15vh;
     }
-
-    .search-overlay.open { display: flex; }
 
     .search-box {
       background: var(--surface);
@@ -930,37 +947,37 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       </div>
       <h1>Museumsufer Frankfurt</h1>
       <p class="subtitle">${escHtml(tr.subtitle)}</p>
-      <div class="lang-switch" role="navigation" aria-label="Language">${SUPPORTED_LOCALES.map(
+      <nav class="lang-switch" aria-label="Language">${SUPPORTED_LOCALES.map(
         (l) =>
           `<a href="?lang=${l}" ${l === locale ? 'class="active" aria-current="page"' : ""}>${l.toUpperCase()}</a>`,
-      ).join("")}</div>
+      ).join("")}</nav>
     </header>
 
     <button class="search-trigger" id="search-trigger" onclick="openSearch()">
       <svg viewBox="0 0 20 20" fill="none" width="14" height="14"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span>${escHtml(tr.searchPlaceholder)}</span>
-      <kbd class="search-kbd">Ctrl K</kbd>
+      <kbd class="search-kbd"><kbd>Ctrl</kbd>+<kbd>K</kbd></kbd>
     </button>
 
-    <div class="pass-promo">
+    <aside class="pass-promo">
       <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true"><path d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="8.5" cy="8.5" r="1" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor"/><path d="M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span class="pass-promo-text">${escHtml(tr.passPromo)}</span>
       <span class="pass-promo-links">
         <a href="https://www.museumsufer.de/${{ de: "de/eintritt-und-tickets/dauerkarten/museumsufercard/", en: "en/admission-tickets/season-tickets/museumsufercard/", fr: "fr/tickets/tickets-permanentes/museumsufercard/" }[locale]}?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=card" target="_blank" rel="noopener">${escHtml(tr.passCard)}</a>
         <a href="https://www.museumsufer.de/${{ de: "de/eintritt-und-tickets/dauerkarten/museumsuferticket/", en: "en/admission-tickets/season-tickets/museumsuferticket/", fr: "fr/tickets/tickets-permanentes/museumsufer-ticket/" }[locale]}?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=ticket" target="_blank" rel="noopener">${escHtml(tr.passTicket)}</a>
       </span>
-    </div>
+    </aside>
 
     <nav class="date-nav" aria-label="${escHtml(tr.dateNav)}">
       <button id="btn-today" class="active">${escHtml(tr.today)}</button>
       <button id="btn-tomorrow">${escHtml(tr.tomorrow)}</button>
       <button id="btn-weekend">${escHtml(tr.saturday)}</button>
       <button id="btn-sunday">${escHtml(tr.sunday)}</button>
-      <label class="date-picker-label" aria-label="${escHtml(tr.pickDate)}">
+      <label class="date-picker-label">
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <input type="date" id="date-picker" aria-label="${escHtml(tr.pickDate)}" min="" max="">
       </label>
-      <button id="btn-near" aria-pressed="false">${escHtml(tr.nearMe)}</button>
+      <button id="btn-near" aria-pressed="false" aria-label="${escHtml(tr.nearMe)}" title="${escHtml(tr.nearMe)}"><svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1" fill="currentColor"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
     </nav>
 
     <p class="date-label" id="date-label" aria-live="polite"></p>
@@ -989,16 +1006,16 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     </details>
   </div>
 
-  <div class="search-overlay" id="search-overlay" role="dialog" aria-label="${escHtml(tr.search)}">
+  <dialog class="search-overlay" id="search-overlay" aria-label="${escHtml(tr.search)}">
     <div class="search-box">
       <div class="search-input-wrap">
-        <svg viewBox="0 0 20 20" fill="none"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input class="search-input" id="search-input" type="text" placeholder="${escHtml(tr.searchPlaceholder)}" autocomplete="off">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input class="search-input" id="search-input" type="text" placeholder="${escHtml(tr.searchPlaceholder)}" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="search-results" aria-autocomplete="list" aria-activedescendant="">
         <span class="search-kbd">Esc</span>
       </div>
-      <div class="search-results" id="search-results"></div>
+      <div class="search-results" id="search-results" role="listbox" aria-label="${escHtml(tr.search)}"></div>
     </div>
-  </div>
+  </dialog>
 
   <script>
     const T = ${trJson};
@@ -1218,9 +1235,9 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       if (sortedEvents.length === 0) {
         eventsInner = '<div class="empty">' + escHtml(T.noEvents) + '</div>';
       } else {
-        eventsInner = '<div class="card-list">';
+        eventsInner = '<ul class="card-list">';
         for (const ev of sortedEvents) eventsInner += renderEvent(ev);
-        eventsInner += '</div>';
+        eventsInner += '</ul>';
       }
       html += renderSection('events', T.events, data.events.length, 'M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z', eventsInner);
 
@@ -1234,16 +1251,16 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       if (sortedExhibitions.length === 0 && museumsWithout.length === 0) {
         exhInner = '<div class="empty">' + escHtml(T.noExhibitions) + '</div>';
       } else {
-        exhInner = '<div class="card-list">';
+        exhInner = '<ul class="card-list">';
         exhInner += renderExhibitionsGrouped(sortedExhibitions);
         for (const slug of museumsWithout) {
           const m = MUSEUMS[slug];
-          exhInner += '<div class="museum-group-header museum-no-exhibition">'
+          exhInner += '<li><h3 class="museum-group-header museum-no-exhibition">'
             + museumHeader(m.name, slug)
             + '<span class="museum-permanent">' + escHtml(T.permanentCollection) + '</span>'
-            + '</div>';
+            + '</h3></li>';
         }
-        exhInner += '</div>';
+        exhInner += '</ul>';
       }
       html += renderSection('exhibitions', T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
 
@@ -1265,11 +1282,12 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       let html = renderExhibitionList(active);
 
       if (visited.length > 0) {
-        html += '<details class="visited-section"><summary>'
+        html += '<li><details class="visited-section"><summary>'
+          + '<span aria-hidden="true" class="disclosure-icon"></span>'
           + escHtml(T.alreadyVisited) + ' <span class="section-count">' + visited.length + '</span>'
-          + '</summary><div class="card-list">'
+          + '</summary><ul class="card-list">'
           + renderExhibitionList(visited)
-          + '</div></details>';
+          + '</ul></details></li>';
       }
 
       return html;
@@ -1291,7 +1309,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         const museum = ex.museum_name || '';
         if (museum !== currentMuseum) {
           currentMuseum = museum;
-          html += '<div class="museum-group-header">' + museumHeader(museum, ex.museum_slug) + '</div>';
+          html += '<li><h3 class="museum-group-header">' + museumHeader(museum, ex.museum_slug) + '</h3></li>';
         }
         html += renderExhibition(ex);
       }
@@ -1301,7 +1319,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     function renderExhibition(ex) {
       const imgTag = ex.image_url
         ? '<img class="card-img" src="' + escHtml(ex.image_url + '?w=120') + '" srcset="' + escHtml(ex.image_url + '?w=120') + ' 120w, ' + escHtml(ex.image_url + '?w=200') + ' 200w" sizes="(max-width: 480px) 56px, 72px" alt="' + escHtml(ex.title) + '"' + (ex._idx > 2 ? ' loading="lazy"' : '') + '>'
-        : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+        : '<div class="card-img-placeholder" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const img = ex.detail_url
         ? '<a href="' + escHtml(ex.detail_url) + '" target="_blank" rel="noopener" tabindex="-1">' + imgTag + '</a>'
         : imgTag;
@@ -1317,12 +1335,13 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       let endingTag = '';
       if (ex.end_date) {
         const daysLeft = Math.ceil((new Date(ex.end_date + 'T00:00:00') - new Date(toIso(today()) + 'T00:00:00')) / 86400000);
-        if (daysLeft <= 3) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + (daysLeft === 1 ? 'Tag' : 'Tage') + '">' + escHtml(T.lastDays) + '</span>';
-        else if (daysLeft <= 14) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + (daysLeft === 1 ? 'Tag' : 'Tage') + '">' + escHtml(T.endingSoon) + '</span>';
+        const daysUnit = daysLeft === 1 ? T.daysSingular : T.daysPlural;
+        if (daysLeft <= 3) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + escAttr(daysUnit) + '">' + escHtml(T.lastDays) + '</span>';
+        else if (daysLeft <= 14) endingTag = '<span class="card-ending-soon" title="' + daysLeft + ' ' + escAttr(daysUnit) + '">' + escHtml(T.endingSoon) + '</span>';
       }
 
       const desc = ex.description
-        ? '<details><summary>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
+        ? '<details><summary><span aria-hidden="true" class="disclosure-icon"></span>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ex.description) + '</div></details>'
         : '';
 
       const v = isVisited(ex.id);
@@ -1334,10 +1353,10 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           + '</button>';
 
-      return '<div class="card">'
+      return '<li><article class="card">'
         + img
         + '<div class="card-body">'
-        + '<div class="card-title">' + titleHtml + ' ' + translatedBadge(ex) + '</div>'
+        + '<p class="card-title">' + titleHtml + ' ' + translatedBadge(ex) + '</p>'
         + '<div class="card-meta">'
         + (dates ? '<span class="card-dates">' + dates + '</span>' : '')
         + endingTag
@@ -1346,13 +1365,13 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         + visitedBtn
         + '</div>'
         + desc
-        + '</div></div>';
+        + '</div></article></li>';
     }
 
     function renderEvent(ev) {
       const imgTag = ev.image_url
         ? '<img class="card-img" src="' + escHtml(ev.image_url + '?w=120') + '" srcset="' + escHtml(ev.image_url + '?w=120') + ' 120w, ' + escHtml(ev.image_url + '?w=200') + ' 200w" sizes="(max-width: 480px) 56px, 72px" alt="' + escHtml(ev.title) + '"' + (ev._idx > 2 ? ' loading="lazy"' : '') + '>'
-        : '<div class="card-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
+        : '<div class="card-img-placeholder" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>';
       const imgLink = ev.detail_url || ev.url;
       const img = imgLink
         ? '<a href="' + escHtml(imgLink) + '" target="_blank" rel="noopener" tabindex="-1">' + imgTag + '</a>'
@@ -1386,17 +1405,17 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       const meta = [timeTag, priceTag, distanceBadge(ev.museum_slug), navButton(ev.museum_slug), calBtn].filter(Boolean).join(' ');
 
       const desc = ev.description
-        ? '<details><summary>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
+        ? '<details><summary><span aria-hidden="true" class="disclosure-icon"></span>' + escHtml(T.details) + '</summary><div class="card-desc">' + escHtml(ev.description) + '</div></details>'
         : '';
 
-      return '<div class="card">'
+      return '<li><article class="card">'
         + img
         + '<div class="card-body">'
-        + '<div class="card-title">' + titleHtml + ' ' + translatedBadge(ev) + '</div>'
-        + '<div class="card-museum">' + escHtml(ev.museum_name || '') + '</div>'
+        + '<p class="card-title">' + titleHtml + ' ' + translatedBadge(ev) + '</p>'
+        + '<p class="card-museum">' + escHtml(ev.museum_name || '') + '</p>'
         + '<div class="card-meta">' + meta + '</div>'
         + desc
-        + '</div></div>';
+        + '</div></article></li>';
     }
 
     function copyPrompt() {
@@ -1433,7 +1452,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         btnNear.classList.remove('active');
         btnNear.classList.remove('loading');
         btnNear.setAttribute('aria-pressed', 'false');
-        btnNear.textContent = T.nearMe;
+        btnNear.removeAttribute('aria-busy');
         if (lastRenderData) render(lastRenderData);
         return;
       }
@@ -1444,20 +1463,20 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         if (lastRenderData) render(lastRenderData);
       } else if ('geolocation' in navigator) {
         btnNear.classList.add('loading');
-        btnNear.textContent = '...';
+        btnNear.setAttribute('aria-busy', 'true');
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             sortByDistance = true;
             btnNear.classList.remove('loading');
+            btnNear.removeAttribute('aria-busy');
             btnNear.classList.add('active');
             btnNear.setAttribute('aria-pressed', 'true');
-            btnNear.textContent = T.nearMe;
             if (lastRenderData) render(lastRenderData);
           },
           () => {
             btnNear.classList.remove('loading');
-            btnNear.textContent = T.nearMe;
+            btnNear.removeAttribute('aria-busy');
             btnNear.style.display = 'none';
           },
           { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
@@ -1504,15 +1523,19 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
 
     function openSearch() {
       buildSearchIndex();
-      searchOverlay.classList.add('open');
+      searchOverlay.showModal();
       searchInput.value = '';
+      searchInput.setAttribute('aria-expanded', 'true');
       searchInput.focus();
       updateSearch();
     }
 
     function closeSearch() {
-      searchOverlay.classList.remove('open');
+      searchOverlay.close();
+      searchInput.setAttribute('aria-expanded', 'false');
+      searchInput.setAttribute('aria-activedescendant', '');
       searchIdx = -1;
+      document.getElementById('search-trigger').focus();
     }
 
     function highlight(text, matches, key) {
@@ -1560,7 +1583,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
           : '';
         const timeStr = item.time ? '<span class="search-result-time">' + escHtml(item.time) + '</span>' : '';
 
-        return '<div class="search-result" data-idx="' + i + '"'
+        return '<div class="search-result" role="option" id="search-opt-' + i + '" data-idx="' + i + '"'
           + (item.url ? ' data-url="' + escAttr(item.url) + '"' : '')
           + '><div class="search-result-type">' + escHtml(item.type.slice(0, 6)) + '</div>'
           + '<div class="search-result-body">'
@@ -1592,10 +1615,18 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       else if (e.key === 'Escape') { closeSearch(); return; }
       else return;
       rows.forEach((r, i) => r.classList.toggle('active', i === searchIdx));
+      searchInput.setAttribute('aria-activedescendant', searchIdx >= 0 ? 'search-opt-' + searchIdx : '');
       if (searchIdx >= 0 && rows[searchIdx]) rows[searchIdx].scrollIntoView({ block: 'nearest' });
     });
 
-    searchOverlay.addEventListener('click', (e) => { if (e.target === searchOverlay) closeSearch(); });
+    searchOverlay.addEventListener('click', (e) => {
+      if (e.target === searchOverlay) closeSearch();
+    });
+    searchOverlay.addEventListener('cancel', () => {
+      searchInput.setAttribute('aria-expanded', 'false');
+      searchInput.setAttribute('aria-activedescendant', '');
+      searchIdx = -1;
+    });
 
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
