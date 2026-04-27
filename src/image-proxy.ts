@@ -96,8 +96,15 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
       res = await fetch(imageUrl, fetchInit);
     }
 
-    if (!res.ok && width > 0 && !env.FETCH_PROXY_URL) {
-      res = await fetch(imageUrl, { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok && width > 0) {
+      if (env.FETCH_PROXY_URL) {
+        const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(imageUrl)}`;
+        const headers: Record<string, string> = {};
+        if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
+        res = await fetch(proxyUrl, { headers });
+      } else {
+        res = await fetch(imageUrl, { headers: { "User-Agent": USER_AGENT } });
+      }
     }
     if (!res.ok) {
       return new Response("Upstream error", { status: 502 });
