@@ -1,24 +1,17 @@
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
-import {
-  attachLikeCounts,
-  getEventsForDate,
-  getExhibitionsForDate,
-  getLikeCounts,
-  getMuseumMap,
-  handleApi,
-  handleFeeds,
-  proxyImages,
-} from "./api";
+import { fetchDayData, getMuseumMap, handleApi, handleFeeds } from "./api";
+import { ContentBody } from "./components";
 import { todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { scrapeMuseumExhibitions } from "./exhibition-scraper";
 import { type InitialData, renderPage } from "./frontend";
-import { detectLocale } from "./i18n";
+import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import { scrape } from "./scraper";
 import { SERVICE_WORKER_JS } from "./service-worker";
-import { translateEvents, translateFields } from "./translate";
+import { formatDateFull } from "./shared";
+import { translateEvents } from "./translate";
 import type { Env } from "./types";
 
 const LLMS_TXT = `# Museumsufer Frankfurt
@@ -185,51 +178,40 @@ app.get("/calendar.ics", async (c) => {
   return response ?? c.notFound();
 });
 
+app.get("/partial/content", async (c) => {
+  const locale = (c.req.query("lang") || detectLocale(c.req.raw)) as Locale;
+  const date = c.req.query("date") || todayIso();
+  const [data, museums] = await Promise.all([fetchDayData(c.env, date, locale), getMuseumMap(c.env).catch(() => ({}))]);
+  const tr = getTranslations(locale);
+
+  const html = (
+    <>
+      <ContentBody
+        events={data.events}
+        exhibitions={data.exhibitions}
+        museums={museums}
+        tr={tr}
+        locale={locale}
+        todayIso={todayIso()}
+      />
+      <script type="application/json" id="partial-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+    </>
+  );
+
+  return c.html(html, {
+    headers: {
+      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600",
+      "X-Date-Label": formatDateFull(date, dateLocale(locale)),
+    },
+  });
+});
+
 app.get("*", async (c) => {
   const locale = detectLocale(c.req.raw);
   let initialData: InitialData | undefined;
   const museums = await getMuseumMap(c.env).catch(() => ({}));
   try {
-    const date = todayIso();
-    const [rawExhibitions, rawEvents] = await Promise.all([
-      getExhibitionsForDate(c.env, date),
-      getEventsForDate(c.env, date),
-    ]);
-    const exhibitions = proxyImages(rawExhibitions);
-    const events = proxyImages(rawEvents);
-    const [exhCounts, evCounts] = await Promise.all([
-      getLikeCounts(
-        c.env,
-        "exhibition",
-        exhibitions.map((e) => e.id),
-      ),
-      getLikeCounts(
-        c.env,
-        "event",
-        events.map((e) => e.id),
-      ),
-    ]);
-    const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
-    const evWithLikes = attachLikeCounts(events, evCounts);
-    let finalExh: unknown[] = exhWithLikes;
-    let finalEv: unknown[] = evWithLikes;
-    if (locale !== "de") {
-      const [trExh, trEv] = await Promise.all([
-        translateFields(c.env, exhWithLikes, ["title"], locale),
-        translateFields(c.env, evWithLikes, ["title", "description"], locale),
-      ]);
-      finalExh = trExh.map((item, i) => {
-        const orig = exhWithLikes[i] as unknown as Record<string, unknown>;
-        const cur = item as unknown as Record<string, unknown>;
-        return cur.title !== orig.title ? { ...cur, translated: true } : cur;
-      });
-      finalEv = trEv.map((item, i) => {
-        const orig = evWithLikes[i] as unknown as Record<string, unknown>;
-        const cur = item as unknown as Record<string, unknown>;
-        return cur.title !== orig.title || cur.description !== orig.description ? { ...cur, translated: true } : cur;
-      });
-    }
-    initialData = { date, exhibitions: finalExh, events: finalEv };
+    initialData = await fetchDayData(c.env, todayIso(), locale);
   } catch {}
 
   return c.html(renderPage(locale, initialData, museums), {
