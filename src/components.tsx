@@ -121,48 +121,6 @@ function ExternalLinkIcon() {
   );
 }
 
-function MuseumGroupHeader({
-  name,
-  slug,
-  museums,
-  tr,
-}: {
-  name: string;
-  slug: string | undefined;
-  museums: Record<string, MuseumInfo>;
-  tr: Record<string, string>;
-}) {
-  const info = slug ? museums[slug] : undefined;
-  const url = info?.website;
-  return (
-    <li>
-      <h3 class="museum-group-header text-[0.6875rem] font-bold uppercase tracking-wide text-text-secondary py-2.5 pr-4 pl-4 border-b border-border-light border-l-[3px] border-l-accent bg-border-light m-0">
-        {name}
-        {url && (
-          <a
-            class="text-text-tertiary ml-1 hover:text-accent"
-            href={url}
-            target="_blank"
-            rel="noopener"
-            aria-label={name}
-          >
-            <ExternalLinkIcon />
-          </a>
-        )}
-        {info?.museumsufer === false && (
-          <span class="text-text-tertiary ml-1 opacity-60" title={tr.notMuseumsufer}>
-            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="12" height="12" class="align-[-1px]">
-              <path d="M8 2L2 6v1h12V6L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
-              <path d="M4 9v4M8 9v4M12 9v4M3 13h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
-              <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            </svg>
-          </span>
-        )}
-      </h3>
-    </li>
-  );
-}
-
 function EndingBadge({
   endDate,
   todayIso,
@@ -234,6 +192,7 @@ function ExhibitionCard({
           <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
+          <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
             {dates && <span class="text-[0.6875rem] text-text-tertiary leading-7">{dates}</span>}
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
@@ -515,13 +474,7 @@ export function ContentBody({
           </div>
         ) : (
           <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
-            <ExhibitionList
-              exhibitions={sortedExhibitions}
-              todayIso={todayIso}
-              locale={locale}
-              tr={tr}
-              museums={museums}
-            />
+            <ExhibitionList exhibitions={sortedExhibitions} todayIso={todayIso} locale={locale} tr={tr} />
             <li>
               <details class="visited-section mt-4" id="visited-section">
                 <summary class="text-[0.6875rem] font-bold uppercase tracking-wide text-text-tertiary cursor-pointer flex items-center gap-2 mb-3">
@@ -599,28 +552,17 @@ function ExhibitionList({
   todayIso,
   locale,
   tr,
-  museums,
 }: {
   exhibitions: ExhibitionWithLikes[];
   todayIso: string;
   locale: Locale;
   tr: Record<string, string>;
-  museums: Record<string, MuseumInfo>;
 }) {
-  let currentMuseum = "";
   return (
     <>
-      {exhibitions.map((ex, i) => {
-        const museum = ex.museum_name || "";
-        const showHeader = museum !== currentMuseum;
-        if (showHeader) currentMuseum = museum;
-        return (
-          <>
-            {showHeader && <MuseumGroupHeader name={museum} slug={ex.museum_slug} museums={museums} tr={tr} />}
-            <ExhibitionCard ex={ex} idx={i} todayIso={todayIso} locale={locale} tr={tr} />
-          </>
-        );
-      })}
+      {exhibitions.map((ex, i) => (
+        <ExhibitionCard ex={ex} idx={i} todayIso={todayIso} locale={locale} tr={tr} />
+      ))}
     </>
   );
 }

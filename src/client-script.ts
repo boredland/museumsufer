@@ -84,7 +84,6 @@ export const CLIENT_SCRIPT = `
       var li = card.parentElement;
       if (visitedList && li) visitedList.appendChild(li);
       updateVisitedCount();
-      hideEmptyMuseumHeaders();
     }
 
     function updateVisitedCount() {
@@ -346,19 +345,7 @@ export const CLIENT_SCRIPT = `
 
       if (count > 0) {
         visitedCount.textContent = count;
-        hideEmptyMuseumHeaders();
       }
-    }
-
-    function hideEmptyMuseumHeaders() {
-      var exhList = content.querySelector('[data-section="exhibitions"] .card-list');
-      if (!exhList) return;
-      var headers = exhList.querySelectorAll('li:has(> .museum-group-header:not(.museum-no-exhibition))');
-      headers.forEach(function(headerLi) {
-        var next = headerLi.nextElementSibling;
-        var hasCards = next && next.querySelector('article.card');
-        if (!hasCards) headerLi.remove();
-      });
     }
 
     function hydrateSectionStates() {
