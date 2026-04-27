@@ -64,7 +64,7 @@ app.post("/api/transit", async (c) => {
       const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        cf: { cacheTtl: 300, cacheEverything: true },
+        cf: { cacheTtl: 3600, cacheEverything: true },
         body: JSON.stringify({
           auth: { type: "AID", aid: "x0k4ZR33ICN9CWmj" },
           client: { type: "WEB", id: "RMV", name: "webapp" },
@@ -82,7 +82,7 @@ app.post("/api/transit", async (c) => {
     } catch {}
   }
 
-  return c.json(result, { headers: { "Cache-Control": "public, max-age=300" } });
+  return c.json(result, { headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600" } });
 });
 
 app.all("/api/*", (c) => {
