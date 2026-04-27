@@ -36,7 +36,7 @@ function CardImage({
 }) {
   const imgTag = src ? (
     <img
-      class="w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] object-cover rounded-lg shrink-0 bg-border-light overflow-hidden"
+      class="w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] object-cover rounded-lg shrink-0 bg-border-light overflow-hidden text-[0]"
       src={`${src}?w=120`}
       srcset={`${src}?w=120 120w, ${src}?w=200 200w`}
       sizes="(max-width: 480px) 56px, 72px"
@@ -329,6 +329,8 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
         class="card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0"
         data-item-id={ev.id}
         data-museum-slug={ev.museum_slug}
+        data-event-time={ev.time || undefined}
+        data-event-date={ev.date}
       >
         <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
         <div class="min-w-0 flex flex-col">

@@ -134,7 +134,9 @@ export const CLIENT_SCRIPT = `
     var datePicker = document.getElementById('date-picker');
     var allBtns = [btnToday, btnTomorrow, btnWeekend, btnSunday];
 
-    function toIso(d) { return d.toISOString().slice(0, 10); }
+    function toIso(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
     function today() { return new Date(); }
     function tomorrow() { var d = new Date(); d.setDate(d.getDate() + 1); return d; }
     function nextDay(dayOfWeek) {
@@ -202,7 +204,7 @@ export const CLIENT_SCRIPT = `
       }
       hydrateVisited();
       hydrateSectionStates();
-      if (sortByDistance && userPos) injectDistanceBadges();
+      if (sortByDistance && userPos) { injectDistanceBadges(); injectReachability(); }
     });
 
     function persistSectionState(el) {
@@ -245,8 +247,48 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    function injectReachability() {
+      var now = new Date();
+      var todayStr = toIso(now);
+      var nowMin = now.getHours() * 60 + now.getMinutes();
+
+      content.querySelectorAll('article.card[data-event-time][data-event-date]').forEach(function(card) {
+        if (card.querySelector('.card-reachable, .card-tight, .card-started')) return;
+        var eventDate = card.dataset.eventDate;
+        if (eventDate !== todayStr) return;
+        var eventTime = card.dataset.eventTime;
+        if (!eventTime) return;
+        var slug = card.dataset.museumSlug;
+        var walk = walkMin(slug);
+        if (walk === null) return;
+
+        var parts = eventTime.split(':');
+        var eventMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        var margin = eventMin - nowMin - walk;
+
+        var badge = document.createElement('span');
+        if (margin < 0) {
+          badge.className = 'card-started';
+          badge.textContent = T.started;
+        } else if (margin < 10) {
+          badge.className = 'card-tight';
+          badge.textContent = T.tight;
+        } else {
+          badge.className = 'card-reachable';
+          badge.textContent = T.reachable;
+        }
+        var meta = card.querySelector('.card-meta');
+        if (meta) meta.insertBefore(badge, meta.firstChild);
+      });
+    }
+
+    function removeReachabilityBadges() {
+      content.querySelectorAll('.card-reachable, .card-tight, .card-started').forEach(function(el) { el.remove(); });
+    }
+
     function removeDistanceBadges() {
       content.querySelectorAll('.card-distance').forEach(function(el) { el.remove(); });
+      removeReachabilityBadges();
     }
 
     function sortCardsByDistance() {
@@ -285,7 +327,7 @@ export const CLIENT_SCRIPT = `
         sortByDistance = true;
         btnNear.classList.add('active');
         btnNear.setAttribute('aria-pressed', 'true');
-        injectDistanceBadges();
+        injectDistanceBadges(); injectReachability();
         sortCardsByDistance();
         pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
       } else if ('geolocation' in navigator) {
@@ -299,7 +341,7 @@ export const CLIENT_SCRIPT = `
             btnNear.removeAttribute('aria-busy');
             btnNear.classList.add('active');
             btnNear.setAttribute('aria-pressed', 'true');
-            injectDistanceBadges();
+            injectDistanceBadges(); injectReachability();
             sortCardsByDistance();
             pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
           },
