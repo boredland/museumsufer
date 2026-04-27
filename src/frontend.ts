@@ -357,6 +357,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       border-radius: 8px;
       flex-shrink: 0;
       background: var(--border-light);
+      overflow: hidden;
     }
 
     .card-img-placeholder {
