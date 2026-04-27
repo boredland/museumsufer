@@ -50,7 +50,11 @@ export const CLIENT_SCRIPT = `
       }
 
       toggleVisited(id);
-      showHeartPrompt(id, itemType, card);
+      if (getMyLikes()[id]) {
+        moveToVisited(card);
+      } else {
+        showHeartPrompt(id, itemType, card);
+      }
     }
 
     function showHeartPrompt(id, itemType, card) {
