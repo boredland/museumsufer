@@ -192,6 +192,7 @@ export const CLIENT_SCRIPT = `
     function loadDay(date, btn) {
       currentDate = date;
       setActive(btn || btnForDate(date));
+      datePicker.value = btnForDate(date) ? '' : date;
       var langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
       htmx.ajax('GET', '/partial/content?date=' + date + langParam, {
         target: '#content',
@@ -415,6 +416,7 @@ export const CLIENT_SCRIPT = `
     updateNavVisibility();
     var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : toIso(today());
     setActive(btnForDate(currentDate));
+    if (!btnForDate(currentDate)) datePicker.value = currentDate;
 
     if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;

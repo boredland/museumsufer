@@ -67,13 +67,14 @@ function GithubCorner({ label }: { label: string }) {
   );
 }
 
-function LangSwitch({ locale, date }: { locale: Locale; date?: string }) {
+function LangSwitch({ locale, date, sort }: { locale: Locale; date?: string; sort?: string }) {
   return (
     <nav class="flex justify-center gap-1 mt-3" aria-label="Language">
       {SUPPORTED_LOCALES.map((l) => {
         const params = new URLSearchParams();
         params.set("lang", l);
         if (date) params.set("date", date);
+        if (sort) params.set("sort", sort);
         return (
           <a
             href={`?${params.toString()}`}
@@ -272,6 +273,7 @@ export function renderPage(
   locale: Locale,
   initialData?: InitialData,
   museums?: Record<string, MuseumInfo>,
+  sort?: string,
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
   const trJson = JSON.stringify(tr);
@@ -363,7 +365,11 @@ export function renderPage(
               Museumsufer Frankfurt
             </h1>
             <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
-            <LangSwitch locale={locale} date={initialData?.date !== todayIso() ? initialData?.date : undefined} />
+            <LangSwitch
+              locale={locale}
+              date={initialData?.date !== todayIso() ? initialData?.date : undefined}
+              sort={sort}
+            />
           </header>
 
           <SearchTrigger tr={tr} />
