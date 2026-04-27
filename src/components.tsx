@@ -194,14 +194,20 @@ function ExhibitionCard({
   return (
     <li>
       <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
-        <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
+        <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
+          <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
+          {dates && (
+            <span class="text-[0.5625rem] font-medium text-text-tertiary bg-border-light px-1 py-0.5 rounded text-center leading-tight">
+              {dates}
+            </span>
+          )}
+        </div>
         <div class="card-body min-w-0 flex flex-col">
           <p class="text-sm font-medium leading-tight mb-0.5">
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {dates && <span class="text-[0.6875rem] text-text-tertiary leading-7">{dates}</span>}
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
