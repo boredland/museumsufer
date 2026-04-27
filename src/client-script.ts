@@ -155,6 +155,14 @@ export const CLIENT_SCRIPT = `
       return weekday + ', ' + rest;
     }
 
+    function btnForDate(date) {
+      if (date === toIso(today())) return btnToday;
+      if (date === toIso(tomorrow())) return btnTomorrow;
+      if (date === toIso(nextDay(6))) return btnWeekend;
+      if (date === toIso(nextDay(0))) return btnSunday;
+      return null;
+    }
+
     function setActive(btn) {
       allBtns.forEach(function(b) { b.classList.remove('active'); });
       datePicker.classList.remove('active');
@@ -182,8 +190,8 @@ export const CLIENT_SCRIPT = `
     }
 
     function loadDay(date, btn) {
-      setActive(btn);
-      pushStateToUrl(date, sortByDistance);
+      currentDate = date;
+      setActive(btn || btnForDate(date));
       var langParam = CURRENT_LANG !== 'de' ? '&lang=' + CURRENT_LANG : '';
       htmx.ajax('GET', '/partial/content?date=' + date + langParam, {
         target: '#content',
@@ -193,6 +201,7 @@ export const CLIENT_SCRIPT = `
 
     document.body.addEventListener('htmx:afterSwap', function(e) {
       if (e.detail.target.id !== 'content') return;
+      pushStateToUrl(currentDate, sortByDistance);
       var xhr = e.detail.xhr;
       var label = xhr.getResponseHeader('X-Date-Label');
       if (label) dateLabel.textContent = label;
@@ -320,7 +329,7 @@ export const CLIENT_SCRIPT = `
         btnNear.classList.remove('active');
         btnNear.setAttribute('aria-pressed', 'false');
         removeDistanceBadges();
-        pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), false);
+        pushStateToUrl(currentDate, false);
         return;
       }
       if (userPos) {
@@ -329,7 +338,7 @@ export const CLIENT_SCRIPT = `
         btnNear.setAttribute('aria-pressed', 'true');
         injectDistanceBadges(); injectReachability();
         sortCardsByDistance();
-        pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
+        pushStateToUrl(currentDate, true);
       } else if ('geolocation' in navigator) {
         btnNear.classList.add('loading');
         btnNear.setAttribute('aria-busy', 'true');
@@ -343,7 +352,7 @@ export const CLIENT_SCRIPT = `
             btnNear.setAttribute('aria-pressed', 'true');
             injectDistanceBadges(); injectReachability();
             sortCardsByDistance();
-            pushStateToUrl(new URLSearchParams(location.search).get('date') || toIso(today()), true);
+            pushStateToUrl(currentDate, true);
           },
           function() {
             btnNear.classList.remove('loading');
@@ -404,18 +413,18 @@ export const CLIENT_SCRIPT = `
     }
 
     updateNavVisibility();
-    var urlParams = new URLSearchParams(location.search);
-    var urlDate = urlParams.get('date');
-    var urlSort = urlParams.get('sort');
-    if (urlDate && /^\\d{4}-\\d{2}-\\d{2}$/.test(urlDate) && urlDate !== toIso(today())) {
-      loadDay(urlDate, null);
-    } else if (__INITIAL_DATA__) {
+    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : toIso(today());
+    setActive(btnForDate(currentDate));
+
+    if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited();
       hydrateSectionStates();
     } else {
       loadDay(toIso(today()), btnToday);
     }
+
+    var urlSort = new URLSearchParams(location.search).get('sort');
     if (urlSort === 'near') btnNear.click();
 
     // Search

@@ -179,8 +179,10 @@ app.get("/calendar.ics", async (c) => {
 });
 
 app.get("/partial/content", async (c) => {
-  const locale = (c.req.query("lang") || detectLocale(c.req.raw)) as Locale;
-  const date = c.req.query("date") || todayIso();
+  const langParam = c.req.query("lang");
+  const locale = (langParam && ["de", "en", "fr"].includes(langParam) ? langParam : detectLocale(c.req.raw)) as Locale;
+  const dateParam = c.req.query("date");
+  const date = dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : todayIso();
   const data = await fetchDayData(c.env, date, locale);
   const tr = getTranslations(locale);
 
@@ -201,11 +203,15 @@ app.get("/partial/content", async (c) => {
 
 app.get("*", async (c) => {
   const locale = detectLocale(c.req.raw);
+  const urlDate = c.req.query("date");
+  const date = urlDate && /^\d{4}-\d{2}-\d{2}$/.test(urlDate) ? urlDate : todayIso();
   let initialData: InitialData | undefined;
   const museums = await getMuseumMap(c.env).catch(() => ({}));
   try {
-    initialData = await fetchDayData(c.env, todayIso(), locale);
-  } catch {}
+    initialData = await fetchDayData(c.env, date, locale);
+  } catch (e) {
+    console.error("Failed to fetch initial data:", e);
+  }
 
   return c.html(renderPage(locale, initialData, museums), {
     headers: {
