@@ -167,14 +167,24 @@ function DateNav({ tr }: { tr: Record<string, string> }) {
       <button type="button" id="btn-sunday" class={dateBtnClass}>
         {tr.sunday}
       </button>
-      <input
-        type="date"
-        id="date-picker"
-        aria-label={tr.pickDate}
-        min=""
-        max=""
-        class="py-2 px-3 max-[480px]:px-2 max-[480px]:w-10 max-[480px]:overflow-hidden max-[480px]:text-transparent border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-      />
+      <label class="date-btn relative inline-flex items-center justify-center min-w-9 min-h-9 p-2 cursor-pointer">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true" class="pointer-events-none">
+          <path
+            d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+        <input
+          type="date"
+          id="date-picker"
+          aria-label={tr.pickDate}
+          min=""
+          max=""
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+      </label>
       <button
         type="button"
         id="btn-near"

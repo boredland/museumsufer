@@ -86,7 +86,8 @@ dialog::backdrop {
   @apply bg-accent text-white border-accent;
 }
 
-#date-picker.active {
+#date-picker ~ .date-btn.active,
+label.date-btn.active {
   @apply border-accent bg-accent-light text-accent;
 }
 
