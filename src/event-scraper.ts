@@ -350,7 +350,7 @@ ${textContent}`,
   return { price, image_url: imageUrl };
 }
 
-function extractImageFromHtml(html: string, pageUrl: string): string | null {
+export function extractImageFromHtml(html: string, pageUrl: string): string | null {
   const baseUrl = new URL(pageUrl).origin;
   const pageDomain = new URL(pageUrl).hostname;
 
@@ -394,12 +394,12 @@ function isSameDomain(url: string, pageDomain: string): boolean {
   }
 }
 
-interface PageLink {
+export interface PageLink {
   text: string;
   href: string;
 }
 
-function extractPageLinks(html: string, baseUrl: string): PageLink[] {
+export function extractPageLinks(html: string, baseUrl: string): PageLink[] {
   const links: PageLink[] = [];
   const re = /<a\s[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
   let match;
@@ -417,7 +417,7 @@ function extractPageLinks(html: string, baseUrl: string): PageLink[] {
   return links;
 }
 
-function matchLinkForTitle(title: string, links: PageLink[]): string | null {
+export function matchLinkForTitle(title: string, links: PageLink[]): string | null {
   const titleLower = title.toLowerCase().trim();
   const titleWords = titleLower.split(/\s+/).filter((w) => w.length > 2);
 
@@ -476,7 +476,7 @@ function findEventLink(html: string, baseUrl: string): string | null {
   return null;
 }
 
-function stripHtmlToText(html: string): string {
+export function stripHtmlToText(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, "")
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -489,7 +489,7 @@ function stripHtmlToText(html: string): string {
     .trim();
 }
 
-function extractJson<T>(text: string): T | null {
+export function extractJson<T>(text: string): T | null {
   const match = text.match(/\[[\s\S]*\]/);
   if (!match) return null;
   try {

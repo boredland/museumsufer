@@ -1,6 +1,7 @@
 import { getEventsForDate, getExhibitionsForDate, getMuseumMap, handleApi, handleFeeds, proxyImages } from "./api";
 import { todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
+import { scrapeMuseumExhibitions } from "./exhibition-scraper";
 import { type InitialData, renderPage } from "./frontend";
 import { detectLocale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
@@ -106,6 +107,15 @@ export default {
       const denied = checkScrapeAuth(request, env);
       if (denied) return denied;
       const result = await scrape(env);
+      return new Response(JSON.stringify(result), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (url.pathname === "/scrape/exhibitions" && request.method === "POST") {
+      const denied = checkScrapeAuth(request, env);
+      if (denied) return denied;
+      const result = await scrapeMuseumExhibitions(env);
       return new Response(JSON.stringify(result), {
         headers: { "Content-Type": "application/json" },
       });
@@ -221,6 +231,8 @@ export default {
     ctx.waitUntil(
       scrape(env)
         .catch((e) => console.error("scrape failed:", e))
+        .then(() => scrapeMuseumExhibitions(env))
+        .catch((e) => console.error("exhibition scrape failed:", e))
         .then(() => scrapeMuseumWebsites(env))
         .catch((e) => console.error("event scrape failed:", e))
         .then(() => translateEvents(env))
