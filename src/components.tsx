@@ -582,7 +582,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
       sectionKey="museums"
       title={tr.museums}
       count={Object.keys(museums).length}
-      iconPath="M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
+      iconPath="M10 2L2 6v1.5h16V6L10 2zM4 9.5v5h1.5v-5H4zm3.5 0v5H9v-5H7.5zm3.5 0v5h1.5v-5H11zm3.5 0v5H16v-5h-1.5zM2 16v1.5h16V16H2z"
     >
       <ul class={cardListClass}>
         {Object.entries(museums)
