@@ -330,7 +330,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
           <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
           {timeStr && (
-            <span class="text-[0.625rem] font-medium text-accent bg-accent-light px-1 py-0.5 rounded text-center leading-tight">
+            <span class="card-time text-[0.625rem] font-medium text-accent bg-accent-light px-1 py-0.5 rounded text-center leading-tight">
               {timeStr}
             </span>
           )}

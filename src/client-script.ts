@@ -225,13 +225,19 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    var timeDefault = 'text-accent bg-accent-light';
+    var timeReachable = 'text-green-700 bg-green-50';
+    var timeTight = 'text-amber-700 bg-amber-50';
+    var timeStarted = 'text-text-tertiary bg-border-light opacity-60';
+
     function injectReachability() {
       var now = new Date();
       var todayStr = toIso(now);
       var nowMin = now.getHours() * 60 + now.getMinutes();
 
       content.querySelectorAll('article.card[data-event-time][data-event-date]').forEach(function(card) {
-        if (card.querySelector('.card-reachable, .card-tight, .card-started')) return;
+        var timeEl = card.querySelector('.card-time');
+        if (!timeEl || timeEl.dataset.reachColored) return;
         var eventDate = card.dataset.eventDate;
         if (eventDate !== todayStr) return;
         var eventTime = card.dataset.eventTime;
@@ -244,24 +250,21 @@ export const CLIENT_SCRIPT = `
         var eventMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         var margin = eventMin - nowMin - walk;
 
-        var badge = document.createElement('span');
-        if (margin < 0) {
-          badge.className = 'card-started';
-          badge.textContent = T.started;
-        } else if (margin < 10) {
-          badge.className = 'card-tight';
-          badge.textContent = T.tight;
-        } else {
-          badge.className = 'card-reachable';
-          badge.textContent = T.reachable;
-        }
-        var meta = card.querySelector('.card-meta');
-        if (meta) meta.insertBefore(badge, meta.firstChild);
+        timeEl.dataset.reachColored = '1';
+        timeDefault.split(' ').forEach(function(c) { timeEl.classList.remove(c); });
+        var colors = margin < 0 ? timeStarted : margin < 10 ? timeTight : timeReachable;
+        colors.split(' ').forEach(function(c) { timeEl.classList.add(c); });
       });
     }
 
     function removeReachabilityBadges() {
-      content.querySelectorAll('.card-reachable, .card-tight, .card-started').forEach(function(el) { el.remove(); });
+      content.querySelectorAll('.card-time[data-reach-colored]').forEach(function(el) {
+        delete el.dataset.reachColored;
+        [timeReachable, timeTight, timeStarted].forEach(function(cls) {
+          cls.split(' ').forEach(function(c) { el.classList.remove(c); });
+        });
+        timeDefault.split(' ').forEach(function(c) { el.classList.add(c); });
+      });
     }
 
     function removeDistanceBadges() {
