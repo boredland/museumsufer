@@ -111,7 +111,7 @@ ${truncated}`,
     if (exh.end_date && /^\d{4}-\d{2}-\d{2}$/.test(exh.end_date) && exh.end_date < today) continue;
 
     const detailUrl = matchLinkForTitle(exh.title, pageLinks);
-    const imageUrl = extractImageFromHtml(html, pageUrl);
+    const imageUrl = opts?.proxy ? null : extractImageFromHtml(html, pageUrl);
 
     await env.DB.prepare(
       `INSERT INTO exhibitions (museum_id, title, start_date, end_date, description, image_url, detail_url)
