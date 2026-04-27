@@ -19,6 +19,12 @@ export interface MuseumApiConfig {
   slug: string;
   type: ApiType;
   endpoint: string;
+  proxy?: true;
+}
+
+export interface ProxyConfig {
+  url: string;
+  token?: string;
 }
 
 export const MUSEUM_APIS: MuseumApiConfig[] = [
@@ -91,6 +97,7 @@ export const MUSEUM_APIS: MuseumApiConfig[] = [
     slug: "bibelhaus-erlebnismuseum",
     type: "bibelhaus",
     endpoint: "https://www.bibelhaus-frankfurt.de/de/programm",
+    proxy: true,
   },
   {
     slug: "frankfurter-kunstverein",

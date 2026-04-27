@@ -1,5 +1,5 @@
 import { dateOffset, inferYear, toBerlinDate, toBerlinTime, todayIso } from "./date";
-import type { MuseumApiConfig } from "./museum-apis";
+import type { MuseumApiConfig, ProxyConfig } from "./museum-apis";
 import {
   GERMAN_MONTHS,
   GERMAN_MONTHS_SHORT,
@@ -9,6 +9,13 @@ import {
   truncateHtml,
   USER_AGENT,
 } from "./shared";
+
+export function proxyFetch(url: string, proxy: ProxyConfig): Promise<Response> {
+  const proxyUrl = `${proxy.url}?url=${encodeURIComponent(url)}`;
+  const headers: Record<string, string> = {};
+  if (proxy.token) headers.Authorization = `Bearer ${proxy.token}`;
+  return fetch(proxyUrl, { headers });
+}
 
 export interface ApiEvent {
   title: string;
@@ -23,7 +30,7 @@ export interface ApiEvent {
   museum_slug_override?: string;
 }
 
-export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEvent[]> {
+export async function fetchEventsFromApi(config: MuseumApiConfig, proxy?: ProxyConfig): Promise<ApiEvent[]> {
   switch (config.type) {
     case "tribe-events":
       return fetchTribeEvents(config.endpoint);
@@ -50,7 +57,7 @@ export async function fetchEventsFromApi(config: MuseumApiConfig): Promise<ApiEv
     case "ledermuseum":
       return fetchLedermuseum(config.endpoint);
     case "bibelhaus":
-      return fetchBibelhaus(config.endpoint);
+      return fetchBibelhaus(config.endpoint, config.proxy ? proxy : undefined);
     case "fkv":
       return fetchFkv(config.endpoint);
     case "fdh":
@@ -771,8 +778,10 @@ async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-async function fetchBibelhaus(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+async function fetchBibelhaus(endpoint: string, proxy?: ProxyConfig): Promise<ApiEvent[]> {
+  const res = proxy
+    ? await proxyFetch(endpoint, proxy)
+    : await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
   const html = await res.text();
 
