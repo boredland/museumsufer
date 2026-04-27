@@ -227,6 +227,7 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    var TIGHT_MARGIN_MIN = 10;
     var timeDefault = 'text-accent bg-accent-light';
     var timeReachable = 'text-green-700 bg-green-50';
     var timeTight = 'text-amber-700 bg-amber-50';
@@ -254,7 +255,7 @@ export const CLIENT_SCRIPT = `
 
         timeEl.dataset.reachColored = '1';
         timeEl.classList.remove.apply(timeEl.classList, timeDefault.split(' '));
-        var colors = margin < 0 ? timeStarted : margin < 10 ? timeTight : timeReachable;
+        var colors = margin < 0 ? timeStarted : margin < TIGHT_MARGIN_MIN ? timeTight : timeReachable;
         timeEl.classList.add.apply(timeEl.classList, colors.split(' '));
       });
     }

@@ -130,7 +130,7 @@ app.get("*", async (c) => {
   const locale = detectLocale(c.req.raw);
   const rawDate = c.req.query("date");
   const date = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : todayIso();
-  const sort = c.req.query("sort");
+  const sort = c.req.query("sort") === "near" ? "near" : undefined;
   let initialData: InitialData | undefined;
   const museums = await getMuseumMap(c.env).catch(() => ({}));
   try {
