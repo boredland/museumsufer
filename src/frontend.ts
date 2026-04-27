@@ -1187,7 +1187,6 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
       const museumsWithout = Object.keys(MUSEUMS)
         .filter(slug => !museumsWithExhibitions.has(slug))
         .sort((a, b) => MUSEUMS[a].name.localeCompare(MUSEUMS[b].name));
-      const totalMuseums = Object.keys(MUSEUMS).length;
 
       let exhInner;
       if (sortedExhibitions.length === 0 && museumsWithout.length === 0) {
@@ -1204,7 +1203,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
         }
         exhInner += '</div>';
       }
-      html += renderSection('exhibitions', T.exhibitions, totalMuseums, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
+      html += renderSection('exhibitions', T.exhibitions, data.exhibitions.length, 'M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12', exhInner);
 
       content.innerHTML = html;
       content.querySelectorAll('details.section').forEach(d => {

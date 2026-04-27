@@ -1,4 +1,5 @@
 import { MUSEUM_APIS } from "./museum-apis";
+import { MUSEUM_EXHIBITION_URLS } from "./museum-exhibitions";
 import { MUSEUMSUFER_DE, USER_AGENT } from "./shared";
 
 interface CheckResult {
@@ -26,6 +27,16 @@ const CHECKS: Array<{
         ? null
         : "teaserBox/teaserHeadline elements not found",
   },
+  ...Object.entries(MUSEUM_EXHIBITION_URLS)
+    .filter(([, config]) => !config.js)
+    .map(([slug, config]) => ({
+      name: `Exhibition page: ${slug}`,
+      url: config.url,
+      validate: (_body: string, status: number): string | null => {
+        if (status >= 400) return `HTTP ${status}`;
+        return null;
+      },
+    })),
   ...MUSEUM_APIS.map((api) => ({
     name: `API: ${api.slug} (${api.type})`,
     url: api.endpoint.includes("?")

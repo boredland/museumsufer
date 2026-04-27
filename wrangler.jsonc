@@ -20,6 +20,9 @@
   "ai": {
     "binding": "AI"
   },
+  "browser": {
+    "binding": "BROWSER"
+  },
   "observability": {
     "enabled": false,
     "head_sampling_rate": 1,
