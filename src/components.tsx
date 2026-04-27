@@ -421,6 +421,16 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
         class="flex items-center gap-3 py-2.5 px-4 border-b border-border-light last:border-b-0"
         data-museum-slug={slug}
       >
+        {museum.image_url && (
+          <div class={imgWrapClass}>
+            <img
+              class="w-full h-full object-cover"
+              src={`/img/${encodeURIComponent(museum.image_url)}?w=120`}
+              alt={museum.name}
+              loading="lazy"
+            />
+          </div>
+        )}
         <div class="min-w-0 flex-1">
           <p class="text-sm font-medium leading-tight">
             {museum.website ? (

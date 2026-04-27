@@ -277,18 +277,24 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
 
 export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>> {
   const { results } = await env.DB.prepare(
-    "SELECT slug, name, website_url, description FROM museums ORDER BY name",
+    "SELECT slug, name, website_url, description, image_url FROM museums ORDER BY name",
   ).all<{
     slug: string;
     name: string;
     website_url: string | null;
     description: string | null;
+    image_url: string | null;
   }>();
   const map: Record<string, MuseumInfo> = {};
   for (const m of results) {
     const config = MUSEUMS[m.slug];
     if (config?.hidden) continue;
-    const info: MuseumInfo = { name: m.name, website: m.website_url, description: m.description };
+    const info: MuseumInfo = {
+      name: m.name,
+      website: m.website_url,
+      description: m.description,
+      image_url: m.image_url,
+    };
     if (config?.name) info.museumsufer = false;
     map[m.slug] = info;
   }

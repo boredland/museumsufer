@@ -12,6 +12,7 @@ export interface MuseumInfo {
   name: string;
   website: string | null;
   description: string | null;
+  image_url: string | null;
   museumsufer?: false;
 }
 
