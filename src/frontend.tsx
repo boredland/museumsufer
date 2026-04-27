@@ -294,143 +294,146 @@ export function renderPage(
     const MUSEUMS = ${museumsJson};`;
 
   return (
-    <html lang={locale}>
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{tr.pageTitle}</title>
-        <meta name="description" content={tr.metaLong} />
-        <link rel="canonical" href="https://museumsufer.app/" />
-        <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
-        <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
-        <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
-        <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
-        <meta property="og:title" content={tr.pageTitle} />
-        <meta property="og:description" content={tr.metaLong} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://museumsufer.app/" />
-        <meta property="og:locale" content={locale} />
-        <meta property="og:site_name" content="Museumsufer Frankfurt" />
-        <meta property="og:image" content="https://museumsufer.app/og-image.svg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={tr.pageTitle} />
-        <meta name="twitter:description" content={tr.metaLong} />
-        <meta name="twitter:image" content="https://museumsufer.app/og-image.svg" />
-        <link rel="icon" href="/icon-192.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
-        <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#f5f0eb" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
-        {eventSchemaJson ? raw(eventSchemaJson) : null}
-        <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer />
-        <script src="https://unpkg.com/htmx.org@2.0.4" defer />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap"
-          rel="stylesheet"
-          media="print"
-          onload="this.media='all'"
-        />
-        <link rel="stylesheet" href="/styles.css" />
-      </head>
-      <body>
-        <a
-          href="#content"
-          class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-accent focus:text-white focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
-        >
-          {tr.skipLink}
-        </a>
-        <GithubCorner label={tr.githubAria} />
-
-        <div class="max-w-[680px] mx-auto pt-12 pb-16 px-4 max-[480px]:pt-8 max-[480px]:pb-12">
-          <header class="mb-8 text-center">
-            <div class="inline-flex items-center gap-2 mb-1">
-              <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                <svg
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                  class="w-[18px] h-[18px] fill-white"
-                >
-                  <path d="M12 2L2 7v2h20V7L12 2zm0 2.26L18.47 7H5.53L12 4.26zM2 19v2h20v-2H2zm2-8v8h2v-8H6zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" />
-                </svg>
-              </div>
-            </div>
-            <h1 class="text-3xl max-[480px]:text-[1.625rem] font-bold tracking-tight leading-tight">
-              Museumsufer Frankfurt
-            </h1>
-            <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
-            <LangSwitch
-              locale={locale}
-              date={initialData?.date !== todayIso() ? initialData?.date : undefined}
-              sort={sort}
-            />
-          </header>
-
-          <SearchTrigger tr={tr} />
-          <PassPromo locale={locale} tr={tr} />
-          <DateNav tr={tr} />
-
-          <p
-            class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
-            id="date-label"
-            aria-live="polite"
+    <>
+      {raw("<!DOCTYPE html>")}
+      <html lang={locale}>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>{tr.pageTitle}</title>
+          <meta name="description" content={tr.metaLong} />
+          <link rel="canonical" href={`https://museumsufer.app/${locale !== "de" ? `?lang=${locale}` : ""}`} />
+          <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
+          <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
+          <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
+          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
+          <meta property="og:title" content={tr.pageTitle} />
+          <meta property="og:description" content={tr.metaLong} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://museumsufer.app/" />
+          <meta property="og:locale" content={locale} />
+          <meta property="og:site_name" content="Museumsufer Frankfurt" />
+          <meta property="og:image" content="https://museumsufer.app/og-image.svg" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={tr.pageTitle} />
+          <meta name="twitter:description" content={tr.metaLong} />
+          <meta name="twitter:image" content="https://museumsufer.app/og-image.svg" />
+          <link rel="icon" href="/icon-192.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/icon-192.png" />
+          <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
+          <link rel="manifest" href="/manifest.json" />
+          <meta name="theme-color" content="#f5f0eb" />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
+          {eventSchemaJson ? raw(eventSchemaJson) : null}
+          <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer />
+          <script src="https://unpkg.com/htmx.org@2.0.4" defer />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap"
+            rel="stylesheet"
+            media="print"
+            onload="this.media='all'"
+          />
+          <link rel="stylesheet" href="/styles.css" />
+        </head>
+        <body>
+          <a
+            href="#content"
+            class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-accent focus:text-white focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
           >
-            {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
-          </p>
+            {tr.skipLink}
+          </a>
+          <GithubCorner label={tr.githubAria} />
 
-          <main id="content" class="min-h-[60vh]">
-            {initialData ? (
-              <ContentBody
-                events={initialData.events as EventWithLikes[]}
-                exhibitions={initialData.exhibitions as ExhibitionWithLikes[]}
-                tr={tr}
+          <div class="max-w-[680px] mx-auto pt-12 pb-16 px-4 max-[480px]:pt-8 max-[480px]:pb-12">
+            <header class="mb-8 text-center">
+              <div class="inline-flex items-center gap-2 mb-1">
+                <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
+                  <svg
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                    class="w-[18px] h-[18px] fill-white"
+                  >
+                    <path d="M12 2L2 7v2h20V7L12 2zm0 2.26L18.47 7H5.53L12 4.26zM2 19v2h20v-2H2zm2-8v8h2v-8H6zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" />
+                  </svg>
+                </div>
+              </div>
+              <h1 class="text-3xl max-[480px]:text-[1.625rem] font-bold tracking-tight leading-tight">
+                Museumsufer Frankfurt
+              </h1>
+              <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
+              <LangSwitch
                 locale={locale}
-                todayIso={todayIso()}
+                date={initialData?.date !== todayIso() ? initialData?.date : undefined}
+                sort={sort}
               />
-            ) : (
-              <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>
-            )}
-          </main>
+            </header>
 
-          <MuseumsSection museums={museums || {}} tr={tr} />
+            <SearchTrigger tr={tr} />
+            <PassPromo locale={locale} tr={tr} />
+            <DateNav tr={tr} />
 
-          <footer class="mt-6 pt-4 border-t border-border text-center text-xs flex justify-center gap-4 flex-wrap">
-            <a
-              href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
-              target="_blank"
-              rel="noopener"
-              class="text-text-tertiary no-underline hover:text-accent hover:underline"
+            <p
+              class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
+              id="date-label"
+              aria-live="polite"
             >
-              {tr.subscribeCal}
-            </a>
-            <a href="/feed.xml" class="text-text-tertiary no-underline hover:text-accent hover:underline">
-              {tr.rssFeed}
-            </a>
-            <a
-              href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
-              target="_blank"
-              rel="noopener"
-              class="text-text-tertiary no-underline hover:text-accent hover:underline"
-            >
-              {tr.missingEvent}
-            </a>
-          </footer>
+              {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
+            </p>
 
-          <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
-          <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
-          <LlmTip tr={tr} />
-        </div>
+            <main id="content" class="min-h-[60vh]">
+              {initialData ? (
+                <ContentBody
+                  events={initialData.events as EventWithLikes[]}
+                  exhibitions={initialData.exhibitions as ExhibitionWithLikes[]}
+                  tr={tr}
+                  locale={locale}
+                  todayIso={todayIso()}
+                />
+              ) : (
+                <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>
+              )}
+            </main>
 
-        <SearchDialog tr={tr} />
+            <MuseumsSection museums={museums || {}} tr={tr} />
 
-        <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
-      </body>
-    </html>
+            <footer class="mt-6 pt-4 border-t border-border text-center text-xs flex justify-center gap-4 flex-wrap">
+              <a
+                href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
+                target="_blank"
+                rel="noopener"
+                class="text-text-tertiary no-underline hover:text-accent hover:underline"
+              >
+                {tr.subscribeCal}
+              </a>
+              <a href="/feed.xml" class="text-text-tertiary no-underline hover:text-accent hover:underline">
+                {tr.rssFeed}
+              </a>
+              <a
+                href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
+                target="_blank"
+                rel="noopener"
+                class="text-text-tertiary no-underline hover:text-accent hover:underline"
+              >
+                {tr.missingEvent}
+              </a>
+            </footer>
+
+            <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
+            <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
+            <LlmTip tr={tr} />
+          </div>
+
+          <SearchDialog tr={tr} />
+
+          <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
+        </body>
+      </html>
+    </>
   ) as unknown as HtmlEscapedString;
 }
 
