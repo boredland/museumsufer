@@ -150,41 +150,32 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
 }
 
 const dateBtnClass =
-  "date-btn py-2 px-4.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.8125rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
+  "date-btn py-1.5 px-3 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
 
-function DateNav({ tr }: { tr: Record<string, string> }) {
+function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
+  const dl = dateLocale(locale);
+  const days: { iso: string; weekday: string; day: string; isToday: boolean }[] = [];
+  const now = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(d.getDate() + i);
+    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    days.push({
+      iso,
+      weekday: i === 0 ? tr.today : d.toLocaleDateString(dl, { weekday: "short" }),
+      day: i === 0 ? "" : String(d.getDate()),
+      isToday: i === 0,
+    });
+  }
+
   return (
     <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
-      <button type="button" id="btn-today" class={`${dateBtnClass} active`}>
-        {tr.today}
-      </button>
-      <button type="button" id="btn-tomorrow" class={dateBtnClass}>
-        {tr.tomorrow}
-      </button>
-      <button type="button" id="btn-weekend" class={dateBtnClass}>
-        {tr.saturday}
-      </button>
-      <button type="button" id="btn-sunday" class={dateBtnClass}>
-        {tr.sunday}
-      </button>
-      <label class="date-btn relative inline-flex items-center justify-center min-w-9 min-h-9 p-2 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-text-secondary transition-colors hover:border-accent hover:text-accent">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
-          <path
-            d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-        <input
-          type="date"
-          id="date-picker"
-          aria-label={tr.pickDate}
-          min=""
-          max=""
-          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-        />
-      </label>
+      {days.map((d) => (
+        <button type="button" data-date={d.iso} class={`${dateBtnClass}${d.iso === activeDate ? " active" : ""}`}>
+          <span class="text-[0.6875rem]">{d.weekday}</span>
+          {d.day && <span class="text-[0.625rem] opacity-60">{d.day}</span>}
+        </button>
+      ))}
       <button
         type="button"
         id="btn-near"
@@ -385,7 +376,7 @@ export function renderPage(
 
             <SearchTrigger tr={tr} />
             <PassPromo locale={locale} tr={tr} />
-            <DateNav tr={tr} />
+            <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} />
 
             <p
               class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
