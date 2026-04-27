@@ -544,18 +544,15 @@ export function ContentBody({
           <ul class={cardListClass}>
             <ExhibitionList exhibitions={sortedExhibitions} todayIso={todayIso} locale={locale} tr={tr} />
             <li>
-              <details class="visited-section mt-4" id="visited-section">
-                <summary class="text-[0.6875rem] font-bold uppercase tracking-wide text-text-tertiary cursor-pointer flex items-center gap-2 mb-3">
+              <details class="visited-section mt-4 py-2.5 px-4" id="visited-section" hidden>
+                <summary class="text-[0.6875rem] font-bold uppercase tracking-wide text-text-tertiary cursor-pointer flex items-center gap-2">
                   <span aria-hidden="true" class="disclosure-icon" />
                   {tr.alreadyVisited}{" "}
-                  <span
-                    class="text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
-                    id="visited-count"
-                  >
+                  <span class={badgeCountClass} id="visited-count">
                     0
                   </span>
                 </summary>
-                <ul class={cardListClass} id="visited-list" />
+                <ul class={`${cardListClass} mt-3`} id="visited-list" />
               </details>
             </li>
           </ul>
