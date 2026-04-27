@@ -390,14 +390,20 @@ export const CLIENT_SCRIPT = `
       });
     }
 
-    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : toIso(new Date());
+    var clientToday = toIso(new Date());
+    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : clientToday;
 
-    if (__INITIAL_DATA__) {
+    var firstBtn = document.querySelector('[data-date]');
+    var serverStale = firstBtn && firstBtn.dataset.date !== clientToday;
+
+    if (serverStale) {
+      location.replace('/?lang=' + CURRENT_LANG);
+    } else if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited();
       hydrateSectionStates();
     } else {
-      loadDay(toIso(new Date()));
+      loadDay(clientToday);
     }
 
     var urlSort = new URLSearchParams(location.search).get('sort');
