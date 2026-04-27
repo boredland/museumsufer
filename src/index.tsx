@@ -42,8 +42,8 @@ app.post("/api/transit", async (c) => {
   const body = await c.req.json<{ lat: number; lng: number }>().catch(() => null);
   if (!body?.lat || !body?.lng) return c.json({ error: "invalid" }, 400);
 
-  const snapLat = Math.round(body.lat * 300) / 300;
-  const snapLng = Math.round(body.lng * 300) / 300;
+  const snapLat = Math.round(body.lat * 500) / 500;
+  const snapLng = Math.round(body.lng * 500) / 500;
   const ox = Math.round(snapLng * 1e6);
   const oy = Math.round(snapLat * 1e6);
   const { getMuseumLocations: getLocs } = await import("./museum-config");

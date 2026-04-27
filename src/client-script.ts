@@ -8,8 +8,8 @@ export const CLIENT_SCRIPT = `
 
     function fetchTransitTimes() {
       if (!userPos) return Promise.resolve();
-      var snapLat = Math.round(userPos.lat * 300) / 300;
-      var snapLng = Math.round(userPos.lng * 300) / 300;
+      var snapLat = Math.round(userPos.lat * 500) / 500;
+      var snapLng = Math.round(userPos.lng * 500) / 500;
       var cacheKey = 'transit_' + snapLat + '_' + snapLng;
       var cached = sessionStorage.getItem(cacheKey);
       if (cached) { transitTimes = JSON.parse(cached); return Promise.resolve(); }
