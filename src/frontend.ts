@@ -336,8 +336,8 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .museum-link:hover { color: var(--accent); }
     .museum-link svg, .not-museumsufer svg { vertical-align: -1px; }
     .not-museumsufer { color: var(--text-tertiary); margin-left: 0.25rem; opacity: 0.6; }
-    .museum-no-exhibition { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; opacity: 0.7; border-left-color: var(--border-light); }
-    .museum-permanent { font-weight: 400; font-size: 0.625rem; letter-spacing: 0; text-transform: none; color: var(--text-tertiary); }
+    .museum-no-exhibition { display: flex; align-items: center; gap: 0.5rem; opacity: 0.7; border-left-color: var(--border-light); }
+    .museum-permanent { margin-left: auto; flex-shrink: 0; font-weight: 400; font-size: 0.625rem; letter-spacing: 0; text-transform: none; color: var(--text-tertiary); }
 
     .card {
       display: flex;
