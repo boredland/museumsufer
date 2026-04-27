@@ -40,7 +40,11 @@ export async function scrapeMuseumWebsites(
       const apiConfig = getApiConfig(museum.slug);
 
       if (apiConfig) {
-        const events = await fetchEventsFromApi(apiConfig);
+        const proxy =
+          apiConfig.proxy && env.FETCH_PROXY_URL
+            ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
+            : undefined;
+        const events = await fetchEventsFromApi(apiConfig, proxy);
         let count = 0;
         for (const event of events) {
           if (!event.title || !event.date) continue;
