@@ -14,6 +14,8 @@ const EVENT_PAGE_PATHS = [
   "/de/kalender",
   "/events",
   "/de/events",
+  "/termine",
+  "/de/termine",
   "/besuch/veranstaltungen",
   "/de/besuch/veranstaltungen",
   "/besuch/programm",
