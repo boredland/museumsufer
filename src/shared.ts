@@ -63,6 +63,18 @@ export function nullIfMidnight(time: string | null | undefined): string | null {
   return time;
 }
 
+export function sanitizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const cleaned = url.split(/\s+/)[0].trim();
+  if (!cleaned.startsWith("http")) return null;
+  try {
+    new URL(cleaned);
+    return cleaned;
+  } catch {
+    return null;
+  }
+}
+
 export function formatDateFull(iso: string, dateLocaleStr: string): string {
   if (!iso) return "";
   const d = new Date(`${iso}T00:00:00`);

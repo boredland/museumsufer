@@ -43,8 +43,10 @@ export function attachLikeCounts<T extends { id: number }>(
 }
 
 function proxyImageUrl(url: string | null): string | null {
-  if (!url?.startsWith("https://")) return url;
-  return `/img/${encodeURIComponent(url)}`;
+  if (!url?.startsWith("https://")) return null;
+  const cleaned = url.split(/\s+/)[0].trim();
+  if (!cleaned.startsWith("https://")) return null;
+  return `/img/${encodeURIComponent(cleaned)}`;
 }
 
 export function proxyImages<T extends { image_url?: string | null }>(items: T[]): T[] {
