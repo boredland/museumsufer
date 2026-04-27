@@ -418,6 +418,85 @@ function Section({
   );
 }
 
+function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
+  const geo = MUSEUM_LOCATIONS[slug];
+  return (
+    <li>
+      <div class="flex items-center gap-3 py-2.5 px-4 border-b border-border-light last:border-b-0">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-medium leading-tight">
+            {museum.website ? (
+              <a
+                href={museum.website}
+                target="_blank"
+                rel="noopener"
+                class="text-inherit no-underline hover:text-accent"
+              >
+                {museum.name}
+              </a>
+            ) : (
+              museum.name
+            )}
+            {museum.museumsufer === false && (
+              <span class="text-text-tertiary ml-1 opacity-60 text-[0.625rem]" title={tr.notMuseumsufer}>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  width="10"
+                  height="10"
+                  class="align-[-1px] inline"
+                >
+                  <path d="M8 2L2 6v1h12V6L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  <path
+                    d="M4 9v4M8 9v4M12 9v4M3 13h10"
+                    stroke="currentColor"
+                    stroke-width="1.2"
+                    stroke-linecap="round"
+                  />
+                  <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </span>
+            )}
+          </p>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          {museum.website && (
+            <a
+              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
+              href={museum.website}
+              target="_blank"
+              rel="noopener"
+              aria-label={museum.name}
+              title={museum.name}
+            >
+              <ExternalLinkIcon />
+            </a>
+          )}
+          {geo && (
+            <a
+              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
+              href={`https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}&travelmode=walking`}
+              target="_blank"
+              rel="noopener"
+              aria-label={tr.navigate}
+              title={tr.navigate}
+            >
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3">
+                <path
+                  d="M8 1a5 5 0 015 5c0 3.5-5 9-5 9s-5-5.5-5-9a5 5 0 015-5zm0 3a2 2 0 100 4 2 2 0 000-4z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                />
+              </svg>
+            </a>
+          )}
+        </div>
+      </div>
+    </li>
+  );
+}
+
 export function ContentBody({
   events,
   exhibitions,
@@ -493,55 +572,23 @@ export function ContentBody({
                 />
               </details>
             </li>
-            {museumsWithout.map((slug) => (
-              <li>
-                <h3 class="museum-group-header museum-no-exhibition text-[0.6875rem] font-bold uppercase tracking-wide text-text-secondary py-2.5 pr-4 pl-4 border-b border-border-light border-l-[3px] border-l-border-light bg-border-light m-0 flex items-center gap-2 opacity-70">
-                  {museums[slug].name}
-                  {museums[slug].website && (
-                    <a
-                      class="text-text-tertiary ml-1 hover:text-accent"
-                      href={museums[slug].website!}
-                      target="_blank"
-                      rel="noopener"
-                      aria-label={museums[slug].name}
-                    >
-                      <ExternalLinkIcon />
-                    </a>
-                  )}
-                  {museums[slug].museumsufer === false && (
-                    <span class="text-text-tertiary ml-1 opacity-60" title={tr.notMuseumsufer}>
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        width="12"
-                        height="12"
-                        class="align-[-1px]"
-                      >
-                        <path
-                          d="M8 2L2 6v1h12V6L8 2z"
-                          stroke="currentColor"
-                          stroke-width="1.2"
-                          stroke-linejoin="round"
-                        />
-                        <path
-                          d="M4 9v4M8 9v4M12 9v4M3 13h10"
-                          stroke="currentColor"
-                          stroke-width="1.2"
-                          stroke-linecap="round"
-                        />
-                        <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                      </svg>
-                    </span>
-                  )}
-                  <span class="ml-auto shrink-0 font-normal text-[0.625rem] tracking-normal normal-case text-text-tertiary">
-                    {tr.permanentCollection}
-                  </span>
-                </h3>
-              </li>
-            ))}
           </ul>
         )}
+      </Section>
+
+      <Section
+        sectionKey="museums"
+        title={tr.museums}
+        count={Object.keys(museums).length}
+        iconPath="M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
+      >
+        <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
+          {Object.entries(museums)
+            .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+            .map(([slug, m]) => (
+              <MuseumRow slug={slug} museum={m} tr={tr} />
+            ))}
+        </ul>
       </Section>
     </>
   );
