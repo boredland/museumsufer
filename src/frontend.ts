@@ -411,13 +411,13 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
     .card-visited-btn {
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
-      font-size: 0.6875rem;
-      font-weight: 500;
+      justify-content: center;
+      min-width: 28px;
+      min-height: 28px;
       color: var(--text-tertiary);
       background: none;
       border: 1px solid var(--border);
-      padding: 0.0625rem 0.375rem;
+      padding: 0;
       border-radius: 4px;
       cursor: pointer;
       font-family: inherit;
@@ -1332,7 +1332,7 @@ export function renderPage(locale: Locale, initialData?: InitialData, museums?: 
           + '</button>'
         : '<button class="card-visited-btn" aria-pressed="false" aria-label="' + escAttr(T.markVisited) + '" title="' + escAttr(T.markVisited) + '" onclick="onToggleVisited(' + ex.id + ')">'
           + '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-          + escHtml(T.visited) + '</button>';
+          + '</button>';
 
       return '<div class="card">'
         + img
