@@ -23,6 +23,7 @@ http
       return;
     }
 
+    console.log(`-> ${url}`);
     try {
       const r = await fetch(url, {
         headers: {
@@ -31,12 +32,14 @@ http
         },
         redirect: "follow",
       });
+      console.log(`<- ${r.status} ${url}`);
       const body = Buffer.from(await r.arrayBuffer());
       res.writeHead(r.status, {
         "content-type": r.headers.get("content-type") || "text/html",
       });
       res.end(body);
     } catch (e) {
+      console.error(`!! ${url}: ${e.message}`);
       res.writeHead(502, { "content-type": "application/json" });
       res.end(JSON.stringify({ error: e.message }));
     }
