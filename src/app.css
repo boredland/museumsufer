@@ -155,21 +155,7 @@ dialog::backdrop {
 
 /* Distance info is merged into the nav button dynamically */
 
-.card-reachable {
-  @apply text-[0.6875rem] font-medium text-green-700 bg-green-50 px-1.5 rounded whitespace-nowrap;
-}
-
-.card-tight {
-  @apply text-[0.6875rem] font-medium text-amber-700 bg-amber-50 px-1.5 rounded whitespace-nowrap;
-}
-
-.card-started {
-  @apply text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-1.5 rounded whitespace-nowrap opacity-60;
-}
-
-article.card:has(.card-started) {
-  @apply opacity-50;
-}
+/* Reachability colors applied dynamically to .card-time by JS */
 
 /* View transitions */
 #content {
