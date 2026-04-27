@@ -253,9 +253,9 @@ export const CLIENT_SCRIPT = `
         var margin = eventMin - nowMin - travel;
 
         timeEl.dataset.reachColored = '1';
-        timeDefault.split(' ').forEach(function(c) { timeEl.classList.remove(c); });
+        timeEl.classList.remove.apply(timeEl.classList, timeDefault.split(' '));
         var colors = margin < 0 ? timeStarted : margin < 10 ? timeTight : timeReachable;
-        colors.split(' ').forEach(function(c) { timeEl.classList.add(c); });
+        timeEl.classList.add.apply(timeEl.classList, colors.split(' '));
       });
     }
 
@@ -263,9 +263,9 @@ export const CLIENT_SCRIPT = `
       content.querySelectorAll('.card-time[data-reach-colored]').forEach(function(el) {
         delete el.dataset.reachColored;
         [timeReachable, timeTight, timeStarted].forEach(function(cls) {
-          cls.split(' ').forEach(function(c) { el.classList.remove(c); });
+          el.classList.remove.apply(el.classList, cls.split(' '));
         });
-        timeDefault.split(' ').forEach(function(c) { el.classList.add(c); });
+        el.classList.add.apply(el.classList, timeDefault.split(' '));
       });
     }
 

@@ -324,13 +324,13 @@ export function renderPage(
           <meta property="og:url" content="https://museumsufer.app/" />
           <meta property="og:locale" content={locale} />
           <meta property="og:site_name" content="Museumsufer Frankfurt" />
-          <meta property="og:image" content="https://museumsufer.app/og-image.svg" />
+          <meta property="og:image" content="https://museumsufer.app/og-image.png" />
           <meta property="og:image:width" content="1200" />
           <meta property="og:image:height" content="630" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={tr.pageTitle} />
           <meta name="twitter:description" content={tr.metaLong} />
-          <meta name="twitter:image" content="https://museumsufer.app/og-image.svg" />
+          <meta name="twitter:image" content="https://museumsufer.app/og-image.png" />
           <link rel="icon" href="/icon-192.png" type="image/png" />
           <link rel="apple-touch-icon" href="/icon-192.png" />
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
