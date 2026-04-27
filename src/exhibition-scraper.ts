@@ -37,7 +37,7 @@ export async function scrapeMuseumExhibitions(
     if (!config) continue;
 
     try {
-      const count = await scrapeExhibitionsForMuseum(env, museum, config.url, config.js);
+      const count = await scrapeExhibitionsForMuseum(env, museum, config.url, config);
       exhibitions += count;
       scraped++;
     } catch (e) {
@@ -54,13 +54,15 @@ async function scrapeExhibitionsForMuseum(
   env: Env,
   museum: { id: number; name: string; slug: string },
   pageUrl: string,
-  useJs?: true,
+  opts?: { js?: true; proxy?: true },
 ): Promise<number> {
   let html: string;
 
-  if (useJs && env.BROWSER) {
+  if (opts?.js && env.BROWSER) {
     html = await fetchWithBrowser(env, pageUrl);
-  } else if (useJs) {
+  } else if (opts?.proxy && env.FETCH_PROXY_URL) {
+    html = await fetchViaProxy(env, pageUrl);
+  } else if (opts?.js || opts?.proxy) {
     return 0;
   } else {
     const res = await fetch(pageUrl, {
@@ -136,6 +138,15 @@ ${truncated}`,
   }
 
   return count;
+}
+
+async function fetchViaProxy(env: Env, url: string): Promise<string> {
+  const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(url)}`;
+  const headers: Record<string, string> = {};
+  if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
+  const res = await fetch(proxyUrl, { headers });
+  if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
+  return res.text();
 }
 
 async function fetchWithBrowser(env: Env, url: string): Promise<string> {

@@ -1,6 +1,7 @@
 export interface ExhibitionPageConfig {
   url: string;
   js?: true;
+  proxy?: true;
 }
 
 export const MUSEUM_EXHIBITION_URLS: Record<string, ExhibitionPageConfig> = {
@@ -9,7 +10,7 @@ export const MUSEUM_EXHIBITION_URLS: Record<string, ExhibitionPageConfig> = {
   },
   "bibelhaus-erlebnismuseum": {
     url: "https://www.bibelhaus-frankfurt.de/de/ausstellungen",
-    js: true,
+    proxy: true,
   },
   "caricatura-museum-frankfurt": {
     url: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
