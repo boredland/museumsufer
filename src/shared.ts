@@ -63,6 +63,75 @@ export function nullIfMidnight(time: string | null | undefined): string | null {
   return time;
 }
 
+export function formatDateFull(iso: string, dateLocaleStr: string): string {
+  if (!iso) return "";
+  const d = new Date(`${iso}T00:00:00`);
+  const weekday = d.toLocaleDateString(dateLocaleStr, { weekday: "long" });
+  const rest = d.toLocaleDateString(dateLocaleStr, { day: "numeric", month: "long", year: "numeric" });
+  return `${weekday}, ${rest}`;
+}
+
+export function formatDateShort(iso: string, dateLocaleStr: string): string {
+  if (!iso) return "";
+  const d = new Date(`${iso}T00:00:00`);
+  return d.toLocaleDateString(dateLocaleStr, { day: "numeric", month: "short" });
+}
+
+export function buildCalendarUrl(ev: {
+  date: string;
+  time: string | null;
+  end_time: string | null;
+  end_date: string | null;
+  title: string;
+  museum_name?: string;
+  description: string | null;
+  detail_url: string | null;
+}): string {
+  const date = ev.date.replace(/-/g, "");
+  let startDt: string;
+  let endDt: string;
+  if (ev.time) {
+    startDt = `${date}T${ev.time.replace(":", "")}00`;
+    if (ev.end_time) {
+      const endDate = ev.end_date ? ev.end_date.replace(/-/g, "") : date;
+      endDt = `${endDate}T${ev.end_time.replace(":", "")}00`;
+    } else {
+      const h = (parseInt(ev.time.split(":")[0], 10) + 1) % 24;
+      endDt = `${date}T${h.toString().padStart(2, "0")}${ev.time.split(":")[1]}00`;
+    }
+  } else {
+    startDt = date;
+    endDt = date;
+  }
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: ev.title,
+    dates: `${startDt}/${endDt}`,
+    location: ev.museum_name || "",
+    details: (ev.description || "") + (ev.detail_url ? `\n${ev.detail_url}` : ""),
+  });
+  if (ev.time) params.set("ctz", "Europe/Berlin");
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+export function sortByPopularity<T extends { museum_slug?: string; museum_name?: string; like_count?: number }>(
+  items: T[],
+): T[] {
+  const pop: Record<string, number> = {};
+  for (const item of items) {
+    const slug = item.museum_slug;
+    if (!slug) continue;
+    const count = item.like_count || 0;
+    if (!pop[slug] || count > pop[slug]) pop[slug] = count;
+  }
+  return [...items].sort((a, b) => {
+    const pa = pop[a.museum_slug || ""] || 0;
+    const pb = pop[b.museum_slug || ""] || 0;
+    if (pa !== pb) return pb - pa;
+    return (a.museum_name || "").localeCompare(b.museum_name || "");
+  });
+}
+
 export function normalizeUrl(url: string | null | undefined, baseUrl: string): string | null {
   if (!url) return null;
   url = url.trim();
