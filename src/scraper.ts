@@ -6,11 +6,12 @@ const BASE_URL = MUSEUMSUFER_DE;
 const EXHIBITIONS_URL = `${BASE_URL}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`;
 const MUSEUMS_URL = `${BASE_URL}/de/museen/`;
 
-export async function scrape(env: Env): Promise<{ exhibitions: number; museums: number }> {
+export async function scrape(env: Env): Promise<{ exhibitions: number; museums: number; enriched: number }> {
   const museumsCount = await scrapeMuseums(env);
   await syncManualMuseums(env);
   const exhibitionsCount = await scrapeExhibitions(env);
-  return { exhibitions: exhibitionsCount, museums: museumsCount };
+  const enriched = await enrichExhibitionDescriptions(env);
+  return { exhibitions: exhibitionsCount, museums: museumsCount, enriched };
 }
 
 async function syncManualMuseums(env: Env): Promise<void> {
@@ -259,6 +260,38 @@ function decodeHtmlEntities(text: string): string {
 
 function normalizeStem(word: string): string {
   return word.replace(/en$/, "").replace(/es$/, "").replace(/er$/, "").replace(/em$/, "");
+}
+
+async function enrichExhibitionDescriptions(env: Env): Promise<number> {
+  const { results } = await env.DB.prepare(
+    "SELECT id, detail_url FROM exhibitions WHERE description IS NULL AND detail_url LIKE '%museumsufer.de%' LIMIT 20",
+  ).all<{ id: number; detail_url: string }>();
+
+  let enriched = 0;
+  for (const ex of results) {
+    try {
+      const res = await fetch(ex.detail_url);
+      if (!res.ok) continue;
+      const html = await res.text();
+
+      const containerMatch = html.match(/<div class="textContainer[^"]*">\s*<div class="textPanel">([\s\S]*?)<\/div>/);
+      if (!containerMatch) continue;
+
+      const description = decodeHtmlEntities(
+        containerMatch[1]
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim(),
+      );
+      if (description.length < 20) continue;
+
+      await env.DB.prepare("UPDATE exhibitions SET description = ?, updated_at = datetime('now') WHERE id = ?")
+        .bind(description, ex.id)
+        .run();
+      enriched++;
+    } catch {}
+  }
+  return enriched;
 }
 
 function slugify(text: string): string {
