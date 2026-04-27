@@ -258,6 +258,8 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
   return results;
 }
 
+const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
+
 export async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
   const { results } = await env.DB.prepare(
     `SELECT ev.*, m.name as museum_name, m.slug as museum_slug
@@ -269,10 +271,11 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
     .bind(date)
     .all<Event>();
 
+  const filtered = results.filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
   if (date === todayIso()) {
-    return filterPastEvents(results);
+    return filterPastEvents(filtered);
   }
-  return results;
+  return filtered;
 }
 
 export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>> {
