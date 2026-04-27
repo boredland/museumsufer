@@ -288,6 +288,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     website: "https://hsf-ffm.com/de/",
     lat: 50.0822,
     lng: 8.5816,
+    exhibitionUrl: "https://hsf-ffm.com/de/termine/",
   },
   dialogmuseum: {
     name: "Dialogmuseum",
