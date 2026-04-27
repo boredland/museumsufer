@@ -23,6 +23,7 @@ export interface ProxyConfig {
 export interface MuseumConfig {
   name?: string;
   description?: string;
+  image?: string;
   website?: string;
   lat: number;
   lng: number;
@@ -270,6 +271,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "kunststiftung-dz-bank": {
     name: "Kunststiftung DZ BANK",
     description: "Zeitgenössische Fotokunst und Medienkunst im Herzen Frankfurts.",
+    image: "https://kunststiftungdzbank.de/wp-content/uploads/2026/02/Cwynar_Scroll-1-Still_akt.jpg",
     website: "https://kunststiftungdzbank.de/",
     lat: 50.1134,
     lng: 8.6696,
@@ -278,6 +280,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "feuerwehrmuseum-frankfurt": {
     name: "Feuerwehrmuseum Frankfurt am Main",
     description: "Geschichte der Brandbekämpfung und des Rettungswesens in Frankfurt.",
+    image: "https://www.feuerwehrmuseum-frankfurt.de/bilder/01-hintergrund-startseite.jpg",
     website: "https://www.feuerwehrmuseum-frankfurt.de/",
     lat: 50.178,
     lng: 8.6608,
@@ -300,6 +303,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   dialogmuseum: {
     name: "Dialogmuseum",
     description: "Ausstellung im Dunkeln — die Welt mit anderen Sinnen erleben.",
+    image: "https://dialogmuseum.de/wp-content/uploads/2026/04/Wasserwesen-Banner-Web-Ready.webp",
     website: "https://www.dialogmuseum.de/",
     lat: 50.1131,
     lng: 8.6787,
@@ -308,6 +312,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   experiminta: {
     name: "EXPERIMINTA ScienceCenter",
     description: "Interaktive Experimentierstationen zu Naturwissenschaft, Technik und Mathematik.",
+    image: "https://www.experiminta.de/wp-content/uploads/2025/08/Dauerausstellung-9-350x240.jpeg",
     website: "https://www.experiminta.de/",
     lat: 50.1154,
     lng: 8.6478,
@@ -316,6 +321,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   atelierfrankfurt: {
     name: "Atelierfrankfurt",
     description: "Offene Ateliers und Ausstellungsräume für zeitgenössische Kunst im Ostend.",
+    image: "https://www.atelierfrankfurt.de/wp-content/uploads/2021/02/Willkommen-im-AF-Link-Preview-1.png",
     website: "https://www.atelierfrankfurt.de/",
     lat: 50.1132,
     lng: 8.7197,
@@ -332,6 +338,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   palmengarten: {
     name: "Palmengarten",
     description: "Botanischer Garten mit tropischen Gewächshäusern und Freilandanlagen.",
+    image: "https://www.palmengarten.de/fileadmin/user_upload/Bilder/Kalender/fuehrungen_2023/imGartenSummts.jpg",
     website: "https://www.palmengarten.de/",
     lat: 50.1237,
     lng: 8.656,
@@ -356,10 +363,17 @@ export function getManualMuseums(): Array<{
   name: string;
   website: string | null;
   description: string | null;
+  image: string | null;
 }> {
   return Object.entries(MUSEUMS)
     .filter(([, c]) => c.name)
-    .map(([slug, c]) => ({ slug, name: c.name!, website: c.website ?? null, description: c.description ?? null }));
+    .map(([slug, c]) => ({
+      slug,
+      name: c.name!,
+      website: c.website ?? null,
+      description: c.description ?? null,
+      image: c.image ?? null,
+    }));
 }
 
 export function getProxyDomains(): Set<string> {

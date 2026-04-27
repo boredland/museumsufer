@@ -16,10 +16,13 @@ export async function scrape(env: Env): Promise<{ exhibitions: number; museums: 
 
 async function syncManualMuseums(env: Env): Promise<void> {
   const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url, website_url, description) VALUES (?, ?, '', ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url, description = COALESCE(excluded.description, museums.description), updated_at = datetime('now')`,
+    `INSERT INTO museums (name, slug, museumsufer_url, website_url, description, image_url) VALUES (?, ?, '', ?, ?, ?)
+     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url,
+     description = COALESCE(excluded.description, museums.description),
+     image_url = COALESCE(excluded.image_url, museums.image_url),
+     updated_at = datetime('now')`,
   );
-  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website, m.description));
+  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website, m.description, m.image));
   if (ops.length > 0) await env.DB.batch(ops);
 }
 
