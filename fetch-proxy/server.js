@@ -1,4 +1,7 @@
 const http = require("node:http");
+const https = require("node:https");
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 const AUTH_TOKEN = process.env.AUTH_TOKEN || "";
 const PORT = process.env.PORT || 3000;
