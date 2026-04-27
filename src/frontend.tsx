@@ -6,6 +6,7 @@ import { todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { escHtml, formatDateFull } from "./shared";
+import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 export type { MuseumInfo };
@@ -102,7 +103,7 @@ function SearchTrigger({ tr }: { tr: Record<string, string> }) {
         <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
       </svg>
       <span class="flex-1 text-left">{tr.searchPlaceholder}</span>
-      <kbd class="text-[0.6875rem] text-text-tertiary border border-border rounded px-1.5 py-0.5 font-mono">
+      <kbd class={kbdClass}>
         <kbd>Ctrl</kbd>+<kbd>K</kbd>
       </kbd>
     </button>
@@ -131,7 +132,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
           href={`https://www.museumsufer.de/${urls.card}${utm}card`}
           target="_blank"
           rel="noopener"
-          class="text-xs font-medium py-1 px-2.5 rounded-full no-underline whitespace-nowrap border border-border text-text-primary transition-colors hover:border-accent hover:text-accent max-[480px]:flex-1 max-[480px]:text-center"
+          class={passLinkClass}
         >
           {tr.passCard}
         </a>
@@ -139,7 +140,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
           href={`https://www.museumsufer.de/${urls.ticket}${utm}ticket`}
           target="_blank"
           rel="noopener"
-          class="text-xs font-medium py-1 px-2.5 rounded-full no-underline whitespace-nowrap border border-border text-text-primary transition-colors hover:border-accent hover:text-accent max-[480px]:flex-1 max-[480px]:text-center"
+          class={passLinkClass}
         >
           {tr.passTicket}
         </a>
@@ -217,9 +218,7 @@ function SearchDialog({ tr }: { tr: Record<string, string> }) {
             aria-autocomplete="list"
             aria-activedescendant={undefined}
           />
-          <span class="text-[0.6875rem] text-text-tertiary border border-border rounded px-1.5 py-0.5 font-mono">
-            Esc
-          </span>
+          <span class={kbdClass}>Esc</span>
         </div>
         <div class="overflow-y-auto py-2" id="search-results" role="listbox" aria-label={tr.search} />
       </div>
@@ -229,8 +228,8 @@ function SearchDialog({ tr }: { tr: Record<string, string> }) {
 
 function InfoSection({ summary, children }: { summary: string; children: unknown }) {
   return (
-    <details class="mt-4 py-2.5 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary">
-      <summary class="cursor-pointer font-medium text-text-tertiary text-xs uppercase tracking-wide">{summary}</summary>
+    <details class={infoSectionClass}>
+      <summary class={infoSummaryClass}>{summary}</summary>
       <p class="mt-2 leading-relaxed">{children}</p>
     </details>
   );

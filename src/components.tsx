@@ -1,6 +1,15 @@
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
+import {
+  badgeCountClass,
+  cardClass,
+  cardListClass,
+  descriptionClass,
+  emptyStateClass,
+  iconBtnClass,
+  titleLinkClass,
+} from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
@@ -89,7 +98,7 @@ function NavButton({ slug, tr }: { slug: string | undefined; tr: Record<string, 
   const m = MUSEUM_LOCATIONS[slug];
   return (
     <a
-      class="inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+      class={iconBtnClass}
       href={`https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lng}&travelmode=walking`}
       target="_blank"
       rel="noopener"
@@ -144,9 +153,6 @@ function EndingBadge({
   );
 }
 
-const calBtnClass =
-  "inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2";
-
 function ExhibitionCard({
   ex,
   idx,
@@ -168,12 +174,7 @@ function ExhibitionCard({
     .filter(Boolean)
     .join(" – ");
   const titleContent = ex.detail_url ? (
-    <a
-      href={ex.detail_url}
-      target="_blank"
-      rel="noopener"
-      class="text-inherit no-underline block hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm"
-    >
+    <a href={ex.detail_url} target="_blank" rel="noopener" class={titleLinkClass}>
       {ex.title}
     </a>
   ) : (
@@ -182,11 +183,7 @@ function ExhibitionCard({
 
   return (
     <li>
-      <article
-        class="card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0"
-        data-item-id={ex.id}
-        data-museum-slug={ex.museum_slug}
-      >
+      <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
         <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
         <div class="min-w-0 flex flex-col">
           <p class="text-sm font-medium leading-tight mb-0.5">
@@ -224,9 +221,7 @@ function ExhibitionCard({
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class="text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light">
-                {ex.description}
-              </div>
+              <div class={descriptionClass}>{ex.description}</div>
             </details>
           )}
         </div>
@@ -246,7 +241,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
 
   return (
     <details class="relative inline-block">
-      <summary class={`${calBtnClass} list-none`} aria-label={tr.addToCalendar} title={tr.addToCalendar}>
+      <summary class={`${iconBtnClass} list-none`} aria-label={tr.addToCalendar} title={tr.addToCalendar}>
         <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
           <path
             d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
@@ -312,12 +307,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
   const linkUrl = ev.detail_url || ev.url;
   const titleContent = linkUrl ? (
-    <a
-      href={linkUrl}
-      target="_blank"
-      rel="noopener"
-      class="text-inherit no-underline block hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 focus-visible:rounded-sm"
-    >
+    <a href={linkUrl} target="_blank" rel="noopener" class={titleLinkClass}>
       {ev.title}
     </a>
   ) : (
@@ -326,7 +316,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   return (
     <li>
       <article
-        class="card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0"
+        class={cardClass}
         data-item-id={ev.id}
         data-museum-slug={ev.museum_slug}
         data-event-time={ev.time || undefined}
@@ -355,9 +345,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class="text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light">
-                {ev.description}
-              </div>
+              <div class={descriptionClass}>{ev.description}</div>
             </details>
           )}
         </div>
@@ -529,11 +517,9 @@ export function ContentBody({
         iconPath="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
       >
         {sortedEvents.length === 0 ? (
-          <div class="text-text-tertiary text-sm py-8 px-4 text-center bg-surface rounded-xl shadow-card">
-            {tr.noEvents}
-          </div>
+          <div class={emptyStateClass}>{tr.noEvents}</div>
         ) : (
-          <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
+          <ul class={cardListClass}>
             {sortedEvents.map((ev, i) => (
               <EventCard ev={ev} idx={i} tr={tr} />
             ))}
@@ -548,11 +534,9 @@ export function ContentBody({
         iconPath="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12"
       >
         {sortedExhibitions.length === 0 ? (
-          <div class="text-text-tertiary text-sm py-8 px-4 text-center bg-surface rounded-xl shadow-card">
-            {tr.noExhibitions}
-          </div>
+          <div class={emptyStateClass}>{tr.noExhibitions}</div>
         ) : (
-          <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
+          <ul class={cardListClass}>
             <ExhibitionList exhibitions={sortedExhibitions} todayIso={todayIso} locale={locale} tr={tr} />
             <li>
               <details class="visited-section mt-4" id="visited-section">
@@ -566,10 +550,7 @@ export function ContentBody({
                     0
                   </span>
                 </summary>
-                <ul
-                  class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0"
-                  id="visited-list"
-                />
+                <ul class={cardListClass} id="visited-list" />
               </details>
             </li>
           </ul>
@@ -587,7 +568,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
       count={Object.keys(museums).length}
       iconPath="M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
     >
-      <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
+      <ul class={cardListClass}>
         {Object.entries(museums)
           .sort(([, a], [, b]) => a.name.localeCompare(b.name))
           .map(([slug, m]) => (
