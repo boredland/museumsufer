@@ -464,6 +464,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               </span>
             )}
           </p>
+          {museum.description && <p class="text-xs text-text-tertiary mt-0.5 leading-snug">{museum.description}</p>}
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
           {museum.website && (
@@ -505,7 +506,6 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
 export function ContentBody({
   events,
   exhibitions,
-  museums,
   tr,
   locale,
   todayIso,
@@ -513,17 +513,12 @@ export function ContentBody({
   date?: string;
   events: EventWithLikes[];
   exhibitions: ExhibitionWithLikes[];
-  museums: Record<string, MuseumInfo>;
   tr: Record<string, string>;
   locale: Locale;
   todayIso: string;
 }) {
   const sortedEvents = sortByPopularity(events);
   const sortedExhibitions = sortByPopularity(exhibitions);
-  const museumsWithExhibitions = new Set(sortedExhibitions.map((ex) => ex.museum_slug));
-  const museumsWithout = Object.keys(museums)
-    .filter((slug) => !museumsWithExhibitions.has(slug))
-    .sort((a, b) => museums[a].name.localeCompare(museums[b].name));
 
   return (
     <>
@@ -552,7 +547,7 @@ export function ContentBody({
         count={exhibitions.length}
         iconPath="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12"
       >
-        {sortedExhibitions.length === 0 && museumsWithout.length === 0 ? (
+        {sortedExhibitions.length === 0 ? (
           <div class="text-text-tertiary text-sm py-8 px-4 text-center bg-surface rounded-xl shadow-card">
             {tr.noExhibitions}
           </div>
@@ -580,22 +575,26 @@ export function ContentBody({
           </ul>
         )}
       </Section>
-
-      <Section
-        sectionKey="museums"
-        title={tr.museums}
-        count={Object.keys(museums).length}
-        iconPath="M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
-      >
-        <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
-          {Object.entries(museums)
-            .sort(([, a], [, b]) => a.name.localeCompare(b.name))
-            .map(([slug, m]) => (
-              <MuseumRow slug={slug} museum={m} tr={tr} />
-            ))}
-        </ul>
-      </Section>
     </>
+  );
+}
+
+export function MuseumsSection({ museums, tr }: { museums: Record<string, MuseumInfo>; tr: Record<string, string> }) {
+  return (
+    <Section
+      sectionKey="museums"
+      title={tr.museums}
+      count={Object.keys(museums).length}
+      iconPath="M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
+    >
+      <ul class="card-list bg-surface rounded-xl shadow-card overflow-hidden list-none p-0">
+        {Object.entries(museums)
+          .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+          .map(([slug, m]) => (
+            <MuseumRow slug={slug} museum={m} tr={tr} />
+          ))}
+      </ul>
+    </Section>
   );
 }
 

@@ -22,6 +22,7 @@ export interface ProxyConfig {
 
 export interface MuseumConfig {
   name?: string;
+  description?: string;
   website?: string;
   lat: number;
   lng: number;
@@ -268,6 +269,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
 
   "kunststiftung-dz-bank": {
     name: "Kunststiftung DZ BANK",
+    description: "Zeitgenössische Fotokunst und Medienkunst im Herzen Frankfurts.",
     website: "https://kunststiftungdzbank.de/",
     lat: 50.1134,
     lng: 8.6696,
@@ -275,18 +277,21 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   "feuerwehrmuseum-frankfurt": {
     name: "Feuerwehrmuseum Frankfurt am Main",
+    description: "Geschichte der Brandbekämpfung und des Rettungswesens in Frankfurt.",
     website: "https://www.feuerwehrmuseum-frankfurt.de/",
     lat: 50.178,
     lng: 8.6608,
   },
   "frankfurter-feldbahnmuseum": {
     name: "Frankfurter Feldbahnmuseum",
+    description: "Historische Feldbahnen und Schmalspurlokomotiven zum Anfassen und Mitfahren.",
     website: "https://www.feldbahnmuseum.de/",
     lat: 50.1069,
     lng: 8.6119,
   },
   "verkehrsmuseum-frankfurt": {
     name: "Verkehrsmuseum Frankfurt am Main",
+    description: "Verkehrsgeschichte mit historischen Straßenbahnen, Bussen und Schienenfahrzeugen.",
     website: "https://hsf-ffm.com/de/",
     lat: 50.0822,
     lng: 8.5816,
@@ -294,6 +299,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   dialogmuseum: {
     name: "Dialogmuseum",
+    description: "Ausstellung im Dunkeln — die Welt mit anderen Sinnen erleben.",
     website: "https://www.dialogmuseum.de/",
     lat: 50.1131,
     lng: 8.6787,
@@ -301,6 +307,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   experiminta: {
     name: "EXPERIMINTA ScienceCenter",
+    description: "Interaktive Experimentierstationen zu Naturwissenschaft, Technik und Mathematik.",
     website: "https://www.experiminta.de/",
     lat: 50.1154,
     lng: 8.6478,
@@ -308,6 +315,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   atelierfrankfurt: {
     name: "Atelierfrankfurt",
+    description: "Offene Ateliers und Ausstellungsräume für zeitgenössische Kunst im Ostend.",
     website: "https://www.atelierfrankfurt.de/",
     lat: 50.1132,
     lng: 8.7197,
@@ -315,6 +323,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   "frankfurter-buergerstiftung": {
     name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
+    description: "Kulturelle Veranstaltungen und Ausstellungen im historischen Holzhausenschlösschen.",
     website: "https://www.frankfurter-buergerstiftung.de/",
     lat: 50.1262,
     lng: 8.6792,
@@ -322,6 +331,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   },
   palmengarten: {
     name: "Palmengarten",
+    description: "Botanischer Garten mit tropischen Gewächshäusern und Freilandanlagen.",
     website: "https://www.palmengarten.de/",
     lat: 50.1237,
     lng: 8.656,
@@ -341,10 +351,15 @@ export function getMuseumLocations(): Record<string, { lat: number; lng: number 
   return locations;
 }
 
-export function getManualMuseums(): Array<{ slug: string; name: string; website: string | null }> {
+export function getManualMuseums(): Array<{
+  slug: string;
+  name: string;
+  website: string | null;
+  description: string | null;
+}> {
   return Object.entries(MUSEUMS)
     .filter(([, c]) => c.name)
-    .map(([slug, c]) => ({ slug, name: c.name!, website: c.website ?? null }));
+    .map(([slug, c]) => ({ slug, name: c.name!, website: c.website ?? null, description: c.description ?? null }));
 }
 
 export function getProxyDomains(): Set<string> {
