@@ -106,12 +106,20 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     }
 
     const body = await res.arrayBuffer();
+    const responseHeaders: Record<string, string> = {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=2592000, s-maxage=2592000",
+      "Access-Control-Allow-Origin": "*",
+    };
+
+    // Preserve cache headers from upstream to enable conditional requests
+    const eTag = res.headers.get("ETag");
+    if (eTag) responseHeaders["ETag"] = eTag;
+    const lastModified = res.headers.get("Last-Modified");
+    if (lastModified) responseHeaders["Last-Modified"] = lastModified;
+
     const response = new Response(body, {
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=2592000, s-maxage=2592000",
-        "Access-Control-Allow-Origin": "*",
-      },
+      headers: responseHeaders,
     });
 
     cache.put(cacheKey, response.clone());
