@@ -774,6 +774,57 @@ async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
     });
   }
 
+  // Also fetch permanent exhibitions from main exhibitions page for better images
+  try {
+    const mainRes = await fetch("https://www.ledermuseum.de/ausstellungen", {
+      headers: { "User-Agent": USER_AGENT },
+    });
+    if (mainRes.ok) {
+      const mainHtml = await mainRes.text();
+      // Match current exhibitions section (permanent ones without dates)
+      const currentSectionMatch = mainHtml.match(
+        /<section class="exhibitions space current"[^>]*>([\s\S]*?)<\/section>/,
+      );
+      if (currentSectionMatch) {
+        const currentSection = currentSectionMatch[1];
+        const exhRe = /<li class="half">\s*<a class="item" href="([^"]+)">([\s\S]*?)<\/a>/g;
+        let exhMatch;
+
+        while ((exhMatch = exhRe.exec(currentSection)) !== null) {
+          const url = exhMatch[1];
+          const block = exhMatch[2];
+
+          const titleMatch = block.match(/<h1[^>]*class="[^"]*no-caps[^"]*"[^>]*>([^<]+)/);
+          const subtitleMatch = block.match(/<h3[^>]*class="[^"]*no-caps[^"]*"[^>]*>([^<]+)/);
+          const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
+
+          if (!titleMatch) continue;
+
+          const title = titleMatch[1].trim();
+          const subtitle = subtitleMatch ? subtitleMatch[1].trim() : null;
+          const fullTitle = subtitle ? `${title} – ${subtitle}` : title;
+
+          // Only add if not already in events (check by title match)
+          if (!events.some((e) => e.title.includes(title))) {
+            events.push({
+              title: fullTitle,
+              date: today,
+              time: null,
+              end_time: null,
+              end_date: null,
+              description: null,
+              detail_url: normalizeUrl(url, "https://www.ledermuseum.de"),
+              image_url: imgMatch ? normalizeUrl(imgMatch[1], "https://www.ledermuseum.de") : null,
+              price: null,
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Silently fail - main page fetch is optional enhancement
+  }
+
   return events;
 }
 
