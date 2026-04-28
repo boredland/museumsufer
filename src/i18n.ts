@@ -93,7 +93,7 @@ const de: Translations = {
   popular: "Beliebt",
   privacyNote: "Datenschutz",
   privacyText:
-    "Likes werden anonym gespeichert. Es wird ein tagesaktueller Hash deiner IP-Adresse verwendet — keine personenbezogenen Daten.",
+    "Likes werden anonym mit einem täglichen Hash deiner IP-Adresse gespeichert. Wenn du die Entfernungssortierung aktivierst, wird dein Standort auf ein Raster (~200 m) gerundet und an die RMV-API gesendet, um Fahrzeiten zu schätzen — deine genaue Position wird niemals gespeichert oder weitergegeben. Es werden keine personenbezogenen Daten erhoben.",
   whyTitle: "Warum diese App?",
   whyText:
     "Frankfurt hat über 40 Museen — und die verdienen einen besseren Überblick als den, den sie haben. Diese App bündelt die Ausstellungen und Veranstaltungen aller Museen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.",
@@ -159,7 +159,8 @@ const en: Translations = {
   heartDismiss: "Skip",
   popular: "Popular",
   privacyNote: "Privacy",
-  privacyText: "Likes are stored anonymously. A daily hash of your IP address is used — no personal data is collected.",
+  privacyText:
+    "Likes are stored anonymously using a daily hash of your IP address. When you enable distance sorting, your location is rounded to a grid (~200 m) and sent to the RMV API to estimate travel times — your exact position is never stored or shared. No personal data is collected.",
   whyTitle: "Why this app?",
   whyText:
     "Frankfurt has over 40 museums — and they deserve a better overview than the one they got. This app pulls exhibitions and events from every museum into one fast, searchable page. No app store, no account, no fuss.",
@@ -226,7 +227,7 @@ const fr: Translations = {
   popular: "Populaire",
   privacyNote: "Confidentialité",
   privacyText:
-    "Les likes sont enregistrés de manière anonyme. Un hash quotidien de votre adresse IP est utilisé — aucune donnée personnelle n'est collectée.",
+    "Les likes sont stockés de manière anonyme en utilisant un hachage quotidien de votre adresse IP. Lorsque vous activez le tri par distance, votre position est arrondie à une grille (~200 m) et envoyée à l'API RMV pour estimer les temps de trajet — votre position exacte n'est jamais stockée ou partagée. Aucune donnée personnelle n'est collectée.",
   whyTitle: "Pourquoi cette application ?",
   whyText:
     "Francfort compte plus de 40 musées — et ils méritent une meilleure vue d'ensemble que celle qu'ils ont. Cette application rassemble les expositions et les événements de chaque musée en une seule page rapide et consultable. Pas de magasin d'applications, pas de compte, pas d'ennuis.",
