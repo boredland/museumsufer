@@ -322,8 +322,36 @@ export const CLIENT_SCRIPT = `
 
     var btnNear = document.getElementById('btn-near');
 
+    var nearClickCount = 0;
+
     btnNear.addEventListener('click', function() {
       if (sortByDistance) {
+        nearClickCount++;
+        if (nearClickCount === 1 && 'geolocation' in navigator) {
+          btnNear.classList.add('loading');
+          btnNear.setAttribute('aria-busy', 'true');
+          navigator.geolocation.getCurrentPosition(
+            function(pos) {
+              userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+              try { sessionStorage.setItem('userPos', JSON.stringify(userPos)); } catch(e) {}
+              sessionStorage.removeItem('transit_' + Math.round(userPos.lat * 500) / 500 + '_' + Math.round(userPos.lng * 500) / 500);
+              fetchTransitTimes().then(function() {
+                btnNear.classList.remove('loading');
+                btnNear.removeAttribute('aria-busy');
+                removeDistanceBadges(); removeReachabilityBadges();
+                injectDistanceBadges(); injectReachability();
+                sortCardsByDistance();
+              });
+            },
+            function() {
+              btnNear.classList.remove('loading');
+              btnNear.removeAttribute('aria-busy');
+            },
+            { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+          );
+          return;
+        }
+        nearClickCount = 0;
         sortByDistance = false;
         btnNear.classList.remove('active');
         btnNear.setAttribute('aria-pressed', 'false');
@@ -332,6 +360,7 @@ export const CLIENT_SCRIPT = `
         pushStateToUrl(currentDate, false);
         return;
       }
+      nearClickCount = 0;
       function activateNearMe() {
         sortByDistance = true;
         btnNear.classList.add('active');
