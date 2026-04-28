@@ -8,6 +8,7 @@ import {
 } from "./event-scraper";
 import { fetchPage } from "./fetch-utils";
 import { MUSEUMS } from "./museum-config";
+import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
 interface ScrapedExhibition {
@@ -101,7 +102,14 @@ ${truncated}`,
     if (exh.end_date && /^\d{4}-\d{2}-\d{2}$/.test(exh.end_date) && exh.end_date < today) continue;
 
     const detailUrl = matchLinkForTitle(exh.title, pageLinks);
-    const imageUrl = extractImageFromHtml(html, pageUrl);
+    let imageUrl: string | null = null;
+    if (detailUrl) {
+      try {
+        const detailRes = await fetch(detailUrl, { headers: { "User-Agent": USER_AGENT } });
+        if (detailRes.ok) imageUrl = extractImageFromHtml(await detailRes.text(), detailUrl);
+      } catch {}
+    }
+    if (!imageUrl) imageUrl = extractImageFromHtml(html, pageUrl);
 
     await env.DB.prepare(
       `INSERT INTO exhibitions (museum_id, title, start_date, end_date, description, image_url, detail_url)
