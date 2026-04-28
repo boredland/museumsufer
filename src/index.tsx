@@ -153,6 +153,16 @@ app.post("/api/transit", async (c) => {
     } catch {}
   }
 
+  const WALK_KM_PER_MIN = 0.08;
+  for (const slug of slugs) {
+    if (result[slug] !== undefined) continue;
+    const m = geo[slug];
+    const dLat = (m.lat - snapLat) * 111.32;
+    const dLng = (m.lng - snapLng) * 111.32 * Math.cos((snapLat * Math.PI) / 180);
+    const km = Math.sqrt(dLat * dLat + dLng * dLng);
+    result[slug] = Math.round(km / WALK_KM_PER_MIN);
+  }
+
   return c.json(result, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
 });
 
