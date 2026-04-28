@@ -340,14 +340,6 @@ export function renderPage(
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/fuse.min.js" defer />
           <script src="/htmx.min.js" defer />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap"
-            rel="stylesheet"
-            media="print"
-            onload="this.media='all'"
-          />
           <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
