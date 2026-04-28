@@ -14,12 +14,23 @@ function shouldProxy(imageUrl: string): boolean {
   }
 }
 
+const dynamicAllowed = new Set<string>();
+
 function isDomainAllowed(hostname: string): boolean {
-  if (staticAllowedDomains.has(hostname)) return true;
+  if (staticAllowedDomains.has(hostname) || dynamicAllowed.has(hostname)) return true;
   for (const d of staticAllowedDomains) {
     if (hostname.endsWith(`.${d}`)) return true;
   }
   return false;
+}
+
+async function isDomainInDb(env: Env, imageUrl: string): Promise<boolean> {
+  const row = await env.DB.prepare(
+    "SELECT 1 FROM events WHERE image_url = ? UNION SELECT 1 FROM exhibitions WHERE image_url = ? LIMIT 1",
+  )
+    .bind(imageUrl, imageUrl)
+    .first();
+  return !!row;
 }
 
 export async function handleImageProxy(request: Request, env: Env): Promise<Response | null> {
@@ -36,7 +47,10 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
     const origin = new URL(imageUrl).hostname;
     if (!isDomainAllowed(origin)) {
-      return new Response("Forbidden origin", { status: 403 });
+      if (!(await isDomainInDb(env, imageUrl))) {
+        return new Response("Forbidden origin", { status: 403 });
+      }
+      dynamicAllowed.add(origin);
     }
   } catch {
     return new Response("Bad URL", { status: 400 });
