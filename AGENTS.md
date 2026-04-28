@@ -200,6 +200,27 @@ Before shipping a new scraper:
 - **`truncateHtml(text: string, maxLen = 500): string | null`** — strips HTML, truncates to word boundary, returns null if empty. Use for descriptions, never for dates.
 - **`normalizeUrl(url: string | null, baseUrl: string): string | null`** — prepends baseUrl to relative URLs, handles `/`, `//`, and full URLs correctly.
 
+### Audit findings: Known gaps in production scrapers
+
+These issues exist in the current codebase. When fixing or refactoring scrapers, correct them:
+
+| Parser | Issue | Impact | Fix |
+|---|---|---|---|
+| **tribe-events** (DAM, DFF) | No `nullIfMidnight()` on start/end times | Midnight times render as "00:00" instead of all-day events | Wrap both lines 86-87 with `nullIfMidnight()` |
+| **historisches** | No `nullIfMidnight()` on start time | Extracted times could be "00:00" → shown as midnight | Apply to line 146 |
+| **mak** | Manual "00:00" check missing on extracted time | Regex-matched times not filtered | Use `nullIfMidnight()` on line 721 |
+| **fkv** | Manual "00:00" check missing | Same as MAK | Use `nullIfMidnight()` on line 721 |
+| All parsers | Inconsistent midnight handling | Some use utility, some manual checks | Always use `nullIfMidnight()` from shared.ts |
+
+**Pattern to avoid:** Using `.slice(11, 16)` on ISO datetime without wrapping in `nullIfMidnight()`:
+```typescript
+// ❌ BAD - midnight times leak through
+time: ev.start_date?.slice(11, 16) || null
+
+// ✅ GOOD - always filter midnight
+time: nullIfMidnight(ev.start_date?.slice(11, 16) || null)
+```
+
 ## Common tasks
 
 ### Adding a new museum API
