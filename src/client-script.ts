@@ -4,7 +4,8 @@ export const CLIENT_SCRIPT = `
       if (!htmxReady) { htmxReady = true; htmx.config.globalViewTransitions = true; }
     });
 
-    let userPos = null;
+    var cachedPos = sessionStorage.getItem('userPos');
+    let userPos = cachedPos ? JSON.parse(cachedPos) : null;
     let sortByDistance = false;
 
     var transitTimes = {};
@@ -353,6 +354,7 @@ export const CLIENT_SCRIPT = `
         navigator.geolocation.getCurrentPosition(
           function(pos) {
             userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            try { sessionStorage.setItem('userPos', JSON.stringify(userPos)); } catch(e) {}
             activateNearMe();
           },
           function() {
