@@ -106,7 +106,7 @@ function navUrls(name: string, lat: number, lng: number) {
   return {
     rmvApp: `https://www.rmv.de/go/?ZID=${encodeURIComponent(zid)}`,
     rmvWeb: `https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=${encodeURIComponent(zid)}`,
-    google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
     apple: `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=r`,
   };
 }
