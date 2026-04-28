@@ -11,6 +11,63 @@ import { MUSEUMS } from "./museum-config";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
+const MONTH_MAP: Record<string, string> = {
+  januar: "01",
+  februar: "02",
+  märz: "03",
+  april: "04",
+  mai: "05",
+  juni: "06",
+  juli: "07",
+  august: "08",
+  september: "09",
+  oktober: "10",
+  november: "11",
+  dezember: "12",
+  january: "01",
+  february: "02",
+  march: "03",
+  may: "05",
+  june: "06",
+  july: "07",
+  october: "10",
+  december: "12",
+};
+
+function parseGermanDate(text: string, fallbackYear?: string): string | null {
+  const m = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})?/);
+  if (!m) return null;
+  const day = m[1].padStart(2, "0");
+  const month = MONTH_MAP[m[2].toLowerCase()];
+  const year = m[3] || fallbackYear;
+  if (!month || !year) return null;
+  return `${year}-${month}-${day}`;
+}
+
+const DATE_PAT = String.raw`\d{1,2}\.\s*[A-Za-zÄÖÜäöü]+`;
+const DATE_YEAR_PAT = `${DATE_PAT}\\s*\\d{4}`;
+const RANGE_RE = new RegExp(
+  `(?:Dauer|Laufzeit)[:\\s]+(${DATE_PAT}(?:\\s*\\d{4})?)\\s*[–\\-]\\s*(${DATE_YEAR_PAT})`,
+  "i",
+);
+const GENERIC_RANGE_RE = new RegExp(`(${DATE_PAT}(?:\\s*\\d{4})?)\\s*[–\\-]\\s*(${DATE_YEAR_PAT})`);
+
+function extractDatesFromHtml(html: string): { start: string | null; end: string | null } | null {
+  const text = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&ndash;|–|&#8211;/g, "–")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ");
+  const rangeMatch = RANGE_RE.exec(text) || GENERIC_RANGE_RE.exec(text);
+  if (rangeMatch) {
+    const endDate = parseGermanDate(rangeMatch[2]);
+    const yearFromEnd = rangeMatch[2].match(/\d{4}/)?.[0];
+    const startDate = parseGermanDate(rangeMatch[1], yearFromEnd);
+    if (startDate && endDate) return { start: startDate, end: endDate };
+  }
+  return null;
+}
+
 interface ScrapedExhibition {
   title: string;
   start_date: string | null;
@@ -106,12 +163,18 @@ ${truncated}`,
     validExhibitions.push({ exh, detailUrl: matchLinkForTitle(exh.title, pageLinks) });
   }
 
-  const detailImages = await Promise.all(
+  const detailData = await Promise.all(
     validExhibitions.map(async ({ detailUrl }) => {
       if (!detailUrl) return null;
       try {
         const res = await fetch(detailUrl, { headers: { "User-Agent": USER_AGENT } });
-        if (res.ok) return extractImageFromHtml(await res.text(), detailUrl);
+        if (res.ok) {
+          const detailHtml = await res.text();
+          return {
+            image: extractImageFromHtml(detailHtml, detailUrl),
+            dates: extractDatesFromHtml(detailHtml),
+          };
+        }
       } catch {}
       return null;
     }),
@@ -120,7 +183,10 @@ ${truncated}`,
   let count = 0;
   for (let i = 0; i < validExhibitions.length; i++) {
     const { exh, detailUrl } = validExhibitions[i];
-    const imageUrl = detailImages[i] || extractImageFromHtml(html, pageUrl);
+    const detail = detailData[i];
+    const imageUrl = detail?.image || extractImageFromHtml(html, pageUrl);
+    if (!exh.start_date && detail?.dates?.start) exh.start_date = detail.dates.start;
+    if (!exh.end_date && detail?.dates?.end) exh.end_date = detail.dates.end;
 
     await env.DB.prepare(
       `INSERT INTO exhibitions (museum_id, title, start_date, end_date, description, image_url, detail_url)
