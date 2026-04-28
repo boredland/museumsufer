@@ -248,6 +248,15 @@ export async function fetchDayData(
   return { date, exhibitions: finalExh, events: finalEv };
 }
 
+function fallbackMuseumImage<T extends { image_url: string | null; museum_image_url: string | null }>(
+  items: T[],
+): Omit<T, "museum_image_url">[] {
+  return items.map(({ museum_image_url, ...rest }) => ({
+    ...rest,
+    image_url: rest.image_url || museum_image_url,
+  })) as Omit<T, "museum_image_url">[];
+}
+
 function normalizeForDedup(title: string): string {
   return title
     .toLowerCase()
@@ -301,7 +310,7 @@ function wordsOverlap(a: string, b: string): boolean {
 
 export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
   const { results } = await env.DB.prepare(
-    `SELECT e.*, m.name as museum_name, m.slug as museum_slug
+    `SELECT e.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
      FROM exhibitions e
      JOIN museums m ON e.museum_id = m.id
      WHERE e.start_date IS NOT NULL AND e.end_date IS NOT NULL
@@ -310,24 +319,24 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
      ORDER BY m.slug, e.title`,
   )
     .bind(date, date)
-    .all<Exhibition>();
-  return deduplicateByTitle(results);
+    .all<Exhibition & { museum_image_url: string | null }>();
+  return deduplicateByTitle(fallbackMuseumImage(results));
 }
 
 const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
 
 export async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
   const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug
+    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date = ?
      ORDER BY ev.time, m.name`,
   )
     .bind(date)
-    .all<Event>();
+    .all<Event & { museum_image_url: string | null }>();
 
-  const filtered = results.filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
+  const filtered = fallbackMuseumImage(results).filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
   const deduped = deduplicateEvents(filtered);
   if (date === todayIso()) {
     return filterPastEvents(deduped);
