@@ -1,5 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { z } from "zod";
 import {
   attachLikeCounts,
@@ -44,6 +45,16 @@ app.onError((err, c) => {
   console.error("Unhandled error:", err);
   return c.json({ error: "Internal server error" }, 500);
 });
+
+// CORS middleware - restrict to museumsufer.app
+app.use(
+  "/api/*",
+  cors({
+    origin: ["https://museumsufer.app", "http://localhost:3000", "http://localhost:8787"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    maxAge: 600,
+  }),
+);
 
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
