@@ -95,25 +95,32 @@ ${truncated}`,
   const parsed = extractJson<ScrapedExhibition[]>(responseText);
   if (!parsed || parsed.length === 0) return 0;
 
-  let count = 0;
   const seen = new Set<string>();
+  const validExhibitions: Array<{ exh: ScrapedExhibition; detailUrl: string | null }> = [];
   for (const exh of parsed) {
     if (!exh.title) continue;
     const key = exh.title.trim().toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-
     if (exh.end_date && /^\d{4}-\d{2}-\d{2}$/.test(exh.end_date) && exh.end_date < today) continue;
+    validExhibitions.push({ exh, detailUrl: matchLinkForTitle(exh.title, pageLinks) });
+  }
 
-    const detailUrl = matchLinkForTitle(exh.title, pageLinks);
-    let imageUrl: string | null = null;
-    if (detailUrl) {
+  const detailImages = await Promise.all(
+    validExhibitions.map(async ({ detailUrl }) => {
+      if (!detailUrl) return null;
       try {
-        const detailRes = await fetch(detailUrl, { headers: { "User-Agent": USER_AGENT } });
-        if (detailRes.ok) imageUrl = extractImageFromHtml(await detailRes.text(), detailUrl);
+        const res = await fetch(detailUrl, { headers: { "User-Agent": USER_AGENT } });
+        if (res.ok) return extractImageFromHtml(await res.text(), detailUrl);
       } catch {}
-    }
-    if (!imageUrl) imageUrl = extractImageFromHtml(html, pageUrl);
+      return null;
+    }),
+  );
+
+  let count = 0;
+  for (let i = 0; i < validExhibitions.length; i++) {
+    const { exh, detailUrl } = validExhibitions[i];
+    const imageUrl = detailImages[i] || extractImageFromHtml(html, pageUrl);
 
     await env.DB.prepare(
       `INSERT INTO exhibitions (museum_id, title, start_date, end_date, description, image_url, detail_url)

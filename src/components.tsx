@@ -473,7 +473,6 @@ function Section({
 }
 
 function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
-  const geo = MUSEUM_LOCATIONS[slug];
   return (
     <li>
       <div

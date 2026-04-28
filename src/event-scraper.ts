@@ -51,6 +51,8 @@ export async function scrapeMuseumWebsites(
         let count = 0;
         for (const event of events) {
           if (!event.title || !event.date) continue;
+          event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
+          if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
 
           let targetMuseumId = museum.id;
           if (event.museum_slug_override) {
@@ -219,6 +221,8 @@ ${truncated}`,
   let count = 0;
   for (const event of events) {
     if (!event.title || !event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) continue;
+    event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
+    if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
 
     const detailUrl = matchLinkForTitle(event.title, pageLinks);
 

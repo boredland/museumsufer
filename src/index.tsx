@@ -59,8 +59,8 @@ app.post("/api/transit", async (c) => {
   const slugs = Object.keys(geo);
   const result: Record<string, number> = {};
 
-  for (let i = 0; i < slugs.length; i += 5) {
-    const batch = slugs.slice(i, i + 5);
+  for (let i = 0; i < slugs.length; i += 10) {
+    const batch = slugs.slice(i, i + 10);
     const svcReqL = batch.map((slug) => {
       const m = geo[slug];
       const arrLoc = m.rmvStopLid

@@ -6,7 +6,7 @@ import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { ICON } from "./icons";
-import { escHtml, formatDateFull } from "./shared";
+import { formatDateFull } from "./shared";
 import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
