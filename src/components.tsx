@@ -101,7 +101,7 @@ function LikeBadge({ count }: { count: number }) {
 
 function rmvUrl(name: string, lat: number, lng: number): string {
   const zid = `A=2@O=${name}@X=${Math.round(lng * 1e6)}@Y=${Math.round(lat * 1e6)}@`;
-  return `https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=${encodeURIComponent(zid)}`;
+  return `https://www.rmv.de/go/?ZID=${encodeURIComponent(zid)}`;
 }
 
 function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
