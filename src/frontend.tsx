@@ -5,6 +5,7 @@ import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
+import { ICON } from "./icons";
 import { escHtml, formatDateFull } from "./shared";
 import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
@@ -98,9 +99,8 @@ function SearchTrigger({ tr }: { tr: Record<string, string> }) {
       id="search-trigger"
       onclick="openSearch()"
     >
-      <svg viewBox="0 0 20 20" fill="none" width="14" height="14" aria-hidden="true">
-        <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
-        <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+        <path d={ICON.search} />
       </svg>
       <span class="flex-1 text-left">{tr.searchPlaceholder}</span>
       <kbd class={kbdClass}>
@@ -181,10 +181,8 @@ function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string
         title={tr.nearMe}
         class="inline-flex items-center justify-center min-w-9 min-h-9 p-2 border-[1.5px] border-border bg-surface rounded-full cursor-pointer transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
       >
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
-          <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" />
-          <circle cx="8" cy="8" r="1" fill="currentColor" />
-          <path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+          <path d={ICON.gps} />
         </svg>
       </button>
     </nav>
@@ -200,9 +198,13 @@ function SearchDialog({ tr }: { tr: Record<string, string> }) {
     >
       <div class="bg-surface rounded-xl shadow-search w-[90%] max-w-[520px] max-h-[70vh] flex flex-col overflow-hidden">
         <div class="flex items-center py-3 px-4 gap-2 border-b border-border">
-          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="w-[18px] h-[18px] text-text-tertiary shrink-0">
-            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
-            <path d="M13 13l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            class="w-[18px] h-[18px] text-text-tertiary shrink-0"
+          >
+            <path d={ICON.search} />
           </svg>
           <input
             class="flex-1 border-none outline-none text-[0.9375rem] font-sans text-text-primary bg-transparent placeholder:text-text-tertiary"

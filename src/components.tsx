@@ -1,3 +1,4 @@
+import { ICON } from "./icons";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
@@ -90,8 +91,8 @@ function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <span class={`card-likes ${iconBtnClass} gap-1 px-1.5 !cursor-default`}>
-      <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3 shrink-0">
-        <path d="M8 14s-5.5-3.5-5.5-7A3.5 3.5 0 018 4a3.5 3.5 0 015.5 3c0 3.5-5.5 7-5.5 7z" />
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
+        <path d={ICON.heart} />
       </svg>
       {count}
     </span>
@@ -115,8 +116,8 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
       aria-label={tr.navigate}
       title={tr.navigate}
     >
-      <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3 shrink-0">
-        <path d="M8 1.3L3 13.5l.47.47L8 12l4.53 2 .47-.47z" />
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
+        <path d={ICON.navigate} />
       </svg>
     </a>
   );
@@ -124,14 +125,8 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
 
 function ExternalLinkIcon() {
   return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" width="11" height="11" class="align-[-1px]">
-      <path
-        d="M6 3H3v10h10v-3M9 2h5v5M14 2L7 9"
-        stroke="currentColor"
-        stroke-width="1.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      />
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" width="11" height="11" class="align-[-1px]">
+      <path d={ICON.openInNew} />
     </svg>
   );
 }
@@ -216,9 +211,8 @@ function ExhibitionCard({
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3">
-                <path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z" stroke="currentColor" stroke-width="1.5" />
-                <circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5" />
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
+                <path d={ICON.visibility} />
               </svg>
             </button>
           </div>
@@ -258,14 +252,8 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         style={`anchor-name:--${popId}`}
         onclick={`if(!CSS.supports('anchor-name','--a')){var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'}`}
       >
-        <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3 h-3 shrink-0">
-          <path
-            d="M5 1v2m6-2v2M2 6h12M3 3h10a1 1 0 011 1v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4a1 1 0 011-1z"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-          <path d="M5 9h2v2H5z" fill="currentColor" />
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
+          <path d={ICON.event} />
         </svg>
       </button>
       <div
@@ -513,8 +501,8 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               aria-label={tr.navigate}
               title={tr.navigate}
             >
-              <svg aria-hidden="true" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3">
-                <path d="M8 1.3L3 13.5l.47.47L8 12l4.53 2 .47-.47z" />
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
+                <path d={ICON.navigate} />
               </svg>
             </a>
           )}
