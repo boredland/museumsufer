@@ -248,6 +248,57 @@ export async function fetchDayData(
   return { date, exhibitions: finalExh, events: finalEv };
 }
 
+function normalizeForDedup(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[:.,;!?()[\]{}""„"''‚'«»‹›]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
+  const result: T[] = [];
+  for (const item of items) {
+    const norm = normalizeForDedup(item.title);
+    const dupeIdx = result.findIndex((e) => e.museum_id === item.museum_id && normalizeForDedup(e.title) === norm);
+    if (dupeIdx !== -1) {
+      if (item.id > result[dupeIdx].id) result[dupeIdx] = item;
+      continue;
+    }
+    result.push(item);
+  }
+  return result;
+}
+
+function deduplicateEvents(events: Event[]): Event[] {
+  const afterTitleDedup = deduplicateByTitle(events);
+  const result: Event[] = [];
+  for (const ev of afterTitleDedup) {
+    if (ev.time) {
+      const timeDupeIdx = result.findIndex(
+        (e) => e.museum_id === ev.museum_id && e.time === ev.time && wordsOverlap(e.title, ev.title),
+      );
+      if (timeDupeIdx !== -1) {
+        if (ev.id > result[timeDupeIdx].id) result[timeDupeIdx] = ev;
+        continue;
+      }
+    }
+    result.push(ev);
+  }
+  return result;
+}
+
+function wordsOverlap(a: string, b: string): boolean {
+  const na = normalizeForDedup(a);
+  const nb = normalizeForDedup(b);
+  if (na === nb) return true;
+  const wordsA = na.split(" ").filter((w) => w.length > 2);
+  const wordsB = nb.split(" ").filter((w) => w.length > 2);
+  if (wordsA.length === 0 || wordsB.length === 0) return false;
+  const [shorter, longerStr] = wordsA.length <= wordsB.length ? [wordsA, nb] : [wordsB, na];
+  return shorter.every((w) => longerStr.includes(w));
+}
+
 export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
   const { results } = await env.DB.prepare(
     `SELECT e.*, m.name as museum_name, m.slug as museum_slug
@@ -260,7 +311,7 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
   )
     .bind(date, date)
     .all<Exhibition>();
-  return results;
+  return deduplicateByTitle(results);
 }
 
 const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
@@ -277,10 +328,11 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
     .all<Event>();
 
   const filtered = results.filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
+  const deduped = deduplicateEvents(filtered);
   if (date === todayIso()) {
-    return filterPastEvents(filtered);
+    return filterPastEvents(deduped);
   }
-  return filtered;
+  return deduped;
 }
 
 let museumMapCache: { data: Record<string, MuseumInfo>; ts: number } | null = null;
