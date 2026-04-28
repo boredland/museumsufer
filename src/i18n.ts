@@ -167,7 +167,7 @@ const en: Translations = {
 
 const fr: Translations = {
   subtitle: "Expositions & Événements",
-  today: "Aujourd'hui",
+  today: "Auj.",
   tomorrow: "Demain",
   saturday: "Samedi",
   sunday: "Dimanche",
