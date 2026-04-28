@@ -299,6 +299,22 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    function sortCardsByDate() {
+      var lists = content.querySelectorAll('.card-list');
+      lists.forEach(function(list) {
+        var items = Array.from(list.querySelectorAll(':scope > li'));
+        items.sort(function(a, b) {
+          var cardA = a.querySelector('[data-event-date]');
+          var cardB = b.querySelector('[data-event-date]');
+          var dateA = cardA ? cardA.dataset.eventDate : '';
+          var dateB = cardB ? cardB.dataset.eventDate : '';
+          if (dateA === dateB) return 0;
+          return dateA < dateB ? -1 : 1;
+        });
+        items.forEach(function(item) { list.appendChild(item); });
+      });
+    }
+
     var btnNear = document.getElementById('btn-near');
 
     btnNear.addEventListener('click', function() {
@@ -307,6 +323,7 @@ export const CLIENT_SCRIPT = `
         btnNear.classList.remove('active');
         btnNear.setAttribute('aria-pressed', 'false');
         removeDistanceBadges();
+        sortCardsByDate();
         pushStateToUrl(currentDate, false);
         return;
       }
