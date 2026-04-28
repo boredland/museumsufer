@@ -42,6 +42,14 @@ app.post("/api/transit", async (c) => {
   const body = await c.req.json<{ lat: number; lng: number }>().catch(() => null);
   if (!body?.lat || !body?.lng) return c.json({ error: "invalid" }, 400);
 
+  const CENTER_LAT = 50.1092;
+  const CENTER_LNG = 8.6819;
+  const MAX_KM = 20;
+  const dlat = (body.lat - CENTER_LAT) * 111.32;
+  const dlng = (body.lng - CENTER_LNG) * 111.32 * Math.cos(CENTER_LAT * Math.PI / 180);
+  if (Math.sqrt(dlat * dlat + dlng * dlng) > MAX_KM)
+    return c.json({}, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
+
   const snapLat = Math.round(body.lat * 500) / 500;
   const snapLng = Math.round(body.lng * 500) / 500;
   const ox = Math.round(snapLng * 1e6);
@@ -53,15 +61,21 @@ app.post("/api/transit", async (c) => {
 
   for (let i = 0; i < slugs.length; i += 5) {
     const batch = slugs.slice(i, i + 5);
-    const svcReqL = batch.map((slug) => ({
-      meth: "TripSearch",
-      req: {
-        depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
-        arrLocL: [{ type: "C", crd: { x: Math.round(geo[slug].lng * 1e6), y: Math.round(geo[slug].lat * 1e6) } }],
-        numF: 1,
-        getPolyline: false,
-      },
-    }));
+    const svcReqL = batch.map((slug) => {
+      const m = geo[slug];
+      const arrLoc = m.rmvStopLid
+        ? { lid: m.rmvStopLid }
+        : { type: "C" as const, crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } };
+      return {
+        meth: "TripSearch",
+        req: {
+          depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
+          arrLocL: [arrLoc],
+          numF: 1,
+          getPolyline: false,
+        },
+      };
+    });
     try {
       const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
         method: "POST",

@@ -8,6 +8,9 @@ export const CLIENT_SCRIPT = `
 
     function fetchTransitTimes() {
       if (!userPos) return Promise.resolve();
+      var dlat = (userPos.lat - 50.1092) * 111.32;
+      var dlng = (userPos.lng - 8.6819) * 111.32 * Math.cos(50.1092 * Math.PI / 180);
+      if (Math.sqrt(dlat * dlat + dlng * dlng) > 20) return Promise.resolve();
       var snapLat = Math.round(userPos.lat * 500) / 500;
       var snapLng = Math.round(userPos.lng * 500) / 500;
       var cacheKey = 'transit_' + snapLat + '_' + snapLng;
@@ -417,6 +420,21 @@ export const CLIENT_SCRIPT = `
 
     var urlSort = new URLSearchParams(location.search).get('sort');
     if (urlSort === 'near') btnNear.click();
+
+    setTimeout(function() {
+      var btns = document.querySelectorAll('[data-date]');
+      for (var i = 0; i < Math.min(btns.length, 3); i++) {
+        var d = btns[i].dataset.date;
+        if (d && d !== currentDate) {
+          var link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'fetch';
+          link.href = '/partial/content?date=' + d + '&lang=' + CURRENT_LANG;
+          document.head.appendChild(link);
+          break;
+        }
+      }
+    }, 2000);
 
     // Search
     var searchOverlay = document.getElementById('search-overlay');

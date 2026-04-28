@@ -96,8 +96,12 @@ ${truncated}`,
   if (!parsed || parsed.length === 0) return 0;
 
   let count = 0;
+  const seen = new Set<string>();
   for (const exh of parsed) {
     if (!exh.title) continue;
+    const key = exh.title.trim().toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
 
     if (exh.end_date && /^\d{4}-\d{2}-\d{2}$/.test(exh.end_date) && exh.end_date < today) continue;
 
