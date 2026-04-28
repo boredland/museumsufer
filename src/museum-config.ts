@@ -31,6 +31,7 @@ export interface MuseumConfig {
   spa?: true;
   proxy?: true;
   hidden?: true;
+  skipEvents?: true;
   exhibitionUrl?: string;
   eventApi?: {
     type: EventApiType;
@@ -148,6 +149,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1058,
     lng: 8.6961,
     rmvStopLid: "A=1@O=Frankfurt (Main) Wasserweg@X=8694798@Y=50105432@U=80@L=3000028@",
+    skipEvents: true,
     exhibitionUrl: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/ausstellungen-im-ikonenmuseum/",
   },
   "institut-fuer-stadtgeschichte": {

@@ -661,8 +661,11 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
       if (priceMatch) price = priceMatch[0];
     }
 
+    const finalTitle = title || heading;
+    const isIkonenmuseum = /ikonenmuseum/i.test(finalTitle);
+
     events.push({
-      title: title || heading,
+      title: finalTitle,
       date,
       time: nullIfMidnight(time),
       end_time: nullIfMidnight(endTime),
@@ -671,6 +674,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
       detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
       image_url: null,
       price,
+      ...(isIkonenmuseum && { museum_slug_override: "ikonenmuseum-frankfurt" }),
     });
   }
 
