@@ -103,7 +103,7 @@ function SearchTrigger({ tr }: { tr: Record<string, string> }) {
         <path d={ICON.search} />
       </svg>
       <span class="flex-1 text-left">{tr.searchPlaceholder}</span>
-      <kbd class={kbdClass}>
+      <kbd class={`${kbdClass} max-[1024px]:hidden`}>
         <kbd>Ctrl</kbd>+<kbd>K</kbd>
       </kbd>
     </button>
@@ -150,7 +150,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
 }
 
 const dateBtnClass =
-  "date-btn w-12 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
+  "date-btn min-w-12 px-2 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
 
 function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
   const dl = dateLocale(locale);
@@ -338,8 +338,8 @@ export function renderPage(
           <meta name="theme-color" content="#f5f0eb" />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
-          <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer />
-          <script src="https://unpkg.com/htmx.org@2.0.4" defer />
+          <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer integrity="sha384-PCSoOZTpbkikBEtd/+uV3WNdc676i9KUf01KOA8CnJotvlx8rRrETbDuwdjqTYvt" crossorigin="anonymous" />
+          <script src="https://unpkg.com/htmx.org@2.0.4" defer integrity="sha384-M06VwgoUOHG3FN0UchwWKqh9jS4ejwpoL0yjF3EVljtsxFwFETEYMkyNL5lXbJ5/" crossorigin="anonymous" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
@@ -388,17 +388,17 @@ export function renderPage(
             <PassPromo locale={locale} tr={tr} />
             <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} />
 
-            <p
+            <h2
               class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
               id="date-label"
               aria-live="polite"
             >
               {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
-            </p>
+            </h2>
 
             <style
               dangerouslySetInnerHTML={{
-                __html: "#content{opacity:0}.hydrated #content{opacity:1;transition:opacity .1s}",
+                __html: "#content>*{opacity:0}.hydrated #content>*{opacity:1;transition:opacity .1s}",
               }}
             />
             <main id="content">
