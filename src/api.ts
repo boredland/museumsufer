@@ -22,16 +22,20 @@ async function visitorHash(request: Request): Promise<string> {
 
 export async function getLikeCounts(env: Env, itemType: string, itemIds: number[]): Promise<Record<number, number>> {
   if (itemIds.length === 0) return {};
-  const placeholders = itemIds.map(() => "?").join(",");
-  const { results } = await env.DB.prepare(
-    `SELECT item_id, COUNT(*) as like_count FROM likes
-     WHERE item_type = ? AND item_id IN (${placeholders})
-     GROUP BY item_id`,
-  )
-    .bind(itemType, ...itemIds)
-    .all<{ item_id: number; like_count: number }>();
   const counts: Record<number, number> = {};
-  for (const r of results) counts[r.item_id] = r.like_count;
+  const BATCH = 90;
+  for (let i = 0; i < itemIds.length; i += BATCH) {
+    const batch = itemIds.slice(i, i + BATCH);
+    const placeholders = batch.map(() => "?").join(",");
+    const { results } = await env.DB.prepare(
+      `SELECT item_id, COUNT(*) as like_count FROM likes
+       WHERE item_type = ? AND item_id IN (${placeholders})
+       GROUP BY item_id`,
+    )
+      .bind(itemType, ...batch)
+      .all<{ item_id: number; like_count: number }>();
+    for (const r of results) counts[r.item_id] = r.like_count;
+  }
   return counts;
 }
 

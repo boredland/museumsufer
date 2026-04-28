@@ -469,6 +469,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
         "@type": "ExhibitionEvent",
         name: ex.title,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
       };
       if (ex.start_date) exSchema.startDate = ex.start_date;
       if (ex.end_date) exSchema.endDate = ex.end_date;
@@ -484,6 +485,14 @@ function buildEventSchema(data: InitialData, tz: string): string {
         loc.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
       }
       exSchema.location = loc;
+      const org = { "@type": "Organization", name: museum };
+      exSchema.organizer = org;
+      exSchema.performer = org;
+      exSchema.offers = {
+        "@type": "Offer",
+        url: ex.detail_url || `https://museumsufer.app/?lang=de`,
+        availability: "https://schema.org/InStock",
+      };
       schemas.push(exSchema);
     }
   }
@@ -515,9 +524,10 @@ function buildEventSchema(data: InitialData, tz: string): string {
         "@type": "Event",
         name: ev.title,
         startDate: startIso,
+        endDate: endIso,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
       };
-      schema.endDate = endIso;
       if (ev.description) schema.description = ev.description;
       if (ev.detail_url) schema.url = ev.detail_url;
       if (ev.image_url) {
@@ -532,9 +542,12 @@ function buildEventSchema(data: InitialData, tz: string): string {
       }
       schema.location = location;
 
-      if (ev.price) {
-        schema.offers = { "@type": "Offer", price: 0, priceCurrency: "EUR", description: ev.price };
-      }
+      const org = { "@type": "Organization", name: museum };
+      schema.organizer = org;
+      schema.performer = org;
+      schema.offers = ev.price
+        ? { "@type": "Offer", url: ev.detail_url || ev.url, availability: "https://schema.org/InStock", description: ev.price }
+        : { "@type": "Offer", url: ev.detail_url || ev.url, availability: "https://schema.org/InStock" };
 
       schemas.push(schema);
     });

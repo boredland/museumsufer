@@ -112,6 +112,8 @@ function navUrls(name: string, lat: number, lng: number) {
 const navLinkClass =
   "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
 
+const positionPopover = `var p=document.getElementById(this.getAttribute('popovertarget'));var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.right-180,innerWidth-188))+'px'`;
+
 function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
   const m = MUSEUM_LOCATIONS[slug];
@@ -125,8 +127,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
         aria-label={tr.navigate}
         title={tr.navigate}
         popovertarget={popId}
-        style={`anchor-name:--${popId}`}
-        onclick={`if(!CSS.supports('anchor-name','--a')){var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'}`}
+        onclick={positionPopover}
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
           <path d={ICON.navigate} />
@@ -135,30 +136,33 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
       <div
         id={popId}
         popover="auto"
-        style={`position-anchor:--${popId};position-area:bottom span-right`}
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
         <a href={urls.rmvApp} target="_blank" rel="noopener" class={`${navLinkClass} hidden max-[1024px]:flex`}>
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
+            <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
           RMV
         </a>
         <a href={urls.rmvWeb} target="_blank" rel="noopener" class={`${navLinkClass} max-[1024px]:hidden`}>
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
+            <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
           RMV
         </a>
         <a href={urls.google} target="_blank" rel="noopener" class={navLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d={ICON.navigate} />
+          <svg aria-hidden="true" viewBox="0 0 92.3 132.3" class="w-3.5 h-3.5 shrink-0">
+            <path d="M60.2 2.2C55.8.8 51 0 46.1 0 32 0 19.3 6.4 10.8 16.5l21.8 18.3L60.2 2.2z" fill="#1a73e8" />
+            <path d="M10.8 16.5C4.1 24.5 0 34.9 0 46.1c0 8.7 1.7 15.7 4.6 22l28-31.8L10.8 16.5z" fill="#ea4335" />
+            <path d="M46.2 28.5c9.8 0 17.7 7.9 17.7 17.7 0 4.3-1.6 8.3-4.2 11.4 0 0 13.9-16.6 27.5-32.7-5.6-10.8-15.3-19-27-22.7L32.6 34.8c3.3-3.8 8.1-6.3 13.6-6.3" fill="#4285f4" />
+            <path d="M46.2 63.8c-9.8 0-17.7-7.9-17.7-17.7 0-4.3 1.5-8.3 4.1-11.3l-28 31.8c4.7 10.3 12.3 18.9 22.3 29.1l31.2-36.1c-3.3 3.2-7.9 4.2-11.9 4.2" fill="#fbbc04" />
+            <path d="M59.1 109.2c15.4-24.1 33.3-35 33.3-63 0-7.7-1.9-14.9-5.2-21.3L24.8 95.9c2.6 2.8 5.3 5.8 7.9 9.2 11.4 14.7 13.5 27.2 13.5 27.2s2.1-12.5 12.9-23.1" fill="#34a853" />
           </svg>
           Google Maps
         </a>
         <a href={urls.apple} target="_blank" rel="noopener" class={navLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d={ICON.navigate} />
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0">
+            <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.65-2.2.46-3.06-.4C3.79 16.17 4.36 9.43 8.9 9.18c1.25.07 2.12.73 2.86.78.97-.2 1.9-.76 2.93-.69 1.24.1 2.17.58 2.79 1.48-2.56 1.53-1.95 4.89.58 5.83-.45 1.19-.99 2.38-1.95 3.72h-.06zM12.03 9.12C11.9 7.05 13.6 5.36 15.56 5.2c.29 2.38-2.16 4.16-3.53 3.92z" fill="#333" />
           </svg>
           Apple Maps
         </a>
@@ -293,8 +297,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         popovertarget={popId}
-        style={`anchor-name:--${popId}`}
-        onclick={`if(!CSS.supports('anchor-name','--a')){var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'}`}
+        onclick={positionPopover}
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
           <path d={ICON.event} />
@@ -303,7 +306,6 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
       <div
         id={popId}
         popover="auto"
-        style={`position-anchor:--${popId};position-area:bottom span-right`}
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
         <a href={googleUrl} target="_blank" rel="noopener" class={calLinkClass}>
@@ -389,14 +391,17 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
           </p>
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
           <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-            {ev.price && (
-              <span class="text-[0.6875rem] font-medium text-text-secondary bg-border-light px-1.5 rounded">
-                {ev.price}
-              </span>
-            )}
-            <LikeBadge count={ev.like_count} />
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
+            <LikeBadge count={ev.like_count} />
+            {ev.price && (
+              <>
+                <span class="w-px h-3 bg-border mx-0.5" aria-hidden="true" />
+                <span class="text-[0.6875rem] font-medium text-text-secondary bg-border-light px-1.5 rounded">
+                  {ev.price}
+                </span>
+              </>
+            )}
           </div>
           {ev.description && (
             <details class="mt-1">
