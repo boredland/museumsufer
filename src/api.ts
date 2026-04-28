@@ -178,7 +178,7 @@ export async function handleFeeds(request: Request, env: Env): Promise<Response 
   return null;
 }
 
-async function handleLike(request: Request, env: Env): Promise<Response> {
+export async function handleLike(request: Request, env: Env): Promise<Response> {
   const body = await request
     .json<{ item_type?: string; item_id?: number }>()
     .catch((): { item_type?: string; item_id?: number } => ({}));
@@ -378,7 +378,7 @@ ${items.join("\n")}
 </rss>`;
 }
 
-function buildIcs(events: (Event & { museum_name: string })[]): string {
+export function buildIcs(events: (Event & { museum_name: string })[]): string {
   const vevents = events.map((ev) => {
     const dtDate = ev.date.replace(/-/g, "");
     let dtStart: string;
@@ -414,7 +414,7 @@ function icsEsc(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
-function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {
+export function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {
   if (lang === "de") return originals;
   return translated.map((item, i) => {
     const orig = originals[i] as Record<string, unknown>;

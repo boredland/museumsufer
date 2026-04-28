@@ -1,7 +1,18 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
-import { fetchDayData, getMuseumMap, handleApi } from "./api";
+import {
+  attachLikeCounts,
+  buildIcs,
+  fetchDayData,
+  getEventsForDate,
+  getExhibitionsForDate,
+  getLikeCounts,
+  getMuseumMap,
+  handleLike,
+  markTranslated,
+  proxyImages,
+} from "./api";
 import { ContentBody } from "./components";
 import { todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
@@ -14,8 +25,8 @@ import scrapeRoute from "./routes/scrape";
 import staticRoute from "./routes/static";
 import { scrape } from "./scraper";
 import { formatDateFull } from "./shared";
-import { translateEvents } from "./translate";
-import type { Env } from "./types";
+import { translateEvents, translateFields } from "./translate";
+import type { Env, Event, Exhibition } from "./types";
 
 const dayQuery = z.object({
   date: z
@@ -27,6 +38,12 @@ const dayQuery = z.object({
 });
 
 const app = new Hono<{ Bindings: Env }>();
+
+// Error middleware
+app.onError((err, c) => {
+  console.error("Unhandled error:", err);
+  return c.json({ error: "Internal server error" }, 500);
+});
 
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
@@ -46,7 +63,7 @@ app.post("/api/transit", async (c) => {
   const CENTER_LNG = 8.6819;
   const MAX_KM = 20;
   const dlat = (body.lat - CENTER_LAT) * 111.32;
-  const dlng = (body.lng - CENTER_LNG) * 111.32 * Math.cos(CENTER_LAT * Math.PI / 180);
+  const dlng = (body.lng - CENTER_LNG) * 111.32 * Math.cos((CENTER_LAT * Math.PI) / 180);
   if (Math.sqrt(dlat * dlat + dlng * dlng) > MAX_KM)
     return c.json({}, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
 
@@ -77,7 +94,10 @@ app.post("/api/transit", async (c) => {
     ...uniqueLids.map((lid) => ({ key: lid, arrLoc: { lid } })),
     ...coordSlugs.map((slug) => {
       const m = geo[slug];
-      return { key: slug, arrLoc: { type: "C" as const, crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } } };
+      return {
+        key: slug,
+        arrLoc: { type: "C" as const, crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } },
+      };
     }),
   ];
 
@@ -125,9 +145,107 @@ app.post("/api/transit", async (c) => {
   return c.json(result, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
 });
 
-app.all("/api/*", (c) => {
-  const locale = detectLocale(c.req.raw);
-  return handleApi(c.req.raw, c.env, locale);
+// API routes (migrated from handleApi)
+app.post("/api/like", async (c) => {
+  return handleLike(c.req.raw, c.env);
+});
+
+app.get("/api/events", async (c) => {
+  const date = c.req.query("date") || todayIso();
+  const lang = c.req.query("lang") || "de";
+  const events = proxyImages(await getEventsForDate(c.env, date));
+  const counts = await getLikeCounts(
+    c.env,
+    "event",
+    events.map((e) => e.id),
+  );
+  const withLikes = attachLikeCounts(events, counts);
+  const translated = await translateFields(c.env, withLikes, ["title", "description"] as (keyof Event)[], lang);
+  return c.json(markTranslated(withLikes, translated, lang), {
+    headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
+  });
+});
+
+app.get("/api/exhibitions", async (c) => {
+  const date = c.req.query("date") || todayIso();
+  const lang = c.req.query("lang") || "de";
+  const exhibitions = proxyImages(await getExhibitionsForDate(c.env, date));
+  const counts = await getLikeCounts(
+    c.env,
+    "exhibition",
+    exhibitions.map((e) => e.id),
+  );
+  const withLikes = attachLikeCounts(exhibitions, counts);
+  const translated = await translateFields(c.env, withLikes, ["title"] as (keyof Exhibition)[], lang);
+  return c.json(markTranslated(withLikes, translated, lang), {
+    headers: { "Cache-Control": "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600" },
+  });
+});
+
+app.get("/api/museums", async (c) => {
+  const { results } = await c.env.DB.prepare("SELECT * FROM museums ORDER BY name").all();
+  return c.json(results, {
+    headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400" },
+  });
+});
+
+app.get("/api/day", async (c) => {
+  const date = c.req.query("date") || todayIso();
+  const lang = c.req.query("lang") || "de";
+  const [rawExhibitions, rawEvents] = await Promise.all([
+    getExhibitionsForDate(c.env, date),
+    getEventsForDate(c.env, date),
+  ]);
+  const exhibitions = proxyImages(rawExhibitions);
+  const events = proxyImages(rawEvents);
+  const [exhCounts, evCounts] = await Promise.all([
+    getLikeCounts(
+      c.env,
+      "exhibition",
+      exhibitions.map((e) => e.id),
+    ),
+    getLikeCounts(
+      c.env,
+      "event",
+      events.map((e) => e.id),
+    ),
+  ]);
+  const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
+  const evWithLikes = attachLikeCounts(events, evCounts);
+  const [trExh, trEv] = await Promise.all([
+    translateFields(c.env, exhWithLikes, ["title"] as (keyof Exhibition)[], lang),
+    translateFields(c.env, evWithLikes, ["title", "description"] as (keyof Event)[], lang),
+  ]);
+  return c.json(
+    {
+      date,
+      exhibitions: markTranslated(exhWithLikes, trExh, lang),
+      events: markTranslated(evWithLikes, trEv, lang),
+    },
+    {
+      headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
+    },
+  );
+});
+
+app.get("/api/event/:id.ics", async (c) => {
+  const idStr = c.req.param("id");
+  if (!idStr) return c.json({ error: "invalid id" }, { status: 400 });
+  const id = parseInt(idStr, 10);
+  if (Number.isNaN(id)) return c.json({ error: "invalid id" }, { status: 400 });
+  const ev = await c.env.DB.prepare(
+    "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?",
+  )
+    .bind(id)
+    .first<Event & { museum_name: string }>();
+  if (!ev) return c.json({ error: "not found" }, { status: 404 });
+  return c.text(buildIcs([ev]), {
+    headers: {
+      "Content-Type": "text/calendar; charset=utf-8",
+      "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
+      "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600",
+    },
+  });
 });
 
 app.get(
@@ -164,27 +282,35 @@ app.get(
   },
 );
 
-app.get("*", async (c) => {
-  const locale = detectLocale(c.req.raw);
-  const rawDate = c.req.query("date");
-  const date = rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : todayIso();
-  const sort = c.req.query("sort") === "near" ? "near" : undefined;
-  let initialData: InitialData | undefined;
-  const museums = await getMuseumMap(c.env).catch(() => ({}));
-  try {
-    initialData = await fetchDayData(c.env, date, locale);
-  } catch (e) {
-    console.error("Failed to fetch initial data:", e);
-  }
+// Catch-all route with query validation
+app.get(
+  "*",
+  zValidator("query", dayQuery, (result, _c) => {
+    if (!result.success) {
+      console.warn("Query validation failed:", result.error);
+    }
+  }),
+  async (c) => {
+    const locale = detectLocale(c.req.raw);
+    const { date: rawDate, sort } = c.req.valid("query");
+    const date = rawDate || todayIso();
+    let initialData: InitialData | undefined;
+    const museums = await getMuseumMap(c.env).catch(() => ({}));
+    try {
+      initialData = await fetchDayData(c.env, date, locale);
+    } catch (e) {
+      console.error("Failed to fetch initial data:", e);
+    }
 
-  return c.html(renderPage(locale, initialData, museums, sort), {
-    headers: {
-      "Content-Language": locale,
-      Vary: "Accept-Language",
-      "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
-    },
-  });
-});
+    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined), {
+      headers: {
+        "Content-Language": locale,
+        Vary: "Accept-Language",
+        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+      },
+    });
+  },
+);
 
 export default {
   fetch: (request: Request, env: Env, ctx: ExecutionContext) => app.fetch(request, env, ctx),
