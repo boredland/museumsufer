@@ -258,8 +258,12 @@ export const CLIENT_SCRIPT = `
 
         timeEl.dataset.reachColored = '1';
         timeEl.classList.remove.apply(timeEl.classList, timeDefault.split(' '));
-        var colors = margin < 0 ? timeStarted : margin < TIGHT_MARGIN_MIN ? timeTight : timeReachable;
+        var colors, reachLabel;
+        if (margin < 0) { colors = timeStarted; reachLabel = T.started; }
+        else if (margin < TIGHT_MARGIN_MIN) { colors = timeTight; reachLabel = T.tight; }
+        else { colors = timeReachable; reachLabel = T.reachable; }
         timeEl.classList.add.apply(timeEl.classList, colors.split(' '));
+        timeEl.title = '~' + travel + ' ' + T.minWalk + ' — ' + reachLabel;
       });
     }
 

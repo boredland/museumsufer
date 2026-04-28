@@ -128,6 +128,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
         class={iconBtnClass}
         aria-label={tr.navigate}
         title={tr.navigate}
+        aria-haspopup="menu"
         popovertarget={popId}
         onclick={positionPopover}
       >
@@ -138,21 +139,22 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
       <div
         id={popId}
         popover="auto"
+        role="menu"
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
-        <a href={urls.rmvApp} target="_blank" rel="noopener" class={`${navLinkClass} hidden max-[1024px]:flex`}>
+        <a href={urls.rmvApp} target="_blank" rel="noopener" role="menuitem" class={`${navLinkClass} hidden max-[1024px]:flex`}>
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
             <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
           RMV
         </a>
-        <a href={urls.rmvWeb} target="_blank" rel="noopener" class={`${navLinkClass} max-[1024px]:hidden`}>
+        <a href={urls.rmvWeb} target="_blank" rel="noopener" role="menuitem" class={`${navLinkClass} max-[1024px]:hidden`}>
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
             <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
           RMV
         </a>
-        <a href={urls.google} target="_blank" rel="noopener" class={navLinkClass}>
+        <a href={urls.google} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 92.3 132.3" class="w-3.5 h-3.5 shrink-0">
             <path d="M60.2 2.2C55.8.8 51 0 46.1 0 32 0 19.3 6.4 10.8 16.5l21.8 18.3L60.2 2.2z" fill="#1a73e8" />
             <path d="M10.8 16.5C4.1 24.5 0 34.9 0 46.1c0 8.7 1.7 15.7 4.6 22l28-31.8L10.8 16.5z" fill="#ea4335" />
@@ -171,7 +173,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
           </svg>
           Google Maps
         </a>
-        <a href={urls.apple} target="_blank" rel="noopener" class={navLinkClass}>
+        <a href={urls.apple} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0">
             <path
               d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.65-2.2.46-3.06-.4C3.79 16.17 4.36 9.43 8.9 9.18c1.25.07 2.12.73 2.86.78.97-.2 1.9-.76 2.93-.69 1.24.1 2.17.58 2.79 1.48-2.56 1.53-1.95 4.89.58 5.83-.45 1.19-.99 2.38-1.95 3.72h-.06zM12.03 9.12C11.9 7.05 13.6 5.36 15.56 5.2c.29 2.38-2.16 4.16-3.53 3.92z"
@@ -310,6 +312,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         class={iconBtnClass}
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
+        aria-haspopup="menu"
         popovertarget={popId}
         onclick={positionPopover}
       >
@@ -320,9 +323,10 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
       <div
         id={popId}
         popover="auto"
+        role="menu"
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
-        <a href={googleUrl} target="_blank" rel="noopener" class={calLinkClass}>
+        <a href={googleUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
             <path d="M8 1a7 7 0 110 14A7 7 0 018 1z" stroke="currentColor" stroke-width="1.2" />
             <path
@@ -335,14 +339,14 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
           </svg>
           Google
         </a>
-        <a href={outlookUrl} target="_blank" rel="noopener" class={calLinkClass}>
+        <a href={outlookUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
             <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2" />
             <path d="M2 6l6 3.5L14 6" stroke="currentColor" stroke-width="1.2" />
           </svg>
           Outlook
         </a>
-        <a href={yahooUrl} target="_blank" rel="noopener" class={calLinkClass}>
+        <a href={yahooUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
             <path
               d="M3 3l5 6v4M13 3L8 9"
@@ -355,7 +359,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
           Yahoo
         </a>
         <hr class="my-1 border-border-light" />
-        <a href={icsUrl} download="event.ics" class={calLinkClass}>
+        <a href={icsUrl} download="event.ics" role="menuitem" class={calLinkClass}>
           <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
             <path
               d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
@@ -457,7 +461,7 @@ function Section({
         >
           <path d={iconPath} stroke-width="1.5" stroke-linecap="round" />
         </svg>
-        <h2 class="section-title text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">{title}</h2>
+        <h3 class="section-title text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">{title}</h3>
         <span
           class="text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
           title={`${count} ${title}`}
