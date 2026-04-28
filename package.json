@@ -27,7 +27,9 @@
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
     "dayjs": "^1.11.20",
+    "fuse.js": "^7.0.0",
     "hono": "^4.12.15",
+    "htmx.org": "^2.0.4",
     "zod": "^4.3.6"
   }
 }
