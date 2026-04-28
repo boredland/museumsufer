@@ -54,6 +54,8 @@ function CardImage({
         src={`${src}?w=120`}
         srcset={`${src}?w=120 120w, ${src}?w=200 200w`}
         sizes="(max-width: 480px) 56px, 72px"
+        width={72}
+        height={54}
         alt={alt}
         loading={lazy ? "lazy" : undefined}
       />
