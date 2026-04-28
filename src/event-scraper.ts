@@ -162,14 +162,17 @@ async function scrapeMuseumEvents(
   let eventsHtml: string | null = null;
   let eventsUrl: string | null = null;
 
-  for (const path of EVENT_PAGE_PATHS) {
-    const url = `${baseUrl}${path}`;
-    const html = await fetchPage(env, url, fetchOpts);
-    if (html) {
-      eventsHtml = html;
-      eventsUrl = url;
-      break;
-    }
+  const candidates = EVENT_PAGE_PATHS.map((path) => `${baseUrl}${path}`);
+  const results = await Promise.all(
+    candidates.map(async (url) => {
+      const html = await fetchPage(env, url, fetchOpts);
+      return html ? { url, html } : null;
+    }),
+  );
+  const found = results.find((r) => r !== null);
+  if (found) {
+    eventsHtml = found.html;
+    eventsUrl = found.url;
   }
 
   if (!eventsHtml || !eventsUrl) {
@@ -266,41 +269,46 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       website_url: string;
     }>();
 
+  const detailResults = await Promise.all(
+    events.map(async (event) => {
+      try {
+        return await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
+      } catch {
+        return null;
+      }
+    }),
+  );
+
   let enriched = 0;
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    const details = detailResults[i];
+    if (!details) continue;
 
-  for (const event of events) {
-    try {
-      const details = await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
-      if (!details) continue;
+    const updates: string[] = [];
+    const values: (string | null)[] = [];
 
-      const updates: string[] = [];
-      const values: (string | null)[] = [];
-
-      if (details.price) {
-        updates.push("price = ?");
-        values.push(details.price);
-      }
-      if (details.image_url) {
-        updates.push("image_url = ?");
-        values.push(details.image_url);
-      }
-
-      if (updates.length === 0) {
-        // Mark as checked so we don't re-fetch
-        await env.DB.prepare("UPDATE events SET price = '', updated_at = datetime('now') WHERE id = ?")
-          .bind(event.id)
-          .run();
-        continue;
-      }
-
-      updates.push("updated_at = datetime('now')");
-      await env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`)
-        .bind(...values, event.id)
-        .run();
-      enriched++;
-    } catch (e) {
-      console.error(`Failed to enrich event ${event.id}:`, e);
+    if (details.price) {
+      updates.push("price = ?");
+      values.push(details.price);
     }
+    if (details.image_url) {
+      updates.push("image_url = ?");
+      values.push(details.image_url);
+    }
+
+    if (updates.length === 0) {
+      await env.DB.prepare("UPDATE events SET price = '', updated_at = datetime('now') WHERE id = ?")
+        .bind(event.id)
+        .run();
+      continue;
+    }
+
+    updates.push("updated_at = datetime('now')");
+    await env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`)
+      .bind(...values, event.id)
+      .run();
+    enriched++;
   }
 
   return enriched;
