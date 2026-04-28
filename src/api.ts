@@ -23,7 +23,7 @@ async function visitorHash(request: Request): Promise<string> {
 export async function getLikeCounts(env: Env, itemType: string, itemIds: number[]): Promise<Record<number, number>> {
   if (itemIds.length === 0) return {};
   const counts: Record<number, number> = {};
-  const BATCH = 400;
+  const BATCH = 99;
   for (let i = 0; i < itemIds.length; i += BATCH) {
     const batch = itemIds.slice(i, i + BATCH);
     const placeholders = batch.map(() => "?").join(",");
