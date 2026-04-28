@@ -206,11 +206,11 @@ These issues exist in the current codebase. When fixing or refactoring scrapers,
 
 | Parser | Issue | Impact | Fix |
 |---|---|---|---|
-| **tribe-events** (DAM, DFF) | No `nullIfMidnight()` on start/end times | Midnight times render as "00:00" instead of all-day events | Wrap both lines 86-87 with `nullIfMidnight()` |
-| **historisches** | No `nullIfMidnight()` on start time | Extracted times could be "00:00" → shown as midnight | Apply to line 146 |
-| **mak** | Manual "00:00" check missing on extracted time | Regex-matched times not filtered | Use `nullIfMidnight()` on line 721 |
-| **fkv** | Manual "00:00" check missing | Same as MAK | Use `nullIfMidnight()` on line 721 |
-| All parsers | Inconsistent midnight handling | Some use utility, some manual checks | Always use `nullIfMidnight()` from shared.ts |
+| **tribe-events** (DAM, DFF) | No `nullIfMidnight()` on start/end times (lines 86-87) | Midnight times render as "00:00" instead of all-day events | Wrap both lines with `nullIfMidnight()` |
+| **historisches** | No `nullIfMidnight()` on start time (line 146) | Extracted times could be "00:00" → shown as midnight | Apply to line 146; end_time already has it on line 131 |
+| **mak** (MAK) | No `nullIfMidnight()` on time/end_time (lines 667-668) | Times extracted via regex could theoretically be "00:00" | Use `nullIfMidnight()` for both; low risk since regex-matched |
+| **stadtgeschichte-rss** (IfS) | No `nullIfMidnight()` on time/end_time (lines 721-722) | Times extracted via regex not filtered for "00:00" | Use `nullIfMidnight()` for both |
+| All parsers | Inconsistent midnight handling | Some use utility, some manual checks, some skip | Always use `nullIfMidnight()` from shared.ts |
 
 **Pattern to avoid:** Using `.slice(11, 16)` on ISO datetime without wrapping in `nullIfMidnight()`:
 ```typescript
@@ -220,6 +220,33 @@ time: ev.start_date?.slice(11, 16) || null
 // ✅ GOOD - always filter midnight
 time: nullIfMidnight(ev.start_date?.slice(11, 16) || null)
 ```
+
+### Additional patterns & observations from audit
+
+**1. Regex time extraction consistency:**
+- Some parsers handle `.` vs `:` separators (German "14.30 Uhr" vs ISO "14:30")
+- MAK & Bibelhaus & FDH normalize dots to colons: `.replace(".", ":")`
+- Always apply this when German text times are parsed
+
+**2. Price extraction blind spots:**
+- Liebieghaus: looks for "Kosten|Eintritt|Preis" but only stores first regex match
+- IfS: looks for "€" but regex is greedy across commas (ermäßigt prices)
+- Consider: should we extract cheapest or most expensive ticket? Currently stores all
+
+**3. URL format inconsistencies:**
+- Some endpoints expect `.slice(0, 10)` for dates (ISO), some expect `.slice(0, 8)` (YYYYMMDD)
+- MAK/IfS use German month text matching which can be slower than numeric parsing
+- Tribe-events already handles ISO correctly but doesn't normalize times
+
+**4. Empty/null field handling:**
+- Liebieghaus: stores `endTime: null` when duration math fails
+- Historisches: doesn't extract `toBerlinTime(start)` result—uses separate `ev.time` field
+- MAK: only sets `title` if timeRangeMatch succeeds; fallback to full heading exists
+
+**5. Description truncation:**
+- Most parsers call `truncateHtml()` which limits to 500 chars
+- Some store raw text (IfS RSS), some strip HTML (Liebieghaus skips description entirely)
+- Bibelhaus/FDH/MAK all skip descriptions—could improve UX by extracting from detail pages
 
 ## Common tasks
 
