@@ -430,7 +430,12 @@ export const CLIENT_SCRIPT = `
     var serverStale = !alreadyRefreshed && firstBtn && firstBtn.dataset.date !== clientToday;
 
     if (serverStale) {
-      location.replace('/?lang=' + CURRENT_LANG + '&_r=1');
+      var url = new URL(location);
+      url.search = '';
+      url.searchParams.set('lang', CURRENT_LANG);
+      url.searchParams.set('_r', '1');
+      if (currentDate !== clientToday) url.searchParams.set('date', currentDate);
+      location.replace(url.toString());
     } else if (__INITIAL_DATA__) {
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited(); hydrateMyLikes();
