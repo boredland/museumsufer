@@ -15,6 +15,18 @@ import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
 
+function utm(url: string, content: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.set("utm_source", "museumsufer.app");
+    u.searchParams.set("utm_medium", "referral");
+    u.searchParams.set("utm_content", content);
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function ImagePlaceholder() {
   return (
     <div
@@ -41,11 +53,13 @@ function CardImage({
   alt,
   detailUrl,
   lazy,
+  utmContent,
 }: {
   src: string | null;
   alt: string;
   detailUrl: string | null;
   lazy: boolean;
+  utmContent: string;
 }) {
   const inner = src ? (
     <div class={imgWrapClass}>
@@ -66,7 +80,7 @@ function CardImage({
 
   if (detailUrl) {
     return (
-      <a href={detailUrl} target="_blank" rel="noopener" tabindex={-1} class="shrink-0">
+      <a href={utm(detailUrl, utmContent)} target="_blank" rel="noopener" tabindex={-1} class="shrink-0">
         {inner}
       </a>
     );
@@ -239,7 +253,7 @@ function ExhibitionCard({
     .filter(Boolean)
     .join(" – ");
   const titleContent = ex.detail_url ? (
-    <a href={ex.detail_url} target="_blank" rel="noopener" class={titleLinkClass}>
+    <a href={utm(ex.detail_url, "exhibition_title")} target="_blank" rel="noopener" class={titleLinkClass}>
       {ex.title}
     </a>
   ) : (
@@ -250,7 +264,7 @@ function ExhibitionCard({
     <li>
       <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
-          <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} />
+          <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} utmContent="exhibition_image" />
           {dates && (
             <span class="text-[0.5625rem] font-medium text-text-tertiary bg-border-light px-1 py-0.5 rounded text-center leading-tight">
               {dates}
@@ -380,7 +394,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
   const linkUrl = ev.detail_url || ev.url;
   const titleContent = linkUrl ? (
-    <a href={linkUrl} target="_blank" rel="noopener" class={titleLinkClass}>
+    <a href={utm(linkUrl, "event_title")} target="_blank" rel="noopener" class={titleLinkClass}>
       {ev.title}
     </a>
   ) : (
@@ -396,7 +410,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
         data-event-date={ev.date}
       >
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
-          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} />
+          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} utmContent="event_image" />
           {timeStr && (
             <span class="card-time text-[0.625rem] font-medium text-accent bg-accent-light px-1 py-0.5 rounded text-center leading-tight">
               {timeStr}
@@ -511,7 +525,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
           <p class="text-sm font-medium leading-tight">
             {museum.website ? (
               <a
-                href={museum.website}
+                href={utm(museum.website, "museum_name")}
                 target="_blank"
                 rel="noopener"
                 class="text-inherit no-underline hover:text-accent"
@@ -549,7 +563,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
           {museum.website && (
             <a
               class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
-              href={museum.website}
+              href={utm(museum.website, "museum_link")}
               target="_blank"
               rel="noopener"
               aria-label={museum.name}

@@ -325,6 +325,17 @@ export const CLIENT_SCRIPT = `
     var nearClickCount = 0;
 
     btnNear.addEventListener('click', function() {
+      if (btnNear.classList.contains('loading')) {
+        btnNear.classList.remove('loading', 'active');
+        btnNear.removeAttribute('aria-busy');
+        btnNear.setAttribute('aria-pressed', 'false');
+        sortByDistance = false;
+        nearClickCount = 0;
+        removeDistanceBadges();
+        sortCardsByDate();
+        pushStateToUrl(currentDate, false);
+        return;
+      }
       if (sortByDistance) {
         nearClickCount++;
         if (nearClickCount === 1 && 'geolocation' in navigator) {
