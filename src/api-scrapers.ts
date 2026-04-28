@@ -83,8 +83,8 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
       return {
         title: stripHtml(ev.title || ""),
         date: startDate,
-        time: ev.start_date?.slice(11, 16) || null,
-        end_time: ev.end_date?.slice(11, 16) || null,
+        time: nullIfMidnight(ev.start_date?.slice(11, 16) || null),
+        end_time: nullIfMidnight(ev.end_date?.slice(11, 16) || null),
         end_date: endDate !== startDate ? endDate : null,
         description: truncateHtml(ev.excerpt || ev.description || ""),
         detail_url: ev.url || null,
@@ -143,7 +143,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       {
         title: ev.title,
         date,
-        time: timeMatch?.[1] || null,
+        time: nullIfMidnight(timeMatch?.[1] || null),
         end_time: endTime,
         end_date: endDate,
         description: truncateHtml(ev.summary || ""),
@@ -664,8 +664,8 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     events.push({
       title: title || heading,
       date,
-      time,
-      end_time: endTime,
+      time: nullIfMidnight(time),
+      end_time: nullIfMidnight(endTime),
       end_date: null,
       description,
       detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
@@ -718,8 +718,8 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
     events.push({
       title,
       date,
-      time: timeMatch ? timeMatch[1] : null,
-      end_time: endTimeMatch ? endTimeMatch[1] : null,
+      time: nullIfMidnight(timeMatch ? timeMatch[1] : null),
+      end_time: nullIfMidnight(endTimeMatch ? endTimeMatch[1] : null),
       end_date: null,
       description: truncateHtml(desc),
       detail_url: linkMatch ? linkMatch[1].trim() : null,
