@@ -104,6 +104,8 @@ async function scrapeExhibitions(env: Env): Promise<number> {
   return exhibitions.length;
 }
 
+let museumListCache: Array<{ id: number; name: string; slug: string }> | null = null;
+
 async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
   const slug = slugify(museumName);
   const nameNorm = museumName.toLowerCase().trim();
@@ -111,11 +113,15 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
   const bySlug = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?").bind(slug).first<{ id: number }>();
   if (bySlug) return bySlug.id;
 
-  const { results: allMuseums } = await env.DB.prepare("SELECT id, name, slug FROM museums").all<{
-    id: number;
-    name: string;
-    slug: string;
-  }>();
+  if (!museumListCache) {
+    const { results } = await env.DB.prepare("SELECT id, name, slug FROM museums").all<{
+      id: number;
+      name: string;
+      slug: string;
+    }>();
+    museumListCache = results;
+  }
+  const allMuseums = museumListCache;
 
   let bestMatch: { id: number; score: number } | null = null;
   const slugParts = slug.split("-");
@@ -154,6 +160,7 @@ async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
     .bind(museumName, slug, `${BASE_URL}/de/museen/${slug}/`)
     .first<{ id: number }>();
   if (!inserted) throw new Error(`Failed to insert museum: ${museumName}`);
+  museumListCache = null;
   return inserted.id;
 }
 

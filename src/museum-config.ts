@@ -430,6 +430,22 @@ export function getManualMuseums(): Array<{
     }));
 }
 
+export function getImageAllowedDomains(): Set<string> {
+  const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
+  for (const config of Object.values(MUSEUMS)) {
+    const urls = [config.website, config.image, config.exhibitionUrl, config.eventApi?.endpoint].filter(Boolean);
+    for (const url of urls) {
+      try {
+        const hostname = new URL(url!).hostname;
+        domains.add(hostname);
+        if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
+        else domains.add(`www.${hostname}`);
+      } catch {}
+    }
+  }
+  return domains;
+}
+
 export function getProxyDomains(): Set<string> {
   const domains = new Set<string>();
   for (const config of Object.values(MUSEUMS)) {

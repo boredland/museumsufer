@@ -23,7 +23,7 @@ async function visitorHash(request: Request): Promise<string> {
 export async function getLikeCounts(env: Env, itemType: string, itemIds: number[]): Promise<Record<number, number>> {
   if (itemIds.length === 0) return {};
   const counts: Record<number, number> = {};
-  const BATCH = 90;
+  const BATCH = 400;
   for (let i = 0; i < itemIds.length; i += BATCH) {
     const batch = itemIds.slice(i, i + BATCH);
     const placeholders = batch.map(() => "?").join(",");
@@ -282,7 +282,11 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
   return filtered;
 }
 
+let museumMapCache: { data: Record<string, MuseumInfo>; ts: number } | null = null;
+
 export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>> {
+  if (museumMapCache && Date.now() - museumMapCache.ts < 3600_000) return museumMapCache.data;
+
   const { results } = await env.DB.prepare(
     "SELECT slug, name, website_url, description, image_url FROM museums ORDER BY name",
   ).all<{
@@ -305,6 +309,7 @@ export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>
     if (config?.name) info.museumsufer = false;
     map[m.slug] = info;
   }
+  museumMapCache = { data: map, ts: Date.now() };
   return map;
 }
 

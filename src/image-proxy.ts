@@ -1,8 +1,9 @@
-import { getProxyDomains } from "./museum-config";
+import { getImageAllowedDomains, getProxyDomains } from "./museum-config";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
 const proxyDomains = getProxyDomains();
+const staticAllowedDomains = getImageAllowedDomains();
 
 function shouldProxy(imageUrl: string): boolean {
   try {
@@ -13,37 +14,12 @@ function shouldProxy(imageUrl: string): boolean {
   }
 }
 
-let allowedDomains: Set<string> | null = null;
-
-async function getAllowedDomains(env: Env): Promise<Set<string>> {
-  if (allowedDomains) return allowedDomains;
-
-  const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
-  const [museumRows, imageRows] = await Promise.all([
-    env.DB.prepare(
-      "SELECT website_url, image_url FROM museums WHERE website_url IS NOT NULL OR image_url IS NOT NULL",
-    ).all<{ website_url: string | null; image_url: string | null }>(),
-    env.DB.prepare(
-      "SELECT DISTINCT image_url FROM events WHERE image_url IS NOT NULL UNION SELECT DISTINCT image_url FROM exhibitions WHERE image_url IS NOT NULL",
-    ).all<{ image_url: string | null }>(),
-  ]);
-
-  const urls = [
-    ...museumRows.results.flatMap((r) => [r.website_url, r.image_url]),
-    ...imageRows.results.map((r) => r.image_url),
-  ];
-  for (const url of urls) {
-    if (!url) continue;
-    try {
-      const hostname = new URL(url).hostname;
-      domains.add(hostname);
-      if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
-      else domains.add(`www.${hostname}`);
-    } catch {}
+function isDomainAllowed(hostname: string): boolean {
+  if (staticAllowedDomains.has(hostname)) return true;
+  for (const d of staticAllowedDomains) {
+    if (hostname.endsWith(`.${d}`)) return true;
   }
-
-  allowedDomains = domains;
-  return domains;
+  return false;
 }
 
 export async function handleImageProxy(request: Request, env: Env): Promise<Response | null> {
@@ -59,17 +35,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     if (!imageUrl.startsWith("https://") && !imageUrl.startsWith("http://")) return null;
 
     const origin = new URL(imageUrl).hostname;
-    const allowed = await getAllowedDomains(env);
-    let isAllowed = allowed.has(origin);
-    if (!isAllowed) {
-      for (const d of allowed) {
-        if (origin.endsWith(`.${d}`)) {
-          isAllowed = true;
-          break;
-        }
-      }
-    }
-    if (!isAllowed) {
+    if (!isDomainAllowed(origin)) {
       return new Response("Forbidden origin", { status: 403 });
     }
   } catch {
