@@ -251,12 +251,12 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
   const weekAhead = dateOffset(7);
 
   const { results: events } = await env.DB.prepare(
-    `SELECT ev.id, ev.detail_url, ev.price, ev.image_url, m.name as museum_name, m.website_url
+    `SELECT ev.id, ev.detail_url, ev.price, ev.image_url, ev.time, m.name as museum_name, m.website_url
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date >= ? AND ev.date <= ?
        AND ev.detail_url IS NOT NULL
-       AND (ev.price IS NULL AND ev.image_url IS NULL)
+       AND (ev.price IS NULL OR ev.image_url IS NULL OR ev.time IS NULL)
      LIMIT 30`,
   )
     .bind(today, weekAhead)
@@ -265,6 +265,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       detail_url: string;
       price: string | null;
       image_url: string | null;
+      time: string | null;
       museum_name: string;
       website_url: string;
     }>();
@@ -288,17 +289,25 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
     const updates: string[] = [];
     const values: (string | null)[] = [];
 
-    if (details.price) {
+    if (details.price && !event.price) {
       updates.push("price = ?");
       values.push(details.price);
     }
-    if (details.image_url) {
+    if (details.image_url && !event.image_url) {
       updates.push("image_url = ?");
       values.push(details.image_url);
     }
+    if (details.time && !event.time) {
+      updates.push("time = ?");
+      values.push(details.time);
+    }
+    if (details.end_time) {
+      updates.push("end_time = ?");
+      values.push(details.end_time);
+    }
 
     if (updates.length === 0) {
-      await env.DB.prepare("UPDATE events SET price = '', updated_at = datetime('now') WHERE id = ?")
+      await env.DB.prepare("UPDATE events SET price = COALESCE(price, ''), updated_at = datetime('now') WHERE id = ?")
         .bind(event.id)
         .run();
       continue;
@@ -314,12 +323,36 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
   return enriched;
 }
 
+function extractTimeFromHtml(html: string): { time: string | null; end_time: string | null } {
+  const text = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&ndash;|&#8211;/g, "–")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ");
+  const rangeMatch = text.match(/(\d{1,2}[:.]\d{2})\s*(?:–|-)\s*(\d{1,2}[:.]\d{2})\s*(?:Uhr|h)?/);
+  if (rangeMatch) {
+    return {
+      time: rangeMatch[1].replace(".", ":"),
+      end_time: rangeMatch[2].replace(".", ":"),
+    };
+  }
+  const singleMatch = text.match(/(\d{1,2}[:.]\d{2})\s*(?:Uhr|h)/);
+  if (singleMatch) {
+    return { time: singleMatch[1].replace(".", ":"), end_time: null };
+  }
+  const commaMatch = text.match(/\d{2}\.\d{2}\.\d{4},?\s*(\d{1,2}[:.]\d{2})/);
+  if (commaMatch) {
+    return { time: commaMatch[1].replace(".", ":"), end_time: null };
+  }
+  return { time: null, end_time: null };
+}
+
 async function fetchEventDetails(
   env: Env,
   detailUrl: string,
   museumName: string,
   _websiteUrl: string,
-): Promise<{ price: string | null; image_url: string | null } | null> {
+): Promise<{ price: string | null; image_url: string | null; time: string | null; end_time: string | null } | null> {
   let html: string;
   try {
     const res = await fetch(detailUrl, { redirect: "follow" });
@@ -332,9 +365,10 @@ async function fetchEventDetails(
   }
 
   const imageUrl = extractImageFromHtml(html, detailUrl);
+  const { time, end_time } = extractTimeFromHtml(html);
 
   const textContent = stripHtmlToText(html).slice(0, 6000);
-  if (textContent.length < 50) return { price: null, image_url: imageUrl };
+  if (textContent.length < 50) return { price: null, image_url: imageUrl, time, end_time };
 
   const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     messages: [
@@ -362,7 +396,7 @@ ${textContent}`,
     price = parsed.price;
   }
 
-  return { price, image_url: imageUrl };
+  return { price, image_url: imageUrl, time, end_time };
 }
 
 export function extractImageFromHtml(html: string, pageUrl: string): string | null {
