@@ -339,7 +339,7 @@ export function renderPage(
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js" defer integrity="sha384-PCSoOZTpbkikBEtd/+uV3WNdc676i9KUf01KOA8CnJotvlx8rRrETbDuwdjqTYvt" crossorigin="anonymous" />
-          <script src="https://unpkg.com/htmx.org@2.0.4" defer integrity="sha384-M06VwgoUOHG3FN0UchwWKqh9jS4ejwpoL0yjF3EVljtsxFwFETEYMkyNL5lXbJ5/" crossorigin="anonymous" />
+          <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" defer integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous" />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
