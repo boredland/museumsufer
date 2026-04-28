@@ -105,6 +105,101 @@ Five tables in D1:
 - **PWA**: Installable, offline support via service worker
 - **Image proxy**: All museum images served through /img/ with 7-day edge cache
 
+## Date/time scraping: Common issues & patterns
+
+When adding or fixing event scrapers, watch for these recurring problems and use the patterns in `src/api-scrapers.ts` to solve them.
+
+### Problem: Missing or malformed dates
+
+| Issue | Museums | Mitigation |
+|---|---|---|
+| Dates embedded in German text (e.g., "15. März") | Junges Museum, Ledermuseum, FKV | Use `GERMAN_MONTHS` lookup + `inferYear()` to parse `DD. MONTH` → ISO date. Always validate against `todayIso()` to reject past events. |
+| ISO 8601 timestamps (both valid & UTC) | Historisches, Jüdisches, Staedel, Senckenberg | Slice `YYYY-MM-DD` from index 0:10 or split on `T`. For Unix/seconds timestamps, pass to `new Date(ms * 1000)`, then convert with `toBerlinDate()`. |
+| Malformed or empty dates | All | Filter with `.filter((ev) => ev.title && ev.date)` after mapping to catch parser failures. Always validate `date < todayIso()` to avoid expired events. |
+| Duration instead of end time | Liebieghaus (schema.org `duration="P1H30M"`) | Parse `PT(\d+)H(?:(\d+)M)?` from datetime attributes. Add hours to start time, wrapping at 24 with `% 24`. |
+
+### Problem: Times missing or in wrong format
+
+| Issue | Museums | Mitigation |
+|---|---|---|
+| Midnight as "00:00" (all-day events) | Liebieghaus, Staedel, Dommuseum, many others | Use `nullIfMidnight(time)` from `shared.ts` to convert "00:00" → `null`. Always apply this AFTER extracting time. |
+| Time in description or title, not dedicated field | MFK (My Calendar), Ledermuseum | Use regex: `(\d{1,2})[.:](\d{2})\s*(?:Uhr\|h\b)` to extract HH:MM, handle `.` as hour separator and `:` as both. Try hour-only fallback: `(?:ab\s+)?(\d{1,2})\s*Uhr` → `HH:00`. |
+| Time range in single field (e.g., "14:00–16:00") | Junges Museum, MAK | Split on `[-–]`, parse both, store first as `time` and second as `end_time`. Handle both `.` (German) and `:` (ISO) as separators. |
+| Seconds or milliseconds | Various APIs | Always slice to `HH:MM` (positions 11:16 for ISO datetime strings). Never store full ISO times in DB. |
+| "00:00" for unknown end time | Dommuseum | Only set `end_time` if non-midnight. Discard midnight values: `endTime !== "00:00" ? endTime : null`. |
+
+### Problem: Times leaking into titles
+
+This happens when parsing HTML extracts time alongside title, or scrapers concatenate title + date.
+
+| Symptom | Root cause | Fix |
+|---|---|---|
+| Title contains "14:00" or "Uhr" | HTML parser grabbed sibling time element in same block | Use `stripHtml()` on title, then trim whitespace. Add negative lookbehind in regex if needed: `(?<![\d:])(PATTERN)` to avoid matching inside times. Extract title and time into separate fields BEFORE building ApiEvent. |
+| Title has date like "15. Mai" | AI or HTML parser confused structure | If date parser already extracted date, remove it from title with regex replace: `title.replace(/\d{1,2}\.\s*\w+/g, '')` AFTER date extraction. Or run `stripHtml()` which merges adjacent text nodes. |
+| Title has duration like "2 Stunden" | Common in descriptions | Use `truncateHtml()` for descriptions instead of titles. Keep titles short; discard non-title text before `.flatMap()`. |
+
+**Example:** Junges Museum (`fetchJungesMuseum`) extracts from h2/h3 headers separately, ensuring title and date never mix.
+
+### Problem: Invalid date ranges
+
+| Issue | Museums | Fix |
+|---|---|---|
+| `end_date` before `date` (data error) | Sporadic in HTML sources | Validate: `if (ed !== date) endDate = ed;` BEFORE return. Compare ISO strings (YYYY-MM-DD sorts lexicographically). |
+| `end_date` same as `date` | Staedel, Senckenberg, Liebieghaus | Omit it: `endDate !== startDate ? endDate : null`. Only set `end_date` for multi-day events. |
+| No `end_date` but `end_time` exists | Normal for same-day events | Store `end_time` only; leave `end_date` null. DB schema allows this. |
+
+### Pattern: Timezone conversions
+
+Always use `src/date.ts` utilities for timezone work:
+
+- **`toBerlinDate(date: Date): string`** — converts `Date` object → ISO date string in Berlin timezone (Europe/Berlin). Use for all timestamp parsing.
+- **`toBerlinTime(date: Date): string`** — converts `Date` object → HH:MM time string in Berlin timezone.
+- **`todayIso(): string`** — returns today's date in Berlin timezone as YYYY-MM-DD.
+- **`dateOffset(days: number): string`** — returns future date (e.g., 30 days from now) as ISO string.
+- **`inferYear(month: string, day: string): string`** — infers year for partial dates (e.g., "15. März") by checking if date has already passed this year.
+
+Example (Dommuseum iCal parsing):
+```typescript
+const startDate = new Date(`${dtStart.slice(0, 4)}-${dtStart.slice(4, 6)}-${dtStart.slice(6, 8)}T${dtStart.slice(9, 11)}:${dtStart.slice(11, 13)}:${dtStart.slice(13, 15)}Z`);
+const date = toBerlinDate(startDate);  // Now in Europe/Berlin
+const time = toBerlinTime(startDate);   // Now in Europe/Berlin
+```
+
+### Pattern: Fallback extraction (multi-level parsing)
+
+When primary date/time fields are missing, try progressively weaker sources:
+
+1. Dedicated API fields (e.g., `start_date`, `event_start_time`)
+2. Structured data (schema.org, JSON-LD, microformats)
+3. HTML text nodes (regex or AI)
+4. Metadata (iCal, RSS timestamps)
+5. Default to all-day (time=null)
+
+Example (My Calendar fallback):
+```typescript
+let time = ev.event_time && ev.event_time !== "00:00:00" ? ev.event_time.slice(0, 5) : null;
+if (!time && ev.event_desc) {
+  const withMinutes = ev.event_desc.match(/(\d{1,2})[.:](\d{2})\s*(?:Uhr|h\b)/);
+  if (withMinutes) time = `${withMinutes[1].padStart(2, "0")}:${withMinutes[2]}`;
+}
+```
+
+### QA: How to check for missing/broken dates
+
+Before shipping a new scraper:
+
+1. **Manual run:** `curl -X POST https://museumsufer.app/scrape/events -H "Authorization: Bearer $SCRAPE_SECRET"` and check logs for parse errors.
+2. **Spot-check DB:** Query a few events: `SELECT title, date, time FROM events WHERE museum_id = ? LIMIT 5`. Look for NULL dates, midnight times, or dates in titles.
+3. **Check frontend:** Visit https://museumsufer.app?lang=de, search by museum name, verify dates display correctly without times if `time IS NULL`.
+4. **Regression test:** If fixing an existing scraper, ensure at least as many events are extracted (check event count delta).
+
+### Utility functions from `shared.ts`
+
+- **`stripHtml(text: string): string`** — removes tags, decodes entities, collapses whitespace. Use on all user-facing text.
+- **`nullIfMidnight(time: string | null): string | null`** — converts "00:00" → null. Apply AFTER extracting time, before storing.
+- **`truncateHtml(text: string, maxLen = 500): string | null`** — strips HTML, truncates to word boundary, returns null if empty. Use for descriptions, never for dates.
+- **`normalizeUrl(url: string | null, baseUrl: string): string | null`** — prepends baseUrl to relative URLs, handles `/`, `//`, and full URLs correctly.
+
 ## Common tasks
 
 ### Adding a new museum API
