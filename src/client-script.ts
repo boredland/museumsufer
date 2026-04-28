@@ -323,30 +323,39 @@ export const CLIENT_SCRIPT = `
     var btnNear = document.getElementById('btn-near');
 
     var nearClickCount = 0;
+    var nearGen = 0;
+
+    function deactivateNear() {
+      nearGen++;
+      nearClickCount = 0;
+      sortByDistance = false;
+      btnNear.classList.remove('loading', 'active');
+      btnNear.removeAttribute('aria-busy');
+      btnNear.setAttribute('aria-pressed', 'false');
+      removeDistanceBadges();
+      sortCardsByDate();
+      pushStateToUrl(currentDate, false);
+    }
 
     btnNear.addEventListener('click', function() {
       if (btnNear.classList.contains('loading')) {
-        btnNear.classList.remove('loading', 'active');
-        btnNear.removeAttribute('aria-busy');
-        btnNear.setAttribute('aria-pressed', 'false');
-        sortByDistance = false;
-        nearClickCount = 0;
-        removeDistanceBadges();
-        sortCardsByDate();
-        pushStateToUrl(currentDate, false);
+        deactivateNear();
         return;
       }
       if (sortByDistance) {
         nearClickCount++;
         if (nearClickCount === 1 && 'geolocation' in navigator) {
+          var gen = ++nearGen;
           btnNear.classList.add('loading');
           btnNear.setAttribute('aria-busy', 'true');
           navigator.geolocation.getCurrentPosition(
             function(pos) {
+              if (gen !== nearGen) return;
               userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
               try { sessionStorage.setItem('userPos', JSON.stringify(userPos)); } catch(e) {}
               sessionStorage.removeItem('transit_' + Math.round(userPos.lat * 500) / 500 + '_' + Math.round(userPos.lng * 500) / 500);
               fetchTransitTimes().then(function() {
+                if (gen !== nearGen) return;
                 btnNear.classList.remove('loading');
                 btnNear.removeAttribute('aria-busy');
                 removeDistanceBadges(); removeReachabilityBadges();
@@ -355,6 +364,7 @@ export const CLIENT_SCRIPT = `
               });
             },
             function() {
+              if (gen !== nearGen) return;
               btnNear.classList.remove('loading');
               btnNear.removeAttribute('aria-busy');
             },
@@ -362,16 +372,11 @@ export const CLIENT_SCRIPT = `
           );
           return;
         }
-        nearClickCount = 0;
-        sortByDistance = false;
-        btnNear.classList.remove('active');
-        btnNear.setAttribute('aria-pressed', 'false');
-        removeDistanceBadges();
-        sortCardsByDate();
-        pushStateToUrl(currentDate, false);
+        deactivateNear();
         return;
       }
       nearClickCount = 0;
+      var gen = ++nearGen;
       function activateNearMe() {
         sortByDistance = true;
         btnNear.classList.add('active');
@@ -379,6 +384,7 @@ export const CLIENT_SCRIPT = `
         btnNear.classList.add('loading');
         btnNear.setAttribute('aria-busy', 'true');
         fetchTransitTimes().then(function() {
+          if (gen !== nearGen) return;
           btnNear.classList.remove('loading');
           btnNear.removeAttribute('aria-busy');
           injectDistanceBadges(); injectReachability();
@@ -393,11 +399,13 @@ export const CLIENT_SCRIPT = `
         btnNear.setAttribute('aria-busy', 'true');
         navigator.geolocation.getCurrentPosition(
           function(pos) {
+            if (gen !== nearGen) return;
             userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
             try { sessionStorage.setItem('userPos', JSON.stringify(userPos)); } catch(e) {}
             activateNearMe();
           },
           function() {
+            if (gen !== nearGen) return;
             btnNear.classList.remove('loading');
             btnNear.removeAttribute('aria-busy');
             btnNear.style.display = 'none';
