@@ -212,7 +212,7 @@ export const CLIENT_SCRIPT = `
         var slug = el.dataset.museumSlug;
         var min = travelMin(slug);
         if (min === null) return;
-        var navBtn = el.querySelector('a[href*="rmv.de/go"]');
+        var navBtn = el.querySelector('button[popovertarget^="nav-"]');
         if (navBtn && !navBtn.dataset.distanced) {
           navBtn.dataset.distanced = '1';
           navBtn.innerHTML = pinSvg + ' ' + min + ' ' + escHtml(T.minWalk);
