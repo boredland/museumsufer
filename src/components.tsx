@@ -99,27 +99,71 @@ function LikeBadge({ count }: { count: number }) {
   );
 }
 
-function rmvUrl(name: string, lat: number, lng: number): string {
+function navUrls(name: string, lat: number, lng: number) {
   const zid = `A=2@O=${name}@X=${Math.round(lng * 1e6)}@Y=${Math.round(lat * 1e6)}@`;
-  return `https://www.rmv.de/go/?ZID=${encodeURIComponent(zid)}`;
+  return {
+    rmvApp: `https://www.rmv.de/go/?ZID=${encodeURIComponent(zid)}`,
+    rmvWeb: `https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=${encodeURIComponent(zid)}`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit`,
+    apple: `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=r`,
+  };
 }
+
+const navLinkClass =
+  "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
 
 function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
   const m = MUSEUM_LOCATIONS[slug];
+  const urls = navUrls(name, m.lat, m.lng);
+  const popId = `nav-${slug}`;
   return (
-    <a
-      class={iconBtnClass}
-      href={rmvUrl(name, m.lat, m.lng)}
-      target="_blank"
-      rel="noopener"
-      aria-label={tr.navigate}
-      title={tr.navigate}
-    >
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
-        <path d={ICON.navigate} />
-      </svg>
-    </a>
+    <span class="relative inline-block">
+      <button
+        type="button"
+        class={iconBtnClass}
+        aria-label={tr.navigate}
+        title={tr.navigate}
+        popovertarget={popId}
+        style={`anchor-name:--${popId}`}
+        onclick={`if(!CSS.supports('anchor-name','--a')){var p=document.getElementById('${popId}');var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,r.right-180)+'px'}`}
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
+          <path d={ICON.navigate} />
+        </svg>
+      </button>
+      <div
+        id={popId}
+        popover="auto"
+        style={`position-anchor:--${popId};position-area:bottom span-right`}
+        class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
+      >
+        <a href={urls.rmvApp} target="_blank" rel="noopener" class={`${navLinkClass} hidden max-[1024px]:flex`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+            <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
+          </svg>
+          RMV
+        </a>
+        <a href={urls.rmvWeb} target="_blank" rel="noopener" class={`${navLinkClass} max-[1024px]:hidden`}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+            <path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z" />
+          </svg>
+          RMV
+        </a>
+        <a href={urls.google} target="_blank" rel="noopener" class={navLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+            <path d={ICON.navigate} />
+          </svg>
+          Google Maps
+        </a>
+        <a href={urls.apple} target="_blank" rel="noopener" class={navLinkClass}>
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
+            <path d={ICON.navigate} />
+          </svg>
+          Apple Maps
+        </a>
+      </div>
+    </span>
   );
 }
 
@@ -492,20 +536,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               <ExternalLinkIcon />
             </a>
           )}
-          {geo && (
-            <a
-              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
-              href={rmvUrl(museum.name, geo.lat, geo.lng)}
-              target="_blank"
-              rel="noopener"
-              aria-label={tr.navigate}
-              title={tr.navigate}
-            >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
-                <path d={ICON.navigate} />
-              </svg>
-            </a>
-          )}
+          <NavButton slug={slug} name={museum.name} tr={tr} />
         </div>
       </div>
     </li>
