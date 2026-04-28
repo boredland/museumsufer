@@ -856,10 +856,16 @@ async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
     const date = `${dm[3]}-${dm[2]}-${dm[1]}`;
     if (date < today) continue;
 
+    const timeMatch = subtitleMatch[1].match(/(\d{1,2}):(\d{2})\s*Uhr/);
+    let time: string | null = null;
+    if (timeMatch) {
+      time = `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+    }
+
     events.push({
       title: titleMatch[1].trim(),
       date,
-      time: null,
+      time: nullIfMidnight(time),
       end_time: null,
       end_date: null,
       description: null,
