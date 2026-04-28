@@ -114,7 +114,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
     // Preserve cache headers from upstream to enable conditional requests
     const eTag = res.headers.get("ETag");
-    if (eTag) responseHeaders["ETag"] = eTag;
+    if (eTag) responseHeaders.ETag = eTag;
     const lastModified = res.headers.get("Last-Modified");
     if (lastModified) responseHeaders["Last-Modified"] = lastModified;
 

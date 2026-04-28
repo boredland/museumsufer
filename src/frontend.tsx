@@ -4,8 +4,8 @@ import { CLIENT_SCRIPT } from "./client-script";
 import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
-import { getMuseumLocations } from "./museum-config";
 import { ICON } from "./icons";
+import { getMuseumLocations } from "./museum-config";
 import { formatDateFull } from "./shared";
 import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
@@ -396,7 +396,11 @@ export function renderPage(
               {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
             </p>
 
-            <style dangerouslySetInnerHTML={{ __html: "#content{opacity:0}.hydrated #content{opacity:1;transition:opacity .1s}" }} />
+            <style
+              dangerouslySetInnerHTML={{
+                __html: "#content{opacity:0}.hydrated #content{opacity:1;transition:opacity .1s}",
+              }}
+            />
             <main id="content">
               {initialData ? (
                 <ContentBody
@@ -547,7 +551,12 @@ function buildEventSchema(data: InitialData, tz: string): string {
       schema.organizer = org;
       schema.performer = org;
       schema.offers = ev.price
-        ? { "@type": "Offer", url: ev.detail_url || ev.url, availability: "https://schema.org/InStock", description: ev.price }
+        ? {
+            "@type": "Offer",
+            url: ev.detail_url || ev.url,
+            availability: "https://schema.org/InStock",
+            description: ev.price,
+          }
         : { "@type": "Offer", url: ev.detail_url || ev.url, availability: "https://schema.org/InStock" };
 
       schemas.push(schema);
