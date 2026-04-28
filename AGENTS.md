@@ -267,8 +267,28 @@ curl -X POST https://museumsufer.app/scrape \
 curl -X POST https://museumsufer.app/scrape/events \
   -H "Authorization: Bearer $SCRAPE_SECRET"
 
+curl -X POST https://museumsufer.app/scrape/exhibitions \
+  -H "Authorization: Bearer $SCRAPE_SECRET"
+
 curl -X POST https://museumsufer.app/scrape/translate \
   -H "Authorization: Bearer $SCRAPE_SECRET"
+```
+
+### Full re-scrape (wipe + rebuild)
+
+When scraping logic has changed significantly and stale data needs to be flushed:
+
+```bash
+# 1. Set a SCRAPE_SECRET if not already set
+openssl rand -hex 32 | npx wrangler secret put SCRAPE_SECRET --name museumsufer
+
+# 2. Wipe the table (events, exhibitions, or both)
+npx wrangler d1 execute museumsufer-db --remote --command "DELETE FROM events;"
+npx wrangler d1 execute museumsufer-db --remote --command "DELETE FROM exhibitions;"
+
+# 3. Trigger re-scrape
+curl -s -X POST "https://museumsufer.app/scrape/events" -H "Authorization: Bearer $SCRAPE_SECRET"
+curl -s -X POST "https://museumsufer.app/scrape/exhibitions" -H "Authorization: Bearer $SCRAPE_SECRET"
 ```
 
 ### Running migrations
