@@ -253,8 +253,9 @@ export async function getExhibitionsForDate(env: Env, date: string): Promise<Exh
     `SELECT e.*, m.name as museum_name, m.slug as museum_slug
      FROM exhibitions e
      JOIN museums m ON e.museum_id = m.id
-     WHERE (e.start_date IS NULL OR e.start_date <= ?)
-       AND (e.end_date IS NULL OR e.end_date >= ?)
+     WHERE e.start_date IS NOT NULL AND e.end_date IS NOT NULL
+       AND e.start_date <= ?
+       AND e.end_date >= ?
      ORDER BY m.slug, e.title`,
   )
     .bind(date, date)
