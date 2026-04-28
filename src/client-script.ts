@@ -1,5 +1,8 @@
 export const CLIENT_SCRIPT = `
-    if (typeof htmx !== 'undefined') htmx.config.globalViewTransitions = true;
+    var htmxReady = false;
+    document.body.addEventListener('htmx:load', function() {
+      if (!htmxReady) { htmxReady = true; htmx.config.globalViewTransitions = true; }
+    });
 
     let userPos = null;
     let sortByDistance = false;
@@ -180,6 +183,7 @@ export const CLIENT_SCRIPT = `
       }
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
+      document.body.classList.add('hydrated');
       if (sortByDistance && userPos) { injectDistanceBadges(); injectReachability(); }
     });
 
@@ -414,6 +418,7 @@ export const CLIENT_SCRIPT = `
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
+      document.body.classList.add('hydrated');
     } else {
       loadDay(clientToday);
     }

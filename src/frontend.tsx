@@ -396,6 +396,7 @@ export function renderPage(
               {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
             </p>
 
+            <style dangerouslySetInnerHTML={{ __html: "#content{opacity:0}.hydrated #content{opacity:1;transition:opacity .1s}" }} />
             <main id="content">
               {initialData ? (
                 <ContentBody
