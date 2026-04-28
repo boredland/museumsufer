@@ -59,23 +59,39 @@ app.post("/api/transit", async (c) => {
   const slugs = Object.keys(geo);
   const result: Record<string, number> = {};
 
-  for (let i = 0; i < slugs.length; i += 10) {
-    const batch = slugs.slice(i, i + 10);
-    const svcReqL = batch.map((slug) => {
+  const lidToSlugs = new Map<string, string[]>();
+  const coordSlugs: string[] = [];
+  for (const slug of slugs) {
+    const m = geo[slug];
+    if (m.rmvStopLid) {
+      const existing = lidToSlugs.get(m.rmvStopLid);
+      if (existing) existing.push(slug);
+      else lidToSlugs.set(m.rmvStopLid, [slug]);
+    } else {
+      coordSlugs.push(slug);
+    }
+  }
+
+  const uniqueLids = [...lidToSlugs.keys()];
+  const queryItems = [
+    ...uniqueLids.map((lid) => ({ key: lid, arrLoc: { lid } })),
+    ...coordSlugs.map((slug) => {
       const m = geo[slug];
-      const arrLoc = m.rmvStopLid
-        ? { lid: m.rmvStopLid }
-        : { type: "C" as const, crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } };
-      return {
-        meth: "TripSearch",
-        req: {
-          depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
-          arrLocL: [arrLoc],
-          numF: 1,
-          getPolyline: false,
-        },
-      };
-    });
+      return { key: slug, arrLoc: { type: "C" as const, crd: { x: Math.round(m.lng * 1e6), y: Math.round(m.lat * 1e6) } } };
+    }),
+  ];
+
+  for (let i = 0; i < queryItems.length; i += 10) {
+    const batch = queryItems.slice(i, i + 10);
+    const svcReqL = batch.map((item) => ({
+      meth: "TripSearch",
+      req: {
+        depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
+        arrLocL: [item.arrLoc],
+        numF: 1,
+        getPolyline: false,
+      },
+    }));
     try {
       const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
         method: "POST",
@@ -93,7 +109,15 @@ app.post("/api/transit", async (c) => {
       const data = (await res.json()) as { svcResL?: Array<{ res?: { outConL?: Array<{ dur?: string }> } }> };
       (data.svcResL || []).forEach((r, j) => {
         const dur = r.res?.outConL?.[0]?.dur;
-        if (dur) result[batch[j]] = parseInt(dur.slice(0, 2), 10) * 60 + parseInt(dur.slice(2, 4), 10);
+        if (!dur) return;
+        const minutes = parseInt(dur.slice(0, 2), 10) * 60 + parseInt(dur.slice(2, 4), 10);
+        const item = batch[j];
+        const mappedSlugs = lidToSlugs.get(item.key);
+        if (mappedSlugs) {
+          for (const s of mappedSlugs) result[s] = minutes;
+        } else {
+          result[item.key] = minutes;
+        }
       });
     } catch {}
   }
