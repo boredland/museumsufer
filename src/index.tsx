@@ -112,46 +112,52 @@ app.post("/api/transit", async (c) => {
     }),
   ];
 
+  const batches: typeof queryItems[] = [];
   for (let i = 0; i < queryItems.length; i += 10) {
-    const batch = queryItems.slice(i, i + 10);
-    const svcReqL = batch.map((item) => ({
-      meth: "TripSearch",
-      req: {
-        depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
-        arrLocL: [item.arrLoc],
-        numF: 1,
-        getPolyline: false,
-      },
-    }));
-    try {
-      const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        cf: { cacheTtl: 86400, cacheEverything: true },
-        body: JSON.stringify({
-          auth: { type: "AID", aid: "x0k4ZR33ICN9CWmj" },
-          client: { type: "WEB", id: "RMV", name: "webapp" },
-          ver: "1.44",
-          ext: "RMV.1",
-          lang: "de",
-          svcReqL,
-        }),
-      });
-      const data = (await res.json()) as { svcResL?: Array<{ res?: { outConL?: Array<{ dur?: string }> } }> };
-      (data.svcResL || []).forEach((r, j) => {
-        const dur = r.res?.outConL?.[0]?.dur;
-        if (!dur) return;
-        const minutes = parseInt(dur.slice(0, 2), 10) * 60 + parseInt(dur.slice(2, 4), 10);
-        const item = batch[j];
-        const mappedSlugs = lidToSlugs.get(item.key);
-        if (mappedSlugs) {
-          for (const s of mappedSlugs) result[s] = minutes;
-        } else {
-          result[item.key] = minutes;
-        }
-      });
-    } catch {}
+    batches.push(queryItems.slice(i, i + 10));
   }
+
+  await Promise.all(
+    batches.map(async (batch) => {
+      const svcReqL = batch.map((item) => ({
+        meth: "TripSearch",
+        req: {
+          depLocL: [{ type: "C", crd: { x: ox, y: oy } }],
+          arrLocL: [item.arrLoc],
+          numF: 1,
+          getPolyline: false,
+        },
+      }));
+      try {
+        const res = await fetch("https://www.rmv.de/auskunft/bin/jp/mgate.exe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          cf: { cacheTtl: 86400, cacheEverything: true },
+          body: JSON.stringify({
+            auth: { type: "AID", aid: "x0k4ZR33ICN9CWmj" },
+            client: { type: "WEB", id: "RMV", name: "webapp" },
+            ver: "1.44",
+            ext: "RMV.1",
+            lang: "de",
+            svcReqL,
+          }),
+        });
+        const data = (await res.json()) as { svcResL?: Array<{ res?: { outConL?: Array<{ dur?: string }> } }> };
+        (data.svcResL || []).forEach((r, j) => {
+          const dur = r.res?.outConL?.[0]?.dur;
+          if (!dur) return;
+          const minutes = parseInt(dur.slice(0, 2), 10) * 60 + parseInt(dur.slice(2, 4), 10);
+          const item = batch[j];
+          const mappedSlugs = lidToSlugs.get(item.key);
+          if (mappedSlugs) {
+            for (const s of mappedSlugs) result[s] = minutes;
+          } else {
+            result[item.key] = minutes;
+          }
+        });
+      } catch {}
+    }),
+  );
 
   const WALK_KM_PER_MIN = 0.08;
   for (const slug of slugs) {
