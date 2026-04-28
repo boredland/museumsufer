@@ -42,6 +42,8 @@ export async function scrapeMuseumWebsites(
     try {
       const museumConfig = getMuseumConfig(museum.slug);
 
+      if (museumConfig?.skipEvents && !museumConfig.eventApi) continue;
+
       if (museumConfig?.eventApi) {
         const proxy =
           museumConfig.proxy && env.FETCH_PROXY_URL
