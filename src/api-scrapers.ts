@@ -125,7 +125,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       : ((data as { events?: HistorischesEvent[] }).events ?? []);
     if (!Array.isArray(events)) continue;
     for (const ev of events) {
-      if (!ev.title || !ev.dateStart) continue;
+      if (!ev.title || !ev.dateStart || ev.type === "specialExhibition") continue;
       const key = `${ev.title}::${ev.dateStart}`;
       if (seen.has(key)) continue;
       seen.add(key);
@@ -175,6 +175,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
 
 interface HistorischesEvent {
   title?: string;
+  type?: string;
   dateStart?: number;
   dateEnd?: number;
   time?: string;
