@@ -355,9 +355,10 @@ export function renderPage(
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true"
-                    class="w-[18px] h-[18px] fill-white"
+                    class="w-[18px] h-[18px]"
                   >
-                    <path d="M12 2L2 7v2h20V7L12 2zm0 2.26L18.47 7H5.53L12 4.26zM2 19v2h20v-2H2zm2-8v8h2v-8H6zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2zm4 0v8h2v-8h-2z" />
+                    <path d="M12 1L2 6v2h20V6L12 1zm0 2.26L18.47 6H5.53L12 3.26zM2 17v2h20v-2H2zm2-7v7h2v-7H6zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2z" fill="white" />
+                    <path d="M2,22 Q6,20.5 10,22 Q14,23.5 18,22 Q20,21.2 22,22" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-linecap="round" />
                   </svg>
                 </div>
               </div>
