@@ -16,40 +16,39 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 - **Translation:** DeepL API Free (500K chars/month) with D1 hash-based caching
 - **Date handling:** dayjs with timezone plugin (Europe/Berlin)
 - **Search:** Fuse.js (client-side fuzzy search, loaded from CDN)
+- **Framework:** [Hono](https://hono.dev) v4 with `@hono/zod-validator` for request validation
+- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx
 - **Build:** wrangler (no bundler config — wrangler handles it)
-- **No framework** — vanilla Worker with manual routing in `src/index.ts`
 
 ## Key files
 
-| File | Lines | Purpose |
-|---|---|---|
-| `src/index.ts` | 214 | Entry point. Routes HTTP, SSR with inline data, cron handler, robots.txt, sitemap, OG image, manifest, service worker. |
-| `src/scraper.ts` | 258 | Scrapes museumsufer.de for museums (from embedded `museumMapConfig` JSON) and exhibitions (HTML parsing of `.teaserBox` elements). Deterministic — no AI. |
-| `src/museum-apis.ts` | 99 | Static registry of 16 museum API endpoints and parser types. Source of truth for structured vs AI scraping. |
-| `src/api-scrapers.ts` | 912 | 16 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `junges-museum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`. Each returns `ApiEvent[]`. |
-| `src/event-scraper.ts` | 518 | Orchestrator: API-first with AI fallback, link matching, detail page enrichment (images + prices for next 7 days). |
-| `src/translate.ts` | 199 | DeepL translation pipeline with SHA-256 hash-based D1 caching. Translates DE→EN/FR. |
-| `src/api.ts` | 256 | JSON API with SWR caching, RSS/ICS feeds, past-event filtering, per-event ICS download, translation integration. |
-| `src/frontend.ts` | 1480 | SSR HTML template: i18n (DE/EN/FR), Fuse.js search, distance sorting with river-side awareness, collapsible sections, visited tracking, Event JSON-LD schema, DeepL attribution badges. |
-| `src/i18n.ts` | 171 | Translations (DE/EN/FR) and locale detection from Accept-Language / ?lang= param. |
-| `src/date.ts` | 33 | dayjs-based Berlin timezone utilities (toBerlinDate, toBerlinTime, todayIso, dateOffset). |
-| `src/shared.ts` | 54 | Shared constants (URLs, USER_AGENT) and utilities (stripHtml, escHtml, normalizeUrl, truncateHtml, nullIfMidnight, German month maps). |
-| `src/museum-geo.ts` | 71 | Lat/lng for all 39 museums, haversine distance with Main river-side penalty (+800m for cross-river). |
-| `src/image-proxy.ts` | 88 | Edge-cached image proxy with dynamic domain allowlist from DB + subdomain matching. 7-day TTL. |
-| `src/service-worker.ts` | 69 | Offline PWA support: network-first for pages/API, cache-first for images. |
-| `src/health-check.ts` | 154 | Source health checks for all 16 structured endpoints + museumsufer.de pages. |
-| `src/types.ts` | 41 | Env interface (D1 + AI + SCRAPE_SECRET + DEEPL_API_KEYS) and data types. |
+| File | Purpose |
+|---|---|
+| `src/index.tsx` | Hono app, routes, cron handler, SSR with inline data. |
+| `src/routes/scrape.ts` | Auth-protected scrape endpoints (`POST /scrape/*`). |
+| `src/routes/feeds.ts` | RSS and ICS feed endpoints. |
+| `src/routes/static.ts` | Static assets (robots.txt, sitemap, manifest, llms.txt, OG image). |
+| `src/frontend.tsx` | SSR JSX: i18n (DE/EN/FR), Fuse.js search, distance sorting, visited tracking, JSON-LD. |
+| `src/components.tsx` | Shared JSX components. |
+| `src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
+| `src/scraper.ts` | Scrapes museumsufer.de for museums and exhibitions. Deterministic — no AI. |
+| `src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
+| `src/api-scrapers.ts` | 15 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`. Each returns `ApiEvent[]`. |
+| `src/event-scraper.ts` | Orchestrator: API-first with AI fallback, link matching, detail page enrichment. |
+| `src/translate.ts` | DeepL translation pipeline with SHA-256 hash-based D1 caching. DE→EN/FR. |
+| `src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
+| `src/health-check.ts` | Source health checks for all structured endpoints + museumsufer.de. |
 
 ## Event scraping: three tiers
 
-### Tier 1: Structured APIs (16 museums, best data)
+### Tier 1: Structured APIs (15 museums, best data)
 
-Configured in `src/museum-apis.ts`. When the event scraper finds a matching slug, it calls `fetchEventsFromApi()` and skips AI scraping entirely.
+Configured in `src/museum-config.ts`. When the event scraper finds a matching slug, it calls `fetchEventsFromApi()` and skips AI scraping entirely.
 
 | Museum | Slug | Parser | Notes |
 |---|---|---|---|
 | Städel Museum | `staedel-museum` | `staedel` | ~370 events, images, sold-out status, `@web`/`@images` URL aliases |
-| Historisches Museum | `historisches-museum-frankfurt` | `historisches` | Unix timestamps, `isFree`, "Bibliothek der Generationen" blocklisted |
+| Historisches Museum (+ Junges Museum, Porzellan Museum) | `historisches-museum-frankfurt` | `historisches` | Fetches 4 endpoints (base + fuehrung/workshop/stadtgang types), routes to sub-museums via `locations` field, filters `specialExhibition` |
 | Jüdisches Museum | `juedisches-museum-frankfurt` | `juedisches` | TYPO3 feed.json, events routed to Judengasse via `locationAlt` → `museum_slug_override` |
 | DAM | `deutsches-architekturmuseum` | `tribe-events` | Standard Tribe Events with cost, image, venue |
 | DFF | `dff-deutsches-filminstitut-filmmuseum` | `tribe-events` | Same format |
@@ -59,7 +58,6 @@ Configured in `src/museum-apis.ts`. When the event scraper finds a matching slug
 | MAK | `museum-angewandte-kunst` | `mak` | mak-event-item elements, time ranges in headings |
 | IfS | `institut-fuer-stadtgeschichte` | `stadtgeschichte-rss` | RSS feed with German dates/prices in description |
 | Dommuseum | `dommuseum-frankfurt` | `dommuseum` | TYPO3 Calendarize per-event ICS files, needs browser UA |
-| Junges Museum | `junges-museum-frankfurt` | `junges-museum` | Drupal Views h2/h3 structure |
 | Ledermuseum | `deutsches-ledermuseum-of` | `ledermuseum` | Kirby CMS li.quarter + div.date |
 | Bibelhaus | `bibelhaus-erlebnismuseum` | `bibelhaus` | BEM-style bmBase--eventsItem elements |
 | FKV | `frankfurter-kunstverein` | `fkv` | WP article with DD.MM.YYYY in p.subtitle |
@@ -207,7 +205,6 @@ These issues exist in the current codebase. When fixing or refactoring scrapers,
 | Parser | Issue | Impact | Fix |
 |---|---|---|---|
 | **tribe-events** (DAM, DFF) | No `nullIfMidnight()` on start/end times (lines 86-87) | Midnight times render as "00:00" instead of all-day events | Wrap both lines with `nullIfMidnight()` |
-| **historisches** | No `nullIfMidnight()` on start time (line 146) | Extracted times could be "00:00" → shown as midnight | Apply to line 146; end_time already has it on line 131 |
 | **mak** (MAK) | No `nullIfMidnight()` on time/end_time (lines 667-668) | Times extracted via regex could theoretically be "00:00" | Use `nullIfMidnight()` for both; low risk since regex-matched |
 | **stadtgeschichte-rss** (IfS) | No `nullIfMidnight()` on time/end_time (lines 721-722) | Times extracted via regex not filtered for "00:00" | Use `nullIfMidnight()` for both |
 | All parsers | Inconsistent midnight handling | Some use utility, some manual checks, some skip | Always use `nullIfMidnight()` from shared.ts |
@@ -313,7 +310,7 @@ wrangler d1 execute museumsufer-db --remote --file=./migrations/NNNN_name.sql
 - **SCHIRN** WP API: `ho_event_data` serialized as single characters (their bug)
 - **FKV** WP REST: no event date fields in API (now using HTML parsing instead)
 - **Archäologisches Museum** RSS: static program pages, not dated events
-- **Junges Museum** Drupal iCal: accepts URLs but returns HTML (module not configured)
+- **Junges Museum** Drupal scraper: replaced by Historisches Museum API which covers all sub-museums via `locations` field
 - **Curator.io** for Jüdisches Museum: social media aggregator, not events
 - **Workers AI m2m100**: available as free translation fallback but lower quality than DeepL
 
