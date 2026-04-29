@@ -76,7 +76,7 @@ function LangSwitch({ locale }: { locale: Locale }) {
         <a
           href={`?lang=${l}`}
           data-lang={l}
-          onclick="var u=new URL(location.href);u.searchParams.set('lang',this.dataset.lang);if(typeof currentDate!=='undefined'&&currentDate!==BERLIN_TODAY)u.searchParams.set('date',currentDate);else u.searchParams.delete('date');if(typeof sortByDistance!=='undefined'&&sortByDistance)u.searchParams.set('sort','near');else u.searchParams.delete('sort');location.href=u.toString();return false"
+          onclick="var u=new URL(location.href);u.searchParams.set('lang',this.dataset.lang);if(typeof currentDate!=='undefined'){u.searchParams.set('date',currentDate)}if(typeof sortByDistance!=='undefined'&&sortByDistance)u.searchParams.set('sort','near');else u.searchParams.delete('sort');location.href=u.toString();return false"
           class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
           aria-current={l === locale ? "page" : undefined}
         >
