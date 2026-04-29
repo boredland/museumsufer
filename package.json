@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.6",
+    "@scalar/hono-api-reference": "^0.10.11",
     "dayjs": "^1.11.20",
     "fuse.js": "^7.0.0",
     "hono": "^4.12.15",

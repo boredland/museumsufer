@@ -421,6 +421,9 @@ export function renderPage(
               <a href="/feed.xml" class="text-text-tertiary no-underline hover:text-accent hover:underline">
                 {tr.rssFeed}
               </a>
+              <a href="/api/docs" class="text-text-tertiary no-underline hover:text-accent hover:underline">
+                {tr.apiDocs}
+              </a>
               <a
                 href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
                 target="_blank"

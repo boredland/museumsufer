@@ -58,6 +58,7 @@ const de: Translations = {
   llmPrompt:
     "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.app/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",
   llmCopied: "Kopiert!",
+  apiDocs: "API",
   missingEvent: "Veranstaltung fehlt?",
   subscribeCal: "Kalender abonnieren",
   rssFeed: "RSS-Feed",
@@ -125,6 +126,7 @@ const en: Translations = {
   llmPrompt:
     "What's on at Frankfurt's Museumsufer today? Read https://museumsufer.app/llms.txt and use the API to get current exhibitions and events.",
   llmCopied: "Copied!",
+  apiDocs: "API",
   missingEvent: "Event missing?",
   subscribeCal: "Subscribe to calendar",
   rssFeed: "RSS feed",
@@ -192,6 +194,7 @@ const fr: Translations = {
   llmPrompt:
     "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et evenements actuels.",
   llmCopied: "Copie !",
+  apiDocs: "API",
   missingEvent: "Evenement manquant ?",
   subscribeCal: "S'abonner au calendrier",
   rssFeed: "Flux RSS",
