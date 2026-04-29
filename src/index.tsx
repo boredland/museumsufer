@@ -21,6 +21,7 @@ import { scrapeMuseumExhibitions } from "./exhibition-scraper";
 import { type InitialData, renderPage } from "./frontend";
 import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
+import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import scrapeRoute from "./routes/scrape";
 import staticRoute from "./routes/static";
@@ -58,6 +59,7 @@ app.use(
 
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
+app.route("/api/docs", docsRoute);
 app.route("/scrape", scrapeRoute);
 
 app.get("/img/*", async (c) => {
