@@ -69,24 +69,20 @@ function GithubCorner({ label }: { label: string }) {
   );
 }
 
-function LangSwitch({ locale, date, sort }: { locale: Locale; date?: string; sort?: string }) {
+function LangSwitch({ locale }: { locale: Locale }) {
   return (
     <nav class="flex justify-center gap-1 mt-3" aria-label="Language">
-      {SUPPORTED_LOCALES.map((l) => {
-        const params = new URLSearchParams();
-        params.set("lang", l);
-        if (date) params.set("date", date);
-        if (sort) params.set("sort", sort);
-        return (
-          <a
-            href={`?${params.toString()}`}
-            class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
-            aria-current={l === locale ? "page" : undefined}
-          >
-            {l.toUpperCase()}
-          </a>
-        );
-      })}
+      {SUPPORTED_LOCALES.map((l) => (
+        <a
+          href={`?lang=${l}`}
+          data-lang={l}
+          onclick="var u=new URL(location.href);u.searchParams.set('lang',this.dataset.lang);if(typeof currentDate!=='undefined'&&currentDate!==BERLIN_TODAY)u.searchParams.set('date',currentDate);else u.searchParams.delete('date');if(typeof sortByDistance!=='undefined'&&sortByDistance)u.searchParams.set('sort','near');else u.searchParams.delete('sort');location.href=u.toString();return false"
+          class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
+          aria-current={l === locale ? "page" : undefined}
+        >
+          {l.toUpperCase()}
+        </a>
+      ))}
     </nav>
   );
 }
@@ -369,11 +365,7 @@ export function renderPage(
                 Museumsufer Frankfurt
               </h1>
               <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
-              <LangSwitch
-                locale={locale}
-                date={initialData?.date !== todayIso() ? initialData?.date : undefined}
-                sort={sort}
-              />
+              <LangSwitch locale={locale} />
             </header>
 
             <SearchTrigger tr={tr} />
