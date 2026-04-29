@@ -110,7 +110,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6776,
     rmvStopLid: "A=1@O=Frankfurt (Main) Karmeliterkloster@X=8678186@Y=50110125@U=80@L=3060835@",
     hidden: true,
-    exhibitionUrl: "https://frankfurter-goethe-haus.de/ausstellungen/",
+    exhibitionUrl: "https://frankfurter-goethe-haus.de/ausstellung/",
     eventApi: { type: "fdh", endpoint: "https://www.goethehaus-frankfurt.de/programm/" },
   },
   "frankfurter-kunstverein": {
@@ -141,7 +141,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1092,
     lng: 8.6819,
     rmvStopLid: "A=1@O=Frankfurt (Main) Römer/Paulskirche@X=8682007@Y=50110934@U=80@L=3000002@",
-    exhibitionUrl: "https://www.historisches-museum-frankfurt.de/de/ausstellungen/",
+    exhibitionUrl: "https://historisches-museum-frankfurt.de/de/",
     eventApi: { type: "historisches", endpoint: "https://historisches-museum-frankfurt.de/api/calendar" },
   },
   "ikonenmuseum-frankfurt": {
@@ -149,7 +149,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6961,
     rmvStopLid: "A=1@O=Frankfurt (Main) Wasserweg@X=8694798@Y=50105432@U=80@L=3000028@",
     skipEvents: true,
-    exhibitionUrl: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/ausstellungen-im-ikonenmuseum/",
+    exhibitionUrl: "https://www.museumangewandtekunst.de/de/presse/ikonenmuseum/",
   },
   "institut-fuer-stadtgeschichte": {
     lat: 50.1088,
