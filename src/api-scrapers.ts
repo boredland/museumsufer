@@ -107,17 +107,35 @@ interface TribeEvent {
 }
 
 const HISTORISCHES_TITLE_BLOCKLIST = ["bibliothek der generationen"];
+const HISTORISCHES_EXTRA_TYPES = ["fuehrung", "workshop", "stadtgang"];
 
 async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint);
-  if (!res.ok) return [];
-  const data = (await res.json()) as HistorischesEvent[];
-  if (!Array.isArray(data)) return [];
+  const fetches = [
+    fetch(endpoint).then((r) => (r.ok ? r.json() : null)),
+    ...HISTORISCHES_EXTRA_TYPES.map((t) => fetch(`${endpoint}?type=${t}`).then((r) => (r.ok ? r.json() : null))),
+  ];
+  const responses = await Promise.all(fetches);
 
-  return data.flatMap((ev): ApiEvent[] => {
-    if (!ev.title || !ev.dateStart) return [];
-    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title?.toLowerCase().includes(b))) return [];
-    const start = new Date(ev.dateStart * 1000);
+  const seen = new Set<string>();
+  const allEvents: HistorischesEvent[] = [];
+  for (const data of responses) {
+    if (!data) continue;
+    const events: HistorischesEvent[] = Array.isArray(data)
+      ? data
+      : ((data as { events?: HistorischesEvent[] }).events ?? []);
+    if (!Array.isArray(events)) continue;
+    for (const ev of events) {
+      if (!ev.title || !ev.dateStart) continue;
+      const key = `${ev.title}::${ev.dateStart}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      allEvents.push(ev);
+    }
+  }
+
+  return allEvents.flatMap((ev): ApiEvent[] => {
+    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title!.toLowerCase().includes(b))) return [];
+    const start = new Date(ev.dateStart! * 1000);
     const date = toBerlinDate(start);
     if (date < todayIso()) return [];
 
@@ -141,7 +159,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
 
     return [
       {
-        title: ev.title,
+        title: ev.title!,
         date,
         time: nullIfMidnight(timeMatch?.[1] || null),
         end_time: endTime,
