@@ -247,6 +247,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.0999,
     lng: 8.5476,
     rmvStopLid: "A=1@O=Frankfurt (Main) Mainberg@X=8549524@Y=50100012@U=80@L=3001005@",
+    skipEvents: true,
   },
   "schirn-kunsthalle-frankfurt": {
     lat: 50.1102,
