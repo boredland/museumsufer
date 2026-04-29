@@ -7,7 +7,7 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 ## Features
 
 - Scrapes ~40 museums from museumsufer.de
-- Fetches events from 16 museums via structured APIs, ~22 more via AI-assisted HTML scraping
+- Fetches events from 15 museums via structured APIs, ~22 more via AI-assisted HTML scraping
 - Enriches upcoming events with prices, images, and deep links from detail pages
 - Frontend with i18n (DE/EN/FR), fuzzy search, distance sorting, calendar downloads
 - RSS (`/feed.xml`) and ICS (`/feed.ics`) feeds
@@ -15,41 +15,45 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 - Installable as a PWA with offline support
 - Daily cron refresh (6am UTC) with health check GitHub Action at 8am UTC
 
+## Tech stack
+
+- **Runtime:** Cloudflare Workers (TypeScript)
+- **Framework:** [Hono](https://hono.dev) with Zod validation
+- **Database:** Cloudflare D1 (SQLite)
+- **AI:** Cloudflare Workers AI (`llama-4-scout-17b`) for parsing museum websites without APIs
+- **Translation:** DeepL API with D1 hash-based caching (DE → EN/FR)
+- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, Fuse.js search
+- **Cron:** Daily scrape at 6am UTC, health check GitHub Action at 8am UTC
+
 ## Architecture
 
 ```
 src/
-  index.ts          HTTP routes, cron handler, SSR
-  scraper.ts        Museums + exhibitions from museumsufer.de
-  museum-apis.ts    Static config of museum API endpoints
-  api-scrapers.ts   Typed parsers for each API format
-  event-scraper.ts  Orchestrator: API-first with AI fallback, detail page enrichment
-  api.ts            JSON API with SWR caching, RSS/ICS feeds, past-event filtering
-  frontend.ts       Single-page HTML with i18n, search, distance sorting, .ics downloads
-  i18n.ts           Translations (DE/EN/FR) and locale detection
-  date.ts           dayjs-based Berlin timezone utilities
-  shared.ts         Shared constants and utilities
-  museum-geo.ts     Lat/lng for all museums, haversine distance
-  image-proxy.ts    Edge-cached image proxy with dynamic domain allowlist
-  service-worker.ts Offline PWA support
-  health-check.ts   Source health checks for all scraping endpoints
-  types.ts          Env interface and data types
+  index.tsx           Hono app, routes, cron handler, SSR
+  routes/
+    scrape.ts         Auth-protected scrape endpoints
+    feeds.ts          RSS and ICS feeds
+    static.ts         robots.txt, sitemap, manifest, llms.txt, OG image
+  frontend.tsx        Single-page HTML with i18n, search, distance sorting
+  components.tsx      Shared JSX components
+  api.ts              JSON API with SWR caching and past-event filtering
+  scraper.ts          Museums + exhibitions from museumsufer.de
+  museum-config.ts    Museum coordinates, API endpoints, scraping config
+  api-scrapers.ts     Typed parsers for each museum API format
+  event-scraper.ts    Orchestrator: API-first with AI fallback, detail page enrichment
+  exhibition-scraper.ts  Exhibition scraping from museum websites
+  translate.ts        DeepL translation pipeline with SHA-256 caching
+  i18n.ts             Translations (DE/EN/FR) and locale detection
+  date.ts             dayjs-based Berlin timezone utilities
+  shared.ts           Shared constants and utilities
+  image-proxy.ts      Edge-cached image proxy with dynamic domain allowlist
+  health-check.ts     Source health checks for all scraping endpoints
+  types.ts            Env interface and data types
 scripts/
-  health-check.ts   CLI runner for health checks
+  health-check.ts     CLI runner for health checks
 migrations/
-  0001_init.sql     D1 schema (museums, exhibitions, events)
-  0002_events_unique.sql
-  0003_event_detail_fields.sql
-  0004_event_end_time.sql
+  *.sql               D1 schema migrations
 ```
-
-### Cloudflare services
-
-- **Workers** — compute
-- **D1** — SQLite database for museums, exhibitions, events
-- **Workers AI** (`llama-4-scout-17b`) — extract events from websites without structured APIs
-- **Cron Triggers** — daily scrape at 6am UTC
-- **Cache API** — edge caching for proxied museum images (7-day TTL)
 
 ## API
 
@@ -71,12 +75,12 @@ Scrape endpoints require `Authorization: Bearer <SCRAPE_SECRET>`. The cron trigg
 
 ## Event sources
 
-### Structured APIs (16 museums)
+### Structured APIs (15 museums)
 
 | Museum | API type |
 |---|---|
 | Städel Museum | Custom JSON (`/de/api/finder`) |
-| Historisches Museum Frankfurt | Custom JSON (`/api/calendar`) |
+| Historisches Museum Frankfurt (+ Junges Museum, Porzellan Museum) | Custom JSON (`/api/calendar`) |
 | Jüdisches Museum + Museum Judengasse | TYPO3 feed.json |
 | Deutsches Architekturmuseum (DAM) | Tribe Events (WP) |
 | DFF – Deutsches Filminstitut & Filmmuseum | Tribe Events (WP) |
@@ -86,7 +90,6 @@ Scrape endpoints require `Authorization: Bearer <SCRAPE_SECRET>`. The cron trigg
 | Museum Angewandte Kunst | Structured HTML |
 | Institut für Stadtgeschichte | RSS feed |
 | Dommuseum Frankfurt | TYPO3 Calendarize ICS |
-| Junges Museum Frankfurt | Drupal Views HTML |
 | Deutsches Ledermuseum (Offenbach) | Kirby CMS HTML |
 | Bibelhaus ErlebnisMuseum | Structured HTML |
 | Frankfurter Kunstverein | WP HTML |
@@ -96,7 +99,7 @@ Scrape endpoints require `Authorization: Bearer <SCRAPE_SECRET>`. The cron trigg
 
 Museums with a website but no structured API. Events are extracted using Workers AI (Llama 4 Scout 17B).
 
-Archäologisches Museum, Caricatura Museum, Eintracht Frankfurt Museum, Fotografie Forum Frankfurt, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte (Offenbach), Hindemith Kabinett, Ikonenmuseum, Klingspor Museum (Offenbach), MGGU – Museum Giersch, MMK (Museum/Tower/Zollamt), MOMEM, Museum Sinclair-Haus (Bad Homburg), Portikus, Porzellan Museum Frankfurt, SCHIRN Kunsthalle Frankfurt, Stoltze-Museum, Struwwelpeter Museum, Weltkulturen Museum
+Archäologisches Museum, Caricatura Museum, Eintracht Frankfurt Museum, Fotografie Forum Frankfurt, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte (Offenbach), Hindemith Kabinett, Ikonenmuseum, Klingspor Museum (Offenbach), MGGU – Museum Giersch, MMK (Museum/Tower/Zollamt), MOMEM, Museum Sinclair-Haus (Bad Homburg), Portikus, SCHIRN Kunsthalle Frankfurt, Stoltze-Museum, Struwwelpeter Museum, Weltkulturen Museum
 
 ## Development
 
