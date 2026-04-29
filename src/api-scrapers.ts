@@ -111,12 +111,20 @@ const HISTORISCHES_LOCATION_SLUGS: Record<string, string> = {
   "6fb0dfb1": "porzellan-museum-frankfurt",
 };
 
+async function fetchHistorischesUrl(url: string): Promise<unknown> {
+  const r = await fetch(url);
+  if (!r.ok) {
+    await r.body?.cancel();
+    return null;
+  }
+  return r.json();
+}
+
 async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
-  const fetches = [
-    fetch(endpoint).then((r) => (r.ok ? r.json() : null)),
-    ...HISTORISCHES_EXTRA_TYPES.map((t) => fetch(`${endpoint}?type=${t}`).then((r) => (r.ok ? r.json() : null))),
-  ];
-  const responses = await Promise.all(fetches);
+  const responses = await Promise.all([
+    fetchHistorischesUrl(endpoint),
+    ...HISTORISCHES_EXTRA_TYPES.map((t) => fetchHistorischesUrl(`${endpoint}?type=${t}`)),
+  ]);
 
   const seen = new Set<string>();
   const allEvents: HistorischesEvent[] = [];
