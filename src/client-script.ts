@@ -143,10 +143,8 @@ export const CLIENT_SCRIPT = `
 
     function updateLangLinks() {
       document.querySelectorAll('a[data-lang]').forEach(function(a) {
-        var u = new URLSearchParams();
+        var u = new URLSearchParams(location.search);
         u.set('lang', a.dataset.lang);
-        if (currentDate && currentDate !== BERLIN_TODAY) u.set('date', currentDate);
-        if (sortByDistance) u.set('sort', 'near');
         a.href = '?' + u.toString();
       });
     }
