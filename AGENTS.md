@@ -38,7 +38,7 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 | `src/image-proxy.ts` | 88 | Edge-cached image proxy with dynamic domain allowlist from DB + subdomain matching. 7-day TTL. |
 | `src/service-worker.ts` | 69 | Offline PWA support: network-first for pages/API, cache-first for images. |
 | `src/health-check.ts` | 154 | Source health checks for all 16 structured endpoints + museumsufer.de pages. |
-| `src/types.ts` | 41 | Env interface (D1 + AI + SCRAPE_SECRET + DEEPL_API_KEY) and data types. |
+| `src/types.ts` | 41 | Env interface (D1 + AI + SCRAPE_SECRET + DEEPL_API_KEYS) and data types. |
 
 ## Event scraping: three tiers
 
