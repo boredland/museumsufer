@@ -141,6 +141,16 @@ export const CLIENT_SCRIPT = `
     var content = document.getElementById('content');
     var dateLabel = document.getElementById('date-label');
 
+    function updateLangLinks() {
+      document.querySelectorAll('a[data-lang]').forEach(function(a) {
+        var u = new URLSearchParams();
+        u.set('lang', a.dataset.lang);
+        if (currentDate && currentDate !== BERLIN_TODAY) u.set('date', currentDate);
+        if (sortByDistance) u.set('sort', 'near');
+        a.href = '?' + u.toString();
+      });
+    }
+
     function pushStateToUrl(date, near) {
       var url = new URL(location.href);
       if (date === BERLIN_TODAY) url.searchParams.delete('date');
@@ -148,6 +158,7 @@ export const CLIENT_SCRIPT = `
       if (near) url.searchParams.set('sort', 'near');
       else url.searchParams.delete('sort');
       history.replaceState(null, '', url.toString());
+      updateLangLinks();
     }
 
     function setActiveDate(date) {
@@ -494,6 +505,7 @@ export const CLIENT_SCRIPT = `
       lastRenderData = __INITIAL_DATA__;
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
+      updateLangLinks();
       document.body.classList.add('hydrated');
     } else {
       loadDay(clientToday);
