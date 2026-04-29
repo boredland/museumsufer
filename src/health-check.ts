@@ -30,8 +30,6 @@ function validateEventApi(type: EventApiType, body: string): string | null {
       return body.includes("<rss") && body.includes("<item>") ? null : "Not a valid RSS feed";
     case "dommuseum":
       return body.includes("event-date-day") ? null : "Missing event-date-day elements";
-    case "junges-museum":
-      return body.includes("view-calendar") && body.includes("<h2>") ? null : "Missing Drupal calendar view structure";
     case "ledermuseum":
       return body.includes("quarter") && body.includes('<div class="date">') ? null : "Missing li.quarter event items";
     case "bibelhaus":
