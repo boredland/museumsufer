@@ -4,7 +4,7 @@ const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
 const BATCH_SIZE = 50;
 
 export async function translateEvents(env: Env): Promise<{ translated: number }> {
-  if (!env.DEEPL_API_KEY) return { translated: 0 };
+  if (!env.DEEPL_API_KEYS) return { translated: 0 };
 
   const targets = ["EN", "FR"] as const;
   let translated = 0;
@@ -27,7 +27,7 @@ async function translateUntranslated(env: Env, targetLang: string): Promise<numb
     const sourceTexts = batch.map((t) => t.text);
 
     try {
-      const translations = await callDeepL(env.DEEPL_API_KEY!, sourceTexts, targetLang);
+      const translations = await callDeepL(env.DEEPL_API_KEYS!, sourceTexts, targetLang);
       if (translations.length !== batch.length) continue;
 
       const stmts = batch.map((t, j) =>
@@ -87,30 +87,46 @@ async function getUntranslatedTexts(env: Env, targetLang: string): Promise<Array
   return candidates.filter((c) => !existing.has(c.hash)).slice(0, 200);
 }
 
-async function callDeepL(apiKey: string, texts: string[], targetLang: string): Promise<string[]> {
+async function callDeepL(apiKeys: string, texts: string[], targetLang: string): Promise<string[]> {
+  const keys = apiKeys
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+
   const params = new URLSearchParams();
   for (const text of texts) {
     params.append("text", text);
   }
   params.append("source_lang", "DE");
   params.append("target_lang", targetLang);
+  const body = params.toString();
 
-  const res = await fetch(DEEPL_FREE_URL, {
-    method: "POST",
-    headers: {
-      Authorization: `DeepL-Auth-Key ${apiKey}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params.toString(),
-  });
+  for (const key of keys) {
+    const res = await fetch(DEEPL_FREE_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `DeepL-Auth-Key ${key}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+    });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`DeepL API error ${res.status}: ${body}`);
+    if (res.ok) {
+      const data = (await res.json()) as { translations: Array<{ text: string }> };
+      return data.translations.map((t) => t.text);
+    }
+
+    console.warn(`DeepL key ${key.slice(0, 8)}… failed with ${res.status}`);
+    if (res.status === 456 || res.status === 403) continue;
+    const errorBody = await res.text();
+    throw new Error(`DeepL API error ${res.status}: ${errorBody}`);
   }
 
-  const data = (await res.json()) as { translations: Array<{ text: string }> };
-  return data.translations.map((t) => t.text);
+  throw new Error("All DeepL API keys exhausted");
 }
 
 export async function getTranslation(env: Env, text: string | null, targetLang: string): Promise<string | null> {

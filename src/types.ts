@@ -3,7 +3,7 @@ export interface Env {
   AI: Ai;
   BROWSER?: Fetcher;
   SCRAPE_SECRET?: string;
-  DEEPL_API_KEY?: string;
+  DEEPL_API_KEYS?: string;
   FETCH_PROXY_URL?: string;
   FETCH_PROXY_TOKEN?: string;
 }
