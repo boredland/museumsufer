@@ -9,7 +9,6 @@ export type EventApiType =
   | "mak"
   | "stadtgeschichte-rss"
   | "dommuseum"
-  | "junges-museum"
   | "ledermuseum"
   | "bibelhaus"
   | "fkv"
@@ -183,7 +182,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.683,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://junges-museum-frankfurt.de/ausstellung",
-    eventApi: { type: "junges-museum", endpoint: "https://junges-museum-frankfurt.de/kalender" },
+    skipEvents: true,
   },
   "klingspor-museum-of": {
     lat: 50.0988,

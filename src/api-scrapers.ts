@@ -51,8 +51,6 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchStadtgeschichteRss(config.endpoint);
     case "dommuseum":
       return fetchDommuseum(config.endpoint);
-    case "junges-museum":
-      return fetchJungesMuseum(config.endpoint);
     case "ledermuseum":
       return fetchLedermuseum(config.endpoint);
     case "bibelhaus":
@@ -108,6 +106,10 @@ interface TribeEvent {
 
 const HISTORISCHES_TITLE_BLOCKLIST = ["bibliothek der generationen"];
 const HISTORISCHES_EXTRA_TYPES = ["fuehrung", "workshop", "stadtgang"];
+const HISTORISCHES_LOCATION_SLUGS: Record<string, string> = {
+  c93ff959: "junges-museum-frankfurt",
+  "6fb0dfb1": "porzellan-museum-frankfurt",
+};
 
 async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
   const fetches = [
@@ -157,6 +159,8 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
       if (priceMatch) price = priceMatch[1];
     }
 
+    const locationSlug = ev.locations?.[0] ? HISTORISCHES_LOCATION_SLUGS[ev.locations[0]] : undefined;
+
     return [
       {
         title: ev.title!,
@@ -168,6 +172,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
         detail_url: ev.url || null,
         image_url: ev.image || null,
         price,
+        museum_slug_override: locationSlug,
       },
     ];
   });
@@ -176,6 +181,7 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
 interface HistorischesEvent {
   title?: string;
   type?: string;
+  locations?: string[];
   dateStart?: number;
   dateEnd?: number;
   time?: string;
@@ -556,63 +562,6 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
         price: null,
       });
     } catch {}
-  }
-
-  return events;
-}
-
-async function fetchJungesMuseum(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint, {
-    headers: { "User-Agent": USER_AGENT },
-  });
-  if (!res.ok) return [];
-  const html = await res.text();
-
-  const today = todayIso();
-  const events: ApiEvent[] = [];
-
-  const entryRe = /<h2>([\s\S]*?)<\/h2>[\s\S]*?<h3>([\s\S]*?)<\/h3>[\s\S]*?(?:<p>([\s\S]*?)<\/p>)?/g;
-  const calSection = html.slice(html.indexOf("view-calendar"));
-  let match;
-
-  while ((match = entryRe.exec(calSection)) !== null) {
-    const title = stripHtml(match[1]).trim();
-    const dateInfo = stripHtml(match[2]).trim();
-    const desc = match[3] ? stripHtml(match[3]).trim() : null;
-    if (!title || !dateInfo) continue;
-
-    const dayMatch = dateInfo.match(/(\d{1,2})\.\s*(\w+)/);
-    if (!dayMatch) continue;
-    const [, day, monthName] = dayMatch;
-    const monthNum = GERMAN_MONTHS[monthName.toLowerCase()];
-    if (!monthNum) continue;
-
-    const date = `${inferYear(monthNum, day)}-${monthNum}-${day.padStart(2, "0")}`;
-    if (date < today) continue;
-
-    const timeMatch = dateInfo.match(/(\d{1,2}(?:[.:]\d{2})?)\s*[-–]\s*(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
-    let time: string | null = null;
-    let endTime: string | null = null;
-    if (timeMatch) {
-      const s = timeMatch[1].replace(".", ":");
-      time = s.includes(":") ? s : `${s}:00`;
-      const e = timeMatch[2].replace(".", ":");
-      endTime = e.includes(":") ? e : `${e}:00`;
-    }
-
-    const imgMatch = calSection.slice(match.index - 500, match.index).match(/<img[^>]+src="([^"]+)"/);
-
-    events.push({
-      title,
-      date,
-      time: nullIfMidnight(time),
-      end_time: nullIfMidnight(endTime),
-      end_date: null,
-      description: desc ? truncateHtml(desc) : null,
-      detail_url: null,
-      image_url: imgMatch ? imgMatch[1] : null,
-      price: null,
-    });
   }
 
   return events;
