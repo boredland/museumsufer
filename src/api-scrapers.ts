@@ -163,8 +163,9 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
     let price: string | null = null;
     if (ev.isFree) price = "Eintritt frei";
     else {
-      const priceMatch = ev.summary?.match(/(\d+[.,]?\d*\s*€[^,]*(?:,\s*\d+[.,]?\d*\s*€[^,]*)?)/);
-      if (priceMatch) price = priceMatch[1];
+      const stripped = ev.summary?.replace(/<[^>]+>/g, " ");
+      const priceMatch = stripped?.match(/(\d+[.,]?\d*\s*€[^,]*(?:,\s*\d+[.,]?\d*\s*€[^,]*)?)/);
+      if (priceMatch) price = priceMatch[1].trim();
     }
 
     const locationSlug = ev.locations?.[0] ? HISTORISCHES_LOCATION_SLUGS[ev.locations[0]] : undefined;
