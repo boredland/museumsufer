@@ -9,17 +9,13 @@ const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="6
   <text x="600" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="72" font-weight="700" fill="#1c1917" letter-spacing="-2">Museumsufer Frankfurt</text>
   <text x="600" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="32" fill="#78716c">Ausstellungen &amp; Veranstaltungen</text>
   <text x="600" y="400" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#b45309">museumsufer.app</text>
-  <g transform="translate(564, 475)" fill="#b45309">
-    <polygon points="0,-18 -22,-2 22,-2"/>
-    <rect x="-23" y="-3" width="46" height="3"/>
-    <rect x="-18" y="0" width="5" height="22"/>
-    <rect x="-7" y="0" width="5" height="22"/>
-    <rect x="4" y="0" width="5" height="22"/>
-    <rect x="14" y="0" width="5" height="22"/>
-    <rect x="-23" y="22" width="46" height="4"/>
+  <g transform="translate(564, 475)">
+    <rect x="-30" y="-25" width="60" height="60" rx="10" fill="#b45309"/>
+    <g transform="scale(2.2) translate(-12,-14.5)" fill="white">
+      <path d="M12 1L2 6v2h20V6L12 1zm0 2.26L18.47 6H5.53L12 3.26zM2 17v2h20v-2H2zm2-7v7h2v-7H6zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2z"/>
+    </g>
+    <path d="M-26,27 Q-16,23 -6,27 Q4,31 14,27 Q20,24.5 26,27" fill="none" stroke="#93c5fd" stroke-width="3.3" stroke-linecap="round"/>
   </g>
-  <path d="M490,520 Q520,512 550,520 Q580,528 610,520 Q640,512 670,520 Q700,528 730,520" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" opacity="0.65"/>
-  <path d="M500,535 Q530,527 560,535 Q590,543 620,535 Q650,527 680,535 Q710,543 720,535" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
 </svg>`;
 
 const MANIFEST = JSON.stringify({
