@@ -36,13 +36,13 @@ function utm(url: string, content: string): string {
   }
 }
 
-function ImagePlaceholder() {
+function ImagePlaceholder({ hero }: { hero?: boolean }) {
+  const cls = hero
+    ? "w-[112px] h-[112px] max-[480px]:w-20 max-[480px]:h-20 rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border"
+    : "w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border";
   return (
-    <div
-      class="w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border"
-      aria-hidden="true"
-    >
-      <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <div class={cls} aria-hidden="true">
+      <svg aria-hidden="true" width={hero ? 32 : 24} height={hero ? 32 : 24} viewBox="0 0 24 24" fill="none">
         <path
           d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
           stroke="currentColor"
@@ -63,28 +63,35 @@ function CardImage({
   detailUrl,
   lazy,
   utmContent,
+  hero,
 }: {
   src: string | null;
   alt: string;
   detailUrl: string | null;
   lazy: boolean;
   utmContent: string;
+  hero?: boolean;
 }) {
+  const wrapClass = hero
+    ? "w-[112px] h-[112px] max-[480px]:w-20 max-[480px]:h-20 rounded-lg shrink-0 bg-border-light overflow-hidden"
+    : imgWrapClass;
+  const w = hero ? 112 : 72;
+  const h = hero ? 112 : 54;
   const inner = src ? (
-    <div class={imgWrapClass}>
+    <div class={wrapClass}>
       <img
         class="w-full h-full object-cover"
-        src={`${src}?w=120`}
-        srcset={`${src}?w=120 120w, ${src}?w=200 200w`}
-        sizes="(max-width: 480px) 56px, 72px"
-        width={72}
-        height={54}
+        src={`${src}?w=${w * 2}`}
+        srcset={`${src}?w=${w} ${w}w, ${src}?w=${w * 2} ${w * 2}w`}
+        sizes={hero ? "(max-width: 480px) 80px, 112px" : "(max-width: 480px) 56px, 72px"}
+        width={w}
+        height={h}
         alt={alt}
         loading={lazy ? "lazy" : undefined}
       />
     </div>
   ) : (
-    <ImagePlaceholder />
+    <ImagePlaceholder hero={hero} />
   );
 
   if (detailUrl) {
@@ -281,25 +288,37 @@ function ExhibitionCard({
     ex.title
   );
 
+  const hero = idx === 0;
   return (
     <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
-      <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
-        <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
+      <article
+        class={`${cardClass}${hero ? " is-hero" : ""}`}
+        data-item-id={ex.id}
+        data-museum-slug={ex.museum_slug}
+      >
+        <div class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}>
           <CardImage
             src={ex.image_url}
             alt={ex.title}
             detailUrl={ex.detail_url}
             lazy={idx > 2}
             utmContent="exhibition_image"
+            hero={hero}
           />
           {dates && (
-            <span class="text-[0.5625rem] font-medium text-text-tertiary bg-border-light px-1 py-0.5 rounded text-center leading-tight">
+            <span class="text-[0.5625rem] font-mono font-medium text-text-tertiary px-1 py-0.5 text-center leading-tight tracking-tight">
               {dates}
             </span>
           )}
         </div>
         <div class="card-body min-w-0 flex flex-col">
-          <p class="text-sm font-medium leading-tight mb-0.5">
+          <p
+            class={
+              hero
+                ? "card-title font-display italic text-[1.25rem] leading-[1.15] tracking-tight mb-1.5"
+                : "text-sm font-medium leading-tight mb-0.5"
+            }
+          >
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
@@ -309,14 +328,14 @@ function ExhibitionCard({
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
-              class="card-visited-btn inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary bg-transparent border border-border p-0 rounded cursor-pointer font-sans transition-colors hover:border-river hover:text-river"
+              class="card-visited-btn inline-flex items-center justify-center w-6 h-6 text-text-tertiary bg-transparent border-0 p-0 rounded cursor-pointer transition-all opacity-50 hover:opacity-100 hover:text-river focus-visible:opacity-100"
               aria-pressed="false"
               aria-label={tr.markVisited}
               title={tr.markVisited}
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
                 <path d={ICON.visibility} />
               </svg>
             </button>
@@ -417,9 +436,20 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
   );
 }
 
-function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Record<string, string> }) {
+function EventCard({
+  ev,
+  idx,
+  tr,
+  hero: heroProp,
+}: {
+  ev: EventWithLikes;
+  idx: number;
+  tr: Record<string, string>;
+  hero?: boolean;
+}) {
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
   const linkUrl = ev.detail_url || ev.url;
+  const hero = heroProp !== undefined ? heroProp : idx === 0;
   const titleContent = linkUrl ? (
     <a href={utm(linkUrl, "event_title")} target="_blank" rel="noopener" class={titleLinkClass}>
       {ev.title}
@@ -430,14 +460,14 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
   return (
     <li data-search={searchHaystack(ev.title, ev.museum_name, ev.description)}>
       <article
-        class={cardClass}
+        class={`${cardClass}${hero ? " is-hero" : ""}`}
         data-item-id={ev.id}
         data-museum-slug={ev.museum_slug}
         data-event-time={ev.time || undefined}
         data-event-date={ev.date}
       >
-        <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
-          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} utmContent="event_image" />
+        <div class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}>
+          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} utmContent="event_image" hero={hero} />
           {timeStr && (
             <span class="card-time text-[0.625rem] font-mono font-medium text-river bg-river-light px-1 py-0.5 rounded text-center leading-tight tabular-nums tracking-tight">
               {timeStr}
@@ -445,7 +475,13 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
           )}
         </div>
         <div class="card-body min-w-0 flex flex-col">
-          <p class="text-sm font-medium leading-tight mb-0.5">
+          <p
+            class={
+              hero
+                ? "card-title font-display italic text-[1.25rem] leading-[1.15] tracking-tight mb-1.5"
+                : "text-sm font-medium leading-tight mb-0.5"
+            }
+          >
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
@@ -492,14 +528,10 @@ function Section({
   children: unknown;
   defaultOpen?: boolean;
 }) {
-  const eyebrow = sectionKey === "events" ? "Today's program" : sectionKey === "exhibitions" ? "Now showing" : "Index";
   return (
     <details class="section mb-12" data-section={sectionKey} open={defaultOpen}>
       <summary class="section-header flex items-baseline gap-3 mb-5 cursor-pointer select-none group">
-        <div class="flex flex-col flex-1 min-w-0">
-          <span class="section-eyebrow opacity-70 mb-0.5">{eyebrow}</span>
-          <h3 class="section-display group-hover:text-river transition-colors">{title}</h3>
-        </div>
+        <h3 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h3>
         <span
           class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
           title={`${count} ${title}`}
@@ -754,9 +786,9 @@ function GroupedEventList({
               </span>
             </header>
             <ul class={cardListClass}>
-              {groups[date].map((ev) => {
-                const idx = cardIdx++;
-                return <EventCard ev={ev} idx={idx} tr={tr} />;
+              {groups[date].map((ev, i) => {
+                const globalIdx = cardIdx++;
+                return <EventCard ev={ev} idx={globalIdx} hero={i === 0} tr={tr} />;
               })}
             </ul>
           </section>
