@@ -309,7 +309,7 @@ function ExhibitionCard({
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
-              class="card-visited-btn inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary bg-transparent border border-border p-0 rounded cursor-pointer font-sans transition-colors hover:border-accent hover:text-accent"
+              class="card-visited-btn inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary bg-transparent border border-border p-0 rounded cursor-pointer font-sans transition-colors hover:border-river hover:text-river"
               aria-pressed="false"
               aria-label={tr.markVisited}
               title={tr.markVisited}
@@ -323,7 +323,7 @@ function ExhibitionCard({
           </div>
           {ex.description && (
             <details class="mt-1">
-              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-accent">
+              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-river">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
@@ -439,7 +439,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
           <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} utmContent="event_image" />
           {timeStr && (
-            <span class="card-time text-[0.625rem] font-medium text-accent bg-accent-light px-1 py-0.5 rounded text-center leading-tight">
+            <span class="card-time text-[0.625rem] font-mono font-medium text-river bg-river-light px-1 py-0.5 rounded text-center leading-tight tabular-nums tracking-tight">
               {timeStr}
             </span>
           )}
@@ -464,7 +464,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
           </div>
           {ev.description && (
             <details class="mt-1">
-              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-accent">
+              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-river">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
@@ -481,7 +481,7 @@ function Section({
   sectionKey,
   title,
   count,
-  iconPath,
+  iconPath: _iconPath,
   children,
   defaultOpen = true,
 }: {
@@ -492,29 +492,24 @@ function Section({
   children: unknown;
   defaultOpen?: boolean;
 }) {
+  const eyebrow = sectionKey === "events" ? "Today's program" : sectionKey === "exhibitions" ? "Now showing" : "Index";
   return (
-    <details class="section mb-10" data-section={sectionKey} open={defaultOpen}>
-      <summary class="section-header flex items-center gap-2 mb-4 cursor-pointer select-none hover:[&_.section-title]:text-text-secondary">
-        <svg
-          aria-hidden="true"
-          class="section-icon w-5 h-5 shrink-0 [&_path]:stroke-text-tertiary"
-          viewBox="0 0 20 20"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d={iconPath} stroke-width="1.5" stroke-linecap="round" />
-        </svg>
-        <h3 class="section-title text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">{title}</h3>
+    <details class="section mb-12" data-section={sectionKey} open={defaultOpen}>
+      <summary class="section-header flex items-baseline gap-3 mb-5 cursor-pointer select-none group">
+        <div class="flex flex-col flex-1 min-w-0">
+          <span class="section-eyebrow opacity-70 mb-0.5">{eyebrow}</span>
+          <h3 class="section-display group-hover:text-river transition-colors">{title}</h3>
+        </div>
         <span
-          class="section-count text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
+          class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
           title={`${count} ${title}`}
           data-total={count}
         >
-          {count}
+          {String(count).padStart(2, "0")}
         </span>
         <svg
           aria-hidden="true"
-          class="section-chevron ml-auto text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
+          class="section-chevron text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
           viewBox="0 0 16 16"
           fill="none"
           width="14"
@@ -558,7 +553,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
                 href={utm(museum.website, "museum_name")}
                 target="_blank"
                 rel="noopener"
-                class="text-inherit no-underline hover:text-accent"
+                class="text-inherit no-underline hover:text-river"
               >
                 {museum.name}
               </a>
@@ -592,7 +587,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
         <div class="flex items-center gap-1.5 shrink-0">
           {museum.website && (
             <a
-              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-accent hover:text-accent"
+              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-river hover:text-river"
               href={utm(museum.website, "museum_link")}
               target="_blank"
               rel="noopener"
@@ -739,25 +734,34 @@ function GroupedEventList({
   const dates = Object.keys(groups).sort();
   let cardIdx = 0;
   return (
-    <>
+    <div class="flex flex-col gap-8">
       {dates.map((date) => {
-        const formatted = new Date(`${date}T00:00:00`).toLocaleDateString(dl, {
-          weekday: "short",
-          day: "numeric",
-          month: "short",
-        });
+        const dayDate = new Date(`${date}T00:00:00`);
+        const weekday = dayDate.toLocaleDateString(dl, { weekday: "long" });
+        const dayMonth = dayDate.toLocaleDateString(dl, { day: "numeric", month: "long" });
         return (
-          <>
-            <li class="mt-4 first:mt-0 mb-2 text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">
-              {formatted}
-            </li>
-            {groups[date].map((ev) => {
-              const idx = cardIdx++;
-              return <EventCard ev={ev} idx={idx} tr={tr} />;
-            })}
-          </>
+          <section>
+            <header class="flex items-baseline gap-3 mb-3 px-1">
+              <span class="font-display italic text-2xl text-river leading-none tabular-nums">
+                {dayDate.getDate()}
+              </span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
+                {weekday}
+              </span>
+              <span class="font-mono text-[0.6875rem] text-text-tertiary opacity-60">·</span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
+                {dayMonth}
+              </span>
+            </header>
+            <ul class={cardListClass}>
+              {groups[date].map((ev) => {
+                const idx = cardIdx++;
+                return <EventCard ev={ev} idx={idx} tr={tr} />;
+              })}
+            </ul>
+          </section>
         );
       })}
-    </>
+    </div>
   );
 }

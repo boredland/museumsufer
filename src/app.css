@@ -1,31 +1,70 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #f5f0eb;
-  --color-surface: #ffffff;
-  --color-text-primary: #1c1917;
-  --color-text-secondary: #6b6560;
-  --color-text-tertiary: #706a68;
+  /* Light mode — riverside paper */
+  --color-bg: #efe7d8;
+  --color-bg-warm: #ebe1cf;
+  --color-surface: #fbf6ec;
+  --color-text-primary: #1c1410;
+  --color-text-secondary: #5b524a;
+  --color-text-tertiary: #847a6f;
   --color-accent: #b45309;
-  --color-accent-light: #fef3c7;
-  --color-border: #e7e5e4;
-  --color-border-light: #f5f5f4;
-  --color-card-hover: #fdf8f0;
+  --color-accent-light: #f5e1bf;
+  --color-river: #1f3a52;
+  --color-river-light: #c8d4df;
+  --color-river-deep: #0f2436;
+  --color-border: #d8cdb9;
+  --color-border-light: #e6dcc8;
+  --color-card-hover: #f3ead7;
 
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", "Apple Garamond", Georgia, serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-search: 0 8px 30px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 1px 2px rgba(31, 36, 54, 0.04), 0 2px 8px rgba(31, 36, 54, 0.04);
+  --shadow-search: 0 12px 32px rgba(15, 36, 54, 0.18);
+  --shadow-anchor: 0 4px 12px rgba(31, 58, 82, 0.18);
 }
 
-/* Base styles */
-@layer base {
-  body {
-    @apply font-sans bg-bg text-text-primary leading-relaxed antialiased;
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-bg: #14110e;
+    --color-bg-warm: #1a1612;
+    --color-surface: #1f1a15;
+    --color-text-primary: #f0e6d4;
+    --color-text-secondary: #b8ad9c;
+    --color-text-tertiary: #8a8275;
+    --color-accent: #e2a064;
+    --color-accent-light: #3a2918;
+    --color-river: #86b3d8;
+    --color-river-light: #1a2c3e;
+    --color-river-deep: #c5dbeb;
+    --color-border: #34291f;
+    --color-border-light: #251e17;
+    --color-card-hover: #261f17;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-search: 0 12px 32px rgba(0, 0, 0, 0.6);
+    --shadow-anchor: 0 4px 16px rgba(134, 179, 216, 0.18);
   }
 }
 
-/* Animations */
+@layer base {
+  body {
+    @apply font-sans bg-bg text-text-primary leading-relaxed antialiased;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(180, 83, 9, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(31, 58, 82, 0.05) 0%, transparent 50%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: var(--color-river);
+    color: var(--color-bg);
+  }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
@@ -35,120 +74,289 @@
   to { transform: rotate(360deg); }
 }
 
-@keyframes octocat-wave {
-  0%, 100% { transform: rotate(0); }
-  20%, 60% { transform: rotate(-25deg); }
-  40%, 80% { transform: rotate(10deg); }
+@keyframes flowRiver {
+  from { background-position: 0 0; }
+  to { background-position: 80px 0; }
 }
 
-.fade-in {
-  animation: fadeIn 0.25s ease-out;
-}
+.fade-in { animation: fadeIn 0.25s ease-out; }
 
-/* GitHub corner */
-.github-corner:hover .octo-arm {
-  animation: octocat-wave 560ms ease-in-out;
-}
-
-/* Details/summary marker removal */
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 
-/* Disclosure icon */
-.disclosure-icon::before { content: '+'; font-family: monospace; margin-right: 0.25rem; }
-[open] > summary .disclosure-icon::before { content: '-'; }
+.disclosure-icon { display: inline-block; width: 0.75rem; height: 0.75rem; margin-right: 0.25rem; vertical-align: -2px; transition: transform 0.15s ease; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 4.5l3 3 3-3'/></svg>"); background-repeat: no-repeat; background-position: center; }
+[open] > summary .disclosure-icon { transform: rotate(180deg); }
 
-/* Loading spinner */
 .loading::after {
   content: '';
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--color-border);
-  border-top-color: var(--color-accent);
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--color-border);
+  border-top-color: var(--color-river);
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: spin 0.7s linear infinite;
   margin-left: 0.5rem;
   vertical-align: middle;
 }
-
-/* Dialog backdrop */
-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-/* State classes (toggled by client JS) */
-.date-btn.active {
-  @apply bg-accent text-white border-accent;
-}
-
-#btn-near.active {
-  @apply bg-accent text-white border-accent;
-}
-
 
 .loading {
   pointer-events: none;
   opacity: 0.6;
 }
 
+dialog::backdrop {
+  background: color-mix(in oklab, var(--color-river-deep) 50%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+/* River band — flowing horizontal element */
+.river-band {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-river-light) 8%, var(--color-river-light) 92%, transparent 100%);
+}
+.river-band::before {
+  content: '';
+  position: absolute;
+  inset: -1px 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='4' viewBox='0 0 80 4' fill='none' stroke='%231f3a52' stroke-opacity='0.5' stroke-width='1.5' stroke-linecap='round'><path d='M0 2 Q 10 0 20 2 T 40 2 T 60 2 T 80 2'/></svg>");
+  background-repeat: repeat-x;
+  background-position: 0 50%;
+  opacity: 0.7;
+}
+@media (prefers-color-scheme: dark) {
+  .river-band::before {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='4' viewBox='0 0 80 4' fill='none' stroke='%2386b3d8' stroke-opacity='0.6' stroke-width='1.5' stroke-linecap='round'><path d='M0 2 Q 10 0 20 2 T 40 2 T 60 2 T 80 2'/></svg>");
+  }
+}
+
+/* Date stops — buttons sit ON the river */
+.date-stop {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0.5rem 0.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.15s ease;
+  min-width: 3rem;
+}
+.date-stop:hover { color: var(--color-river); }
+.date-stop > .stop-day { font-family: var(--font-display); font-size: 1.125rem; font-weight: 500; color: var(--color-text-primary); line-height: 1; font-feature-settings: "lnum" 1; letter-spacing: -0.01em; }
+.date-stop > .stop-weekday { opacity: 0.7; }
+.date-stop::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-river-light);
+  transition: all 0.18s ease;
+  z-index: 1;
+}
+.date-stop:hover::after { border-color: var(--color-river); }
+.date-stop.active { color: var(--color-river); }
+.date-stop.active > .stop-day { color: var(--color-river); font-weight: 600; }
+.date-stop.active::after {
+  width: 12px;
+  height: 12px;
+  background: var(--color-river);
+  border-color: var(--color-river);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-river) 18%, transparent);
+}
+
+/* Range / GPS pills sit off-river */
+.range-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.range-pill:hover { border-color: var(--color-river); color: var(--color-river); }
+.range-pill.active {
+  border-color: var(--color-river);
+  background: var(--color-river);
+  color: var(--color-bg);
+}
+
+/* Anchor headline — replaces H2 date label */
+.anchor-headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  font-style: italic;
+  font-feature-settings: "ss01" 1;
+}
+.anchor-headline em { font-style: normal; color: var(--color-river); }
+.anchor-headline .day-num { font-style: normal; font-feature-settings: "lnum" 1; }
+
+/* Section header — display, much louder */
+.section-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.section-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.625rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+  font-feature-settings: "ss01" 1;
+}
+
+/* Cards — softer, more print-like */
+.card {
+  background: var(--color-surface);
+}
+.card-list {
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--color-border) 60%, transparent);
+}
+
+/* Hero card — first card in a section */
+.card.is-hero {
+  background: linear-gradient(180deg, var(--color-bg-warm) 0%, var(--color-surface) 60%);
+  padding: 1.25rem 1rem;
+}
+.card.is-hero .card-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
 .is-visited {
-  @apply text-green-800 bg-green-100 border-green-100;
+  color: var(--color-river);
+  background: var(--color-river-light);
+  border-color: var(--color-river-light);
 }
 
 .visited-section .card {
-  @apply opacity-60 hover:opacity-100;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+}
+@media (hover: hover) {
+  .visited-section .card:hover { opacity: 1; }
 }
 
 /* Inline search filter */
 [data-search-hidden] { display: none !important; }
 .section[data-search-empty] > summary .section-count {
-  @apply text-text-tertiary opacity-50;
+  color: var(--color-text-tertiary);
+  opacity: 0.4;
 }
 
-/* Client-side JS generated classes: heart prompt */
+/* Search bar — ink in paper */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  transition: border-color 0.15s ease;
+}
+.search-bar:focus-within {
+  border-color: var(--color-river);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-river) 15%, transparent);
+}
+.search-bar input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--color-text-primary);
+  min-width: 0;
+}
+.search-bar input::placeholder { color: var(--color-text-tertiary); }
+
+/* Heart prompt */
 .heart-prompt {
-  @apply flex items-center gap-1.5 px-3 py-2 bg-accent-light rounded-lg mt-1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-accent-light);
+  border-radius: 8px;
+  margin-top: 0.375rem;
   animation: fadeIn 0.2s ease-out;
 }
 .heart-prompt-text {
-  @apply text-xs text-text-secondary flex-1;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  flex: 1;
 }
 .heart-prompt-btn {
-  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-border bg-surface cursor-pointer font-sans text-[0.6875rem] font-medium text-text-secondary transition-colors;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: all 0.15s ease;
 }
-.heart-prompt-btn:hover {
-  @apply border-accent text-accent;
-}
-.heart-prompt-btn.heart {
-  @apply text-red-600 border-red-200;
-}
-.heart-prompt-btn.heart:hover {
-  @apply bg-red-50 border-red-600;
-}
-.heart-prompt-btn svg {
-  @apply w-3 h-3;
-}
-
-/* Distance info is merged into the nav button dynamically */
-
-/* Reachability colors applied dynamically to .card-time by JS */
+.heart-prompt-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.heart-prompt-btn.heart { color: #c2410c; border-color: var(--color-accent-light); }
+.heart-prompt-btn.heart:hover { background: var(--color-accent-light); border-color: var(--color-accent); }
+.heart-prompt-btn svg { width: 0.75rem; height: 0.75rem; }
 
 /* View transitions */
 #content {
   view-transition-name: content;
 }
 
-#date-label {
-  view-transition-name: date-label;
-}
-
 ::view-transition-old(content) {
   animation: fadeOut 0.15s ease-out;
 }
-
 ::view-transition-new(content) {
-  animation: fadeIn 0.15s ease-out;
+  animation: fadeIn 0.18s ease-out;
 }
 
 @keyframes fadeOut {
@@ -156,9 +364,6 @@ dialog::backdrop {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
-/* Popover backdrop is handled natively */
-
-/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .loading::after, .octo-arm, .fade-in { animation: none !important; }
+  .loading::after, .fade-in, .date-stop, .range-pill { animation: none !important; transition: none !important; }
 }
