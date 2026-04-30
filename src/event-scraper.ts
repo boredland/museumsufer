@@ -59,6 +59,13 @@ export async function scrapeMuseumWebsites(
   return { updated, events: totalEvents, enriched, api: apiCount };
 }
 
+async function sha256(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let cursor = 0;
@@ -215,6 +222,16 @@ async function scrapeMuseumEvents(
 
   if (!eventsHtml) return 0;
 
+  const cached = await env.DB.prepare("SELECT events_html_hash, events_scraped_at FROM museums WHERE id = ?")
+    .bind(museum.id)
+    .first<{ events_html_hash: string | null; events_scraped_at: string | null }>();
+  const hash = await sha256(stripHtmlToText(eventsHtml));
+  const now = Date.now();
+  const lastScrapedMs = cached?.events_scraped_at ? Date.parse(`${cached.events_scraped_at}Z`) : 0;
+  if (cached?.events_html_hash === hash && now - lastScrapedMs < 24 * 60 * 60 * 1000) {
+    return 0;
+  }
+
   const pageLinks = extractPageLinks(eventsHtml, baseUrl);
   const textContent = stripHtmlToText(eventsHtml);
   if (textContent.length < 100) return 0;
@@ -246,6 +263,10 @@ ${truncated}`,
   const responseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
+
+  await env.DB.prepare("UPDATE museums SET events_html_hash = ?, events_scraped_at = datetime('now') WHERE id = ?")
+    .bind(hash, museum.id)
+    .run();
 
   let count = 0;
   for (const event of events) {
