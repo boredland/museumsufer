@@ -100,33 +100,10 @@ dialog::backdrop {
   @apply opacity-60 hover:opacity-100;
 }
 
-/* Client-side JS generated classes: search results */
-.search-result {
-  @apply flex gap-3 py-2 px-4 cursor-pointer items-center transition-colors;
-}
-.search-result:hover, .search-result.active {
-  @apply bg-accent-light;
-}
-.search-result-type {
-  @apply text-[0.625rem] font-semibold uppercase tracking-wide text-text-tertiary w-12 shrink-0;
-}
-.search-result-body {
-  @apply min-w-0;
-}
-.search-result-title {
-  @apply text-[0.8125rem] font-medium whitespace-nowrap overflow-hidden text-ellipsis;
-}
-.search-result-museum {
-  @apply text-[0.6875rem] text-text-secondary whitespace-nowrap overflow-hidden text-ellipsis;
-}
-.search-result-desc {
-  @apply text-[0.6875rem] text-text-tertiary mt-0.5 leading-snug line-clamp-2;
-}
-.search-result-time {
-  @apply text-[0.625rem] font-medium text-accent bg-accent-light px-1 rounded-sm align-middle;
-}
-.search-result mark {
-  @apply bg-accent-light text-accent rounded-sm px-px;
+/* Inline search filter */
+[data-search-hidden] { display: none !important; }
+.section[data-search-empty] > summary .section-count {
+  @apply text-text-tertiary opacity-50;
 }
 
 /* Client-side JS generated classes: heart prompt */

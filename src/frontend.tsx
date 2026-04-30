@@ -86,22 +86,31 @@ function LangSwitch({ locale }: { locale: Locale }) {
   );
 }
 
-function SearchTrigger({ tr }: { tr: Record<string, string> }) {
+function SearchBar({ tr }: { tr: Record<string, string> }) {
   return (
-    <button
-      type="button"
-      class="flex items-center gap-2 w-full py-2 px-3.5 mb-3 bg-surface border-[1.5px] border-border rounded-full cursor-pointer font-sans text-[0.8125rem] text-text-tertiary transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-      id="search-trigger"
-      onclick="openSearch()"
-    >
-      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+    <div class="relative mb-3">
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        width="14"
+        height="14"
+        aria-hidden="true"
+        class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+      >
         <path d={ICON.search} />
       </svg>
-      <span class="flex-1 text-left">{tr.searchPlaceholder}</span>
-      <kbd class={`${kbdClass} max-[1024px]:hidden`}>
+      <input
+        type="search"
+        id="search-input"
+        autocomplete="off"
+        placeholder={tr.searchPlaceholder}
+        aria-label={tr.search}
+        class="w-full py-2 pl-9 pr-20 bg-surface border-[1.5px] border-border rounded-full font-sans text-[0.8125rem] text-text-primary placeholder:text-text-tertiary transition-colors hover:border-accent focus:border-accent focus:outline-none"
+      />
+      <kbd class={`${kbdClass} absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none max-[1024px]:hidden`}>
         <kbd>Ctrl</kbd>+<kbd>K</kbd>
       </kbd>
-    </button>
+    </div>
   );
 }
 
@@ -181,43 +190,6 @@ function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string
         </svg>
       </button>
     </nav>
-  );
-}
-
-function SearchDialog({ tr }: { tr: Record<string, string> }) {
-  return (
-    <dialog
-      class="border-none bg-transparent p-0 max-w-screen max-h-screen w-full h-full overflow-visible open:flex open:items-start open:justify-center open:pt-[15vh]"
-      id="search-overlay"
-      aria-label={tr.search}
-    >
-      <div class="bg-surface rounded-xl shadow-search w-[90%] max-w-[520px] max-h-[70vh] flex flex-col overflow-hidden">
-        <div class="flex items-center py-3 px-4 gap-2 border-b border-border">
-          <svg
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden="true"
-            class="w-[18px] h-[18px] text-text-tertiary shrink-0"
-          >
-            <path d={ICON.search} />
-          </svg>
-          <input
-            class="flex-1 border-none outline-none text-[0.9375rem] font-sans text-text-primary bg-transparent placeholder:text-text-tertiary"
-            id="search-input"
-            type="text"
-            placeholder={tr.searchPlaceholder}
-            autocomplete="off"
-            role="combobox"
-            aria-expanded="false"
-            aria-controls="search-results"
-            aria-autocomplete="list"
-            aria-activedescendant={undefined}
-          />
-          <span class={kbdClass}>Esc</span>
-        </div>
-        <div class="overflow-y-auto py-2" id="search-results" role="listbox" aria-label={tr.search} />
-      </div>
-    </dialog>
   );
 }
 
@@ -333,7 +305,7 @@ export function renderPage(
           <meta name="theme-color" content="#f5f0eb" />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
-          <script src="/fuse.min.js" defer />
+          <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
           <link rel="stylesheet" href="/styles.css" />
         </head>
@@ -368,7 +340,7 @@ export function renderPage(
               <LangSwitch locale={locale} />
             </header>
 
-            <SearchTrigger tr={tr} />
+            <SearchBar tr={tr} />
             <PassPromo locale={locale} tr={tr} />
             <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} />
 
@@ -430,8 +402,6 @@ export function renderPage(
             <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
             <LlmTip tr={tr} />
           </div>
-
-          <SearchDialog tr={tr} />
 
           <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
         </body>
