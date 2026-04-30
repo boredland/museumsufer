@@ -12,9 +12,6 @@ export const quietCountClass =
 export const titleLinkClass =
   "text-inherit no-underline block hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm";
 
-export const badgeCountClass =
-  "text-[0.6875rem] font-mono font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full";
-
 export const emptyStateClass = "empty-state";
 
 export const descriptionClass =

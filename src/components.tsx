@@ -3,7 +3,6 @@ import { ICON } from "./icons";
 import { getMuseumLocations } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
 import {
-  badgeCountClass,
   cardClass,
   cardListClass,
   descriptionClass,
@@ -692,10 +691,13 @@ export function ContentBody({
             <ExhibitionList exhibitions={sortedExhibitions} todayIso={todayIso} locale={locale} tr={tr} />
             <li>
               <details class="visited-section mt-4 py-2.5 px-4" id="visited-section" hidden>
-                <summary class="text-[0.6875rem] font-bold uppercase tracking-wide text-text-tertiary cursor-pointer flex items-center gap-2">
+                <summary class="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary cursor-pointer flex items-center gap-2 hover:text-river">
                   <span aria-hidden="true" class="disclosure-icon" />
-                  {tr.alreadyVisited}{" "}
-                  <span class={badgeCountClass} id="visited-count">
+                  {tr.alreadyVisited}
+                  <span
+                    id="visited-count"
+                    class="font-mono text-[0.625rem] tabular-nums opacity-70"
+                  >
                     0
                   </span>
                 </summary>
@@ -773,7 +775,7 @@ function GroupedEventList({
         const dayMonth = dayDate.toLocaleDateString(dl, { day: "numeric", month: "long" });
         return (
           <section>
-            <header class="flex items-baseline gap-3 mb-3 px-1">
+            <header class="day-spine flex items-baseline gap-3 mb-3 px-1 lg:sticky lg:top-0 lg:z-10 lg:py-2 lg:-mx-1 lg:px-1 lg:backdrop-blur-sm">
               <span class="font-display italic text-2xl text-river leading-none tabular-nums">
                 {dayDate.getDate()}
               </span>
