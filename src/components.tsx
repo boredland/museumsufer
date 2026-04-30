@@ -757,21 +757,21 @@ function GroupedEventList({
   const dates = Object.keys(groups).sort();
   let cardIdx = 0;
   return (
-    <div class="flex flex-col gap-8">
+    <div class="flex flex-col gap-8 lg:gap-10">
       {dates.map((date) => {
         const dayDate = new Date(`${date}T00:00:00`);
         const weekday = dayDate.toLocaleDateString(dl, { weekday: "long" });
         const dayMonth = dayDate.toLocaleDateString(dl, { day: "numeric", month: "long" });
         return (
-          <section>
-            <header class="day-spine flex items-baseline gap-3 mb-3 px-1 lg:sticky lg:top-0 lg:z-10 lg:py-2 lg:-mx-1 lg:px-1 lg:backdrop-blur-sm">
-              <span class="font-display italic text-2xl text-river leading-none tabular-nums">
+          <section class="lg:grid lg:grid-cols-[6.5rem_1fr] lg:gap-6 lg:items-start">
+            <header class="day-spine flex items-baseline gap-3 mb-3 px-1 lg:flex-col lg:items-end lg:gap-1 lg:mb-0 lg:px-0 lg:text-right lg:sticky lg:top-4 lg:self-start">
+              <span class="font-display italic text-2xl text-river leading-none tabular-nums lg:text-[2.75rem] lg:tracking-tight">
                 {dayDate.getDate()}
               </span>
               <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
                 {weekday}
               </span>
-              <span class="font-mono text-[0.6875rem] text-text-tertiary opacity-60">·</span>
+              <span class="font-mono text-[0.6875rem] text-text-tertiary opacity-60 lg:hidden">·</span>
               <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
                 {dayMonth}
               </span>

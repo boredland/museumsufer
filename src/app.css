@@ -258,13 +258,6 @@ dialog::backdrop {
   font-feature-settings: "ss01" 1;
 }
 
-/* Sticky day-spine on desktop — soft scrim so cards don't bleed through */
-@media (min-width: 1024px) {
-  .day-spine {
-    background: color-mix(in oklab, var(--color-bg) 88%, transparent);
-  }
-}
-
 /* Cards — softer, more print-like */
 .card {
   background: var(--color-surface);
