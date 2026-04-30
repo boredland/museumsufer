@@ -555,6 +555,8 @@ export const CLIENT_SCRIPT = `
 
     // Inline search filter
     var searchInput = document.getElementById('search-input');
+    var searchClear = document.getElementById('search-clear');
+    var searchNoResults = document.getElementById('search-no-results');
     var sectionPrevOpen = {};
 
     function normalizeQuery(q) {
@@ -565,6 +567,8 @@ export const CLIENT_SCRIPT = `
       var q = normalizeQuery(searchInput.value);
       var items = document.querySelectorAll('[data-search]');
       var sections = document.querySelectorAll('.section[data-section]');
+
+      if (searchClear) searchClear.classList.toggle('hidden', q.length === 0);
 
       if (q.length === 0) {
         items.forEach(function(el) { el.removeAttribute('data-search-hidden'); });
@@ -578,6 +582,8 @@ export const CLIENT_SCRIPT = `
           if (badge) badge.textContent = badge.dataset.total;
         });
         sectionPrevOpen = {};
+        if (searchNoResults) searchNoResults.classList.add('hidden');
+        content.classList.remove('hidden');
         return;
       }
 
@@ -605,6 +611,7 @@ export const CLIENT_SCRIPT = `
         else el.setAttribute('data-search-hidden', '');
       });
 
+      var anyVisible = false;
       sections.forEach(function(s) {
         var key = s.dataset.section;
         if (!(key in sectionPrevOpen)) sectionPrevOpen[key] = s.open;
@@ -614,16 +621,29 @@ export const CLIENT_SCRIPT = `
         if (visible > 0) {
           s.open = true;
           s.removeAttribute('data-search-empty');
+          anyVisible = true;
         } else {
           s.setAttribute('data-search-empty', '');
         }
       });
+
+      if (searchNoResults) {
+        searchNoResults.classList.toggle('hidden', anyVisible);
+        content.classList.toggle('hidden', !anyVisible);
+      }
     }
 
     searchInput.addEventListener('input', applySearchFilter);
     searchInput.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') { searchInput.value = ''; applySearchFilter(); searchInput.blur(); }
     });
+    if (searchClear) {
+      searchClear.addEventListener('click', function() {
+        searchInput.value = '';
+        applySearchFilter();
+        searchInput.focus();
+      });
+    }
     document.body.addEventListener('htmx:afterSwap', function() {
       sectionPrevOpen = {};
       if (searchInput.value) applySearchFilter();
