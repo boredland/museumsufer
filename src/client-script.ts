@@ -644,6 +644,16 @@ export const CLIENT_SCRIPT = `
         searchInput.focus();
       });
     }
+
+    var themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+      themeToggle.addEventListener('click', function() {
+        var isDark = document.documentElement.classList.toggle('dark');
+        document.documentElement.classList.toggle('light', !isDark);
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+    }
+
     document.body.addEventListener('htmx:afterSwap', function() {
       sectionPrevOpen = {};
       if (searchInput.value) applySearchFilter();

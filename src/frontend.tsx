@@ -40,7 +40,10 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
     <header class="mb-12 max-[480px]:mb-9">
       <div class="flex items-center justify-between gap-4 mb-4">
         <p class="section-eyebrow">Frankfurt am Main · 50.10°N 8.68°E</p>
-        <LangSwitch locale={locale} />
+        <div class="flex items-center gap-4">
+          <ThemeToggle tr={tr} />
+          <LangSwitch locale={locale} />
+        </div>
       </div>
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
         Museumsufer
@@ -53,6 +56,42 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
         <div class="river-band flex-1" aria-hidden="true" />
       </div>
     </header>
+  );
+}
+
+function ThemeToggle({ tr }: { tr: Record<string, string> }) {
+  return (
+    <button
+      type="button"
+      id="theme-toggle"
+      class="flex items-center gap-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary hover:text-river transition-colors cursor-pointer"
+      aria-label={tr.switchTheme}
+      title={tr.switchTheme}
+    >
+      <span class="dark:hidden">{tr.themeDark}</span>
+      <span class="hidden dark:inline">{tr.themeLight}</span>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        class="w-3.5 h-3.5"
+        aria-hidden="true"
+      >
+        <path
+          class="dark:hidden"
+          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+          fill="currentColor"
+          stroke="none"
+        />
+        <circle class="hidden dark:block" cx="12" cy="12" r="5" fill="currentColor" stroke="none" />
+        <path
+          class="hidden dark:block"
+          d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+          stroke="currentColor"
+        />
+      </svg>
+    </button>
   );
 }
 
@@ -252,7 +291,7 @@ export function renderPage(
   locale: Locale,
   initialData?: InitialData,
   museums?: Record<string, MuseumInfo>,
-  sort?: string,
+  _sort?: string,
   range?: number,
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
@@ -318,6 +357,11 @@ export function renderPage(
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
           <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`,
+            }}
+          />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
