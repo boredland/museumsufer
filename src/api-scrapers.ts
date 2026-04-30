@@ -821,14 +821,18 @@ async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
 
   const today = todayIso();
   const events: ApiEvent[] = [];
-  const itemRe = /<article[^>]*>([\s\S]*?)<\/article>/g;
+  // Listing markup wraps each <article> with <a class="tile-link" href="...">…</a>
+  const tileRe =
+    /<a[^>]+class="tile-link"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>|<a[^>]+href="([^"]+)"[^>]+class="tile-link"[^>]*>([\s\S]*?)<\/a>/g;
   let match;
 
-  while ((match = itemRe.exec(html)) !== null) {
-    const block = match[1];
+  while ((match = tileRe.exec(html)) !== null) {
+    const href = match[1] || match[3];
+    const block = match[2] || match[4];
+    if (!href || !block) continue;
+
     const titleMatch = block.match(/archive-title[^>]*>([^<]+)/);
     const subtitleMatch = block.match(/<p class="subtitle">([^<]+)/);
-    const linkMatch = block.match(/<a[^>]+href="([^"]+)"[^>]*class="tile-link"/);
     const imgMatch = block.match(/<img[^>]+src="([^"]+)"/);
     if (!titleMatch || !subtitleMatch) continue;
 
@@ -850,7 +854,7 @@ async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
       end_time: null,
       end_date: null,
       description: null,
-      detail_url: linkMatch ? normalizeUrl(linkMatch[1], "https://www.fkv.de") : null,
+      detail_url: normalizeUrl(href, "https://www.fkv.de"),
       image_url: imgMatch ? normalizeUrl(imgMatch[1], "https://www.fkv.de") : null,
       price: null,
     });
