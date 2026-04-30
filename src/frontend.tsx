@@ -104,20 +104,14 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   const urls = PASS_URLS[locale];
   const utm = "?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=";
   return (
-    <aside class="flex items-center gap-2.5 py-2 px-3 mb-3 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary max-[480px]:flex-col max-[480px]:items-stretch max-[480px]:gap-1.5">
-      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" aria-hidden="true">
-        <path
-          d="M20 12V6a2 2 0 00-2-2H6a2 2 0 00-2 2v6m16 0v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6m16 0H4"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-        />
-        <circle cx="8.5" cy="8.5" r="1" fill="currentColor" />
-        <circle cx="15.5" cy="15.5" r="1" fill="currentColor" />
-        <path d="M14.5 9.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-      </svg>
-      <span class="flex-1 min-w-0">{tr.passPromo}</span>
-      <span class="flex gap-1.5 shrink-0 max-[480px]:justify-stretch">
+    <aside class="my-12 px-2 py-8 border-y border-border-light text-center">
+      <p class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary mb-3">
+        Card · Ticket
+      </p>
+      <p class="font-display italic text-[1.5rem] leading-tight text-text-primary mb-1 max-w-[28ch] mx-auto">
+        {tr.passPromo}
+      </p>
+      <div class="flex justify-center gap-3 mt-5 flex-wrap">
         <a
           href={`https://www.museumsufer.de/${urls.card}${utm}card`}
           target="_blank"
@@ -134,7 +128,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
         >
           {tr.passTicket}
         </a>
-      </span>
+      </div>
     </aside>
   );
 }
@@ -385,9 +379,9 @@ export function renderPage(
               )}
             </main>
 
-            <MuseumsSection museums={museums || {}} tr={tr} />
-
             <PassPromo locale={locale} tr={tr} />
+
+            <MuseumsSection museums={museums || {}} tr={tr} />
 
             <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
             <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
