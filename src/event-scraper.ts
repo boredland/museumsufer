@@ -89,55 +89,64 @@ async function processMuseum(
   if (museumConfig?.skipEvents && !museumConfig.eventApi) return { events: 0, api: false };
 
   if (museumConfig?.eventApi) {
+    const eventApi = museumConfig.eventApi;
     const proxy =
       museumConfig.proxy && env.FETCH_PROXY_URL
         ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
         : undefined;
-    const events = await fetchEventsFromApi(museumConfig.eventApi, proxy);
-    let count = 0;
-    for (const event of events) {
-      if (!event.title || !event.date) continue;
-      event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
-      if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
+    const events = await fetchEventsFromApi(eventApi, proxy);
 
-      let targetMuseumId = museum.id;
-      if (event.museum_slug_override) {
-        const override = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
-          .bind(event.museum_slug_override)
-          .first<{ id: number }>();
-        if (override) targetMuseumId = override.id;
-      }
+    const validEvents = events
+      .filter((e) => e.title && e.date)
+      .map((e) => ({
+        ...e,
+        title: e.title.replace(/\\"/g, '"').replace(/\\'/g, "'"),
+        description: e.description ? e.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : e.description,
+      }));
 
-      await env.DB.prepare(
-        `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON CONFLICT(museum_id, title, date) DO UPDATE SET
-           time = COALESCE(excluded.time, events.time),
-           end_time = COALESCE(excluded.end_time, events.end_time),
-           end_date = COALESCE(excluded.end_date, events.end_date),
-           description = COALESCE(excluded.description, events.description),
-           detail_url = COALESCE(excluded.detail_url, events.detail_url),
-           image_url = COALESCE(excluded.image_url, events.image_url),
-           price = COALESCE(excluded.price, events.price),
-           updated_at = datetime('now')`,
-      )
-        .bind(
-          targetMuseumId,
-          event.title,
-          event.date,
-          event.time,
-          event.end_time,
-          event.end_date,
-          event.description,
-          museumConfig.eventApi.endpoint,
-          event.detail_url,
-          event.image_url,
-          event.price,
-        )
-        .run();
-      count++;
+    const overrideSlugs = Array.from(
+      new Set(validEvents.map((e) => e.museum_slug_override).filter((s): s is string => !!s)),
+    );
+    const overrideMap = new Map<string, number>();
+    if (overrideSlugs.length > 0) {
+      const placeholders = overrideSlugs.map(() => "?").join(",");
+      const { results } = await env.DB.prepare(`SELECT id, slug FROM museums WHERE slug IN (${placeholders})`)
+        .bind(...overrideSlugs)
+        .all<{ id: number; slug: string }>();
+      for (const r of results) overrideMap.set(r.slug, r.id);
     }
-    return { events: count, api: count > 0 };
+
+    const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(museum_id, title, date) DO UPDATE SET
+         time = COALESCE(excluded.time, events.time),
+         end_time = COALESCE(excluded.end_time, events.end_time),
+         end_date = COALESCE(excluded.end_date, events.end_date),
+         description = COALESCE(excluded.description, events.description),
+         detail_url = COALESCE(excluded.detail_url, events.detail_url),
+         image_url = COALESCE(excluded.image_url, events.image_url),
+         price = COALESCE(excluded.price, events.price),
+         updated_at = datetime('now')`;
+
+    const statements = validEvents.map((event) => {
+      const targetMuseumId = (event.museum_slug_override && overrideMap.get(event.museum_slug_override)) || museum.id;
+      return env.DB.prepare(insertSql).bind(
+        targetMuseumId,
+        event.title,
+        event.date,
+        event.time,
+        event.end_time,
+        event.end_date,
+        event.description,
+        eventApi.endpoint,
+        event.detail_url,
+        event.image_url,
+        event.price,
+      );
+    });
+
+    if (statements.length > 0) await env.DB.batch(statements);
+    return { events: statements.length, api: statements.length > 0 };
   }
 
   if (!museum.website_url) return { events: 0, api: false };
@@ -268,31 +277,40 @@ ${truncated}`,
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
-  let count = 0;
-  for (const event of events) {
-    if (!event.title || !event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) continue;
-    if (isPlaceholderTitle(event.title) || !textContent.toLowerCase().includes(event.title.toLowerCase().slice(0, 12)))
-      continue;
-    event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
-    if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
+  const insertSql = `INSERT INTO events (museum_id, title, date, time, description, url, detail_url)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(museum_id, title, date) DO UPDATE SET
+       time = excluded.time,
+       description = excluded.description,
+       detail_url = COALESCE(excluded.detail_url, events.detail_url),
+       updated_at = datetime('now')`;
 
-    const detailUrl = matchLinkForTitle(event.title, pageLinks);
-
-    await env.DB.prepare(
-      `INSERT INTO events (museum_id, title, date, time, description, url, detail_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(museum_id, title, date) DO UPDATE SET
-         time = excluded.time,
-         description = excluded.description,
-         detail_url = COALESCE(excluded.detail_url, events.detail_url),
-         updated_at = datetime('now')`,
+  const statements = events
+    .filter(
+      (event) =>
+        event.title &&
+        event.date &&
+        /^\d{4}-\d{2}-\d{2}$/.test(event.date) &&
+        !isPlaceholderTitle(event.title) &&
+        textContent.toLowerCase().includes(event.title.toLowerCase().slice(0, 12)),
     )
-      .bind(museum.id, event.title, event.date, event.time, event.description, eventsUrl, detailUrl)
-      .run();
-    count++;
-  }
+    .map((event) => {
+      const title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
+      const description = event.description ? event.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : null;
+      const detailUrl = matchLinkForTitle(title, pageLinks);
+      return env.DB.prepare(insertSql).bind(
+        museum.id,
+        title,
+        event.date,
+        event.time,
+        description,
+        eventsUrl,
+        detailUrl,
+      );
+    });
 
-  return count;
+  if (statements.length > 0) await env.DB.batch(statements);
+  return statements.length;
 }
 
 async function enrichUpcomingEvents(env: Env): Promise<number> {
@@ -331,6 +349,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
     }),
   );
 
+  const statements: D1PreparedStatement[] = [];
   let enriched = 0;
   for (let i = 0; i < events.length; i++) {
     const event = events[i];
@@ -362,21 +381,20 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
     }
 
     if (updates.length === 0) {
-      await env.DB.prepare(
-        "UPDATE events SET price = COALESCE(price, ''), description = COALESCE(description, ''), updated_at = datetime('now') WHERE id = ?",
-      )
-        .bind(event.id)
-        .run();
+      statements.push(
+        env.DB.prepare(
+          "UPDATE events SET price = COALESCE(price, ''), description = COALESCE(description, ''), updated_at = datetime('now') WHERE id = ?",
+        ).bind(event.id),
+      );
       continue;
     }
 
     updates.push("updated_at = datetime('now')");
-    await env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`)
-      .bind(...values, event.id)
-      .run();
+    statements.push(env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`).bind(...values, event.id));
     enriched++;
   }
 
+  if (statements.length > 0) await env.DB.batch(statements);
   return enriched;
 }
 
