@@ -149,10 +149,18 @@ export const CLIENT_SCRIPT = `
       });
     }
 
-    function pushStateToUrl(date, near) {
+    var currentRange = 0;
+
+    function pushStateToUrl(date, near, range) {
       var url = new URL(location.href);
-      if (date === BERLIN_TODAY) url.searchParams.delete('date');
-      else url.searchParams.set('date', date);
+      if (range) {
+        url.searchParams.set('range', String(range));
+        url.searchParams.delete('date');
+      } else {
+        url.searchParams.delete('range');
+        if (date === BERLIN_TODAY) url.searchParams.delete('date');
+        else url.searchParams.set('date', date);
+      }
       if (near) url.searchParams.set('sort', 'near');
       else url.searchParams.delete('sort');
       history.replaceState(null, '', url.toString());
@@ -163,10 +171,17 @@ export const CLIENT_SCRIPT = `
       document.querySelectorAll('[data-date]').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.date === date);
       });
+      var up = document.getElementById('btn-upcoming');
+      if (up) {
+        var on = !date && currentRange > 0;
+        up.classList.toggle('active', on);
+        up.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
     }
 
     function loadDay(date) {
       currentDate = date;
+      currentRange = 0;
       setActiveDate(date);
       htmx.ajax('GET', '/partial/content?date=' + date + '&lang=' + CURRENT_LANG, {
         target: '#content',
@@ -174,14 +189,26 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    function loadUpcoming(range) {
+      currentRange = range;
+      currentDate = BERLIN_TODAY;
+      setActiveDate(null);
+      htmx.ajax('GET', '/partial/content?range=' + range + '&lang=' + CURRENT_LANG, {
+        target: '#content',
+        swap: 'innerHTML',
+      });
+    }
+
     document.addEventListener('click', function(e) {
-      var btn = e.target.closest('[data-date]');
-      if (btn) loadDay(btn.dataset.date);
+      var dateBtn = e.target.closest('[data-date]');
+      if (dateBtn) { loadDay(dateBtn.dataset.date); return; }
+      var rangeBtn = e.target.closest('[data-range]');
+      if (rangeBtn) loadUpcoming(parseInt(rangeBtn.dataset.range, 10));
     });
 
     document.body.addEventListener('htmx:afterSwap', function(e) {
       if (e.detail.target.id !== 'content') return;
-      pushStateToUrl(currentDate, sortByDistance);
+      pushStateToUrl(currentDate, sortByDistance, currentRange);
       var xhr = e.detail.xhr;
       var label = xhr.getResponseHeader('X-Date-Label');
       if (label) dateLabel.textContent = label;
@@ -189,7 +216,6 @@ export const CLIENT_SCRIPT = `
       if (dataEl) {
         lastRenderData = JSON.parse(dataEl.textContent);
         dataEl.remove();
-        buildSearchIndex();
       }
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();

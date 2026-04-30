@@ -597,14 +597,18 @@ export function ContentBody({
   tr,
   locale,
   todayIso,
+  groupByDate,
 }: {
   events: EventWithLikes[];
   exhibitions: ExhibitionWithLikes[];
   tr: Record<string, string>;
   locale: Locale;
   todayIso: string;
+  groupByDate?: boolean;
 }) {
-  const sortedEvents = sortByPopularity(events);
+  const sortedEvents = groupByDate
+    ? [...events].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || "")))
+    : sortByPopularity(events);
   const sortedExhibitions = sortByPopularity(exhibitions);
 
   return (
@@ -617,6 +621,8 @@ export function ContentBody({
       >
         {sortedEvents.length === 0 ? (
           <div class={emptyStateClass}>{tr.noEvents}</div>
+        ) : groupByDate ? (
+          <GroupedEventList events={sortedEvents} locale={locale} tr={tr} />
         ) : (
           <ul class={cardListClass}>
             {sortedEvents.map((ev, i) => (
@@ -692,6 +698,46 @@ function ExhibitionList({
       {exhibitions.map((ex, i) => (
         <ExhibitionCard ex={ex} idx={i} todayIso={todayIso} locale={locale} tr={tr} />
       ))}
+    </>
+  );
+}
+
+function GroupedEventList({
+  events,
+  locale,
+  tr,
+}: {
+  events: EventWithLikes[];
+  locale: Locale;
+  tr: Record<string, string>;
+}) {
+  const dl = dateLocale(locale);
+  const groups: Record<string, EventWithLikes[]> = {};
+  for (const ev of events) {
+    (groups[ev.date] ||= []).push(ev);
+  }
+  const dates = Object.keys(groups).sort();
+  let cardIdx = 0;
+  return (
+    <>
+      {dates.map((date) => {
+        const formatted = new Date(`${date}T00:00:00`).toLocaleDateString(dl, {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+        return (
+          <>
+            <li class="mt-4 first:mt-0 mb-2 text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">
+              {formatted}
+            </li>
+            {groups[date].map((ev) => {
+              const idx = cardIdx++;
+              return <EventCard ev={ev} idx={idx} tr={tr} />;
+            })}
+          </>
+        );
+      })}
     </>
   );
 }
