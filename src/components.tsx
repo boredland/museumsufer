@@ -328,7 +328,7 @@ function ExhibitionCard({
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
-          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
@@ -491,7 +491,7 @@ function EventCard({
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
-          <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />

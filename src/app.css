@@ -282,6 +282,11 @@ dialog::backdrop {
   background: linear-gradient(180deg, var(--color-bg-warm) 0%, var(--color-surface) 60%);
   padding: 1.25rem 1rem;
 }
+@media (max-width: 480px) {
+  .card.is-hero {
+    padding: 1rem 0.875rem;
+  }
+}
 .card.is-hero .card-title {
   font-family: var(--font-display);
   font-style: italic;
