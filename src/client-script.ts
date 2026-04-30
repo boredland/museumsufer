@@ -590,7 +590,7 @@ export const CLIENT_SCRIPT = `
 
       var matchSet;
       if (typeof uFuzzy !== 'undefined' && q.length >= 2) {
-        var u = new uFuzzy({ intraMode: 1, intraIns: 1, intraSub: 0, intraTrn: 1, intraDel: 1 });
+        var u = new uFuzzy({ intraMode: 1, intraIns: 1, intraSub: 1, intraTrn: 1, intraDel: 1 });
         var idxs = u.filter(haystack, q);
         matchSet = new Set(idxs || []);
       } else {
