@@ -527,148 +527,84 @@ export const CLIENT_SCRIPT = `
       }
     }, 2000);
 
-    // Search
-    var searchOverlay = document.getElementById('search-overlay');
+    // Inline search filter
     var searchInput = document.getElementById('search-input');
-    var searchResults = document.getElementById('search-results');
-    var searchIdx = -1;
-    var fuse = null;
+    var sectionPrevOpen = {};
 
-    function buildSearchIndex() {
-      if (!lastRenderData || typeof Fuse === 'undefined') return;
-      var items = [];
-      for (var i = 0; i < lastRenderData.events.length; i++) {
-        var ev = lastRenderData.events[i];
-        items.push({ type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, time: ev.time || '' });
-      }
-      for (var j = 0; j < lastRenderData.exhibitions.length; j++) {
-        var ex = lastRenderData.exhibitions[j];
-        items.push({ type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, time: '' });
-      }
-      fuse = new Fuse(items, {
-        keys: [{ name: 'title', weight: 3 }, { name: 'museum', weight: 2 }, { name: 'desc', weight: 1 }],
-        includeMatches: true,
-        threshold: 0.4,
-        minMatchCharLength: 2,
-      });
+    function normalizeQuery(q) {
+      return q.normalize('NFD').replace(/\\p{Diacritic}/gu, '').toLowerCase().trim();
     }
 
-    function openSearch() {
-      buildSearchIndex();
-      searchOverlay.showModal();
-      searchInput.value = '';
-      searchInput.setAttribute('aria-expanded', 'true');
-      searchInput.focus();
-      updateSearch();
-    }
+    function applySearchFilter() {
+      var q = normalizeQuery(searchInput.value);
+      var items = document.querySelectorAll('[data-search]');
+      var sections = document.querySelectorAll('.section[data-section]');
 
-    function closeSearch() {
-      searchOverlay.close();
-      searchInput.setAttribute('aria-expanded', 'false');
-      searchInput.setAttribute('aria-activedescendant', '');
-      searchIdx = -1;
-      document.getElementById('search-trigger').focus();
-    }
-
-    function highlight(text, matches, key) {
-      if (!matches) return escHtml(text);
-      var m = matches.find(function(m) { return m.key === key; });
-      if (!m || !m.indices.length) return escHtml(text);
-      var result = '';
-      var last = 0;
-      for (var i = 0; i < m.indices.length; i++) {
-        var start = m.indices[i][0], end = m.indices[i][1];
-        result += escHtml(text.slice(last, start));
-        result += '<mark>' + escHtml(text.slice(start, end + 1)) + '</mark>';
-        last = end + 1;
-      }
-      result += escHtml(text.slice(last));
-      return result;
-    }
-
-    function updateSearch() {
-      var q = searchInput.value.trim();
-      searchIdx = -1;
-      var results;
-
-      if (!fuse || q.length === 0) {
-        var items = [];
-        if (lastRenderData) {
-          for (var i = 0; i < lastRenderData.events.length; i++) {
-            var ev = lastRenderData.events[i];
-            items.push({ item: { type: T.events, title: ev.title, museum: ev.museum_name || '', desc: ev.description || '', url: ev.detail_url || ev.url || null, time: ev.time || '' }, matches: null });
+      if (q.length === 0) {
+        items.forEach(function(el) { el.removeAttribute('data-search-hidden'); });
+        sections.forEach(function(s) {
+          s.removeAttribute('data-search-empty');
+          var key = s.dataset.section;
+          if (key in sectionPrevOpen) {
+            s.open = sectionPrevOpen[key];
           }
-          for (var j = 0; j < lastRenderData.exhibitions.length; j++) {
-            var ex = lastRenderData.exhibitions[j];
-            items.push({ item: { type: T.exhibitions, title: ex.title, museum: ex.museum_name || '', desc: ex.description || '', url: ex.detail_url || null, time: '' }, matches: null });
-          }
-        }
-        results = items.slice(0, 15);
-      } else {
-        results = fuse.search(q).slice(0, 15);
-      }
-
-      if (results.length === 0) {
-        searchResults.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-tertiary);font-size:0.8125rem">' + escHtml(T.noResults) + '</div>';
+          var badge = s.querySelector('.section-count');
+          if (badge) badge.textContent = badge.dataset.total;
+        });
+        sectionPrevOpen = {};
         return;
       }
 
-      searchResults.innerHTML = results.map(function(r, i) {
-        var item = r.item;
-        var titleHtml = highlight(item.title, r.matches, 'title');
-        var museumHtml = highlight(item.museum, r.matches, 'museum');
-        var descSnippet = item.desc && r.matches && r.matches.some(function(m) { return m.key === 'desc'; })
-          ? '<div class="search-result-desc">' + highlight(item.desc.slice(0, 120), r.matches, 'desc') + '</div>'
-          : '';
-        var timeStr = item.time ? '<span class="search-result-time">' + escHtml(item.time) + '</span>' : '';
+      var haystack = [];
+      var elList = [];
+      items.forEach(function(el) {
+        haystack.push(el.dataset.search || '');
+        elList.push(el);
+      });
 
-        return '<div class="search-result" role="option" id="search-opt-' + i + '" data-idx="' + i + '"'
-          + (item.url ? ' data-url="' + escAttr(item.url) + '"' : '')
-          + '><div class="search-result-type">' + escHtml(item.type.slice(0, 6)) + '</div>'
-          + '<div class="search-result-body">'
-          + '<div class="search-result-title">' + titleHtml + ' ' + timeStr + '</div>'
-          + '<div class="search-result-museum">' + museumHtml + '</div>'
-          + descSnippet
-          + '</div></div>';
-      }).join('');
+      var matchSet;
+      if (typeof uFuzzy !== 'undefined' && q.length >= 2) {
+        var u = new uFuzzy({ intraMode: 1, intraIns: 1, intraSub: 0, intraTrn: 1, intraDel: 1 });
+        var idxs = u.filter(haystack, q);
+        matchSet = new Set(idxs || []);
+      } else {
+        matchSet = new Set();
+        for (var i = 0; i < haystack.length; i++) {
+          if (haystack[i].indexOf(q) !== -1) matchSet.add(i);
+        }
+      }
+
+      elList.forEach(function(el, i) {
+        if (matchSet.has(i)) el.removeAttribute('data-search-hidden');
+        else el.setAttribute('data-search-hidden', '');
+      });
+
+      sections.forEach(function(s) {
+        var key = s.dataset.section;
+        if (!(key in sectionPrevOpen)) sectionPrevOpen[key] = s.open;
+        var visible = s.querySelectorAll('[data-search]:not([data-search-hidden])').length;
+        var badge = s.querySelector('.section-count');
+        if (badge) badge.textContent = visible + '/' + badge.dataset.total;
+        if (visible > 0) {
+          s.open = true;
+          s.removeAttribute('data-search-empty');
+        } else {
+          s.setAttribute('data-search-empty', '');
+        }
+      });
     }
 
-    searchInput.addEventListener('input', updateSearch);
-
-    searchResults.addEventListener('click', function(e) {
-      var row = e.target.closest('.search-result');
-      if (row && row.dataset.url) {
-        window.open(row.dataset.url, '_blank');
-        closeSearch();
-      }
-    });
-
+    searchInput.addEventListener('input', applySearchFilter);
     searchInput.addEventListener('keydown', function(e) {
-      var rows = searchResults.querySelectorAll('.search-result');
-      if (e.key === 'ArrowDown') { e.preventDefault(); searchIdx = Math.min(searchIdx + 1, rows.length - 1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); searchIdx = Math.max(searchIdx - 1, -1); }
-      else if (e.key === 'Enter' && searchIdx >= 0 && rows[searchIdx]) {
-        var url = rows[searchIdx].dataset.url;
-        if (url) { window.open(url, '_blank'); closeSearch(); }
-      }
-      else if (e.key === 'Escape') { closeSearch(); return; }
-      else return;
-      rows.forEach(function(r, i) { r.classList.toggle('active', i === searchIdx); });
-      searchInput.setAttribute('aria-activedescendant', searchIdx >= 0 ? 'search-opt-' + searchIdx : '');
-      if (searchIdx >= 0 && rows[searchIdx]) rows[searchIdx].scrollIntoView({ block: 'nearest' });
+      if (e.key === 'Escape') { searchInput.value = ''; applySearchFilter(); searchInput.blur(); }
     });
-
-    searchOverlay.addEventListener('click', function(e) {
-      if (e.target === searchOverlay) closeSearch();
-    });
-    searchOverlay.addEventListener('cancel', function() {
-      searchInput.setAttribute('aria-expanded', 'false');
-      searchInput.setAttribute('aria-activedescendant', '');
-      searchIdx = -1;
+    document.body.addEventListener('htmx:afterSwap', function() {
+      sectionPrevOpen = {};
+      if (searchInput.value) applySearchFilter();
     });
 
     document.addEventListener('keydown', function(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); searchInput.focus(); searchInput.select(); }
     });
 
     if ('serviceWorker' in navigator) {

@@ -15,6 +15,15 @@ import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
 
+function searchHaystack(...parts: (string | null | undefined)[]): string {
+  return parts
+    .filter(Boolean)
+    .join(" ")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
 function utm(url: string, content: string): string {
   try {
     const u = new URL(url);
@@ -261,7 +270,7 @@ function ExhibitionCard({
   );
 
   return (
-    <li>
+    <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
       <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
           <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} utmContent="exhibition_image" />
@@ -401,7 +410,7 @@ function EventCard({ ev, idx, tr }: { ev: EventWithLikes; idx: number; tr: Recor
     ev.title
   );
   return (
-    <li>
+    <li data-search={searchHaystack(ev.title, ev.museum_name, ev.description)}>
       <article
         class={cardClass}
         data-item-id={ev.id}
@@ -479,8 +488,9 @@ function Section({
         </svg>
         <h3 class="section-title text-[0.6875rem] font-bold uppercase tracking-widest text-text-tertiary">{title}</h3>
         <span
-          class="text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
+          class="section-count text-[0.6875rem] font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full"
           title={`${count} ${title}`}
+          data-total={count}
         >
           {count}
         </span>
@@ -508,7 +518,7 @@ function Section({
 
 function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
   return (
-    <li>
+    <li data-search={searchHaystack(museum.name, slug)}>
       <div
         class="flex items-center gap-3 py-2.5 px-4 border-b border-border-light last:border-b-0"
         data-museum-slug={slug}
