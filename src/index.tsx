@@ -115,7 +115,7 @@ app.post("/api/transit", async (c) => {
     }),
   ];
 
-  const batches: typeof queryItems[] = [];
+  const batches: (typeof queryItems)[] = [];
   for (let i = 0; i < queryItems.length; i += 10) {
     batches.push(queryItems.slice(i, i + 10));
   }
@@ -287,7 +287,11 @@ app.get(
     const { date: rawDate, lang, range } = c.req.valid("query");
     const date = rawDate || todayIso();
     const locale = (lang || detectLocale(c.req.raw)) as Locale;
-    const endDate = range ? berlinNow().add(range - 1, "day").format("YYYY-MM-DD") : undefined;
+    const endDate = range
+      ? berlinNow()
+          .add(range - 1, "day")
+          .format("YYYY-MM-DD")
+      : undefined;
     const data = await fetchDayData(c.env, date, locale, endDate);
     const tr = getTranslations(locale);
 
@@ -327,7 +331,11 @@ app.get(
     const locale = detectLocale(c.req.raw);
     const { date: rawDate, sort, range } = c.req.valid("query");
     const date = range ? todayIso() : rawDate || todayIso();
-    const endDate = range ? berlinNow().add(range - 1, "day").format("YYYY-MM-DD") : undefined;
+    const endDate = range
+      ? berlinNow()
+          .add(range - 1, "day")
+          .format("YYYY-MM-DD")
+      : undefined;
     let initialData: InitialData | undefined;
     const museums = await getMuseumMap(c.env).catch(() => ({}));
     try {

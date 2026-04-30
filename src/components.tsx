@@ -165,13 +165,25 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
         role="menu"
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
-        <a href={urls.rmvApp} target="_blank" rel="noopener" role="menuitem" class={`${navLinkClass} hidden max-[1024px]:flex`}>
+        <a
+          href={urls.rmvApp}
+          target="_blank"
+          rel="noopener"
+          role="menuitem"
+          class={`${navLinkClass} hidden max-[1024px]:flex`}
+        >
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
             <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
           RMV
         </a>
-        <a href={urls.rmvWeb} target="_blank" rel="noopener" role="menuitem" class={`${navLinkClass} max-[1024px]:hidden`}>
+        <a
+          href={urls.rmvWeb}
+          target="_blank"
+          rel="noopener"
+          role="menuitem"
+          class={`${navLinkClass} max-[1024px]:hidden`}
+        >
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
             <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
           </svg>
@@ -273,7 +285,13 @@ function ExhibitionCard({
     <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
       <article class={cardClass} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
         <div class="shrink-0 w-[72px] max-[480px]:w-14 flex flex-col items-center gap-1">
-          <CardImage src={ex.image_url} alt={ex.title} detailUrl={ex.detail_url} lazy={idx > 2} utmContent="exhibition_image" />
+          <CardImage
+            src={ex.image_url}
+            alt={ex.title}
+            detailUrl={ex.detail_url}
+            lazy={idx > 2}
+            utmContent="exhibition_image"
+          />
           {dates && (
             <span class="text-[0.5625rem] font-medium text-text-tertiary bg-border-light px-1 py-0.5 rounded text-center leading-tight">
               {dates}
@@ -607,7 +625,9 @@ export function ContentBody({
   groupByDate?: boolean;
 }) {
   const sortedEvents = groupByDate
-    ? [...events].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || "")))
+    ? [...events].sort((a, b) =>
+        a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || ""),
+      )
     : sortByPopularity(events);
   const sortedExhibitions = sortByPopularity(exhibitions);
 
