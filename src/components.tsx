@@ -456,15 +456,17 @@ function Section({
   count,
   iconPath,
   children,
+  defaultOpen = true,
 }: {
   sectionKey: string;
   title: string;
   count: number;
   iconPath: string;
   children: unknown;
+  defaultOpen?: boolean;
 }) {
   return (
-    <details class="section mb-10" data-section={sectionKey} open>
+    <details class="section mb-10" data-section={sectionKey} open={defaultOpen}>
       <summary class="section-header flex items-center gap-2 mb-4 cursor-pointer select-none hover:[&_.section-title]:text-text-secondary">
         <svg
           aria-hidden="true"
@@ -651,6 +653,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
       title={tr.museums}
       count={Object.keys(museums).length}
       iconPath="M10 2L2 6v1.5h16V6L10 2zM4 9.5v5h1.5v-5H4zm3.5 0v5H9v-5H7.5zm3.5 0v5h1.5v-5H11zm3.5 0v5H16v-5h-1.5zM2 16v1.5h16V16H2z"
+      defaultOpen={false}
     >
       <ul class={cardListClass}>
         {Object.entries(museums)
