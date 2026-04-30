@@ -1,7 +1,7 @@
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { CLIENT_SCRIPT } from "./client-script";
-import { ContentBody, MuseumsSection } from "./components";
+import { ContentBody, Logo, Mark, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON } from "./icons";
@@ -45,9 +45,15 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
           <LangSwitch locale={locale} />
         </div>
       </div>
-      <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
-        Museumsufer
-      </h1>
+      <div class="flex items-center gap-6 max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-4">
+        <Logo class="w-20 h-20 rounded-xl shadow-card shrink-0" />
+        <div class="flex flex-col items-start gap-1">
+          <Mark class="w-8 h-8 text-river" />
+          <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
+            Museumsufer
+          </h1>
+        </div>
+      </div>
       <div class="flex items-center gap-3 mt-4">
         <div class="river-band flex-1" aria-hidden="true" />
         <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
@@ -351,7 +357,7 @@ export function renderPage(
           <meta name="twitter:title" content={tr.pageTitle} />
           <meta name="twitter:description" content={tr.metaLong} />
           <meta name="twitter:image" content="https://museumsufer.app/og-image.png" />
-          <link rel="icon" href="/icon-192.png" type="image/png" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
           <link rel="apple-touch-icon" href="/icon-192.png" />
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
