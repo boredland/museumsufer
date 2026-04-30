@@ -8,7 +8,8 @@ import {
   cardListClass,
   descriptionClass,
   emptyStateClass,
-  iconBtnClass,
+  iconBtnGhost,
+  quietCountClass,
   titleLinkClass,
 } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
@@ -122,7 +123,7 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class={`card-likes ${iconBtnClass} gap-1 px-1.5 !cursor-default`}>
+    <span class={`card-likes ${quietCountClass}`} aria-label={`${count} likes`}>
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
         <path d={ICON.heart} />
       </svg>
@@ -155,7 +156,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
     <span class="relative inline-block">
       <button
         type="button"
-        class={iconBtnClass}
+        class={iconBtnGhost}
         aria-label={tr.navigate}
         title={tr.navigate}
         aria-haspopup="menu"
@@ -253,8 +254,13 @@ function EndingBadge({
   if (daysLeft > 14) return null;
   const daysUnit = daysLeft === 1 ? tr.daysSingular : tr.daysPlural;
   const label = daysLeft <= 3 ? tr.lastDays : tr.endingSoon;
+  const urgent = daysLeft <= 3;
   return (
-    <span class="text-[0.6875rem] font-medium text-red-700 bg-red-50 px-1.5 rounded" title={`${daysLeft} ${daysUnit}`}>
+    <span
+      class={`ending-badge inline-flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${urgent ? "text-red-700" : "text-text-tertiary"}`}
+      title={`${daysLeft} ${daysUnit}`}
+    >
+      <span aria-hidden="true" class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700" : "bg-text-tertiary"}`} />
       {label}
     </span>
   );
@@ -328,21 +334,21 @@ function ExhibitionCard({
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
-              class="card-visited-btn inline-flex items-center justify-center w-6 h-6 text-text-tertiary bg-transparent border-0 p-0 rounded cursor-pointer transition-all opacity-50 hover:opacity-100 hover:text-river focus-visible:opacity-100"
+              class={`card-visited-btn ${iconBtnGhost}`}
               aria-pressed="false"
               aria-label={tr.markVisited}
               title={tr.markVisited}
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
                 <path d={ICON.visibility} />
               </svg>
             </button>
           </div>
           {ex.description && (
             <details class="mt-1">
-              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-river">
+              <summary class="card-disclosure font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
@@ -369,7 +375,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
     <span class="relative inline-block">
       <button
         type="button"
-        class={iconBtnClass}
+        class={iconBtnGhost}
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         aria-haspopup="menu"
@@ -490,17 +496,14 @@ function EventCard({
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />
             {ev.price && (
-              <>
-                <span class="w-px h-3 bg-border mx-0.5" aria-hidden="true" />
-                <span class="text-[0.6875rem] font-medium text-text-secondary bg-border-light px-1.5 rounded">
-                  {ev.price}
-                </span>
-              </>
+              <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">
+                {ev.price}
+              </span>
             )}
           </div>
           {ev.description && (
             <details class="mt-1">
-              <summary class="text-[0.6875rem] text-text-tertiary cursor-pointer hover:text-river">
+              <summary class="card-disclosure font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
