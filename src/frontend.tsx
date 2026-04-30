@@ -39,15 +39,21 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
   return (
     <header class="mb-12 max-[480px]:mb-9">
       <div class="flex items-center justify-between gap-4 mb-4">
-        <p class="section-eyebrow">Frankfurt am Main</p>
+        <p class="section-eyebrow">
+          Frankfurt am Main · 50.10°N 8.68°E
+        </p>
         <LangSwitch locale={locale} />
       </div>
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
         Museumsufer
       </h1>
-      <p class="mt-3 font-sans text-text-secondary text-[0.9375rem] max-w-[36ch] leading-snug">
-        {tr.subtitle}
-      </p>
+      <div class="flex items-center gap-3 mt-4">
+        <div class="river-band flex-1" aria-hidden="true" />
+        <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
+          {tr.subtitle}
+        </span>
+        <div class="river-band flex-1" aria-hidden="true" />
+      </div>
     </header>
   );
 }
@@ -372,7 +378,10 @@ export function renderPage(
                   groupByDate={!!range}
                 />
               ) : (
-                <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>
+                <div class="py-16 px-4 text-center">
+                  <div class="river-band mx-auto mb-6 max-w-[200px] opacity-60" aria-hidden="true" />
+                  <p class="font-display italic text-xl text-text-tertiary">{tr.loading}…</p>
+                </div>
               )}
             </main>
 
