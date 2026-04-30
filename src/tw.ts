@@ -3,8 +3,11 @@ export const cardClass =
 
 export const cardListClass = "card-list list-none p-0";
 
-export const iconBtnClass =
-  "inline-flex items-center justify-center min-w-7 min-h-7 text-[0.6875rem] font-medium text-text-tertiary border border-border rounded cursor-pointer transition-colors no-underline hover:border-river hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2";
+export const iconBtnGhost =
+  "inline-flex items-center justify-center w-7 h-7 text-text-tertiary bg-transparent border-0 p-0 rounded cursor-pointer no-underline opacity-60 transition-all hover:opacity-100 hover:text-river focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2";
+
+export const quietCountClass =
+  "inline-flex items-center gap-1 text-[0.6875rem] font-mono font-medium text-text-tertiary tabular-nums opacity-70";
 
 export const titleLinkClass =
   "text-inherit no-underline block hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm";
