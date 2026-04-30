@@ -15,7 +15,7 @@ import {
   proxyImages,
 } from "./api";
 import { ContentBody } from "./components";
-import { todayIso } from "./date";
+import { berlinNow, todayIso } from "./date";
 import { scrapeMuseumWebsites } from "./event-scraper";
 import { scrapeMuseumExhibitions } from "./exhibition-scraper";
 import { type InitialData, renderPage } from "./frontend";
@@ -37,6 +37,7 @@ const dayQuery = z.object({
     .optional(),
   lang: z.enum(["de", "en", "fr"]).optional(),
   sort: z.string().optional(),
+  range: z.coerce.number().int().min(2).max(14).optional(),
 });
 
 const app = new Hono<{ Bindings: Env }>();
@@ -283,10 +284,11 @@ app.get(
     if (!result.success) return c.text("Bad request", 400);
   }),
   async (c) => {
-    const { date: rawDate, lang } = c.req.valid("query");
+    const { date: rawDate, lang, range } = c.req.valid("query");
     const date = rawDate || todayIso();
     const locale = (lang || detectLocale(c.req.raw)) as Locale;
-    const data = await fetchDayData(c.env, date, locale);
+    const endDate = range ? berlinNow().add(range - 1, "day").format("YYYY-MM-DD") : undefined;
+    const data = await fetchDayData(c.env, date, locale, endDate);
     const tr = getTranslations(locale);
 
     const html = (
@@ -297,15 +299,17 @@ app.get(
           tr={tr}
           locale={locale}
           todayIso={todayIso()}
+          groupByDate={!!range}
         />
         <script type="application/json" id="partial-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
       </>
     );
 
+    const label = range ? tr.upcomingDays.replace("{n}", String(range)) : formatDateFull(date, dateLocale(locale));
     return c.html(html, {
       headers: {
         "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600",
-        "X-Date-Label": formatDateFull(date, dateLocale(locale)),
+        "X-Date-Label": label,
       },
     });
   },
@@ -321,17 +325,18 @@ app.get(
   }),
   async (c) => {
     const locale = detectLocale(c.req.raw);
-    const { date: rawDate, sort } = c.req.valid("query");
-    const date = rawDate || todayIso();
+    const { date: rawDate, sort, range } = c.req.valid("query");
+    const date = range ? todayIso() : rawDate || todayIso();
+    const endDate = range ? berlinNow().add(range - 1, "day").format("YYYY-MM-DD") : undefined;
     let initialData: InitialData | undefined;
     const museums = await getMuseumMap(c.env).catch(() => ({}));
     try {
-      initialData = await fetchDayData(c.env, date, locale);
+      initialData = await fetchDayData(c.env, date, locale, endDate);
     } catch (e) {
       console.error("Failed to fetch initial data:", e);
     }
 
-    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined), {
+    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined, range), {
       headers: {
         "Content-Language": locale,
         Vary: "Accept-Language",

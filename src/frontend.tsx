@@ -156,7 +156,17 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
 const dateBtnClass =
   "date-btn min-w-12 px-2 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
 
-function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string, string>; activeDate: string }) {
+function DateNav({
+  locale,
+  tr,
+  activeDate,
+  activeRange,
+}: {
+  locale: Locale;
+  tr: Record<string, string>;
+  activeDate: string;
+  activeRange?: number;
+}) {
   const dl = dateLocale(locale);
   const now = berlinNow();
   const days = Array.from({ length: 7 }, (_, i) => {
@@ -172,11 +182,25 @@ function DateNav({ locale, tr, activeDate }: { locale: Locale; tr: Record<string
   return (
     <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
       {days.map((d) => (
-        <button type="button" data-date={d.iso} class={`${dateBtnClass}${d.iso === activeDate ? " active" : ""}`}>
+        <button
+          type="button"
+          data-date={d.iso}
+          class={`${dateBtnClass}${!activeRange && d.iso === activeDate ? " active" : ""}`}
+        >
           <span class="text-[0.6875rem]">{d.weekday}</span>
           <span class="text-[0.625rem] opacity-60">{d.day}</span>
         </button>
       ))}
+      <button
+        type="button"
+        id="btn-upcoming"
+        data-range="7"
+        aria-pressed={activeRange ? "true" : "false"}
+        title={tr.upcoming}
+        class={`date-btn px-3 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 leading-tight${activeRange ? " active" : ""}`}
+      >
+        {tr.upcoming}
+      </button>
       <button
         type="button"
         id="btn-near"
@@ -240,6 +264,7 @@ export function renderPage(
   initialData?: InitialData,
   museums?: Record<string, MuseumInfo>,
   sort?: string,
+  range?: number,
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
   const trJson = JSON.stringify(tr);
@@ -342,14 +367,18 @@ export function renderPage(
 
             <SearchBar tr={tr} />
             <PassPromo locale={locale} tr={tr} />
-            <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} />
+            <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} activeRange={range} />
 
             <h2
               class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
               id="date-label"
               aria-live="polite"
             >
-              {initialData ? formatDateFull(initialData.date, dateLocale(locale)) : ""}
+              {range
+                ? tr.upcomingDays.replace("{n}", String(range))
+                : initialData
+                  ? formatDateFull(initialData.date, dateLocale(locale))
+                  : ""}
             </h2>
 
             <style
@@ -365,6 +394,7 @@ export function renderPage(
                   tr={tr}
                   locale={locale}
                   todayIso={todayIso()}
+                  groupByDate={!!range}
                 />
               ) : (
                 <div class="loading text-text-tertiary py-12 px-4 text-center text-sm">{tr.loading}</div>

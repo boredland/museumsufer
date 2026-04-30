@@ -204,10 +204,11 @@ export async function fetchDayData(
   env: Env,
   date: string,
   locale: Locale,
+  endDate?: string,
 ): Promise<{ date: string; exhibitions: ExhibitionWithLikes[]; events: EventWithLikes[] }> {
   const [rawExhibitions, rawEvents] = await Promise.all([
     getExhibitionsForDate(env, date),
-    getEventsForDate(env, date),
+    endDate ? getEventsForRange(env, date, endDate) : getEventsForDate(env, date),
   ]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
@@ -340,6 +341,29 @@ export async function getEventsForDate(env: Env, date: string): Promise<Event[]>
   const deduped = deduplicateEvents(filtered);
   if (date === todayIso()) {
     return filterPastEvents(deduped);
+  }
+  return deduped;
+}
+
+export async function getEventsForRange(env: Env, startDate: string, endDate: string): Promise<Event[]> {
+  const { results } = await env.DB.prepare(
+    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
+     FROM events ev
+     JOIN museums m ON ev.museum_id = m.id
+     WHERE ev.date >= ? AND ev.date <= ?
+     ORDER BY ev.date, ev.time, m.name`,
+  )
+    .bind(startDate, endDate)
+    .all<Event & { museum_image_url: string | null }>();
+
+  const filtered = fallbackMuseumImage(results).filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
+  const deduped = deduplicateEvents(filtered);
+  const today = todayIso();
+  if (startDate <= today && today <= endDate) {
+    const past = deduped.filter((ev) => ev.date < today);
+    const todayEvents = filterPastEvents(deduped.filter((ev) => ev.date === today));
+    const future = deduped.filter((ev) => ev.date > today);
+    return [...past, ...todayEvents, ...future];
   }
   return deduped;
 }
