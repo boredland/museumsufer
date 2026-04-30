@@ -318,13 +318,7 @@ function ExhibitionCard({
           )}
         </div>
         <div class="card-body min-w-0 flex flex-col">
-          <p
-            class={
-              hero
-                ? "card-title font-display italic text-[1.25rem] leading-[1.15] tracking-tight mb-1.5"
-                : "text-sm font-medium leading-tight mb-0.5"
-            }
-          >
+          <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
@@ -347,7 +341,7 @@ function ExhibitionCard({
             </button>
           </div>
           {ex.description && (
-            <details class="mt-1">
+            <details class="mt-1" open={hero}>
               <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
@@ -481,13 +475,7 @@ function EventCard({
           )}
         </div>
         <div class="card-body min-w-0 flex flex-col">
-          <p
-            class={
-              hero
-                ? "card-title font-display italic text-[1.25rem] leading-[1.15] tracking-tight mb-1.5"
-                : "text-sm font-medium leading-tight mb-0.5"
-            }
-          >
+          <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
           <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
@@ -502,7 +490,7 @@ function EventCard({
             )}
           </div>
           {ev.description && (
-            <details class="mt-1">
+            <details class="mt-1" open={hero}>
               <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
