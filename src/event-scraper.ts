@@ -5,6 +5,13 @@ import { getMuseumConfig, MUSEUMS } from "./museum-config";
 import { normalizeUrl } from "./shared";
 import type { Env } from "./types";
 
+const PLACEHOLDER_TITLE_RE =
+  /^(event title|sample event|placeholder|untitled|tba|tbd|lorem|beispiel(?:event| ?titel)?|test event|veranstaltung \d+)\s*\d*\s*$/i;
+
+function isPlaceholderTitle(title: string): boolean {
+  return PLACEHOLDER_TITLE_RE.test(title.trim());
+}
+
 const EVENT_PAGE_PATHS = [
   "/programm",
   "/de/programm",
@@ -207,11 +214,14 @@ async function scrapeMuseumEvents(
         role: "user",
         content: `Extract upcoming events from this museum's program page. Today is ${todayIso()}.
 
-Only extract concrete events with specific dates (not permanent exhibitions or general descriptions).
-Return ONLY a JSON array, nothing else. Each element:
-{"title": "Event Title", "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": "brief description" or null}
+Rules:
+- Only extract concrete events with specific dates that appear verbatim in the text below.
+- Do NOT invent, paraphrase, or generate placeholder events. Never use generic titles like "Event Title 1", "Sample Event", "TBA", etc.
+- If the page has no concrete dated events, return [] — empty is the correct answer.
+- Skip permanent exhibitions and general descriptions.
 
-If there are no events with specific dates, return an empty array: []
+Return ONLY a JSON array, nothing else. Each element:
+{"title": <exact title from text>, "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": <short snippet from text> or null}
 
 Text content from ${museum.name} (${eventsUrl}):
 ${truncated}`,
@@ -226,6 +236,8 @@ ${truncated}`,
   let count = 0;
   for (const event of events) {
     if (!event.title || !event.date || !/^\d{4}-\d{2}-\d{2}$/.test(event.date)) continue;
+    if (isPlaceholderTitle(event.title) || !textContent.toLowerCase().includes(event.title.toLowerCase().slice(0, 12)))
+      continue;
     event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
     if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
 
