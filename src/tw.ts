@@ -12,8 +12,7 @@ export const titleLinkClass =
 export const badgeCountClass =
   "text-[0.6875rem] font-mono font-medium text-text-tertiary bg-border-light px-2 py-0.5 rounded-full";
 
-export const emptyStateClass =
-  "text-text-tertiary text-sm py-12 px-4 text-center bg-surface rounded-xl shadow-card border border-border-light italic font-display";
+export const emptyStateClass = "empty-state";
 
 export const descriptionClass =
   "text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light";

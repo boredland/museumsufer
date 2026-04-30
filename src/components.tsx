@@ -563,73 +563,70 @@ function Section({
 
 function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
   return (
-    <li data-search={searchHaystack(museum.name, slug)}>
+    <li class="museum-cell" data-search={searchHaystack(museum.name, slug)}>
       <div
-        class="flex items-center gap-3 py-2.5 px-4 border-b border-border-light last:border-b-0"
+        class="group relative flex flex-col h-full bg-surface rounded-lg border border-border-light overflow-hidden transition-colors hover:border-river"
         data-museum-slug={slug}
       >
-        {museum.image_url && (
-          <div class={imgWrapClass}>
+        <div class="aspect-[4/3] bg-border-light overflow-hidden">
+          {museum.image_url ? (
             <img
-              class="w-full h-full object-cover"
-              src={`/img/${encodeURIComponent(museum.image_url)}?w=120`}
+              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              src={`/img/${encodeURIComponent(museum.image_url)}?w=320`}
+              srcset={`/img/${encodeURIComponent(museum.image_url)}?w=200 200w, /img/${encodeURIComponent(museum.image_url)}?w=320 320w`}
+              sizes="(max-width: 480px) 45vw, (max-width: 720px) 30vw, 220px"
               alt={museum.name}
               loading="lazy"
             />
-          </div>
-        )}
-        <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium leading-tight">
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-border">
+              <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M12 2L2 6v2h20V6L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+        <div class="flex-1 flex flex-col gap-2 p-3">
+          <p class="font-display italic text-[0.9375rem] leading-tight line-clamp-2 max-[480px]:text-[0.8125rem]">
             {museum.website ? (
               <a
                 href={utm(museum.website, "museum_name")}
                 target="_blank"
                 rel="noopener"
-                class="text-inherit no-underline hover:text-river"
+                class="text-inherit no-underline hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
               >
                 {museum.name}
               </a>
             ) : (
               museum.name
             )}
-            {museum.museumsufer === false && (
-              <span class="text-text-tertiary ml-1 opacity-60 text-[0.625rem]" title={tr.notMuseumsufer}>
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  width="10"
-                  height="10"
-                  class="align-[-1px] inline"
-                >
-                  <path d="M8 2L2 6v1h12V6L8 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
-                  <path
-                    d="M4 9v4M8 9v4M12 9v4M3 13h10"
-                    stroke="currentColor"
-                    stroke-width="1.2"
-                    stroke-linecap="round"
-                  />
-                  <path d="M2 2l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                </svg>
-              </span>
-            )}
           </p>
-          {museum.description && <p class="text-xs text-text-tertiary mt-0.5 leading-snug">{museum.description}</p>}
-        </div>
-        <div class="flex items-center gap-1.5 shrink-0">
-          {museum.website && (
-            <a
-              class="inline-flex items-center justify-center min-w-7 min-h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-river hover:text-river"
-              href={utm(museum.website, "museum_link")}
-              target="_blank"
-              rel="noopener"
-              aria-label={museum.name}
-              title={museum.name}
+          {museum.museumsufer === false && (
+            <span
+              class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary opacity-70 -mt-1"
+              title={tr.notMuseumsufer}
             >
-              <ExternalLinkIcon />
-            </a>
+              Card excl.
+            </span>
           )}
-          <NavButton slug={slug} name={museum.name} tr={tr} />
+          <div class="flex items-center gap-1 mt-auto">
+            {museum.website && (
+              <a
+                class="inline-flex items-center justify-center w-7 h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-river hover:text-river"
+                href={utm(museum.website, "museum_link")}
+                target="_blank"
+                rel="noopener"
+                aria-label={museum.name}
+                title={museum.name}
+              >
+                <ExternalLinkIcon />
+              </a>
+            )}
+            <NavButton slug={slug} name={museum.name} tr={tr} />
+          </div>
         </div>
       </div>
     </li>
@@ -718,7 +715,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
       iconPath="M10 2L2 6v1.5h16V6L10 2zM4 9.5v5h1.5v-5H4zm3.5 0v5H9v-5H7.5zm3.5 0v5h1.5v-5H11zm3.5 0v5H16v-5h-1.5zM2 16v1.5h16V16H2z"
       defaultOpen={false}
     >
-      <ul class={cardListClass}>
+      <ul class="museum-grid grid grid-cols-2 sm:grid-cols-3 gap-3 list-none p-0">
         {Object.entries(museums)
           .sort(([, a], [, b]) => a.name.localeCompare(b.name))
           .map(([slug, m]) => (
