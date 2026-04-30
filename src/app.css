@@ -290,10 +290,11 @@ dialog::backdrop {
 .card.is-hero .card-title {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: 1.125rem;
+  font-size: 1.1875rem;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.18;
   letter-spacing: -0.01em;
+  font-feature-settings: "ss01" 1;
 }
 
 .is-visited {
