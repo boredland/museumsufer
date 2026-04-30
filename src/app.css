@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Light mode — riverside paper */
   --color-bg: #efe7d8;
@@ -47,6 +49,48 @@
     --shadow-search: 0 12px 32px rgba(0, 0, 0, 0.6);
     --shadow-anchor: 0 4px 16px rgba(134, 179, 216, 0.18);
   }
+}
+
+:root.dark {
+  --color-bg: #14110e;
+  --color-bg-warm: #1a1612;
+  --color-surface: #1f1a15;
+  --color-text-primary: #f0e6d4;
+  --color-text-secondary: #b8ad9c;
+  --color-text-tertiary: #8a8275;
+  --color-accent: #e2a064;
+  --color-accent-light: #3a2918;
+  --color-river: #86b3d8;
+  --color-river-light: #1a2c3e;
+  --color-river-deep: #c5dbeb;
+  --color-border: #34291f;
+  --color-border-light: #251e17;
+  --color-card-hover: #261f17;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-search: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-anchor: 0 4px 16px rgba(134, 179, 216, 0.18);
+}
+
+:root.light {
+  --color-bg: #efe7d8;
+  --color-bg-warm: #ebe1cf;
+  --color-surface: #fbf6ec;
+  --color-text-primary: #1c1410;
+  --color-text-secondary: #5b524a;
+  --color-text-tertiary: #847a6f;
+  --color-accent: #b45309;
+  --color-accent-light: #f5e1bf;
+  --color-river: #1f3a52;
+  --color-river-light: #c8d4df;
+  --color-river-deep: #0f2436;
+  --color-border: #d8cdb9;
+  --color-border-light: #e6dcc8;
+  --color-card-hover: #f3ead7;
+
+  --shadow-card: 0 1px 2px rgba(31, 36, 54, 0.04), 0 2px 8px rgba(31, 36, 54, 0.04);
+  --shadow-search: 0 12px 32px rgba(15, 36, 54, 0.18);
+  --shadow-anchor: 0 4px 12px rgba(31, 58, 82, 0.18);
 }
 
 @layer base {
