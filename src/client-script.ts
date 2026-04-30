@@ -267,7 +267,7 @@ export const CLIENT_SCRIPT = `
     }
 
     var TIGHT_MARGIN_MIN = 10;
-    var timeDefault = 'text-accent bg-accent-light';
+    var timeDefault = 'text-river bg-river-light';
     var timeReachable = 'text-green-700 bg-green-50';
     var timeTight = 'text-amber-700 bg-amber-50';
     var timeStarted = 'text-text-tertiary bg-border-light opacity-60';

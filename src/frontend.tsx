@@ -35,48 +35,31 @@ const PASS_URLS: Record<Locale, { card: string; ticket: string }> = {
   },
 };
 
-function GithubCorner({ label }: { label: string }) {
+function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
-    <a
-      href="https://github.com/boredland/museumsufer"
-      class="github-corner fixed top-0 right-0 z-50 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-4px]"
-      aria-label={label}
-      target="_blank"
-      rel="noopener"
-    >
-      <span class="sr-only">{label}</span>
-      <svg
-        width="72"
-        height="72"
-        viewBox="0 0 250 250"
-        aria-hidden="true"
-        class="fill-accent text-bg max-[480px]:w-[60px] max-[480px]:h-[60px]"
-      >
-        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z" />
-        <path
-          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
-          fill="currentColor"
-          style="transform-origin:130px 106px;"
-          class="octo-arm"
-        />
-        <path
-          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
-          fill="currentColor"
-          class="octo-body"
-        />
-      </svg>
-    </a>
+    <header class="mb-12 max-[480px]:mb-9">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <p class="section-eyebrow">Frankfurt am Main</p>
+        <LangSwitch locale={locale} />
+      </div>
+      <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
+        Museumsufer
+      </h1>
+      <p class="mt-3 font-sans text-text-secondary text-[0.9375rem] max-w-[36ch] leading-snug">
+        {tr.subtitle}
+      </p>
+    </header>
   );
 }
 
 function LangSwitch({ locale }: { locale: Locale }) {
   return (
-    <nav class="flex justify-center gap-1 mt-3" aria-label="Language">
+    <nav class="flex gap-3 font-mono text-[0.6875rem] uppercase tracking-[0.14em]" aria-label="Language">
       {SUPPORTED_LOCALES.map((l) => (
         <a
           href={`?lang=${l}`}
           data-lang={l}
-          class={`text-xs font-medium no-underline px-2 py-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 ${l === locale ? "text-text-primary font-bold" : "text-text-tertiary hover:text-accent"}`}
+          class={`no-underline transition-colors focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 ${l === locale ? "text-text-primary" : "text-text-tertiary hover:text-river"}`}
           aria-current={l === locale ? "page" : undefined}
         >
           {l.toUpperCase()}
@@ -88,14 +71,14 @@ function LangSwitch({ locale }: { locale: Locale }) {
 
 function SearchBar({ tr }: { tr: Record<string, string> }) {
   return (
-    <div class="relative mb-3">
+    <div class="search-bar mb-6">
       <svg
         viewBox="0 0 24 24"
         fill="currentColor"
         width="14"
         height="14"
         aria-hidden="true"
-        class="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+        class="text-text-tertiary shrink-0"
       >
         <path d={ICON.search} />
       </svg>
@@ -105,11 +88,8 @@ function SearchBar({ tr }: { tr: Record<string, string> }) {
         autocomplete="off"
         placeholder={tr.searchPlaceholder}
         aria-label={tr.search}
-        class="w-full py-2 pl-9 pr-20 bg-surface border-[1.5px] border-border rounded-full font-sans text-[0.8125rem] text-text-primary placeholder:text-text-tertiary transition-colors hover:border-accent focus:border-accent focus:outline-none"
       />
-      <kbd class={`${kbdClass} absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none max-[1024px]:hidden`}>
-        <kbd>Ctrl</kbd>+<kbd>K</kbd>
-      </kbd>
+      <kbd class={`${kbdClass} max-[1024px]:hidden`}>⌘K</kbd>
     </div>
   );
 }
@@ -153,10 +133,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   );
 }
 
-const dateBtnClass =
-  "date-btn min-w-12 px-2 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 flex flex-col items-center leading-tight";
-
-function DateNav({
+function RiverNav({
   locale,
   tr,
   activeDate,
@@ -175,44 +152,50 @@ function DateNav({
       iso: d.format("YYYY-MM-DD"),
       weekday: i === 0 ? tr.today : d.toDate().toLocaleDateString(dl, { weekday: "short" }),
       day: String(d.date()),
-      isToday: i === 0,
     };
   });
 
   return (
-    <nav class="flex items-center gap-1.5 mb-4 justify-center flex-wrap" aria-label={tr.dateNav}>
-      {days.map((d) => (
+    <nav class="mb-7" aria-label={tr.dateNav}>
+      <div class="relative pb-3">
+        <div class="river-band absolute left-2 right-2 bottom-1.5" aria-hidden="true" />
+        <div class="relative flex items-end justify-between gap-0.5">
+          {days.map((d) => (
+            <button
+              type="button"
+              data-date={d.iso}
+              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}`}
+            >
+              <span class="stop-day">{d.day}</span>
+              <span class="stop-weekday">{d.weekday}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div class="flex items-center gap-2 mt-5 flex-wrap">
         <button
           type="button"
-          data-date={d.iso}
-          class={`${dateBtnClass}${!activeRange && d.iso === activeDate ? " active" : ""}`}
+          id="btn-upcoming"
+          data-range="7"
+          aria-pressed={activeRange ? "true" : "false"}
+          class={`range-pill${activeRange ? " active" : ""}`}
         >
-          <span class="text-[0.6875rem]">{d.weekday}</span>
-          <span class="text-[0.625rem] opacity-60">{d.day}</span>
+          {tr.upcoming}
         </button>
-      ))}
-      <button
-        type="button"
-        id="btn-upcoming"
-        data-range="7"
-        aria-pressed={activeRange ? "true" : "false"}
-        title={tr.upcoming}
-        class={`date-btn px-3 py-1.5 border-[1.5px] border-border bg-surface rounded-full cursor-pointer text-[0.75rem] font-medium font-sans text-text-secondary transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2 leading-tight${activeRange ? " active" : ""}`}
-      >
-        {tr.upcoming}
-      </button>
-      <button
-        type="button"
-        id="btn-near"
-        aria-pressed="false"
-        aria-label={tr.nearMe}
-        title={tr.nearMe}
-        class="inline-flex items-center justify-center min-w-9 min-h-9 p-2 border-[1.5px] border-border bg-surface rounded-full cursor-pointer transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
-          <path d={ICON.gps} />
-        </svg>
-      </button>
+        <button
+          type="button"
+          id="btn-near"
+          aria-pressed="false"
+          aria-label={tr.nearMe}
+          title={tr.nearMe}
+          class="range-pill"
+        >
+          <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true">
+            <path d={ICON.gps} />
+          </svg>
+          <span class="max-[480px]:sr-only">{tr.nearMe}</span>
+        </button>
+      </div>
     </nav>
   );
 }
@@ -248,7 +231,7 @@ function LlmTip({ tr }: { tr: Record<string, string> }) {
         {tr.llmPrompt}
         <button
           type="button"
-          class="absolute top-2 right-2 bg-surface border border-border rounded px-2 py-1 text-[0.6875rem] font-sans cursor-pointer text-text-secondary transition-colors hover:border-accent hover:text-accent"
+          class="absolute top-2 right-2 bg-surface border border-border rounded px-2 py-1 text-[0.6875rem] font-sans cursor-pointer text-text-secondary transition-colors hover:border-river hover:text-river"
           onclick="copyPrompt()"
           aria-label={tr.copyPrompt}
         >
@@ -327,7 +310,14 @@ export function renderPage(
           <link rel="apple-touch-icon" href="/icon-192.png" />
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#f5f0eb" />
+          <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+          />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
@@ -337,49 +327,23 @@ export function renderPage(
         <body>
           <a
             href="#content"
-            class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-accent focus:text-white focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
+            class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-river focus:text-bg focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
           >
             {tr.skipLink}
           </a>
-          <GithubCorner label={tr.githubAria} />
 
-          <div class="max-w-[680px] mx-auto pt-12 pb-16 px-4 max-[480px]:pt-8 max-[480px]:pb-12">
-            <header class="mb-8 text-center">
-              <div class="inline-flex items-center gap-2 mb-1">
-                <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-                  <svg
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    class="w-[18px] h-[18px]"
-                  >
-                    <path
-                      d="M12 1L2 6v2h20V6L12 1zm0 2.26L18.47 6H5.53L12 3.26zM2 17v2h20v-2H2zm2-7v7h2v-7H6zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2z"
-                      fill="white"
-                    />
-                    <path
-                      d="M2,22 Q6,20.5 10,22 Q14,23.5 18,22 Q20,21.2 22,22"
-                      fill="none"
-                      stroke="#93c5fd"
-                      stroke-width="1.5"
-                      stroke-linecap="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <h1 class="text-3xl max-[480px]:text-[1.625rem] font-bold tracking-tight leading-tight">
-                Museumsufer Frankfurt
-              </h1>
-              <p class="text-text-secondary mt-1 text-sm tracking-wide">{tr.subtitle}</p>
-              <LangSwitch locale={locale} />
-            </header>
+          <div class="max-w-[720px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
+            <Masthead locale={locale} tr={tr} />
 
-            <SearchBar tr={tr} />
-            <PassPromo locale={locale} tr={tr} />
-            <DateNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} activeRange={range} />
+            <RiverNav
+              locale={locale}
+              tr={tr}
+              activeDate={initialData?.date || todayIso()}
+              activeRange={range}
+            />
 
-            <h2
-              class="text-xl max-[480px]:text-[1.0625rem] font-semibold text-text-primary mb-6 text-center pb-4 border-b border-border"
+            <div
+              class="anchor-headline mb-7 mt-8"
               id="date-label"
               aria-live="polite"
             >
@@ -388,7 +352,9 @@ export function renderPage(
                 : initialData
                   ? formatDateFull(initialData.date, dateLocale(locale))
                   : ""}
-            </h2>
+            </div>
+
+            <SearchBar tr={tr} />
 
             <style
               dangerouslySetInnerHTML={{
@@ -412,34 +378,49 @@ export function renderPage(
 
             <MuseumsSection museums={museums || {}} tr={tr} />
 
-            <footer class="mt-6 pt-4 border-t border-border text-center text-xs flex justify-center gap-4 flex-wrap">
-              <a
-                href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
-                target="_blank"
-                rel="noopener"
-                class="text-text-tertiary no-underline hover:text-accent hover:underline"
-              >
-                {tr.subscribeCal}
-              </a>
-              <a href="/feed.xml" class="text-text-tertiary no-underline hover:text-accent hover:underline">
-                {tr.rssFeed}
-              </a>
-              <a href="/api/docs" class="text-text-tertiary no-underline hover:text-accent hover:underline">
-                {tr.apiDocs}
-              </a>
-              <a
-                href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
-                target="_blank"
-                rel="noopener"
-                class="text-text-tertiary no-underline hover:text-accent hover:underline"
-              >
-                {tr.missingEvent}
-              </a>
-            </footer>
+            <PassPromo locale={locale} tr={tr} />
 
             <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
             <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
             <LlmTip tr={tr} />
+
+            <footer class="mt-12 pt-6 border-t border-border-light flex flex-col gap-3 max-[480px]:items-stretch">
+              <div class="flex flex-wrap gap-x-5 gap-y-2 text-[0.8125rem]">
+                <a
+                  href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-text-secondary no-underline hover:text-river"
+                >
+                  {tr.subscribeCal}
+                </a>
+                <a href="/feed.xml" class="text-text-secondary no-underline hover:text-river">
+                  {tr.rssFeed}
+                </a>
+                <a
+                  href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-text-secondary no-underline hover:text-river"
+                >
+                  {tr.missingEvent}
+                </a>
+              </div>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
+                <a href="/api/docs" class="no-underline hover:text-river">
+                  API
+                </a>
+                <a
+                  href="https://github.com/boredland/museumsufer"
+                  target="_blank"
+                  rel="noopener"
+                  class="no-underline hover:text-river"
+                >
+                  Source
+                </a>
+                <span class="opacity-60">© Museumsufer Frankfurt</span>
+              </div>
+            </footer>
           </div>
 
           <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
