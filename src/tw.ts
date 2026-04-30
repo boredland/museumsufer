@@ -1,5 +1,5 @@
 export const cardClass =
-  "card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0";
+  "card flex items-start gap-3.5 py-3.5 px-4 border-b border-border-light transition-colors hover:bg-card-hover last:border-b-0 max-[480px]:gap-3 max-[480px]:py-3 max-[480px]:px-3";
 
 export const cardListClass = "card-list list-none p-0";
 
