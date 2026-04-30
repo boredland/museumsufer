@@ -789,3 +789,105 @@ function GroupedEventList({
     </div>
   );
 }
+
+export function Mark({ class: className }: { class?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      role="img"
+      aria-label="Museumsufer mark"
+      class={className}
+    >
+      <circle cx="256" cy="120" r="6" fill="currentColor" />
+      <g fill="currentColor">
+        <path d="M 256 134 L 358 202 L 154 202 Z" />
+        <rect x="148" y="206" width="216" height="14" />
+        <rect x="160" y="224" width="14" height="60" />
+        <rect x="198" y="224" width="14" height="60" />
+        <rect x="249" y="224" width="14" height="60" />
+        <rect x="300" y="224" width="14" height="60" />
+        <rect x="338" y="224" width="14" height="60" />
+        <rect x="142" y="286" width="228" height="14" />
+      </g>
+    </svg>
+  );
+}
+
+export function Logo({ class: className }: { class?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Museumsufer" class={className}>
+      <defs>
+        <filter id="grain" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3" />
+          <feColorMatrix values="0 0 0 0 0.11  0 0 0 0 0.08  0 0 0 0 0.06  0 0 0 0 0.06 0" />
+          <feComposite in2="SourceGraphic" operator="in" />
+        </filter>
+        <linearGradient id="reflectFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--color-river)" stop-opacity="0.55" />
+          <stop offset="65%" stop-color="var(--color-river)" stop-opacity="0.18" />
+          <stop offset="100%" stop-color="var(--color-river)" stop-opacity="0" />
+        </linearGradient>
+        <clipPath id="reflectClip">
+          <rect x="0" y="304" width="512" height="180" />
+        </clipPath>
+      </defs>
+
+      <rect width="512" height="512" fill="var(--color-surface)" />
+      <radialGradient id="warm" cx="20%" cy="15%" r="80%">
+        <stop offset="0%" stop-color="var(--color-accent)" stop-opacity="0.06" />
+        <stop offset="60%" stop-color="var(--color-accent)" stop-opacity="0" />
+      </radialGradient>
+      <rect width="512" height="512" fill="url(#warm)" />
+      <radialGradient id="cool" cx="85%" cy="90%" r="70%">
+        <stop offset="0%" stop-color="var(--color-river)" stop-opacity="0.07" />
+        <stop offset="60%" stop-color="var(--color-river)" stop-opacity="0" />
+      </radialGradient>
+      <rect width="512" height="512" fill="url(#cool)" />
+      <rect width="512" height="512" fill="var(--color-surface)" filter="url(#grain)" opacity="0.5" />
+
+      <circle cx="256" cy="120" r="6" fill="var(--color-accent)" />
+
+      <g fill="var(--color-river)">
+        <path d="M 256 134 L 358 202 L 154 202 Z" />
+        <rect x="148" y="206" width="216" height="14" />
+        <rect x="160" y="224" width="14" height="60" />
+        <rect x="198" y="224" width="14" height="60" />
+        <rect x="249" y="224" width="14" height="60" />
+        <rect x="300" y="224" width="14" height="60" />
+        <rect x="338" y="224" width="14" height="60" />
+        <rect x="142" y="286" width="228" height="14" />
+      </g>
+
+      <line x1="96" y1="302" x2="416" y2="302" stroke="var(--color-river)" stroke-opacity="0.35" stroke-width="1.5" />
+
+      <g clip-path="url(#reflectClip)">
+        <g fill="url(#reflectFade)">
+          <rect x="142" y="304" width="228" height="14" />
+          <rect x="160" y="320" width="14" height="60" />
+          <rect x="198" y="320" width="14" height="60" />
+          <rect x="249" y="320" width="14" height="60" />
+          <rect x="300" y="320" width="14" height="60" />
+          <rect x="338" y="320" width="14" height="60" />
+          <rect x="148" y="384" width="216" height="14" />
+          <path d="M 256 470 L 358 402 L 154 402 Z" />
+        </g>
+
+        <g stroke="var(--color-surface)" fill="none" stroke-linecap="round">
+          <path
+            d="M 80 312 Q 100 308 120 312 T 160 312 T 200 312 T 240 312 T 280 312 T 320 312 T 360 312 T 400 312 T 440 312"
+            stroke-width="3.5"
+          />
+          <path
+            d="M 80 330 Q 104 325 128 330 T 176 330 T 224 330 T 272 330 T 320 330 T 368 330 T 416 330"
+            stroke-width="3"
+          />
+          <path d="M 80 354 Q 108 349 136 354 T 192 354 T 248 354 T 304 354 T 360 354 T 416 354" stroke-width="3" />
+          <path d="M 80 384 Q 110 379 140 384 T 200 384 T 260 384 T 320 384 T 380 384 T 440 384" stroke-width="2.5" />
+          <path d="M 80 418 Q 112 414 144 418 T 208 418 T 272 418 T 336 418 T 400 418" stroke-width="2.5" />
+          <path d="M 80 452 Q 114 448 148 452 T 216 452 T 284 452 T 352 452 T 420 452" stroke-width="2" />
+        </g>
+      </g>
+    </svg>
+  );
+}
