@@ -265,21 +265,23 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
   const weekAhead = dateOffset(7);
 
   const { results: events } = await env.DB.prepare(
-    `SELECT ev.id, ev.detail_url, ev.price, ev.image_url, ev.time, m.name as museum_name, m.website_url
+    `SELECT ev.id, ev.detail_url, ev.title, ev.price, ev.image_url, ev.time, ev.description, m.name as museum_name, m.website_url
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date >= ? AND ev.date <= ?
        AND ev.detail_url IS NOT NULL
-       AND (ev.price IS NULL OR ev.image_url IS NULL OR ev.time IS NULL)
+       AND (ev.price IS NULL OR ev.image_url IS NULL OR ev.time IS NULL OR ev.description IS NULL)
      LIMIT 30`,
   )
     .bind(today, weekAhead)
     .all<{
       id: number;
       detail_url: string;
+      title: string;
       price: string | null;
       image_url: string | null;
       time: string | null;
+      description: string | null;
       museum_name: string;
       website_url: string;
     }>();
@@ -287,7 +289,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
   const detailResults = await Promise.all(
     events.map(async (event) => {
       try {
-        return await fetchEventDetails(env, event.detail_url, event.museum_name, event.website_url);
+        return await fetchEventDetails(env, event.detail_url, event.title, event.museum_name, event.website_url);
       } catch {
         return null;
       }
@@ -319,9 +321,15 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       updates.push("end_time = ?");
       values.push(details.end_time);
     }
+    if (details.description && !event.description) {
+      updates.push("description = ?");
+      values.push(details.description);
+    }
 
     if (updates.length === 0) {
-      await env.DB.prepare("UPDATE events SET price = COALESCE(price, ''), updated_at = datetime('now') WHERE id = ?")
+      await env.DB.prepare(
+        "UPDATE events SET price = COALESCE(price, ''), description = COALESCE(description, ''), updated_at = datetime('now') WHERE id = ?",
+      )
         .bind(event.id)
         .run();
       continue;
@@ -364,9 +372,16 @@ function extractTimeFromHtml(html: string): { time: string | null; end_time: str
 async function fetchEventDetails(
   env: Env,
   detailUrl: string,
+  title: string,
   museumName: string,
   _websiteUrl: string,
-): Promise<{ price: string | null; image_url: string | null; time: string | null; end_time: string | null } | null> {
+): Promise<{
+  price: string | null;
+  image_url: string | null;
+  time: string | null;
+  end_time: string | null;
+  description: string | null;
+} | null> {
   let html: string;
   try {
     const res = await fetch(detailUrl, { redirect: "follow" });
@@ -380,9 +395,10 @@ async function fetchEventDetails(
 
   const imageUrl = extractImageFromHtml(html, detailUrl);
   const { time, end_time } = extractTimeFromHtml(html);
+  const description = extractDescriptionFromHtml(html, title);
 
   const textContent = stripHtmlToText(html).slice(0, 6000);
-  if (textContent.length < 50) return { price: null, image_url: imageUrl, time, end_time };
+  if (textContent.length < 50) return { price: null, image_url: imageUrl, time, end_time, description };
 
   const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
     messages: [
@@ -410,7 +426,87 @@ ${textContent}`,
     price = parsed.price;
   }
 
-  return { price, image_url: imageUrl, time, end_time };
+  return { price, image_url: imageUrl, time, end_time, description };
+}
+
+const HTML_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#039;": "'",
+  "&apos;": "'",
+  "&nbsp;": " ",
+  "&ndash;": "–",
+  "&mdash;": "—",
+  "&#8211;": "–",
+  "&#8212;": "—",
+  "&#8216;": "‘",
+  "&#8217;": "’",
+  "&#8220;": "“",
+  "&#8221;": "”",
+  "&hellip;": "…",
+  "&#8230;": "…",
+};
+
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&[a-z]+;|&#\d+;/gi, (m) => HTML_ENTITIES[m] ?? m)
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)));
+}
+
+const DATETIME_ONLY = /^\s*\d{1,2}[.\s]\s?[\w.]+\s?\d{0,4}.{0,40}(?:Uhr|h)?\s*$/i;
+
+const CAPTION_HINT = /(©|Photo:|Foto:|Courtesy)/i;
+const CONTENT_CONTAINERS = [
+  /<div[^>]*\bclass="(?:[^"]*\s)?(?:page-content|entry-content|wp-block-post-content|event-description|single-event-content|content-area|main-content|c-event-description|event-content)(?:\s[^"]*)?"[^>]*>/i,
+  /<article\b[^>]*>/i,
+  /<main\b[^>]*>/i,
+];
+
+function findContentScope(html: string): string {
+  for (const re of CONTENT_CONTAINERS) {
+    const m = re.exec(html);
+    if (!m) continue;
+    const start = m.index + m[0].length;
+    const slice = html.slice(start, start + 60000);
+    if (slice.length > 200) return slice;
+  }
+  return html;
+}
+
+export function extractDescriptionFromHtml(html: string, title: string): string | null {
+  const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "");
+  const scope = findContentScope(stripped);
+  const titleLower = title.toLowerCase().slice(0, 60);
+
+  const paragraphs: string[] = [];
+  const re = /<p\b[^>]*>([\s\S]*?)<\/p>/gi;
+  let m: RegExpExecArray | null = re.exec(scope);
+  while (m !== null) {
+    let text = m[1].replace(/<[^>]+>/g, " ");
+    text = decodeEntities(text);
+    text = text.replace(/\s+/g, " ").trim();
+    if (
+      text.length >= 80 &&
+      !text.toLowerCase().startsWith(titleLower) &&
+      !DATETIME_ONLY.test(text) &&
+      !CAPTION_HINT.test(text.slice(0, 120))
+    ) {
+      paragraphs.push(text);
+    }
+    if (paragraphs.join(" ").length > 600) break;
+    m = re.exec(scope);
+  }
+
+  if (paragraphs.length === 0) return null;
+  let out = paragraphs.join(" ");
+  if (out.length > 600) {
+    const cut = out.slice(0, 600);
+    const lastSpace = cut.lastIndexOf(" ");
+    out = `${cut.slice(0, lastSpace > 0 ? lastSpace : 600)}…`;
+  }
+  return out;
 }
 
 export function extractImageFromHtml(html: string, pageUrl: string): string | null {

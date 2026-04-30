@@ -39,9 +39,7 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
   return (
     <header class="mb-12 max-[480px]:mb-9">
       <div class="flex items-center justify-between gap-4 mb-4">
-        <p class="section-eyebrow">
-          Frankfurt am Main · 50.10°N 8.68°E
-        </p>
+        <p class="section-eyebrow">Frankfurt am Main · 50.10°N 8.68°E</p>
         <LangSwitch locale={locale} />
       </div>
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
@@ -105,9 +103,7 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   const utm = "?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=";
   return (
     <aside class="my-12 px-2 py-8 border-y border-border-light text-center">
-      <p class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary mb-3">
-        Card · Ticket
-      </p>
+      <p class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary mb-3">Card · Ticket</p>
       <p class="font-display italic text-[1.5rem] leading-tight text-text-primary mb-1 max-w-[28ch] mx-auto">
         {tr.passPromo}
       </p>
@@ -335,18 +331,9 @@ export function renderPage(
           <div class="max-w-[720px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
             <Masthead locale={locale} tr={tr} />
 
-            <RiverNav
-              locale={locale}
-              tr={tr}
-              activeDate={initialData?.date || todayIso()}
-              activeRange={range}
-            />
+            <RiverNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} activeRange={range} />
 
-            <div
-              class="anchor-headline mb-7 mt-8"
-              id="date-label"
-              aria-live="polite"
-            >
+            <div class="anchor-headline mb-7 mt-8" id="date-label" aria-live="polite">
               {range
                 ? tr.upcomingDays.replace("{n}", String(range))
                 : initialData

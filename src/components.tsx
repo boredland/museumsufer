@@ -123,7 +123,7 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class={`card-likes ${quietCountClass}`} aria-label={`${count} likes`}>
+    <span class={`card-likes ${quietCountClass}`} title={`${count} likes`}>
       <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
         <path d={ICON.heart} />
       </svg>
@@ -260,7 +260,10 @@ function EndingBadge({
       class={`ending-badge inline-flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${urgent ? "text-red-700" : "text-text-tertiary"}`}
       title={`${daysLeft} ${daysUnit}`}
     >
-      <span aria-hidden="true" class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700" : "bg-text-tertiary"}`} />
+      <span
+        aria-hidden="true"
+        class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700" : "bg-text-tertiary"}`}
+      />
       {label}
     </span>
   );
@@ -297,12 +300,10 @@ function ExhibitionCard({
   const hero = idx === 0;
   return (
     <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
-      <article
-        class={`${cardClass}${hero ? " is-hero" : ""}`}
-        data-item-id={ex.id}
-        data-museum-slug={ex.museum_slug}
-      >
-        <div class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}>
+      <article class={`${cardClass}${hero ? " is-hero" : ""}`} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
+        <div
+          class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
+        >
           <CardImage
             src={ex.image_url}
             alt={ex.title}
@@ -466,8 +467,17 @@ function EventCard({
         data-event-time={ev.time || undefined}
         data-event-date={ev.date}
       >
-        <div class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}>
-          <CardImage src={ev.image_url} alt={ev.title} detailUrl={linkUrl} lazy={idx > 2} utmContent="event_image" hero={hero} />
+        <div
+          class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
+        >
+          <CardImage
+            src={ev.image_url}
+            alt={ev.title}
+            detailUrl={linkUrl}
+            lazy={idx > 2}
+            utmContent="event_image"
+            hero={hero}
+          />
           {timeStr && (
             <span class="card-time text-[0.625rem] font-mono font-medium text-river bg-river-light px-1 py-0.5 rounded text-center leading-tight tabular-nums tracking-tight">
               {timeStr}
@@ -484,9 +494,7 @@ function EventCard({
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />
             {ev.price && (
-              <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">
-                {ev.price}
-              </span>
+              <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}
           </div>
           {ev.description && (
@@ -683,10 +691,7 @@ export function ContentBody({
                 <summary class="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary cursor-pointer flex items-center gap-2 hover:text-river">
                   <span aria-hidden="true" class="disclosure-icon" />
                   {tr.alreadyVisited}
-                  <span
-                    id="visited-count"
-                    class="font-mono text-[0.625rem] tabular-nums opacity-70"
-                  >
+                  <span id="visited-count" class="font-mono text-[0.625rem] tabular-nums opacity-70">
                     0
                   </span>
                 </summary>
@@ -768,13 +773,9 @@ function GroupedEventList({
               <span class="font-display italic text-2xl text-river leading-none tabular-nums lg:text-[2.75rem] lg:tracking-tight">
                 {dayDate.getDate()}
               </span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
-                {weekday}
-              </span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">{weekday}</span>
               <span class="font-mono text-[0.6875rem] text-text-tertiary opacity-60 lg:hidden">·</span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">
-                {dayMonth}
-              </span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">{dayMonth}</span>
             </header>
             <ul class={cardListClass}>
               {groups[date].map((ev, i) => {
