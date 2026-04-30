@@ -28,8 +28,6 @@ const MANIFEST = JSON.stringify({
   background_color: "#f5f0eb",
   theme_color: "#f5f0eb",
   icons: [
-    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-    { src: "/mark.svg", sizes: "any", type: "image/svg+xml" },
     { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
     { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
   ],
