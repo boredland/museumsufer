@@ -7,6 +7,7 @@ import {
   cardListClass,
   descriptionClass,
   emptyStateClass,
+  iconBtnClass,
   iconBtnGhost,
   quietCountClass,
   titleLinkClass,
@@ -155,7 +156,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
     <span class="relative inline-block">
       <button
         type="button"
-        class={iconBtnGhost}
+        class={iconBtnClass}
         aria-label={tr.navigate}
         title={tr.navigate}
         aria-haspopup="menu"
@@ -347,7 +348,7 @@ function ExhibitionCard({
           </div>
           {ex.description && (
             <details class="mt-1">
-              <summary class="card-disclosure font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
+              <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
@@ -374,7 +375,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
     <span class="relative inline-block">
       <button
         type="button"
-        class={iconBtnGhost}
+        class={iconBtnClass}
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         aria-haspopup="menu"
@@ -502,7 +503,7 @@ function EventCard({
           </div>
           {ev.description && (
             <details class="mt-1">
-              <summary class="card-disclosure font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
+              <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
