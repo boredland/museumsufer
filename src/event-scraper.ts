@@ -260,13 +260,13 @@ ${truncated}`,
     ],
   })) as Record<string, unknown>;
 
-  const responseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
-  const events = extractJson<ScrapedEvent[]>(responseText);
-  if (!events || events.length === 0) return 0;
-
   await env.DB.prepare("UPDATE museums SET events_html_hash = ?, events_scraped_at = datetime('now') WHERE id = ?")
     .bind(hash, museum.id)
     .run();
+
+  const responseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
+  const events = extractJson<ScrapedEvent[]>(responseText);
+  if (!events || events.length === 0) return 0;
 
   let count = 0;
   for (const event of events) {
