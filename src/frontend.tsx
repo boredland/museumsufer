@@ -160,11 +160,11 @@ function RiverNav({
       <div class="relative pb-3">
         <div class="river-band absolute left-2 right-2 bottom-1.5" aria-hidden="true" />
         <div class="relative flex items-end justify-between gap-0.5">
-          {days.map((d) => (
+          {days.map((d, i) => (
             <button
               type="button"
               data-date={d.iso}
-              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}`}
+              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}${i === 0 ? " is-today" : ""}`}
             >
               <span class="stop-day">{d.day}</span>
               <span class="stop-weekday">{d.weekday}</span>

@@ -84,7 +84,17 @@
 details > summary { list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 
-.disclosure-icon { display: inline-block; width: 0.75rem; height: 0.75rem; margin-right: 0.25rem; vertical-align: -2px; transition: transform 0.15s ease; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 4.5l3 3 3-3'/></svg>"); background-repeat: no-repeat; background-position: center; }
+.disclosure-icon {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.25rem;
+  vertical-align: -2px;
+  transition: transform 0.15s ease;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 4.5l3 3 3-3'/></svg>") center/contain no-repeat;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M3 4.5l3 3 3-3'/></svg>") center/contain no-repeat;
+}
 [open] > summary .disclosure-icon { transform: rotate(180deg); }
 
 .loading::after {
@@ -176,6 +186,18 @@ dialog::backdrop {
   background: var(--color-river);
   border-color: var(--color-river);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-river) 18%, transparent);
+}
+.date-stop.is-today::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 25%, transparent);
 }
 
 /* Range / GPS pills sit off-river */
