@@ -41,91 +41,105 @@ export async function scrapeMuseumWebsites(
     website_url: string | null;
   }>();
 
-  let totalEvents = 0;
-  let updated = 0;
-  let apiCount = 0;
-
-  for (const museum of museums) {
+  const results = await runWithConcurrency(museums, 5, async (museum) => {
     try {
-      const museumConfig = getMuseumConfig(museum.slug);
-
-      if (museumConfig?.skipEvents && !museumConfig.eventApi) continue;
-
-      if (museumConfig?.eventApi) {
-        const proxy =
-          museumConfig.proxy && env.FETCH_PROXY_URL
-            ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
-            : undefined;
-        const events = await fetchEventsFromApi(museumConfig.eventApi, proxy);
-        let count = 0;
-        for (const event of events) {
-          if (!event.title || !event.date) continue;
-          event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
-          if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
-
-          let targetMuseumId = museum.id;
-          if (event.museum_slug_override) {
-            const override = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
-              .bind(event.museum_slug_override)
-              .first<{ id: number }>();
-            if (override) targetMuseumId = override.id;
-          }
-
-          await env.DB.prepare(
-            `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-             ON CONFLICT(museum_id, title, date) DO UPDATE SET
-               time = COALESCE(excluded.time, events.time),
-               end_time = COALESCE(excluded.end_time, events.end_time),
-               end_date = COALESCE(excluded.end_date, events.end_date),
-               description = COALESCE(excluded.description, events.description),
-               detail_url = COALESCE(excluded.detail_url, events.detail_url),
-               image_url = COALESCE(excluded.image_url, events.image_url),
-               price = COALESCE(excluded.price, events.price),
-               updated_at = datetime('now')`,
-          )
-            .bind(
-              targetMuseumId,
-              event.title,
-              event.date,
-              event.time,
-              event.end_time,
-              event.end_date,
-              event.description,
-              museumConfig.eventApi.endpoint,
-              event.detail_url,
-              event.image_url,
-              event.price,
-            )
-            .run();
-          count++;
-        }
-        if (count > 0) {
-          totalEvents += count;
-          updated++;
-          apiCount++;
-        }
-        continue;
-      }
-
-      if (!museum.website_url) continue;
-
-      const count = await scrapeMuseumEvents(
-        env,
-        museum as { id: number; name: string; slug: string; website_url: string },
-      );
-      if (count > 0) {
-        totalEvents += count;
-        updated++;
-      }
+      return await processMuseum(env, museum);
     } catch (e) {
       console.error(`Failed to scrape events for ${museum.name}:`, e);
+      return { events: 0, api: false };
     }
-  }
+  });
+
+  const totalEvents = results.reduce((sum, r) => sum + r.events, 0);
+  const updated = results.filter((r) => r.events > 0).length;
+  const apiCount = results.filter((r) => r.api).length;
 
   const enriched = await enrichUpcomingEvents(env);
 
   return { updated, events: totalEvents, enriched, api: apiCount };
+}
+
+async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = cursor++;
+      if (i >= items.length) return;
+      results[i] = await fn(items[i]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+async function processMuseum(
+  env: Env,
+  museum: { id: number; name: string; slug: string; website_url: string | null },
+): Promise<{ events: number; api: boolean }> {
+  const museumConfig = getMuseumConfig(museum.slug);
+
+  if (museumConfig?.skipEvents && !museumConfig.eventApi) return { events: 0, api: false };
+
+  if (museumConfig?.eventApi) {
+    const proxy =
+      museumConfig.proxy && env.FETCH_PROXY_URL
+        ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
+        : undefined;
+    const events = await fetchEventsFromApi(museumConfig.eventApi, proxy);
+    let count = 0;
+    for (const event of events) {
+      if (!event.title || !event.date) continue;
+      event.title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
+      if (event.description) event.description = event.description.replace(/\\"/g, '"').replace(/\\'/g, "'");
+
+      let targetMuseumId = museum.id;
+      if (event.museum_slug_override) {
+        const override = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?")
+          .bind(event.museum_slug_override)
+          .first<{ id: number }>();
+        if (override) targetMuseumId = override.id;
+      }
+
+      await env.DB.prepare(
+        `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(museum_id, title, date) DO UPDATE SET
+           time = COALESCE(excluded.time, events.time),
+           end_time = COALESCE(excluded.end_time, events.end_time),
+           end_date = COALESCE(excluded.end_date, events.end_date),
+           description = COALESCE(excluded.description, events.description),
+           detail_url = COALESCE(excluded.detail_url, events.detail_url),
+           image_url = COALESCE(excluded.image_url, events.image_url),
+           price = COALESCE(excluded.price, events.price),
+           updated_at = datetime('now')`,
+      )
+        .bind(
+          targetMuseumId,
+          event.title,
+          event.date,
+          event.time,
+          event.end_time,
+          event.end_date,
+          event.description,
+          museumConfig.eventApi.endpoint,
+          event.detail_url,
+          event.image_url,
+          event.price,
+        )
+        .run();
+      count++;
+    }
+    return { events: count, api: count > 0 };
+  }
+
+  if (!museum.website_url) return { events: 0, api: false };
+
+  const count = await scrapeMuseumEvents(
+    env,
+    museum as { id: number; name: string; slug: string; website_url: string },
+  );
+  return { events: count, api: false };
 }
 
 async function discoverWebsiteUrls(env: Env): Promise<void> {
@@ -370,10 +384,10 @@ function extractTimeFromHtml(html: string): { time: string | null; end_time: str
 }
 
 async function fetchEventDetails(
-  env: Env,
+  _env: Env,
   detailUrl: string,
   title: string,
-  museumName: string,
+  _museumName: string,
   _websiteUrl: string,
 ): Promise<{
   price: string | null;
@@ -396,37 +410,37 @@ async function fetchEventDetails(
   const imageUrl = extractImageFromHtml(html, detailUrl);
   const { time, end_time } = extractTimeFromHtml(html);
   const description = extractDescriptionFromHtml(html, title);
-
-  const textContent = stripHtmlToText(html).slice(0, 6000);
-  if (textContent.length < 50) return { price: null, image_url: imageUrl, time, end_time, description };
-
-  const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
-    messages: [
-      {
-        role: "user",
-        content: `Extract price/cost information from this event detail page for "${museumName}".
-
-Look for: admission price, ticket cost, "Eintritt", "€", "kostenlos", "kostenfrei", "frei", "inklusive Museumseintritt", etc.
-
-Return ONLY a JSON object, nothing else:
-{"price": "the price text exactly as shown, e.g. '8 €', 'Eintritt frei', 'kostenlos', '12 € / 8 € ermäßigt'" or null}
-
-If no price information is found, return: {"price": null}
-
-Page content:
-${textContent}`,
-      },
-    ],
-  })) as Record<string, unknown>;
-
-  let price: string | null = null;
-  const priceResponseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
-  const parsed = extractJsonObject<{ price: string | null }>(priceResponseText);
-  if (parsed?.price && parsed.price !== "null") {
-    price = parsed.price;
-  }
+  const price = extractPriceFromHtml(html);
 
   return { price, image_url: imageUrl, time, end_time, description };
+}
+
+const AMOUNT = String.raw`\d+(?:[.,]\d{1,2})?(?:,-)?`;
+const PRICE_TOKEN = String.raw`(?:€\s*${AMOUNT}|${AMOUNT}\s*(?:€|Euro|EUR))`;
+const PRICE_RANGE = new RegExp(
+  String.raw`${PRICE_TOKEN}(?:\s*(?:\/|–|-|bis)\s*${PRICE_TOKEN}(?:\s*(?:erm[äa]ßigt|reduziert|ermäßigt))?)?`,
+  "i",
+);
+
+export function extractPriceFromHtml(html: string): string | null {
+  const stripped = html.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "");
+  const scope = findContentScope(stripped);
+  const text = decodeEntities(scope.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ");
+
+  const eintrittFree = text.match(/Eintritt:?\s*(frei|kostenlos|kostenfrei)\b/i);
+  if (eintrittFree) return "Eintritt frei";
+
+  const eintrittPrice = text.match(new RegExp(String.raw`Eintritt:?\s*(${PRICE_RANGE.source})`, "i"));
+  if (eintrittPrice) return `Eintritt ${eintrittPrice[1].trim()}`.replace(/\s+/g, " ");
+
+  if (/\b(?:kostenlos|kostenfrei|Eintritt\s+frei|free\s+admission)\b/i.test(text)) {
+    return "Eintritt frei";
+  }
+
+  const priceMatch = text.match(PRICE_RANGE);
+  if (priceMatch) return priceMatch[0].replace(/\s+/g, " ").trim();
+
+  return null;
 }
 
 const HTML_ENTITIES: Record<string, string> = {
@@ -650,16 +664,6 @@ export function stripHtmlToText(html: string): string {
 
 export function extractJson<T>(text: string): T | null {
   const match = text.match(/\[[\s\S]*\]/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]) as T;
-  } catch {
-    return null;
-  }
-}
-
-function extractJsonObject<T>(text: string): T | null {
-  const match = text.match(/\{[\s\S]*\}/);
   if (!match) return null;
   try {
     return JSON.parse(match[0]) as T;
