@@ -93,6 +93,16 @@ function SearchBar({ tr }: { tr: Record<string, string> }) {
         placeholder={tr.searchPlaceholder}
         aria-label={tr.search}
       />
+      <button
+        type="button"
+        id="search-clear"
+        class="text-text-tertiary hover:text-river hidden cursor-pointer transition-colors"
+        aria-label="Clear search"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+          <path d={ICON.close} />
+        </svg>
+      </button>
       <kbd class={`${kbdClass} max-[1024px]:hidden`}>⌘K</kbd>
     </div>
   );
@@ -342,6 +352,12 @@ export function renderPage(
             </div>
 
             <SearchBar tr={tr} />
+
+            <div id="search-no-results" class="hidden py-16 px-4 text-center fade-in">
+              <div class="empty-state">
+                <p>{tr.noResults}</p>
+              </div>
+            </div>
 
             <style
               dangerouslySetInnerHTML={{

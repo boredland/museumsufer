@@ -18,7 +18,7 @@ export const titleLinkClass =
 export const emptyStateClass = "empty-state";
 
 export const descriptionClass =
-  "text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light";
+  "text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light font-display italic";
 
 export const infoSectionClass =
   "mt-4 py-3 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary border border-border-light";
