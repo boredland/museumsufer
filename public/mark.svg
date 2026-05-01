@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 80" role="img" aria-label="Museumsufer">
+  <defs>
+    <linearGradient id="m-fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="m-clip">
+      <rect x="0" y="48" width="96" height="40"/>
+    </clipPath>
+  </defs>
+  <g fill="currentColor">
+    <path d="M48 6 L72 22 L24 22 Z"/>
+    <rect x="22" y="24" width="52" height="3.5"/>
+    <rect x="26" y="29" width="3.5" height="14"/>
+    <rect x="35" y="29" width="3.5" height="14"/>
+    <rect x="46.25" y="29" width="3.5" height="14"/>
+    <rect x="57.5" y="29" width="3.5" height="14"/>
+    <rect x="66.5" y="29" width="3.5" height="14"/>
+    <rect x="20" y="44" width="56" height="3.5"/>
+  </g>
+  <g clip-path="url(#m-clip)">
+    <g fill="url(#m-fade)">
+      <rect x="20" y="49" width="56" height="3.5"/>
+      <rect x="26" y="53" width="3.5" height="14"/>
+      <rect x="35" y="53" width="3.5" height="14"/>
+      <rect x="46.25" y="53" width="3.5" height="14"/>
+      <rect x="57.5" y="53" width="3.5" height="14"/>
+      <rect x="66.5" y="53" width="3.5" height="14"/>
+      <rect x="22" y="68" width="52" height="3.5"/>
+      <path d="M48 86 L72 70 L24 70 Z"/>
+    </g>
+  </g>
+</svg>

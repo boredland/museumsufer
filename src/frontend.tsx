@@ -35,12 +35,53 @@ const PASS_URLS: Record<Locale, { card: string; ticket: string }> = {
   },
 };
 
+function Mark({ class: cls }: { class?: string }) {
+  return (
+    <svg viewBox="0 0 96 80" role="img" aria-label="Museumsufer" class={cls} xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="mark-fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="currentColor" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
+        </linearGradient>
+        <clipPath id="mark-clip">
+          <rect x="0" y="48" width="96" height="40" />
+        </clipPath>
+      </defs>
+      <g fill="currentColor">
+        <path d="M48 6 L72 22 L24 22 Z" />
+        <rect x="22" y="24" width="52" height="3.5" />
+        <rect x="26" y="29" width="3.5" height="14" />
+        <rect x="35" y="29" width="3.5" height="14" />
+        <rect x="46.25" y="29" width="3.5" height="14" />
+        <rect x="57.5" y="29" width="3.5" height="14" />
+        <rect x="66.5" y="29" width="3.5" height="14" />
+        <rect x="20" y="44" width="56" height="3.5" />
+      </g>
+      <g clip-path="url(#mark-clip)">
+        <g fill="url(#mark-fade)">
+          <rect x="20" y="49" width="56" height="3.5" />
+          <rect x="26" y="53" width="3.5" height="14" />
+          <rect x="35" y="53" width="3.5" height="14" />
+          <rect x="46.25" y="53" width="3.5" height="14" />
+          <rect x="57.5" y="53" width="3.5" height="14" />
+          <rect x="66.5" y="53" width="3.5" height="14" />
+          <rect x="22" y="68" width="52" height="3.5" />
+          <path d="M48 86 L72 70 L24 70 Z" />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
     <header class="mb-12 max-[480px]:mb-9">
       <div class="flex items-center justify-between gap-4 mb-4">
-        <p class="section-eyebrow">Frankfurt am Main · 50.10°N 8.68°E</p>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <Mark class="text-river w-7 h-[1.45rem] shrink-0" />
+          <p class="section-eyebrow truncate">Frankfurt am Main · 50.10°N 8.68°E</p>
+        </div>
+        <div class="flex items-center gap-4 shrink-0">
           <ThemeToggle tr={tr} />
           <LangSwitch locale={locale} />
         </div>
@@ -351,7 +392,8 @@ export function renderPage(
           <meta name="twitter:title" content={tr.pageTitle} />
           <meta name="twitter:description" content={tr.metaLong} />
           <meta name="twitter:image" content="https://museumsufer.app/og-image.png" />
-          <link rel="icon" href="/icon-192.png" type="image/png" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
           <link rel="apple-touch-icon" href="/icon-192.png" />
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
