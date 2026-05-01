@@ -4,7 +4,7 @@ import { CLIENT_SCRIPT } from "./client-script";
 import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
-import { ICON } from "./icons";
+import { ICON, IconSprite } from "./icons";
 import { getMuseumLocations } from "./museum-config";
 import { formatDateFull } from "./shared";
 import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
@@ -445,6 +445,7 @@ export function renderPage(
           <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
+          <IconSprite />
           <a
             href="#content"
             class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-river focus:text-bg focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
