@@ -5,7 +5,7 @@ import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
-import { getMuseumLocations } from "./museum-config";
+import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { formatDateFull } from "./shared";
 import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
@@ -579,19 +579,24 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const museum = (ex.museum_name as string) || "";
       const slug = (ex.museum_slug as string) || "";
       const geo = MUSEUM_LOCATIONS[slug];
+      const museumConfig = getMuseumConfig(slug);
+      const museumUrl = museumConfig?.website || "https://museumsufer.app/";
+      const exUrl = (ex.detail_url as string) || museumUrl;
       const exSchema: Record<string, unknown> = {
         "@type": "ExhibitionEvent",
         name: ex.title,
+        description: (ex.description as string) || `${ex.title} — ${museum}, Frankfurt am Main`,
+        url: exUrl,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
       };
       if (ex.start_date) exSchema.startDate = ex.start_date;
       if (ex.end_date) exSchema.endDate = ex.end_date;
-      if (ex.description) exSchema.description = ex.description;
-      if (ex.detail_url) exSchema.url = ex.detail_url;
       if (ex.image_url) {
         const img = ex.image_url as string;
         exSchema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
+      } else {
+        exSchema.image = "https://museumsufer.app/og-image.png";
       }
       const loc: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
       if (geo) {
@@ -599,11 +604,14 @@ function buildEventSchema(data: InitialData, tz: string): string {
         loc.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
       }
       exSchema.location = loc;
-      exSchema.organizer = { "@type": "Organization", name: museum };
+      exSchema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
       exSchema.offers = {
         "@type": "Offer",
-        url: (ex.detail_url as string) || "https://museumsufer.app/",
+        url: exUrl,
+        price: "0",
+        priceCurrency: "EUR",
         availability: "https://schema.org/InStock",
+        validFrom: (ex.start_date as string) || undefined,
       };
       schemas.push(exSchema);
     }
@@ -632,19 +640,25 @@ function buildEventSchema(data: InitialData, tz: string): string {
         endIso = `${date}T18:00:00${tz}`;
       }
 
+      const museumConfig = getMuseumConfig(slug);
+      const museumUrl = museumConfig?.website || "https://museumsufer.app/";
+      const evUrl = (ev.detail_url as string) || (ev.url as string) || museumUrl;
+
       const schema: Record<string, unknown> = {
         "@type": "Event",
         name: ev.title,
+        description: (ev.description as string) || `${ev.title} — ${museum}, Frankfurt am Main`,
+        url: evUrl,
         startDate: startIso,
         endDate: endIso,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
       };
-      if (ev.description) schema.description = ev.description;
-      if (ev.detail_url) schema.url = ev.detail_url;
       if (ev.image_url) {
         const img = ev.image_url as string;
         schema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
+      } else {
+        schema.image = "https://museumsufer.app/og-image.png";
       }
 
       const location: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
@@ -654,16 +668,17 @@ function buildEventSchema(data: InitialData, tz: string): string {
       }
       schema.location = location;
 
-      schema.organizer = { "@type": "Organization", name: museum };
-      const offerUrl = (ev.detail_url as string) || (ev.url as string) || "https://museumsufer.app/";
-      schema.offers = ev.price
-        ? {
-            "@type": "Offer",
-            url: offerUrl,
-            availability: "https://schema.org/InStock",
-            description: ev.price,
-          }
-        : { "@type": "Offer", url: offerUrl, availability: "https://schema.org/InStock" };
+      schema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
+      const priceStr = ev.price ? String(ev.price).replace(/[^\d.,]/g, "") || "0" : "0";
+      schema.offers = {
+        "@type": "Offer",
+        url: evUrl,
+        price: priceStr,
+        priceCurrency: "EUR",
+        availability: "https://schema.org/InStock",
+        validFrom: date,
+        ...(ev.price ? { description: ev.price } : {}),
+      };
 
       schemas.push(schema);
     });
