@@ -96,6 +96,9 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
         </span>
         <div class="river-band flex-1" aria-hidden="true" />
       </div>
+      <p class="mt-4 text-[0.75rem] text-text-tertiary text-center italic font-display leading-snug">
+        {tr.aiDisclosure}
+      </p>
     </header>
   );
 }
@@ -342,6 +345,14 @@ export function renderPage(
   const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": "https://museumsufer.app/#publisher",
+    name: "Jonas Strasel",
+    email: "info@jonas-strassel.de",
+    url: "https://museumsufer.app/impressum",
+  };
   const websiteSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -349,12 +360,17 @@ export function renderPage(
     url: "https://museumsufer.app/",
     description: tr.metaLong,
     inLanguage: ["de", "en", "fr"],
+    publisher: { "@id": "https://museumsufer.app/#publisher" },
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://museumsufer.app/?q={search_term_string}",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://museumsufer.app/?q={search_term_string}",
+      },
       "query-input": "required name=search_term_string",
     },
   });
+  const publisherSchema = JSON.stringify(orgSchema);
 
   const dataInit = `const T = ${trJson};
     const DATE_LOCALE = ${dlJson};
@@ -373,7 +389,10 @@ export function renderPage(
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>{tr.pageTitle}</title>
           <meta name="description" content={tr.metaLong} />
-          <link rel="canonical" href={`https://museumsufer.app/${locale !== "de" ? `?lang=${locale}` : ""}`} />
+          <link
+            rel="canonical"
+            href={locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`}
+          />
           <link rel="alternate" hreflang="de" href="https://museumsufer.app/" />
           <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
           <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
@@ -418,9 +437,11 @@ export function renderPage(
             />
           </noscript>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: publisherSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
+          <link rel="preload" as="style" href="/styles.css" />
           <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
@@ -517,8 +538,19 @@ export function renderPage(
                 >
                   Source
                 </a>
-                <span class="opacity-60">© Museumsufer Frankfurt</span>
+                <a
+                  href={locale === "de" ? "/impressum" : `/impressum?lang=${locale}`}
+                  class="no-underline hover:text-river"
+                >
+                  {tr.imprint}
+                </a>
               </div>
+              <p class="text-[0.75rem] text-text-tertiary">
+                {tr.byline} ·{" "}
+                <a href="mailto:info@jonas-strassel.de" class="no-underline hover:text-river text-text-secondary">
+                  info@jonas-strassel.de
+                </a>
+              </p>
             </footer>
           </div>
 
@@ -560,18 +592,16 @@ function buildEventSchema(data: InitialData, tz: string): string {
         const img = ex.image_url as string;
         exSchema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
       }
-      const loc: Record<string, unknown> = { "@type": "Place", name: museum };
+      const loc: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
       if (geo) {
         loc.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
         loc.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
       }
       exSchema.location = loc;
-      const org = { "@type": "Organization", name: museum };
-      exSchema.organizer = org;
-      exSchema.performer = org;
+      exSchema.organizer = { "@type": "Organization", name: museum };
       exSchema.offers = {
         "@type": "Offer",
-        url: ex.detail_url || `https://museumsufer.app/?lang=de`,
+        url: (ex.detail_url as string) || "https://museumsufer.app/",
         availability: "https://schema.org/InStock",
       };
       schemas.push(exSchema);
@@ -616,24 +646,23 @@ function buildEventSchema(data: InitialData, tz: string): string {
         schema.image = img.startsWith("/") ? `https://museumsufer.app${img}` : img;
       }
 
-      const location: Record<string, unknown> = { "@type": "Place", name: museum };
+      const location: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
       if (geo) {
         location.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
         location.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
       }
       schema.location = location;
 
-      const org = { "@type": "Organization", name: museum };
-      schema.organizer = org;
-      schema.performer = org;
+      schema.organizer = { "@type": "Organization", name: museum };
+      const offerUrl = (ev.detail_url as string) || (ev.url as string) || "https://museumsufer.app/";
       schema.offers = ev.price
         ? {
             "@type": "Offer",
-            url: ev.detail_url || ev.url,
+            url: offerUrl,
             availability: "https://schema.org/InStock",
             description: ev.price,
           }
-        : { "@type": "Offer", url: ev.detail_url || ev.url, availability: "https://schema.org/InStock" };
+        : { "@type": "Offer", url: offerUrl, availability: "https://schema.org/InStock" };
 
       schemas.push(schema);
     });

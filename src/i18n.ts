@@ -103,6 +103,22 @@ const de: Translations = {
   whyTitle: "Warum diese App?",
   whyText:
     "Frankfurt hat über 40 Museen — und die verdienen einen besseren Überblick als den, den sie haben. Diese App bündelt die Ausstellungen und Veranstaltungen aller Museen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.",
+  imprint: "Impressum",
+  imprintTitle: "Impressum — Museumsufer Frankfurt",
+  imprintHeading: "Impressum",
+  imprintTmgHeading: "Angaben gemäß § 5 TMG",
+  imprintContactHeading: "Kontakt",
+  imprintResponsibleHeading: "Verantwortlich für den Inhalt",
+  imprintDataSourceHeading: "Datenquellen",
+  imprintDataSourceText:
+    "Inhalte werden täglich automatisch von den Webseiten der ~40 beteiligten Museen gesammelt. Übersetzungen erfolgen über DeepL. Die Anwendung steht in keiner offiziellen Verbindung zur Kulturdezernat oder zur Museumsufer-Initiative der Stadt Frankfurt am Main.",
+  imprintDisclaimerHeading: "Haftungsausschluss",
+  imprintDisclaimerText:
+    "Trotz sorgfältiger Aufbereitung können einzelne Termine, Preise oder Beschreibungen veraltet oder unvollständig sein. Verbindliche Informationen bitte direkt beim jeweiligen Museum prüfen.",
+  back: "Zurück",
+  byline: "Erstellt von Jonas Strasel",
+  contactEmail: "info@jonas-strassel.de",
+  aiDisclosure: "Daten täglich automatisch von Museumswebseiten gesammelt · Übersetzungen via DeepL",
 };
 
 const en: Translations = {
@@ -176,6 +192,22 @@ const en: Translations = {
   whyTitle: "Why this app?",
   whyText:
     "Frankfurt has over 40 museums — and they deserve a better overview than the one they got. This app pulls exhibitions and events from every museum into one fast, searchable page. No app store, no account, no fuss.",
+  imprint: "Imprint",
+  imprintTitle: "Imprint — Museumsufer Frankfurt",
+  imprintHeading: "Imprint",
+  imprintTmgHeading: "Information according to § 5 TMG",
+  imprintContactHeading: "Contact",
+  imprintResponsibleHeading: "Responsible for content",
+  imprintDataSourceHeading: "Data sources",
+  imprintDataSourceText:
+    "Content is collected automatically every day from the websites of the ~40 participating museums. Translations are produced by DeepL. This site is not officially affiliated with the City of Frankfurt's cultural department or the Museumsufer initiative.",
+  imprintDisclaimerHeading: "Disclaimer",
+  imprintDisclaimerText:
+    "Despite careful processing, individual dates, prices or descriptions may be outdated or incomplete. For binding information please check directly with the respective museum.",
+  back: "Back",
+  byline: "Built by Jonas Strasel",
+  contactEmail: "info@jonas-strassel.de",
+  aiDisclosure: "Data collected daily from museum websites · Translations by DeepL",
 };
 
 const fr: Translations = {
@@ -249,6 +281,22 @@ const fr: Translations = {
   whyTitle: "Pourquoi cette application ?",
   whyText:
     "Francfort compte plus de 40 musées — et ils méritent une meilleure vue d'ensemble que celle qu'ils ont. Cette application rassemble les expositions et les événements de chaque musée en une seule page rapide et consultable. Pas de magasin d'applications, pas de compte, pas d'ennuis.",
+  imprint: "Mentions légales",
+  imprintTitle: "Mentions légales — Museumsufer Frankfurt",
+  imprintHeading: "Mentions légales",
+  imprintTmgHeading: "Informations conformément au § 5 TMG",
+  imprintContactHeading: "Contact",
+  imprintResponsibleHeading: "Responsable du contenu",
+  imprintDataSourceHeading: "Sources des données",
+  imprintDataSourceText:
+    "Le contenu est collecté automatiquement chaque jour à partir des sites web des ~40 musées participants. Les traductions sont fournies par DeepL. Ce site n'est pas officiellement affilié au département culturel de la Ville de Francfort ni à l'initiative Museumsufer.",
+  imprintDisclaimerHeading: "Avertissement",
+  imprintDisclaimerText:
+    "Malgré un traitement soigneux, certaines dates, prix ou descriptions peuvent être obsolètes ou incomplets. Pour des informations contractuelles, veuillez vérifier directement auprès du musée concerné.",
+  back: "Retour",
+  byline: "Réalisé par Jonas Strasel",
+  contactEmail: "info@jonas-strassel.de",
+  aiDisclosure: "Données collectées quotidiennement depuis les sites des musées · Traductions par DeepL",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
