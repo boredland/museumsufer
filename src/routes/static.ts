@@ -95,14 +95,32 @@ app.get("/robots.txt", (c) =>
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://museumsufer.app/</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://museumsufer.app/?lang=de</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/?lang=en</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/?lang=fr</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/feed.xml</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/feed.ics</loc><lastmod>${today}</lastmod><changefreq>daily</changefreq></url>
-  <url><loc>https://museumsufer.app/llms.txt</loc><changefreq>weekly</changefreq></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://museumsufer.app/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
+  </url>
+  <url>
+    <loc>https://museumsufer.app/?lang=en</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://museumsufer.app/?lang=fr</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://museumsufer.app/impressum</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 </urlset>`;
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
 });

@@ -23,6 +23,7 @@ import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
+import imprintRoute from "./routes/imprint";
 import scrapeRoute from "./routes/scrape";
 import staticRoute from "./routes/static";
 import { scrape } from "./scraper";
@@ -48,6 +49,30 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
+// Security headers — applied to every response
+app.use("*", async (c, next) => {
+  await next();
+  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  c.header("X-Frame-Options", "DENY");
+  c.header("X-Content-Type-Options", "nosniff");
+  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header("Permissions-Policy", "geolocation=(self), microphone=(), camera=(), payment=()");
+  c.header(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "img-src 'self' data: https:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' 'unsafe-inline'",
+      "connect-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; "),
+  );
+});
+
 // CORS middleware - restrict to museumsufer.app
 app.use(
   "/api/*",
@@ -60,6 +85,7 @@ app.use(
 
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
+app.route("/", imprintRoute);
 app.route("/api/docs", docsRoute);
 app.route("/scrape", scrapeRoute);
 

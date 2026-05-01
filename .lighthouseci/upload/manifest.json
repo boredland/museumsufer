@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://museumsufer.app/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/jonass/Documents/museumsufer/.lighthouseci/upload/museumsufer_app--2026_05_01_06_24_40.report.html",
+    "jsonPath": "/home/jonass/Documents/museumsufer/.lighthouseci/upload/museumsufer_app--2026_05_01_06_24_40.report.json",
+    "summary": {
+      "performance": 0.76,
+      "accessibility": 0.98,
+      "best-practices": 1,
+      "seo": 0.92
+    }
+  }
+]
