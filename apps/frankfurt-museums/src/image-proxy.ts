@@ -67,28 +67,25 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
   try {
     let res: Response;
 
-    if (env.FETCH_PROXY_URL && shouldProxy(imageUrl)) {
+    if (width > 0) {
+      const wsrv = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=${width}&output=webp&q=80&we`;
+      res = await fetch(wsrv, { headers: { "User-Agent": USER_AGENT } });
+    } else if (env.FETCH_PROXY_URL && shouldProxy(imageUrl)) {
       const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(imageUrl)}`;
       const headers: Record<string, string> = {};
       if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
       res = await fetch(proxyUrl, { headers });
-    } else if (width > 0) {
-      // wsrv.nl is a free image-resize CDN (the same project behind the sharp lib).
-      // Reliable when Cloudflare Images isn't enabled on the account, where the
-      // `cf.image` hint is silently dropped and the original full-size image is served.
-      const wsrv = `https://wsrv.nl/?url=${encodeURIComponent(imageUrl)}&w=${width}&output=webp&q=80&we`;
-      res = await fetch(wsrv, { headers: { "User-Agent": USER_AGENT } });
     } else {
       res = await fetch(imageUrl, { headers: { "User-Agent": USER_AGENT } });
     }
 
-    if (!res.ok && width > 0) {
+    if (!res.ok) {
       if (env.FETCH_PROXY_URL) {
         const proxyUrl = `${env.FETCH_PROXY_URL}?url=${encodeURIComponent(imageUrl)}`;
         const headers: Record<string, string> = {};
         if (env.FETCH_PROXY_TOKEN) headers.Authorization = `Bearer ${env.FETCH_PROXY_TOKEN}`;
         res = await fetch(proxyUrl, { headers });
-      } else {
+      } else if (width > 0) {
         res = await fetch(imageUrl, { headers: { "User-Agent": USER_AGENT } });
       }
     }
