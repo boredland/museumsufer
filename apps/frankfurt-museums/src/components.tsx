@@ -232,12 +232,12 @@ function EndingBadge({
   const urgent = daysLeft <= 3;
   return (
     <span
-      class={`ending-badge inline-flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${urgent ? "text-red-700" : "text-text-tertiary"}`}
+      class={`ending-badge inline-flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${urgent ? "text-red-700 dark:text-red-500" : "text-text-tertiary"}`}
       title={`${daysLeft} ${daysUnit}`}
     >
       <span
         aria-hidden="true"
-        class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700" : "bg-text-tertiary"}`}
+        class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700 dark:bg-red-500" : "bg-text-tertiary"}`}
       />
       {label}
     </span>

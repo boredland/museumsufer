@@ -393,7 +393,7 @@ export function renderPage(
             rel="canonical"
             href={locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`}
           />
-          <link rel="alternate" hreflang="de" href="https://museumsufer.app/" />
+          <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
           <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
           <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
           <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
