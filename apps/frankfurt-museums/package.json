@@ -1,0 +1,39 @@
+{
+  "name": "@museumsufer/frankfurt-museums",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i src/app.css -o public/styles.css --minify",
+    "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
+    "dev": "npm run css && wrangler dev",
+    "build": "npm run css",
+    "deploy": "npm run css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply museumsufer-db --local",
+    "db:migrate": "wrangler d1 migrations apply museumsufer-db --remote",
+    "health-check": "tsx scripts/health-check.ts",
+    "screenshot": "tsx scripts/screenshots.ts",
+    "screenshots:manifest": "tsx scripts/screenshots.ts --format=landscape --out=public/ss-wide.png && tsx scripts/screenshots.ts --format=portrait --out=public/ss-mobile.png",
+    "lint": "../../node_modules/.bin/biome check src/ scripts/",
+    "lint:fix": "../../node_modules/.bin/biome check --write src/ scripts/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
+    "@scalar/hono-api-reference": "^0.10.11",
+    "dayjs": "^1.11.20",
+    "fuse.js": "^7.0.0",
+    "hono": "^4.12.15",
+    "htmx.org": "^2.0.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/puppeteer": "^1.1.0",
+    "@cloudflare/workers-types": "^4.20250410.0",
+    "@museumsufer/tsconfig": "*",
+    "@tailwindcss/cli": "^4.2.4",
+    "playwright": "^1.59.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.83.0"
+  }
+}

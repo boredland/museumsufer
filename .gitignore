@@ -1,6 +1,7 @@
 node_modules/
 .wrangler/
 dist/
+.turbo/
 claude-seo
 
 # Lighthouse CI output

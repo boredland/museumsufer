@@ -1,0 +1,47 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "globalDependencies": ["biome.json", "tsconfig.json", ".env", ".env.*"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "scripts/**", "public/**", "tsconfig.json", "package.json", "wrangler.jsonc"],
+      "outputs": ["public/styles.css", "dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "inputs": ["src/**", "scripts/**"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "scripts/**", "tsconfig.json"],
+      "outputs": []
+    },
+    "deploy": {
+      "cache": false,
+      "dependsOn": ["build"]
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:migrate:local": {
+      "cache": false
+    },
+    "health-check": {
+      "cache": false
+    },
+    "screenshot": {
+      "cache": false
+    },
+    "screenshots:manifest": {
+      "cache": false
+    }
+  }
+}

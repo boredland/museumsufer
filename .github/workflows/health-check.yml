@@ -22,7 +22,7 @@ jobs:
 
       - name: Run health checks
         id: health
-        run: npx tsx scripts/health-check.ts > report.txt 2>&1 || echo "failed=true" >> "$GITHUB_OUTPUT"
+        run: npm run health-check > report.txt 2>&1 || echo "failed=true" >> "$GITHUB_OUTPUT"
 
       - name: Show report
         run: cat report.txt

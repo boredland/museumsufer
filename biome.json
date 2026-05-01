@@ -1,32 +1,12 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
+  "extends": ["./packages/config/biome.json"],
   "files": {
-    "includes": ["src/**/*.ts", "src/**/*.tsx", "scripts/**/*.ts"]
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noAssignInExpressions": "off",
-        "noImplicitAnyLet": "off"
-      },
-      "complexity": {
-        "noForEach": "off"
-      },
-      "style": {
-        "noNonNullAssertion": "off"
-      },
-      "a11y": {
-        "useAnchorContent": "off"
-      }
-    }
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 120
+    "includes": [
+      "apps/**/src/**/*.ts",
+      "apps/**/src/**/*.tsx",
+      "apps/**/scripts/**/*.ts",
+      "packages/**/src/**/*.ts"
+    ]
   }
 }
