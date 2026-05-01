@@ -396,7 +396,7 @@ export function renderPage(
           <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
           <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
           <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
-          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
+          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/?lang=de" />
           <meta property="og:title" content={tr.pageTitle} />
           <meta property="og:description" content={tr.metaLong} />
           <meta property="og:type" content="website" />
