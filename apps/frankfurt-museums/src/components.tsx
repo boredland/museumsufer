@@ -1,5 +1,4 @@
 import { dateLocale, type Locale } from "./i18n";
-import { ICON } from "./icons";
 import { getMuseumLocations } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
 import {
@@ -13,6 +12,14 @@ import {
   titleLinkClass,
 } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
+
+function Icon({ id, class: cls }: { id: string; class: string }) {
+  return (
+    <svg aria-hidden="true" class={cls}>
+      <use href={`#${id}`} />
+    </svg>
+  );
+}
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
 
@@ -124,9 +131,7 @@ function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
     <span class={`card-likes ${quietCountClass}`} title={`${count} likes`}>
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
-        <path d={ICON.heart} />
-      </svg>
+      <Icon id="i-heart" class="w-3 h-3 shrink-0 fill-current" />
       {count}
     </span>
   );
@@ -163,9 +168,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
         popovertarget={popId}
         onclick={positionPopover}
       >
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
-          <path d={ICON.navigate} />
-        </svg>
+        <Icon id="i-navigate" class="w-3 h-3 shrink-0 fill-current" />
       </button>
       <div
         id={popId}
@@ -180,9 +183,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
           role="menuitem"
           class={`${navLinkClass} hidden max-[1024px]:flex`}
         >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
-          </svg>
+          <Icon id="i-rmv" class="w-3.5 h-3.5 shrink-0 fill-current" />
           RMV
         </a>
         <a
@@ -192,37 +193,15 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
           role="menuitem"
           class={`${navLinkClass} max-[1024px]:hidden`}
         >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3.5 h-3.5 shrink-0">
-            <path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z" />
-          </svg>
+          <Icon id="i-rmv" class="w-3.5 h-3.5 shrink-0 fill-current" />
           RMV
         </a>
         <a href={urls.google} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 92.3 132.3" class="w-3.5 h-3.5 shrink-0">
-            <path d="M60.2 2.2C55.8.8 51 0 46.1 0 32 0 19.3 6.4 10.8 16.5l21.8 18.3L60.2 2.2z" fill="#1a73e8" />
-            <path d="M10.8 16.5C4.1 24.5 0 34.9 0 46.1c0 8.7 1.7 15.7 4.6 22l28-31.8L10.8 16.5z" fill="#ea4335" />
-            <path
-              d="M46.2 28.5c9.8 0 17.7 7.9 17.7 17.7 0 4.3-1.6 8.3-4.2 11.4 0 0 13.9-16.6 27.5-32.7-5.6-10.8-15.3-19-27-22.7L32.6 34.8c3.3-3.8 8.1-6.3 13.6-6.3"
-              fill="#4285f4"
-            />
-            <path
-              d="M46.2 63.8c-9.8 0-17.7-7.9-17.7-17.7 0-4.3 1.5-8.3 4.1-11.3l-28 31.8c4.7 10.3 12.3 18.9 22.3 29.1l31.2-36.1c-3.3 3.2-7.9 4.2-11.9 4.2"
-              fill="#fbbc04"
-            />
-            <path
-              d="M59.1 109.2c15.4-24.1 33.3-35 33.3-63 0-7.7-1.9-14.9-5.2-21.3L24.8 95.9c2.6 2.8 5.3 5.8 7.9 9.2 11.4 14.7 13.5 27.2 13.5 27.2s2.1-12.5 12.9-23.1"
-              fill="#34a853"
-            />
-          </svg>
+          <Icon id="i-gmaps" class="w-3.5 h-3.5 shrink-0" />
           Google Maps
         </a>
         <a href={urls.apple} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 24 24" class="w-3.5 h-3.5 shrink-0">
-            <path
-              d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.65-2.2.46-3.06-.4C3.79 16.17 4.36 9.43 8.9 9.18c1.25.07 2.12.73 2.86.78.97-.2 1.9-.76 2.93-.69 1.24.1 2.17.58 2.79 1.48-2.56 1.53-1.95 4.89.58 5.83-.45 1.19-.99 2.38-1.95 3.72h-.06zM12.03 9.12C11.9 7.05 13.6 5.36 15.56 5.2c.29 2.38-2.16 4.16-3.53 3.92z"
-              fill="#333"
-            />
-          </svg>
+          <Icon id="i-apple" class="w-3.5 h-3.5 shrink-0" />
           Apple Maps
         </a>
       </div>
@@ -231,11 +210,7 @@ function NavButton({ slug, name, tr }: { slug: string | undefined; name: string;
 }
 
 function ExternalLinkIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" width="11" height="11" class="align-[-1px]">
-      <path d={ICON.openInNew} />
-    </svg>
-  );
+  return <Icon id="i-open" class="w-[11px] h-[11px] align-[-1px] fill-current" />;
 }
 
 function EndingBadge({
@@ -336,9 +311,7 @@ function ExhibitionCard({
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
-                <path d={ICON.visibility} />
-              </svg>
+              <Icon id="i-visibility" class="w-3 h-3 shrink-0 fill-current" />
             </button>
           </div>
           {ex.description && (
@@ -377,9 +350,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         popovertarget={popId}
         onclick={positionPopover}
       >
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="w-3 h-3 shrink-0">
-          <path d={ICON.event} />
-        </svg>
+        <Icon id="i-event" class="w-3 h-3 shrink-0 fill-current" />
       </button>
       <div
         id={popId}
@@ -388,48 +359,20 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
         class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
       >
         <a href={googleUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
-            <path d="M8 1a7 7 0 110 14A7 7 0 018 1z" stroke="currentColor" stroke-width="1.2" />
-            <path
-              d="M5.5 8l2 2 3-4"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <Icon id="i-cal-google" class="w-3.5 h-3.5 shrink-0" />
           Google
         </a>
         <a href={outlookUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
-            <rect x="2" y="3" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.2" />
-            <path d="M2 6l6 3.5L14 6" stroke="currentColor" stroke-width="1.2" />
-          </svg>
+          <Icon id="i-cal-outlook" class="w-3.5 h-3.5 shrink-0" />
           Outlook
         </a>
         <a href={yahooUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
-            <path
-              d="M3 3l5 6v4M13 3L8 9"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <Icon id="i-cal-yahoo" class="w-3.5 h-3.5 shrink-0" />
           Yahoo
         </a>
         <hr class="my-1 border-border-light" />
         <a href={icsUrl} download="event.ics" role="menuitem" class={calLinkClass}>
-          <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="w-3.5 h-3.5 shrink-0">
-            <path
-              d="M8 2v8m0 0l-3-3m3 3l3-3M3 12h10"
-              stroke="currentColor"
-              stroke-width="1.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+          <Icon id="i-cal-ics" class="w-3.5 h-3.5 shrink-0" />
           .ics (Apple, Proton, ...)
         </a>
       </div>
