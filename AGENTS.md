@@ -18,32 +18,33 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 - **Search:** Fuse.js (client-side fuzzy search, loaded from CDN)
 - **Framework:** [Hono](https://hono.dev) v4 with `@hono/zod-validator` for request validation
 - **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx
+- **Monorepo:** Turborepo with npm workspaces (`apps/*`, `packages/*`)
 - **Build:** wrangler (no bundler config — wrangler handles it)
 
 ## Key files
 
 | File | Purpose |
 |---|---|
-| `src/index.tsx` | Hono app, routes, cron handler, SSR with inline data. |
-| `src/routes/scrape.ts` | Auth-protected scrape endpoints (`POST /scrape/*`). |
-| `src/routes/feeds.ts` | RSS and ICS feed endpoints. |
-| `src/routes/static.ts` | Static assets (robots.txt, sitemap, manifest, llms.txt, OG image). |
-| `src/frontend.tsx` | SSR JSX: i18n (DE/EN/FR), Fuse.js search, distance sorting, visited tracking, JSON-LD. |
-| `src/components.tsx` | Shared JSX components. |
-| `src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
-| `src/scraper.ts` | Scrapes museumsufer.de for museums and exhibitions. Deterministic — no AI. |
-| `src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
-| `src/api-scrapers.ts` | 15 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`. Each returns `ApiEvent[]`. |
-| `src/event-scraper.ts` | Orchestrator: API-first with AI fallback, link matching, detail page enrichment. |
-| `src/translate.ts` | DeepL translation pipeline with SHA-256 hash-based D1 caching. DE→EN/FR. |
-| `src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
-| `src/health-check.ts` | Source health checks for all structured endpoints + museumsufer.de. |
+| `apps/frankfurt-museums/src/index.tsx` | Hono app, routes, cron handler, SSR with inline data. |
+| `apps/frankfurt-museums/src/routes/scrape.ts` | Auth-protected scrape endpoints (`POST /scrape/*`). |
+| `apps/frankfurt-museums/src/routes/feeds.ts` | RSS and ICS feed endpoints. |
+| `apps/frankfurt-museums/src/routes/static.ts` | Static assets (robots.txt, sitemap, manifest, llms.txt, OG image). |
+| `apps/frankfurt-museums/src/frontend.tsx` | SSR JSX: i18n (DE/EN/FR), Fuse.js search, distance sorting, visited tracking, JSON-LD. |
+| `apps/frankfurt-museums/src/components.tsx` | Shared JSX components. |
+| `apps/frankfurt-museums/src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
+| `apps/frankfurt-museums/src/scraper.ts` | Scrapes museumsufer.de for museums and exhibitions. Deterministic — no AI. |
+| `apps/frankfurt-museums/src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
+| `apps/frankfurt-museums/src/api-scrapers.ts` | 15 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`. Each returns `ApiEvent[]`. |
+| `apps/frankfurt-museums/src/event-scraper.ts` | Orchestrator: API-first with AI fallback, link matching, detail page enrichment. |
+| `apps/frankfurt-museums/src/translate.ts` | DeepL translation pipeline with SHA-256 hash-based D1 caching. DE→EN/FR. |
+| `apps/frankfurt-museums/src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
+| `apps/frankfurt-museums/src/health-check.ts` | Source health checks for all structured endpoints + museumsufer.de. |
 
 ## Event scraping: three tiers
 
 ### Tier 1: Structured APIs (15 museums, best data)
 
-Configured in `src/museum-config.ts`. When the event scraper finds a matching slug, it calls `fetchEventsFromApi()` and skips AI scraping entirely.
+Configured in `apps/frankfurt-museums/src/museum-config.ts`. When the event scraper finds a matching slug, it calls `fetchEventsFromApi()` and skips AI scraping entirely.
 
 | Museum | Slug | Parser | Notes |
 |---|---|---|---|
@@ -105,7 +106,7 @@ Five tables in D1:
 
 ## Date/time scraping: Common issues & patterns
 
-When adding or fixing event scrapers, watch for these recurring problems and use the patterns in `src/api-scrapers.ts` to solve them.
+When adding or fixing event scrapers, watch for these recurring problems and use the patterns in `apps/frankfurt-museums/src/api-scrapers.ts` to solve them.
 
 ### Problem: Missing or malformed dates
 
@@ -148,7 +149,7 @@ This happens when parsing HTML extracts time alongside title, or scrapers concat
 
 ### Pattern: Timezone conversions
 
-Always use `src/date.ts` utilities for timezone work:
+Always use `apps/frankfurt-museums/src/date.ts` utilities for timezone work:
 
 - **`toBerlinDate(date: Date): string`** — converts `Date` object → ISO date string in Berlin timezone (Europe/Berlin). Use for all timestamp parsing.
 - **`toBerlinTime(date: Date): string`** — converts `Date` object → HH:MM time string in Berlin timezone.
@@ -250,9 +251,9 @@ time: nullIfMidnight(ev.start_date?.slice(11, 16) || null)
 ### Adding a new museum API
 
 1. Find the endpoint (check `/wp-json/`, embedded JSON, network requests)
-2. Add slug + endpoint to `MUSEUM_APIS` in `src/museum-apis.ts`
-3. Add parser in `src/api-scrapers.ts` (or reuse existing type like `tribe-events`)
-4. Add health check case in `src/health-check.ts`
+2. Add slug + endpoint to `MUSEUM_APIS` in `apps/frankfurt-museums/src/museum-apis.ts`
+3. Add parser in `apps/frankfurt-museums/src/api-scrapers.ts` (or reuse existing type like `tribe-events`)
+4. Add health check case in `apps/frankfurt-museums/src/health-check.ts`
 5. Add exhaustive switch case — TypeScript will error if you forget
 
 ### Manually triggering scrapes

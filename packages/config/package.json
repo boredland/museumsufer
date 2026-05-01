@@ -1,0 +1,12 @@
+{
+  "name": "@museumsufer/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "files": ["base.json", "worker.json", "node.json", "biome.json"],
+  "exports": {
+    "./base.json": "./base.json",
+    "./worker.json": "./worker.json",
+    "./node.json": "./node.json",
+    "./biome.json": "./biome.json"
+  }
+}

@@ -2,38 +2,31 @@
   "name": "museumsufer",
   "version": "0.0.1",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "css": "tailwindcss -i src/app.css -o public/styles.css --minify",
-    "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
-    "dev": "npm run css && wrangler dev",
-    "deploy": "npm run css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
-    "db:migrate:local": "wrangler d1 migrations apply museumsufer-db --local",
-    "db:migrate": "wrangler d1 migrations apply museumsufer-db --remote",
-    "health-check": "npx tsx scripts/health-check.ts",
-    "screenshot": "npx tsx scripts/screenshots.ts",
-    "screenshots:manifest": "npx tsx scripts/screenshots.ts --format=landscape --out=public/ss-wide.png && npx tsx scripts/screenshots.ts --format=portrait --out=public/ss-mobile.png",
-    "lint": "biome check src/ scripts/",
-    "lint:fix": "biome check --write src/ scripts/",
-    "typecheck": "tsc --noEmit"
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "deploy": "turbo run deploy",
+    "health-check": "turbo run health-check",
+    "screenshot": "turbo run screenshot",
+    "screenshots:manifest": "turbo run screenshots:manifest",
+    "db:migrate:local": "turbo run db:migrate:local",
+    "db:migrate": "turbo run db:migrate"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.13",
-    "@cloudflare/puppeteer": "^1.1.0",
-    "@cloudflare/workers-types": "^4.20250410.0",
-    "@tailwindcss/cli": "^4.2.4",
+    "@biomejs/biome": "^2.4.14",
     "lefthook": "^2.1.6",
-    "playwright": "^1.59.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.8.3",
-    "wrangler": "^4.83.0"
+    "turbo": "^2.3.0",
+    "typescript": "^5.8.3"
   },
-  "dependencies": {
-    "@hono/zod-validator": "^0.7.6",
-    "@scalar/hono-api-reference": "^0.10.11",
-    "dayjs": "^1.11.20",
-    "fuse.js": "^7.0.0",
-    "hono": "^4.12.15",
-    "htmx.org": "^2.0.4",
-    "zod": "^4.3.6"
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=22"
   }
 }
