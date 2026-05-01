@@ -10,6 +10,8 @@
     "db:migrate:local": "wrangler d1 migrations apply museumsufer-db --local",
     "db:migrate": "wrangler d1 migrations apply museumsufer-db --remote",
     "health-check": "npx tsx scripts/health-check.ts",
+    "screenshot": "npx tsx scripts/screenshots.ts",
+    "screenshots:manifest": "npx tsx scripts/screenshots.ts --format=landscape --out=public/ss-wide.png && npx tsx scripts/screenshots.ts --format=portrait --out=public/ss-mobile.png",
     "lint": "biome check src/ scripts/",
     "lint:fix": "biome check --write src/ scripts/",
     "typecheck": "tsc --noEmit"
