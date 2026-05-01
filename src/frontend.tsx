@@ -106,7 +106,6 @@ function ThemeToggle({ tr }: { tr: Record<string, string> }) {
       type="button"
       id="theme-toggle"
       class="flex items-center gap-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary hover:text-river transition-colors cursor-pointer"
-      aria-label={tr.switchTheme}
       title={tr.switchTheme}
     >
       <span class="dark:hidden">{tr.themeDark}</span>
@@ -375,7 +374,7 @@ export function renderPage(
           <title>{tr.pageTitle}</title>
           <meta name="description" content={tr.metaLong} />
           <link rel="canonical" href={`https://museumsufer.app/${locale !== "de" ? `?lang=${locale}` : ""}`} />
-          <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
+          <link rel="alternate" hreflang="de" href="https://museumsufer.app/" />
           <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
           <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
           <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
@@ -407,9 +406,17 @@ export function renderPage(
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
+            rel="preload"
+            as="style"
             href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            rel="stylesheet"
+            onload="this.onload=null;this.rel='stylesheet'"
           />
+          <noscript>
+            <link
+              rel="stylesheet"
+              href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+            />
+          </noscript>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />

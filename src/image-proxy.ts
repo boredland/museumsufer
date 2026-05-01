@@ -108,7 +108,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
     const body = await res.arrayBuffer();
     const responseHeaders: Record<string, string> = {
       "Content-Type": contentType,
-      "Cache-Control": "public, max-age=2592000, s-maxage=2592000",
+      "Cache-Control": "public, max-age=31536000, s-maxage=31536000, immutable",
       "Access-Control-Allow-Origin": "*",
     };
 

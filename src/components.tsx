@@ -530,7 +530,7 @@ function Section({
   return (
     <details class="section mb-12" data-section={sectionKey} open={defaultOpen}>
       <summary class="section-header flex items-baseline gap-3 mb-5 cursor-pointer select-none group">
-        <h3 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h3>
+        <h2 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h2>
         <span
           class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
           title={`${count} ${title}`}
