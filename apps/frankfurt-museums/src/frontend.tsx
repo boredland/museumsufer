@@ -347,7 +347,7 @@ export function renderPage(
     "@context": "https://schema.org",
     "@type": "Person",
     "@id": "https://museumsufer.app/#publisher",
-    name: "Jonas Strasel",
+    name: "Jonas Strassel",
     email: "info@jonas-strassel.de",
     url: "https://museumsufer.app/impressum",
   };
