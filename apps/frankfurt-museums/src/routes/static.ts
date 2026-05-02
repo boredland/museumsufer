@@ -119,6 +119,8 @@ app.get("/robots.txt", (c) =>
       "User-agent: *",
       "Allow: /",
       "",
+      "Content-Signal: ai-train=no, search=yes, ai-input=yes",
+      "",
       "Sitemap: https://museumsufer.app/sitemap.xml",
       "",
     ].join("\n"),
