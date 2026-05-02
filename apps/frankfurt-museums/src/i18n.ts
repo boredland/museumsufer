@@ -119,8 +119,25 @@ const de: Translations = {
   byline: "Erstellt von Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Daten täglich automatisch von Museumswebseiten gesammelt · Übersetzungen via DeepL",
+  aboutHeading: "Was ist das Frankfurter Museumsufer?",
   introText:
-    "Das Frankfurter Museumsufer vereint rund 40 Museen entlang beider Mainufer – eines der dichtesten Museumsviertel Europas. Hier findest du täglich alle aktuellen Ausstellungen und Veranstaltungen auf einen Blick, mit Kalender-Export, Nahverkehrsanbindung und Preisen.",
+    "Das Frankfurter Museumsufer vereint rund 40 Museen entlang beider Mainufer zwischen Eisernem Steg und Friedensbrücke – eines der dichtesten Museumsviertel Europas. Große Häuser wie das Städel Museum, das Senckenberg Naturmuseum, die Schirn Kunsthalle, das Liebieghaus und das Historische Museum Frankfurt liegen nur wenige Gehminuten voneinander entfernt. Das Angebot reicht von Alter Kunst über Naturkunde und Film bis zu zeitgenössischer Fotografie und angewandter Kunst. Mit der Museumsufercard erhalten Besucher ein Jahr lang freien Eintritt in alle teilnehmenden Häuser. Diese App sammelt täglich die aktuellen Ausstellungen und Veranstaltungen aller Museen und zeigt sie auf einer einzigen, durchsuchbaren Seite – mit Preisen, Kalender-Export und Nahverkehrsanbindung über den RMV.",
+  faqTitle: "Häufige Fragen",
+  faq1Q: "Wie viele Museen gibt es am Frankfurter Museumsufer?",
+  faq1A:
+    "Rund 40 Museen säumen beide Mainufer zwischen Sachsenhausen und der Innenstadt. Dazu gehören weltweit bekannte Häuser wie das Städel Museum, das Senckenberg Naturmuseum und die Schirn Kunsthalle.",
+  faq2Q: "Was ist die Museumsufercard?",
+  faq2A:
+    "Die Museumsufercard ist ein Jahrespass, der freien Eintritt in alle teilnehmenden Museen bietet. Daneben gibt es das Museumsuferticket für zwei aufeinanderfolgende Tage. Beide sind über museumsufer.de erhältlich.",
+  faq3Q: "Wie oft wird der Veranstaltungskalender aktualisiert?",
+  faq3A:
+    "Die Daten werden täglich um 6 Uhr morgens automatisch von den Webseiten der teilnehmenden Museen gesammelt. Übersetzungen ins Englische und Französische erfolgen über DeepL.",
+  faq4Q: "Ist die App kostenlos?",
+  faq4A:
+    "Ja, museumsufer.app ist vollständig kostenlos, ohne Registrierung und ohne App-Store. Die Seite funktioniert als Progressive Web App direkt im Browser.",
+  faq5Q: "In welchen Sprachen ist die Seite verfügbar?",
+  faq5A:
+    "Die App ist auf Deutsch, Englisch und Französisch verfügbar. Veranstaltungstitel und Beschreibungen werden automatisch übersetzt.",
 };
 
 const en: Translations = {
@@ -210,8 +227,25 @@ const en: Translations = {
   byline: "Built by Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Data collected daily from museum websites · Translations by DeepL",
+  aboutHeading: "What is Frankfurt's Museumsufer?",
   introText:
-    "Frankfurt's Museumsufer unites around 40 museums along both banks of the Main — one of the densest museum districts in Europe. Here you can find all current exhibitions and events at a glance every day, with calendar export, local transport connections and prices.",
+    "Frankfurt's Museumsufer (Museum Embankment) unites around 40 museums along both banks of the Main between Eiserner Steg and Friedensbrücke — one of the densest museum districts in Europe. Major institutions such as the Städel Museum, Senckenberg Nature Museum, Schirn Kunsthalle, Liebieghaus and the Historical Museum Frankfurt are just a few minutes' walk from each other. The range spans Old Masters and natural history to film, contemporary photography and applied art. With the Museumsufercard, visitors get free admission to all participating museums for a full year. This app collects all current exhibitions and events from every museum daily and displays them on a single, searchable page — with prices, calendar export and public transport connections via RMV.",
+  faqTitle: "FAQ",
+  faq1Q: "How many museums are on Frankfurt's Museumsufer?",
+  faq1A:
+    "Around 40 museums line both banks of the Main between Sachsenhausen and the city centre. They include world-renowned institutions such as the Städel Museum, Senckenberg Nature Museum and Schirn Kunsthalle.",
+  faq2Q: "What is the Museumsufercard?",
+  faq2A:
+    "The Museumsufercard is an annual pass that grants free admission to all participating museums. There is also a Museumsuferticket for two consecutive days. Both are available via museumsufer.de.",
+  faq3Q: "How often is the event calendar updated?",
+  faq3A:
+    "Data is collected automatically from participating museum websites every day at 6 a.m. Translations into English and French are provided by DeepL.",
+  faq4Q: "Is the app free to use?",
+  faq4A:
+    "Yes, museumsufer.app is completely free, with no registration and no app store required. The site works as a Progressive Web App directly in the browser.",
+  faq5Q: "Which languages does the site support?",
+  faq5A:
+    "The app is available in German, English and French. Event titles and descriptions are translated automatically.",
 };
 
 const fr: Translations = {
@@ -301,8 +335,25 @@ const fr: Translations = {
   byline: "Réalisé par Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Données collectées quotidiennement depuis les sites des musées · Traductions par DeepL",
+  aboutHeading: "Qu'est-ce que le Museumsufer de Francfort ?",
   introText:
-    "Le Museumsufer de Francfort réunit environ 40 musées le long des deux rives du Main — l'un des quartiers muséaux les plus denses d'Europe. Retrouvez chaque jour toutes les expositions et événements en un coup d'œil, avec export calendrier, transports en commun et tarifs.",
+    "Le Museumsufer de Francfort (rive des musées) réunit environ 40 musées le long des deux rives du Main entre l'Eiserner Steg et le Friedensbrücke — l'un des quartiers muséaux les plus denses d'Europe. De grandes institutions comme le Städel Museum, le Senckenberg Naturmuseum, la Schirn Kunsthalle, le Liebieghaus et le Historisches Museum Frankfurt se trouvent à quelques minutes de marche les uns des autres. L'offre va des maîtres anciens aux sciences naturelles, en passant par le cinéma, la photographie contemporaine et les arts appliqués. Avec la Museumsufercard, les visiteurs bénéficient d'un an d'entrée gratuite dans tous les musées participants. Cette application collecte chaque jour les expositions et événements de tous les musées et les affiche sur une seule page consultable — avec tarifs, export calendrier et liaisons en transports en commun via le RMV.",
+  faqTitle: "Questions fréquentes",
+  faq1Q: "Combien de musées se trouvent au Museumsufer de Francfort ?",
+  faq1A:
+    "Environ 40 musées bordent les deux rives du Main entre Sachsenhausen et le centre-ville. On y trouve des institutions de renommée mondiale comme le Städel Museum, le Senckenberg Naturmuseum et la Schirn Kunsthalle.",
+  faq2Q: "Qu'est-ce que la Museumsufercard ?",
+  faq2A:
+    "La Museumsufercard est un pass annuel offrant l'entrée gratuite dans tous les musées participants. Il existe également un Museumsuferticket pour deux jours consécutifs. Les deux sont disponibles sur museumsufer.de.",
+  faq3Q: "À quelle fréquence le calendrier des événements est-il mis à jour ?",
+  faq3A:
+    "Les données sont collectées automatiquement chaque jour à 6 heures du matin à partir des sites des musées participants. Les traductions en anglais et en français sont fournies par DeepL.",
+  faq4Q: "L'application est-elle gratuite ?",
+  faq4A:
+    "Oui, museumsufer.app est entièrement gratuite, sans inscription et sans téléchargement. Le site fonctionne comme une Progressive Web App directement dans le navigateur.",
+  faq5Q: "Dans quelles langues le site est-il disponible ?",
+  faq5A:
+    "L'application est disponible en allemand, en anglais et en français. Les titres et descriptions des événements sont traduits automatiquement.",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
