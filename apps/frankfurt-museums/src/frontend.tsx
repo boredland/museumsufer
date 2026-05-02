@@ -96,7 +96,7 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
         </span>
         <div class="river-band flex-1" aria-hidden="true" />
       </div>
-      <p class="mt-4 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
+      <p class="mt-1.5 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
     </header>
   );
 }
