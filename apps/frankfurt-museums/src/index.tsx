@@ -375,6 +375,12 @@ app.get(
         "Content-Language": locale,
         Vary: "Accept-Language",
         "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+        Link: [
+          '</api/docs>; rel=service-doc; title="API Documentation"',
+          '</feed.xml>; rel=alternate; type="application/rss+xml"; title="RSS"',
+          '</feed.ics>; rel=alternate; type="text/calendar"; title="iCal"',
+          '</llms.txt>; rel=describedby; type="text/plain"; title="LLM Instructions"',
+        ].join(", "),
       },
     });
   },
