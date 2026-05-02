@@ -72,6 +72,7 @@ function CardImage({
   lazy,
   utmContent,
   hero,
+  priority,
 }: {
   src: string | null;
   alt: string;
@@ -79,6 +80,7 @@ function CardImage({
   lazy: boolean;
   utmContent: string;
   hero?: boolean;
+  priority?: boolean;
 }) {
   const wrapClass = hero
     ? "w-[112px] h-[112px] max-[480px]:w-20 max-[480px]:h-20 rounded-lg shrink-0 bg-border-light overflow-hidden"
@@ -96,6 +98,7 @@ function CardImage({
         height={h}
         alt={alt}
         loading={lazy ? "lazy" : undefined}
+        fetchpriority={priority ? "high" : undefined}
       />
     </div>
   ) : (
@@ -286,6 +289,7 @@ function ExhibitionCard({
             lazy={idx > 2}
             utmContent="exhibition_image"
             hero={hero}
+            priority={idx === 0}
           />
           {dates && (
             <span class="text-[0.5625rem] font-mono font-medium text-text-tertiary px-1 py-0.5 text-center leading-tight tracking-tight">
@@ -420,6 +424,7 @@ function EventCard({
             lazy={idx > 2}
             utmContent="event_image"
             hero={hero}
+            priority={idx === 0}
           />
           {timeStr && (
             <span class="card-time text-[0.625rem] font-mono font-medium text-river bg-river-light px-1 py-0.5 rounded text-center leading-tight tabular-nums tracking-tight">

@@ -119,6 +119,8 @@ const de: Translations = {
   byline: "Erstellt von Jonas Strasel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Daten täglich automatisch von Museumswebseiten gesammelt · Übersetzungen via DeepL",
+  introText:
+    "Das Frankfurter Museumsufer vereint rund 40 Museen entlang beider Mainufer – eines der dichtesten Museumsviertel Europas. Hier findest du täglich alle aktuellen Ausstellungen und Veranstaltungen auf einen Blick, mit Kalender-Export, Nahverkehrsanbindung und Preisen.",
 };
 
 const en: Translations = {
@@ -208,6 +210,8 @@ const en: Translations = {
   byline: "Built by Jonas Strasel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Data collected daily from museum websites · Translations by DeepL",
+  introText:
+    "Frankfurt's Museumsufer unites around 40 museums along both banks of the Main — one of the densest museum districts in Europe. Here you can find all current exhibitions and events at a glance every day, with calendar export, local transport connections and prices.",
 };
 
 const fr: Translations = {
@@ -231,32 +235,32 @@ const fr: Translations = {
   calendarAria: "Ajouter au calendrier",
   githubAria: "Voir le code source sur GitHub",
   meta: "Expositions et événements actuels au Museumsufer de Francfort",
-  pageTitle: "Museumsufer Frankfurt — Expositions & Evenements du jour",
+  pageTitle: "Museumsufer Frankfurt — Expositions & Événements du jour",
   metaLong:
-    "Toutes les expositions et evenements au Museumsufer de Francfort. Calendrier, prix, itineraire et plus pour 40 musees.",
-  llmTip: "Demandez a votre LLM",
+    "Toutes les expositions et événements au Museumsufer de Francfort. Calendrier, prix, itinéraire et plus pour 40 musées.",
+  llmTip: "Demandez à votre LLM",
   llmPrompt:
-    "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et evenements actuels.",
-  llmCopied: "Copie !",
+    "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et événements actuels.",
+  llmCopied: "Copié !",
   apiDocs: "API",
-  missingEvent: "Evenement manquant ?",
+  missingEvent: "Événement manquant ?",
   subscribeCal: "S'abonner au calendrier",
   rssFeed: "Flux RSS",
-  endingSoon: "Se termine bientot",
+  endingSoon: "Se termine bientôt",
   lastDays: "Derniers jours",
-  visited: "Visite",
-  alreadyVisited: "Deja visite",
-  details: "Details",
+  visited: "Visité",
+  alreadyVisited: "Déjà visité",
+  details: "Détails",
   copyPrompt: "Copier",
-  nearMe: "Pres de moi",
+  nearMe: "Près de moi",
   minWalk: "min",
-  navigate: "Itineraire",
+  navigate: "Itinéraire",
   addToCalendar: "Ajouter au calendrier",
-  markVisited: "Marquer comme visite",
+  markVisited: "Marquer comme visité",
   unmarkVisited: "Retirer le marquage",
   search: "Rechercher",
-  searchPlaceholder: "Rechercher musees, expositions ou evenements...",
-  noResults: "Aucun resultat.",
+  searchPlaceholder: "Rechercher musées, expositions ou événements...",
+  noResults: "Aucun résultat.",
   passPromo: "Découvrez les 39 musées",
   passCard: "Carte annuelle",
   passTicket: "Pass 2 jours",
@@ -297,6 +301,8 @@ const fr: Translations = {
   byline: "Réalisé par Jonas Strasel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Données collectées quotidiennement depuis les sites des musées · Traductions par DeepL",
+  introText:
+    "Le Museumsufer de Francfort réunit environ 40 musées le long des deux rives du Main — l'un des quartiers muséaux les plus denses d'Europe. Retrouvez chaque jour toutes les expositions et événements en un coup d'œil, avec export calendrier, transports en commun et tarifs.",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
