@@ -339,8 +339,6 @@ export function renderPage(
   const trJson = JSON.stringify(tr);
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
-  const initialDataJson = initialData ? JSON.stringify(initialData) : "null";
-  const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
   const personSchema = {
@@ -401,8 +399,7 @@ export function renderPage(
     const LOCALES = ${localesJson};
     const CURRENT_LANG = '${locale}';
     const BERLIN_TODAY = '${todayIso()}';
-    const __INITIAL_DATA__ = ${initialDataJson};
-    const MUSEUMS = ${museumsJson};`;
+    const __INITIAL_DATE__ = ${initialData ? JSON.stringify(initialData.date) : "null"};`;
 
   return (
     <>

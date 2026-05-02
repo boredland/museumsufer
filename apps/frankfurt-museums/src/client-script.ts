@@ -35,7 +35,7 @@ export const CLIENT_SCRIPT = `
       return transitTimes[slug] !== undefined ? transitTimes[slug] : null;
     }
 
-    let lastRenderData = null;
+    var lastRenderData = null;
 
     function onToggleVisited(id, itemType) {
       const card = document.querySelector('[data-item-id="' + id + '"]');
@@ -512,7 +512,7 @@ export const CLIENT_SCRIPT = `
     }
 
     var clientToday = BERLIN_TODAY;
-    var currentDate = __INITIAL_DATA__ ? __INITIAL_DATA__.date : clientToday;
+    var currentDate = __INITIAL_DATE__ || clientToday;
 
     var firstBtn = document.querySelector('[data-date]');
     var alreadyRefreshed = new URLSearchParams(location.search).has('_r');
@@ -525,8 +525,7 @@ export const CLIENT_SCRIPT = `
       url.searchParams.set('_r', '1');
       if (currentDate !== clientToday) url.searchParams.set('date', currentDate);
       location.replace(url.toString());
-    } else if (__INITIAL_DATA__) {
-      lastRenderData = __INITIAL_DATA__;
+    } else if (__INITIAL_DATE__) {
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
       updateLangLinks();
