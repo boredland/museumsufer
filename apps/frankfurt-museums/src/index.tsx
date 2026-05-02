@@ -29,7 +29,7 @@ import staticRoute from "./routes/static";
 import { scrape } from "./scraper";
 import { formatDateFull } from "./shared";
 import { translateEvents, translateFields } from "./translate";
-import type { Env, Event, Exhibition } from "./types";
+import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const dayQuery = z.object({
   date: z
@@ -345,6 +345,61 @@ app.get(
   },
 );
 
+function renderMarkdown(data: InitialData, locale: Locale, museums: Record<string, MuseumInfo>): string {
+  const tr = getTranslations(locale);
+  const dl = dateLocale(locale);
+  const lines: string[] = [
+    `# Museumsufer Frankfurt — ${tr.subtitle}`,
+    "",
+    `> ${tr.introText}`,
+    "",
+    `**${formatDateFull(data.date, dl)}**`,
+    "",
+  ];
+
+  const events = data.events as EventWithLikes[];
+  if (events.length > 0) {
+    lines.push(`## ${tr.events} (${events.length})`, "");
+    for (const ev of events) {
+      const time = ev.time ? ` ${ev.time}` : "";
+      const price = ev.price ? ` · ${ev.price}` : "";
+      const url = ev.detail_url || ev.url;
+      const title = url ? `[${ev.title}](${url})` : ev.title;
+      lines.push(`- **${title}**${time}${price}`);
+      lines.push(`  ${ev.museum_name || ""}`);
+      if (ev.description) lines.push(`  ${ev.description}`);
+    }
+    lines.push("");
+  }
+
+  const exhibitions = data.exhibitions as ExhibitionWithLikes[];
+  if (exhibitions.length > 0) {
+    lines.push(`## ${tr.exhibitions} (${exhibitions.length})`, "");
+    for (const ex of exhibitions) {
+      const dates = [ex.start_date, ex.end_date].filter(Boolean).join(" – ");
+      const url = ex.detail_url;
+      const title = url ? `[${ex.title}](${url})` : ex.title;
+      lines.push(`- **${title}**${dates ? ` (${dates})` : ""}`);
+      lines.push(`  ${ex.museum_name || ""}`);
+      if (ex.description) lines.push(`  ${ex.description}`);
+    }
+    lines.push("");
+  }
+
+  const museumEntries = Object.entries(museums).sort(([, a], [, b]) => a.name.localeCompare(b.name));
+  if (museumEntries.length > 0) {
+    lines.push(`## ${tr.museums} (${museumEntries.length})`, "");
+    for (const [, m] of museumEntries) {
+      const link = m.website ? `[${m.name}](${m.website})` : m.name;
+      lines.push(`- ${link}`);
+    }
+    lines.push("");
+  }
+
+  lines.push(`---`, "", `Source: https://museumsufer.app · API: https://museumsufer.app/api/docs`);
+  return lines.join("\n");
+}
+
 // Catch-all route with query validation
 app.get(
   "*",
@@ -370,17 +425,33 @@ app.get(
       console.error("Failed to fetch initial data:", e);
     }
 
+    const linkHeader = [
+      '</api/docs>; rel=service-doc; title="API Documentation"',
+      '</feed.xml>; rel=alternate; type="application/rss+xml"; title="RSS"',
+      '</feed.ics>; rel=alternate; type="text/calendar"; title="iCal"',
+      '</llms.txt>; rel=describedby; type="text/plain"; title="LLM Instructions"',
+    ].join(", ");
+
+    const accept = c.req.header("Accept") || "";
+    if (accept.includes("text/markdown") && initialData) {
+      const md = renderMarkdown(initialData, locale, museums);
+      return c.text(md, {
+        headers: {
+          "Content-Type": "text/markdown; charset=utf-8",
+          "Content-Language": locale,
+          Vary: "Accept, Accept-Language",
+          "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+          Link: linkHeader,
+        },
+      });
+    }
+
     return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined, range), {
       headers: {
         "Content-Language": locale,
-        Vary: "Accept-Language",
+        Vary: "Accept, Accept-Language",
         "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
-        Link: [
-          '</api/docs>; rel=service-doc; title="API Documentation"',
-          '</feed.xml>; rel=alternate; type="application/rss+xml"; title="RSS"',
-          '</feed.ics>; rel=alternate; type="text/calendar"; title="iCal"',
-          '</llms.txt>; rel=describedby; type="text/plain"; title="LLM Instructions"',
-        ].join(", "),
+        Link: linkHeader,
       },
     });
   },
