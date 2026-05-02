@@ -436,7 +436,7 @@ app.get(
     const accept = c.req.header("Accept") || "";
     if (accept.includes("text/markdown") && initialData) {
       const md = renderMarkdown(initialData, locale, museums);
-      return c.text(md, {
+      return c.body(md, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
           "Content-Language": locale,
