@@ -87,8 +87,9 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
         </div>
       </div>
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
-        Museumsufer
+        Museumsufer Frankfurt
       </h1>
+      <p class="mt-4 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
       <div class="flex items-center gap-3 mt-4">
         <div class="river-band flex-1" aria-hidden="true" />
         <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
@@ -96,9 +97,6 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
         </span>
         <div class="river-band flex-1" aria-hidden="true" />
       </div>
-      <p class="mt-4 text-[0.75rem] text-text-tertiary text-center italic font-display leading-snug">
-        {tr.aiDisclosure}
-      </p>
     </header>
   );
 }
@@ -393,10 +391,10 @@ export function renderPage(
             rel="canonical"
             href={locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`}
           />
-          <link rel="alternate" hreflang="de" href="https://museumsufer.app/?lang=de" />
+          <link rel="alternate" hreflang="de" href="https://museumsufer.app/" />
           <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
           <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
-          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/?lang=de" />
+          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
           <meta property="og:title" content={tr.pageTitle} />
           <meta property="og:description" content={tr.metaLong} />
           <meta property="og:type" content="website" />
