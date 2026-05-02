@@ -343,7 +343,7 @@ export function renderPage(
   const museumsJson = JSON.stringify(museums || {});
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
-  const orgSchema = {
+  const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
     "@id": "https://museumsufer.app/#publisher",
@@ -351,14 +351,38 @@ export function renderPage(
     email: "info@jonas-strassel.de",
     url: "https://museumsufer.app/impressum",
   };
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://museumsufer.app/#org",
+    name: "Museumsufer Frankfurt",
+    url: "https://museumsufer.app/",
+    logo: { "@type": "ImageObject", url: "https://museumsufer.app/og-image.png", width: 1200, height: 630 },
+    founder: { "@id": "https://museumsufer.app/#publisher" },
+    sameAs: ["https://github.com/boredland/museumsufer"],
+  };
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": "https://museumsufer.app/#webapp",
+    name: "Museumsufer Frankfurt",
+    url: "https://museumsufer.app/",
+    description: tr.metaLong,
+    applicationCategory: "EntertainmentApplication",
+    operatingSystem: "All",
+    inLanguage: ["de", "en", "fr"],
+    offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+    publisher: { "@id": "https://museumsufer.app/#org" },
+  };
   const websiteSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Museumsufer Frankfurt",
     url: "https://museumsufer.app/",
     description: tr.metaLong,
+    dateModified: todayIso(),
     inLanguage: ["de", "en", "fr"],
-    publisher: { "@id": "https://museumsufer.app/#publisher" },
+    publisher: { "@id": "https://museumsufer.app/#org" },
     potentialAction: {
       "@type": "SearchAction",
       target: {
@@ -368,7 +392,9 @@ export function renderPage(
       "query-input": "required name=search_term_string",
     },
   });
-  const publisherSchema = JSON.stringify(orgSchema);
+  const publisherSchema = JSON.stringify(personSchema);
+  const orgSchemaJson = JSON.stringify(orgSchema);
+  const webAppSchemaJson = JSON.stringify(webAppSchema);
 
   const dataInit = `const T = ${trJson};
     const DATE_LOCALE = ${dlJson};
@@ -436,6 +462,8 @@ export function renderPage(
           </noscript>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: publisherSchema }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: orgSchemaJson }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: webAppSchemaJson }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
@@ -568,15 +596,35 @@ function getBerlinUtcOffset(): string {
   return `+${String(Math.floor(diff)).padStart(2, "0")}:00`;
 }
 
+function museumLocationNode(slug: string, name: string): Record<string, unknown> {
+  const id = `https://museumsufer.app/#museum/${slug}`;
+  const geo = MUSEUM_LOCATIONS[slug];
+  const config = getMuseumConfig(slug);
+  const node: Record<string, unknown> = { "@type": "Museum", "@id": id, name };
+  if (config?.website) node.url = config.website;
+  if (geo) {
+    node.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
+    node.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
+  }
+  return node;
+}
+
 function buildEventSchema(data: InitialData, tz: string): string {
   const schemas: Record<string, unknown>[] = [];
+  const emittedMuseums = new Set<string>();
+
+  function ensureMuseum(slug: string, name: string) {
+    if (!slug || emittedMuseums.has(slug)) return;
+    emittedMuseums.add(slug);
+    schemas.push(museumLocationNode(slug, name));
+  }
 
   const exhibitions = data.exhibitions as Array<Record<string, unknown>>;
   if (exhibitions) {
     for (const ex of exhibitions.slice(0, 20)) {
       const museum = (ex.museum_name as string) || "";
       const slug = (ex.museum_slug as string) || "";
-      const geo = MUSEUM_LOCATIONS[slug];
+      ensureMuseum(slug, museum);
       const museumConfig = getMuseumConfig(slug);
       const museumUrl = museumConfig?.website || "https://museumsufer.app/";
       const exUrl = (ex.detail_url as string) || museumUrl;
@@ -596,12 +644,9 @@ function buildEventSchema(data: InitialData, tz: string): string {
       } else {
         exSchema.image = "https://museumsufer.app/og-image.png";
       }
-      const loc: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
-      if (geo) {
-        loc.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
-        loc.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
-      }
-      exSchema.location = loc;
+      exSchema.location = slug
+        ? { "@id": `https://museumsufer.app/#museum/${slug}` }
+        : { "@type": "Place", name: museum };
       exSchema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
       schemas.push(exSchema);
     }
@@ -616,7 +661,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const endDate = ev.end_date as string | null;
       const museum = (ev.museum_name as string) || "";
       const slug = (ev.museum_slug as string) || "";
-      const geo = MUSEUM_LOCATIONS[slug];
+      ensureMuseum(slug, museum);
 
       const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
       let endIso: string;
@@ -651,13 +696,9 @@ function buildEventSchema(data: InitialData, tz: string): string {
         schema.image = "https://museumsufer.app/og-image.png";
       }
 
-      const location: Record<string, unknown> = { "@type": ["Place", "Museum"], name: museum };
-      if (geo) {
-        location.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
-        location.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
-      }
-      schema.location = location;
-
+      schema.location = slug
+        ? { "@id": `https://museumsufer.app/#museum/${slug}` }
+        : { "@type": "Place", name: museum };
       schema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
       if (ev.price) {
         const raw = String(ev.price).trim();

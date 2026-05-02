@@ -53,7 +53,7 @@ const de: Translations = {
   calendarAria: "Zum Kalender hinzufügen",
   githubAria: "Quellcode auf GitHub",
   meta: "Aktuelle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer",
-  pageTitle: "Museumsufer Frankfurt — Ausstellungen & Veranstaltungen heute",
+  pageTitle: "Museumsufer Frankfurt – Ausstellungen & Events heute",
   metaLong:
     "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr für 40 Museen.",
   llmTip: "Frag dein LLM",
@@ -235,7 +235,7 @@ const fr: Translations = {
   calendarAria: "Ajouter au calendrier",
   githubAria: "Voir le code source sur GitHub",
   meta: "Expositions et événements actuels au Museumsufer de Francfort",
-  pageTitle: "Museumsufer Frankfurt — Expositions & Événements du jour",
+  pageTitle: "Museumsufer Frankfurt – Expositions & Événements",
   metaLong:
     "Toutes les expositions et événements au Museumsufer de Francfort. Calendrier, prix, itinéraire et plus pour 40 musées.",
   llmTip: "Demandez à votre LLM",
