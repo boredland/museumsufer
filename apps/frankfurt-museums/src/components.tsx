@@ -522,6 +522,8 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               src={`/img/${encodeURIComponent(museum.image_url)}?w=320`}
               srcset={`/img/${encodeURIComponent(museum.image_url)}?w=200 200w, /img/${encodeURIComponent(museum.image_url)}?w=320 320w`}
               sizes="(max-width: 480px) 45vw, (max-width: 720px) 30vw, 220px"
+              width={320}
+              height={240}
               alt={museum.name}
               loading="lazy"
             />
