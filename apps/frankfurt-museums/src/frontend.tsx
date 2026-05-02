@@ -343,6 +343,8 @@ function FaqSection({ tr }: { tr: Record<string, string> }) {
     { q: tr.faq3Q, a: tr.faq3A },
     { q: tr.faq4Q, a: tr.faq4A },
     { q: tr.faq5Q, a: tr.faq5A },
+    { q: tr.faq6Q, a: tr.faq6A },
+    { q: tr.faq7Q, a: tr.faq7A },
   ];
   return (
     <section class="mt-8">
@@ -434,6 +436,8 @@ export function renderPage(
       { "@type": "Question", name: tr.faq3Q, acceptedAnswer: { "@type": "Answer", text: tr.faq3A } },
       { "@type": "Question", name: tr.faq4Q, acceptedAnswer: { "@type": "Answer", text: tr.faq4A } },
       { "@type": "Question", name: tr.faq5Q, acceptedAnswer: { "@type": "Answer", text: tr.faq5A } },
+      { "@type": "Question", name: tr.faq6Q, acceptedAnswer: { "@type": "Answer", text: tr.faq6A } },
+      { "@type": "Question", name: tr.faq7Q, acceptedAnswer: { "@type": "Answer", text: tr.faq7A } },
     ],
   });
 
@@ -571,8 +575,6 @@ export function renderPage(
             <AboutSection tr={tr} />
             <FaqSection tr={tr} />
 
-            <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
-            <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
             <LlmTip tr={tr} />
 
             <footer class="mt-12 pt-6 border-t border-border-light flex flex-col gap-3 max-[480px]:items-stretch">
