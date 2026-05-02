@@ -7,7 +7,7 @@ import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { formatDateFull } from "./shared";
-import { infoSectionClass, infoSummaryClass, kbdClass, passLinkClass } from "./tw";
+import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 export type { MuseumInfo };
@@ -282,15 +282,6 @@ function RiverNav({
         </button>
       </div>
     </nav>
-  );
-}
-
-function InfoSection({ summary, children }: { summary: string; children: unknown }) {
-  return (
-    <details class={infoSectionClass}>
-      <summary class={infoSummaryClass}>{summary}</summary>
-      <p class="mt-2 leading-relaxed">{children}</p>
-    </details>
   );
 }
 
