@@ -70,6 +70,13 @@ GET /api/museums
 
 Returns: name, slug, museumsufer_url, website_url
 
+## Optional
+
+- API documentation: https://museumsufer.app/api/docs
+- RSS feed (next 7 days): https://museumsufer.app/feed.xml
+- Calendar feed (ICS): https://museumsufer.app/feed.ics
+- OpenAPI spec: https://museumsufer.app/api/docs/openapi.json
+
 ## Notes
 
 - Event content (titles, descriptions) is in German
@@ -78,6 +85,7 @@ Returns: name, slug, museumsufer_url, website_url
 - Events are available for the next 7 days with the most detail (images, prices, deep links)
 - Exhibitions are available for any date (they span weeks/months)
 - Data is refreshed daily at 6am UTC
+- Translations available via ?lang=en or ?lang=fr query parameter on the API
 `;
 
 const app = new Hono<{ Bindings: Env }>();
