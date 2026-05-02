@@ -92,7 +92,27 @@ Returns: name, slug, museumsufer_url, website_url
 - Translations available via ?lang=en or ?lang=fr query parameter on the API
 `;
 
+const API_CATALOG = JSON.stringify({
+  linkset: [
+    {
+      anchor: "https://museumsufer.app/api/",
+      "service-desc": [{ href: "https://museumsufer.app/api/docs/openapi.json", type: "application/openapi+json" }],
+      "service-doc": [{ href: "https://museumsufer.app/api/docs", type: "text/html" }],
+      status: [{ href: "https://museumsufer.app/api/day", type: "application/json" }],
+    },
+  ],
+});
+
 const app = new Hono<{ Bindings: Env }>();
+
+app.get("/.well-known/api-catalog", (c) =>
+  c.body(API_CATALOG, {
+    headers: {
+      "Content-Type": "application/linkset+json",
+      "Cache-Control": "public, max-age=86400",
+    },
+  }),
+);
 
 app.get("/og-image.svg", (c) =>
   c.body(OG_IMAGE, { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } }),

@@ -426,6 +426,7 @@ app.get(
     }
 
     const linkHeader = [
+      '</.well-known/api-catalog>; rel=api-catalog; type="application/linkset+json"',
       '</api/docs>; rel=service-doc; title="API Documentation"',
       '</feed.xml>; rel=alternate; type="application/rss+xml"; title="RSS"',
       '</feed.ics>; rel=alternate; type="text/calendar"; title="iCal"',
