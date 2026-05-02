@@ -607,7 +607,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     if (date < todayIso()) continue;
 
     const timeRangeMatch = heading.match(
-      /^(\d{1,2}(?:[.:]\d{2})?)\s*(?:–\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*–\s*/,
+      /^(\d{1,2}(?:[.:]\d{2})?)\s*(?:[–\-]\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*[–\-]\s*/,
     );
     let time: string | null = null;
     let endTime: string | null = null;
