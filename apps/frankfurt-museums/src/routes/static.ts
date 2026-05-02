@@ -42,6 +42,10 @@ const LLMS_TXT = `# Museumsufer Frankfurt
 
 > Aggregated exhibitions and events from ~40 museums along Frankfurt's Museumsufer (Museum Embankment).
 
+Contact: info@jonas-strassel.de
+License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer)
+Source: https://github.com/boredland/museumsufer
+
 This site provides a JSON API for querying museum exhibitions and events in Frankfurt am Main, Germany.
 
 ## API
@@ -95,9 +99,31 @@ app.get("/og-image.svg", (c) =>
 );
 
 app.get("/robots.txt", (c) =>
-  c.text("User-agent: *\nAllow: /\n\nSitemap: https://museumsufer.app/sitemap.xml\n", {
-    headers: { "Cache-Control": "public, max-age=86400" },
-  }),
+  c.text(
+    [
+      "User-agent: GPTBot",
+      "Allow: /",
+      "",
+      "User-agent: OAI-SearchBot",
+      "Allow: /",
+      "",
+      "User-agent: ChatGPT-User",
+      "Allow: /",
+      "",
+      "User-agent: ClaudeBot",
+      "Allow: /",
+      "",
+      "User-agent: PerplexityBot",
+      "Allow: /",
+      "",
+      "User-agent: *",
+      "Allow: /",
+      "",
+      "Sitemap: https://museumsufer.app/sitemap.xml",
+      "",
+    ].join("\n"),
+    { headers: { "Cache-Control": "public, max-age=86400" } },
+  ),
 );
 
 app.get("/sitemap.xml", (c) => {

@@ -89,7 +89,6 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
         Museumsufer Frankfurt
       </h1>
-      <p class="mt-4 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
       <div class="flex items-center gap-3 mt-4">
         <div class="river-band flex-1" aria-hidden="true" />
         <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
@@ -328,6 +327,38 @@ function LlmTip({ tr }: { tr: Record<string, string> }) {
   );
 }
 
+function AboutSection({ tr }: { tr: Record<string, string> }) {
+  return (
+    <section class="mt-12">
+      <h2 class="font-display italic text-[1.25rem] leading-tight text-text-primary mb-3">{tr.aboutHeading}</h2>
+      <p class="text-[0.8125rem] text-text-secondary leading-relaxed">{tr.introText}</p>
+    </section>
+  );
+}
+
+function FaqSection({ tr }: { tr: Record<string, string> }) {
+  const items = [
+    { q: tr.faq1Q, a: tr.faq1A },
+    { q: tr.faq2Q, a: tr.faq2A },
+    { q: tr.faq3Q, a: tr.faq3A },
+    { q: tr.faq4Q, a: tr.faq4A },
+    { q: tr.faq5Q, a: tr.faq5A },
+  ];
+  return (
+    <section class="mt-8">
+      <h2 class="font-display italic text-[1.25rem] leading-tight text-text-primary mb-4">{tr.faqTitle}</h2>
+      <dl class="flex flex-col gap-4">
+        {items.map((item) => (
+          <div>
+            <dt class="text-[0.8125rem] font-medium text-text-primary">{item.q}</dt>
+            <dd class="mt-1 text-[0.8125rem] text-text-secondary leading-relaxed">{item.a}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 export function renderPage(
   locale: Locale,
   initialData?: InitialData,
@@ -348,6 +379,7 @@ export function renderPage(
     name: "Jonas Strassel",
     email: "info@jonas-strassel.de",
     url: "https://museumsufer.app/impressum",
+    sameAs: ["https://github.com/boredland"],
   };
   const orgSchema = {
     "@context": "https://schema.org",
@@ -393,6 +425,17 @@ export function renderPage(
   const publisherSchema = JSON.stringify(personSchema);
   const orgSchemaJson = JSON.stringify(orgSchema);
   const webAppSchemaJson = JSON.stringify(webAppSchema);
+  const faqSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      { "@type": "Question", name: tr.faq1Q, acceptedAnswer: { "@type": "Answer", text: tr.faq1A } },
+      { "@type": "Question", name: tr.faq2Q, acceptedAnswer: { "@type": "Answer", text: tr.faq2A } },
+      { "@type": "Question", name: tr.faq3Q, acceptedAnswer: { "@type": "Answer", text: tr.faq3A } },
+      { "@type": "Question", name: tr.faq4Q, acceptedAnswer: { "@type": "Answer", text: tr.faq4A } },
+      { "@type": "Question", name: tr.faq5Q, acceptedAnswer: { "@type": "Answer", text: tr.faq5A } },
+    ],
+  });
 
   const dataInit = `const T = ${trJson};
     const DATE_LOCALE = ${dlJson};
@@ -461,6 +504,7 @@ export function renderPage(
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: publisherSchema }} />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: orgSchemaJson }} />
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: webAppSchemaJson }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
@@ -523,6 +567,9 @@ export function renderPage(
             <PassPromo locale={locale} tr={tr} />
 
             <MuseumsSection museums={museums || {}} tr={tr} />
+
+            <AboutSection tr={tr} />
+            <FaqSection tr={tr} />
 
             <InfoSection summary={tr.whyTitle}>{tr.whyText}</InfoSection>
             <InfoSection summary={tr.privacyNote}>{tr.privacyText}</InfoSection>
