@@ -244,7 +244,7 @@ function RiverNav({
   return (
     <nav class="mb-7" aria-label={tr.dateNav}>
       <div class="relative pb-3">
-        <div class="river-band absolute left-2 right-2 bottom-1.5" aria-hidden="true" />
+        <div class="river-band absolute left-0 right-0 bottom-1.5" aria-hidden="true" />
         <div class="relative flex items-end justify-between gap-0.5">
           {days.map((d, i) => (
             <button
