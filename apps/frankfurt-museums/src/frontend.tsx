@@ -89,7 +89,6 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.6rem,9vw,4rem)]">
         Museumsufer Frankfurt
       </h1>
-      <p class="mt-4 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
       <div class="flex items-center gap-3 mt-4">
         <div class="river-band flex-1" aria-hidden="true" />
         <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
@@ -519,6 +518,8 @@ export function renderPage(
                 </div>
               )}
             </main>
+
+            <p class="mt-12 text-[0.8125rem] text-text-secondary leading-relaxed max-w-[60ch]">{tr.introText}</p>
 
             <PassPromo locale={locale} tr={tr} />
 
