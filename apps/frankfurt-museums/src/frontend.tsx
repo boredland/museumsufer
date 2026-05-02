@@ -603,14 +603,6 @@ function buildEventSchema(data: InitialData, tz: string): string {
       }
       exSchema.location = loc;
       exSchema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
-      exSchema.offers = {
-        "@type": "Offer",
-        url: exUrl,
-        price: "0",
-        priceCurrency: "EUR",
-        availability: "https://schema.org/InStock",
-        validFrom: (ex.start_date as string) || undefined,
-      };
       schemas.push(exSchema);
     }
   }
@@ -667,16 +659,19 @@ function buildEventSchema(data: InitialData, tz: string): string {
       schema.location = location;
 
       schema.organizer = { "@type": "Organization", name: museum, url: museumUrl };
-      const priceStr = ev.price ? String(ev.price).replace(/[^\d.,]/g, "") || "0" : "0";
-      schema.offers = {
-        "@type": "Offer",
-        url: evUrl,
-        price: priceStr,
-        priceCurrency: "EUR",
-        availability: "https://schema.org/InStock",
-        validFrom: date,
-        ...(ev.price ? { description: ev.price } : {}),
-      };
+      if (ev.price) {
+        const raw = String(ev.price).trim();
+        const cleaned = raw.replace(/[^\d.,]/g, "");
+        const isSimplePrice = /^\d+([.,]\d+)?$/.test(cleaned);
+        schema.offers = {
+          "@type": "Offer",
+          url: evUrl,
+          priceCurrency: "EUR",
+          availability: "https://schema.org/InStock",
+          validFrom: date,
+          ...(isSimplePrice ? { price: cleaned.replace(",", ".") } : { price: "0", description: raw }),
+        };
+      }
 
       schemas.push(schema);
     });

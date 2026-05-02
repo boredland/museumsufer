@@ -110,11 +110,19 @@ app.get("/sitemap.xml", (c) => {
     <loc>https://museumsufer.app/?lang=en</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
+    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
   </url>
   <url>
     <loc>https://museumsufer.app/?lang=fr</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
+    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
   </url>
   <url>
     <loc>https://museumsufer.app/impressum</loc>

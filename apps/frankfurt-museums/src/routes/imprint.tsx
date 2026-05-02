@@ -137,6 +137,9 @@ const handler = (path: string) =>
   });
 
 handler("/impressum");
-handler("/imprint");
+app.get("/imprint", (c) => {
+  const lang = new URL(c.req.url).searchParams.get("lang");
+  return c.redirect(lang ? `/impressum?lang=${lang}` : "/impressum", 301);
+});
 
 export default app;
