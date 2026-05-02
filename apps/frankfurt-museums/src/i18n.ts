@@ -116,7 +116,7 @@ const de: Translations = {
   imprintDisclaimerText:
     "Trotz sorgfältiger Aufbereitung können einzelne Termine, Preise oder Beschreibungen veraltet oder unvollständig sein. Verbindliche Informationen bitte direkt beim jeweiligen Museum prüfen.",
   back: "Zurück",
-  byline: "Erstellt von Jonas Strasel",
+  byline: "Erstellt von Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Daten täglich automatisch von Museumswebseiten gesammelt · Übersetzungen via DeepL",
   introText:
@@ -207,7 +207,7 @@ const en: Translations = {
   imprintDisclaimerText:
     "Despite careful processing, individual dates, prices or descriptions may be outdated or incomplete. For binding information please check directly with the respective museum.",
   back: "Back",
-  byline: "Built by Jonas Strasel",
+  byline: "Built by Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Data collected daily from museum websites · Translations by DeepL",
   introText:
@@ -298,7 +298,7 @@ const fr: Translations = {
   imprintDisclaimerText:
     "Malgré un traitement soigneux, certaines dates, prix ou descriptions peuvent être obsolètes ou incomplets. Pour des informations contractuelles, veuillez vérifier directement auprès du musée concerné.",
   back: "Retour",
-  byline: "Réalisé par Jonas Strasel",
+  byline: "Réalisé par Jonas Strassel",
   contactEmail: "info@jonas-strassel.de",
   aiDisclosure: "Données collectées quotidiennement depuis les sites des musées · Traductions par DeepL",
   introText:

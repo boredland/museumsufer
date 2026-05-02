@@ -4,7 +4,7 @@ import { detectLocale, getTranslations, type Locale } from "../i18n";
 import type { Env } from "../types";
 
 const OPERATOR = {
-  name: "Jonas Strasel",
+  name: "Jonas Strassel",
   email: "info@jonas-strassel.de",
 };
 
