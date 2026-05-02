@@ -142,6 +142,7 @@ app.get("/robots.txt", (c) =>
       "Content-Signal: ai-train=no, search=yes, ai-input=yes",
       "",
       "Sitemap: https://museumsufer.app/sitemap.xml",
+      "# LLMs: https://museumsufer.app/llms.txt",
       "",
     ].join("\n"),
     { headers: { "Cache-Control": "public, max-age=86400" } },
