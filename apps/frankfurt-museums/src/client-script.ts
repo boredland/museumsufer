@@ -665,4 +665,102 @@ export const CLIENT_SCRIPT = `
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js');
     }
+
+    if (navigator.modelContext && navigator.modelContext.provideContext) {
+      navigator.modelContext.provideContext({
+        tools: [
+          {
+            name: 'get_events',
+            description: 'Get museum events for a specific date in Frankfurt. Returns event titles, times, venues, prices, and links.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                date: { type: 'string', description: 'ISO date (YYYY-MM-DD). Defaults to today.' },
+                lang: { type: 'string', enum: ['de', 'en', 'fr'], description: 'Language. Defaults to de.' }
+              }
+            },
+            execute: function(input) {
+              var params = new URLSearchParams();
+              if (input.date) params.set('date', input.date);
+              if (input.lang) params.set('lang', input.lang);
+              return fetch('/api/events?' + params).then(function(r) { return r.json(); });
+            }
+          },
+          {
+            name: 'get_exhibitions',
+            description: 'Get current museum exhibitions in Frankfurt. Returns exhibition titles, date ranges, venues, and links.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                date: { type: 'string', description: 'ISO date (YYYY-MM-DD). Defaults to today.' },
+                lang: { type: 'string', enum: ['de', 'en', 'fr'], description: 'Language. Defaults to de.' }
+              }
+            },
+            execute: function(input) {
+              var params = new URLSearchParams();
+              if (input.date) params.set('date', input.date);
+              if (input.lang) params.set('lang', input.lang);
+              return fetch('/api/exhibitions?' + params).then(function(r) { return r.json(); });
+            }
+          },
+          {
+            name: 'get_museums',
+            description: 'Get all museums in Frankfurt\\'s Museumsufer district with names, slugs, and website URLs.',
+            inputSchema: { type: 'object', properties: {} },
+            execute: function() {
+              return fetch('/api/museums').then(function(r) { return r.json(); });
+            }
+          },
+          {
+            name: 'get_day_overview',
+            description: 'Get a full overview of a day at Frankfurt\\'s Museumsufer: both events and exhibitions combined.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                date: { type: 'string', description: 'ISO date (YYYY-MM-DD). Defaults to today.' },
+                lang: { type: 'string', enum: ['de', 'en', 'fr'], description: 'Language. Defaults to de.' }
+              }
+            },
+            execute: function(input) {
+              var params = new URLSearchParams();
+              if (input.date) params.set('date', input.date);
+              if (input.lang) params.set('lang', input.lang);
+              return fetch('/api/day?' + params).then(function(r) { return r.json(); });
+            }
+          },
+          {
+            name: 'search_museumsufer',
+            description: 'Search across all museums, exhibitions, and events on the page by keyword.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                query: { type: 'string', description: 'Search term' }
+              },
+              required: ['query']
+            },
+            execute: function(input) {
+              var searchInput = document.getElementById('search-input');
+              if (searchInput) {
+                searchInput.value = input.query;
+                searchInput.dispatchEvent(new Event('input'));
+              }
+              var items = document.querySelectorAll('[data-search]:not([data-search-hidden])');
+              var results = [];
+              items.forEach(function(el) {
+                var card = el.querySelector('article');
+                if (!card) return;
+                var title = card.querySelector('.card-title, .text-sm');
+                var museum = card.querySelector('.text-xs');
+                results.push({
+                  title: title ? title.textContent.trim() : '',
+                  museum: museum ? museum.textContent.trim() : '',
+                  slug: card.dataset.museumSlug || ''
+                });
+              });
+              return Promise.resolve({ query: input.query, count: results.length, results: results.slice(0, 20) });
+            }
+          }
+        ]
+      });
+    }
 `;
