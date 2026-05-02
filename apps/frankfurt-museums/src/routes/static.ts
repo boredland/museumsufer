@@ -213,4 +213,10 @@ app.get("/.well-known/llms.txt", (c) =>
   }),
 );
 
+app.get("/.well-known/*", (c) =>
+  c.json({ error: "Not Found", path: new URL(c.req.url).pathname }, 404, {
+    "Cache-Control": "public, max-age=3600",
+  }),
+);
+
 export default app;
