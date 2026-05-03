@@ -228,16 +228,6 @@ export const CLIENT_SCRIPT = `
       try { localStorage.setItem('section-' + key, el.open ? 'open' : 'closed'); } catch {}
     }
 
-    function copyPrompt() {
-      var el = document.getElementById('llm-prompt');
-      navigator.clipboard.writeText(el.dataset.prompt).then(function() {
-        var btn = document.querySelector('.llm-tip-copy');
-        var orig = btn.textContent;
-        btn.textContent = T.llmCopied;
-        setTimeout(function() { btn.textContent = orig; }, 1500);
-      });
-    }
-
     function escAttr(s) {
       return escHtml(s).replace(/"/g, '&quot;');
     }

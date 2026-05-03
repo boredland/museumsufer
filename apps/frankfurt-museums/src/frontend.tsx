@@ -285,6 +285,55 @@ function RiverNav({
   );
 }
 
+function AskAI({ tr }: { tr: Record<string, string> }) {
+  const prompt = encodeURIComponent(tr.llmPrompt);
+  const services = [
+    { id: "i-gemini", name: "Gemini", href: `https://gemini.google.com/app?text=${prompt}`, color: "#4285F4" },
+    { id: "i-chatgpt", name: "ChatGPT", href: `https://chat.openai.com/?q=${prompt}`, color: "#10A37F" },
+    { id: "i-claude", name: "Claude", href: `https://claude.ai/new?q=${prompt}`, color: "#D97757" },
+    {
+      id: "i-perplexity",
+      name: "Perplexity",
+      href: `https://www.perplexity.ai/search/new?q=${prompt}`,
+      color: "#1FB8CD",
+    },
+    { id: "i-grok", name: "Grok", href: `https://x.com/i/grok?text=${prompt}`, color: "currentColor" },
+  ];
+  return (
+    <section
+      class="my-7 py-3 px-4 bg-surface rounded-xl border border-border-light flex items-center gap-3 flex-wrap max-[480px]:gap-2 max-[480px]:py-2.5 max-[480px]:px-3"
+      aria-label={tr.llmTip}
+    >
+      <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary shrink-0">
+        {tr.llmTip}
+      </span>
+      <div class="flex items-center gap-1 ml-auto">
+        {services.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener"
+            aria-label={s.name}
+            title={s.name}
+            class="inline-flex items-center justify-center w-8 h-8 rounded-full text-text-tertiary border border-border transition-all hover:border-current hover:scale-105 focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2"
+            style={`--brand:${s.color}`}
+          >
+            <svg
+              aria-hidden="true"
+              class="w-4 h-4 fill-current transition-colors"
+              style="color:inherit"
+              onmouseover={`this.style.color='${s.color}'`}
+              onmouseout="this.style.color=''"
+            >
+              <use href={`#${s.id}`} />
+            </svg>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ContactDialog({ tr }: { tr: Record<string, string> }) {
   const inputClass =
     "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
@@ -372,39 +421,6 @@ function ContactDialog({ tr }: { tr: Record<string, string> }) {
         </div>
       </form>
     </dialog>
-  );
-}
-
-function LlmTip({ tr }: { tr: Record<string, string> }) {
-  return (
-    <details class="mt-4 py-2.5 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary open:[&>summary]:mb-3">
-      <summary class="cursor-pointer font-medium text-text-tertiary text-xs uppercase tracking-wide flex items-center gap-1.5">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="w-3.5 h-3.5 shrink-0">
-          <path
-            d="M8 1v4M8 11v4M1 8h4M11 8h4M3 3l2.5 2.5M10.5 10.5L13 13M13 3l-2.5 2.5M5.5 10.5L3 13"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-        {tr.llmTip}
-      </summary>
-      <div
-        class="relative bg-border-light rounded-lg p-3 font-mono text-xs leading-relaxed text-text-primary whitespace-pre-wrap break-words"
-        id="llm-prompt"
-        data-prompt={tr.llmPrompt}
-      >
-        {tr.llmPrompt}
-        <button
-          type="button"
-          class="absolute top-2 right-2 bg-surface border border-border rounded px-2 py-1 text-[0.6875rem] font-sans cursor-pointer text-text-secondary transition-colors hover:border-river hover:text-river"
-          onclick="copyPrompt()"
-          aria-label={tr.copyPrompt}
-        >
-          {tr.copyPrompt}
-        </button>
-      </div>
-    </details>
   );
 }
 
@@ -608,6 +624,8 @@ export function renderPage(
           <div class="max-w-[720px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
             <Masthead locale={locale} tr={tr} />
 
+            <AskAI tr={tr} />
+
             <RiverNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} activeRange={range} />
 
             <div class="anchor-headline mb-7 mt-8" id="date-label" aria-live="polite">
@@ -655,8 +673,6 @@ export function renderPage(
 
             <AboutSection tr={tr} />
             <FaqSection tr={tr} />
-
-            <LlmTip tr={tr} />
 
             <footer class="mt-12 pt-6 border-t border-border-light flex flex-col gap-3 max-[480px]:items-stretch">
               <div class="flex flex-wrap gap-x-5 gap-y-2 text-[0.8125rem]">

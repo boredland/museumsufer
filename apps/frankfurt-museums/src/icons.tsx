@@ -37,6 +37,21 @@ export function IconSprite() {
       <symbol id="i-report" viewBox="0 0 24 24">
         <path d={ICON.report} />
       </symbol>
+      <symbol id="i-gemini" viewBox="0 0 24 24">
+        <path d="M12 1.5l1.7 6.3a6 6 0 004.5 4.5L24 14l-5.8 1.7a6 6 0 00-4.5 4.5L12 26.5l-1.7-6.3a6 6 0 00-4.5-4.5L0 14l5.8-1.7a6 6 0 004.5-4.5L12 1.5z" />
+      </symbol>
+      <symbol id="i-chatgpt" viewBox="0 0 24 24">
+        <path d="M12 2a5 5 0 00-4.33 7.5A5 5 0 002 14a5 5 0 008.33 3.5A5 5 0 0022 13a5 5 0 00-4.33-7.5A5 5 0 0012 2zm0 4.4l4 2.3v4.6l-4 2.3-4-2.3V8.7l4-2.3z" />
+      </symbol>
+      <symbol id="i-claude" viewBox="0 0 24 24">
+        <path d="M9 4l-5 8h3l1 4h3.5l1.5-3 1.5 3H18l1-4h3l-5-8h-2l-1.5 3L13 4h-2l-1.5 3L9 4z" />
+      </symbol>
+      <symbol id="i-perplexity" viewBox="0 0 24 24">
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 2.5c4.1 0 7.5 3.4 7.5 7.5s-3.4 7.5-7.5 7.5S4.5 16.1 4.5 12 7.9 4.5 12 4.5zM7 8v8l5-3 5 3V8l-5 3-5-3z" />
+      </symbol>
+      <symbol id="i-grok" viewBox="0 0 24 24">
+        <path d="M5 4l6 8-6 8h3l4.5-6 4.5 6h3l-6-8 6-8h-3l-4.5 6L8 4H5z" />
+      </symbol>
       <symbol id="i-open" viewBox="0 0 24 24">
         <path d={ICON.openInNew} />
       </symbol>

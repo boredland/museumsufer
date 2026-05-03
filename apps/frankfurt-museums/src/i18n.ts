@@ -56,9 +56,8 @@ const de: Translations = {
   pageTitle: "Museumsufer Frankfurt – Ausstellungen & Events heute",
   metaLong:
     "Alle Ausstellungen und Veranstaltungen am Frankfurter Museumsufer auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr für 40 Museen.",
-  llmTip: "Frag dein LLM",
-  llmPrompt:
-    "Was ist heute am Frankfurter Museumsufer los? Lies https://museumsufer.app/llms.txt und nutz die API, um die aktuellen Ausstellungen und Veranstaltungen abzurufen.",
+  llmTip: "Frag eine KI",
+  llmPrompt: "Was ist heute am Frankfurter Museumsufer los? Quelle: https://museumsufer.app",
   llmCopied: "Kopiert!",
   apiDocs: "API",
   missingEvent: "Veranstaltung fehlt?",
@@ -187,9 +186,8 @@ const en: Translations = {
   pageTitle: "Museumsufer Frankfurt — Exhibitions & Events Today",
   metaLong:
     "All exhibitions and events at Frankfurt's Museumsufer at a glance. Calendar, prices, directions and more for 40 museums.",
-  llmTip: "Ask your LLM",
-  llmPrompt:
-    "What's on at Frankfurt's Museumsufer today? Read https://museumsufer.app/llms.txt and use the API to get current exhibitions and events.",
+  llmTip: "Ask AI",
+  llmPrompt: "What's on at Frankfurt's Museumsufer today? Source: https://museumsufer.app",
   llmCopied: "Copied!",
   apiDocs: "API",
   missingEvent: "Event missing?",
@@ -318,9 +316,8 @@ const fr: Translations = {
   pageTitle: "Museumsufer Frankfurt – Expositions & Événements",
   metaLong:
     "Toutes les expositions et événements au Museumsufer de Francfort. Calendrier, prix, itinéraire et plus pour 40 musées.",
-  llmTip: "Demandez à votre LLM",
-  llmPrompt:
-    "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Lis https://museumsufer.app/llms.txt et utilise l'API pour obtenir les expositions et événements actuels.",
+  llmTip: "Demander à une IA",
+  llmPrompt: "Qu'est-ce qui se passe au Museumsufer de Francfort aujourd'hui ? Source : https://museumsufer.app",
   llmCopied: "Copié !",
   apiDocs: "API",
   missingEvent: "Événement manquant ?",
