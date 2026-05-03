@@ -86,7 +86,7 @@ function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }
           <LangSwitch locale={locale} />
         </div>
       </div>
-      <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.3rem,8vw,3.5rem)]">
+      <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(4.6rem,16vw,7rem)]">
         Museumsufer Frankfurt
       </h1>
       <div class="flex items-center gap-3 mt-4">
