@@ -42,7 +42,7 @@ const LLMS_TXT = `# Museumsufer Frankfurt
 
 > Aggregated exhibitions and events from ~40 museums along Frankfurt's Museumsufer (Museum Embankment).
 
-Contact: info@jonas-strassel.de
+Contact: feedback@ins.museum
 License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer)
 Source: https://github.com/boredland/museumsufer
 

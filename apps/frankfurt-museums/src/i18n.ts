@@ -127,7 +127,7 @@ const de: Translations = {
   contactEmailPlaceholder: "deine@email.de",
   contactMessageLabel: "Nachricht",
   contactMessagePlaceholder: "Worum geht es?",
-  contactEmail: "info@jonas-strassel.de",
+  contactEmail: "feedback@ins.museum",
   aiDisclosure: "Daten täglich automatisch von Museumswebseiten gesammelt · Übersetzungen via DeepL",
   aboutHeading: "Was ist das Frankfurter Museumsufer?",
   introText:
@@ -251,7 +251,7 @@ const en: Translations = {
   contactEmailPlaceholder: "your@email.com",
   contactMessageLabel: "Message",
   contactMessagePlaceholder: "What's on your mind?",
-  contactEmail: "info@jonas-strassel.de",
+  contactEmail: "feedback@ins.museum",
   aiDisclosure: "Data collected daily from museum websites · Translations by DeepL",
   aboutHeading: "What is Frankfurt's Museumsufer?",
   introText:
@@ -375,7 +375,7 @@ const fr: Translations = {
   contactEmailPlaceholder: "votre@email.fr",
   contactMessageLabel: "Message",
   contactMessagePlaceholder: "Qu'avez-vous en tête ?",
-  contactEmail: "info@jonas-strassel.de",
+  contactEmail: "feedback@ins.museum",
   aiDisclosure: "Données collectées quotidiennement depuis les sites des musées · Traductions par DeepL",
   aboutHeading: "Qu'est-ce que le Museumsufer de Francfort ?",
   introText:

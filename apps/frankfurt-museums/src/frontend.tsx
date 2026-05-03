@@ -370,7 +370,7 @@ export function renderPage(
     "@type": "Person",
     "@id": "https://museumsufer.app/#publisher",
     name: "Jonas Strassel",
-    email: "info@jonas-strassel.de",
+    email: "feedback@ins.museum",
     url: "https://museumsufer.app/impressum",
     sameAs: ["https://github.com/boredland"],
   };
@@ -511,7 +511,7 @@ export function renderPage(
           />
           <script
             dangerouslySetInnerHTML={{
-              __html: `window.formbutton=window.formbutton||function(){(formbutton.q=formbutton.q||[]).push(arguments)};formbutton("create",{action:"https://formspree.io/f/info@ins.museum",title:${JSON.stringify(tr.contactTitle)},fields:[{type:"select",label:${JSON.stringify(tr.contactCategoryLabel)},name:"category",required:true,options:[${JSON.stringify(tr.contactCategoryEvent)},${JSON.stringify(tr.contactCategoryInstitution)},${JSON.stringify(tr.contactCategoryFeedback)}]},{type:"email",label:${JSON.stringify(tr.contactEmailLabel)},name:"email",required:true,placeholder:${JSON.stringify(tr.contactEmailPlaceholder)}},{type:"textarea",label:${JSON.stringify(tr.contactMessageLabel)},name:"message",required:true,placeholder:${JSON.stringify(tr.contactMessagePlaceholder)}},{type:"submit"}]});`,
+              __html: `window.formbutton=window.formbutton||function(){(formbutton.q=formbutton.q||[]).push(arguments)};formbutton("create",{action:"https://formspree.io/f/feedback@ins.museum",title:${JSON.stringify(tr.contactTitle)},fields:[{type:"select",label:${JSON.stringify(tr.contactCategoryLabel)},name:"category",required:true,options:[${JSON.stringify(tr.contactCategoryEvent)},${JSON.stringify(tr.contactCategoryInstitution)},${JSON.stringify(tr.contactCategoryFeedback)}]},{type:"email",label:${JSON.stringify(tr.contactEmailLabel)},name:"email",required:true,placeholder:${JSON.stringify(tr.contactEmailPlaceholder)}},{type:"textarea",label:${JSON.stringify(tr.contactMessageLabel)},name:"message",required:true,placeholder:${JSON.stringify(tr.contactMessagePlaceholder)}},{type:"submit"}]});`,
             }}
           />
           <link rel="preload" as="style" href="/styles.css" />
@@ -621,8 +621,8 @@ export function renderPage(
               </div>
               <p class="text-[0.75rem] text-text-tertiary">
                 {tr.byline} ·{" "}
-                <a href="mailto:info@jonas-strassel.de" class="no-underline hover:text-river text-text-secondary">
-                  info@jonas-strassel.de
+                <a href="mailto:feedback@ins.museum" class="no-underline hover:text-river text-text-secondary">
+                  feedback@ins.museum
                 </a>
               </p>
             </footer>
