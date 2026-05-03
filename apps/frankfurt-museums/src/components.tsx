@@ -245,6 +245,35 @@ function ReportButton({
   );
 }
 
+function ShareButton({
+  type,
+  id,
+  title,
+  museum,
+  tr,
+}: {
+  type: "event" | "exhibition" | "museum";
+  id: string | number;
+  title: string;
+  museum?: string;
+  tr: Record<string, string>;
+}) {
+  return (
+    <button
+      type="button"
+      data-share-type={type}
+      data-share-id={id}
+      data-share-title={title}
+      data-share-museum={museum || ""}
+      aria-label={tr.shareLabel}
+      title={tr.shareLabel}
+      class={iconBtnGhost}
+    >
+      <Icon id="i-share" class="w-3 h-3 shrink-0 fill-current" />
+    </button>
+  );
+}
+
 function EndingBadge({
   endDate,
   todayIso,
@@ -307,7 +336,12 @@ function ExhibitionCard({
   const hero = idx === 0;
   return (
     <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
-      <article class={`${cardClass}${hero ? " is-hero" : ""}`} data-item-id={ex.id} data-museum-slug={ex.museum_slug}>
+      <article
+        class={`${cardClass}${hero ? " is-hero" : ""}`}
+        data-item-id={ex.id}
+        data-share-key={`exhibition-${ex.id}`}
+        data-museum-slug={ex.museum_slug}
+      >
         <div
           class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
         >
@@ -353,6 +387,7 @@ function ExhibitionCard({
               url={ex.detail_url}
               tr={tr}
             />
+            <ShareButton type="exhibition" id={ex.id} title={ex.title} museum={ex.museum_name || ""} tr={tr} />
           </div>
           {ex.description && (
             <details class="mt-1" open={hero}>
@@ -446,6 +481,7 @@ function EventCard({
       <article
         class={`${cardClass}${hero ? " is-hero" : ""}`}
         data-item-id={ev.id}
+        data-share-key={`event-${ev.id}`}
         data-museum-slug={ev.museum_slug}
         data-event-time={ev.time || undefined}
         data-event-date={ev.date}
@@ -481,6 +517,7 @@ function EventCard({
               <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}
             <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
+            <ShareButton type="event" id={ev.id} title={ev.title} museum={ev.museum_name || ""} tr={tr} />
           </div>
           {ev.description && (
             <details class="mt-1" open={hero}>
@@ -558,6 +595,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
       <div
         class="group relative flex flex-col h-full bg-surface rounded-lg border border-border-light overflow-hidden transition-colors hover:border-river"
         data-museum-slug={slug}
+        data-share-key={`museum-${slug}`}
       >
         <div class="aspect-[4/3] bg-border-light overflow-hidden">
           {museum.image_url ? (
@@ -620,6 +658,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
             )}
             <NavButton slug={slug} name={museum.name} tr={tr} />
             <ReportButton type="museum" title={museum.name} url={museum.website} tr={tr} />
+            <ShareButton type="museum" id={slug} title={museum.name} tr={tr} />
           </div>
         </div>
       </div>

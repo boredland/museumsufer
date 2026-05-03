@@ -17,6 +17,8 @@ export const ICON = {
   museum: "M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z",
   close: "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
   report: "M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z",
+  share:
+    "M9.5 7H7c-2.8 0-5 2.2-5 5s2.2 5 5 5h2.5v-2H7c-1.7 0-3-1.3-3-3s1.3-3 3-3h2.5V7zm5 0h-2.5v2H17c1.7 0 3 1.3 3 3s-1.3 3-3 3h-2.5v2H17c2.8 0 5-2.2 5-5s-2.2-5-5-5zM8 13h8v-2H8v2z",
 };
 
 export function IconSprite() {
@@ -36,6 +38,9 @@ export function IconSprite() {
       </symbol>
       <symbol id="i-report" viewBox="0 0 24 24">
         <path d={ICON.report} />
+      </symbol>
+      <symbol id="i-share" viewBox="0 0 24 24">
+        <path d={ICON.share} />
       </symbol>
       <symbol id="i-gemini" viewBox="0 0 24 24">
         <path d="M12 0 L13.4 9.6 L24 12 L13.4 14.4 L12 24 L10.6 14.4 L0 12 L10.6 9.6 Z" />

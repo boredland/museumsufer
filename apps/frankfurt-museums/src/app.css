@@ -464,6 +464,49 @@ dialog::backdrop {
   to { opacity: 0; transform: translateY(-4px); }
 }
 
+/* Share highlight — soft river-accent pulse when an item is linked-to */
+@keyframes share-highlight {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--color-river) 60%, transparent),
+      inset 0 0 0 2px var(--color-river);
+    background-color: color-mix(in oklab, var(--color-river) 8%, transparent);
+  }
+  60% {
+    box-shadow: 0 0 0 6px transparent, inset 0 0 0 2px color-mix(in oklab, var(--color-river) 40%, transparent);
+    background-color: color-mix(in oklab, var(--color-river) 4%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent, inset 0 0 0 0 transparent;
+    background-color: transparent;
+  }
+}
+.share-highlight {
+  animation: share-highlight 2.5s ease-out;
+  border-radius: 8px;
+  scroll-margin-top: 1.5rem;
+}
+
+/* Share copied tooltip — small floating confirmation */
+.share-copied-toast {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.5rem;
+  background: var(--color-river);
+  color: var(--color-bg);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: fadeIn 0.18s ease-out;
+  z-index: 10;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loading::after, .fade-in, .date-stop, .range-pill { animation: none !important; transition: none !important; }
+  .share-highlight { animation: none !important; outline: 2px solid var(--color-river); outline-offset: 4px; }
 }
