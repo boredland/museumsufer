@@ -666,6 +666,101 @@ export const CLIENT_SCRIPT = `
       navigator.serviceWorker.register('/sw.js');
     }
 
+    var contactDialog = document.getElementById('contact-dialog');
+    if (contactDialog) {
+      var contactForm = document.getElementById('contact-form');
+      var contactCategory = document.getElementById('contact-category');
+      var contactMessage = document.getElementById('contact-message');
+      var contactContext = document.getElementById('contact-context');
+      var contactRegarding = document.getElementById('contact-regarding');
+      var contactRegardingText = document.getElementById('contact-regarding-text');
+      var contactStatus = document.getElementById('contact-status');
+      var contactSubmit = document.getElementById('contact-submit');
+
+      function openContactDialog(prefill) {
+        contactStatus.hidden = true;
+        contactStatus.textContent = '';
+        contactStatus.className = 'text-[0.75rem] leading-snug min-w-0 text-text-secondary';
+        contactSubmit.disabled = false;
+        contactSubmit.textContent = T.contactSubmit;
+        if (prefill && prefill.category) {
+          contactCategory.value = prefill.category;
+        }
+        if (prefill && prefill.regarding) {
+          contactRegardingText.textContent = prefill.regarding;
+          contactContext.value = prefill.context || prefill.regarding;
+          contactRegarding.hidden = false;
+        } else {
+          contactRegarding.hidden = true;
+          contactRegardingText.textContent = '';
+          contactContext.value = '';
+        }
+        if (typeof contactDialog.showModal === 'function') contactDialog.showModal();
+        else contactDialog.setAttribute('open', '');
+        setTimeout(function() { contactMessage.focus(); }, 50);
+      }
+
+      function closeContactDialog() {
+        if (typeof contactDialog.close === 'function') contactDialog.close();
+        else contactDialog.removeAttribute('open');
+      }
+
+      document.addEventListener('click', function(e) {
+        var openBtn = e.target.closest('[data-contact-open]');
+        if (openBtn) { e.preventDefault(); openContactDialog(null); return; }
+        var closeBtn = e.target.closest('[data-contact-close]');
+        if (closeBtn) { e.preventDefault(); closeContactDialog(); return; }
+        var reportBtn = e.target.closest('[data-report-type]');
+        if (reportBtn) {
+          e.preventDefault();
+          var type = reportBtn.dataset.reportType;
+          var title = reportBtn.dataset.reportTitle || '';
+          var museum = reportBtn.dataset.reportMuseum || '';
+          var url = reportBtn.dataset.reportUrl || '';
+          var category = type === 'museum' ? T.contactCategoryInstitution : T.contactCategoryEvent;
+          var regarding = title + (museum ? ' — ' + museum : '');
+          var context = regarding + (url ? ' (' + url + ')' : '');
+          openContactDialog({ category: category, regarding: regarding, context: context });
+          return;
+        }
+      });
+
+      contactDialog.addEventListener('click', function(e) {
+        if (e.target === contactDialog) closeContactDialog();
+      });
+
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        contactSubmit.disabled = true;
+        contactSubmit.textContent = T.contactSubmitting;
+        contactStatus.hidden = true;
+        var data = new FormData(contactForm);
+        var payload = {};
+        data.forEach(function(v, k) { payload[k] = v; });
+        fetch('https://formspree.io/f/feedback@ins.museum', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload)
+        }).then(function(r) {
+          if (r.ok) {
+            contactStatus.textContent = T.contactSuccess;
+            contactStatus.className = 'text-[0.75rem] leading-snug min-w-0 text-river';
+            contactStatus.hidden = false;
+            contactForm.reset();
+            setTimeout(closeContactDialog, 1800);
+          } else {
+            throw new Error('submit failed');
+          }
+        }).catch(function() {
+          contactStatus.textContent = T.contactError;
+          contactStatus.className = 'text-[0.75rem] leading-snug min-w-0 text-red-700 dark:text-red-500';
+          contactStatus.hidden = false;
+          contactSubmit.disabled = false;
+          contactSubmit.textContent = T.contactSubmit;
+        });
+      });
+    }
+
     if (navigator.modelContext && navigator.modelContext.provideContext) {
       navigator.modelContext.provideContext({
         tools: [

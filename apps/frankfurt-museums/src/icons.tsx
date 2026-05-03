@@ -16,6 +16,7 @@ export const ICON = {
   download: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z",
   museum: "M12 2L2 7v2h20V7L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z",
   close: "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+  report: "M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z",
 };
 
 export function IconSprite() {
@@ -32,6 +33,9 @@ export function IconSprite() {
       </symbol>
       <symbol id="i-event" viewBox="0 0 24 24">
         <path d={ICON.event} />
+      </symbol>
+      <symbol id="i-report" viewBox="0 0 24 24">
+        <path d={ICON.report} />
       </symbol>
       <symbol id="i-open" viewBox="0 0 24 24">
         <path d={ICON.openInNew} />
