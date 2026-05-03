@@ -64,11 +64,11 @@ app.use("*", async (c, next) => {
       "img-src 'self' data: https:",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline'",
-      "connect-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://formspree.io",
+      "connect-src 'self' https://formspree.io",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self'",
+      "form-action 'self' https://formspree.io",
     ].join("; "),
   );
 });
