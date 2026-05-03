@@ -500,6 +500,7 @@ function EventCard({
 function Section({
   sectionKey,
   title,
+  description,
   count,
   iconPath: _iconPath,
   children,
@@ -507,6 +508,7 @@ function Section({
 }: {
   sectionKey: string;
   title: string;
+  description?: string;
   count: number;
   iconPath: string;
   children: unknown;
@@ -514,31 +516,36 @@ function Section({
 }) {
   return (
     <details class="section mb-12" data-section={sectionKey} open={defaultOpen}>
-      <summary class="section-header flex items-baseline gap-3 mb-5 cursor-pointer select-none group">
-        <h2 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h2>
-        <span
-          class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
-          title={`${count} ${title}`}
-          data-total={count}
-        >
-          {String(count).padStart(2, "0")}
-        </span>
-        <svg
-          aria-hidden="true"
-          class="section-chevron text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
-          viewBox="0 0 16 16"
-          fill="none"
-          width="14"
-          height="14"
-        >
-          <path
-            d="M4 6l4 4 4-4"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
+      <summary class="section-header mb-5 cursor-pointer select-none group">
+        <div class="flex items-baseline gap-3">
+          <h2 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h2>
+          <span
+            class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
+            title={`${count} ${title}`}
+            data-total={count}
+          >
+            {String(count).padStart(2, "0")}
+          </span>
+          <svg
+            aria-hidden="true"
+            class="section-chevron text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
+            viewBox="0 0 16 16"
+            fill="none"
+            width="14"
+            height="14"
+          >
+            <path
+              d="M4 6l4 4 4-4"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+        {description && (
+          <p class="mt-1 text-[0.75rem] text-text-tertiary leading-snug font-display italic">{description}</p>
+        )}
       </summary>
       {children}
     </details>
@@ -647,6 +654,7 @@ export function ContentBody({
       <Section
         sectionKey="events"
         title={tr.events}
+        description={tr.eventsDescription}
         count={events.length}
         iconPath="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
       >
@@ -666,6 +674,7 @@ export function ContentBody({
       <Section
         sectionKey="exhibitions"
         title={tr.exhibitions}
+        description={tr.exhibitionsDescription}
         count={exhibitions.length}
         iconPath="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12"
       >
@@ -698,6 +707,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
     <Section
       sectionKey="museums"
       title={tr.museums}
+      description={tr.museumsDescription}
       count={Object.keys(museums).length}
       iconPath="M10 2L2 6v1.5h16V6L10 2zM4 9.5v5h1.5v-5H4zm3.5 0v5H9v-5H7.5zm3.5 0v5h1.5v-5H11zm3.5 0v5H16v-5h-1.5zM2 16v1.5h16V16H2z"
       defaultOpen={false}
