@@ -6,3 +6,5 @@ claude-seo
 
 # Lighthouse CI output
 .lighthouseci/
+screenshots/
+scripts/capture_askai.py
