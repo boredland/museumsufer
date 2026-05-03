@@ -285,6 +285,96 @@ function RiverNav({
   );
 }
 
+function ContactDialog({ tr }: { tr: Record<string, string> }) {
+  const inputClass =
+    "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
+  const labelClass = "font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary block mb-1.5";
+  return (
+    <dialog
+      id="contact-dialog"
+      class="m-auto p-0 bg-bg text-text-primary rounded-xl shadow-search border border-border max-w-[480px] w-[calc(100%-2rem)] backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+    >
+      <form id="contact-form" class="flex flex-col p-6 gap-4 max-[480px]:p-5 max-[480px]:gap-3.5">
+        <div class="flex items-start justify-between gap-4">
+          <h2 class="font-display italic text-[1.5rem] leading-tight text-text-primary">{tr.contactTitle}</h2>
+          <button
+            type="button"
+            data-contact-close
+            aria-label={tr.contactClose}
+            class="text-text-tertiary hover:text-river bg-transparent border-0 p-1 -m-1 cursor-pointer transition-colors shrink-0"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+              <path d={ICON.close} />
+            </svg>
+          </button>
+        </div>
+
+        <div
+          id="contact-regarding"
+          hidden
+          class="flex items-baseline gap-2 px-3 py-2 rounded-lg bg-surface border border-border-light text-[0.75rem]"
+        >
+          <span class="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary shrink-0">
+            {tr.contactRegarding}
+          </span>
+          <span id="contact-regarding-text" class="text-text-secondary leading-snug min-w-0 break-words" />
+        </div>
+
+        <label class="block">
+          <span class={labelClass}>{tr.contactCategoryLabel}</span>
+          <select id="contact-category" name="category" required class={inputClass}>
+            <option value={tr.contactCategoryEvent}>{tr.contactCategoryEvent}</option>
+            <option value={tr.contactCategoryInstitution}>{tr.contactCategoryInstitution}</option>
+            <option value={tr.contactCategoryFeedback}>{tr.contactCategoryFeedback}</option>
+          </select>
+        </label>
+
+        <label class="block">
+          <span class={labelClass}>{tr.contactEmailLabel}</span>
+          <input
+            type="email"
+            id="contact-email"
+            name="email"
+            required
+            placeholder={tr.contactEmailPlaceholder}
+            class={inputClass}
+          />
+        </label>
+
+        <label class="block">
+          <span class={labelClass}>{tr.contactMessageLabel}</span>
+          <textarea
+            id="contact-message"
+            name="message"
+            required
+            rows={4}
+            placeholder={tr.contactMessagePlaceholder}
+            class={`${inputClass} resize-none font-sans`}
+          />
+        </label>
+
+        <input type="hidden" id="contact-context" name="context" />
+
+        <div class="flex items-center justify-between gap-4 mt-1">
+          <p
+            id="contact-status"
+            hidden
+            class="text-[0.75rem] text-text-secondary leading-snug min-w-0"
+            aria-live="polite"
+          />
+          <button
+            type="submit"
+            id="contact-submit"
+            class="ml-auto shrink-0 text-sm font-medium py-2 px-5 rounded-full no-underline whitespace-nowrap border border-river text-river bg-transparent transition-colors cursor-pointer hover:bg-river hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {tr.contactSubmit}
+          </button>
+        </div>
+      </form>
+    </dialog>
+  );
+}
+
 function LlmTip({ tr }: { tr: Record<string, string> }) {
   return (
     <details class="mt-4 py-2.5 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary open:[&>summary]:mb-3">
@@ -503,17 +593,6 @@ export function renderPage(
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
-          <script src="https://formspree.io/js/formbutton-v1.min.js" defer />
-          <style
-            dangerouslySetInnerHTML={{
-              __html: "#formbutton-button{opacity:0!important;pointer-events:none!important;position:fixed!important}",
-            }}
-          />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.formbutton=window.formbutton||function(){(formbutton.q=formbutton.q||[]).push(arguments)};formbutton("create",{action:"https://formspree.io/f/feedback@ins.museum",title:${JSON.stringify(tr.contactTitle)},fields:[{type:"select",label:${JSON.stringify(tr.contactCategoryLabel)},name:"category",required:true,options:[${JSON.stringify(tr.contactCategoryEvent)},${JSON.stringify(tr.contactCategoryInstitution)},${JSON.stringify(tr.contactCategoryFeedback)}]},{type:"email",label:${JSON.stringify(tr.contactEmailLabel)},name:"email",required:true,placeholder:${JSON.stringify(tr.contactEmailPlaceholder)}},{type:"textarea",label:${JSON.stringify(tr.contactMessageLabel)},name:"message",required:true,placeholder:${JSON.stringify(tr.contactMessagePlaceholder)}},{type:"submit"}]});`,
-            }}
-          />
           <link rel="preload" as="style" href="/styles.css" />
           <link rel="stylesheet" href="/styles.css" />
         </head>
@@ -594,7 +673,7 @@ export function renderPage(
                 </a>
                 <button
                   type="button"
-                  onclick="document.getElementById('formbutton-button').click()"
+                  data-contact-open
                   class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
                 >
                   {tr.contact}
@@ -627,6 +706,8 @@ export function renderPage(
               </p>
             </footer>
           </div>
+
+          <ContactDialog tr={tr} />
 
           <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
         </body>

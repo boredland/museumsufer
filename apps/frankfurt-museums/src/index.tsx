@@ -64,7 +64,7 @@ app.use("*", async (c, next) => {
       "img-src 'self' data: https:",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline' https://formspree.io",
+      "script-src 'self' 'unsafe-inline'",
       "connect-src 'self' https://formspree.io",
       "frame-ancestors 'none'",
       "base-uri 'self'",

@@ -216,6 +216,35 @@ function ExternalLinkIcon() {
   return <Icon id="i-open" class="w-[11px] h-[11px] align-[-1px] fill-current" />;
 }
 
+function ReportButton({
+  type,
+  title,
+  museum,
+  url,
+  tr,
+}: {
+  type: "event" | "exhibition" | "museum";
+  title: string;
+  museum?: string;
+  url?: string | null;
+  tr: Record<string, string>;
+}) {
+  return (
+    <button
+      type="button"
+      data-report-type={type}
+      data-report-title={title}
+      data-report-museum={museum || ""}
+      data-report-url={url || ""}
+      aria-label={tr.reportLabel}
+      title={tr.reportLabel}
+      class={iconBtnGhost}
+    >
+      <Icon id="i-report" class="w-3 h-3 shrink-0 fill-current" />
+    </button>
+  );
+}
+
 function EndingBadge({
   endDate,
   todayIso,
@@ -317,6 +346,13 @@ function ExhibitionCard({
             >
               <Icon id="i-visibility" class="w-3 h-3 shrink-0 fill-current" />
             </button>
+            <ReportButton
+              type="exhibition"
+              title={ex.title}
+              museum={ex.museum_name || ""}
+              url={ex.detail_url}
+              tr={tr}
+            />
           </div>
           {ex.description && (
             <details class="mt-1" open={hero}>
@@ -444,6 +480,7 @@ function EventCard({
             {ev.price && (
               <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}
+            <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
           </div>
           {ev.description && (
             <details class="mt-1" open={hero}>
@@ -575,6 +612,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               </a>
             )}
             <NavButton slug={slug} name={museum.name} tr={tr} />
+            <ReportButton type="museum" title={museum.name} url={museum.website} tr={tr} />
           </div>
         </div>
       </div>
