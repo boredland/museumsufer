@@ -58,7 +58,8 @@ export function IconSprite() {
         <circle cx="6" cy="12" r="4" />
       </symbol>
       <symbol id="i-grok" viewBox="0 0 24 24">
-        <path d="M5 4 H8 L12 9.5 L16 4 H19 L13.5 11.5 L19.5 20 H16.5 L12 13.5 L7.5 20 H4.5 L10.5 11.5 Z" />
+        <path d="M2 5 L4 5 L7 9 L10 5 L12 5 L8.5 10.5 L12 16 L10 16 L7 12 L4 16 L2 16 L5.5 10.5 Z" />
+        <path d="M12 8 L14 8 L17 12 L20 8 L22 8 L18.5 13.5 L22 19 L20 19 L17 15 L14 19 L12 19 L15.5 13.5 Z" />
       </symbol>
       <symbol id="i-open" viewBox="0 0 24 24">
         <path d={ICON.openInNew} />
