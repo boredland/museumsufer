@@ -38,7 +38,7 @@ export function IconSprite() {
         <path d={ICON.report} />
       </symbol>
       <symbol id="i-gemini" viewBox="0 0 24 24">
-        <path d="M12 1.5l1.7 6.3a6 6 0 004.5 4.5L24 14l-5.8 1.7a6 6 0 00-4.5 4.5L12 26.5l-1.7-6.3a6 6 0 00-4.5-4.5L0 14l5.8-1.7a6 6 0 004.5-4.5L12 1.5z" />
+        <path d="M12 2 L13.5 9 L21 11 L13.5 13 L12 21 L10.5 13 L3 11 L10.5 9 Z" />
       </symbol>
       <symbol id="i-chatgpt" viewBox="0 0 24 24">
         <path d="M12 2a5 5 0 00-4.33 7.5A5 5 0 002 14a5 5 0 008.33 3.5A5 5 0 0022 13a5 5 0 00-4.33-7.5A5 5 0 0012 2zm0 4.4l4 2.3v4.6l-4 2.3-4-2.3V8.7l4-2.3z" />
