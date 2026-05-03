@@ -503,6 +503,17 @@ export function renderPage(
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
+          <script src="https://formspree.io/js/formbutton-v1.min.js" defer />
+          <style
+            dangerouslySetInnerHTML={{
+              __html: "#formbutton-button{opacity:0!important;pointer-events:none!important;position:fixed!important}",
+            }}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.formbutton=window.formbutton||function(){(formbutton.q=formbutton.q||[]).push(arguments)};formbutton("create",{action:"https://formspree.io/f/info@ins.museum",title:${JSON.stringify(tr.contactTitle)},fields:[{type:"select",label:${JSON.stringify(tr.contactCategoryLabel)},name:"category",required:true,options:[${JSON.stringify(tr.contactCategoryEvent)},${JSON.stringify(tr.contactCategoryInstitution)},${JSON.stringify(tr.contactCategoryFeedback)}]},{type:"email",label:${JSON.stringify(tr.contactEmailLabel)},name:"email",required:true,placeholder:${JSON.stringify(tr.contactEmailPlaceholder)}},{type:"textarea",label:${JSON.stringify(tr.contactMessageLabel)},name:"message",required:true,placeholder:${JSON.stringify(tr.contactMessagePlaceholder)}},{type:"submit"}]});`,
+            }}
+          />
           <link rel="preload" as="style" href="/styles.css" />
           <link rel="stylesheet" href="/styles.css" />
         </head>
@@ -581,14 +592,13 @@ export function renderPage(
                 <a href="/feed.xml" class="text-text-secondary no-underline hover:text-river">
                   {tr.rssFeed}
                 </a>
-                <a
-                  href="https://github.com/boredland/museumsufer/issues/new?template=missing-event.yml"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-text-secondary no-underline hover:text-river"
+                <button
+                  type="button"
+                  onclick="document.getElementById('formbutton-button').click()"
+                  class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
                 >
-                  {tr.missingEvent}
-                </a>
+                  {tr.contact}
+                </button>
               </div>
               <div class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
                 <a href="/api/docs" class="no-underline hover:text-river">
