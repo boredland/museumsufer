@@ -656,6 +656,78 @@ export const CLIENT_SCRIPT = `
       navigator.serviceWorker.register('/sw.js');
     }
 
+    function buildShareUrl(key) {
+      var url = new URL(location.origin + '/');
+      url.searchParams.set('item', key);
+      if (CURRENT_LANG && CURRENT_LANG !== 'de') url.searchParams.set('lang', CURRENT_LANG);
+      return url.toString();
+    }
+
+    function showCopiedToast(btn) {
+      var existing = btn.querySelector('.share-copied-toast');
+      if (existing) existing.remove();
+      var toast = document.createElement('span');
+      toast.className = 'share-copied-toast';
+      toast.textContent = T.shareCopied;
+      btn.style.position = 'relative';
+      btn.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 1500);
+    }
+
+    function handleShareClick(btn) {
+      var type = btn.dataset.shareType;
+      var id = btn.dataset.shareId;
+      var title = btn.dataset.shareTitle || '';
+      var museum = btn.dataset.shareMuseum || '';
+      var key = type + '-' + id;
+      var url = buildShareUrl(key);
+      var shareText = museum ? title + ' — ' + museum : title;
+
+      if (navigator.share) {
+        navigator.share({ title: shareText, url: url }).catch(function() {});
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() { showCopiedToast(btn); }).catch(function() {});
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      var shareBtn = e.target.closest('[data-share-type]');
+      if (shareBtn) { e.preventDefault(); handleShareClick(shareBtn); }
+    });
+
+    function highlightShareTarget(key) {
+      if (!key) return;
+      var el = document.querySelector('[data-share-key="' + CSS.escape(key) + '"]');
+      if (!el) return;
+      var parentSection = el.closest('details.section');
+      if (parentSection && !parentSection.open) parentSection.open = true;
+      var parentMuseumDetails = el.closest('details');
+      if (parentMuseumDetails && parentMuseumDetails !== parentSection && !parentMuseumDetails.open) {
+        parentMuseumDetails.open = true;
+      }
+      requestAnimationFrame(function() {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.remove('share-highlight');
+        // Force reflow so the animation re-runs even if the class lingered
+        void el.offsetWidth;
+        el.classList.add('share-highlight');
+        setTimeout(function() { el.classList.remove('share-highlight'); }, 2600);
+      });
+    }
+
+    var initialShareKey = new URLSearchParams(location.search).get('item');
+    if (initialShareKey) {
+      // Wait until content is rendered, then highlight
+      setTimeout(function() { highlightShareTarget(initialShareKey); }, 400);
+    }
+    document.body.addEventListener('htmx:afterSwap', function(e) {
+      if (e.detail.target.id !== 'content') return;
+      var key = new URLSearchParams(location.search).get('item');
+      if (key) setTimeout(function() { highlightShareTarget(key); }, 100);
+    });
+
     var contactDialog = document.getElementById('contact-dialog');
     if (contactDialog) {
       var contactForm = document.getElementById('contact-form');
