@@ -656,9 +656,10 @@ export const CLIENT_SCRIPT = `
       navigator.serviceWorker.register('/sw.js');
     }
 
-    function buildShareUrl(key) {
+    function buildShareUrl(key, date) {
       var url = new URL(location.origin + '/');
       url.searchParams.set('item', key);
+      if (date) url.searchParams.set('date', date);
       if (CURRENT_LANG && CURRENT_LANG !== 'de') url.searchParams.set('lang', CURRENT_LANG);
       return url.toString();
     }
@@ -679,8 +680,9 @@ export const CLIENT_SCRIPT = `
       var id = btn.dataset.shareId;
       var title = btn.dataset.shareTitle || '';
       var museum = btn.dataset.shareMuseum || '';
+      var date = btn.dataset.shareDate || '';
       var key = type + '-' + id;
-      var url = buildShareUrl(key);
+      var url = buildShareUrl(key, date);
       var shareText = museum ? title + ' — ' + museum : title;
 
       if (navigator.share) {

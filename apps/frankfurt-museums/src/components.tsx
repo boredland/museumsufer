@@ -250,12 +250,14 @@ function ShareButton({
   id,
   title,
   museum,
+  date,
   tr,
 }: {
   type: "event" | "exhibition" | "museum";
   id: string | number;
   title: string;
   museum?: string;
+  date?: string;
   tr: Record<string, string>;
 }) {
   return (
@@ -265,6 +267,7 @@ function ShareButton({
       data-share-id={id}
       data-share-title={title}
       data-share-museum={museum || ""}
+      data-share-date={date || ""}
       aria-label={tr.shareLabel}
       title={tr.shareLabel}
       class={iconBtnGhost}
@@ -387,7 +390,14 @@ function ExhibitionCard({
               url={ex.detail_url}
               tr={tr}
             />
-            <ShareButton type="exhibition" id={ex.id} title={ex.title} museum={ex.museum_name || ""} tr={tr} />
+            <ShareButton
+              type="exhibition"
+              id={ex.id}
+              title={ex.title}
+              museum={ex.museum_name || ""}
+              date={todayIso}
+              tr={tr}
+            />
           </div>
           {ex.description && (
             <details class="mt-1" open={hero}>
@@ -517,7 +527,14 @@ function EventCard({
               <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}
             <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
-            <ShareButton type="event" id={ev.id} title={ev.title} museum={ev.museum_name || ""} tr={tr} />
+            <ShareButton
+              type="event"
+              id={ev.id}
+              title={ev.title}
+              museum={ev.museum_name || ""}
+              date={ev.date}
+              tr={tr}
+            />
           </div>
           {ev.description && (
             <details class="mt-1" open={hero}>
