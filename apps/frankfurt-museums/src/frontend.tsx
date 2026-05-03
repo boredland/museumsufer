@@ -288,7 +288,12 @@ function RiverNav({
 function AskAI({ tr }: { tr: Record<string, string> }) {
   const prompt = encodeURIComponent(tr.llmPrompt);
   const services = [
-    { id: "i-gemini", name: "Gemini", href: `https://gemini.google.com/app?text=${prompt}`, color: "#4285F4" },
+    {
+      id: "i-gemini",
+      name: "Gemini (Google AI Mode)",
+      href: `https://www.google.com/search?udm=50&q=${prompt}`,
+      color: "#4285F4",
+    },
     { id: "i-chatgpt", name: "ChatGPT", href: `https://chat.openai.com/?q=${prompt}`, color: "#10A37F" },
     { id: "i-claude", name: "Claude", href: `https://claude.ai/new?q=${prompt}`, color: "#D97757" },
     {
