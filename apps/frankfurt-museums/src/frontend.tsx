@@ -315,9 +315,8 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
             rel="noopener"
             aria-label={s.name}
             title={s.name}
-            class="inline-flex items-center justify-center w-7 h-7 rounded-full text-text-tertiary border border-border transition-colors hover:border-current focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2"
-            onmouseover={`this.style.color='${s.color}'`}
-            onmouseout="this.style.color=''"
+            class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-border transition-colors hover:border-current focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2"
+            style={`color:${s.color}`}
           >
             <svg aria-hidden="true" class="w-3 h-3 fill-current">
               <use href={`#${s.id}`} />
