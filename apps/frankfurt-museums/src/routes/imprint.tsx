@@ -5,7 +5,7 @@ import type { Env } from "../types";
 
 const OPERATOR = {
   name: "Jonas Strassel",
-  email: "info@jonas-strassel.de",
+  email: "feedback@ins.museum",
 };
 
 function ImprintPage({ locale }: { locale: Locale }) {
