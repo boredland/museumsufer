@@ -530,18 +530,18 @@ export const CLIENT_SCRIPT = `
     var urlSort = new URLSearchParams(location.search).get('sort');
     if (urlSort === 'near') btnNear.click();
 
-    // Auto-refresh when midnight passes to show next day's events
-    var pageLoadTime = Date.now();
-    var midnightCheckInterval = setInterval(function() {
-      fetch('/api/day?lang=' + CURRENT_LANG, { headers: { 'Accept': 'application/json' } })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-          if (data.date && data.date !== currentDate) {
-            location.reload();
-          }
-        })
-        .catch(function() {});
-    }, 60000);
+    // Auto-refresh at midnight Berlin time to show next day's events
+    function scheduleNextDayRefresh() {
+      var now = new Date();
+      var utcStr = now.toLocaleString('en-US', { timeZone: 'UTC' });
+      var berlinStr = now.toLocaleString('en-US', { timeZone: 'Europe/Berlin' });
+      var berlinDate = new Date(berlinStr);
+      var berlinMidnight = new Date(berlinDate.getFullYear(), berlinDate.getMonth(), berlinDate.getDate() + 1, 0, 0, 0);
+      var utcDate = new Date(utcStr);
+      var timeToMidnight = berlinMidnight.getTime() - berlinDate.getTime();
+      setTimeout(function() { location.reload(); }, timeToMidnight);
+    }
+    scheduleNextDayRefresh();
 
     setTimeout(function() {
       var btns = document.querySelectorAll('[data-date]');
