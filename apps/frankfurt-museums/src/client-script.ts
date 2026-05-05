@@ -216,6 +216,9 @@ export const CLIENT_SCRIPT = `
       if (dataEl) {
         lastRenderData = JSON.parse(dataEl.textContent);
         dataEl.remove();
+        if (lastRenderData.date && lastRenderData.date !== currentDate && !currentRange) {
+          clientToday = lastRenderData.date;
+        }
       }
       hydrateVisited(); hydrateMyLikes();
       hydrateSectionStates();
@@ -526,6 +529,19 @@ export const CLIENT_SCRIPT = `
 
     var urlSort = new URLSearchParams(location.search).get('sort');
     if (urlSort === 'near') btnNear.click();
+
+    // Auto-refresh when midnight passes to show next day's events
+    var pageLoadTime = Date.now();
+    var midnightCheckInterval = setInterval(function() {
+      fetch('/api/day?lang=' + CURRENT_LANG, { headers: { 'Accept': 'application/json' } })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.date && data.date !== currentDate) {
+            location.reload();
+          }
+        })
+        .catch(function() {});
+    }, 60000);
 
     setTimeout(function() {
       var btns = document.querySelectorAll('[data-date]');
