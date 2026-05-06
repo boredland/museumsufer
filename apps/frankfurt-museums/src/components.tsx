@@ -155,7 +155,7 @@ const navLinkClass =
 
 const positionPopover = `var p=document.getElementById(this.getAttribute('popovertarget'));var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.right-180,innerWidth-188))+'px'`;
 
-function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
+export function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
   const m = MUSEUM_LOCATIONS[slug];
   const urls = navUrls(name, m.lat, m.lng);
@@ -216,7 +216,7 @@ function ExternalLinkIcon() {
   return <Icon id="i-open" class="w-[11px] h-[11px] align-[-1px] fill-current" />;
 }
 
-function ReportButton({
+export function ReportButton({
   type,
   title,
   museum,
@@ -245,7 +245,7 @@ function ReportButton({
   );
 }
 
-function ShareButton({
+export function ShareButton({
   type,
   id,
   title,

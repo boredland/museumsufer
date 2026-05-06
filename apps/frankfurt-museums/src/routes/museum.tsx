@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { raw } from "hono/html";
+import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
@@ -199,19 +200,24 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                 src={primaryMuseum.image_url}
                 alt={`${museumName} Fassade in Frankfurt`}
                 loading="lazy"
-                class="w-full h-auto rounded mb-6 aspect-video object-cover"
+                class="w-full h-auto rounded mb-8 aspect-video object-cover"
               />
             )}
+
+            <div class="flex items-center justify-between pb-6 border-b border-border mb-6">
+              <div class="flex items-center gap-3">
+                <NavButton slug={slug} name={museumName} tr={tr} />
+                <ShareButton type="museum" id={slug} title={museumName} tr={tr} />
+                <ReportButton type="museum" title={museumName} url={canonicalUrl} tr={tr} />
+              </div>
+              {abbreviation && (
+                <p class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary">{abbreviation}</p>
+              )}
+            </div>
 
             <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2rem,6vw,3rem)] mb-2">
               {museumName}
             </h1>
-
-            {abbreviation && (
-              <p class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary mb-6">
-                {tr.museumAlsoKnownAs}: {abbreviation}
-              </p>
-            )}
 
             {primaryMuseum.opening_hours && (
               <section class="mb-6">
