@@ -1,11 +1,11 @@
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
-import { CLIENT_SCRIPT } from "./client-script";
 import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
+import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
@@ -558,9 +558,6 @@ export function renderPage(
   range?: number,
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
-  const trJson = JSON.stringify(tr);
-  const dlJson = JSON.stringify(dateLocale(locale));
-  const localesJson = JSON.stringify(SUPPORTED_LOCALES);
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
   const personSchema = {
@@ -629,13 +626,6 @@ export function renderPage(
       { "@type": "Question", name: tr.faq7Q, acceptedAnswer: { "@type": "Answer", text: tr.faq7A } },
     ],
   });
-
-  const dataInit = `const T = ${trJson};
-    const DATE_LOCALE = ${dlJson};
-    const LOCALES = ${localesJson};
-    const CURRENT_LANG = '${locale}';
-    const BERLIN_TODAY = '${todayIso()}';
-    const __INITIAL_DATE__ = ${initialData ? JSON.stringify(initialData.date) : "null"};`;
 
   const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
   const jsonSchemas = [
@@ -777,7 +767,9 @@ export function renderPage(
 
           <ContactDialog tr={tr} />
 
-          <script dangerouslySetInnerHTML={{ __html: dataInit + CLIENT_SCRIPT }} />
+          <script
+            dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale, initialDate: initialData?.date }) }}
+          />
         </body>
       </html>
     </>
