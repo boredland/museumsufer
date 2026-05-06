@@ -174,7 +174,7 @@ function renderPerformance(p: DayPerformance, index: number): string {
   const room = p.venue_room ? escapeHtml(p.venue_room) : null;
   const isStruck = p.status === "sold_out" || p.status === "cancelled";
   const subtitle = p.show.subtitle ? escapeHtml(p.show.subtitle).replace(/\s*<br\s*\/?>\s*/gi, " · ") : null;
-  const price = formatPriceRange(p.price_min, p.price_max);
+  const price = p.status === "sold_out" ? null : formatPriceRange(p.price_min, p.price_max);
   const titleHref = p.show.detail_url ?? p.ticket_url ?? null;
 
   const stamp = renderStatusStamp(p.status);
