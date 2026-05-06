@@ -62,6 +62,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchFdh(config.endpoint);
     case "dff-kino":
       return fetchDffKino(config.endpoint);
+    case "archaeologisches":
+      return fetchArchaeologisches(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1050,6 +1052,87 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
     }
   } catch (e) {
     console.error("Failed to fetch DFF tribe events:", e);
+  }
+
+  return events;
+}
+
+async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const events: ApiEvent[] = [];
+  const today = todayIso();
+
+  // Split by panels (months)
+  const panelRe = /<div class="sppb-panel[^"]*">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g;
+  let panelMatch;
+
+  while ((panelMatch = panelRe.exec(html)) !== null) {
+    const panel = panelMatch[1];
+    const monthMatch = panel.match(/<span class="sppb-panel-title">([^<]+)/);
+    if (!monthMatch) continue;
+
+    const monthParts = monthMatch[1].trim().split(" ");
+    const monthName = monthParts[0].toLowerCase();
+    const monthNum = GERMAN_MONTHS[monthName];
+    if (!monthNum) continue;
+
+    const bodyMatch = panel.match(/<div class="sppb-panel-body">([\s\S]*?)<\/div>/);
+    if (!bodyMatch) continue;
+    const body = bodyMatch[1];
+
+    // Split body by day headers: "10 | SAMSTAG"
+    const dayBlocks = body.split(/<strong>\s*\d{1,2}\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/);
+    const dayHeaders = body.match(/<strong>\s*(\d{1,2})\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/g);
+
+    if (!dayHeaders) continue;
+
+    for (let i = 0; i < dayHeaders.length; i++) {
+      const header = dayHeaders[i];
+      const dayMatch = header.match(/(\d{1,2})/);
+      if (!dayMatch) continue;
+      const day = dayMatch[1].padStart(2, "0");
+      const date = `${inferYear(monthNum, day)}-${monthNum}-${day}`;
+      if (date < today) continue;
+
+      const block = dayBlocks[i + 1];
+      if (!block) continue;
+
+      // Events in this block
+      // Regex for time range, optional category in <em>, and title in <strong>
+      const eventRe =
+        /(?:(\d{1,2}(?:[:.]\d{2})?(?:\s*[-–]\s*\d{1,2}(?:[:.]\d{2})?)?)\s*Uhr)?\s*(?:&nbsp;|\s)*?(?:<em>([^<]*)<\/em>)?\s*(?:<br \/>)?\s*<strong>([^<]+)<\/strong>/g;
+
+      let evMatch;
+      while ((evMatch = eventRe.exec(block)) !== null) {
+        const [, timeRange, category, title] = evMatch;
+
+        let time = null;
+        let endTime = null;
+        if (timeRange) {
+          const times = timeRange.split(/[-–]/).map((t) => t.trim().replace(".", ":"));
+          time = times[0];
+          if (times[1]) endTime = times[1];
+          if (time && !time.includes(":")) time += ":00";
+          if (endTime && !endTime.includes(":")) endTime += ":00";
+        }
+
+        events.push({
+          title: stripHtml(title).trim(),
+          date,
+          time: nullIfMidnight(time),
+          end_time: nullIfMidnight(endTime),
+          end_date: null,
+          description: null,
+          detail_url: null,
+          image_url: null,
+          category: category ? stripHtml(category).trim() : null,
+          price: null,
+        });
+      }
+    }
   }
 
   return events;
