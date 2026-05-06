@@ -1,7 +1,6 @@
 export interface Env {
   DB: D1Database;
   AI: Ai;
-  ASSETS: Fetcher;
   SCRAPE_SECRET?: string;
   DEEPL_API_KEY?: string;
 }

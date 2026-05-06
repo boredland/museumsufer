@@ -13,12 +13,6 @@
       "database_id": "c610b75f-a189-4692-a50a-13cf7e1a63f4"
     }
   ],
-  "assets": {
-    "directory": "./public",
-    "binding": "ASSETS",
-    "html_handling": "none",
-    "not_found_handling": "none"
-  },
   "ai": {
     "binding": "AI"
   },
