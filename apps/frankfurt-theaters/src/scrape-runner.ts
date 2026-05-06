@@ -1,4 +1,5 @@
 import { persistScrapeResult, upsertTheater } from "./db";
+import { scrapeEnglishTheatre } from "./scrapers/english-theatre";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
 import { scrapeSchauspielFrankfurt } from "./scrapers/schauspiel";
 import { THEATERS, type TheaterConfig } from "./theater-config";
@@ -43,5 +44,7 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeSchauspielFrankfurt();
     case "oper":
       return scrapeOperFrankfurt();
+    case "english-theatre":
+      return scrapeEnglishTheatre();
   }
 }
