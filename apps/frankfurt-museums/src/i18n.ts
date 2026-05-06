@@ -175,6 +175,13 @@ const de: Translations = {
   faq7Q: "Wie geht die App mit meinen Daten um?",
   faq7A:
     "Likes werden anonym mit einem täglichen Hash deiner IP-Adresse gespeichert. Wenn du die Entfernungssortierung aktivierst, wird dein Standort auf ein Raster (~200 m) gerundet und an die RMV-API gesendet, um Fahrzeiten zu schätzen — deine genaue Position wird niemals gespeichert oder weitergegeben. Es werden keine personenbezogenen Daten erhoben.",
+  categoryFilm: "Film",
+  categoryFuehrung: "Führung",
+  categoryWorkshop: "Workshop",
+  categoryVortrag: "Vortrag",
+  categoryFamilie: "Familie",
+  categoryVernissage: "Vernissage",
+  categoryKonzert: "Konzert",
 };
 
 const en: Translations = {
@@ -320,6 +327,13 @@ const en: Translations = {
   faq7Q: "How does the app handle my data?",
   faq7A:
     "Likes are stored anonymously using a daily hash of your IP address. When you enable distance sorting, your location is rounded to a grid (~200 m) and sent to the RMV API to estimate travel times — your exact position is never stored or shared. No personal data is collected.",
+  categoryFilm: "Film",
+  categoryFuehrung: "Guided tour",
+  categoryWorkshop: "Workshop",
+  categoryVortrag: "Lecture",
+  categoryFamilie: "Family",
+  categoryVernissage: "Vernissage",
+  categoryKonzert: "Concert",
 };
 
 const fr: Translations = {
@@ -465,6 +479,13 @@ const fr: Translations = {
   faq7Q: "Comment l'application gère-t-elle mes données ?",
   faq7A:
     "Les likes sont stockés de manière anonyme en utilisant un hachage quotidien de votre adresse IP. Lorsque vous activez le tri par distance, votre position est arrondie à une grille (~200 m) et envoyée à l'API RMV pour estimer les temps de trajet — votre position exacte n'est jamais stockée ou partagée. Aucune donnée personnelle n'est collectée.",
+  categoryFilm: "Film",
+  categoryFuehrung: "Visite guidée",
+  categoryWorkshop: "Atelier",
+  categoryVortrag: "Conférence",
+  categoryFamilie: "Famille",
+  categoryVernissage: "Vernissage",
+  categoryKonzert: "Concert",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
