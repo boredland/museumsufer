@@ -3,7 +3,7 @@ import { raw } from "hono/html";
 import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
-import { ContactDialog } from "../frontend";
+import { buildLangParam, ContactDialog, renderHtmlHead } from "../frontend";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
@@ -45,7 +45,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
   const description = primaryMuseum.description;
   const metaDescription = truncate(description);
   const canonicalUrl = `https://museumsufer.app/museum/${slug}`;
-  const langParam = locale === "de" ? "" : `?lang=${locale}`;
+  const langParam = buildLangParam(locale);
 
   // Build JSON-LD schemas
   const breadcrumb = {
@@ -129,63 +129,20 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>{museumName} – Museumsufer Frankfurt</title>
-          <meta name="description" content={metaDescription || museumName} />
-          <link rel="canonical" href={canonicalUrl} />
+          {renderHtmlHead({
+            locale,
+            title: `${museumName} – Museumsufer Frankfurt`,
+            description: metaDescription || museumName,
+            canonicalUrl,
+            ogImage: primaryMuseum.image_url || "https://museumsufer.app/og-image.png",
+            jsonSchemas: [
+              { name: "breadcrumb", json: JSON.stringify(breadcrumb) },
+              ...museumSchemas.map((schema, i) => ({ name: `museum-${i}`, json: JSON.stringify(schema) })),
+              ...eventSchemas.map((schema, i) => ({ name: `event-${i}`, json: JSON.stringify(schema) })),
+              ...exhibitionSchemas.map((schema, i) => ({ name: `exhibition-${i}`, json: JSON.stringify(schema) })),
+            ],
+          })}
           <meta name="robots" content="index,follow" />
-          <link rel="alternate" hreflang="de" href={`https://museumsufer.app/museum/${slug}`} />
-          <link rel="alternate" hreflang="en" href={`https://museumsufer.app/museum/${slug}?lang=en`} />
-          <link rel="alternate" hreflang="fr" href={`https://museumsufer.app/museum/${slug}?lang=fr`} />
-          <link rel="alternate" hreflang="x-default" href={`https://museumsufer.app/museum/${slug}`} />
-          <meta property="og:title" content={museumName} />
-          <meta property="og:description" content={metaDescription || museumName} />
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content={canonicalUrl} />
-          <meta property="og:locale" content={locale} />
-          <meta property="og:site_name" content="Museumsufer Frankfurt" />
-          <meta property="og:image" content={primaryMuseum.image_url || "https://museumsufer.app/og-image.png"} />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={museumName} />
-          <meta name="twitter:description" content={metaDescription || museumName} />
-          <meta name="twitter:image" content={primaryMuseum.image_url || "https://museumsufer.app/og-image.png"} />
-          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-          <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
-          <link rel="apple-touch-icon" href="/icon-192.png" />
-          <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`,
-            }}
-          />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link
-            rel="preload"
-            as="style"
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            onload="this.onload=null;this.rel='stylesheet'"
-          />
-          <noscript>
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            />
-          </noscript>
-          <link rel="preload" as="style" href="/styles.css" />
-          <link rel="stylesheet" href="/styles.css" />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-          {museumSchemas.map((schema) => (
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-          ))}
-          {eventSchemas.map((schema) => (
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-          ))}
-          {exhibitionSchemas.map((schema) => (
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-          ))}
         </head>
         <body>
           <IconSprite />
@@ -277,7 +234,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                           rel="noopener"
                           class="text-xs text-river hover:underline no-underline"
                         >
-                          {locale === "de" ? "Details" : locale === "en" ? "Details" : "Détails"} →
+                          {tr.details} →
                         </a>
                       )}
                     </div>
@@ -319,7 +276,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                           rel="noopener"
                           class="text-xs text-river hover:underline no-underline"
                         >
-                          {locale === "de" ? "Details" : locale === "en" ? "Details" : "Détails"} →
+                          {tr.details} →
                         </a>
                       )}
                     </div>

@@ -155,6 +155,7 @@ const navLinkClass =
 
 const positionPopover = `var p=document.getElementById(this.getAttribute('popovertarget'));var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.right-180,innerWidth-188))+'px'`;
 
+/** Navigation button for museums — opens popover menu with RMV, Google Maps, and Apple Maps links */
 export function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
   const m = MUSEUM_LOCATIONS[slug];
@@ -216,6 +217,7 @@ function ExternalLinkIcon() {
   return <Icon id="i-open" class="w-[11px] h-[11px] align-[-1px] fill-current" />;
 }
 
+/** Report button for submitting feedback about events, exhibitions, or museums */
 export function ReportButton({
   type,
   title,
@@ -245,6 +247,7 @@ export function ReportButton({
   );
 }
 
+/** Share button for sharing events, exhibitions, or museums on social media */
 export function ShareButton({
   type,
   id,
@@ -698,6 +701,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
   );
 }
 
+/** Main content section with events and exhibitions — used on landing page and partial updates */
 export function ContentBody({
   events,
   exhibitions,
@@ -773,6 +777,7 @@ export function ContentBody({
   );
 }
 
+/** Museums grid section — displays all museums as cards with images and navigation buttons */
 export function MuseumsSection({ museums, tr }: { museums: Record<string, MuseumInfo>; tr: Record<string, string> }) {
   return (
     <Section
