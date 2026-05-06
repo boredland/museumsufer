@@ -943,7 +943,7 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
       // followed by <div class="cinetixxdataset"> blocks for each screening
       // Split by day wrapper to get date context
       const dayWrapperRe =
-        /<h3[^>]*class="[^"]*cinetixxdateseperator[^"]*"[^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3[^>]*class="[^"]*cinetixxdateseperator|$)/gi;
+        /<h3[^>]*class=['"]cinetixxdateseperator['"][^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3[^>]*class=['"]cinetixxdateseperator|$)/gi;
       let dayMatch;
 
       while ((dayMatch = dayWrapperRe.exec(html)) !== null) {
