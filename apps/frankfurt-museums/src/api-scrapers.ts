@@ -376,6 +376,23 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
   const posts = (await res.json()) as SenckenbergEvent[];
   if (!Array.isArray(posts)) return [];
 
+  // The event_title is intentionally generic (e.g. "Alle Jahre wieder…");
+  // the type — "Öffentliche Führung", "Diskussion", "Vortrag", etc. — only
+  // shows up via the event_type taxonomy. Fetch the term names once.
+  const typeMap = new Map<number, string>();
+  try {
+    const base = endpoint.split("/wp-json/")[0];
+    const tRes = await fetch(`${base}/wp-json/wp/v2/event_type?per_page=100`, {
+      headers: { "User-Agent": USER_AGENT },
+    });
+    if (tRes.ok) {
+      const terms = (await tRes.json()) as Array<{ id?: number; name?: string }>;
+      for (const t of terms) {
+        if (typeof t.id === "number" && t.name) typeMap.set(t.id, stripHtml(t.name));
+      }
+    }
+  } catch {}
+
   return posts.flatMap((post): ApiEvent[] => {
     const acf = post.acf;
     if (!acf) return [];
@@ -401,6 +418,11 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
       if (ed !== date) endDate = ed;
     }
 
+    const typeNames = (post.event_type || [])
+      .map((id) => typeMap.get(id) || "")
+      .filter(Boolean)
+      .join(" ");
+
     return [
       {
         title,
@@ -412,6 +434,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
         detail_url: post.link || null,
         image_url: null,
         price: null,
+        category: classifyEvent(`${title} ${typeNames}`, acf.event_decription),
       },
     ];
   });
@@ -420,6 +443,7 @@ async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
 interface SenckenbergEvent {
   title?: { rendered?: string };
   link?: string;
+  event_type?: number[];
   acf?: {
     event_start_time?: string;
     event_stop_time?: string;

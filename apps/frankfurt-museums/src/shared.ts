@@ -222,6 +222,7 @@ export function classifyEvent(title: string, description?: string | null): strin
     haystack.includes("führung") ||
     haystack.includes("fuehrung") ||
     haystack.includes("rundgang") ||
+    haystack.includes("spaziergang") ||
     haystack.includes("tour")
   )
     return "Führung";
