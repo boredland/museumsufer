@@ -56,6 +56,7 @@ export interface Event {
   detail_url: string | null;
   image_url: string | null;
   price: string | null;
+  category: string | null;
   museum_name?: string;
   museum_slug?: string;
 }
