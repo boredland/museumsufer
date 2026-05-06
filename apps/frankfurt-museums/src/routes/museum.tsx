@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { raw } from "hono/html";
 import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
-import { berlinNow, dateOffset, todayIso } from "../date";
+import { dateOffset, todayIso } from "../date";
 import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
 import { dateLocale, detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
 import { IconSprite } from "../icons";
@@ -296,7 +296,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                 rel="noopener"
                 class="hover:text-river no-underline"
               >
-                Source · GitHub
+                Source
               </a>
             </p>
           </div>
