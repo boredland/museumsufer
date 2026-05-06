@@ -461,6 +461,21 @@ export function getManualMuseums(): Array<{
     }));
 }
 
+// Override the Wikipedia article title used for image lookups when the museum's
+// display name doesn't match the article. Keyed by museum slug. Verified to
+// exist on de.wikipedia.org and to have an infobox image.
+export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
+  "deutsches-architekturmuseum": "Deutsches Architekturmuseum",
+  "deutsches-ledermuseum-of": "Deutsches Ledermuseum",
+  "frankfurter-goethe-haus": "Frankfurt-Goethehaus",
+  "junges-museum-frankfurt": "Historisches Museum Frankfurt",
+  "museum-giersch-der-goethe-universitaet": "Museum Giersch",
+  "ikonenmuseum-frankfurt": "Ikonen-Museum (Frankfurt am Main)",
+  "hindemith-kabinett": "Kuhhirtenturm",
+  "caricatura-museum-frankfurt": "Caricatura Museum für Komische Kunst",
+  experiminta: "Experiminta",
+};
+
 export function getImageAllowedDomains(): Set<string> {
   const domains = new Set<string>([
     "museumsufer.de",
