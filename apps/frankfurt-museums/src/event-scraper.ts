@@ -378,8 +378,13 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       values.push(details.time);
     }
     if (details.end_time && !event.end_time) {
-      updates.push("end_time = ?");
-      values.push(details.end_time);
+      // Reject if it's <= the start time (e.g. the regex matched a museum
+      // opening-hours range, not the event's own time slot).
+      const start = event.time || details.time || null;
+      if (!start || details.end_time > start) {
+        updates.push("end_time = ?");
+        values.push(details.end_time);
+      }
     }
     if (details.description && !event.description) {
       updates.push("description = ?");
