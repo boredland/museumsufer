@@ -59,7 +59,11 @@ async function getUntranslatedTexts(env: Env, targetLang: string): Promise<Array
     "SELECT DISTINCT title as text FROM exhibitions WHERE title != ''",
   ).all<{ text: string }>();
 
-  const allTexts = [...eventTexts, ...exhibTexts];
+  const { results: museumTexts } = await env.DB.prepare(
+    "SELECT DISTINCT description as text FROM museums WHERE description IS NOT NULL AND description != ''",
+  ).all<{ text: string }>();
+
+  const allTexts = [...eventTexts, ...exhibTexts, ...museumTexts];
   const seen = new Set<string>();
   const candidates: Array<{ hash: string; text: string }> = [];
 
