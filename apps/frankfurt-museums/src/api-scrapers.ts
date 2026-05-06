@@ -929,98 +929,79 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
 
 const GERMAN_WEEKDAYS = /^(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+/;
 
+interface CinetixxShow {
+  id: number;
+  displayDateTime: string; // ISO 8601
+  _UrlBooking: string;
+}
+
+interface CinetixxEvent {
+  id: number;
+  title: string;
+  movieName?: string;
+  shortDescription?: string;
+  longDescription?: string;
+  imageUrlArtwork?: string;
+  actors?: string;
+  director?: string;
+  genre?: string;
+  duration?: number;
+  shows: CinetixxShow[];
+}
+
 async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
   const today = todayIso();
   const events: ApiEvent[] = [];
 
-  // 1. Scrape the cinema program page (Cinetixx-powered HTML)
+  // 1. Fetch the cinema program from the Cinetixx JSON API
   try {
     const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
     if (res.ok) {
-      const html = await res.text();
+      const data = (await res.json()) as CinetixxEvent[];
+      for (const movie of data) {
+        // Build description from metadata
+        const metadata = [
+          movie.director ? `Regie: ${movie.director}` : null,
+          movie.actors ? `Darsteller: ${movie.actors}` : null,
+          movie.duration ? `${movie.duration} Min.` : null,
+          movie.genre && movie.genre !== "-" ? movie.genre : null,
+        ]
+          .filter(Boolean)
+          .join(" | ");
 
-      // Page structure: <h3 class="cinetixxdateseperator">Weekday DD.MM.YYYY</h3>
-      // followed by <div class="cinetixxdataset"> blocks for each screening
-      // Split by day wrapper to get date context
-      const dayWrapperRe =
-        /<h3[^>]*class=['"]cinetixxdateseperator['"][^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3[^>]*class=['"]cinetixxdateseperator|$)/gi;
-      let dayMatch;
+        const combinedDescription = [
+          metadata ? `<strong>${metadata}</strong>` : null,
+          movie.shortDescription,
+          movie.longDescription,
+        ]
+          .filter(Boolean)
+          .join("<br /><br />");
 
-      while ((dayMatch = dayWrapperRe.exec(html)) !== null) {
-        const headerText = dayMatch[1]
-          .replace(/<[^>]+>/g, "")
-          .replace(/&nbsp;/g, " ")
-          .trim();
-        const dayContent = dayMatch[2];
+        const description = truncateHtml(combinedDescription, 800);
 
-        // Extract DD.MM.YYYY from header
-        const cleaned = headerText.replace(GERMAN_WEEKDAYS, "").trim();
-        const dateMatch = cleaned.match(/(\d{2})\.(\d{2})\.(\d{4})/);
-        if (!dateMatch) continue;
-        const date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
-        if (date < today) continue;
+        for (const show of movie.shows) {
+          const start = new Date(show.displayDateTime);
+          const date = toBerlinDate(start);
+          const time = toBerlinTime(start);
 
-        // Extract each screening from cinetixxdataset blocks
-        const datasetRe =
-          /<div\s+class='cinetixxdataset'>([\s\S]*?)(?=<div\s+class='cinetixxdataset'>|<\/div>\s*<\/div>\s*<div\s+class='cinetixxday-wrapper|$)/gi;
-        let datasetMatch;
-
-        while ((datasetMatch = datasetRe.exec(dayContent)) !== null) {
-          const block = datasetMatch[1];
-
-          // Time: <p class='cinetixx-content-value' id='time'>18:00 Uhr</p>
-          const timeMatch = block.match(/class='cinetixx-content-value'[^>]*>\s*(\d{1,2}:\d{2})\s*Uhr/);
-          if (!timeMatch) continue;
-          const time = timeMatch[1].padStart(5, "0");
-
-          // Title: <h4>TITLE</h4>
-          const titleMatch = block.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
-          if (!titleMatch) continue;
-          const rawTitle = titleMatch[1].replace(/<[^>]+>/g, "").trim();
-          if (!rawTitle) continue;
-
-          // Image: <div class='cinetixx-image'><img src='https://images.cinetixx.com/...' /></div>
-          const imgMatch = block.match(/class='cinetixx-image'[^>]*>\s*<img[^>]+src='([^']+)'/i);
-          const imageUrl = imgMatch?.[1] || null;
-
-          // Short description (metadata): <div class='textshort'>...</div>
-          const shortMatch = block.match(/<div\s+class='textshort'>([\s\S]*?)<\/div>/i);
-          const shortText = shortMatch ? stripHtml(shortMatch[1]).trim() : null;
-
-          // Long description (plot synopsis): <div class='additionaltext' ... id='longTextN'>...</div>
-          const longMatch = block.match(/<div\s+class='additionaltext'[^>]*>([\s\S]*?)<\/div>/i);
-          const longText = longMatch ? stripHtml(longMatch[1]).trim() : null;
-
-          // Combine: short metadata + long description
-          let description: string | null = null;
-          if (shortText && longText) {
-            description = truncateHtml(`${shortText}\n${longText}`, 500);
-          } else if (longText) {
-            description = truncateHtml(longText, 500);
-          } else if (shortText) {
-            description = truncateHtml(shortText, 500);
-          }
-
-          // Detail URL: link to film series page
-          const linkMatch = block.match(/href=['"]([^'"]+)['"][^>]*>\s*Zur Filmreihe/);
-          const detailUrl = linkMatch ? normalizeUrl(linkMatch[1].trim(), "https://www.dff.film") : null;
+          if (date < today) continue;
 
           events.push({
-            title: rawTitle,
+            title: movie.title || movie.movieName || "Unbenannter Film",
             date,
             time: nullIfMidnight(time),
             end_time: null,
             end_date: null,
             description,
-            detail_url: detailUrl,
-            image_url: imageUrl,
+            detail_url: show._UrlBooking || null,
+            image_url: movie.imageUrlArtwork || null,
             price: null,
           });
         }
       }
     }
   } catch (e) {
-    console.error("Failed to scrape DFF cinema program:", e);
+    console.error("Failed to fetch DFF cinema API:", e);
   }
 
   // 2. Also fetch tribe-events for non-cinema museum events (workshops, tours, etc.)

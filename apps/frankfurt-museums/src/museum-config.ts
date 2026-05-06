@@ -91,7 +91,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6728,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dff.film/besuch/ausstellungen/",
-    eventApi: { type: "dff-kino", endpoint: "https://www.dff.film/kino/kinoprogramm/aktuelles-kinoprogramm/" },
+    eventApi: { type: "dff-kino", endpoint: "https://booking.cinetixx.de/api/cinemas/events/cinema/2038440885" },
   },
   "dommuseum-frankfurt": {
     lat: 50.1114,
