@@ -104,55 +104,6 @@ export async function persistScrapeResult(
   return { shows: result.shows.length, performances: performanceCount };
 }
 
-export interface AvailabilityCandidate {
-  performance_id: number;
-  provider_event_id: string;
-}
-
-export async function getAvailabilityCandidates(
-  db: D1Database,
-  theaterId: number,
-  fromDate: string,
-  toDate: string,
-): Promise<AvailabilityCandidate[]> {
-  const { results } = await db
-    .prepare(
-      `SELECT p.id AS performance_id, p.provider_event_id
-       FROM performances p
-       JOIN shows s ON s.id = p.show_id
-       WHERE s.theater_id = ?1
-         AND p.date BETWEEN ?2 AND ?3
-         AND p.provider_event_id IS NOT NULL
-         AND p.status IN ('available', 'few_left', 'unknown')
-       ORDER BY p.date, p.time`,
-    )
-    .bind(theaterId, fromDate, toDate)
-    .all<{ performance_id: number; provider_event_id: string }>();
-
-  return results;
-}
-
-export async function updateAvailability(
-  db: D1Database,
-  performanceId: number,
-  available: number,
-  total: number,
-  status: string,
-): Promise<void> {
-  await db
-    .prepare(
-      `UPDATE performances
-         SET available_seats = ?2,
-             total_seats = ?3,
-             status = ?4,
-             availability_checked_at = datetime('now'),
-             updated_at = datetime('now')
-       WHERE id = ?1`,
-    )
-    .bind(performanceId, available, total, status)
-    .run();
-}
-
 export async function getPerformancesForDate(
   db: D1Database,
   date: string,

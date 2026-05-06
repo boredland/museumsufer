@@ -8,9 +8,7 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel";
-  /** Eventim Inhouse host for the live availability enricher, if applicable. */
-  eventim_inhouse_host?: string;
+  scraper: "schauspiel" | "oper";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -23,6 +21,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.schauspielfrankfurt.de",
     ticketing_provider: "eventim_inhouse",
     scraper: "schauspiel",
-    eventim_inhouse_host: "schauspielfrankfurt.eventim-inhouse.de",
+  },
+  {
+    slug: "oper-frankfurt",
+    name: "Oper Frankfurt",
+    address: "Untermainanlage 11, 60311 Frankfurt am Main",
+    lat: 50.1077,
+    lon: 8.6726,
+    website_url: "https://oper-frankfurt.de",
+    ticketing_provider: "eventim_inhouse",
+    scraper: "oper",
   },
 ];

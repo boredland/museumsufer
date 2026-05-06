@@ -6,7 +6,14 @@ Cloudflare Worker that aggregates performances from Frankfurt theaters.
 
 ## Status
 
-Early scaffold. Single theater wired up: **Schauspiel Frankfurt** (~93 performances/45 days, with sold-out detection and Eventim event IDs for live availability checks later).
+Two theaters wired up:
+
+| Theater | Source | Coverage | Status detection |
+|---|---|---|---|
+| Schauspiel Frankfurt | `schauspielfrankfurt.de/spielplan/` (schema.org Event microdata + `performance--is-*` classes) | ~93 performances / 45 days | available / sold_out / cancelled |
+| Oper Frankfurt | `oper-frankfurt.de/de/spielplan/` (`repertoire-element` cards anchored to a `dates_available` JS array) | ~29 performances / 22 days (current month only) | available / sold_out / cancelled |
+
+Live seat counts are **not** scraped — the Eventim Inhouse API requires a signed URL that's only producible in a real browser, and the inhouse host blocks Cloudflare Workers (Akamai bot management).
 
 ## Stack
 
@@ -56,10 +63,11 @@ curl http://localhost:8787/api/day?date=2026-05-08
 
 ## Roadmap
 
-- [x] Eventim public API enrichment for live seat counts. Implemented in `src/enrich/eventim-availability.ts`, but **currently a no-op in production**: the inhouse host returns HTTP 520 to Cloudflare Workers (Akamai bot management). The HTML-derived `available` / `sold_out` / `cancelled` status remains correct. To unblock live counts we'd need Workers Browser Rendering — see `BROWSER` binding pattern in the museums app.
-- [x] Cancelled performance detection (`performance--is-canceled` class)
-- [ ] Oper Frankfurt — sister theater, expected to share parser shape. Live structure not yet verified (host unreachable from current dev IP).
+- [x] Schauspiel Frankfurt parser (sold-out / cancelled detection)
+- [x] Oper Frankfurt parser
+- [ ] Oper Frankfurt: pull next-month performances too. Front page only ships the current month's repertoire-elements, even though `dates_available` lists the full season. The AJAX endpoint at `/includes/php/spielplan/spielplan_ausgabe_monat.php` dumps the entire archive (~3800 events back to 2016) but with no per-event date attribution, so it isn't a drop-in replacement.
 - [ ] Show description + image enrichment from each show's detail page
 - [ ] Theater Willy Praml (WordPress + Eventim)
 - [ ] DeepL translation pipeline (reuse museums approach)
 - [ ] Design pass after a few theaters are wired up
+- [ ] Live seat counts via Workers Browser Rendering (deferred — Eventim Inhouse blocks plain Worker fetches via Akamai bot management)
