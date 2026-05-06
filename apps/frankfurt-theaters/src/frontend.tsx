@@ -61,6 +61,7 @@ function renderPerformance(p: DayPerformance): string {
   const room = p.venue_room ? ` · ${escapeHtml(p.venue_room)}` : "";
   const ticket = p.ticket_url ? `<a href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">Tickets</a>` : "";
   const subtitle = p.show.subtitle ? `<div class="meta">${escapeHtml(p.show.subtitle)}</div>` : "";
+  const price = formatPriceRange(p.price_min, p.price_max);
 
   return `<article class="perf">
     <div class="time">${time}${endTime}</div>
@@ -71,9 +72,16 @@ function renderPerformance(p: DayPerformance): string {
     </div>
     <div>
       <span class="badge badge--${p.status}">${badgeLabel(p.status)}</span><br/>
+      ${price ? `<span class="meta">${price}</span><br/>` : ""}
       ${ticket}
     </div>
   </article>`;
+}
+
+function formatPriceRange(min: number | null, max: number | null): string | null {
+  if (min == null && max == null) return null;
+  if (min != null && max != null && min !== max) return `${min}–${max} €`;
+  return `${max ?? min} €`;
 }
 
 function badgeLabel(status: string): string {
