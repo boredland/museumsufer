@@ -143,8 +143,17 @@ function parseElement(block: string): ParsedElement | null {
   const ticketUrl = idDatum ? detailUrl : null;
 
   const isSoldOut = /label-blank">\s*Ausverkauft/.test(block);
+  const isFewLeft = /label-blank">\s*Restkarten/.test(block);
   const isCancelled = /\b(?:Abgesagt|Entfällt|Ausgefallen)\b/i.test(block);
-  const status = isCancelled ? "cancelled" : isSoldOut ? "sold_out" : ticketUrl ? "available" : "unknown";
+  const status = isCancelled
+    ? "cancelled"
+    : isSoldOut
+      ? "sold_out"
+      : isFewLeft
+        ? "few_left"
+        : ticketUrl
+          ? "available"
+          : "unknown";
 
   return {
     show: {

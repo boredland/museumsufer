@@ -4,21 +4,64 @@ import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://www.schauspielfrankfurt.de";
 const SPIELPLAN_URL = `${BASE}/spielplan/`;
+const KARTEN_URL = `${BASE}/karten-abos/karten/`;
 
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 export async function scrapeSchauspielFrankfurt(): Promise<ScrapeResult> {
-  const res = await fetch(SPIELPLAN_URL, {
-    headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
-  });
-  if (!res.ok) {
-    throw new Error(`Schauspiel spielplan fetch failed: ${res.status}`);
-  }
-  const html = await res.text();
-  return parseSchauspielHtml(html);
+  const [spielplanHtml, kartenHtml] = await Promise.all([
+    fetchHtml(SPIELPLAN_URL),
+    fetchHtml(KARTEN_URL).catch(() => null),
+  ]);
+  const venuePrices = kartenHtml ? parseSchauspielPrices(kartenHtml) : new Map();
+  return parseSchauspielHtml(spielplanHtml, venuePrices);
 }
 
-export function parseSchauspielHtml(html: string): ScrapeResult {
+async function fetchHtml(url: string): Promise<string> {
+  const res = await fetch(url, {
+    headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
+  });
+  if (!res.ok) throw new Error(`fetch failed: ${url} → ${res.status}`);
+  return res.text();
+}
+
+interface PriceRange {
+  min: number;
+  max: number;
+}
+
+/**
+ * Parses /karten-abos/karten/ to a `venue_room → {min, max}€` map.
+ *
+ * The page lists per-venue tables of Preisgruppe × Kategorie cells. We don't
+ * know which Preisgruppe applies to a given performance — Schauspiel doesn't
+ * publish that on the spielplan — so we report the overall venue range and
+ * let the UI advertise it as "from X € to Y €".
+ *
+ * Box has no table; it's a flat 9-15 € line ("Box 15 € / ermäßigt 9 €").
+ */
+export function parseSchauspielPrices(html: string): Map<string, PriceRange> {
+  const out = new Map<string, PriceRange>();
+  const parts = html.split(/<h[34][^>]*>([^<]+)<\/h[34]>/);
+  for (let i = 1; i < parts.length; i += 2) {
+    const heading = parts[i].trim();
+    const content = parts[i + 1] ?? "";
+    if (heading === "Schauspielhaus" || heading === "Kammerspiele") {
+      const table = content.match(/<table\b[\s\S]*?<\/table>/);
+      if (!table) continue;
+      const prices = [...table[0].matchAll(/(\d{1,3})\s*€/g)].map((m) => parseInt(m[1], 10));
+      if (prices.length) out.set(heading, { min: Math.min(...prices), max: Math.max(...prices) });
+    }
+    if (heading === "Box") {
+      // "Box 15 € / ermäßigt 9 €" — text only, no table.
+      const flat = stripHtml(content).match(/(\d{1,3})\s*€\s*\/\s*ermäßigt\s*(\d{1,3})\s*€/);
+      if (flat) out.set("Box", { min: parseInt(flat[2], 10), max: parseInt(flat[1], 10) });
+    }
+  }
+  return out;
+}
+
+export function parseSchauspielHtml(html: string, venuePrices: Map<string, PriceRange> = new Map()): ScrapeResult {
   const blocks = extractPerformanceBlocks(html);
 
   const showsBySlug = new Map<string, ScrapedShow>();
@@ -36,6 +79,12 @@ export function parseSchauspielHtml(html: string): ScrapeResult {
     const dedup = `${show.slug}|${perf.date}|${perf.time ?? ""}|${perf.venue_room ?? ""}`;
     if (seen.has(dedup)) continue;
     seen.add(dedup);
+
+    const range = perf.venue_room ? venuePrices.get(perf.venue_room) : undefined;
+    if (range) {
+      perf.price_min = range.min;
+      perf.price_max = range.max;
+    }
 
     if (!showsBySlug.has(show.slug)) showsBySlug.set(show.slug, show);
     performances.push({ ...perf, show_slug: show.slug });
