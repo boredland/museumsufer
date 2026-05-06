@@ -163,7 +163,8 @@ function Mark({ class: cls }: { class?: string }) {
   );
 }
 
-function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
+/** Masthead with logo, location, theme toggle, and language switcher */
+export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
     <header class="mb-12 max-[480px]:mb-9">
       <div class="flex items-center justify-between gap-4 mb-4">

@@ -3,7 +3,7 @@ import { raw } from "hono/html";
 import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
-import { buildLangParam, ContactDialog, renderHtmlHead } from "../frontend";
+import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
@@ -146,7 +146,9 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
         </head>
         <body>
           <IconSprite />
-          <div class="max-w-[640px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
+          <div class="max-w-[720px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
+            <Masthead locale={locale} tr={tr} />
+
             <p class="mb-8">
               <a
                 href={`/${langParam}`}
