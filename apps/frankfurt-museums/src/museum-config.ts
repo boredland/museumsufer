@@ -14,7 +14,8 @@ export type EventApiType =
   | "fkv"
   | "fdh"
   | "dff-kino"
-  | "archaeologisches";
+  | "archaeologisches"
+  | "fritz-bauer-wollheim";
 
 export interface ProxyConfig {
   url: string;
@@ -420,6 +421,16 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Botanischer Garten@X=8654383@Y=50126171@U=80@L=3000215@",
     exhibitionUrl: "https://www.palmengarten.de/de/aktuelles.html",
   },
+  "wollheim-memorial-frankfurt": {
+    name: "Wollheim Memorial",
+    description:
+      "Mahnmal auf dem Campus Westend zur Erinnerung an die KZ-Häftlinge, die im IG Farben-Werk Buna/Monowitz Zwangsarbeit leisten mussten.",
+    website: "http://www.wollheim-memorial.de/",
+    lat: 50.1244,
+    lng: 8.6671,
+    rmvStopLid: "A=1@O=Frankfurt (Main) Bockenheimer Warte@X=8649789@Y=50125353@U=80@L=3000111@",
+    eventApi: { type: "fritz-bauer-wollheim", endpoint: "https://www.fritz-bauer-institut.de/veranstaltungen" },
+  },
 };
 
 export function getMuseumConfig(slug: string): MuseumConfig | undefined {
@@ -472,6 +483,7 @@ export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
   "dommuseum-frankfurt": "Frankfurter Dom",
   "kunststiftung-dz-bank": "City-Haus I",
   "museum-sinclair-haus-bad-homburg": "Sinclair-Haus",
+  "wollheim-memorial-frankfurt": "Wollheim-Memorial",
 };
 
 // Direct Wikimedia Commons image URLs for museums without a relevant

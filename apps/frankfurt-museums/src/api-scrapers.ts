@@ -65,6 +65,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchDffKino(config.endpoint);
     case "archaeologisches":
       return fetchArchaeologisches(config.endpoint);
+    case "fritz-bauer-wollheim":
+      return fetchFritzBauerWollheim(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1246,6 +1248,74 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
         lastIndexThisDay = events.length - 1;
       }
     }
+  }
+
+  return events;
+}
+
+// The Wollheim Memorial has no events feed of its own; their guided tours are
+// listed on the Fritz Bauer Institut's calendar, mixed with the institute's
+// own events. We scrape the listing and keep only entries whose title mentions
+// "Wollheim Memorial".
+async function fetchFritzBauerWollheim(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const today = todayIso();
+  const events: ApiEvent[] = [];
+
+  const blockRe =
+    /<div class="col-sm-12 col-md-12 mb-12 events events-latest[^"]*"[^>]*>([\s\S]*?)(?=<div class="col-sm-12 col-md-12 mb-12 events events-latest|<footer\b|$)/g;
+
+  let m: RegExpExecArray | null = blockRe.exec(html);
+  while (m !== null) {
+    const block = m[1];
+    const titleMatch = block.match(/<a\s+title="([^"]+)"[^>]+href="([^"]+)"/);
+    if (!titleMatch || !/wollheim\s*[-\s]\s*memorial/i.test(titleMatch[1])) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const title = titleMatch[1].trim();
+    const detailUrl = titleMatch[2].startsWith("http")
+      ? titleMatch[2]
+      : `https://www.fritz-bauer-institut.de${titleMatch[2]}`;
+
+    const dateRaw = block.match(/class="_event-date"[^>]*>([\s\S]*?)<\/h3>/)?.[1] ?? "";
+    const dateText = stripHtml(dateRaw).replace(/\s+/g, " ").trim();
+    const dateParts = dateText.match(/(\d{1,2})\s+(\w+)\s+(\d{4})(?:\s+(\d{1,2}:\d{2}))?/);
+    if (!dateParts) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const [, day, monthName, year, time] = dateParts;
+    const monthNum = GERMAN_MONTHS[monthName.toLowerCase()];
+    if (!monthNum) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const date = `${year}-${monthNum}-${day.padStart(2, "0")}`;
+    if (date < today) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const subtitle = block.match(/<h3 class="mt-0"><small>([^<]+)<\/small>/)?.[1]?.trim() || null;
+    const descMatch = block.match(/<div class="collapse"[^>]*>[\s\S]*?<p>([\s\S]*?)<\/p>/);
+
+    events.push({
+      title,
+      date,
+      time: nullIfMidnight(time || null),
+      end_time: null,
+      end_date: null,
+      description: descMatch ? truncateHtml(descMatch[1]) : null,
+      detail_url: detailUrl,
+      image_url: null,
+      price: null,
+      category: subtitle && /führung|rundgang/i.test(subtitle) ? "Führung" : null,
+    });
+
+    m = blockRe.exec(html);
   }
 
   return events;
