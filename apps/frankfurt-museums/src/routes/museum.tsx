@@ -3,6 +3,7 @@ import { raw } from "hono/html";
 import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
+import { ContactDialog } from "../frontend";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
@@ -340,6 +341,9 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
               </a>
             </p>
           </div>
+
+          <ContactDialog tr={tr} />
+
           <script
             dangerouslySetInnerHTML={{
               __html: `const T = ${JSON.stringify(tr)};\n${CLIENT_SCRIPT}`,

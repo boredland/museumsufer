@@ -333,7 +333,7 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-function ContactDialog({ tr }: { tr: Record<string, string> }) {
+export function ContactDialog({ tr }: { tr: Record<string, string> }) {
   const inputClass =
     "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
   const labelClass = "font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary block mb-1.5";
