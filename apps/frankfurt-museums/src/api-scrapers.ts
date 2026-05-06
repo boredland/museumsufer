@@ -206,6 +206,37 @@ interface HistorischesEvent {
   isFree?: boolean;
 }
 
+const JUEDISCHES_CATEGORY_MAP: Record<string, string> = {
+  führung: "Führung",
+  rundgang: "Führung",
+  workshop: "Workshop",
+  kurs: "Workshop",
+  atelier: "Workshop",
+  werkstatt: "Workshop",
+  vortrag: "Vortrag",
+  buchvorstellung: "Vortrag",
+  buchpräsentation: "Vortrag",
+  lesung: "Vortrag",
+  gespräch: "Vortrag",
+  podiumsdiskussion: "Vortrag",
+  diskussion: "Vortrag",
+  konzert: "Konzert",
+  musik: "Konzert",
+  vernissage: "Vernissage",
+  eröffnung: "Vernissage",
+  familienprogramm: "Familie",
+  familie: "Familie",
+  kinder: "Familie",
+  film: "Film",
+  kino: "Film",
+};
+
+function mapJuedischesCategory(raw: string | undefined): string | null {
+  if (!raw) return null;
+  const key = raw.trim().toLowerCase();
+  return JUEDISCHES_CATEGORY_MAP[key] || null;
+}
+
 async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
   if (!res.ok) return [];
@@ -246,6 +277,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
         detail_url: ev.detailPageLink?.href || null,
         image_url: imageUrl,
         price: null,
+        category: mapJuedischesCategory(ev.category),
         museum_slug_override: isJudengasse ? "juedisches-museum-museum-judengasse-frankfurt" : undefined,
       },
     ];
@@ -1057,6 +1089,9 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
+const ARCHAEOLOGISCHES_CANCELLED = /\b(?:muss\s+leider\s+entfallen|entfällt|entfallen|abgesagt|fällt\s+aus)\b/i;
+const ARCHAEOLOGISCHES_SOLDOUT = /\b(?:bereits\s+ausgebucht|ausgebucht|sold\s+out)\b/i;
+
 async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
@@ -1071,7 +1106,9 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
 
   while ((panelMatch = panelRe.exec(html)) !== null) {
     const panel = panelMatch[1];
-    const monthMatch = panel.match(/<span class="sppb-panel-title">([^<]+)/);
+    const monthMatch =
+      panel.match(/<span[^>]*\bclass="sppb-panel-title"[^>]*\baria-label="([^"]+)"/) ||
+      panel.match(/<span[^>]*\bclass="sppb-panel-title"[^>]*>\s*([^<]+?)\s*</);
     if (!monthMatch) continue;
 
     const monthParts = monthMatch[1].trim().split(" ");
@@ -1083,7 +1120,12 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
     if (!bodyMatch) continue;
     const body = bodyMatch[1];
 
-    // Split body by day headers: "10 | SAMSTAG"
+    // The calendar is a rolling 12 months in Jan–Dec order, so the year jumps
+    // mid-list. Each panel body opens with <p><strong>YYYY</strong></p>; trust
+    // it instead of inferring from today's date.
+    const yearMatch = body.match(/<p[^>]*>\s*<strong>\s*(\d{4})\s*<\/strong>\s*<\/p>/);
+    const panelYear = yearMatch ? yearMatch[1] : String(inferYear(monthNum, "01"));
+
     const dayBlocks = body.split(/<strong>\s*\d{1,2}\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/);
     const dayHeaders = body.match(/<strong>\s*(\d{1,2})\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/g);
 
@@ -1094,20 +1136,44 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
       const dayMatch = header.match(/(\d{1,2})/);
       if (!dayMatch) continue;
       const day = dayMatch[1].padStart(2, "0");
-      const date = `${inferYear(monthNum, day)}-${monthNum}-${day}`;
+      const date = `${panelYear}-${monthNum}-${day}`;
       if (date < today) continue;
 
       const block = dayBlocks[i + 1];
       if (!block) continue;
 
-      // Events in this block
-      // Regex for time range, optional category in <em>, and title in <strong>
+      // Inner [\s\S]*? lets us capture titles that contain <em>, <span>, or
+      // status notes like <span style="...">ausgebucht</span>.
       const eventRe =
-        /(?:(\d{1,2}(?:[:.]\d{2})?(?:\s*[-–]\s*\d{1,2}(?:[:.]\d{2})?)?)\s*Uhr)?\s*(?:&nbsp;|\s)*?(?:<em>([^<]*)<\/em>)?\s*(?:<br \/>)?\s*<strong>([^<]+)<\/strong>/g;
+        /(?:(\d{1,2}(?:[:.]\d{2})?(?:\s*[-–]\s*\d{1,2}(?:[:.]\d{2})?)?)\s*Uhr)?\s*(?:&nbsp;|\s)*?(?:<em>([^<]*)<\/em>)?\s*(?:<br \/>)?\s*<strong>([\s\S]*?)<\/strong>/g;
 
+      let lastIndexThisDay = -1;
       let evMatch;
       while ((evMatch = eventRe.exec(block)) !== null) {
-        const [, timeRange, category, title] = evMatch;
+        const [, timeRange, category, rawTitle] = evMatch;
+        const cleanTitle = stripHtml(rawTitle).trim();
+        if (!cleanTitle) continue;
+
+        const cancelled = ARCHAEOLOGISCHES_CANCELLED.test(cleanTitle);
+        const soldOut = ARCHAEOLOGISCHES_SOLDOUT.test(cleanTitle);
+
+        // A trailing <strong> that contains nothing but a status note ("muss
+        // leider entfallen", "ausgebucht") refers to the prior event in the
+        // same day rather than introducing a new one.
+        const statusOnly = !timeRange && !category && (cancelled || soldOut) && cleanTitle.length < 40;
+        if (statusOnly) {
+          if (lastIndexThisDay >= 0) {
+            if (cancelled) {
+              events.splice(lastIndexThisDay, 1);
+              lastIndexThisDay = -1;
+            } else if (soldOut && !events[lastIndexThisDay].title.includes("ausgebucht")) {
+              events[lastIndexThisDay].title = `${events[lastIndexThisDay].title} (ausgebucht)`;
+            }
+          }
+          continue;
+        }
+
+        if (cancelled) continue;
 
         let time = null;
         let endTime = null;
@@ -1119,8 +1185,12 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
           if (endTime && !endTime.includes(":")) endTime += ":00";
         }
 
+        const finalTitle = soldOut
+          ? `${cleanTitle.replace(ARCHAEOLOGISCHES_SOLDOUT, "").trim()} (ausgebucht)`
+          : cleanTitle;
+
         events.push({
-          title: stripHtml(title).trim(),
+          title: finalTitle,
           date,
           time: nullIfMidnight(time),
           end_time: nullIfMidnight(endTime),
@@ -1131,6 +1201,7 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
           category: category ? stripHtml(category).trim() : null,
           price: null,
         });
+        lastIndexThisDay = events.length - 1;
       }
     }
   }
