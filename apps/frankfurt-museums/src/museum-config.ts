@@ -480,6 +480,7 @@ export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
   "frankfurter-buergerstiftung": "Holzhausenschlösschen",
   "dommuseum-frankfurt": "Frankfurter Dom",
   "kunststiftung-dz-bank": "City-Haus I",
+  "museum-sinclair-haus-bad-homburg": "Sinclair-Haus",
 };
 
 export function getImageAllowedDomains(): Set<string> {
