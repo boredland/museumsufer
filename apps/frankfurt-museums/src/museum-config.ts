@@ -479,6 +479,7 @@ export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": "Museum MMK für Moderne Kunst",
   "frankfurter-buergerstiftung": "Holzhausenschlösschen",
   "dommuseum-frankfurt": "Frankfurter Dom",
+  "kunststiftung-dz-bank": "City-Haus I",
 };
 
 export function getImageAllowedDomains(): Set<string> {
