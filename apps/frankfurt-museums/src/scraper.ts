@@ -136,9 +136,12 @@ async function scrapeMuseums(env: Env): Promise<number> {
 
   const ops = museums.map((m) => {
     const slug = m.url.replace(/^\/de\/museen\//, "").replace(/\/$/, "");
-    const desc = m.description?.trim() || null;
+    // The source HTML occasionally embeds line breaks inside the name (e.g.
+    // "Klingspor Museum –\r\nOffenbach am Main"); collapse runs of whitespace.
+    const name = m.name.replace(/\s+/g, " ").trim();
+    const desc = m.description?.replace(/\s+/g, " ").trim() || null;
     const img = m.teaser_img ? `${BASE_URL}/media/sliderimages/${m.teaser_img}` : null;
-    return stmt.bind(m.name.trim(), slug, `${BASE_URL}${m.url}`, desc, img);
+    return stmt.bind(name, slug, `${BASE_URL}${m.url}`, desc, img);
   });
 
   await env.DB.batch(ops);
