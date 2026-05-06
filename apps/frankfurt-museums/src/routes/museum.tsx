@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import { raw } from "hono/html";
 import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
-import { dateOffset, todayIso } from "../date";
+import { berlinNow, dateOffset, todayIso } from "../date";
 import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
-import { detectLocale, getTranslations, type Locale } from "../i18n";
+import { dateLocale, detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
 import type { Env, Event, Exhibition } from "../types";
@@ -305,7 +305,13 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
 
           <script
             dangerouslySetInnerHTML={{
-              __html: `const T = ${JSON.stringify(tr)};\n${CLIENT_SCRIPT}`,
+              __html: `const T = ${JSON.stringify(tr)};
+const DATE_LOCALE = ${JSON.stringify(dateLocale(locale))};
+const LOCALES = ${JSON.stringify(SUPPORTED_LOCALES)};
+const CURRENT_LANG = '${locale}';
+const BERLIN_TODAY = '${todayIso()}';
+const __INITIAL_DATE__ = null;
+${CLIENT_SCRIPT}`,
             }}
           />
         </body>
