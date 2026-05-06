@@ -34,7 +34,7 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 | `apps/frankfurt-museums/src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
 | `apps/frankfurt-museums/src/scraper.ts` | Scrapes museumsufer.de for museums and exhibitions. Deterministic — no AI. |
 | `apps/frankfurt-museums/src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
-| `apps/frankfurt-museums/src/api-scrapers.ts` | 15 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`. Each returns `ApiEvent[]`. |
+| `apps/frankfurt-museums/src/api-scrapers.ts` | 16 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`, `dff-kino`. Each returns `ApiEvent[]`. |
 | `apps/frankfurt-museums/src/event-scraper.ts` | Orchestrator: API-first with AI fallback, link matching, detail page enrichment. |
 | `apps/frankfurt-museums/src/translate.ts` | DeepL translation pipeline with SHA-256 hash-based D1 caching. DE→EN/FR. |
 | `apps/frankfurt-museums/src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
@@ -42,7 +42,7 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 
 ## Event scraping: three tiers
 
-### Tier 1: Structured APIs (15 museums, best data)
+### Tier 1: Structured APIs (16 museums, best data)
 
 Configured in `apps/frankfurt-museums/src/museum-config.ts`. When the event scraper finds a matching slug, it calls `fetchEventsFromApi()` and skips AI scraping entirely.
 
@@ -52,7 +52,7 @@ Configured in `apps/frankfurt-museums/src/museum-config.ts`. When the event scra
 | Historisches Museum (+ Junges Museum, Porzellan Museum) | `historisches-museum-frankfurt` | `historisches` | Fetches 4 endpoints (base + fuehrung/workshop/stadtgang types), routes to sub-museums via `locations` field, filters `specialExhibition` |
 | Jüdisches Museum | `juedisches-museum-frankfurt` | `juedisches` | TYPO3 feed.json, events routed to Judengasse via `locationAlt` → `museum_slug_override` |
 | DAM | `deutsches-architekturmuseum` | `tribe-events` | Standard Tribe Events with cost, image, venue |
-| DFF | `dff-deutsches-filminstitut-filmmuseum` | `tribe-events` | Same format |
+| DFF | `dff-deutsches-filminstitut-filmmuseum` | `dff-kino` | Cinema program HTML (h3 date headers + h4 titles) + tribe-events for museum events |
 | Senckenberg | `senckenberg-naturmuseum` | `senckenberg` | WP REST + ACF fields, needs User-Agent |
 | MFK | `museum-fuer-kommunikation-frankfurt` | `my-calendar` | My Calendar WP plugin, fallback time extraction from event_desc |
 | Liebieghaus | `liebieghaus-skulpturensammlung` | `liebieghaus` | schema.org Event HTML with duration |
@@ -205,7 +205,7 @@ These issues exist in the current codebase. When fixing or refactoring scrapers,
 
 | Parser | Issue | Impact | Fix |
 |---|---|---|---|
-| **tribe-events** (DAM, DFF) | No `nullIfMidnight()` on start/end times (lines 86-87) | Midnight times render as "00:00" instead of all-day events | Wrap both lines with `nullIfMidnight()` |
+| **tribe-events** (DAM) | No `nullIfMidnight()` on start/end times (lines 86-87) | Midnight times render as "00:00" instead of all-day events | Wrap both lines with `nullIfMidnight()` |
 | **mak** (MAK) | No `nullIfMidnight()` on time/end_time (lines 667-668) | Times extracted via regex could theoretically be "00:00" | Use `nullIfMidnight()` for both; low risk since regex-matched |
 | **stadtgeschichte-rss** (IfS) | No `nullIfMidnight()` on time/end_time (lines 721-722) | Times extracted via regex not filtered for "00:00" | Use `nullIfMidnight()` for both |
 | All parsers | Inconsistent midnight handling | Some use utility, some manual checks, some skip | Always use `nullIfMidnight()` from shared.ts |

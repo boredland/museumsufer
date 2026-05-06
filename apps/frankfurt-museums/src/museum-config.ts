@@ -12,7 +12,8 @@ export type EventApiType =
   | "ledermuseum"
   | "bibelhaus"
   | "fkv"
-  | "fdh";
+  | "fdh"
+  | "dff-kino";
 
 export interface ProxyConfig {
   url: string;
@@ -90,7 +91,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6728,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dff.film/besuch/ausstellungen/",
-    eventApi: { type: "tribe-events", endpoint: "https://www.dff.film/wp-json/tribe/events/v1/events" },
+    eventApi: { type: "dff-kino", endpoint: "https://www.dff.film/kino/kinoprogramm/aktuelles-kinoprogramm/" },
   },
   "dommuseum-frankfurt": {
     lat: 50.1114,

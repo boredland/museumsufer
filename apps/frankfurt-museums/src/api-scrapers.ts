@@ -59,6 +59,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchFkv(config.endpoint);
     case "fdh":
       return fetchFdh(config.endpoint);
+    case "dff-kino":
+      return fetchDffKino(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -607,7 +609,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
     if (date < todayIso()) continue;
 
     const timeRangeMatch = heading.match(
-      /^(\d{1,2}(?:[.:]\d{2})?)\s*(?:[–\-]\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*[–\-]\s*/,
+      /^(\d{1,2}(?:[.:]\d{2})?)\s*(?:[–-]\s*(\d{1,2}(?:[.:]\d{2})?))?(?:\s*Uhr)?\s*[–-]\s*/,
     );
     let time: string | null = null;
     let endTime: string | null = null;
@@ -920,6 +922,93 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
         });
       }
     } catch {}
+  }
+
+  return events;
+}
+
+const GERMAN_WEEKDAYS = /^(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+/;
+
+async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
+  const today = todayIso();
+  const events: ApiEvent[] = [];
+
+  // 1. Scrape the cinema program page
+  try {
+    const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+    if (res.ok) {
+      const html = await res.text();
+
+      // Structure: <h3>Weekday DD.MM.YYYY</h3> then pairs of "HH:MM Uhr" + <h4>TITLE</h4>
+      // Split by h3 day headers
+      const dayBlocks = html.split(/<h3[^>]*>/i);
+
+      for (const block of dayBlocks) {
+        // Extract date from the day header: "Mittwoch  06.05.2026"
+        const headerEnd = block.indexOf("</h3>");
+        if (headerEnd === -1) continue;
+        const header = block
+          .slice(0, headerEnd)
+          .replace(/<[^>]+>/g, "")
+          .trim();
+
+        // Remove weekday prefix, extract DD.MM.YYYY
+        const cleaned = header.replace(GERMAN_WEEKDAYS, "").trim();
+        const dateMatch = cleaned.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+        if (!dateMatch) continue;
+        const date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
+        if (date < today) continue;
+
+        // Extract time + title pairs from the rest of the block
+        const content = block.slice(headerEnd + 5);
+
+        // Find all h4 titles and their preceding times
+        const entryRe = /(\d{1,2}:\d{2})\s*Uhr[\s\S]*?<h4[^>]*>([\s\S]*?)<\/h4>/gi;
+        let entryMatch;
+        while ((entryMatch = entryRe.exec(content)) !== null) {
+          const time = entryMatch[1].padStart(5, "0");
+          const rawTitle = entryMatch[2].replace(/<[^>]+>/g, "").trim();
+          if (!rawTitle) continue;
+
+          // Extract link to film series page ("Zur Filmreihe/Veranstaltung")
+          const afterTitle = content.slice(
+            entryMatch.index + entryMatch[0].length,
+            entryMatch.index + entryMatch[0].length + 500,
+          );
+          const linkMatch = afterTitle.match(/href="([^"]+)"[^>]*>\s*Zur Filmreihe/);
+          const detailUrl = linkMatch ? normalizeUrl(linkMatch[1], "https://www.dff.film") : null;
+
+          events.push({
+            title: rawTitle,
+            date,
+            time: nullIfMidnight(time),
+            end_time: null,
+            end_date: null,
+            description: null,
+            detail_url: detailUrl,
+            image_url: null,
+            price: null,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Failed to scrape DFF cinema program:", e);
+  }
+
+  // 2. Also fetch tribe-events for non-cinema museum events (workshops, tours, etc.)
+  try {
+    const tribeEvents = await fetchTribeEvents("https://www.dff.film/wp-json/tribe/events/v1/events");
+    // Deduplicate: tribe-events take priority if same title+date exists
+    const kinoKeys = new Set(events.map((e) => `${e.title.toLowerCase()}::${e.date}`));
+    for (const te of tribeEvents) {
+      const key = `${te.title.toLowerCase()}::${te.date}`;
+      if (!kinoKeys.has(key)) {
+        events.push(te);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch DFF tribe events:", e);
   }
 
   return events;
