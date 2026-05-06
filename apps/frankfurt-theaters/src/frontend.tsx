@@ -119,7 +119,6 @@ ${renderGrain()}
       <a href="https://www.schauspielfrankfurt.de" target="_blank" rel="noopener">schauspielfrankfurt.de</a>,
       <a href="https://oper-frankfurt.de" target="_blank" rel="noopener">oper-frankfurt.de</a>
       und <a href="https://english-theatre.de" target="_blank" rel="noopener">english-theatre.de</a>.
-      Inoffiziell, nicht mit den Häusern verbunden.
     </p>
   </div>
 </footer>
