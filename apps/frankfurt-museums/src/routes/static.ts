@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { todayIso } from "../date";
+import { MUSEUMS } from "../museum-config";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import type { Env } from "../types";
 
@@ -151,6 +152,45 @@ app.get("/robots.txt", (c) =>
 
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
+
+  // Collect museum slugs to include in sitemap
+  const museumSlugs = new Set<string>();
+  const groupedSlugs = new Set<string>();
+
+  for (const [slug, config] of Object.entries(MUSEUMS)) {
+    if (config.hidden) continue;
+    if (config.group) {
+      groupedSlugs.add(slug);
+    } else {
+      museumSlugs.add(slug);
+    }
+  }
+
+  // Add group slugs (mmk, jmf) instead of their child slugs
+  if (groupedSlugs.size > 0) {
+    for (const [slug] of Object.entries(MUSEUMS)) {
+      if (!groupedSlugs.has(slug) && MUSEUMS[slug].group) {
+        museumSlugs.add(MUSEUMS[slug].group!);
+      }
+    }
+  }
+
+  const museumUrls = Array.from(museumSlugs)
+    .sort()
+    .map(
+      (slug) => `  <url>
+    <loc>https://museumsufer.app/museum/${slug}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/museum/${slug}"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/museum/${slug}?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/museum/${slug}?lang=fr"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/museum/${slug}"/>
+  </url>`,
+    )
+    .join("\n");
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
@@ -186,6 +226,7 @@ app.get("/sitemap.xml", (c) => {
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+${museumUrls}
 </urlset>`;
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
 });

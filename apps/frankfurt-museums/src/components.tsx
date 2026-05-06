@@ -1,5 +1,5 @@
 import { dateLocale, type Locale } from "./i18n";
-import { getMuseumLocations } from "./museum-config";
+import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
 import {
   cardClass,
@@ -367,7 +367,15 @@ function ExhibitionCard({
           <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
-          <p class="text-xs text-text-secondary">{ex.museum_name || ""}</p>
+          <p class="text-xs text-text-secondary">
+            {ex.museum_slug ? (
+              <a href={`/museum/${ex.museum_slug}`} class="no-underline hover:text-river">
+                {ex.museum_name || ""}
+              </a>
+            ) : (
+              ex.museum_name || ""
+            )}
+          </p>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
             <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
@@ -518,7 +526,15 @@ function EventCard({
           <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
-          <p class="text-xs text-text-secondary">{ev.museum_name || ""}</p>
+          <p class="text-xs text-text-secondary">
+            {ev.museum_slug ? (
+              <a href={`/museum/${ev.museum_slug}`} class="no-underline hover:text-river">
+                {ev.museum_name || ""}
+              </a>
+            ) : (
+              ev.museum_name || ""
+            )}
+          </p>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
@@ -639,19 +655,18 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
         </div>
         <div class="flex-1 flex flex-col gap-2 p-3">
           <p class="font-display italic text-[0.9375rem] leading-tight line-clamp-2 max-[480px]:text-[0.8125rem]">
-            {museum.website ? (
-              <a
-                href={utm(museum.website, "museum_name")}
-                target="_blank"
-                rel="noopener"
-                class="text-inherit no-underline hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
-              >
-                {museum.name}
-              </a>
-            ) : (
-              museum.name
-            )}
+            <a
+              href={`/museum/${slug}`}
+              class="text-inherit no-underline hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
+            >
+              {museum.name}
+            </a>
           </p>
+          {MUSEUMS[slug]?.abbreviation && (
+            <p class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary -mt-1">
+              {MUSEUMS[slug]?.abbreviation}
+            </p>
+          )}
           {museum.museumsufer === false && (
             <span
               class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary opacity-70 -mt-1"
