@@ -24,6 +24,8 @@ export interface MuseumConfig {
   description?: string;
   image?: string;
   website?: string;
+  abbreviation?: string;
+  group?: string;
   lat: number;
   lng: number;
   rmvStopLid?: string;
@@ -54,12 +56,14 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: { type: "bibelhaus", endpoint: "https://www.bibelhaus-frankfurt.de/de/programm" },
   },
   "caricatura-museum-frankfurt": {
+    abbreviation: "Caricatura",
     lat: 50.1109,
     lng: 8.6845,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
   },
   "deutsches-architekturmuseum": {
+    abbreviation: "DAM",
     lat: 50.1049,
     lng: 8.6715,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
@@ -81,6 +85,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: { type: "fdh", endpoint: "https://deutsches-romantik-museum.de/programm/" },
   },
   "dff-deutsches-filminstitut-filmmuseum": {
+    abbreviation: "DFF",
     lat: 50.1052,
     lng: 8.6728,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
@@ -114,6 +119,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: { type: "fdh", endpoint: "https://www.goethehaus-frankfurt.de/programm/" },
   },
   "frankfurter-kunstverein": {
+    abbreviation: "FKV",
     lat: 50.1108,
     lng: 8.6907,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hospital Zum Heiligen Geist@X=8692722@Y=50110637@U=80@L=3000524@",
@@ -138,6 +144,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Zum Apothekerhof@X=8697953@Y=50105271@U=80@L=3001994@",
   },
   "historisches-museum-frankfurt": {
+    abbreviation: "HMF",
     lat: 50.1092,
     lng: 8.6819,
     rmvStopLid: "A=1@O=Frankfurt (Main) Römer/Paulskirche@X=8682007@Y=50110934@U=80@L=3000002@",
@@ -162,6 +169,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     },
   },
   "juedisches-museum-frankfurt": {
+    abbreviation: "JMF",
+    group: "jmf",
     lat: 50.104,
     lng: 8.6649,
     rmvStopLid: "A=1@O=Frankfurt (Main) Baseler Platz@X=8664792@Y=50104507@U=80@L=3000025@",
@@ -172,6 +181,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     },
   },
   "juedisches-museum-museum-judengasse-frankfurt": {
+    group: "jmf",
     lat: 50.1143,
     lng: 8.6922,
     rmvStopLid: "A=1@O=Frankfurt (Main) Allerheiligentor@X=8693666@Y=50113316@U=80@L=3000523@",
@@ -191,6 +201,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.offenbach.de/microsite/klingspor_museum/ausstellungen/index.php",
   },
   "liebieghaus-skulpturensammlung": {
+    abbreviation: "Liebieghaus",
     lat: 50.0996,
     lng: 8.66,
     rmvStopLid: "A=1@O=Frankfurt (Main) Zanderstraße@X=8658976@Y=50099922@U=80@L=3001978@",
@@ -198,12 +209,14 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: { type: "liebieghaus", endpoint: "https://www.liebieghaus.de/de/kalender" },
   },
   "momem-museum-of-modern-electronic-music": {
+    abbreviation: "MOMEM",
     lat: 50.114,
     lng: 8.6727,
     rmvStopLid: "A=1@O=Frankfurt (Main) Freßgass@X=8672406@Y=50114377@U=80@L=3065052@",
     exhibitionUrl: "https://momem.org/ausstellungen/",
   },
   "museum-angewandte-kunst": {
+    abbreviation: "MAK",
     lat: 50.1056,
     lng: 8.68,
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
@@ -211,6 +224,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: { type: "mak", endpoint: "https://www.museumangewandtekunst.de/de/kalender/" },
   },
   "museum-fuer-kommunikation-frankfurt": {
+    abbreviation: "MFK",
     lat: 50.1038,
     lng: 8.6702,
     rmvStopLid: "A=1@O=Frankfurt (Main) Baseler Platz@X=8664792@Y=50104507@U=80@L=3000025@",
@@ -224,6 +238,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.mggu.de/ausstellungen/",
   },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": {
+    abbreviation: "MMK",
+    group: "mmk",
     lat: 50.1126,
     lng: 8.6878,
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz@X=8687993@Y=50112552@U=80@L=3000522@",
@@ -249,6 +265,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     skipEvents: true,
   },
   "schirn-kunsthalle-frankfurt": {
+    abbreviation: "Schirn",
     lat: 50.1102,
     lng: 8.659,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hohenstaufenstraße@X=8657655@Y=50110826@U=80@L=3001938@",
@@ -261,6 +278,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.schirn.de/ausstellung/",
   },
   "senckenberg-naturmuseum": {
+    abbreviation: "SNF",
     lat: 50.1175,
     lng: 8.6522,
     rmvStopLid: "A=1@O=Frankfurt (Main) Senckenbergmuseum@X=8652720@Y=50117047@U=80@L=3000211@",
@@ -271,6 +289,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     },
   },
   "staedel-museum": {
+    abbreviation: "Städel",
     lat: 50.1016,
     lng: 8.6721,
     rmvStopLid: "A=1@O=Frankfurt (Main) Otto-Hahn-Platz@X=8675678@Y=50101864@U=80@L=3000922@",
@@ -289,6 +308,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.struwwelpeter-museum.de/sonderausstellungen/",
   },
   "tower-mmk-museum-mmk-fuer-moderne-kunst": {
+    abbreviation: "MMK",
+    group: "mmk",
     lat: 50.1105,
     lng: 8.6698,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weserstraße@X=8668837@Y=50109918@U=80@L=3060766@",
@@ -302,6 +323,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://weltkulturenmuseum.de/de/ausstellungen/",
   },
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": {
+    abbreviation: "MMK",
+    group: "mmk",
     lat: 50.1122,
     lng: 8.6855,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",

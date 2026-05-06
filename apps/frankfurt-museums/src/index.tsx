@@ -24,6 +24,7 @@ import { handleImageProxy } from "./image-proxy";
 import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import imprintRoute from "./routes/imprint";
+import museumRoute from "./routes/museum";
 import scrapeRoute from "./routes/scrape";
 import staticRoute from "./routes/static";
 import { scrape } from "./scraper";
@@ -86,6 +87,7 @@ app.use(
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
 app.route("/", imprintRoute);
+app.route("/", museumRoute);
 app.route("/api/docs", docsRoute);
 app.route("/scrape", scrapeRoute);
 
