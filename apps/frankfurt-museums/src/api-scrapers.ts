@@ -2,6 +2,7 @@ import { dateOffset, inferYear, toBerlinDate, toBerlinTime, todayIso } from "./d
 import { proxyFetch } from "./fetch-utils";
 import type { EventApiType, ProxyConfig } from "./museum-config";
 import {
+  classifyEvent,
   GERMAN_MONTHS,
   GERMAN_MONTHS_SHORT,
   normalizeUrl,
@@ -333,6 +334,11 @@ async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
         if (ed !== date) endDate = ed;
       }
 
+      // The API has no title; description is generic ("Die wichtigsten
+      // Werke der Ausstellung auf einen Blick"). The URL slug carries the
+      // real type — e.g. /programm/ueberblicksfuehrung-monets-kueste/...
+      const slugWords = (ev.url || "").match(/\/programm\/([^/]+)/)?.[1].replace(/-/g, " ");
+
       return [
         {
           title: ev.title || ev.description || "",
@@ -344,6 +350,7 @@ async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
           detail_url: url,
           image_url: thumb,
           price: null,
+          category: classifyEvent(`${ev.title || ""} ${slugWords || ""}`, ev.description),
         },
       ];
     })
