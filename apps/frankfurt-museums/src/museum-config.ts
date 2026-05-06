@@ -474,6 +474,11 @@ export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
   "hindemith-kabinett": "Kuhhirtenturm",
   "caricatura-museum-frankfurt": "Caricatura Museum für Komische Kunst",
   experiminta: "Experiminta",
+  // Sub-venues / parent-building stand-ins.
+  "tower-mmk-museum-mmk-fuer-moderne-kunst": "Museum MMK für Moderne Kunst",
+  "zollamt-mmk-museum-mmk-fuer-moderne-kunst": "Museum MMK für Moderne Kunst",
+  "frankfurter-buergerstiftung": "Holzhausenschlösschen",
+  "dommuseum-frankfurt": "Frankfurter Dom",
 };
 
 export function getImageAllowedDomains(): Set<string> {
