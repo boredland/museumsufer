@@ -74,7 +74,7 @@ ${renderGrain()}
 <header class="masthead" role="banner">
   <div class="masthead__brand">
     <h1 class="wordmark"><span>Frankfurt</span><span>Theater.</span></h1>
-    <p class="tagline">Spielplan der Bühnen am Willy-Brandt-Platz.</p>
+    <p class="tagline">Was heute auf den Frankfurter Bühnen läuft.</p>
   </div>
   <div class="masthead__date">
     <p class="masthead__weekday">${headerWeekday}</p>

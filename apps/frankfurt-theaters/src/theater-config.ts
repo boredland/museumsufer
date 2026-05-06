@@ -8,7 +8,7 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel" | "oper";
+  scraper: "schauspiel" | "oper" | "english-theatre";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -31,5 +31,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://oper-frankfurt.de",
     ticketing_provider: "eventim_inhouse",
     scraper: "oper",
+  },
+  {
+    slug: "english-theatre-frankfurt",
+    name: "The English Theatre Frankfurt",
+    address: "Gallusanlage 7, 60329 Frankfurt am Main",
+    lat: 50.1083,
+    lon: 8.6712,
+    website_url: "https://english-theatre.de",
+    ticketing_provider: "eventim_inhouse",
+    scraper: "english-theatre",
   },
 ];
