@@ -4,6 +4,11 @@ dist/
 .turbo/
 claude-seo
 
+# Secrets — manage via `wrangler secret put` instead
+scrape_secret.txt
+.env
+.env.*
+
 # Lighthouse CI output
 .lighthouseci/
 screenshots/
