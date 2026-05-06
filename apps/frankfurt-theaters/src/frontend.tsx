@@ -115,9 +115,11 @@ ${renderGrain()}
     <p class="footer__rule"></p>
     <p>Eine Übersicht des Spielplans an Frankfurts Bühnen.</p>
     <p class="footer__small">
-      Daten von <a href="https://www.schauspielfrankfurt.de" target="_blank" rel="noopener">schauspielfrankfurt.de</a>
-      und <a href="https://oper-frankfurt.de" target="_blank" rel="noopener">oper-frankfurt.de</a>.
-      Kein offizielles Angebot der Städtischen Bühnen.
+      Daten von
+      <a href="https://www.schauspielfrankfurt.de" target="_blank" rel="noopener">schauspielfrankfurt.de</a>,
+      <a href="https://oper-frankfurt.de" target="_blank" rel="noopener">oper-frankfurt.de</a>
+      und <a href="https://english-theatre.de" target="_blank" rel="noopener">english-theatre.de</a>.
+      Inoffiziell, nicht mit den Häusern verbunden.
     </p>
   </div>
 </footer>
