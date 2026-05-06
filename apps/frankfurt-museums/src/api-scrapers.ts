@@ -369,12 +369,23 @@ interface StaedelEvent {
 }
 
 async function fetchSenckenberg(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint, {
-    headers: { "User-Agent": USER_AGENT },
-  });
-  if (!res.ok) return [];
-  const posts = (await res.json()) as SenckenbergEvent[];
-  if (!Array.isArray(posts)) return [];
+  // The WP REST API caps per_page at 100, sorts by post-creation date (not
+  // event date), and exposes no event_start_time filter. So future events
+  // are interleaved across pages — we have to walk all of them.
+  const pageUrl = (n: number) => `${endpoint}${endpoint.includes("?") ? "&" : "?"}page=${n}`;
+  const fetchJson = async (n: number): Promise<{ posts: SenckenbergEvent[]; totalPages: number }> => {
+    const res = await fetch(pageUrl(n), { headers: { "User-Agent": USER_AGENT } });
+    if (!res.ok) return { posts: [], totalPages: 1 };
+    const totalPages = parseInt(res.headers.get("x-wp-totalpages") || "1", 10) || 1;
+    const data = await res.json();
+    return { posts: Array.isArray(data) ? (data as SenckenbergEvent[]) : [], totalPages };
+  };
+
+  const first = await fetchJson(1);
+  const remainingPages = Array.from({ length: Math.max(0, first.totalPages - 1) }, (_, i) => i + 2);
+  const rest = await Promise.all(remainingPages.map((n) => fetchJson(n)));
+  const posts: SenckenbergEvent[] = [...first.posts, ...rest.flatMap((r) => r.posts)];
+  if (posts.length === 0) return [];
 
   // The event_title is intentionally generic (e.g. "Alle Jahre wieder…");
   // the type — "Öffentliche Führung", "Diskussion", "Vortrag", etc. — only
