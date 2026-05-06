@@ -20,10 +20,11 @@ export interface AvailabilityResult {
  *   2. GET that signed URL on `public-api.eventim.com/seatmap/api/public/availability/...`
  *      → JSON `{ seats: [[priceCat, status], ...] }` where status 0 = free.
  *
- * Akamai bot management protects the inhouse host. From a Cloudflare Worker
- * (or any clean IP), the call works on the first request; from a flagged IP it
- * times out. We swallow all failures to keep the scraper resilient — callers
- * fall back to whatever status the spielplan HTML reported.
+ * Known limitation: the inhouse host sits behind Akamai bot management. As of
+ * 2026-05-06, plain fetches from Cloudflare Workers return HTTP 520; only real
+ * browsers reliably get HTML back. To make this work in production we'd need
+ * Workers Browser Rendering. Until then, every call here returns null and
+ * callers fall back to whatever status the spielplan HTML reported.
  */
 export async function fetchEventimAvailability(
   inhouseHost: string,

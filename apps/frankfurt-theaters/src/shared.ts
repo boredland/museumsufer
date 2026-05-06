@@ -1,13 +1,38 @@
-export function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
+const NAMED_ENTITIES: Record<string, string> = {
+  nbsp: " ",
+  shy: "­",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  ndash: "–",
+  mdash: "—",
+  hellip: "…",
+  laquo: "«",
+  raquo: "»",
+  bdquo: "„",
+  ldquo: "“",
+  rdquo: "”",
+  sbquo: "‚",
+  lsquo: "‘",
+  rsquo: "’",
+  euro: "€",
+  copy: "©",
+  reg: "®",
+  trade: "™",
+  middot: "·",
+};
+
+export function decodeEntities(text: string): string {
+  return text
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&([a-zA-Z]+);/g, (m, name) => NAMED_ENTITIES[name] ?? m);
+}
+
+export function stripHtml(html: string): string {
+  return decodeEntities(html.replace(/<[^>]+>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
 }

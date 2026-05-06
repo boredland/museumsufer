@@ -56,7 +56,7 @@ curl http://localhost:8787/api/day?date=2026-05-08
 
 ## Roadmap
 
-- [x] Eventim public API enrichment for live seat counts (`available_seats`, `total_seats`, derive `few_left` status). Implemented in `src/enrich/eventim-availability.ts`. Best-effort: failures are swallowed and the HTML-derived status stands. Akamai bot protection on the inhouse host means dev-laptop testing is unreliable; production (Cloudflare edge) should be cleaner.
+- [x] Eventim public API enrichment for live seat counts. Implemented in `src/enrich/eventim-availability.ts`, but **currently a no-op in production**: the inhouse host returns HTTP 520 to Cloudflare Workers (Akamai bot management). The HTML-derived `available` / `sold_out` / `cancelled` status remains correct. To unblock live counts we'd need Workers Browser Rendering — see `BROWSER` binding pattern in the museums app.
 - [x] Cancelled performance detection (`performance--is-canceled` class)
 - [ ] Oper Frankfurt — sister theater, expected to share parser shape. Live structure not yet verified (host unreachable from current dev IP).
 - [ ] Show description + image enrichment from each show's detail page
