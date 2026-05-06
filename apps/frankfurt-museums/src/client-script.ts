@@ -357,15 +357,17 @@ export const CLIENT_SCRIPT = `
       nearGen++;
       nearClickCount = 0;
       sortByDistance = false;
-      btnNear.classList.remove('loading', 'active');
-      btnNear.removeAttribute('aria-busy');
-      btnNear.setAttribute('aria-pressed', 'false');
+      if (btnNear) {
+        btnNear.classList.remove('loading', 'active');
+        btnNear.removeAttribute('aria-busy');
+        btnNear.setAttribute('aria-pressed', 'false');
+      }
       removeDistanceBadges();
       sortCardsByDate();
       pushStateToUrl(currentDate, false);
     }
 
-    btnNear.addEventListener('click', function() {
+    if (btnNear) btnNear.addEventListener('click', function() {
       if (btnNear.classList.contains('loading')) {
         deactivateNear();
         return;
@@ -443,7 +445,7 @@ export const CLIENT_SCRIPT = `
       }
     });
 
-    if (!('geolocation' in navigator)) btnNear.style.display = 'none';
+    if (btnNear && !('geolocation' in navigator)) btnNear.style.display = 'none';
 
     function hydrateVisited() {
       var visited = getVisited();
@@ -528,7 +530,7 @@ export const CLIENT_SCRIPT = `
     }
 
     var urlSort = new URLSearchParams(location.search).get('sort');
-    if (urlSort === 'near') btnNear.click();
+    if (urlSort === 'near' && btnNear) btnNear.click();
 
     // Auto-refresh at midnight Berlin time to show next day's events
     function scheduleNextDayRefresh() {
@@ -638,10 +640,12 @@ export const CLIENT_SCRIPT = `
       }
     }
 
-    searchInput.addEventListener('input', applySearchFilter);
-    searchInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') { searchInput.value = ''; applySearchFilter(); searchInput.blur(); }
-    });
+    if (searchInput) {
+      searchInput.addEventListener('input', applySearchFilter);
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { searchInput.value = ''; applySearchFilter(); searchInput.blur(); }
+      });
+    }
     if (searchClear) {
       searchClear.addEventListener('click', function() {
         searchInput.value = '';
