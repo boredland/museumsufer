@@ -1,4 +1,4 @@
-import { getManualMuseums, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
+import { getManualMuseums, WIKIPEDIA_IMAGE_URL_OVERRIDES, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 import type { Env } from "./types";
 
@@ -75,10 +75,12 @@ async function refreshWikipediaImages(env: Env): Promise<number> {
     name: string;
   }>();
   const lookups = await Promise.all(
-    results.map(async (m) => ({
-      id: m.id,
-      image: await lookupWikipediaImage(WIKIPEDIA_TITLE_OVERRIDES[m.slug] || m.name).catch(() => null),
-    })),
+    results.map(async (m) => {
+      const direct = WIKIPEDIA_IMAGE_URL_OVERRIDES[m.slug];
+      if (direct) return { id: m.id, image: direct };
+      const image = await lookupWikipediaImage(WIKIPEDIA_TITLE_OVERRIDES[m.slug] || m.name).catch(() => null);
+      return { id: m.id, image };
+    }),
   );
   const updates = lookups.filter((l): l is { id: number; image: string } => !!l.image);
   if (updates.length === 0) return 0;

@@ -483,6 +483,17 @@ export const WIKIPEDIA_TITLE_OVERRIDES: Record<string, string> = {
   "museum-sinclair-haus-bad-homburg": "Sinclair-Haus",
 };
 
+// Direct Wikimedia Commons image URLs for museums without a relevant
+// Wikipedia article but with a usable Commons file. Takes precedence over
+// WIKIPEDIA_TITLE_OVERRIDES.
+export const WIKIPEDIA_IMAGE_URL_OVERRIDES: Record<string, string> = {
+  "porzellan-museum-frankfurt": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Kronberger_Haus_H%C3%B6chst.JPG",
+  "bibelhaus-erlebnismuseum":
+    "https://upload.wikimedia.org/wikipedia/commons/f/f2/Frankfurt_am_Main%2C_Bibelhaus_ErlebnisMuseum_-_Au%C3%9Fenansicht.jpg",
+  "stoltze-museum":
+    "https://upload.wikimedia.org/wikipedia/commons/2/27/Frankfurt_am_Main_-_Stoltze-Museum_-_aussen.jpg",
+};
+
 export function getImageAllowedDomains(): Set<string> {
   const domains = new Set<string>([
     "museumsufer.de",
