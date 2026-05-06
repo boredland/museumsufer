@@ -7,6 +7,7 @@ import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../fron
 import { dateLocale, detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
+import { translateFields } from "../translate";
 import type { Env, Event, Exhibition } from "../types";
 
 interface MuseumRow {
@@ -371,7 +372,7 @@ app.get("/museum/:slug", async (c) => {
 
   // Fetch exhibitions and events for all museums in parallel
   const museumIds = museums.map((m) => m.id);
-  const [exhibitions, events] = await Promise.all([
+  const [rawExhibitions, rawEvents] = await Promise.all([
     (async () => {
       const placeholders = museumIds.map(() => "?").join(",");
       const result = await c.env.DB.prepare(
@@ -395,6 +396,16 @@ app.get("/museum/:slug", async (c) => {
       return result.results || [];
     })(),
   ]);
+
+  // Translate exhibition and event content if not German
+  const exhibitions =
+    locale === "de"
+      ? rawExhibitions
+      : await translateFields(c.env, rawExhibitions, ["title", "description"] as (keyof Exhibition)[], locale);
+  const events =
+    locale === "de"
+      ? rawEvents
+      : await translateFields(c.env, rawEvents, ["title", "description"] as (keyof Event)[], locale);
 
   const config = MUSEUMS[slug];
   return c.html(MuseumPage({ locale, museums, config, exhibitions, events, slug }), {
