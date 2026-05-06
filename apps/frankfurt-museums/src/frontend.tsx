@@ -10,6 +10,14 @@ import { formatDateFull } from "./shared";
 import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
+/** Theme initialization script to prevent flash of unstyled content */
+export const THEME_SCRIPT = `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`;
+
+/** Generates language parameter string for URLs */
+export function buildLangParam(locale: Locale): string {
+  return locale === "de" ? "" : `?lang=${locale}`;
+}
+
 export type { MuseumInfo };
 
 const MUSEUM_LOCATIONS = getMuseumLocations();
@@ -18,6 +26,88 @@ export interface InitialData {
   date: string;
   exhibitions: unknown[];
   events: unknown[];
+}
+
+/** Options for rendering the HTML head */
+interface HtmlHeadOptions {
+  locale: Locale;
+  title: string;
+  description: string;
+  canonicalUrl: string;
+  ogImage?: string;
+  jsonSchemas?: Array<{ name: string; json: string }>;
+  twitterCard?: "summary_large_image" | "summary";
+}
+
+/** Renders the HTML head with meta tags, fonts, stylesheets, and structured data */
+export function renderHtmlHead(options: HtmlHeadOptions) {
+  const {
+    locale,
+    title,
+    description,
+    canonicalUrl,
+    ogImage = "https://museumsufer.app/og-image.png",
+    jsonSchemas = [],
+    twitterCard = "summary_large_image",
+  } = options;
+
+  const hreflangs = [
+    { hreflang: "de", href: canonicalUrl.replace(/\?lang=[^&]*/, "").split("?")[0] || "https://museumsufer.app/" },
+    { hreflang: "en", href: `${canonicalUrl.split("?")[0]}${canonicalUrl.includes("?") ? "&" : "?"}lang=en` },
+    { hreflang: "fr", href: `${canonicalUrl.split("?")[0]}${canonicalUrl.includes("?") ? "&" : "?"}lang=fr` },
+    { hreflang: "x-default", href: canonicalUrl.split("?")[0] || "https://museumsufer.app/" },
+  ];
+
+  return (
+    <>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={canonicalUrl} />
+      {hreflangs.map((h) => (
+        <link key={h.hreflang} rel="alternate" hreflang={h.hreflang} href={h.href} />
+      ))}
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={canonicalUrl} />
+      <meta property="og:locale" content={locale} />
+      <meta property="og:site_name" content="Museumsufer Frankfurt" />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content={twitterCard} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
+      <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+      <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+      <link rel="apple-touch-icon" href="/icon-192.png" />
+      <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
+      <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+      <link
+        rel="preload"
+        as="style"
+        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        onload="this.onload=null;this.rel='stylesheet'"
+      />
+      <noscript>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        />
+      </noscript>
+      {jsonSchemas.map((schema) => (
+        <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
+      ))}
+      <link rel="preload" as="style" href="/styles.css" />
+      <link rel="stylesheet" href="/styles.css" />
+    </>
+  );
 }
 
 const PASS_URLS: Record<Locale, { card: string; ticket: string }> = {
@@ -333,6 +423,7 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
   );
 }
 
+/** Contact dialog for submitting feedback, missing events, or museum corrections */
 export function ContactDialog({ tr }: { tr: Record<string, string> }) {
   const inputClass =
     "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
@@ -457,6 +548,7 @@ function FaqSection({ tr }: { tr: Record<string, string> }) {
   );
 }
 
+/** Renders the complete landing page with all sections, schemas, and interactivity */
 export function renderPage(
   locale: Locale,
   initialData?: InitialData,
@@ -544,72 +636,32 @@ export function renderPage(
     const BERLIN_TODAY = '${todayIso()}';
     const __INITIAL_DATE__ = ${initialData ? JSON.stringify(initialData.date) : "null"};`;
 
+  const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
+  const jsonSchemas = [
+    { name: "website", json: websiteSchema },
+    { name: "publisher", json: publisherSchema },
+    { name: "org", json: orgSchemaJson },
+    { name: "webapp", json: webAppSchemaJson },
+    { name: "faq", json: faqSchema },
+  ];
+
   return (
     <>
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>{tr.pageTitle}</title>
-          <meta name="description" content={tr.metaLong} />
-          <link
-            rel="canonical"
-            href={locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`}
-          />
-          <link rel="alternate" hreflang="de" href="https://museumsufer.app/" />
-          <link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en" />
-          <link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr" />
-          <link rel="alternate" hreflang="x-default" href="https://museumsufer.app/" />
-          <meta property="og:title" content={tr.pageTitle} />
-          <meta property="og:description" content={tr.metaLong} />
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://museumsufer.app/" />
-          <meta property="og:locale" content={locale} />
-          <meta property="og:site_name" content="Museumsufer Frankfurt" />
-          <meta property="og:image" content="https://museumsufer.app/og-image.png" />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content={tr.pageTitle} />
-          <meta name="twitter:description" content={tr.metaLong} />
-          <meta name="twitter:image" content="https://museumsufer.app/og-image.png" />
-          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-          <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
-          <link rel="apple-touch-icon" href="/icon-192.png" />
+          {renderHtmlHead({
+            locale,
+            title: tr.pageTitle,
+            description: tr.metaLong,
+            canonicalUrl,
+            jsonSchemas,
+          })}
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
-          <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`,
-            }}
-          />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link
-            rel="preload"
-            as="style"
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            onload="this.onload=null;this.rel='stylesheet'"
-          />
-          <noscript>
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            />
-          </noscript>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteSchema }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: publisherSchema }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: orgSchemaJson }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: webAppSchemaJson }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqSchema }} />
           {eventSchemaJson ? raw(eventSchemaJson) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
-          <link rel="preload" as="style" href="/styles.css" />
-          <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
           <IconSprite />
