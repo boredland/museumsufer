@@ -6,12 +6,67 @@ const BASE_URL = MUSEUMSUFER_DE;
 const EXHIBITIONS_URL = `${BASE_URL}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`;
 const MUSEUMS_URL = `${BASE_URL}/de/museen/`;
 
-export async function scrape(env: Env): Promise<{ exhibitions: number; museums: number; enriched: number }> {
+export async function scrape(
+  env: Env,
+): Promise<{ exhibitions: number; museums: number; enriched: number; wikipediaImages: number }> {
   const museumsCount = await scrapeMuseums(env);
   await syncManualMuseums(env);
   const exhibitionsCount = await scrapeExhibitions(env);
   const enriched = await enrichExhibitionDescriptions(env);
-  return { exhibitions: exhibitionsCount, museums: museumsCount, enriched };
+  const wikipediaImages = await refreshWikipediaImages(env);
+  return { exhibitions: exhibitionsCount, museums: museumsCount, enriched, wikipediaImages };
+}
+
+const WIKIPEDIA_UA = "Museumsufer/1.0 (https://museumsufer.app; jonas@bgdlabs.com)";
+
+async function lookupWikipediaImage(name: string): Promise<string | null> {
+  const summary = async (title: string): Promise<string | null> => {
+    const r = await fetch(`https://de.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
+      headers: { "User-Agent": WIKIPEDIA_UA },
+    });
+    if (!r.ok) {
+      await r.body?.cancel();
+      return null;
+    }
+    const d = (await r.json()) as { originalimage?: { source?: string }; thumbnail?: { source?: string } };
+    return d.originalimage?.source || d.thumbnail?.source || null;
+  };
+
+  const direct = await summary(name);
+  if (direct) return direct;
+
+  // Some museums have slightly different Wikipedia titles ("Museum Judengasse"
+  // → "Jüdisches Museum Frankfurt", "Goethe-Haus" → "Goethe-Haus (Frankfurt am
+  // Main)"). Fall back to opensearch.
+  try {
+    const r = await fetch(
+      `https://de.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(name)}&limit=1&format=json`,
+      { headers: { "User-Agent": WIKIPEDIA_UA } },
+    );
+    if (!r.ok) {
+      await r.body?.cancel();
+      return null;
+    }
+    const data = (await r.json()) as [string, string[], string[], string[]];
+    const candidate = data[1]?.[0];
+    if (candidate) return await summary(candidate);
+  } catch {}
+  return null;
+}
+
+async function refreshWikipediaImages(env: Env): Promise<number> {
+  const { results } = await env.DB.prepare("SELECT id, name FROM museums").all<{ id: number; name: string }>();
+  const lookups = await Promise.all(
+    results.map(async (m) => ({ id: m.id, image: await lookupWikipediaImage(m.name).catch(() => null) })),
+  );
+  const updates = lookups.filter((l): l is { id: number; image: string } => !!l.image);
+  if (updates.length === 0) return 0;
+  await env.DB.batch(
+    updates.map((u) =>
+      env.DB.prepare("UPDATE museums SET image_url = ?, updated_at = datetime('now') WHERE id = ?").bind(u.image, u.id),
+    ),
+  );
+  return updates.length;
 }
 
 async function syncManualMuseums(env: Env): Promise<void> {
