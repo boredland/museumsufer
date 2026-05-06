@@ -218,7 +218,13 @@ export function classifyEvent(title: string, description?: string | null): strin
   const d = (description || "").toLowerCase();
   const haystack = `${t} ${d}`;
 
-  if (haystack.includes("führung") || haystack.includes("rundgang") || haystack.includes("tour")) return "Führung";
+  if (
+    haystack.includes("führung") ||
+    haystack.includes("fuehrung") ||
+    haystack.includes("rundgang") ||
+    haystack.includes("tour")
+  )
+    return "Führung";
   if (
     haystack.includes("workshop") ||
     haystack.includes("kurs") ||
