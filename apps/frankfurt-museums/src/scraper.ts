@@ -32,15 +32,25 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
     return d.originalimage?.source || d.thumbnail?.source || null;
   };
 
-  const direct = await summary(name);
-  if (direct) return direct;
+  // Many museum names carry a subtitle or alternative ("Caricatura Museum
+  // Frankfurt – Museum für Komische Kunst", "Goethe-Haus / Freies Deutsches
+  // Hochstift"). Strip after the first /, –, : or & — but NOT hyphens, since
+  // German compounds use them ("Goethe-Haus", "Romantik-Museum").
+  const cleaned = name.split(/\s*[/–:&]\s*/)[0].trim();
+  for (const candidate of cleaned !== name ? [name, cleaned] : [name]) {
+    const img = await summary(candidate);
+    if (img) return img;
+  }
 
-  // Some museums have slightly different Wikipedia titles ("Museum Judengasse"
-  // → "Jüdisches Museum Frankfurt", "Goethe-Haus" → "Goethe-Haus (Frankfurt am
-  // Main)"). Fall back to opensearch.
+  // Conservative opensearch: only accept a result whose title contains every
+  // significant token (≥3 letters) of the cleaned source name. Prevents
+  // matches like "ZOLLAMT MMK" → "Zollamt (Kempten)" while still catching
+  // "MUSEUM MMK" → "Museum MMK für Moderne Kunst".
+  const tokens = (cleaned.toLowerCase().match(/\p{L}+/gu) || []).filter((t) => t.length >= 3);
+  if (tokens.length === 0) return null;
   try {
     const r = await fetch(
-      `https://de.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(name)}&limit=1&format=json`,
+      `https://de.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(cleaned)}&limit=3&format=json`,
       { headers: { "User-Agent": WIKIPEDIA_UA } },
     );
     if (!r.ok) {
@@ -48,8 +58,12 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
       return null;
     }
     const data = (await r.json()) as [string, string[], string[], string[]];
-    const candidate = data[1]?.[0];
-    if (candidate) return await summary(candidate);
+    for (const candidate of data[1] || []) {
+      const lower = candidate.toLowerCase();
+      if (!tokens.every((t) => lower.includes(t))) continue;
+      const img = await summary(candidate);
+      if (img) return img;
+    }
   } catch {}
   return null;
 }
