@@ -933,50 +933,77 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
   const today = todayIso();
   const events: ApiEvent[] = [];
 
-  // 1. Scrape the cinema program page
+  // 1. Scrape the cinema program page (Cinetixx-powered HTML)
   try {
     const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
     if (res.ok) {
       const html = await res.text();
 
-      // Structure: <h3>Weekday DD.MM.YYYY</h3> then pairs of "HH:MM Uhr" + <h4>TITLE</h4>
-      // Split by h3 day headers
-      const dayBlocks = html.split(/<h3[^>]*>/i);
+      // Page structure: <h3 class="cinetixxdateseperator">Weekday DD.MM.YYYY</h3>
+      // followed by <div class="cinetixxdataset"> blocks for each screening
+      // Split by day wrapper to get date context
+      const dayWrapperRe =
+        /<h3[^>]*class="[^"]*cinetixxdateseperator[^"]*"[^>]*>([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3[^>]*class="[^"]*cinetixxdateseperator|$)/gi;
+      let dayMatch;
 
-      for (const block of dayBlocks) {
-        // Extract date from the day header: "Mittwoch  06.05.2026"
-        const headerEnd = block.indexOf("</h3>");
-        if (headerEnd === -1) continue;
-        const header = block
-          .slice(0, headerEnd)
+      while ((dayMatch = dayWrapperRe.exec(html)) !== null) {
+        const headerText = dayMatch[1]
           .replace(/<[^>]+>/g, "")
+          .replace(/&nbsp;/g, " ")
           .trim();
+        const dayContent = dayMatch[2];
 
-        // Remove weekday prefix, extract DD.MM.YYYY
-        const cleaned = header.replace(GERMAN_WEEKDAYS, "").trim();
+        // Extract DD.MM.YYYY from header
+        const cleaned = headerText.replace(GERMAN_WEEKDAYS, "").trim();
         const dateMatch = cleaned.match(/(\d{2})\.(\d{2})\.(\d{4})/);
         if (!dateMatch) continue;
         const date = `${dateMatch[3]}-${dateMatch[2]}-${dateMatch[1]}`;
         if (date < today) continue;
 
-        // Extract time + title pairs from the rest of the block
-        const content = block.slice(headerEnd + 5);
+        // Extract each screening from cinetixxdataset blocks
+        const datasetRe =
+          /<div\s+class='cinetixxdataset'>([\s\S]*?)(?=<div\s+class='cinetixxdataset'>|<\/div>\s*<\/div>\s*<div\s+class='cinetixxday-wrapper|$)/gi;
+        let datasetMatch;
 
-        // Find all h4 titles and their preceding times
-        const entryRe = /(\d{1,2}:\d{2})\s*Uhr[\s\S]*?<h4[^>]*>([\s\S]*?)<\/h4>/gi;
-        let entryMatch;
-        while ((entryMatch = entryRe.exec(content)) !== null) {
-          const time = entryMatch[1].padStart(5, "0");
-          const rawTitle = entryMatch[2].replace(/<[^>]+>/g, "").trim();
+        while ((datasetMatch = datasetRe.exec(dayContent)) !== null) {
+          const block = datasetMatch[1];
+
+          // Time: <p class='cinetixx-content-value' id='time'>18:00 Uhr</p>
+          const timeMatch = block.match(/class='cinetixx-content-value'[^>]*>\s*(\d{1,2}:\d{2})\s*Uhr/);
+          if (!timeMatch) continue;
+          const time = timeMatch[1].padStart(5, "0");
+
+          // Title: <h4>TITLE</h4>
+          const titleMatch = block.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i);
+          if (!titleMatch) continue;
+          const rawTitle = titleMatch[1].replace(/<[^>]+>/g, "").trim();
           if (!rawTitle) continue;
 
-          // Extract link to film series page ("Zur Filmreihe/Veranstaltung")
-          const afterTitle = content.slice(
-            entryMatch.index + entryMatch[0].length,
-            entryMatch.index + entryMatch[0].length + 500,
-          );
-          const linkMatch = afterTitle.match(/href="([^"]+)"[^>]*>\s*Zur Filmreihe/);
-          const detailUrl = linkMatch ? normalizeUrl(linkMatch[1], "https://www.dff.film") : null;
+          // Image: <div class='cinetixx-image'><img src='https://images.cinetixx.com/...' /></div>
+          const imgMatch = block.match(/class='cinetixx-image'[^>]*>\s*<img[^>]+src='([^']+)'/i);
+          const imageUrl = imgMatch?.[1] || null;
+
+          // Short description (metadata): <div class='textshort'>...</div>
+          const shortMatch = block.match(/<div\s+class='textshort'>([\s\S]*?)<\/div>/i);
+          const shortText = shortMatch ? stripHtml(shortMatch[1]).trim() : null;
+
+          // Long description (plot synopsis): <div class='additionaltext' ... id='longTextN'>...</div>
+          const longMatch = block.match(/<div\s+class='additionaltext'[^>]*>([\s\S]*?)<\/div>/i);
+          const longText = longMatch ? stripHtml(longMatch[1]).trim() : null;
+
+          // Combine: short metadata + long description
+          let description: string | null = null;
+          if (shortText && longText) {
+            description = truncateHtml(`${shortText}\n${longText}`, 500);
+          } else if (longText) {
+            description = truncateHtml(longText, 500);
+          } else if (shortText) {
+            description = truncateHtml(shortText, 500);
+          }
+
+          // Detail URL: link to film series page
+          const linkMatch = block.match(/href=['"]([^'"]+)['"][^>]*>\s*Zur Filmreihe/);
+          const detailUrl = linkMatch ? normalizeUrl(linkMatch[1].trim(), "https://www.dff.film") : null;
 
           events.push({
             title: rawTitle,
@@ -984,9 +1011,9 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
             time: nullIfMidnight(time),
             end_time: null,
             end_date: null,
-            description: null,
+            description,
             detail_url: detailUrl,
-            image_url: null,
+            image_url: imageUrl,
             price: null,
           });
         }
@@ -999,7 +1026,7 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
   // 2. Also fetch tribe-events for non-cinema museum events (workshops, tours, etc.)
   try {
     const tribeEvents = await fetchTribeEvents("https://www.dff.film/wp-json/tribe/events/v1/events");
-    // Deduplicate: tribe-events take priority if same title+date exists
+    // Deduplicate: cinema entries take priority if same title+date exists
     const kinoKeys = new Set(events.map((e) => `${e.title.toLowerCase()}::${e.date}`));
     for (const te of tribeEvents) {
       const key = `${te.title.toLowerCase()}::${te.date}`;

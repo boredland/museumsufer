@@ -457,7 +457,7 @@ export function getManualMuseums(): Array<{
 }
 
 export function getImageAllowedDomains(): Set<string> {
-  const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de"]);
+  const domains = new Set<string>(["museumsufer.de", "www.museumsufer.de", "images.cinetixx.com"]);
   for (const config of Object.values(MUSEUMS)) {
     const urls = [config.website, config.image, config.exhibitionUrl, config.eventApi?.endpoint].filter(Boolean);
     for (const url of urls) {
