@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import { raw } from "hono/html";
+import { CLIENT_SCRIPT } from "../client-script";
 import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
+import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
 import type { Env, Event, Exhibition } from "../types";
 
@@ -185,6 +187,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
           ))}
         </head>
         <body>
+          <IconSprite />
           <div class="max-w-[640px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
             <p class="mb-8">
               <a
@@ -337,6 +340,11 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
               </a>
             </p>
           </div>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `const T = ${JSON.stringify(tr)};\n${CLIENT_SCRIPT}`,
+            }}
+          />
         </body>
       </html>
     </>
