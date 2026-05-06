@@ -197,7 +197,8 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
             {primaryMuseum.image_url && (
               <img
                 src={primaryMuseum.image_url}
-                alt={museumName}
+                alt={`${museumName} Fassade in Frankfurt`}
+                loading="lazy"
                 class="w-full h-auto rounded mb-6 aspect-video object-cover"
               />
             )}
@@ -248,6 +249,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                         <img
                           src={ex.image_url}
                           alt={ex.title}
+                          loading="lazy"
                           class="w-full h-auto rounded mb-3 aspect-video object-cover"
                         />
                       )}
@@ -288,6 +290,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
                         <img
                           src={ev.image_url}
                           alt={ev.title}
+                          loading="lazy"
                           class="w-full h-auto rounded mb-3 aspect-video object-cover"
                         />
                       )}
