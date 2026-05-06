@@ -8,7 +8,7 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel" | "oper" | "english-theatre";
+  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -41,5 +41,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://english-theatre.de",
     ticketing_provider: "eventim_inhouse",
     scraper: "english-theatre",
+  },
+  {
+    slug: "komoedie-frankfurt",
+    name: "Die Komödie Frankfurt",
+    address: "Neue Mainzer Straße 18, 60311 Frankfurt am Main",
+    lat: 50.1086,
+    lon: 8.6739,
+    website_url: "https://diekomoedie.de",
+    ticketing_provider: "custom",
+    scraper: "komoedie",
   },
 ];
