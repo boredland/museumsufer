@@ -323,7 +323,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
   const weekAhead = dateOffset(7);
 
   const { results: events } = await env.DB.prepare(
-    `SELECT ev.id, ev.detail_url, ev.title, ev.price, ev.image_url, ev.time, ev.description, m.name as museum_name, m.website_url
+    `SELECT ev.id, ev.detail_url, ev.title, ev.price, ev.image_url, ev.time, ev.end_time, ev.description, m.name as museum_name, m.website_url
      FROM events ev
      JOIN museums m ON ev.museum_id = m.id
      WHERE ev.date >= ? AND ev.date <= ?
@@ -339,6 +339,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       price: string | null;
       image_url: string | null;
       time: string | null;
+      end_time: string | null;
       description: string | null;
       museum_name: string;
       website_url: string;
@@ -376,7 +377,7 @@ async function enrichUpcomingEvents(env: Env): Promise<number> {
       updates.push("time = ?");
       values.push(details.time);
     }
-    if (details.end_time) {
+    if (details.end_time && !event.end_time) {
       updates.push("end_time = ?");
       values.push(details.end_time);
     }
