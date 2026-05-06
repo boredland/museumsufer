@@ -280,6 +280,47 @@ export function ShareButton({
   );
 }
 
+function EventTag({ category }: { category: string | null }) {
+  if (!category) return null;
+
+  const categories: Record<string, { icon: string; color: string; bg: string }> = {
+    Film: { icon: "i-film", color: "text-blue-700 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-900/20" },
+    Führung: {
+      icon: "i-navigate",
+      color: "text-green-700 dark:text-green-400",
+      bg: "bg-green-50 dark:bg-green-900/20",
+    },
+    Workshop: {
+      icon: "i-edit",
+      color: "text-orange-700 dark:text-orange-400",
+      bg: "bg-orange-50 dark:bg-orange-900/20",
+    },
+    Vortrag: {
+      icon: "i-chat",
+      color: "text-purple-700 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-900/20",
+    },
+    Familie: { icon: "i-user", color: "text-pink-700 dark:text-pink-400", bg: "bg-pink-50 dark:bg-pink-900/20" },
+    Vernissage: {
+      icon: "i-star",
+      color: "text-yellow-700 dark:text-yellow-400",
+      bg: "bg-yellow-50 dark:bg-yellow-900/20",
+    },
+    Konzert: { icon: "i-music", color: "text-red-700 dark:text-red-400", bg: "bg-red-50 dark:bg-red-900/20" },
+  };
+
+  const config = categories[category] || { icon: "i-tag", color: "text-text-tertiary", bg: "bg-border-light/50" };
+
+  return (
+    <span
+      class={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[0.625rem] font-medium uppercase tracking-wider ${config.bg} ${config.color}`}
+    >
+      <Icon id={config.icon} class="w-2.5 h-2.5 fill-current" />
+      {category}
+    </span>
+  );
+}
+
 function EndingBadge({
   endDate,
   todayIso,
@@ -542,6 +583,7 @@ function EventCard({
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />
+            <EventTag category={ev.category} />
             {ev.price && (
               <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}

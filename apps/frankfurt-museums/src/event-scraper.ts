@@ -2,7 +2,7 @@ import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { fetchPage } from "./fetch-utils";
 import { getMuseumConfig, MUSEUMS } from "./museum-config";
-import { normalizeUrl } from "./shared";
+import { classifyEvent, normalizeUrl } from "./shared";
 import type { Env } from "./types";
 
 const PLACEHOLDER_TITLE_RE =
@@ -116,8 +116,8 @@ async function processMuseum(
       for (const r of results) overrideMap.set(r.slug, r.id);
     }
 
-    const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price, category)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(museum_id, title, date) DO UPDATE SET
          time = COALESCE(excluded.time, events.time),
          end_time = COALESCE(excluded.end_time, events.end_time),
@@ -126,6 +126,7 @@ async function processMuseum(
          detail_url = COALESCE(excluded.detail_url, events.detail_url),
          image_url = COALESCE(excluded.image_url, events.image_url),
          price = COALESCE(excluded.price, events.price),
+         category = COALESCE(excluded.category, events.category),
          updated_at = datetime('now')`;
 
     const statements = validEvents.map((event) => {
@@ -142,6 +143,7 @@ async function processMuseum(
         event.detail_url,
         event.image_url,
         event.price,
+        event.category || classifyEvent(event.title, event.description) || null,
       );
     });
 
@@ -189,6 +191,7 @@ interface ScrapedEvent {
   date: string;
   time: string | null;
   description: string | null;
+  category: string | null;
 }
 
 async function scrapeMuseumEvents(
@@ -261,7 +264,7 @@ Rules:
 - Skip permanent exhibitions and general descriptions.
 
 Return ONLY a JSON array, nothing else. Each element:
-{"title": <exact title from text>, "date": "YYYY-MM-DD", "time": "HH:MM" or null, "description": <short snippet from text> or null}
+{"title": <exact title>, "date": "YYYY-MM-DD", "time": "HH:MM" or null, "category": "Führung" | "Workshop" | "Vortrag" | "Konzert" | "Vernissage" | "Familie" | "Film" | null, "description": <short snippet> or null}
 
 Text content from ${museum.name} (${eventsUrl}):
 ${truncated}`,
@@ -277,12 +280,13 @@ ${truncated}`,
   const events = extractJson<ScrapedEvent[]>(responseText);
   if (!events || events.length === 0) return 0;
 
-  const insertSql = `INSERT INTO events (museum_id, title, date, time, description, url, detail_url)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
+  const insertSql = `INSERT INTO events (museum_id, title, date, time, description, url, detail_url, category)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(museum_id, title, date) DO UPDATE SET
        time = excluded.time,
        description = excluded.description,
        detail_url = COALESCE(excluded.detail_url, events.detail_url),
+       category = COALESCE(excluded.category, events.category),
        updated_at = datetime('now')`;
 
   const statements = events
@@ -306,6 +310,7 @@ ${truncated}`,
         description,
         eventsUrl,
         detailUrl,
+        event.category || classifyEvent(title, description) || null,
       );
     });
 

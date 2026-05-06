@@ -22,6 +22,7 @@ export interface ApiEvent {
   image_url: string | null;
   price: string | null;
   museum_slug_override?: string;
+  category?: string | null;
 }
 
 export interface EventApiConfig {
@@ -986,6 +987,28 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
 
           if (date < today) continue;
 
+          // Categorize: Default to "Film", but check for "Familie" or "Vortrag"
+          let category = "Film";
+          const genre = (movie.genre || "").toLowerCase();
+          const lowerTitle = (movie.title || movie.movieName || "").toLowerCase();
+
+          if (
+            genre.includes("animation") ||
+            genre.includes("familie") ||
+            genre.includes("kinder") ||
+            genre.includes("kinderfilm")
+          ) {
+            category = "Familie";
+          } else if (
+            genre.includes("vortrag") ||
+            genre.includes("lecture") ||
+            lowerTitle.includes("vortrag") ||
+            lowerTitle.includes("lecture") ||
+            lowerTitle.includes("buchpräsentation")
+          ) {
+            category = "Vortrag";
+          }
+
           events.push({
             title: movie.title || movie.movieName || "Unbenannter Film",
             date,
@@ -996,6 +1019,7 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
             detail_url: show._UrlBooking || null,
             image_url: movie.imageUrlArtwork || null,
             price: null,
+            category,
           });
         }
       }
@@ -1012,6 +1036,15 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
     for (const te of tribeEvents) {
       const key = `${te.title.toLowerCase()}::${te.date}`;
       if (!kinoKeys.has(key)) {
+        // Basic classification for DFF Tribe events
+        const title = te.title.toLowerCase();
+        if (title.includes("führung") || title.includes("rundgang")) te.category = "Führung";
+        else if (title.includes("workshop") || title.includes("kurs") || title.includes("atelier"))
+          te.category = "Workshop";
+        else if (title.includes("vortrag") || title.includes("lecture") || title.includes("gespräch"))
+          te.category = "Vortrag";
+        else if (title.includes("film") || title.includes("kino")) te.category = "Film";
+
         events.push(te);
       }
     }

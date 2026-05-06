@@ -19,6 +19,13 @@ export const ICON = {
   report: "M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z",
   share:
     "M9.5 7H7c-2.8 0-5 2.2-5 5s2.2 5 5 5h2.5v-2H7c-1.7 0-3-1.3-3-3s1.3-3 3-3h2.5V7zm5 0h-2.5v2H17c1.7 0 3 1.3 3 3s-1.3 3-3 3h-2.5v2H17c2.8 0 5-2.2 5-5s-2.2-5-5-5zM8 13h8v-2H8v2z",
+  film: "M18 3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8 17H6v-2h2v2zm0-4H6v-2h2v2zm0-4H6V7h2v2zm10 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z",
+  edit: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 000-1.42l-2.34-2.34a1.003 1.003 0 00-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
+  chat: "M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z",
+  music: "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-4z",
+  star: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
+  user: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z",
+  tag: "M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z",
 };
 
 export function IconSprite() {
@@ -41,6 +48,27 @@ export function IconSprite() {
       </symbol>
       <symbol id="i-share" viewBox="0 0 24 24">
         <path d={ICON.share} />
+      </symbol>
+      <symbol id="i-film" viewBox="0 0 24 24">
+        <path d={ICON.film} />
+      </symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24">
+        <path d={ICON.edit} />
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24">
+        <path d={ICON.chat} />
+      </symbol>
+      <symbol id="i-music" viewBox="0 0 24 24">
+        <path d={ICON.music} />
+      </symbol>
+      <symbol id="i-star" viewBox="0 0 24 24">
+        <path d={ICON.star} />
+      </symbol>
+      <symbol id="i-user" viewBox="0 0 24 24">
+        <path d={ICON.user} />
+      </symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24">
+        <path d={ICON.tag} />
       </symbol>
       <symbol id="i-gemini" viewBox="0 0 24 24">
         <path d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81" />
