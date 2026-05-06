@@ -356,7 +356,7 @@ app.get("/museum/:slug", async (c) => {
 
   // Fetch museums
   const slugsToFetch = groupSlugs || [slug];
-  const museums: MuseumRow[] = [];
+  let museums: MuseumRow[] = [];
   for (const s of slugsToFetch) {
     const museum = await c.env.DB.prepare(
       "SELECT id, name, slug, opening_hours, website_url, description, image_url FROM museums WHERE slug = ?",
@@ -368,6 +368,11 @@ app.get("/museum/:slug", async (c) => {
 
   if (museums.length === 0) {
     return c.notFound();
+  }
+
+  // Translate museum descriptions if not German
+  if (locale !== "de") {
+    museums = await translateFields(c.env, museums, ["description"] as (keyof MuseumRow)[], locale);
   }
 
   // Fetch exhibitions and events for all museums in parallel
