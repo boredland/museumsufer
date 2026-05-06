@@ -218,7 +218,7 @@ function renderStatusStamp(status: string): string {
 }
 
 function renderAction(p: DayPerformance): string {
-  if (p.status === "cancelled") return "";
+  if (p.status === "cancelled" || p.status === "sold_out") return "";
   if (p.ticket_url) {
     return `<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
       <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
