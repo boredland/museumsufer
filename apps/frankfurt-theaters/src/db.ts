@@ -104,6 +104,27 @@ export async function persistScrapeResult(
   return { shows: result.shows.length, performances: performanceCount };
 }
 
+export interface DateWithCount {
+  date: string;
+  n: number;
+}
+
+export async function getDatesWithPerformances(
+  db: D1Database,
+  fromDate: string,
+  toDate: string,
+): Promise<DateWithCount[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT date, COUNT(*) AS n FROM performances
+       WHERE date BETWEEN ?1 AND ?2 AND status != 'cancelled'
+       GROUP BY date ORDER BY date`,
+    )
+    .bind(fromDate, toDate)
+    .all<{ date: string; n: number }>();
+  return results.map((r) => ({ date: String(r.date), n: Number(r.n) }));
+}
+
 export async function getPerformancesForDate(
   db: D1Database,
   date: string,
