@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "frankfurt-theaters-db",
-      "database_id": "REPLACE_AFTER_WRANGLER_D1_CREATE"
+      "database_id": "c610b75f-a189-4692-a50a-13cf7e1a63f4"
     }
   ],
   "assets": {
