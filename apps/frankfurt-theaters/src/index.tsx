@@ -1,7 +1,6 @@
-import dayjs from "dayjs";
 import { Hono } from "hono";
 import { dateOffset, todayIso } from "./date";
-import { getPerformancesForDate } from "./db";
+import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { renderPage } from "./frontend";
 import { runAll, runOne } from "./scrape-runner";
 import type { Env } from "./types";
@@ -26,10 +25,12 @@ app.get("/healthz", (c) => c.json({ ok: true }));
 app.get("/", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
-  const performances = await getPerformancesForDate(c.env.DB, date);
-  const prevDate = dayjs(date).subtract(1, "day").format("YYYY-MM-DD");
-  const nextDate = dayjs(date).add(1, "day").format("YYYY-MM-DD");
-  return c.html(renderPage({ date, performances, prevDate, nextDate }));
+  const today = todayIso();
+  const [performances, dateStrip] = await Promise.all([
+    getPerformancesForDate(c.env.DB, date),
+    getDatesWithPerformances(c.env.DB, today, dateOffset(60)),
+  ]);
+  return c.html(renderPage({ date, today, performances, dateStrip }));
 });
 
 app.get("/api/day", async (c) => {
