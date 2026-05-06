@@ -525,8 +525,11 @@ export const CLIENT_SCRIPT = `
       hydrateSectionStates();
       updateLangLinks();
       document.body.classList.add('hydrated');
-    } else {
+    } else if (content) {
       loadDay(clientToday);
+    } else {
+      updateLangLinks();
+      document.body.classList.add('hydrated');
     }
 
     var urlSort = new URLSearchParams(location.search).get('sort');
