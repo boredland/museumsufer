@@ -8,12 +8,78 @@ const SPIELPLAN_URL = `${BASE}/de/spielplan/`;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 export async function scrapeOperFrankfurt(): Promise<ScrapeResult> {
-  const res = await fetch(SPIELPLAN_URL, {
+  const html = await fetchHtml(SPIELPLAN_URL);
+  const result = parseOperHtml(html);
+  await enrichShowsFromDetailPages(result);
+  return result;
+}
+
+async function fetchHtml(url: string): Promise<string> {
+  const res = await fetch(url, {
     headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
   });
-  if (!res.ok) throw new Error(`Oper spielplan fetch failed: ${res.status}`);
-  const html = await res.text();
-  return parseOperHtml(html);
+  if (!res.ok) throw new Error(`fetch failed: ${url} → ${res.status}`);
+  return res.text();
+}
+
+/**
+ * Oper detail pages (`/de/spielplan/<slug>/?id_datum=<id>`) carry the
+ * synopsis, the production photo, and a price field — sometimes a flat
+ * "18 Euro", sometimes a category code ("S2", "P", "A") which maps to a
+ * separate price grid we don't have yet. Parse what we can; leave coded
+ * prices null until we wire the mapping.
+ *
+ * One fetch per unique show — descriptions and prices are constant per
+ * production, not per performance.
+ */
+async function enrichShowsFromDetailPages(result: ScrapeResult): Promise<void> {
+  for (const show of result.shows) {
+    const sample = result.performances.find((p) => p.show_slug === show.slug);
+    if (!sample?.provider_event_id) continue;
+    try {
+      const detail = await fetchHtml(`${BASE}/de/spielplan/${show.slug}/?id_datum=${sample.provider_event_id}`);
+      const parsed = parseOperDetail(detail);
+      if (parsed.priceEuro != null) {
+        for (const perf of result.performances) {
+          if (perf.show_slug === show.slug) {
+            perf.price_min = parsed.priceEuro;
+            perf.price_max = parsed.priceEuro;
+          }
+        }
+      }
+      if (parsed.image) show.image_url = parsed.image;
+      if (parsed.description) show.description = parsed.description;
+    } catch (err) {
+      console.warn(`Oper detail enrichment failed for ${show.slug}:`, err);
+    }
+  }
+}
+
+interface OperDetail {
+  priceEuro: number | null;
+  description: string | null;
+  image: string | null;
+}
+
+export function parseOperDetail(html: string): OperDetail {
+  const priceText = match1(html, /<dt>\s*Preise\s*<\/dt>\s*<dd>([\s\S]*?)<\/dd>/i);
+  const priceMatch = priceText?.match(/(\d{1,3})\s*Euro/i);
+  const priceEuro = priceMatch ? parseInt(priceMatch[1], 10) : null;
+
+  let description: string | null = null;
+  const articleStart = html.search(/<div\s+class="article-header"/i);
+  if (articleStart !== -1) {
+    const region = html.slice(articleStart);
+    const firstLongP = [...region.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+      .map((m) => stripHtml(m[1]))
+      .find((t) => t.length >= 120 && !/cookie|datenschutz|google|analyse/i.test(t));
+    if (firstLongP) description = firstLongP.length > 800 ? `${firstLongP.slice(0, 800).trimEnd()}…` : firstLongP;
+  }
+
+  const imageHref = match1(html, /<a\s+class="item slide"[^>]*data-src="([^"]+)"/);
+  const image = imageHref ? normalizeUrl(imageHref, BASE) : null;
+
+  return { priceEuro, description, image };
 }
 
 /**
