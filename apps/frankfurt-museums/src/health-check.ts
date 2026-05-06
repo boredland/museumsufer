@@ -40,6 +40,10 @@ function validateEventApi(type: EventApiType, body: string): string | null {
         : "Missing archive-title/subtitle elements";
     case "fdh":
       return body.includes("o-program-link") ? null : "Missing o-program-link elements";
+    case "dff-kino":
+      return body.includes("<h3") && body.includes("<h4") && body.includes("Uhr")
+        ? null
+        : "Missing h3/h4 cinema program elements";
     default:
       return null;
   }
