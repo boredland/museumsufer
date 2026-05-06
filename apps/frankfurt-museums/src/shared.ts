@@ -235,7 +235,7 @@ export function classifyEvent(title: string, description?: string | null): strin
     haystack.includes("podiumsdiskussion")
   )
     return "Vortrag";
-  if (haystack.includes("konzert") || haystack.includes("musik") || haystack.includes(" live")) return "Konzert";
+  if (haystack.includes("konzert") || haystack.includes("musik")) return "Konzert";
   if (haystack.includes("vernissage") || haystack.includes("eröffnung") || haystack.includes("eröffnungsfeier"))
     return "Vernissage";
   if (
