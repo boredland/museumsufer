@@ -13,7 +13,8 @@ export type EventApiType =
   | "bibelhaus"
   | "fkv"
   | "fdh"
-  | "dff-kino";
+  | "dff-kino"
+  | "archaeologisches";
 
 export interface ProxyConfig {
   url: string;
@@ -47,6 +48,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6832,
     rmvStopLid: "A=1@O=Frankfurt (Main) Elisabethenstraße@X=8688119@Y=50105882@U=80@L=3000905@",
     exhibitionUrl: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen/",
+    eventApi: {
+      type: "archaeologisches",
+      endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/kalender",
+    },
   },
   "bibelhaus-erlebnismuseum": {
     lat: 50.1044,
