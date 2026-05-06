@@ -350,15 +350,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Taunusanlage@X=8668765@Y=50113487@U=80@L=3000011@",
     exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
   },
-  "feuerwehrmuseum-frankfurt": {
-    name: "Feuerwehrmuseum Frankfurt am Main",
-    description: "Geschichte der Brandbekämpfung und des Rettungswesens in Frankfurt.",
-    image: "https://www.feuerwehrmuseum-frankfurt.de/bilder/01-hintergrund-startseite.jpg",
-    website: "https://www.feuerwehrmuseum-frankfurt.de/",
-    lat: 50.178,
-    lng: 8.6608,
-    rmvStopLid: "A=1@O=Frankfurt (Main) Alt-Bonames@X=8664037@Y=50180636@U=80@L=3001390@",
-  },
   "frankfurter-feldbahnmuseum": {
     name: "Frankfurter Feldbahnmuseum",
     description: "Historische Feldbahnen und Schmalspurlokomotiven zum Anfassen und Mitfahren.",
