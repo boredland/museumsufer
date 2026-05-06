@@ -1,4 +1,4 @@
-import { getManualMuseums } from "./museum-config";
+import { getManualMuseums, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 import type { Env } from "./types";
 
@@ -69,9 +69,16 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
 }
 
 async function refreshWikipediaImages(env: Env): Promise<number> {
-  const { results } = await env.DB.prepare("SELECT id, name FROM museums").all<{ id: number; name: string }>();
+  const { results } = await env.DB.prepare("SELECT id, slug, name FROM museums").all<{
+    id: number;
+    slug: string;
+    name: string;
+  }>();
   const lookups = await Promise.all(
-    results.map(async (m) => ({ id: m.id, image: await lookupWikipediaImage(m.name).catch(() => null) })),
+    results.map(async (m) => ({
+      id: m.id,
+      image: await lookupWikipediaImage(WIKIPEDIA_TITLE_OVERRIDES[m.slug] || m.name).catch(() => null),
+    })),
   );
   const updates = lookups.filter((l): l is { id: number; image: string } => !!l.image);
   if (updates.length === 0) return 0;
