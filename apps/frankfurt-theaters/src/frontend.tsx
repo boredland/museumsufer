@@ -59,6 +59,8 @@ export interface HeadOptions {
   canonical: string;
   ogImage?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** Extra <link> tags rendered after the standard head links (e.g. per-theater iCal). */
+  extraLinks?: Array<{ rel: string; href: string; type?: string; title?: string }>;
 }
 
 export function renderHead(opts: HeadOptions): string {
@@ -87,6 +89,14 @@ export function renderHead(opts: HeadOptions): string {
 <link rel="manifest" href="/manifest.json" />
 <link rel="alternate" type="application/json" title="Frankfurt Theater API" href="/api/day" />
 <link rel="alternate" type="text/calendar" title="Spielplan iCal" href="/feed.ics" />
+${
+  opts.extraLinks
+    ?.map(
+      (l) =>
+        `<link rel="${escapeHtml(l.rel)}" href="${escapeHtml(l.href)}"${l.type ? ` type="${escapeHtml(l.type)}"` : ""}${l.title ? ` title="${escapeHtml(l.title)}"` : ""} />`,
+    )
+    .join("\n") ?? ""
+}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" />
@@ -408,7 +418,7 @@ export function renderPage(props: PageProps): string {
   const head = renderHead({
     title: `Frankfurt Theater · ${niceDate}`,
     description: `Vorstellungen und Karten der Frankfurter Bühnen am ${niceDate} — kuratiert nach Tag.`,
-    canonical: `${APP_URL}/?date=${date}`,
+    canonical: `${APP_URL}/`,
     jsonLd: buildHomeJsonLd(date, performances),
   });
 
@@ -710,7 +720,7 @@ export function renderClientScript(): string {
       var data = new FormData(form);
       var payload = {};
       data.forEach(function(v, k){ payload[k] = v; });
-      fetch('https://formspree.io/f/feedback@ins.theater', {
+      fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload)
@@ -737,21 +747,44 @@ export function renderClientScript(): string {
     var list = document.getElementById('performances');
     var status = document.getElementById('search-status');
     if (!input || !list || !window.uFuzzy) return;
+    // Tear down any previous empty-state node from a prior swap
+    var prevEmpty = document.getElementById('search-empty');
+    if (prevEmpty) prevEmpty.remove();
 
     var items = Array.prototype.slice.call(list.querySelectorAll('.perf'));
     var haystack = items.map(function(li){
       var t = (li.querySelector('.perf__title')||{}).textContent || '';
       var v = (li.querySelector('.perf__venue')||{}).textContent || '';
       var b = (li.querySelector('.perf__byline')||{}).textContent || '';
-      return (t + ' ' + v + ' ' + b).replace(/s+/g,' ').trim();
+      return (t + ' ' + v + ' ' + b).replace(/\\s+/g,' ').trim();
     });
     var fuzzy = new uFuzzy({ intraMode: 1, intraIns: 1, interIns: Infinity });
+
+    function ensureEmpty(){
+      var node = document.getElementById('search-empty');
+      if (!node) {
+        node = document.createElement('div');
+        node.id = 'search-empty';
+        node.className = 'empty';
+        node.innerHTML = '<p class="empty__mark">∅</p><p>Keine Vorstellung gefunden. <button type="button" class="empty__reset">Filter zurücksetzen</button></p>';
+        list.parentNode.insertBefore(node, list.nextSibling);
+        node.querySelector('.empty__reset').addEventListener('click', function(){
+          input.value = ''; applyFilter(); input.focus();
+        });
+      }
+      node.style.display = '';
+    }
+    function hideEmpty(){
+      var node = document.getElementById('search-empty');
+      if (node) node.style.display = 'none';
+    }
 
     function applyFilter(){
       var q = input.value.trim();
       if (!q) {
         items.forEach(function(li){ li.style.display = ''; });
         if (status) status.textContent = '';
+        hideEmpty();
         return;
       }
       var idxs = fuzzy.filter(haystack, q);
@@ -763,6 +796,7 @@ export function renderClientScript(): string {
         if (match) visible++;
       });
       if (status) status.textContent = visible + ' von ' + items.length + ' Treffern';
+      if (visible === 0) ensureEmpty(); else hideEmpty();
     }
 
     input.addEventListener('input', applyFilter);
@@ -821,10 +855,16 @@ export function buildHomeJsonLd(date: string, performances: DayPerformance[]): R
   const website = {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
     name: "Frankfurt Theater",
     url: APP_URL,
     inLanguage: "de",
     publisher: { "@type": "Organization", name: "Frankfurt Theater", url: APP_URL },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${APP_URL}/?date={date}` },
+      "query-input": "required name=date",
+    },
   };
   return [website, itemList];
 }
