@@ -125,10 +125,12 @@ export async function getDatesWithPerformances(
   return results.map((r) => ({ date: String(r.date), n: Number(r.n) }));
 }
 
-export async function getPerformancesForDate(
-  db: D1Database,
-  date: string,
-): Promise<(Performance & { show: Show; theater: Pick<Theater, "id" | "name" | "slug" | "website_url"> })[]> {
+export type DayPerformance = Performance & {
+  show: Show;
+  theater: Pick<Theater, "id" | "name" | "slug" | "website_url">;
+};
+
+export async function getPerformancesForDate(db: D1Database, date: string): Promise<DayPerformance[]> {
   const { results } = await db
     .prepare(
       `SELECT
@@ -184,4 +186,117 @@ export async function getPerformancesForDate(
       website_url: r.theater_website as string | null,
     },
   }));
+}
+
+const SELECT_PERF_FIELDS = `
+  p.id, p.show_id, p.date, p.time, p.end_time, p.end_date, p.venue_room,
+  p.provider_event_id, p.ticket_url, p.status, p.available_seats, p.total_seats,
+  p.price_min, p.price_max, p.currency, p.availability_checked_at,
+  s.id AS show_id_, s.slug AS show_slug, s.title AS show_title, s.subtitle AS show_subtitle,
+  s.description AS show_description, s.image_url AS show_image_url, s.detail_url AS show_detail_url,
+  t.id AS theater_id, t.name AS theater_name, t.slug AS theater_slug, t.website_url AS theater_website
+`;
+
+function rowToDayPerformance(r: Record<string, unknown>): DayPerformance {
+  return {
+    id: Number(r.id),
+    show_id: Number(r.show_id),
+    date: String(r.date),
+    time: r.time as string | null,
+    end_time: r.end_time as string | null,
+    end_date: r.end_date as string | null,
+    venue_room: r.venue_room as string | null,
+    provider_event_id: r.provider_event_id as string | null,
+    ticket_url: r.ticket_url as string | null,
+    status: (r.status as Performance["status"]) ?? "unknown",
+    available_seats: r.available_seats as number | null,
+    total_seats: r.total_seats as number | null,
+    price_min: r.price_min as number | null,
+    price_max: r.price_max as number | null,
+    currency: r.currency as string | null,
+    availability_checked_at: r.availability_checked_at as string | null,
+    show: {
+      id: Number(r.show_id_),
+      theater_id: Number(r.theater_id),
+      slug: String(r.show_slug),
+      title: String(r.show_title),
+      subtitle: r.show_subtitle as string | null,
+      description: r.show_description as string | null,
+      language: null,
+      age_recommendation: null,
+      image_url: r.show_image_url as string | null,
+      detail_url: r.show_detail_url as string | null,
+      season: null,
+    },
+    theater: {
+      id: Number(r.theater_id),
+      name: String(r.theater_name),
+      slug: String(r.theater_slug),
+      website_url: r.theater_website as string | null,
+    },
+  };
+}
+
+export async function getPerformancesInRange(
+  db: D1Database,
+  fromDate: string,
+  toDate: string,
+  theaterSlug?: string | null,
+): Promise<DayPerformance[]> {
+  const args: (string | number)[] = [fromDate, toDate];
+  let where = "p.date BETWEEN ?1 AND ?2";
+  if (theaterSlug) {
+    args.push(theaterSlug);
+    where += " AND t.slug = ?3";
+  }
+  const { results } = await db
+    .prepare(
+      `SELECT ${SELECT_PERF_FIELDS}
+       FROM performances p
+       JOIN shows s ON s.id = p.show_id
+       JOIN theaters t ON t.id = s.theater_id
+       WHERE ${where}
+       ORDER BY p.date, p.time NULLS LAST, t.name, s.title`,
+    )
+    .bind(...args)
+    .all<Record<string, unknown>>();
+  return results.map(rowToDayPerformance);
+}
+
+export async function getPerformanceById(db: D1Database, id: number): Promise<DayPerformance | null> {
+  const row = await db
+    .prepare(
+      `SELECT ${SELECT_PERF_FIELDS}
+       FROM performances p
+       JOIN shows s ON s.id = p.show_id
+       JOIN theaters t ON t.id = s.theater_id
+       WHERE p.id = ?1
+       LIMIT 1`,
+    )
+    .bind(id)
+    .first<Record<string, unknown>>();
+  return row ? rowToDayPerformance(row) : null;
+}
+
+export async function getTheaterBySlug(db: D1Database, slug: string): Promise<Theater | null> {
+  const row = await db
+    .prepare(
+      `SELECT id, name, slug, address, lat, lon, website_url, ticketing_provider, description, image_url
+       FROM theaters WHERE slug = ?1 LIMIT 1`,
+    )
+    .bind(slug)
+    .first<Record<string, unknown>>();
+  if (!row) return null;
+  return {
+    id: Number(row.id),
+    name: String(row.name),
+    slug: String(row.slug),
+    address: row.address as string | null,
+    lat: row.lat as number | null,
+    lon: row.lon as number | null,
+    website_url: row.website_url as string | null,
+    ticketing_provider: row.ticketing_provider as Theater["ticketing_provider"],
+    description: row.description as string | null,
+    image_url: row.image_url as string | null,
+  };
 }

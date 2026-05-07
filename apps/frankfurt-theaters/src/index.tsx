@@ -2,7 +2,15 @@ import { Hono } from "hono";
 import { dateOffset, todayIso } from "./date";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { renderPage } from "./frontend";
+import { renderDayMarkdown, wantsMarkdown } from "./markdown";
+import apiRoutes from "./routes/api";
+import docsRoutes from "./routes/docs";
+import feedsRoutes from "./routes/feeds";
+import staticRoutes from "./routes/static";
+import theaterRoutes from "./routes/theater";
+import transitRoutes from "./routes/transit";
 import { runAll, runOne } from "./scrape-runner";
+import { SERVICE_WORKER_JS } from "./service-worker";
 import type { Env } from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -18,6 +26,16 @@ app.use("*", async (c, next) => {
   c.header("X-Frame-Options", "DENY");
   c.header("X-Content-Type-Options", "nosniff");
   c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  c.header(
+    "Link",
+    [
+      '</.well-known/api-catalog>; rel=api-catalog; type="application/linkset+json"',
+      '</api/docs/openapi.json>; rel=service-desc; type="application/openapi+json"',
+      '</api/docs>; rel=service-doc; type="text/html"',
+      '</llms.txt>; rel=describedby; type="text/plain"; title="LLM Instructions"',
+    ].join(", "),
+    { append: true },
+  );
 });
 
 app.get("/healthz", (c) => c.json({ ok: true }));
@@ -30,15 +48,31 @@ app.get("/", async (c) => {
     getPerformancesForDate(c.env.DB, date),
     getDatesWithPerformances(c.env.DB, today, dateOffset(60)),
   ]);
-  return c.html(renderPage({ date, today, performances, dateStrip }));
+  if (wantsMarkdown(c.req.raw)) {
+    return c.body(renderDayMarkdown(date, performances), {
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Cache-Control": "public, max-age=600, s-maxage=1800",
+      },
+    });
+  }
+  return c.html(renderPage({ date, today, performances, dateStrip }), {
+    headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
+  });
 });
 
-app.get("/api/day", async (c) => {
-  const date = c.req.query("date") || todayIso();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
-  const performances = await getPerformancesForDate(c.env.DB, date);
-  return c.json({ date, performances });
-});
+app.get("/sw.js", (c) =>
+  c.body(SERVICE_WORKER_JS, {
+    headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
+  }),
+);
+
+app.route("/", staticRoutes);
+app.route("/", apiRoutes);
+app.route("/", feedsRoutes);
+app.route("/", theaterRoutes);
+app.route("/", transitRoutes);
+app.route("/api/docs", docsRoutes);
 
 app.post("/scrape/all", async (c) => {
   const auth = c.req.header("authorization");
@@ -64,7 +98,6 @@ export default {
     ctx.waitUntil(
       runAll(env).then((summary) => {
         console.log("Scheduled scrape summary:", JSON.stringify(summary));
-        // Drop performances that are more than 1 day in the past
         const cutoff = dateOffset(-1);
         return env.DB.prepare("DELETE FROM performances WHERE date < ?1").bind(cutoff).run();
       }),
