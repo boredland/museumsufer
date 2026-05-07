@@ -1,6 +1,8 @@
 import {
+  berlinHourMinute,
   escapeHtml as coreEscapeHtml,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
+  todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
 } from "@museumsufer/core";
@@ -234,35 +236,38 @@ function renderAction(p: DayPerformance): string {
   return icsLink;
 }
 
+const ICON_RMV = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>`;
+const ICON_GOOGLE = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.5"/></svg>`;
+const ICON_APPLE = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.65-2.2.46-3.06-.4C3.79 16.17 4.36 9.43 8.9 9.18c1.25.07 2.12.73 2.86.78.97-.2 1.9-.76 2.93-.69 1.24.1 2.17.58 2.79 1.48-2.56 1.53-1.95 4.89.58 5.83-.45 1.19-.99 2.38-1.95 3.72h-.06zM12.03 9.12C11.9 7.05 13.6 5.36 15.56 5.2c.29 2.38-2.16 4.16-3.53 3.92z"/></svg>`;
+const ICON_REPORT = `<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>`;
+
 function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
   const regarding = `${p.show.title} — ${p.theater.name}, ${p.date}${p.time ? ` ${p.time}` : ""}`;
   const context = `${regarding} (${APP_URL}/api/performance/${p.id})`;
   return `<span class="nav-wrap">
-    <button type="button" class="transit-btn" data-theater="${p.theater.slug}" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
-      <span class="transit-btn__label">Anfahrt</span>
-      <span class="transit-btn__value" aria-live="polite"></span>
+    <button type="button" class="transit-btn" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
+      Anfahrt
     </button>
     <div id="${popId}" popover="auto" role="menu" class="nav-popover" data-theater="${p.theater.slug}">
       <p class="nav-popover__title">${escapeHtml(p.theater.name)}</p>
-      <p class="nav-popover__transit"><span class="nav-popover__minutes" aria-live="polite">…</span></p>
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-app" data-kind="rmv-app" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true">▶</span> RMV App
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV App
       </a>
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-web" data-kind="rmv-web" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true">◐</span> RMV Fahrplan
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV Fahrplan
       </a>
       <a role="menuitem" class="nav-popover__link" data-kind="google" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true">G</span> Google Maps
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_GOOGLE}</span> Google Maps
       </a>
       <a role="menuitem" class="nav-popover__link" data-kind="apple" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true"></span> Apple Maps
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_APPLE}</span> Apple Maps
       </a>
       <button type="button" role="menuitem" class="nav-popover__link nav-popover__link--report"
         data-report-type="performance"
         data-report-regarding="${escapeHtml(regarding)}"
         data-report-context="${escapeHtml(context)}">
-        <span class="nav-popover__icon" aria-hidden="true">!</span> Fehler bei dieser Vorstellung melden
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_REPORT}</span> Fehler melden
       </button>
     </div>
   </span>`;
@@ -358,6 +363,11 @@ export function renderFooter(): string {
 export function renderProgrammePartial(date: string, performances: DayPerformance[]): string {
   const dp = dateParts(date);
   const headerWeekday = WEEKDAYS_LONG[dp.weekday];
+  // On today's view, hide performances whose start time has passed (with a
+  // 30-min grace so late arrivals can still find the row). Un-timed entries
+  // and future dates are unaffected.
+  const visible = filterPastForToday(date, performances);
+  const hidden = performances.length - visible.length;
   return `<header class="programme__header">
     <p class="programme__line"></p>
     <p class="programme__weekday">${headerWeekday}</p>
@@ -380,13 +390,30 @@ export function renderProgrammePartial(date: string, performances: DayPerformanc
   </header>
 
   ${
-    performances.length === 0
+    visible.length === 0
       ? `<div class="empty">
            <p class="empty__mark">∅</p>
-           <p>An diesem Tag keine Vorstellungen.</p>
+           <p>${hidden > 0 ? "Heute keine kommenden Vorstellungen mehr." : "An diesem Tag keine Vorstellungen."}</p>
          </div>`
-      : `<ol class="performances" role="list" id="performances">${performances.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>`
+      : `<ol class="performances" role="list" id="performances">${visible.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>
+         ${
+           hidden > 0
+             ? `<p class="programme__past-note">${hidden} Vorstellung${hidden === 1 ? "" : "en"} heute bereits gestartet — verborgen.</p>`
+             : ""
+         }`
   }`;
+}
+
+function filterPastForToday(date: string, performances: DayPerformance[]): DayPerformance[] {
+  if (date !== todayIso()) return performances;
+  const { hour, minute } = berlinHourMinute();
+  const nowMin = hour * 60 + minute - 30; // 30-minute grace
+  return performances.filter((p) => {
+    if (!p.time) return true;
+    const [hh, mm] = p.time.split(":");
+    const startMin = parseInt(hh, 10) * 60 + parseInt(mm, 10);
+    return startMin >= nowMin;
+  });
 }
 
 export function renderPage(props: PageProps): string {
@@ -448,20 +475,8 @@ export function renderClientScript(): string {
     }
   })();
 
-  // Anfahrt — popover with RMV / Google Maps / Apple Maps + lazy ÖPNV minutes
+  // Anfahrt — popover with RMV / Google Maps / Apple Maps deep-links
   (function(){
-    var transit = null; // { slug -> minutes }
-    var loading = false;
-
-    function snap(n){ return Math.round(n*500)/500; }
-
-    function fmtMin(min){
-      if (min == null) return null;
-      if (min < 60) return min + ' min mit ÖPNV';
-      var h = Math.floor(min/60), m = min%60;
-      return h + 'h' + (m ? ' ' + m + 'm' : '') + ' mit ÖPNV';
-    }
-
     function buildNavUrls(slug){
       var t = window.THEATER_LOC[slug];
       if (!t) return null;
@@ -477,9 +492,8 @@ export function renderClientScript(): string {
       };
     }
 
-    function populatePopover(slug){
-      var pop = document.querySelector('.nav-popover[data-theater="' + slug + '"]');
-      if (!pop) return;
+    function populatePopover(pop){
+      var slug = pop.getAttribute('data-theater');
       var urls = buildNavUrls(slug);
       if (!urls) return;
       pop.querySelectorAll('a[data-kind]').forEach(function(a){
@@ -489,72 +503,10 @@ export function renderClientScript(): string {
         else if (kind === 'google') a.href = urls.google;
         else if (kind === 'apple') a.href = urls.apple;
       });
-      var minutesEl = pop.querySelector('.nav-popover__minutes');
-      var v = transit && transit[slug];
-      if (v != null) {
-        minutesEl.textContent = fmtMin(v);
-        minutesEl.parentElement.classList.add('nav-popover__transit--ready');
-      }
-    }
-
-    function paintAllButtons(){
-      var btns = document.querySelectorAll('.transit-btn');
-      btns.forEach(function(b){
-        var slug = b.getAttribute('data-theater');
-        var v = transit && transit[slug];
-        var label = b.querySelector('.transit-btn__label');
-        var value = b.querySelector('.transit-btn__value');
-        if (v != null && label && value) {
-          label.textContent = 'ÖPNV';
-          value.textContent = (v < 60) ? (v + ' min') : Math.floor(v/60) + 'h' + (v%60 ? ' ' + (v%60) + 'm' : '');
-          b.classList.add('transit-btn--ready');
-        }
-        var pop = document.getElementById(b.getAttribute('data-popover-target'));
-        if (pop) {
-          var minutesEl = pop.querySelector('.nav-popover__minutes');
-          if (minutesEl && v != null) {
-            minutesEl.textContent = fmtMin(v);
-            minutesEl.parentElement.classList.add('nav-popover__transit--ready');
-          }
-        }
-      });
-    }
-
-    function fetchTransit(lat, lng, then){
-      if (loading) return;
-      loading = true;
-      var key = 'transit_' + snap(lat) + '_' + snap(lng);
-      var cached = null;
-      try { cached = sessionStorage.getItem(key); } catch(e){}
-      if (cached) {
-        try { transit = JSON.parse(cached); paintAllButtons(); loading = false; if (then) then(); return; } catch(e){}
-      }
-      fetch('/api/transit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: lat, lng: lng })
-      }).then(function(r){ return r.json(); }).then(function(d){
-        transit = d || {};
-        try { sessionStorage.setItem(key, JSON.stringify(transit)); } catch(e){}
-        paintAllButtons();
-        if (then) then();
-      }).catch(function(){}).finally(function(){ loading = false; });
-    }
-
-    function ensureLocation(cb){
-      if (!navigator.geolocation) { cb(null); return; }
-      navigator.geolocation.getCurrentPosition(
-        function(pos){ cb({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-        function(){ cb(null); },
-        { maximumAge: 600000, timeout: 8000 }
-      );
     }
 
     function rebindAll(){
-      // Pre-populate links on every nav popover currently in the DOM
-      document.querySelectorAll('.transit-btn').forEach(function(b){
-        populatePopover(b.getAttribute('data-theater'));
-      });
+      document.querySelectorAll('.nav-popover').forEach(populatePopover);
     }
 
     function positionPopover(btn){
@@ -564,7 +516,6 @@ export function renderClientScript(): string {
       var w = pop.offsetWidth || 224;
       var h = pop.offsetHeight || 280;
       var maxLeft = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
-      // Flip above the trigger if there isn't enough room below
       var spaceBelow = window.innerHeight - r.bottom;
       var top = (spaceBelow >= h + 12) ? (r.bottom + 4) : Math.max(8, r.top - h - 4);
       pop.style.top = top + 'px';
@@ -572,19 +523,10 @@ export function renderClientScript(): string {
       pop.style.right = 'auto';
     }
 
-    // Event delegation — works for elements added later by HTMX swap
     document.addEventListener('click', function(e){
       var btn = e.target.closest('.transit-btn');
       if (!btn) return;
-      var slug = btn.getAttribute('data-theater');
-      populatePopover(slug);
-      // Position the popover before native showing fires
       requestAnimationFrame(function(){ positionPopover(btn); });
-      if (transit) return;
-      ensureLocation(function(p){
-        if (!p) return;
-        fetchTransit(p.lat, p.lng, function(){ populatePopover(slug); });
-      });
     });
 
     rebindAll();

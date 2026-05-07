@@ -7,9 +7,9 @@ import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
 import feedsRoutes from "./routes/feeds";
 import imprintRoutes from "./routes/imprint";
+import ogRoutes from "./routes/og";
 import staticRoutes from "./routes/static";
 import theaterRoutes from "./routes/theater";
-import transitRoutes from "./routes/transit";
 import { runAll, runOne } from "./scrape-runner";
 import { SERVICE_WORKER_JS } from "./service-worker";
 import type { Env } from "./types";
@@ -87,8 +87,8 @@ app.route("/", staticRoutes);
 app.route("/", apiRoutes);
 app.route("/", feedsRoutes);
 app.route("/", theaterRoutes);
-app.route("/", transitRoutes);
 app.route("/", imprintRoutes);
+app.route("/", ogRoutes);
 app.route("/api/docs", docsRoutes);
 
 function requireScrapeAuth(c: { env: Env; req: { header(name: string): string | undefined } }): boolean {
