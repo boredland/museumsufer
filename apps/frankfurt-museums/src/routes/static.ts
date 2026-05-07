@@ -44,8 +44,8 @@ const LLMS_TXT = `# Museumsufer Frankfurt
 > Aggregated exhibitions and events from ~40 museums along Frankfurt's Museumsufer (Museum Embankment).
 
 Contact: feedback@ins.museum
-License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer)
-Source: https://github.com/boredland/museumsufer
+License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums)
+Source: https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums
 
 This site provides a JSON API for querying museum exhibitions and events in Frankfurt am Main, Germany.
 

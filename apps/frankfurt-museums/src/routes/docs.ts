@@ -11,7 +11,7 @@ const spec = {
     description:
       "Public API for museum exhibitions and events in Frankfurt's Museumsufer district. Data is refreshed daily at 6am UTC.",
     version: "1.0.0",
-    contact: { url: "https://github.com/boredland/museumsufer" },
+    contact: { url: "https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums" },
   },
   servers: [{ url: "https://museumsufer.app" }],
   paths: {

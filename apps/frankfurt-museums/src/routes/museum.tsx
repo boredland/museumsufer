@@ -292,7 +292,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
 
             <p class="mt-12 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
               <a
-                href="https://github.com/boredland/museumsufer"
+                href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
                 target="_blank"
                 rel="noopener"
                 class="hover:text-river no-underline"
