@@ -18,7 +18,10 @@ export type EventApiType =
   | "fritz-bauer-wollheim"
   | "experiminta"
   | "caricatura"
-  | "weltkulturen";
+  | "weltkulturen"
+  | "eventon"
+  | "buergerstiftung"
+  | "schirn";
 
 export interface ProxyConfig {
   url: string;
@@ -114,12 +117,16 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.0685,
     lng: 8.6455,
     rmvStopLid: "A=1@O=Frankfurt (Main) Stadion Osttribüne@X=8651686@Y=50068909@U=80@L=3001808@",
+    // SPA without parseable event listing.
+    skipEvents: true,
   },
   "fotografie-forum-frankfurt": {
     lat: 50.1118,
     lng: 8.6907,
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz/Stoltzestraße@X=8688874@Y=50112606@U=80@L=3060775@",
     exhibitionUrl: "https://www.fffrankfurt.org/aktuell/",
+    // /events and /kalender are SPA-rendered with no parseable dates.
+    skipEvents: true,
   },
   "frankfurter-goethe-haus": {
     lat: 50.1113,
@@ -142,6 +149,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6208,
     rmvStopLid: "A=1@O=Frankfurt (Main) Fischstein@X=8624952@Y=50129344@U=80@L=3001223@",
     exhibitionUrl: "https://www.bundesbank.de/de/bundesbank/geldmuseum/ausstellungen/",
+    // Bundesbank site has no machine-parseable event listing.
+    skipEvents: true,
   },
   "haus-der-stadtgeschichte-of": {
     lat: 50.0984,
@@ -234,6 +243,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6727,
     rmvStopLid: "A=1@O=Frankfurt (Main) Freßgass@X=8672406@Y=50114377@U=80@L=3065052@",
     exhibitionUrl: "https://momem.org/ausstellungen/",
+    // SPA, no parseable event listing.
+    skipEvents: true,
   },
   "museum-angewandte-kunst": {
     abbreviation: "MAK",
@@ -256,6 +267,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6545,
     rmvStopLid: "A=1@O=Frankfurt (Main) Gutleut-/Heilbronner Straße@X=8654212@Y=50099751@U=80@L=3000016@",
     exhibitionUrl: "https://www.mggu.de/ausstellungen/",
+    // /de/programm and /de/veranstaltungen are SPA-rendered with no parseable dates.
+    skipEvents: true,
   },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
@@ -265,18 +278,24 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz@X=8687993@Y=50112552@U=80@L=3000522@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
+    // mmk.art is a JS-rendered SPA, no parseable event listing.
+    skipEvents: true,
   },
   "museum-sinclair-haus-bad-homburg": {
     lat: 50.2267,
     lng: 8.6124,
     rmvStopLid: "A=1@O=Bad Homburg v.d.H. Markt@X=8612097@Y=50228890@U=80@L=3002349@",
     exhibitionUrl: "https://kunst-und-natur.de/museum-sinclair-haus/ausstellungen/",
+    // Site has no parseable event listing.
+    skipEvents: true,
   },
   portikus: {
     lat: 50.1077,
     lng: 8.6891,
     rmvStopLid: "A=1@O=Frankfurt (Main) Elisabethenstraße@X=8688119@Y=50105882@U=80@L=3000905@",
     exhibitionUrl: "https://www.portikus.de/de/exhibitions/",
+    // Small kunsthalle, no parseable event listing.
+    skipEvents: true,
   },
   "porzellan-museum-frankfurt": {
     lat: 50.0999,
@@ -290,12 +309,16 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.659,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hohenstaufenstraße@X=8657655@Y=50110826@U=80@L=3001938@",
     exhibitionUrl: "https://www.schirn.de/ausstellung/",
+    eventApi: { type: "schirn", endpoint: "https://www.schirn.de/de/veranstaltungen/" },
   },
   "schirn-in-bockenheim": {
     lat: 50.1102,
     lng: 8.659,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hohenstaufenstraße@X=8657655@Y=50110826@U=80@L=3001938@",
     exhibitionUrl: "https://www.schirn.de/ausstellung/",
+    // Events come via the parent schirn endpoint with a museum_slug_override
+    // when the page's bockenheim-indicator carries content.
+    skipEvents: true,
   },
   "senckenberg-naturmuseum": {
     abbreviation: "SNF",
@@ -328,6 +351,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.684,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://www.struwwelpeter-museum.de/sonderausstellungen/",
+    // No event listing, only special exhibitions.
+    skipEvents: true,
   },
   "tower-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
@@ -337,6 +362,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Weserstraße@X=8668837@Y=50109918@U=80@L=3060766@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
+    // mmk.art is a JS-rendered SPA, no parseable event listing.
+    skipEvents: true,
   },
   "weltkulturen-museum": {
     lat: 50.1042,
@@ -353,6 +380,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
+    // mmk.art is a JS-rendered SPA, no parseable event listing.
+    skipEvents: true,
   },
 
   // --- Manual additions (not on museumsufer.de) ---
@@ -366,6 +395,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6696,
     rmvStopLid: "A=1@O=Frankfurt (Main) Taunusanlage@X=8668765@Y=50113487@U=80@L=3000011@",
     exhibitionUrl: "https://kunststiftungdzbank.de/ausstellen/",
+    // Booking via Evenito on a hash-routed page; no parseable event listing.
+    skipEvents: true,
   },
   "frankfurter-feldbahnmuseum": {
     name: "Frankfurter Feldbahnmuseum",
@@ -375,6 +406,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1069,
     lng: 8.6119,
     rmvStopLid: "A=1@O=Frankfurt (Main) Gymnasium Römerhof@X=8609428@Y=50106646@U=80@L=3001499@",
+    // Volunteer-run site, opening days only — no concrete event listing.
+    skipEvents: true,
   },
   "verkehrsmuseum-frankfurt": {
     name: "Verkehrsmuseum Frankfurt am Main",
@@ -385,6 +418,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.5816,
     rmvStopLid: "A=1@O=Frankfurt (Main) Rheinlandstraße@X=8581112@Y=50082492@U=80@L=3001905@",
     exhibitionUrl: "https://hsf-ffm.com/de/termine/",
+    eventApi: { type: "eventon", endpoint: "https://hsf-ffm.com/de/termine/" },
   },
   dialogmuseum: {
     name: "Dialogmuseum",
@@ -431,6 +465,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6792,
     rmvStopLid: "A=1@O=Frankfurt (Main) Holzhausen-Park@X=8676910@Y=50127141@U=80@L=3001945@",
     exhibitionUrl: "https://www.frankfurter-buergerstiftung.de/programm/ausstellungen",
+    eventApi: { type: "buergerstiftung", endpoint: "https://www.frankfurter-buergerstiftung.de/programm/" },
   },
   palmengarten: {
     name: "Palmengarten",
@@ -441,6 +476,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.656,
     rmvStopLid: "A=1@O=Frankfurt (Main) Botanischer Garten@X=8654383@Y=50126171@U=80@L=3000215@",
     exhibitionUrl: "https://www.palmengarten.de/de/aktuelles.html",
+    // /de/veranstaltungen has no parseable dates in static HTML.
+    skipEvents: true,
   },
   "wollheim-memorial-frankfurt": {
     name: "Wollheim Memorial",

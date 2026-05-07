@@ -73,6 +73,12 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchCaricatura(config.endpoint);
     case "weltkulturen":
       return fetchWeltkulturen(config.endpoint);
+    case "eventon":
+      return fetchEventon(config.endpoint);
+    case "buergerstiftung":
+      return fetchBuergerstiftung(config.endpoint);
+    case "schirn":
+      return fetchSchirn(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1577,6 +1583,291 @@ async function fetchWeltkulturen(endpoint: string): Promise<ApiEvent[]> {
       price: null,
       category: classifyEvent(titleLine, description) || null,
     });
+  }
+  return events;
+}
+
+interface JsonLdEvent {
+  "@type"?: string | string[];
+  name?: string;
+  startDate?: string;
+  endDate?: string;
+  url?: string;
+  description?: string;
+  image?: string | string[] | { url?: string };
+  offers?: { price?: string; priceCurrency?: string } | Array<{ price?: string; priceCurrency?: string }>;
+}
+
+function isEventType(t: unknown): boolean {
+  if (typeof t === "string") return /Event/.test(t);
+  if (Array.isArray(t)) return t.some(isEventType);
+  return false;
+}
+
+function collectEventJsonLd(html: string): JsonLdEvent[] {
+  const out: JsonLdEvent[] = [];
+  const re = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null = re.exec(html);
+  while (m !== null) {
+    try {
+      const data = JSON.parse(m[1].trim()) as unknown;
+      const items: unknown[] = Array.isArray(data)
+        ? data
+        : data && typeof data === "object" && Array.isArray((data as { "@graph"?: unknown[] })["@graph"])
+          ? ((data as { "@graph": unknown[] })["@graph"] as unknown[])
+          : [data];
+      for (const it of items) {
+        if (!it || typeof it !== "object") continue;
+        const ev = it as JsonLdEvent;
+        if (isEventType(ev["@type"])) out.push(ev);
+      }
+    } catch {}
+    m = re.exec(html);
+  }
+  return out;
+}
+
+// Normalize ISO-ish startDate strings like "2026-5-10" or "2026-5-15T19:00+2:00"
+// (EventON emits non-zero-padded variants) into "YYYY-MM-DD"+"HH:MM".
+function splitJsonLdDate(raw: string): { date: string; time: string | null } | null {
+  const m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:T(\d{1,2}):(\d{2}))?/);
+  if (!m) return null;
+  const date = `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  const time = m[4] && m[5] ? `${m[4].padStart(2, "0")}:${m[5]}` : null;
+  return { date, time };
+}
+
+async function fetchEventon(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const today = todayIso();
+
+  const seen = new Set<string>();
+  return collectEventJsonLd(html).flatMap((ev): ApiEvent[] => {
+    if (!ev.name || !ev.startDate) return [];
+    const start = splitJsonLdDate(ev.startDate);
+    if (!start || start.date < today) return [];
+    const key = `${ev.name}::${start.date}`;
+    if (seen.has(key)) return [];
+    seen.add(key);
+
+    const end = ev.endDate ? splitJsonLdDate(ev.endDate) : null;
+    const offer = Array.isArray(ev.offers) ? ev.offers[0] : ev.offers;
+    const image = Array.isArray(ev.image)
+      ? ev.image[0]
+      : typeof ev.image === "object" && ev.image
+        ? ev.image.url
+        : ev.image;
+    const description = ev.description ? stripHtml(ev.description) : null;
+    return [
+      {
+        title: stripHtml(ev.name),
+        date: start.date,
+        time: nullIfMidnight(start.time),
+        end_time: nullIfMidnight(end?.time ?? null),
+        end_date: end && end.date !== start.date ? end.date : null,
+        description: description ? truncateHtml(description) : null,
+        detail_url: ev.url ?? null,
+        image_url: typeof image === "string" ? image : null,
+        price: offer?.price ? `${offer.price} ${offer.priceCurrency ?? "EUR"}` : null,
+        category: classifyEvent(ev.name, description) || null,
+      },
+    ];
+  });
+}
+
+function parseBuergerstiftungTime(text: string): { time: string | null; end_time: string | null } {
+  const range = text.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+  if (range) {
+    return { time: `${range[1].padStart(2, "0")}:${range[2]}`, end_time: `${range[3].padStart(2, "0")}:${range[4]}` };
+  }
+  const single = text.match(/(\d{1,2}):(\d{2})/);
+  return single
+    ? { time: `${single[1].padStart(2, "0")}:${single[2]}`, end_time: null }
+    : { time: null, end_time: null };
+}
+
+const BUERGERSTIFTUNG_CATEGORY_MAP: Record<string, string> = {
+  musik: "Konzert",
+  literatur: "Vortrag",
+  kinder: "Familie",
+  wissenschaft: "Vortrag",
+  vortrag: "Vortrag",
+  führung: "Führung",
+  film: "Film",
+};
+
+async function fetchBuergerstiftung(endpoint: string): Promise<ApiEvent[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const tileRe = /<a\s+class="w__tile[^"]*"\s+data-date="(\d{4}-\d{2}-\d{2})"\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  const events: ApiEvent[] = [];
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null = tileRe.exec(html);
+  while (m !== null) {
+    const [, date, href, body] = m;
+    if (date < today) {
+      m = tileRe.exec(html);
+      continue;
+    }
+    const dateLine = body.match(/<span class="w__tile--date">([\s\S]*?)<\/span>/)?.[1] ?? "";
+    const { time, end_time } = parseBuergerstiftungTime(dateLine.replace(/<[^>]+>/g, " "));
+    const title = body
+      .match(/<strong class="w__tile--title">([\s\S]*?)<\/strong>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = tileRe.exec(html);
+      continue;
+    }
+    const subtitle =
+      body
+        .match(/<span class="w__tile--subtitle">([\s\S]*?)<\/span>/)?.[1]
+        ?.replace(/<[^>]+>/g, "")
+        .replace(/&[a-z]+;|&#\d+;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim() ?? null;
+    const category = body
+      .match(/<strong class="w__tile--category"><span>([^<]+)<\/span>/)?.[1]
+      ?.toLowerCase()
+      .trim();
+    const image = body.match(/<img[^>]+src="([^"]+)"/)?.[1];
+
+    const key = `${title}::${date}`;
+    if (seen.has(key)) {
+      m = tileRe.exec(html);
+      continue;
+    }
+    seen.add(key);
+
+    events.push({
+      title,
+      date,
+      time,
+      end_time,
+      end_date: null,
+      description: subtitle ? truncateHtml(subtitle) : null,
+      detail_url: normalizeUrl(href, origin),
+      image_url: image ? normalizeUrl(image, origin) : null,
+      price: null,
+      category: (category && BUERGERSTIFTUNG_CATEGORY_MAP[category]) || classifyEvent(title, subtitle) || null,
+    });
+    m = tileRe.exec(html);
+  }
+  return events;
+}
+
+interface SchirnDate {
+  date: string;
+  end_date: string | null;
+  time: string | null;
+}
+
+function parseSchirnDate(raw: string): SchirnDate | null {
+  const text = raw
+    .replace(/&#038;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Pattern A: "Sa 09. & So 10. Mai 2026" — same-month range, single year.
+  const range = text.match(/(\d{1,2})\.\s*&\s*(?:[A-Za-zÄÖÜäöü.]+\s+)?(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})/);
+  if (range) {
+    const month = GERMAN_MONTHS[range[3].toLowerCase()];
+    if (month) {
+      return {
+        date: `${range[4]}-${month}-${range[1].padStart(2, "0")}`,
+        end_date: `${range[4]}-${month}-${range[2].padStart(2, "0")}`,
+        time: null,
+      };
+    }
+  }
+
+  // Pattern B: "Mittwoch, 10. Juni 2026, 11 Uhr" — full date + time.
+  const full = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})(?:[,\s]*(\d{1,2})(?::(\d{2}))?\s*Uhr)?/);
+  if (full) {
+    const month = GERMAN_MONTHS[full[2].toLowerCase()];
+    if (month) {
+      const time = full[4] ? `${full[4].padStart(2, "0")}:${full[5] ?? "00"}` : null;
+      return {
+        date: `${full[3]}-${month}-${full[1].padStart(2, "0")}`,
+        end_date: null,
+        time,
+      };
+    }
+  }
+
+  // Pattern C: "Di 30. Juni, 19:00 Uhr" — no year, infer it.
+  const noYear = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)(?:[,\s]+(\d{1,2}):(\d{2})\s*Uhr)?/);
+  if (noYear) {
+    const month = GERMAN_MONTHS[noYear[2].toLowerCase()];
+    if (month) {
+      const year = inferYear(month, noYear[1]);
+      const time = noYear[3] ? `${noYear[3].padStart(2, "0")}:${noYear[4]}` : null;
+      return {
+        date: `${year}-${month}-${noYear[1].padStart(2, "0")}`,
+        end_date: null,
+        time,
+      };
+    }
+  }
+
+  return null;
+}
+
+async function fetchSchirn(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  // Schirn renders the date inside either a <span class="event-display"> (main
+  // venue) or a Vue custom element <event-display class="event-display">
+  // (Bockenheim sub-venue), so match the class regardless of tag name.
+  const cardRe =
+    /<div[^>]*\bbockenheim-indicator\b[^>]*>([\s\S]*?)<\/div>[\s\S]*?\bevent-display\b[^>]*>\s*([^<]+)[\s\S]*?<h3[^>]*>([\s\S]*?)<\/h3>/g;
+
+  const events: ApiEvent[] = [];
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null = cardRe.exec(html);
+  while (m !== null) {
+    const isBockenheim = m[1].trim().length > 0;
+    const parsed = parseSchirnDate(m[2]);
+    const title = m[3]
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!parsed || !title || parsed.date < today) {
+      m = cardRe.exec(html);
+      continue;
+    }
+    const key = `${title}::${parsed.date}`;
+    if (seen.has(key)) {
+      m = cardRe.exec(html);
+      continue;
+    }
+    seen.add(key);
+
+    events.push({
+      title,
+      date: parsed.date,
+      time: parsed.time,
+      end_time: null,
+      end_date: parsed.end_date,
+      description: null,
+      detail_url: null,
+      image_url: null,
+      price: null,
+      category: classifyEvent(title, null) || null,
+      museum_slug_override: isBockenheim ? "schirn-in-bockenheim" : undefined,
+    });
+    m = cardRe.exec(html);
   }
   return events;
 }
