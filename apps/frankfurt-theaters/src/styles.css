@@ -499,25 +499,71 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .stamp--cancelled { color: var(--ink-quiet); }
 .stamp--few { color: var(--gold); transform: rotate(2deg); }
 
+/* The Karten chip is shaped like a tiny theater-ticket stub:
+   `[ KARTEN | → ]` — the dashed vertical rule between label and arrow
+   is the perforation, and two paper-coloured half-disc notches cut into
+   the top and bottom edges along that perforation so the silhouette
+   reads as a torn ticket. The existing brick-red corner mark on the
+   arrow stub stays as the printer's flourish. On hover the arrow
+   translates right, "tearing" along the perf. */
 .action {
   display: inline-flex;
-  align-items: center;
-  gap: 0.55em;
+  align-items: stretch;
   font-family: var(--mono);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 600;
-  color: var(--ink);
-  padding: 0.55rem 0.9rem 0.5rem 1rem;
   background: var(--ink);
   color: var(--paper);
   border-radius: 0;
-  transition: transform 180ms, background-color 180ms;
+  transition: background-color 180ms;
   position: relative;
+  isolation: isolate;
 }
+.action > span:first-child {
+  padding: 0.55rem 0.9rem 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+}
+.action__arrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.95rem 0.5rem 0.85rem;
+  /* The perforation: a dashed vertical line between the label and
+     the stub. Derived from --paper via color-mix so it stays the
+     opposite of --ink in both light and dark mode (rgba constants
+     would invert wrong when the button flips to cream-on-charcoal). */
+  border-left: 1px dashed color-mix(in srgb, var(--paper) 55%, transparent);
+  position: relative;
+  transition: transform 200ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+/* Two paper-coloured half-discs sit on top of the chip's top and
+   bottom edges, centred on the perforation line. Painting in the
+   page colour creates the visual illusion of notches cut into the
+   ticket — the page background shows "through" each disc. Sized 10×5
+   with a 1px overlap so anti-aliasing doesn't leave a hairline. */
+.action__arrow::before,
+.action__arrow::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  width: 10px;
+  height: 5px;
+  background: var(--paper);
+  pointer-events: none;
+}
+.action__arrow::before {
+  top: -1px;
+  border-radius: 0 0 999px 999px;
+}
+.action__arrow::after {
+  bottom: -1px;
+  border-radius: 999px 999px 0 0;
+}
+/* Brick-red printer's mark on the bottom-right corner of the stub —
+   tiny "L" shape that frames the ticket like a registration mark. */
 .action::after {
-  /* the slight underline rule on the bottom-right corner of the chip */
   content: "";
   position: absolute;
   inset: auto -3px -3px auto;
@@ -525,13 +571,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
   height: 0.65rem;
   border-right: 1.5px solid var(--accent);
   border-bottom: 1.5px solid var(--accent);
+  pointer-events: none;
 }
 .action:hover {
   background: var(--accent);
   color: var(--paper);
 }
-.action__arrow { transition: transform 200ms; display: inline-block; }
-.action:hover .action__arrow { transform: translateX(0.3em); }
+/* On hover the arrow slides rightward — visually "tearing" along the
+   perforation. Dark mode keeps the same gesture but the perforation
+   colour gets re-derived from --paper via currentColor inheritance. */
+.action:hover .action__arrow {
+  transform: translateX(0.25em);
+}
 
 /* ────────────────  Footer  ──────────────── */
 
