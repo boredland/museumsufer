@@ -26,7 +26,7 @@ app.get("/theater/:slug", async (c) => {
   if (!config) return c.notFound();
 
   const today = todayIso();
-  const performances = await getPerformancesInRange(c.env.DB, today, dateOffset(60), slug);
+  const performances = await getPerformancesInRange(today, dateOffset(60), slug);
 
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderTheaterMarkdown(config, performances), {

@@ -1,6 +1,6 @@
 import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
-import { getPerformanceById, getPerformancesForDate, getPerformancesInRange, getTheaterBySlug } from "../db";
+import { getPerformanceById, getPerformancesForDate, getPerformancesInRange } from "../db";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 
@@ -13,7 +13,7 @@ const DAY_HEADERS = {
 app.get("/api/day", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
-  const performances = await getPerformancesForDate(c.env.DB, date);
+  const performances = await getPerformancesForDate(date);
   return c.json({ date, performances }, { headers: DAY_HEADERS });
 });
 
@@ -40,19 +40,8 @@ app.get("/api/theater/:slug{[^.]+}", async (c) => {
   const slug = c.req.param("slug");
   const config = THEATERS.find((t) => t.slug === slug);
   if (!config) return c.json({ error: "not found" }, 404);
-  const performances = await getPerformancesInRange(c.env.DB, todayIso(), dateOffset(60), slug);
-  const dbTheater = await getTheaterBySlug(c.env.DB, slug);
-  return c.json(
-    {
-      theater: {
-        ...config,
-        description: dbTheater?.description ?? null,
-        image_url: dbTheater?.image_url ?? null,
-      },
-      performances,
-    },
-    { headers: DAY_HEADERS },
-  );
+  const performances = await getPerformancesInRange(todayIso(), dateOffset(60), slug);
+  return c.json({ theater: config, performances }, { headers: DAY_HEADERS });
 });
 
 app.get("/api/performances", async (c) => {
@@ -66,14 +55,14 @@ app.get("/api/performances", async (c) => {
   if (from > to) return c.json({ error: "from > to" }, 400);
   const span = (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000;
   if (span > 60) return c.json({ error: "range too large (max 60 days)" }, 400);
-  const performances = await getPerformancesInRange(c.env.DB, from, to, theater);
+  const performances = await getPerformancesInRange(from, to, theater);
   return c.json({ from, to, theater, performances }, { headers: DAY_HEADERS });
 });
 
 app.get("/api/performance/:id{[0-9]+}", async (c) => {
   const id = parseInt(c.req.param("id"), 10);
   if (!Number.isFinite(id)) return c.json({ error: "invalid id" }, 400);
-  const perf = await getPerformanceById(c.env.DB, id);
+  const perf = await getPerformanceById(id);
   if (!perf) return c.json({ error: "not found" }, 404);
   return c.json({ performance: perf }, { headers: DAY_HEADERS });
 });

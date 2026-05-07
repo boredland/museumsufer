@@ -12,6 +12,7 @@
     "./date": "./src/date.ts",
     "./escape": "./src/escape.ts",
     "./german": "./src/german.ts",
+    "./hash": "./src/hash.ts",
     "./html": "./src/html.ts",
     "./manifest": "./src/manifest.ts",
     "./robots": "./src/robots.ts",

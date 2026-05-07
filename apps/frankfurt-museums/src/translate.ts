@@ -1,3 +1,4 @@
+import { fnv1a } from "@museumsufer/core";
 import type { Env } from "./types";
 
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
@@ -182,13 +183,4 @@ export async function translateFields<T>(env: Env, items: T[], fields: string[],
     }
     return translated as T;
   });
-}
-
-function fnv1a(text: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) {
-    hash ^= text.charCodeAt(i);
-    hash = (hash * 0x01000193) >>> 0;
-  }
-  return hash.toString(16).padStart(8, "0");
 }

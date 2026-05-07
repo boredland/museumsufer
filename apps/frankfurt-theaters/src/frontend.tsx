@@ -12,15 +12,11 @@ import {
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
 } from "@museumsufer/core";
-import type { DateWithCount } from "./db";
+import type { DateWithCount, DayPerformance } from "./db";
 import { INLINE_CSS } from "./styles-inline";
 import { THEATERS } from "./theater-config";
-import type { Performance, Show, Theater } from "./types";
 
-export type DayPerformance = Performance & {
-  show: Show;
-  theater: Pick<Theater, "id" | "name" | "slug" | "website_url">;
-};
+export type { DayPerformance } from "./db";
 
 interface PageProps {
   date: string;
