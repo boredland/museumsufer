@@ -28,7 +28,9 @@ export interface TheaterConfig {
     | "internationales-theater"
     | "papageno"
     | "galli"
-    | "alte-bruecke";
+    | "alte-bruecke"
+    | "kaes"
+    | "lempenfieber";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -231,5 +233,25 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.theater-alte-bruecke.de",
     ticketing_provider: "reservix",
     scraper: "alte-bruecke",
+  },
+  {
+    slug: "die-kaes",
+    name: "Die Käs",
+    address: "Waldschmidtstraße 19, 60316 Frankfurt am Main",
+    lat: 50.1196,
+    lon: 8.7041,
+    website_url: "https://www.diekaes.de",
+    ticketing_provider: "reservix",
+    scraper: "kaes",
+  },
+  {
+    slug: "theater-lempenfieber",
+    name: "Theater Lempenfieber",
+    address: "Berkersheimer Weg 31, 60433 Frankfurt am Main",
+    lat: 50.1856,
+    lon: 8.6824,
+    website_url: "https://www.lempenfieber.de",
+    ticketing_provider: "reservix",
+    scraper: "lempenfieber",
   },
 ];
