@@ -8,7 +8,14 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie" | "mousonturm" | "neues-theater-hoechst";
+  scraper:
+    | "schauspiel"
+    | "oper"
+    | "english-theatre"
+    | "komoedie"
+    | "mousonturm"
+    | "neues-theater-hoechst"
+    | "volksbuehne";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -71,5 +78,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://neues-theater.de",
     ticketing_provider: "custom",
     scraper: "neues-theater-hoechst",
+  },
+  {
+    slug: "volksbuehne-frankfurt",
+    name: "Volksbühne im Großen Hirschgraben",
+    address: "Großer Hirschgraben 19, 60311 Frankfurt am Main",
+    lat: 50.1116,
+    lon: 8.6817,
+    website_url: "https://volksbuehne.net",
+    ticketing_provider: "reservix",
+    scraper: "volksbuehne",
   },
 ];
