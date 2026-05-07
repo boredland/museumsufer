@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { dateOffset, todayIso } from "./date";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
-import { renderPage } from "./frontend";
+import { renderPage, renderProgrammePartial } from "./frontend";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
@@ -67,6 +67,15 @@ app.get("/sw.js", (c) =>
     headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
   }),
 );
+
+app.get("/partial/programme", async (c) => {
+  const date = c.req.query("date") || todayIso();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
+  const performances = await getPerformancesForDate(c.env.DB, date);
+  return c.html(renderProgrammePartial(date, performances), {
+    headers: { "Cache-Control": "public, max-age=300, s-maxage=900" },
+  });
+});
 
 app.route("/", staticRoutes);
 app.route("/", apiRoutes);

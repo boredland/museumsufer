@@ -29,6 +29,20 @@ app.get("/feed.ics", async (c) => {
   });
 });
 
+app.get("/feed.xml", async (c) => {
+  const from = todayIso();
+  const to = dateOffset(14);
+  const performances = await getPerformancesInRange(c.env.DB, from, to);
+  return c.body(buildRss(performances), {
+    headers: {
+      "Content-Type": "application/rss+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=1800, s-maxage=3600",
+    },
+  });
+});
+
+app.get("/rss.xml", (c) => c.redirect("/feed.xml", 301));
+
 app.get("/theater/:slug/feed.ics", async (c) => {
   const slug = c.req.param("slug");
   if (!slug) return c.notFound();
@@ -141,6 +155,55 @@ function buildVevent(p: DayPerformance): string {
 
 function utcStamp(): string {
   return `${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "").slice(0, 15)}Z`;
+}
+
+function buildRss(performances: DayPerformance[]): string {
+  const items = performances.map((p) => {
+    const dateStr = p.time ? `${p.date}T${p.time}:00+02:00` : `${p.date}T00:00:00+02:00`;
+    const pubDate = new Date(dateStr).toUTCString();
+    const link = p.show.detail_url || p.ticket_url || `${APP_URL}/api/performance/${p.id}`;
+    const title = p.show.title + (p.time ? ` — ${p.time} Uhr` : "");
+    const descParts: string[] = [];
+    descParts.push(`${p.theater.name}${p.venue_room && p.venue_room !== p.theater.name ? `, ${p.venue_room}` : ""}`);
+    if (p.show.subtitle) descParts.push(p.show.subtitle.replace(/\s*<br\s*\/?>\s*/gi, " · "));
+    if (p.status === "sold_out") descParts.push("Ausverkauft");
+    else if (p.status === "cancelled") descParts.push("Entfällt");
+    else if (p.price_min != null) {
+      descParts.push(
+        p.price_max && p.price_max !== p.price_min ? `${p.price_min}–${p.price_max} €` : `${p.price_min} €`,
+      );
+    }
+    return `    <item>
+      <title>${xmlEsc(title)}</title>
+      <link>${xmlEsc(link)}</link>
+      <guid isPermaLink="false">perf-${p.id}@frankfurt.ins.theater</guid>
+      <pubDate>${pubDate}</pubDate>
+      <category>${xmlEsc(p.theater.name)}</category>
+      <description>${xmlEsc(descParts.join(" — "))}</description>
+    </item>`;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Frankfurt Theater</title>
+    <link>${APP_URL}</link>
+    <description>Spielplan der Frankfurter Bühnen — die nächsten 14 Tage</description>
+    <language>de</language>
+    <atom:link href="${APP_URL}/feed.xml" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
+${items.join("\n")}
+  </channel>
+</rss>`;
+}
+
+function xmlEsc(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function icsEsc(s: string): string {
