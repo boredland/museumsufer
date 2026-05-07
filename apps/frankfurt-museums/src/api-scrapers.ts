@@ -71,6 +71,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchExperiminta(config.endpoint);
     case "caricatura":
       return fetchCaricatura(config.endpoint);
+    case "weltkulturen":
+      return fetchWeltkulturen(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1504,6 +1506,77 @@ async function fetchCaricatura(endpoint: string): Promise<ApiEvent[]> {
       category: classifyEvent(title, description) || null,
     });
     m = blockRe.exec(html);
+  }
+  return events;
+}
+
+function parseWeltkulturenDate(text: string): { date: string | null; time: string | null; end_time: string | null } {
+  // e.g. "Donnerstag, 14. Mai 2026 - 18:00 - 19:30" or "Samstag, 9. Mai 2026 - 15:00"
+  const m = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})\s*-\s*(\d{1,2}:\d{2})(?:\s*-\s*(\d{1,2}:\d{2}))?/);
+  if (!m) return { date: null, time: null, end_time: null };
+  const month = CARICATURA_GERMAN_MONTHS[m[2].toLowerCase()];
+  if (!month) return { date: null, time: null, end_time: null };
+  return {
+    date: `${m[3]}-${month}-${m[1].padStart(2, "0")}`,
+    time: m[4] ?? null,
+    end_time: m[5] ?? null,
+  };
+}
+
+async function fetchWeltkulturen(endpoint: string): Promise<ApiEvent[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const starts = [...html.matchAll(/class="panel-item[^"]*"/g)];
+  const events: ApiEvent[] = [];
+
+  for (let i = 0; i < starts.length; i++) {
+    const start = starts[i].index ?? 0;
+    const end = i + 1 < starts.length ? (starts[i + 1].index ?? html.length) : html.length;
+    const block = html.slice(start, end);
+
+    const dateText = block.match(/<span\s*class="date">\s*([^<]+)/)?.[1]?.trim() ?? "";
+    const { date, time, end_time } = parseWeltkulturenDate(dateText);
+    if (!date || date < today) continue;
+
+    const href = block.match(/<a\s+href="([^"]+)"/)?.[1];
+    const detailUrl = href ? normalizeUrl(href, origin) : null;
+
+    // Title block: 1–3 lines separated by <br>. Prefer a quoted middle line
+    // (the actual programme name) over the all-caps category.
+    const bodyMatch = block.match(/<\/span><\/p>\s*<p>\s*([\s\S]*?)<\/p>/);
+    const lines = bodyMatch
+      ? bodyMatch[1]
+          .split(/<br\s*\/?\s*>/i)
+          .map((l) =>
+            l
+              .replace(/<[^>]+>/g, "")
+              .replace(/&[a-z]+;|&#\d+;/gi, " ")
+              .replace(/\s+/g, " ")
+              .trim(),
+          )
+          .filter(Boolean)
+      : [];
+    const titleLine = lines.find((l) => /[„"»].*[“"«]/.test(l)) ?? lines[1] ?? lines[0];
+    if (!titleLine) continue;
+
+    const description = lines.slice(0, 3).join(" — ") || null;
+
+    events.push({
+      title: titleLine,
+      date,
+      time,
+      end_time,
+      end_date: null,
+      description: description ? truncateHtml(description) : null,
+      detail_url: detailUrl,
+      image_url: null,
+      price: null,
+      category: classifyEvent(titleLine, description) || null,
+    });
   }
   return events;
 }
