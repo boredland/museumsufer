@@ -25,7 +25,9 @@
   --mono:  'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --maxw: 78rem;
-  --gut: clamp(1.25rem, 4vw, 3.5rem);
+  /* Page-edge gutter. Floor lifted from 1.25rem → 1.5rem so the wordmark
+     and performance rows don't kiss the bezel on 390-pt phones. */
+  --gut: clamp(1.5rem, 4vw, 3.5rem);
 }
 
 /* ────────────────  Reset / base  ──────────────── */
@@ -126,7 +128,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-style: italic;
   color: var(--ink-soft);
   font-size: 0.95rem;
-  margin: 0.7rem 0 0 0.1em;
+  margin: 0.85rem 0 0 0.1em;
   max-width: 32ch;
   animation: rise 900ms cubic-bezier(0.2, 0.6, 0.2, 1) 80ms both;
 }
@@ -160,7 +162,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
   grid-template-rows: auto auto auto auto;
   gap: 0.05rem;
   text-align: center;
-  padding: 0.6rem 0.85rem 0.5rem;
+  /* A hair more vertical breathing — the previous 0.6/0.5 read as
+     compressed once the strip sat below the masthead with a 1.5px rule. */
+  padding: 0.7rem 0.95rem 0.6rem;
   border-right: 0.5px solid var(--hairline);
   font-family: var(--mono);
   font-size: 0.7rem;
@@ -553,7 +557,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .perf {
     grid-template-columns: minmax(5rem, auto) 1fr;
     grid-template-rows: auto auto;
-    gap: 0.75rem 1.25rem;
+    gap: 0.85rem 1.25rem;
+    /* Lift the row's vertical rhythm — at 390-pt phones the clamp floor
+       (1.5rem) made consecutive rows feel cramped once the rail wraps
+       below the body. 1.85rem gives the wrapped rail air to breathe. */
+    padding: 1.85rem 0;
   }
   .perf__rail {
     /* Align the rail with the body column so price + buttons start at the
@@ -562,17 +570,64 @@ button, a { -webkit-tap-highlight-color: transparent; }
     align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 0.85rem;
+    gap: 1rem;
     text-align: left;
     padding-top: 0;
-    margin-top: 0.5rem;
+    margin-top: 0.65rem;
   }
   .perf__price { font-size: 0.95rem; }
-  .programme__date { font-size: clamp(2.5rem, 12vw, 4rem); }
-  .wordmark { font-size: clamp(2.2rem, 13vw, 4rem); }
-  .masthead { padding-bottom: 0.75rem; }
-  .perf__title { font-size: clamp(1.35rem, 5vw, 1.85rem); }
-  .perf__time .t1 { font-size: 1.4rem; }
+
+  /* Drop Fraunces opsz from 144 (display) to ~96 on mobile — at 2.5–3 rem
+     the heavy-display cuts of the variable axis read as slightly wonky;
+     opsz 96 keeps the editorial confidence without the over-sharpened
+     terminals you get when display optical sizes shrink to ~40px. */
+  .programme__date {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+    font-variation-settings: 'opsz' 96, 'wght' 360, 'SOFT' 50;
+  }
+  .programme__month {
+    font-variation-settings: 'opsz' 96, 'wght' 360, 'SOFT' 80, 'WONK' 1;
+  }
+  .wordmark {
+    font-size: clamp(2.2rem, 13vw, 4rem);
+    font-variation-settings: 'opsz' 96, 'wght' 380, 'SOFT' 30;
+  }
+  .wordmark__line--2 {
+    font-variation-settings: 'opsz' 96, 'wght' 720, 'SOFT' 60;
+  }
+
+  /* Was 0.75rem — too tight against the date-strip's 1.5px rule, the two
+     elements read as a single fused band. 1.25rem lets the divider register
+     as an editorial section break instead of a sticker seam. */
+  .masthead { padding-bottom: 1.25rem; }
+  .perf__title {
+    font-size: clamp(1.35rem, 5vw, 1.85rem);
+    /* opsz 60 reads better at 1.4rem than the inherited 60 from desktop;
+       leave it explicit so the cascade can't pull a heavier display cut. */
+    font-variation-settings: 'opsz' 36, 'wght' 500, 'SOFT' 20;
+  }
+  .perf__time .t1 {
+    font-size: 1.4rem;
+    font-variation-settings: 'opsz' 24, 'wght' 500;
+  }
+
+  /* Touch comfort — the icon trio on the rail (Anfahrt, calendar, share,
+     report) sits in your thumb's natural arc on mobile. 32 px is the
+     Apple HIG minimum and reads as a properly hittable target. */
+  .transit-btn,
+  .ics-btn,
+  .share-btn,
+  .report-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  /* Theater detail hero: 1.04 prevents long names like "Schauspiel
+     Frankfurt" or "Internationales Theater Frankfurt" from kissing
+     ascender-to-descender when they wrap to two lines. */
+  .theater-hero__name { line-height: 1.04; }
+  .theater-hero__address { margin-bottom: 0.85rem; }
+  .theater-hero__meta { margin-top: 1.25rem; }
 }
 
 /* ────────────────  Motion  ──────────────── */
@@ -1025,8 +1080,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .theme-toggle {
   position: fixed;
-  top: clamp(0.85rem, 2vw, 1.25rem);
-  right: clamp(0.85rem, 2vw, 1.25rem);
+  /* Floor lifted from 0.85rem → 1rem so the toggle clears the wordmark's
+     left-edge gutter on mobile and reads as deliberately offset, not
+     accidentally tucked into the bezel. */
+  top: clamp(1rem, 2vw, 1.25rem);
+  right: clamp(1rem, 2vw, 1.25rem);
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 999px;
