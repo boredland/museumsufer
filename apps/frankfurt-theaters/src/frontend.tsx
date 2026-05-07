@@ -176,7 +176,11 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
   const price = showPrice ? formatPriceRange(p.price_min, p.price_max) : null;
   const titleHref = p.show.detail_url ?? p.ticket_url ?? null;
 
-  const stamp = renderStatusStamp(p.status);
+  // Sold-out and cancelled stamps live in the terminal (Karten) slot of the
+  // rail so the layout matches available rows. Other statuses (e.g. few_left
+  // → "Restkarten") render inline alongside the price.
+  const isTerminalStatus = p.status === "sold_out" || p.status === "cancelled";
+  const inlineStamp = isTerminalStatus ? "" : renderStatusStamp(p.status);
   const dateLine = opts.showDate ? `<p class="perf__when-date">${escapeHtml(fullGerman(p.date))}</p>` : "";
 
   const venueLine = opts.hideTheater
@@ -203,11 +207,12 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
     </div>
     <div class="perf__rail">
       ${price ? `<p class="perf__price">${price}</p>` : ""}
-      ${stamp}
+      ${inlineStamp}
       ${renderTransit(p)}
-      ${renderReportButton(p)}
       ${renderCalendarPopover(p)}
-      ${renderTicketsButton(p)}
+      ${renderShareButton(p)}
+      ${renderReportButton(p)}
+      ${renderTerminus(p)}
     </div>
   </li>`;
 }
@@ -270,8 +275,16 @@ function renderCalendarPopover(p: DayPerformance): string {
   </span>`;
 }
 
-function renderTicketsButton(p: DayPerformance): string {
-  if (p.status === "cancelled" || p.status === "sold_out") return "";
+function renderTerminus(p: DayPerformance): string {
+  // The rightmost rail slot. Sold-out/cancelled rows show their stamp here so
+  // the visual rhythm of the row stays consistent with the Karten button on
+  // available rows.
+  if (p.status === "sold_out") {
+    return `<span class="stamp stamp--soldout stamp--terminus" aria-label="Ausverkauft">Ausverkauft</span>`;
+  }
+  if (p.status === "cancelled") {
+    return `<span class="stamp stamp--cancelled stamp--terminus" aria-label="Abgesagt">Entfällt</span>`;
+  }
   if (!p.ticket_url) return "";
   return `<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
     <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
@@ -304,6 +317,17 @@ function renderTransit(p: DayPerformance): string {
       </a>
     </div>
   </span>`;
+}
+
+const ICON_LINK = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66L12 6.34"/><path d="M13.5 10.5a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66L12 17.66"/></svg>`;
+
+function renderShareButton(p: DayPerformance): string {
+  return `<button type="button" class="share-btn"
+    data-share-id="perf-${p.id}"
+    data-share-date="${p.date}"
+    data-share-title="${escapeHtml(p.show.title)}"
+    aria-label="Link zu dieser Vorstellung kopieren"
+    title="Link zu dieser Vorstellung kopieren">${ICON_LINK}</button>`;
 }
 
 function renderReportButton(p: DayPerformance): string {
@@ -580,46 +604,59 @@ export function renderClientScript(): string {
     window.__rebindTransit = rebindAll;
   })();
 
-  // Share — Web Share API on mobile, clipboard fallback on desktop
+  // Toast helper (used by both the footer share button and per-row share)
+  function showToast(msg){
+    var toast = document.querySelector('.footer__toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('footer__toast--visible');
+    setTimeout(function(){ toast.classList.remove('footer__toast--visible'); }, 2400);
+  }
+  function copyOrShare(payload, successMsg){
+    if (navigator.share) {
+      navigator.share(payload).catch(function(){});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(payload.url || payload.text).then(function(){
+        showToast(successMsg);
+      }).catch(function(){
+        showToast('Kopieren fehlgeschlagen');
+      });
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = payload.url || payload.text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast(successMsg); } catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  // Footer share button — copies an LLM-friendly prompt with the page URL
   (function(){
     var btn = document.querySelector('.footer__action[data-action="share"]');
     if (!btn) return;
-    var toast = document.querySelector('.footer__toast');
-
-    function showToast(msg){
-      if (!toast) return;
-      toast.textContent = msg;
-      toast.classList.add('footer__toast--visible');
-      setTimeout(function(){ toast.classList.remove('footer__toast--visible'); }, 2400);
-    }
-
     btn.addEventListener('click', function(){
       var url = location.href;
       var title = document.title;
       var prompt = 'Was läuft heute auf Frankfurter Bühnen? ' + url;
-      if (navigator.share) {
-        navigator.share({ title: title, text: prompt, url: url }).catch(function(){});
-        return;
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(prompt).then(function(){
-          showToast('Link für KI-Suche kopiert');
-        }).catch(function(){
-          showToast('Kopieren fehlgeschlagen');
-        });
-        return;
-      }
-      // Last-resort fallback: select text in a hidden textarea
-      var ta = document.createElement('textarea');
-      ta.value = prompt;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); showToast('Link kopiert'); } catch(e){}
-      document.body.removeChild(ta);
+      copyOrShare({ title: title, text: prompt, url: url }, 'Link für KI-Suche kopiert');
     });
   })();
+
+  // Per-row share — chain icon copies the deep-link to a single performance
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('.share-btn');
+    if (!btn) return;
+    var key = btn.getAttribute('data-share-id');
+    var date = btn.getAttribute('data-share-date');
+    var title = btn.getAttribute('data-share-title') || '';
+    var url = location.origin + '/?date=' + encodeURIComponent(date) + '&item=' + encodeURIComponent(key);
+    copyOrShare({ title: title, text: title, url: url }, 'Link kopiert');
+  });
 
   // Contact dialog (general feedback + per-perf report)
   (function(){
