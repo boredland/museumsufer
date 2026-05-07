@@ -436,14 +436,20 @@ button, a { -webkit-tap-highlight-color: transparent; }
 /* ────  Rail (price + status + action)  ──── */
 
 .perf__rail {
-  text-align: right;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.65rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
   font-family: var(--mono);
   padding-top: 0.4rem;
 }
+/* Push the primary Karten action to the far right; everything else clusters left of it */
+.perf__rail .action { margin-left: auto; }
+/* On the rail, the ICS button no longer needs its own right margin */
+.perf__rail .ics-btn,
+.perf__rail .report-btn { margin-right: 0; }
 .perf__price {
   margin: 0;
   font-family: var(--serif);

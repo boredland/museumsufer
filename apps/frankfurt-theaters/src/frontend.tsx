@@ -100,7 +100,7 @@ ${jsonLdScripts}`;
 export function renderGrain(): string {
   return `<div class="grain" aria-hidden="true"></div>
 <button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbthema wechseln" title="Farbthema wechseln">
-  <svg class="theme-toggle__moon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M11.5 11A6 6 0 0 1 5.4 4.7a.5.5 0 0 0-.7-.6A6.5 6.5 0 1 0 13.4 11.7a.5.5 0 0 0-.6-.7c-.4.1-.9.1-1.3 0Z"/></svg>
+  <svg class="theme-toggle__moon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
   <svg class="theme-toggle__sun" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"/></svg>
 </button>`;
 }
@@ -173,7 +173,6 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
   const titleHref = p.show.detail_url ?? p.ticket_url ?? null;
 
   const stamp = renderStatusStamp(p.status);
-  const action = renderAction(p);
   const dateLine = opts.showDate ? `<p class="perf__when-date">${escapeHtml(fullGerman(p.date))}</p>` : "";
 
   const venueLine = opts.hideTheater
@@ -203,7 +202,8 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
       ${stamp}
       ${renderTransit(p)}
       ${renderReportButton(p)}
-      ${action}
+      ${renderIcsButton(p)}
+      ${renderTicketsButton(p)}
     </div>
   </li>`;
 }
@@ -221,20 +221,25 @@ function renderStatusStamp(status: string): string {
   }
 }
 
-function renderAction(p: DayPerformance): string {
-  const icsLink = `<a class="ics-btn" href="/performance/${p.id}/feed.ics" aria-label="Termin als iCal herunterladen" title="Zum Kalender hinzufügen">
+function renderIcsButton(p: DayPerformance): string {
+  // Calendar download is offered for every confirmed performance, including
+  // sold-out ones (subscribers may want the date for waitlist/return reasons).
+  // Only cancelled performances drop it.
+  if (p.status === "cancelled") return "";
+  return `<a class="ics-btn" href="/performance/${p.id}/feed.ics" aria-label="Termin als iCal herunterladen" title="Zum Kalender hinzufügen">
     <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">
       <rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/>
       <path d="M2.5 6h11M5.5 2v3M10.5 2v3M5 9h2M9 9h2M5 11h2" stroke-linecap="round"/>
     </svg>
   </a>`;
+}
+
+function renderTicketsButton(p: DayPerformance): string {
   if (p.status === "cancelled" || p.status === "sold_out") return "";
-  if (p.ticket_url) {
-    return `${icsLink}<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
-      <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
-    </a>`;
-  }
-  return icsLink;
+  if (!p.ticket_url) return "";
+  return `<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
+    <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
+  </a>`;
 }
 
 const ICON_RMV = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>`;
