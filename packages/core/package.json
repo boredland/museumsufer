@@ -11,7 +11,8 @@
     "./html": "./src/html.ts",
     "./escape": "./src/escape.ts",
     "./german": "./src/german.ts",
-    "./user-agents": "./src/user-agents.ts"
+    "./user-agents": "./src/user-agents.ts",
+    "./calendar": "./src/calendar.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
