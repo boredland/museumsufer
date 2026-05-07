@@ -158,6 +158,11 @@ app.get("/sitemap.xml", (c) => {
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
+  <url>
+    <loc>${APP_URL}/impressum</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
 ${theaterUrls}
 </urlset>`;
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });

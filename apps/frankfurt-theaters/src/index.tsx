@@ -6,6 +6,7 @@ import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
 import feedsRoutes from "./routes/feeds";
+import imprintRoutes from "./routes/imprint";
 import staticRoutes from "./routes/static";
 import theaterRoutes from "./routes/theater";
 import transitRoutes from "./routes/transit";
@@ -72,6 +73,7 @@ app.route("/", apiRoutes);
 app.route("/", feedsRoutes);
 app.route("/", theaterRoutes);
 app.route("/", transitRoutes);
+app.route("/", imprintRoutes);
 app.route("/api/docs", docsRoutes);
 
 app.post("/scrape/all", async (c) => {
