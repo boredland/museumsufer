@@ -764,19 +764,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 /* Browser fallback: the popover floats centered on screen. Acceptable for now. */
 
-.nav-popover__title {
-  font-family: var(--serif);
-  font-variation-settings: 'opsz' 24, 'wght' 600, 'SOFT' 100;
-  font-size: 0.95rem;
-  letter-spacing: 0;
-  text-transform: none;
-  margin: 0 0 0.1rem;
-  padding: 0 1rem;
-  color: var(--ink);
-}
-
-.nav-popover__title + .nav-popover__link { margin-top: 0.45rem; }
-
 .nav-popover__link {
   display: flex;
   align-items: center;
@@ -919,22 +906,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .footer__toast--visible { opacity: 1; }
 
-/* Report variant in nav popover */
-.nav-popover__link--report {
-  margin-top: 0.25rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid var(--hairline);
+/* Per-row report button — small, muted, sits between Anfahrt and Karten */
+.report-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: transparent;
   color: var(--ink-quiet);
-  font-size: 0.75rem;
+  cursor: pointer;
+  margin-right: 0.4rem;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
-.nav-popover__link--report:hover { color: var(--accent); background: transparent; }
-.nav-popover__link--report .nav-popover__icon {
-  border-color: var(--ink-quiet);
-  color: var(--ink-quiet);
-}
-.nav-popover__link--report:hover .nav-popover__icon {
-  border-color: var(--accent);
+.report-btn:hover,
+.report-btn:focus-visible {
   color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  outline: none;
 }
 
 /* ────────────────  Dark mode  ──────────────── */
@@ -1174,18 +1166,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-color: var(--accent-deep);
 }
 .contact-form__submit:disabled { opacity: 0.55; cursor: progress; }
-
-/* Per-perf report button (button replacement of <a>) */
-.nav-popover__link--report {
-  background: transparent;
-  border: 0;
-  border-top: 1px solid var(--hairline);
-  text-align: left;
-  width: 100%;
-  font: inherit;
-  font-family: inherit;
-  cursor: pointer;
-}
 
 /* ────────────────  Search input in programme header  ──────────────── */
 
