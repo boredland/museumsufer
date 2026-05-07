@@ -78,10 +78,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .masthead {
   position: relative;
   z-index: 3;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 2rem;
   padding: clamp(1.5rem, 3vw, 2.75rem) var(--gut) clamp(1rem, 2vw, 1.5rem);
   max-width: var(--maxw);
   margin: 0 auto;
@@ -133,38 +129,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   margin: 0.7rem 0 0 0.1em;
   max-width: 32ch;
   animation: rise 900ms cubic-bezier(0.2, 0.6, 0.2, 1) 80ms both;
-}
-
-.masthead__date {
-  text-align: right;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  animation: rise 900ms cubic-bezier(0.2, 0.6, 0.2, 1) 160ms both;
-}
-.masthead__weekday { margin: 0; font-weight: 500; }
-.masthead__numeric { margin: 0.1rem 0 0; font-weight: 700; color: var(--ink); font-size: 0.85rem; }
-.masthead__today {
-  margin: 0.4rem 0 0;
-  display: inline-block;
-  font-weight: 700;
-  color: var(--accent);
-  border: 1.5px solid var(--accent);
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  transform: rotate(-2deg);
-  transition: color 200ms ease, border-color 200ms ease, opacity 200ms ease;
-}
-/* When the user is browsing a different day, dim the "Heute" pill so it's
-   clear the masthead date is today's actual date (a session anchor) and
-   not the date currently being viewed. */
-.masthead__today--dim {
-  color: var(--ink-quiet);
-  border-color: var(--ink-faint);
-  opacity: 0.7;
 }
 
 /* ────────────────  Date strip  ──────────────── */
@@ -639,30 +603,30 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ────────────────  Transit button  ──────────────── */
 
+/* Anfahrt — same shape and dimensions as the other icon buttons (calendar,
+   share, report) so the rail reads as a single icon row. The paper-airplane
+   glyph itself is the only label; aria-label/title carry the German name. */
 .transit-btn {
-  font-family: var(--mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: transparent;
-  border: 1px solid var(--rule);
-  padding: 0.3rem 0.65rem 0.3rem 0.55rem;
-  border-radius: 999px;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
   transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
-.transit-btn:hover { color: var(--accent); border-color: var(--accent); }
-.transit-btn__icon {
-  display: inline-flex;
-  align-items: center;
-  /* The paper-airplane glyph leans up-right naturally; nudge it visually so
-     it sits balanced inside the pill rather than tilted away. */
+.transit-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.transit-btn svg {
+  /* Nudge the navigate cursor into a balanced angle within the circle */
   transform: rotate(-12deg);
-  opacity: 0.85;
 }
 
 /* ────────────────  Footer links  ──────────────── */
@@ -863,9 +827,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 .nav-popover__link:hover .nav-popover__icon { border-color: var(--accent); color: var(--accent); }
 
-/* Hide RMV App on desktop (only useful on mobile where the deep link can launch the app) */
+/* Single "RMV" entry per device: the deep link (--rmv-app) on mobile, where it
+   can launch the native RMV app via universal link; the Fahrplan web URL
+   (--rmv-web) on desktop, where the app deep link only opens a useless mobile
+   preview. Both labels are just "RMV" — the user sees one entry either way. */
 @media (min-width: 1024px) {
   .nav-popover__link--rmv-app { display: none; }
+}
+@media (max-width: 1023.98px) {
+  .nav-popover__link--rmv-web { display: none; }
 }
 
 /* ────────────────  Legal / imprint page  ──────────────── */

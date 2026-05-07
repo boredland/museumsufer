@@ -109,16 +109,7 @@ export function renderGrain(): string {
 </button>`;
 }
 
-export function renderMasthead(args: {
-  /** Today's weekday + numeric in Europe/Berlin — a stable session anchor that
-   *  is never updated by HTMX swaps. Pass today's date here, not the URL date. */
-  weekday: string;
-  numeric: string;
-  date: string;
-  /** True iff the user is currently viewing today's programme. */
-  viewingToday: boolean;
-  sublabel?: string;
-}): string {
+export function renderMasthead(args: { sublabel?: string } = {}): string {
   return `<header class="masthead" role="banner">
   <a class="masthead__brand" href="/" aria-label="Frankfurt Theater Startseite">
     <h1 class="wordmark">
@@ -128,11 +119,6 @@ export function renderMasthead(args: {
     </h1>
     <p class="tagline">${escapeHtml(args.sublabel ?? "Was heute auf den Frankfurter Bühnen läuft.")}</p>
   </a>
-  <div class="masthead__date" aria-label="Heutiges Datum">
-    <p class="masthead__weekday">${escapeHtml(args.weekday)}</p>
-    <p class="masthead__numeric"><time datetime="${args.date}">${args.numeric}</time></p>
-    <p class="masthead__today ${args.viewingToday ? "" : "masthead__today--dim"}">Heute</p>
-  </div>
 </header>`;
 }
 
@@ -313,16 +299,13 @@ const ICON_REPORT = `<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden
 function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
   return `<span class="nav-wrap">
-    <button type="button" class="transit-btn" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
-      <span class="transit-btn__icon" aria-hidden="true">${ICON_NAVIGATE}</span>
-      <span>Anfahrt</span>
-    </button>
+    <button type="button" class="transit-btn" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" title="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">${ICON_NAVIGATE}</button>
     <div id="${popId}" popover="auto" role="menu" class="nav-popover" data-theater="${p.theater.slug}">
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-app" data-kind="rmv-app" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV App
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV
       </a>
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-web" data-kind="rmv-web" target="_blank" rel="noopener">
-        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV Fahrplan
+        <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV
       </a>
       <a role="menuitem" class="nav-popover__link" data-kind="google" target="_blank" rel="noopener">
         <span class="nav-popover__icon" aria-hidden="true">${ICON_GOOGLE}</span> Google Maps
@@ -497,13 +480,7 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
 
 export function renderPage(props: PageProps): string {
   const { date, today, performances, dateStrip } = props;
-  const viewingToday = date === today;
   const niceDate = fullGerman(date);
-  // Masthead always shows TODAY's date (a session-stable temporal anchor) —
-  // not the URL date, which is shown in the programme header below.
-  const td = dateParts(today);
-  const todayWeekday = WEEKDAYS_LONG[td.weekday];
-  const todayNumeric = `${pad2(td.day)}.${pad2(td.month + 1)}.${td.year}`;
 
   const head = renderHead({
     title: `Frankfurt Theater · ${niceDate}`,
@@ -519,7 +496,7 @@ ${head}
 </head>
 <body>
 ${renderGrain()}
-${renderMasthead({ weekday: todayWeekday, numeric: todayNumeric, date: today, viewingToday })}
+${renderMasthead()}
 ${renderDateStrip(dateStrip, date, today)}
 
 <main class="programme" id="programme">

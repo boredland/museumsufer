@@ -1,4 +1,4 @@
-import { dateOffset, GERMAN_WEEKDAYS, todayIso } from "@museumsufer/core";
+import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformancesInRange } from "../db";
 import {
@@ -99,10 +99,6 @@ app.get("/theater/:slug", async (c) => {
     ],
   });
 
-  const dpToday = new Date(`${today}T12:00:00Z`);
-  const headerWeekday = GERMAN_WEEKDAYS[dpToday.getUTCDay()];
-  const headerNumeric = `${pad2(dpToday.getUTCDate())}.${pad2(dpToday.getUTCMonth() + 1)}.${dpToday.getUTCFullYear()}`;
-
   return c.html(`<!doctype html>
 <html lang="de">
 <head>
@@ -110,7 +106,7 @@ ${head}
 </head>
 <body>
 ${renderGrain()}
-${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date: today, viewingToday: true, sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
+${renderMasthead({ sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
 
 <main class="programme programme--theater">
   <header class="theater-hero">
@@ -141,10 +137,6 @@ ${renderClientScript()}
 </body>
 </html>`);
 });
-
-function pad2(n: number): string {
-  return String(n).padStart(2, "0");
-}
 
 function renderGrouped(performances: DayPerformance[]): string {
   // Group by date — only render dates that actually have a performance.
