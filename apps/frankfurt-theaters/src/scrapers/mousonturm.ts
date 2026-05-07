@@ -4,8 +4,20 @@ import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://www.mousonturm.de";
 const SPIELPLAN_URL = `${BASE}/de/programm/spielplan`;
+const RESERVIX_BASE = "https://21765.reservix.de";
+const RESERVIX_PAGES = 3;
 
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+
+const BROWSER_HEADERS = {
+  "User-Agent": UA,
+  Accept: "text/html,application/xhtml+xml",
+  "Accept-Language": "de-DE,de;q=0.9",
+  "Sec-Fetch-Dest": "document",
+  "Sec-Fetch-Mode": "navigate",
+  "Sec-Fetch-Site": "none",
+  "Upgrade-Insecure-Requests": "1",
+};
 
 /**
  * Mousonturm groups its spielplan by day under
@@ -38,7 +50,9 @@ export async function scrapeMousonturm(): Promise<ScrapeResult> {
   });
   if (!res.ok) throw new Error(`Mousonturm spielplan fetch failed: ${res.status}`);
   const html = await res.text();
-  return parseMousonturmHtml(html);
+  const result = parseMousonturmHtml(html);
+  await enrichWithReservix(result);
+  return result;
 }
 
 const GROUP_RE = /<div\s+class="calendar-group">([\s\S]*?)(?=<div\s+class="calendar-group">|<\/main\b|<footer\b)/g;
@@ -165,4 +179,101 @@ function parseTime(raw: string): { time: string | null; endTime: string | null }
   const start = nullIfMidnight(`${m[1].padStart(2, "0")}:${m[2]}`);
   const end = m[3] ? nullIfMidnight(`${m[3].padStart(2, "0")}:${m[4]}`) : null;
   return { time: start, endTime: end };
+}
+
+/**
+ * Mousonturm's spielplan ticket links go to `21765.reservix.de/p/reservix/group/<gid>`,
+ * which only opens the production landing page. Reservix's `/events`, `/events/2`,
+ * `/events/3` carry the actual paid performances with `<time datetime="...">`,
+ * a "ab X €" minimum price, a CDN image, and a direct dated ticket URL
+ * (`tickets-...e<id>`). We index by `(groupId, date, hh:mm)` and upgrade matching
+ * spielplan rows in place.
+ */
+async function enrichWithReservix(result: ScrapeResult): Promise<void> {
+  let map: Map<string, ReservixCard>;
+  try {
+    map = await fetchReservixIndex();
+  } catch (err) {
+    console.warn("Mousonturm Reservix enrichment skipped:", err);
+    return;
+  }
+  if (map.size === 0) return;
+
+  for (const perf of result.performances) {
+    const groupId = perf.ticket_url?.match(/\/group\/(\d+)/)?.[1];
+    if (!groupId || !perf.date || !perf.time) continue;
+    const card = map.get(`${groupId}|${perf.date}|${perf.time}`);
+    if (!card) continue;
+    if (card.priceMin != null) perf.price_min = card.priceMin;
+    if (card.ticketUrl) perf.ticket_url = card.ticketUrl;
+    const show = result.shows.find((s) => s.slug === perf.show_slug);
+    if (show && card.image && !show.image_url) show.image_url = card.image;
+  }
+}
+
+interface ReservixCard {
+  groupId: string;
+  date: string;
+  time: string;
+  priceMin: number | null;
+  image: string | null;
+  ticketUrl: string;
+}
+
+async function fetchReservixIndex(): Promise<Map<string, ReservixCard>> {
+  const map = new Map<string, ReservixCard>();
+  for (let page = 1; page <= RESERVIX_PAGES; page++) {
+    const url = page === 1 ? `${RESERVIX_BASE}/events` : `${RESERVIX_BASE}/events/${page}`;
+    const res = await fetch(url, { headers: BROWSER_HEADERS });
+    if (!res.ok) break;
+    const html = await res.text();
+    const cardsBefore = map.size;
+    parseReservixCards(html, map);
+    if (map.size === cardsBefore) break;
+  }
+  return map;
+}
+
+const RESERVIX_CARD_RE =
+  /<a\b[^>]*\bclass="[^"]*\bc-list-item-event\b[^"]*"[^>]*\bhref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+
+function parsePriceEuro(raw: string | undefined): number | null {
+  if (!raw) return null;
+  const m = raw.match(/^(\d+(?:\.\d{3})*)(?:[,](\d{2}))?$/);
+  if (!m) return null;
+  const whole = parseInt(m[1].replace(/\./g, ""), 10);
+  if (!Number.isFinite(whole)) return null;
+  // Round to nearest euro — we display as `price_min` (integer column)
+  return m[2] ? whole + Math.round(parseInt(m[2], 10) / 100) : whole;
+}
+
+export function parseReservixCards(html: string, into: Map<string, ReservixCard>): void {
+  for (const m of html.matchAll(RESERVIX_CARD_RE)) {
+    const href = decodeEntities(m[1]);
+    const inner = m[2];
+
+    const datetime = inner.match(/<time\s+datetime="([^"]+)"/i)?.[1];
+    if (!datetime) continue;
+    const date = datetime.slice(0, 10);
+    const time = datetime.slice(11, 16);
+
+    const groupId = inner.match(/detailGroup_(\d+)\.(?:jpe?g|png|webp)/i)?.[1];
+    if (!groupId) continue;
+
+    const priceText = inner.match(
+      /<div\s+class="c-list-item-event__event-min-price">[\s\S]*?<span>\s*ab\s+([\d.,]+)\s*€/i,
+    )?.[1];
+    const priceMin = parsePriceEuro(priceText);
+
+    const image = inner.match(/<img[^>]*\bsrc="([^"]+detailGroup_\d+\.[a-z]+)"/i)?.[1] ?? null;
+
+    into.set(`${groupId}|${date}|${time}`, {
+      groupId,
+      date,
+      time,
+      priceMin: priceMin != null && Number.isFinite(priceMin) ? priceMin : null,
+      image,
+      ticketUrl: href,
+    });
+  }
 }
