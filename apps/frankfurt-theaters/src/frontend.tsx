@@ -1,7 +1,7 @@
 import type { DateWithCount } from "./db";
 import type { Performance, Show, Theater } from "./types";
 
-type DayPerformance = Performance & {
+export type DayPerformance = Performance & {
   show: Show;
   theater: Pick<Theater, "id" | "name" | "slug" | "website_url">;
 };
@@ -12,6 +12,9 @@ interface PageProps {
   performances: DayPerformance[];
   dateStrip: DateWithCount[];
 }
+
+const APP_URL = "https://frankfurt.ins.theater";
+const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const WEEKDAYS_LONG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
 const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
@@ -49,121 +52,104 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-export function renderPage(props: PageProps): string {
-  const { date, today, performances, dateStrip } = props;
-  const isToday = date === today;
-  const niceDate = fullGerman(date);
-  const datePartsX = dateParts(date);
-  const headerWeekday = WEEKDAYS_LONG[datePartsX.weekday];
-  const headerNumeric = `${pad2(datePartsX.day)}.${pad2(datePartsX.month + 1)}.${datePartsX.year}`;
+export interface HeadOptions {
+  title: string;
+  description: string;
+  canonical: string;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
 
-  return `<!doctype html>
-<html lang="de">
-<head>
-<meta charset="utf-8" />
+export function renderHead(opts: HeadOptions): string {
+  const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
+  const jsonLdScripts = opts.jsonLd
+    ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd])
+        .map((j) => `<script type="application/ld+json">${JSON.stringify(j).replace(/</g, "\\u003c")}</script>`)
+        .join("\n")
+    : "";
+  return `<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Frankfurt Theater · ${niceDate}</title>
-<meta name="description" content="Vorstellungen und Karten der Frankfurter Bühnen — kuratiert nach Tag." />
+<title>${escapeHtml(opts.title)}</title>
+<meta name="description" content="${escapeHtml(opts.description)}" />
+<link rel="canonical" href="${escapeHtml(opts.canonical)}" />
+<meta property="og:title" content="${escapeHtml(opts.title)}" />
+<meta property="og:description" content="${escapeHtml(opts.description)}" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="${escapeHtml(opts.canonical)}" />
+<meta property="og:image" content="${escapeHtml(ogImage)}" />
+<meta property="og:locale" content="de_DE" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#F4EFE2" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="/icon-192.png" />
+<link rel="manifest" href="/manifest.json" />
+<link rel="alternate" type="application/json" title="Frankfurt Theater API" href="/api/day" />
+<link rel="alternate" type="text/calendar" title="Spielplan iCal" href="/feed.ics" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" />
 <link rel="stylesheet" href="/styles.css" />
-</head>
-<body>
-${renderGrain()}
-<header class="masthead" role="banner">
-  <div class="masthead__brand">
-    <h1 class="wordmark"><span>Frankfurt</span><span>Theater.</span></h1>
-    <p class="tagline">Was heute auf den Frankfurter Bühnen läuft.</p>
-  </div>
-  <div class="masthead__date">
-    <p class="masthead__weekday">${headerWeekday}</p>
-    <p class="masthead__numeric"><time datetime="${date}">${headerNumeric}</time></p>
-    ${isToday ? '<p class="masthead__today">Heute</p>' : ""}
-  </div>
-</header>
-
-<nav class="datestrip" aria-label="Spieltage">
-  <div class="datestrip__inner" id="datestrip">
-    ${renderDateStrip(dateStrip, date, today)}
-  </div>
-</nav>
-
-<main class="programme">
-  <header class="programme__header">
-    <p class="programme__line"></p>
-    <p class="programme__weekday">${headerWeekday}</p>
-    <h2 class="programme__date">
-      <span class="programme__day">${datePartsX.day}.</span>
-      <span class="programme__month">${MONTHS_LONG[datePartsX.month]}</span>
-      <span class="programme__year">${datePartsX.year}</span>
-    </h2>
-  </header>
-
-  ${
-    performances.length === 0
-      ? `<div class="empty">
-           <p class="empty__mark">∅</p>
-           <p>An diesem Tag keine Vorstellungen.</p>
-         </div>`
-      : renderPerformances(performances)
-  }
-</main>
-
-<footer class="footer">
-  <div>
-    <p class="footer__rule"></p>
-    <p>Eine Übersicht des Spielplans an Frankfurts Bühnen.</p>
-  </div>
-</footer>
-
-<script>
-  // Center the active date in the strip on load
-  (function(){
-    var strip = document.getElementById('datestrip');
-    if (!strip) return;
-    var active = strip.querySelector('.datetile--active');
-    if (active) {
-      var offset = active.offsetLeft - (strip.parentElement.clientWidth / 2) + (active.offsetWidth / 2);
-      strip.parentElement.scrollLeft = Math.max(0, offset);
-    }
-  })();
-</script>
-</body>
-</html>`;
+${jsonLdScripts}`;
 }
 
-function renderGrain(): string {
+export function renderGrain(): string {
   return `<div class="grain" aria-hidden="true"></div>`;
 }
 
-function renderDateStrip(strip: DateWithCount[], active: string, today: string): string {
+export function renderMasthead(args: {
+  weekday: string;
+  numeric: string;
+  date: string;
+  isToday: boolean;
+  sublabel?: string;
+}): string {
+  return `<header class="masthead" role="banner">
+  <a class="masthead__brand" href="/" aria-label="Frankfurt Theater Startseite">
+    <h1 class="wordmark"><span>Frankfurt</span><span>Theater.</span></h1>
+    <p class="tagline">${escapeHtml(args.sublabel ?? "Was heute auf den Frankfurter Bühnen läuft.")}</p>
+  </a>
+  <div class="masthead__date">
+    <p class="masthead__weekday">${escapeHtml(args.weekday)}</p>
+    <p class="masthead__numeric"><time datetime="${args.date}">${args.numeric}</time></p>
+    ${args.isToday ? '<p class="masthead__today">Heute</p>' : ""}
+  </div>
+</header>`;
+}
+
+export function renderDateStrip(strip: DateWithCount[], active: string, today: string, base: string = "/"): string {
   if (!strip.length) return "";
-  return strip
-    .map((d) => {
-      const p = dateParts(d.date);
-      const isActive = d.date === active;
-      const isToday = d.date === today;
-      const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
-        .filter(Boolean)
-        .join(" ");
-      return `<a class="${cls}" href="/?date=${d.date}" aria-current="${isActive ? "true" : "false"}">
+  const params = base.includes("?") ? "&" : "?";
+  return `<nav class="datestrip" aria-label="Spieltage">
+  <div class="datestrip__inner" id="datestrip">
+    ${strip
+      .map((d) => {
+        const p = dateParts(d.date);
+        const isActive = d.date === active;
+        const isToday = d.date === today;
+        const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
+          .filter(Boolean)
+          .join(" ");
+        return `<a class="${cls}" href="${base}${params}date=${d.date}" aria-current="${isActive ? "true" : "false"}">
         <span class="datetile__weekday">${WEEKDAYS_SHORT[p.weekday]}</span>
         <span class="datetile__day">${p.day}</span>
         <span class="datetile__month">${MONTHS_LONG[p.month].slice(0, 3)}</span>
         <span class="datetile__count">${d.n}</span>
       </a>`;
-    })
-    .join("");
+      })
+      .join("")}
+  </div>
+</nav>`;
 }
 
-function renderPerformances(performances: DayPerformance[]): string {
-  return `<ol class="performances" role="list">
-    ${performances.map((p, i) => renderPerformance(p, i)).join("")}
-  </ol>`;
+export interface PerformanceRowOptions {
+  index: number;
+  showDate?: boolean;
+  /** When true, omit the theater name (used on theater detail pages) */
+  hideTheater?: boolean;
 }
 
-function renderPerformance(p: DayPerformance, index: number): string {
+export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions): string {
+  const { index } = opts;
   const time = p.time ?? "—";
   const endTime = p.end_time ? ` – ${p.end_time}` : "";
   const room = p.venue_room ? escapeHtml(p.venue_room) : null;
@@ -175,9 +161,20 @@ function renderPerformance(p: DayPerformance, index: number): string {
 
   const stamp = renderStatusStamp(p.status);
   const action = renderAction(p);
+  const dateLine = opts.showDate ? `<p class="perf__when-date">${escapeHtml(fullGerman(p.date))}</p>` : "";
 
-  return `<li class="perf perf--${p.status}" style="--i:${index}">
+  const venueLine = opts.hideTheater
+    ? room
+      ? `<p class="perf__venue"><span>${room}</span></p>`
+      : ""
+    : `<p class="perf__venue">
+        <a href="/theater/${p.theater.slug}">${escapeHtml(p.theater.name)}</a>
+        ${room ? `<span class="perf__sep">·</span><span>${room}</span>` : ""}
+      </p>`;
+
+  return `<li class="perf perf--${p.status}" style="--i:${index}" data-perf-id="${p.id}" data-theater="${p.theater.slug}">
     <div class="perf__when">
+      ${dateLine}
       <span class="perf__index">${pad2(index + 1)}</span>
       <span class="perf__time"><span class="t1">${time}</span><span class="t2">${endTime}</span></span>
     </div>
@@ -185,15 +182,13 @@ function renderPerformance(p: DayPerformance, index: number): string {
       <h3 class="perf__title ${isStruck ? "perf__title--struck" : ""}">
         ${titleHref ? `<a href="${escapeHtml(titleHref)}" target="_blank" rel="noopener">${escapeHtml(p.show.title)}</a>` : escapeHtml(p.show.title)}
       </h3>
-      <p class="perf__venue">
-        <span>${escapeHtml(p.theater.name)}</span>
-        ${room ? `<span class="perf__sep">·</span><span>${room}</span>` : ""}
-      </p>
+      ${venueLine}
       ${subtitle ? `<p class="perf__byline">${subtitle}</p>` : ""}
     </div>
     <div class="perf__rail">
       ${price ? `<p class="perf__price">${price}</p>` : ""}
       ${stamp}
+      ${renderTransit(p)}
       ${action}
     </div>
   </li>`;
@@ -222,6 +217,13 @@ function renderAction(p: DayPerformance): string {
   return "";
 }
 
+function renderTransit(p: DayPerformance): string {
+  return `<button type="button" class="transit-btn" data-theater="${p.theater.slug}" aria-label="Anfahrt mit ÖPNV anzeigen">
+    <span class="transit-btn__label">Anfahrt</span>
+    <span class="transit-btn__value" aria-live="polite"></span>
+  </button>`;
+}
+
 function formatPriceRange(min: number | null, max: number | null): string | null {
   if (min == null && max == null) return null;
   if (min != null && max != null && min !== max)
@@ -229,11 +231,239 @@ function formatPriceRange(min: number | null, max: number | null): string | null
   return `${max ?? min} <span class="cur">€</span>`;
 }
 
-function escapeHtml(s: string): string {
+export function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
+}
+
+export function renderFooter(): string {
+  return `<footer class="footer">
+  <div>
+    <p class="footer__rule"></p>
+    <p>Eine Übersicht des Spielplans an Frankfurts Bühnen.</p>
+    <p class="footer__links">
+      <a href="/api/docs">API</a>
+      <span class="footer__sep">·</span>
+      <a href="/feed.ics">iCal</a>
+      <span class="footer__sep">·</span>
+      <a href="/sitemap.xml">Sitemap</a>
+      <span class="footer__sep">·</span>
+      <a href="${REPO_URL}" target="_blank" rel="noopener" aria-label="Quellcode auf GitHub">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M8 .2a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.3-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4A8 8 0 0 0 8 .2Z"/></svg>
+        GitHub
+      </a>
+    </p>
+  </div>
+</footer>`;
+}
+
+export function renderPage(props: PageProps): string {
+  const { date, today, performances, dateStrip } = props;
+  const isToday = date === today;
+  const niceDate = fullGerman(date);
+  const dp = dateParts(date);
+  const headerWeekday = WEEKDAYS_LONG[dp.weekday];
+  const headerNumeric = `${pad2(dp.day)}.${pad2(dp.month + 1)}.${dp.year}`;
+
+  const head = renderHead({
+    title: `Frankfurt Theater · ${niceDate}`,
+    description: `Vorstellungen und Karten der Frankfurter Bühnen am ${niceDate} — kuratiert nach Tag.`,
+    canonical: `${APP_URL}/?date=${date}`,
+    jsonLd: buildHomeJsonLd(date, performances),
+  });
+
+  return `<!doctype html>
+<html lang="de">
+<head>
+${head}
+</head>
+<body>
+${renderGrain()}
+${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date, isToday })}
+${renderDateStrip(dateStrip, date, today)}
+
+<main class="programme">
+  <header class="programme__header">
+    <p class="programme__line"></p>
+    <p class="programme__weekday">${headerWeekday}</p>
+    <h2 class="programme__date">
+      <span class="programme__day">${dp.day}.</span>
+      <span class="programme__month">${MONTHS_LONG[dp.month]}</span>
+      <span class="programme__year">${dp.year}</span>
+    </h2>
+  </header>
+
+  ${
+    performances.length === 0
+      ? `<div class="empty">
+           <p class="empty__mark">∅</p>
+           <p>An diesem Tag keine Vorstellungen.</p>
+         </div>`
+      : `<ol class="performances" role="list">${performances.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>`
+  }
+</main>
+
+${renderFooter()}
+
+${renderClientScript()}
+</body>
+</html>`;
+}
+
+export function renderClientScript(): string {
+  return `<script>
+  // Center the active date in the strip on load
+  (function(){
+    var strip = document.getElementById('datestrip');
+    if (!strip) return;
+    var active = strip.querySelector('.datetile--active');
+    if (active) {
+      var offset = active.offsetLeft - (strip.parentElement.clientWidth / 2) + (active.offsetWidth / 2);
+      strip.parentElement.scrollLeft = Math.max(0, offset);
+    }
+  })();
+
+  // Anfahrt — lazy ÖPNV transit time per theater
+  (function(){
+    var btns = document.querySelectorAll('.transit-btn');
+    if (!btns.length) return;
+    var transit = null; // { slug -> minutes }
+    var loading = false;
+
+    function snap(n){ return Math.round(n*500)/500; }
+
+    function fmt(min){
+      if (min == null) return null;
+      if (min < 60) return min + ' min';
+      var h = Math.floor(min/60), m = min%60;
+      return h + 'h' + (m ? ' ' + m + 'm' : '');
+    }
+
+    function paint(){
+      btns.forEach(function(b){
+        var slug = b.getAttribute('data-theater');
+        var v = transit && transit[slug];
+        var label = b.querySelector('.transit-btn__label');
+        var value = b.querySelector('.transit-btn__value');
+        if (v != null) {
+          label.textContent = 'ÖPNV';
+          value.textContent = fmt(v);
+          b.classList.add('transit-btn--ready');
+        }
+      });
+    }
+
+    function fetchTransit(lat, lng){
+      if (loading) return;
+      loading = true;
+      var key = 'transit_' + snap(lat) + '_' + snap(lng);
+      var cached = null;
+      try { cached = sessionStorage.getItem(key); } catch(e){}
+      if (cached) {
+        try { transit = JSON.parse(cached); paint(); loading = false; return; } catch(e){}
+      }
+      fetch('/api/transit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: lat, lng: lng })
+      }).then(function(r){ return r.json(); }).then(function(d){
+        transit = d || {};
+        try { sessionStorage.setItem(key, JSON.stringify(transit)); } catch(e){}
+        paint();
+      }).catch(function(){}).finally(function(){ loading = false; });
+    }
+
+    function ensureLocation(cb){
+      if (!navigator.geolocation) { cb(null); return; }
+      navigator.geolocation.getCurrentPosition(
+        function(pos){ cb({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
+        function(){ cb(null); },
+        { maximumAge: 600000, timeout: 8000 }
+      );
+    }
+
+    btns.forEach(function(b){
+      b.addEventListener('click', function(){
+        if (transit) return; // already painted
+        b.classList.add('transit-btn--pending');
+        ensureLocation(function(p){
+          if (!p) {
+            b.classList.remove('transit-btn--pending');
+            b.querySelector('.transit-btn__value').textContent = '—';
+            return;
+          }
+          fetchTransit(p.lat, p.lng);
+          b.classList.remove('transit-btn--pending');
+        });
+      });
+    });
+  })();
+
+  // Service worker registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+  }
+</script>`;
+}
+
+export function buildHomeJsonLd(date: string, performances: DayPerformance[]): Record<string, unknown>[] {
+  const itemList = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `Spielplan Frankfurt — ${date}`,
+    itemListOrder: "https://schema.org/ItemListOrderAscending",
+    numberOfItems: performances.length,
+    itemListElement: performances.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: buildPerformanceJsonLd(p),
+    })),
+  };
+  const website = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Frankfurt Theater",
+    url: APP_URL,
+    inLanguage: "de",
+    publisher: { "@type": "Organization", name: "Frankfurt Theater", url: APP_URL },
+  };
+  return [website, itemList];
+}
+
+export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {
+  const startDate = p.time ? `${p.date}T${p.time}:00+02:00` : p.date;
+  const endDate = p.end_time ? `${p.end_date ?? p.date}T${p.end_time}:00+02:00` : undefined;
+  const offer =
+    p.status === "cancelled"
+      ? undefined
+      : {
+          "@type": "Offer",
+          url: p.ticket_url ?? p.show.detail_url ?? undefined,
+          price: p.price_min ?? undefined,
+          priceCurrency: "EUR",
+          availability: p.status === "sold_out" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        };
+  return {
+    "@type": "TheaterEvent",
+    name: p.show.title,
+    description: p.show.subtitle ?? p.show.description ?? undefined,
+    startDate,
+    endDate,
+    eventStatus: p.status === "cancelled" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "PerformingArtsTheater",
+      name: p.theater.name,
+      url: p.theater.website_url ?? undefined,
+    },
+    image: p.show.image_url ?? undefined,
+    url: `${APP_URL}/api/performance/${p.id}`,
+    offers: offer,
+  };
 }
