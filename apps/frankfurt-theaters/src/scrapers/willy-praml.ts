@@ -160,13 +160,35 @@ export function parseProduction(html: string, slug: string): ParsedProduction | 
       slug,
       title,
       subtitle: parseSubtitle(description, title),
-      description: stripHtml(description.replace(/Termine[\s\S]*?(?=Eintritt|$)/i, "")).slice(0, 800) || null,
+      description: parseDescription(description),
       detail_url: `${BASE}/${slug}/`,
       image_url: image ? normalizeUrl(image, BASE) : null,
     },
     perfs,
     priceEur,
   };
+}
+
+/**
+ * og:description starts with "Termine\n\n<dates>\n\nEintritt …\n<title>\n<body>".
+ * Earlier versions stripped from "Termine" lazily up to "Eintritt|$" — that
+ * ate everything when a production has no Eintritt block. Take the substring
+ * AFTER the date block instead, which is robust either way.
+ */
+function parseDescription(raw: string): string | null {
+  // Drop everything up to the last DD.MM.YYYY HH:MM token, plus the optional
+  // "Eintritt …" tail if present.
+  let body = raw;
+  const dates = [...raw.matchAll(/\d{1,2}\.\d{1,2}\.\d{4}[\s\S]{0,30}?Uhr/g)];
+  if (dates.length) {
+    const last = dates[dates.length - 1];
+    body = raw.slice(last.index + last[0].length);
+  }
+  body = body.replace(/^[\s ]*Eintritt[^.\n]*\.?[\s ]*/i, "");
+  body = body.replace(/^[\s ]*Anmeldung[^.\n]*\.?[\s ]*/i, "");
+  body = stripHtml(body).trim();
+  if (!body) return null;
+  return body.length > 800 ? `${body.slice(0, 800).trimEnd()}…` : body;
 }
 
 function matchOg(html: string, prop: string): string | null {

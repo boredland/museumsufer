@@ -14,7 +14,41 @@ export async function scrapeSchauspielFrankfurt(): Promise<ScrapeResult> {
     fetchHtml(KARTEN_URL).catch(() => null),
   ]);
   const venuePrices = kartenHtml ? parseSchauspielPrices(kartenHtml) : new Map();
-  return parseSchauspielHtml(spielplanHtml, venuePrices);
+  const result = parseSchauspielHtml(spielplanHtml, venuePrices);
+  await enrichWithDetailPages(result);
+  return result;
+}
+
+/**
+ * Detail pages either expose an `og:image` or just embed the production
+ * photo as the first lazy-loaded `<img class="image__image">` whose src is
+ * the kxcdn `blank_*.png` placeholder, with the real URL on `data-image-url`.
+ */
+async function enrichWithDetailPages(result: ScrapeResult): Promise<void> {
+  for (const show of result.shows) {
+    if (!show.detail_url || show.image_url) continue;
+    try {
+      const html = await fetchHtml(show.detail_url);
+      show.image_url = pickShowImage(html);
+    } catch (err) {
+      console.warn(`Schauspiel detail enrichment failed for ${show.slug}:`, err);
+    }
+  }
+}
+
+function pickShowImage(html: string): string | null {
+  const og = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i)?.[1];
+  if (og && !/blank-image/i.test(og)) return og;
+  // First lazy-loaded production image (data-image-url) that isn't the placeholder
+  const lazy = html.match(/<img[^>]*\bdata-image-url="(https?:\/\/sf-6a25\.kxcdn\.com\/images\/[^"]+)"/i)?.[1];
+  if (lazy) return lazy;
+  // First eager image with kxcdn /images/ path (not blank, not logos)
+  for (const m of html.matchAll(/<img[^>]+src="(https?:\/\/sf-6a25\.kxcdn\.com\/images\/[^"]+)"/gi)) {
+    const url = m[1];
+    if (/\b(?:logo|icon|favicon)\b/i.test(url)) continue;
+    return url;
+  }
+  return null;
 }
 
 async function fetchHtml(url: string): Promise<string> {
