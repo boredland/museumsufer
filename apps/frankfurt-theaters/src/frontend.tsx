@@ -6,6 +6,7 @@ import {
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
+  THEME_FOUC_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
@@ -67,7 +68,7 @@ export function renderHead(opts: HeadOptions): string {
     : "";
   return `<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script>(function(){try{var t=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&d))document.documentElement.classList.add('dark');else if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();</script>
+<script>${THEME_FOUC_SCRIPT}</script>
 <title>${escapeHtml(opts.title)}</title>
 <meta name="description" content="${escapeHtml(opts.description)}" />
 <link rel="canonical" href="${escapeHtml(opts.canonical)}" />
@@ -94,7 +95,8 @@ ${
 }
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" /></noscript>
 <link rel="stylesheet" href="/styles.css" />
 <script src="/htmx.min.js" defer></script>
 <script src="/uFuzzy.iife.min.js" defer></script>
@@ -111,7 +113,7 @@ export function renderGrain(): string {
 
 export function renderMasthead(args: { sublabel?: string } = {}): string {
   return `<header class="masthead" role="banner">
-  <a class="masthead__brand" href="/" aria-label="Frankfurt Theater Startseite">
+  <a class="masthead__brand" href="/">
     <h1 class="wordmark">
       <span class="wordmark__line wordmark__line--1">Frankfurt</span>
       <span class="wordmark__ins" aria-hidden="true">ins</span>

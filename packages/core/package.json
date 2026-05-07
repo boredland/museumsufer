@@ -7,12 +7,17 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./api-catalog": "./src/api-catalog.ts",
+    "./calendar": "./src/calendar.ts",
     "./date": "./src/date.ts",
-    "./html": "./src/html.ts",
     "./escape": "./src/escape.ts",
     "./german": "./src/german.ts",
-    "./user-agents": "./src/user-agents.ts",
-    "./calendar": "./src/calendar.ts"
+    "./html": "./src/html.ts",
+    "./manifest": "./src/manifest.ts",
+    "./robots": "./src/robots.ts",
+    "./security-headers": "./src/security-headers.ts",
+    "./theme-script": "./src/theme-script.ts",
+    "./user-agents": "./src/user-agents.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

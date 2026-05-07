@@ -1,4 +1,4 @@
-import { todayIso } from "@museumsufer/core";
+import { buildApiCatalog, buildManifest, buildRobotsTxt, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
@@ -6,21 +6,13 @@ import type { Env } from "../types";
 const APP_URL = "https://frankfurt.ins.theater";
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
-const MANIFEST = JSON.stringify({
-  id: "/",
+const MANIFEST = buildManifest({
   name: "Frankfurt Theater",
-  short_name: "FT",
+  shortName: "FT",
   description: "Spielplan der Frankfurter Bühnen — kuratiert nach Tag.",
-  start_url: "/",
-  display: "standalone",
-  background_color: "#F4EFE2",
-  theme_color: "#F4EFE2",
+  themeColor: "#F4EFE2",
+  backgroundColor: "#F4EFE2",
   lang: "de",
-  icons: [
-    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-    { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-    { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-  ],
 });
 
 const LLMS_TXT = `# Frankfurt Theater
@@ -78,16 +70,8 @@ GET /performance/{id}/feed.ics — single performance
 - Sold-out performances expose status="sold_out" with no price; cancelled performances expose status="cancelled"
 `;
 
-const API_CATALOG = JSON.stringify({
-  linkset: [
-    {
-      anchor: `${APP_URL}/api/`,
-      "service-desc": [{ href: `${APP_URL}/api/docs/openapi.json`, type: "application/openapi+json" }],
-      "service-doc": [{ href: `${APP_URL}/api/docs`, type: "text/html" }],
-      status: [{ href: `${APP_URL}/api/day`, type: "application/json" }],
-    },
-  ],
-});
+const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
+const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -100,36 +84,7 @@ app.get("/.well-known/api-catalog", (c) =>
   }),
 );
 
-app.get("/robots.txt", (c) =>
-  c.text(
-    [
-      "User-agent: GPTBot",
-      "Allow: /",
-      "",
-      "User-agent: OAI-SearchBot",
-      "Allow: /",
-      "",
-      "User-agent: ChatGPT-User",
-      "Allow: /",
-      "",
-      "User-agent: ClaudeBot",
-      "Allow: /",
-      "",
-      "User-agent: PerplexityBot",
-      "Allow: /",
-      "",
-      "User-agent: *",
-      "Allow: /",
-      "",
-      "Content-Signal: ai-train=no, search=yes, ai-input=yes",
-      "",
-      `Sitemap: ${APP_URL}/sitemap.xml`,
-      `# LLMs: ${APP_URL}/llms.txt`,
-      "",
-    ].join("\n"),
-    { headers: { "Cache-Control": "public, max-age=86400" } },
-  ),
-);
+app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
 
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();

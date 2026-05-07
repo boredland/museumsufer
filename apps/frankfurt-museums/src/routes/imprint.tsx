@@ -1,3 +1,4 @@
+import { THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
@@ -26,11 +27,7 @@ function ImprintPage({ locale }: { locale: Locale }) {
           <link rel="apple-touch-icon" href="/icon-192.png" />
           <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
           <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`,
-            }}
-          />
+          <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
           <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
           <link
