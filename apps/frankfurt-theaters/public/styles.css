@@ -1291,3 +1291,21 @@ textarea:focus-visible,
   color: var(--ink-quiet);
   text-align: center;
 }
+
+/* ────────────────  Deep-link highlight  ──────────────── */
+
+/* When a performance is reached via ?item=perf-<id> or #perf-<id>, the row
+   pulses a soft brick-red wash for ~2.6s so it's findable at a glance. */
+.share-highlight {
+  animation: share-highlight 2.6s ease-out;
+  position: relative;
+  z-index: 4;
+}
+@keyframes share-highlight {
+  0%   { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+  20%  { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+  100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .share-highlight { animation: none; outline: 1.5px solid var(--accent); outline-offset: 4px; }
+}
