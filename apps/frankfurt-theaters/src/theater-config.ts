@@ -22,7 +22,10 @@ export interface TheaterConfig {
     | "dfdc"
     | "dramatische-buehne"
     | "willy-praml"
-    | "kellertheater";
+    | "kellertheater"
+    | "gallus"
+    | "theaterhaus"
+    | "internationales-theater";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -165,5 +168,35 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.kellertheater-frankfurt.de",
     ticketing_provider: "frankfurt_ticket",
     scraper: "kellertheater",
+  },
+  {
+    slug: "gallus-theater",
+    name: "Gallus Theater",
+    address: "Kleyerstraße 15, 60326 Frankfurt am Main",
+    lat: 50.101,
+    lon: 8.6334,
+    website_url: "https://www.gallustheater.de",
+    ticketing_provider: "custom",
+    scraper: "gallus",
+  },
+  {
+    slug: "theaterhaus-frankfurt",
+    name: "Theaterhaus Frankfurt",
+    address: "Schützenstraße 12, 60311 Frankfurt am Main",
+    lat: 50.1116,
+    lon: 8.6877,
+    website_url: "https://www.theaterhaus-frankfurt.de",
+    ticketing_provider: "custom",
+    scraper: "theaterhaus",
+  },
+  {
+    slug: "internationales-theater",
+    name: "Internationales Theater Frankfurt",
+    address: "Hanauer Landstraße 5-7, 60314 Frankfurt am Main",
+    lat: 50.1135,
+    lon: 8.6976,
+    website_url: "https://www.internationales-theater.de",
+    ticketing_provider: "custom",
+    scraper: "internationales-theater",
   },
 ];
