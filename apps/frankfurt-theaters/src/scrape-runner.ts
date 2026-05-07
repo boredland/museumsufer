@@ -1,12 +1,18 @@
 import { persistScrapeResult, upsertTheater } from "./db";
+import { scrapeDfdc } from "./scrapers/dfdc";
+import { scrapeDramatischeBuehne } from "./scrapers/dramatische-buehne";
 import { scrapeEnglishTheatre } from "./scrapers/english-theatre";
+import { scrapeKellertheater } from "./scrapers/kellertheater";
 import { scrapeKomoedieFrankfurt } from "./scrapers/komoedie";
 import { scrapeMousonturm } from "./scrapers/mousonturm";
 import { scrapeNeuesTheaterHoechst } from "./scrapers/neues-theater-hoechst";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
 import { scrapeSchauspielFrankfurt } from "./scrapers/schauspiel";
+import { scrapeSchmiere } from "./scrapers/schmiere";
 import { scrapeStalburg } from "./scrapers/stalburg";
+import { scrapeTigerpalast } from "./scrapers/tigerpalast";
 import { scrapeVolksbuehne } from "./scrapers/volksbuehne";
+import { scrapeWillyPraml } from "./scrapers/willy-praml";
 import { THEATERS, type TheaterConfig } from "./theater-config";
 import type { Env, ScrapeResult } from "./types";
 
@@ -61,5 +67,17 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeVolksbuehne();
     case "stalburg":
       return scrapeStalburg();
+    case "tigerpalast":
+      return scrapeTigerpalast();
+    case "schmiere":
+      return scrapeSchmiere();
+    case "dfdc":
+      return scrapeDfdc();
+    case "dramatische-buehne":
+      return scrapeDramatischeBuehne();
+    case "willy-praml":
+      return scrapeWillyPraml();
+    case "kellertheater":
+      return scrapeKellertheater();
   }
 }

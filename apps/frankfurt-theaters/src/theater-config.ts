@@ -16,7 +16,13 @@ export interface TheaterConfig {
     | "mousonturm"
     | "neues-theater-hoechst"
     | "volksbuehne"
-    | "stalburg";
+    | "stalburg"
+    | "tigerpalast"
+    | "schmiere"
+    | "dfdc"
+    | "dramatische-buehne"
+    | "willy-praml"
+    | "kellertheater";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -99,5 +105,65 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://stalburg.de",
     ticketing_provider: "reservix",
     scraper: "stalburg",
+  },
+  {
+    slug: "tigerpalast-variete",
+    name: "Tigerpalast Varieté",
+    address: "Heiligkreuzgasse 16-20, 60313 Frankfurt am Main",
+    lat: 50.1146,
+    lon: 8.6836,
+    website_url: "https://www.tigerpalast.de",
+    ticketing_provider: "reservix",
+    scraper: "tigerpalast",
+  },
+  {
+    slug: "die-schmiere",
+    name: "Die Schmiere",
+    address: "Seckbächer Gasse 8, 60311 Frankfurt am Main",
+    lat: 50.1112,
+    lon: 8.6833,
+    website_url: "https://die-schmiere.de",
+    ticketing_provider: "reservix",
+    scraper: "schmiere",
+  },
+  {
+    slug: "dresden-frankfurt-dance-company",
+    name: "Dresden Frankfurt Dance Company",
+    address: "Bockenheimer Depot, Carlo-Schmid-Platz 1, 60486 Frankfurt am Main",
+    lat: 50.1205,
+    lon: 8.6463,
+    website_url: "https://www.dfdc.de",
+    ticketing_provider: "eventim_inhouse",
+    scraper: "dfdc",
+  },
+  {
+    slug: "dramatische-buehne",
+    name: "Die Dramatische Bühne",
+    address: "Frankfurt am Main",
+    lat: 50.1109,
+    lon: 8.6821,
+    website_url: "https://www.diedramatischebuehne.de",
+    ticketing_provider: "custom",
+    scraper: "dramatische-buehne",
+  },
+  {
+    slug: "theater-willy-praml",
+    name: "Theater Willy Praml",
+    address: "Naxoshalle, Waldschmidtstraße 19, 60316 Frankfurt am Main",
+    lat: 50.1199,
+    lon: 8.7037,
+    website_url: "https://theaterwillypraml.de",
+    ticketing_provider: "custom",
+    scraper: "willy-praml",
+  },
+  {
+    slug: "kellertheater-frankfurt",
+    name: "Kellertheater Frankfurt",
+    address: "Mainstraße 2, 60311 Frankfurt am Main",
+    lat: 50.1108,
+    lon: 8.6852,
+    website_url: "https://www.kellertheater-frankfurt.de",
+    ticketing_provider: "frankfurt_ticket",
+    scraper: "kellertheater",
   },
 ];
