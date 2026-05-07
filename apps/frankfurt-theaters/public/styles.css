@@ -494,12 +494,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
   transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
-.share-btn:hover,
-.share-btn:focus-visible {
+.share-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-soft);
-  outline: none;
 }
 .perf__price {
   margin: 0;
@@ -649,15 +647,23 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: var(--ink-soft);
   background: transparent;
   border: 1px solid var(--rule);
-  padding: 0.3rem 0.65rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.55rem;
   border-radius: 999px;
   cursor: pointer;
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.35rem;
   transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
 .transit-btn:hover { color: var(--accent); border-color: var(--accent); }
+.transit-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  /* The paper-airplane glyph leans up-right naturally; nudge it visually so
+     it sits balanced inside the pill rather than tilted away. */
+  transform: rotate(-12deg);
+  opacity: 0.85;
+}
 
 /* ────────────────  Footer links  ──────────────── */
 
@@ -993,8 +999,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   margin-right: 0.4rem;
   transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
-.report-btn:hover,
-.report-btn:focus-visible {
+.report-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-soft);
@@ -1075,17 +1080,19 @@ button, a { -webkit-tap-highlight-color: transparent; }
   height: 1.85rem;
   border-radius: 999px;
   border: 1px solid var(--rule);
+  /* Explicit transparent background — when this element is a <button> (the
+     calendar popover trigger), the user-agent default would otherwise paint
+     a light fill that lingers after the popover closes. */
+  background: transparent;
   color: var(--ink-soft);
   text-decoration: none;
-  margin-right: 0.4rem;
+  cursor: pointer;
   transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
 }
-.ics-btn:hover,
-.ics-btn:focus-visible {
+.ics-btn:hover {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-soft);
-  outline: none;
 }
 
 /* ────────────────  Contact dialog (native <dialog>)  ──────────────── */
@@ -1275,8 +1282,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 /* HTMX swap indicator: dim the programme content while loading */
-#programme-content.htmx-swapping { opacity: 0.4; transition: opacity 220ms ease; }
-#programme-content.htmx-settling { opacity: 1; transition: opacity 220ms ease; }
+/* Subtle in-flight cue. Matches the hx-swap modifiers on date tiles
+   (swap:80ms settle:20ms) so the dim is perceptible on slow networks but
+   imperceptible on fast ones — overall total ≤ 100ms. */
+#programme-content.htmx-swapping,
+#programme-content.htmx-settling { opacity: 0.6; transition: opacity 80ms ease; }
 
 /* ────────────────  Accessibility — focus rings  ──────────────── */
 
