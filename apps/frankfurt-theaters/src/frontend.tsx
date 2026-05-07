@@ -243,9 +243,9 @@ function renderCalendarPopover(p: DayPerformance): string {
   const popId = `cal-${p.id}`;
   const ev: CalendarEvent = {
     date: p.date,
-    time: p.time,
-    end_time: p.end_time,
-    end_date: p.end_date,
+    time: p.time ?? null,
+    end_time: p.end_time ?? null,
+    end_date: p.end_date ?? null,
     title: p.show.title,
     location: [p.theater.name, p.venue_room && p.venue_room !== p.theater.name ? p.venue_room : null]
       .filter(Boolean)
@@ -345,7 +345,7 @@ function renderReportButton(p: DayPerformance): string {
     title="Fehler bei dieser Vorstellung melden">${ICON_REPORT}</button>`;
 }
 
-function formatPriceRange(min: number | null, max: number | null): string | null {
+function formatPriceRange(min: number | null | undefined, max: number | null | undefined): string | null {
   if (min == null && max == null) return null;
   if (min != null && max != null && min !== max)
     return `${min}<span class="dash">–</span>${max} <span class="cur">€</span>`;
