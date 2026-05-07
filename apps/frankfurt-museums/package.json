@@ -3,18 +3,18 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "css": "tailwindcss -i src/app.css -o public/styles.css --minify && node scripts/inline-css.mjs",
+    "css": "tailwindcss -i src/app.css -o public/styles.css --minify && bun scripts/inline-css.mjs",
     "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
-    "dev": "npm run css && wrangler dev",
-    "build": "npm run css",
-    "deploy": "npm run css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
+    "dev": "bun css && wrangler dev",
+    "build": "bun css",
+    "deploy": "bun css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply museumsufer-db --local",
     "db:migrate": "wrangler d1 migrations apply museumsufer-db --remote",
-    "health-check": "tsx scripts/health-check.ts",
-    "screenshot": "tsx scripts/screenshots.ts",
-    "screenshots:manifest": "tsx scripts/screenshots.ts --format=landscape --out=public/ss-wide.png && tsx scripts/screenshots.ts --format=portrait --out=public/ss-mobile.png",
-    "lint": "../../node_modules/.bin/biome check src/ scripts/",
-    "lint:fix": "../../node_modules/.bin/biome check --write src/ scripts/",
+    "health-check": "bun scripts/health-check.ts",
+    "screenshot": "bun scripts/screenshots.ts",
+    "screenshots:manifest": "bun scripts/screenshots.ts --format=landscape --out=public/ss-wide.png && bun scripts/screenshots.ts --format=portrait --out=public/ss-mobile.png",
+    "lint": "biome check src/ scripts/",
+    "lint:fix": "biome check --write src/ scripts/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,8 +32,8 @@
     "@cloudflare/workers-types": "^4.20250410.0",
     "@museumsufer/tsconfig": "*",
     "@tailwindcss/cli": "^4.2.4",
+    "tailwindcss": "^4.2.4",
     "playwright": "^1.59.1",
-    "tsx": "^4.21.0",
     "typescript": "^5.8.3",
     "wrangler": "^4.83.0"
   }
