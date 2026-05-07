@@ -15,7 +15,9 @@ export type EventApiType =
   | "fdh"
   | "dff-kino"
   | "archaeologisches"
-  | "fritz-bauer-wollheim";
+  | "fritz-bauer-wollheim"
+  | "experiminta"
+  | "caricatura";
 
 export interface ProxyConfig {
   url: string;
@@ -68,6 +70,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6845,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
+    eventApi: { type: "caricatura", endpoint: "https://caricatura-museum.de/veranstaltungen" },
   },
   "deutsches-architekturmuseum": {
     abbreviation: "DAM",
@@ -381,6 +384,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1131,
     lng: 8.6787,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hauptwache@X=8679292@Y=50113963@U=80@L=3000001@",
+    // Only on-demand workshops/trainings, no dated public events.
+    skipEvents: true,
     exhibitionUrl: "https://www.dialogmuseum.de/",
   },
   experiminta: {
@@ -392,6 +397,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6478,
     rmvStopLid: "A=1@O=Frankfurt (Main) Varrentrappstraße@X=8647443@Y=50115312@U=80@L=3001207@",
     exhibitionUrl: "https://www.experiminta.de/ausstellungen/sonderausstellungen/",
+    eventApi: { type: "experiminta", endpoint: "https://www.experiminta.de/event-sitemap.xml" },
   },
   atelierfrankfurt: {
     name: "Atelierfrankfurt",
@@ -401,6 +407,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1132,
     lng: 8.7197,
     rmvStopLid: "A=1@O=Frankfurt (Main) Schwedlerstraße@X=8719447@Y=50113981@U=80@L=3001539@",
+    // /programm is a portfolio of exhibition projects without concrete dated events.
+    skipEvents: true,
     exhibitionUrl: "https://www.atelierfrankfurt.de/ausstellungen/",
   },
   "frankfurter-buergerstiftung": {

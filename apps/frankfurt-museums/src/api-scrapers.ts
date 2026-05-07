@@ -67,6 +67,10 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchArchaeologisches(config.endpoint);
     case "fritz-bauer-wollheim":
       return fetchFritzBauerWollheim(config.endpoint);
+    case "experiminta":
+      return fetchExperiminta(config.endpoint);
+    case "caricatura":
+      return fetchCaricatura(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1318,5 +1322,188 @@ async function fetchFritzBauerWollheim(endpoint: string): Promise<ApiEvent[]> {
     m = blockRe.exec(html);
   }
 
+  return events;
+}
+
+function parseExperimentaSlugDate(slug: string): string | null {
+  let m = slug.match(/-(\d{2})-(\d{2})-(\d{4})\/?$/);
+  if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+  m = slug.match(/-(\d{2})-(\d{2})-(\d{2})(?:-[a-zäöü]+)?\/?$/i);
+  if (m) return `20${m[3]}-${m[2]}-${m[1]}`;
+  m = slug.match(/-(\d{2})(\d{2})(\d{2})\/?$/);
+  if (m) return `20${m[3]}-${m[2]}-${m[1]}`;
+  return null;
+}
+
+interface ExperimintaProduct {
+  name?: string;
+  description?: string;
+  image?: string | string[];
+  offers?: Array<{
+    priceSpecification?: Array<{ price?: string; priceCurrency?: string }>;
+    price?: string;
+    priceCurrency?: string;
+  }>;
+}
+
+function findProductJsonLd(html: string): ExperimintaProduct | null {
+  const re = /<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi;
+  let m: RegExpExecArray | null = re.exec(html);
+  while (m !== null) {
+    try {
+      const data = JSON.parse(m[1].trim()) as { "@type"?: string } & ExperimintaProduct;
+      if (data["@type"] === "Product") return data;
+    } catch {}
+    m = re.exec(html);
+  }
+  return null;
+}
+
+function extractTimeRange(text: string): { time: string | null; end_time: string | null } {
+  const m = text.match(/(\d{1,2})[:.](\d{2})\s*[–-]\s*(\d{1,2})[:.](\d{2})\s*Uhr/);
+  if (m) return { time: `${m[1].padStart(2, "0")}:${m[2]}`, end_time: `${m[3].padStart(2, "0")}:${m[4]}` };
+  const single = text.match(/(\d{1,2})[:.](\d{2})\s*Uhr/);
+  if (single) return { time: `${single[1].padStart(2, "0")}:${single[2]}`, end_time: null };
+  return { time: null, end_time: null };
+}
+
+async function fetchExperiminta(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const xml = await res.text();
+
+  const today = todayIso();
+  const candidates: Array<{ url: string; date: string }> = [];
+  const seen = new Set<string>();
+  for (const m of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
+    const url = m[1];
+    if (!/\/event\/[^/]+\/?$/.test(url)) continue;
+    const slug = url.replace(/\/$/, "").split("/").pop() ?? "";
+    const date = parseExperimentaSlugDate(slug);
+    if (!date || date < today) continue;
+    const key = `${slug.replace(/-?\d{6,8}.*$/, "")}::${date}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    candidates.push({ url, date });
+  }
+
+  const limited = candidates.slice(0, 30);
+  const detailHtmls = await Promise.all(
+    limited.map(async (c) => {
+      try {
+        const r = await fetch(c.url, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? await r.text() : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  return limited.flatMap((c, i): ApiEvent[] => {
+    const html = detailHtmls[i];
+    if (!html) return [];
+    const product = findProductJsonLd(html);
+    if (!product?.name) return [];
+    const title = product.name.replace(/\s+\d{1,2}\.\d{1,2}\.\d{2,4}\s*$/, "").trim();
+    if (!title) return [];
+    const description = product.description?.replace(/\r\n/g, "\n").trim() ?? "";
+    const { time, end_time } = extractTimeRange(description);
+    const priceSpec = product.offers?.[0]?.priceSpecification?.[0];
+    const priceValue = priceSpec?.price ?? product.offers?.[0]?.price ?? null;
+    const price = priceValue ? `${parseFloat(priceValue).toFixed(2).replace(/\.00$/, "")} €` : null;
+    const image = Array.isArray(product.image) ? product.image[0] : product.image;
+    return [
+      {
+        title,
+        date: c.date,
+        time,
+        end_time,
+        end_date: null,
+        description: description ? truncateHtml(description) : null,
+        detail_url: c.url,
+        image_url: image ?? null,
+        price,
+        category: classifyEvent(title, description) || null,
+      },
+    ];
+  });
+}
+
+const CARICATURA_GERMAN_MONTHS: Record<string, string> = {
+  januar: "01",
+  februar: "02",
+  märz: "03",
+  april: "04",
+  mai: "05",
+  juni: "06",
+  juli: "07",
+  august: "08",
+  september: "09",
+  oktober: "10",
+  november: "11",
+  dezember: "12",
+};
+
+function parseCaricaturaBadgeDate(badge: string): string | null {
+  // Reject date ranges (exhibition runtime previews use the same badge slot,
+  // e.g. "27. Juni 2026 - 17. Januar 2027"). Real events are single-day.
+  if (/[–-]\s*\d{1,2}\.|\bbis\b/i.test(badge)) return null;
+  const m = badge.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})/);
+  if (!m) return null;
+  const month = CARICATURA_GERMAN_MONTHS[m[2].toLowerCase()];
+  if (!month) return null;
+  return `${m[3]}-${month}-${m[1].padStart(2, "0")}`;
+}
+
+async function fetchCaricatura(endpoint: string): Promise<ApiEvent[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const blockRe = /<div class="module_teaser_large[^"]*"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g;
+  const events: ApiEvent[] = [];
+  let m: RegExpExecArray | null = blockRe.exec(html);
+  while (m !== null) {
+    const block = m[0];
+    const badge = block.match(/<p class="badge">([^<]+)<\/p>/)?.[1]?.trim();
+    const title = block
+      .match(/<p class="headline">([\s\S]*?)<\/p>/)?.[1]
+      ?.replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!badge || !title) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const date = parseCaricaturaBadgeDate(badge);
+    if (!date || date < today) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const href = block.match(/<a href="([^"]+)"/)?.[1];
+    const detailUrl = href ? normalizeUrl(href, origin) : null;
+    const image = block.match(/<img[^>]+src="([^"]+)"/)?.[1];
+    const imageUrl = image ? normalizeUrl(image, origin) : null;
+    const subhead = block.match(/<p class="subheadline">([^<]+)<\/p>/)?.[1]?.trim() ?? null;
+    const teaser = block.match(/<div class="teaser_text">\s*<p>([\s\S]*?)<\/p>/)?.[1]?.trim() ?? null;
+    const description = [subhead, teaser].filter(Boolean).join(" — ") || null;
+
+    events.push({
+      title,
+      date,
+      time: null,
+      end_time: null,
+      end_date: null,
+      description: description ? truncateHtml(description) : null,
+      detail_url: detailUrl,
+      image_url: imageUrl,
+      price: null,
+      category: classifyEvent(title, description) || null,
+    });
+    m = blockRe.exec(html);
+  }
   return events;
 }
