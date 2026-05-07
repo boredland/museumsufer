@@ -87,12 +87,14 @@ export async function persistScrapeResult(
       .bind(
         showId,
         p.date,
-        p.time ?? null,
-        p.end_time ?? null,
-        p.end_date ?? null,
         // Empty string instead of NULL so the (show_id, date, time, venue_room)
         // unique constraint catches dupes — SQLite treats NULL != NULL in
         // unique keys, which let hourly scrapes insert the same row repeatedly.
+        // Read paths convert "" back to null so the API/UI can keep using
+        // truthy checks unchanged.
+        p.time ?? "",
+        p.end_time ?? null,
+        p.end_date ?? null,
         p.venue_room ?? "",
         p.provider_event_id ?? null,
         p.ticket_url ?? null,
@@ -156,10 +158,12 @@ export async function getPerformancesForDate(db: D1Database, date: string): Prom
     id: Number(r.id),
     show_id: Number(r.show_id),
     date: String(r.date),
-    time: r.time as string | null,
+    // db.bind coalesces NULL to '' so the unique constraint catches dupes;
+    // restore null on read so the rendering layer's truthy checks stay simple.
+    time: (r.time as string) || null,
     end_time: r.end_time as string | null,
     end_date: r.end_date as string | null,
-    venue_room: r.venue_room as string | null,
+    venue_room: (r.venue_room as string) || null,
     provider_event_id: r.provider_event_id as string | null,
     ticket_url: r.ticket_url as string | null,
     status: (r.status as Performance["status"]) ?? "unknown",
@@ -205,10 +209,12 @@ function rowToDayPerformance(r: Record<string, unknown>): DayPerformance {
     id: Number(r.id),
     show_id: Number(r.show_id),
     date: String(r.date),
-    time: r.time as string | null,
+    // Empty strings are dedup placeholders (see persistScrapeResult) — restore
+    // null so callers can keep using truthy checks.
+    time: (r.time as string) || null,
     end_time: r.end_time as string | null,
     end_date: r.end_date as string | null,
-    venue_room: r.venue_room as string | null,
+    venue_room: (r.venue_room as string) || null,
     provider_event_id: r.provider_event_id as string | null,
     ticket_url: r.ticket_url as string | null,
     status: (r.status as Performance["status"]) ?? "unknown",

@@ -13,6 +13,10 @@ const MANIFEST = buildManifest({
   themeColor: "#F4EFE2",
   backgroundColor: "#F4EFE2",
   lang: "de",
+  screenshots: [
+    { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "Frankfurt Theater" },
+    { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "Frankfurt Theater" },
+  ],
 });
 
 const LLMS_TXT = `# Frankfurt Theater
