@@ -38,11 +38,11 @@ function joinPerformance(p: Performance): DayPerformance | null {
   };
 }
 
-function compareTime(a: string | null, b: string | null): number {
-  // NULL last (matches the old SQL `ORDER BY time NULLS LAST`).
+function compareTime(a: string | null | undefined, b: string | null | undefined): number {
+  // NULL/undefined last (matches the old SQL `ORDER BY time NULLS LAST`).
   if (a === b) return 0;
-  if (a === null) return 1;
-  if (b === null) return -1;
+  if (a == null) return 1;
+  if (b == null) return -1;
   return a.localeCompare(b);
 }
 

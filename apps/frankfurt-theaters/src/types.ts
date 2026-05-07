@@ -9,37 +9,38 @@ export type TicketingProvider = "eventim_inhouse" | "frankfurt_ticket" | "reserv
 // Theater metadata lives in src/theater-config.ts (TheaterConfig) — no
 // DB-row interface needed here.
 
+// Optional-rather-than-nullable on the rarely-set fields. The scrape
+// generator strips null/undefined values from the JSON to keep
+// scrape-data.ts compact, so any field that's frequently null lands as
+// "absent" in the bundled data. Consumers use `?? null` / `?.` already,
+// so the undefined-vs-null distinction never reaches a renderer.
 export interface Show {
   id: number;
   theater_slug: string;
   slug: string;
   title: string;
-  subtitle: string | null;
-  description: string | null;
-  language: string | null;
-  age_recommendation: string | null;
-  image_url: string | null;
-  detail_url: string | null;
-  season: string | null;
+  subtitle?: string;
+  description?: string;
+  language?: string;
+  age_recommendation?: string;
+  image_url?: string;
+  detail_url?: string;
+  season?: string;
 }
 
 export interface Performance {
   id: number;
   show_id: number;
   date: string;
-  time: string | null;
-  end_time: string | null;
-  end_date: string | null;
-  venue_room: string | null;
-  provider_event_id: string | null;
-  ticket_url: string | null;
   status: AvailabilityStatus;
-  available_seats: number | null;
-  total_seats: number | null;
-  price_min: number | null;
-  price_max: number | null;
-  currency: string | null;
-  availability_checked_at: string | null;
+  time?: string;
+  end_time?: string;
+  end_date?: string;
+  venue_room?: string;
+  provider_event_id?: string;
+  ticket_url?: string;
+  price_min?: number;
+  price_max?: number;
 }
 
 export interface ScrapedShow {

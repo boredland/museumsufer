@@ -199,7 +199,6 @@ const spec = {
           },
           price_min: { type: ["number", "null"] },
           price_max: { type: ["number", "null"] },
-          currency: { type: ["string", "null"] },
           show: { $ref: "#/components/schemas/Show" },
           theater: { $ref: "#/components/schemas/TheaterRef" },
         },
