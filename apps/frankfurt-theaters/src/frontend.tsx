@@ -202,6 +202,7 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
       ${price ? `<p class="perf__price">${price}</p>` : ""}
       ${stamp}
       ${renderTransit(p)}
+      ${renderReportButton(p)}
       ${action}
     </div>
   </li>`;
@@ -243,14 +244,11 @@ const ICON_REPORT = `<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden
 
 function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
-  const regarding = `${p.show.title} — ${p.theater.name}, ${p.date}${p.time ? ` ${p.time}` : ""}`;
-  const context = `${regarding} (${APP_URL}/api/performance/${p.id})`;
   return `<span class="nav-wrap">
     <button type="button" class="transit-btn" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
       Anfahrt
     </button>
     <div id="${popId}" popover="auto" role="menu" class="nav-popover" data-theater="${p.theater.slug}">
-      <p class="nav-popover__title">${escapeHtml(p.theater.name)}</p>
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-app" data-kind="rmv-app" target="_blank" rel="noopener">
         <span class="nav-popover__icon" aria-hidden="true">${ICON_RMV}</span> RMV App
       </a>
@@ -263,14 +261,19 @@ function renderTransit(p: DayPerformance): string {
       <a role="menuitem" class="nav-popover__link" data-kind="apple" target="_blank" rel="noopener">
         <span class="nav-popover__icon" aria-hidden="true">${ICON_APPLE}</span> Apple Maps
       </a>
-      <button type="button" role="menuitem" class="nav-popover__link nav-popover__link--report"
-        data-report-type="performance"
-        data-report-regarding="${escapeHtml(regarding)}"
-        data-report-context="${escapeHtml(context)}">
-        <span class="nav-popover__icon" aria-hidden="true">${ICON_REPORT}</span> Fehler melden
-      </button>
     </div>
   </span>`;
+}
+
+function renderReportButton(p: DayPerformance): string {
+  const regarding = `${p.show.title} — ${p.theater.name}, ${p.date}${p.time ? ` ${p.time}` : ""}`;
+  const context = `${regarding} (${APP_URL}/api/performance/${p.id})`;
+  return `<button type="button" class="report-btn"
+    data-report-type="performance"
+    data-report-regarding="${escapeHtml(regarding)}"
+    data-report-context="${escapeHtml(context)}"
+    aria-label="Fehler bei dieser Vorstellung melden"
+    title="Fehler bei dieser Vorstellung melden">${ICON_REPORT}</button>`;
 }
 
 function formatPriceRange(min: number | null, max: number | null): string | null {
