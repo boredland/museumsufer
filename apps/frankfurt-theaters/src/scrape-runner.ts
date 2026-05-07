@@ -6,8 +6,10 @@ import { scrapeEnglishTheatre } from "./scrapers/english-theatre";
 import { scrapeGalli } from "./scrapers/galli";
 import { scrapeGallusTheater } from "./scrapers/gallus";
 import { scrapeInternationalesTheater } from "./scrapers/internationales-theater";
+import { scrapeKaes } from "./scrapers/kaes";
 import { scrapeKellertheater } from "./scrapers/kellertheater";
 import { scrapeKomoedieFrankfurt } from "./scrapers/komoedie";
+import { scrapeLempenfieber } from "./scrapers/lempenfieber";
 import { scrapeMousonturm } from "./scrapers/mousonturm";
 import { scrapeNeuesTheaterHoechst } from "./scrapers/neues-theater-hoechst";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
@@ -97,5 +99,9 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeGalli();
     case "alte-bruecke":
       return scrapeAlteBruecke();
+    case "kaes":
+      return scrapeKaes();
+    case "lempenfieber":
+      return scrapeLempenfieber();
   }
 }

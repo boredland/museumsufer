@@ -48,6 +48,7 @@ export interface ReservixCard {
   venueRoom: string | null;
   priceMin: number | null;
   image: string | null;
+  soldOut: boolean;
 }
 
 export async function fetchReservixListing(host: string): Promise<ReservixCard[]> {
@@ -97,7 +98,12 @@ export function parseReservixListing(html: string): ReservixCard[] {
     )?.[1];
     const priceMin = parsePriceEuro(priceText);
 
-    const image = inner.match(/<img[^>]*\bsrc="([^"]+detailGroup_\d+\.[a-z]+)"/i)?.[1] ?? null;
+    const image =
+      inner.match(/<img[^>]*\bsrc="([^"]+detailGroup_\d+\.[a-z]+)"/i)?.[1] ??
+      inner.match(/<img[^>]*\bsrc="([^"]+detailEvent_\d+\.[a-z]+)"/i)?.[1] ??
+      null;
+
+    const soldOut = /\bAUSVERKAUFT\b/.test(inner);
 
     out.push({
       ticketUrl: href,
@@ -111,6 +117,7 @@ export function parseReservixListing(html: string): ReservixCard[] {
       venueRoom,
       priceMin,
       image,
+      soldOut,
     });
   }
   return out;
@@ -157,8 +164,8 @@ export async function scrapeReservixHost(opts: ReservixScrapeOptions): Promise<S
       venue_room: card.venueRoom ?? opts.defaultVenueRoom ?? null,
       provider_event_id: card.syncId,
       ticket_url: card.ticketUrl,
-      status: "available",
-      price_min: card.priceMin ?? null,
+      status: card.soldOut ? "sold_out" : "available",
+      price_min: card.soldOut ? null : (card.priceMin ?? null),
     });
   }
 
