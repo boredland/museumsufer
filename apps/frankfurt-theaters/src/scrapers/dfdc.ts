@@ -1,4 +1,4 @@
-import { todayIso } from "../date";
+import { todayIso } from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://www.dfdc.de";

@@ -1,5 +1,4 @@
-import { todayIso } from "../date";
-import { decodeEntities, normalizeUrl, nullIfMidnight, stripHtml } from "../shared";
+import { decodeEntities, normalizeUrl, nullIfMidnight, stripHtml, todayIso } from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://volksbuehne.net";

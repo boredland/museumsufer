@@ -1,3 +1,9 @@
+import {
+  escapeHtml as coreEscapeHtml,
+  GERMAN_MONTHS_LONG as MONTHS_LONG,
+  GERMAN_WEEKDAYS as WEEKDAYS_LONG,
+  GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
+} from "@museumsufer/core";
 import type { DateWithCount } from "./db";
 import { THEATERS } from "./theater-config";
 import type { Performance, Show, Theater } from "./types";
@@ -16,23 +22,6 @@ interface PageProps {
 
 const APP_URL = "https://frankfurt.ins.theater";
 const REPO_URL = "https://github.com/boredland/museumsufer";
-
-const WEEKDAYS_LONG = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-const WEEKDAYS_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const MONTHS_LONG = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember",
-];
 
 function dateParts(iso: string) {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -286,14 +275,7 @@ function formatPriceRange(min: number | null, max: number | null): string | null
   return `${max ?? min} <span class="cur">€</span>`;
 }
 
-export function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+export const escapeHtml = coreEscapeHtml;
 
 export function renderFooter(): string {
   return `<footer class="footer">

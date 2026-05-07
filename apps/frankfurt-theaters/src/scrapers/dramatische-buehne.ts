@@ -1,5 +1,12 @@
-import { todayIso } from "../date";
-import { decodeEntities, normalizeUrl, nullIfMidnight, slugify, stripHtml, truncate } from "../shared";
+import {
+  decodeEntities,
+  normalizeUrl,
+  nullIfMidnight,
+  slugify,
+  stripHtml,
+  todayIso,
+  truncate,
+} from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://www.diedramatischebuehne.de";

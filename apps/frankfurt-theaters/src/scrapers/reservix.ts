@@ -1,5 +1,4 @@
-import { todayIso } from "../date";
-import { decodeEntities, slugify, stripHtml } from "../shared";
+import { decodeEntities, slugify, stripHtml, todayIso } from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 /**

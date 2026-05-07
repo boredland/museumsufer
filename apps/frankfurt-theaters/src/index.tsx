@@ -1,5 +1,5 @@
+import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
-import { dateOffset, todayIso } from "./date";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { renderPage, renderProgrammePartial } from "./frontend";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
