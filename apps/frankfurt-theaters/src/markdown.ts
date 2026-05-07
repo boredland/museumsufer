@@ -71,11 +71,9 @@ function perfBullet(p: DayPerformance, opts: { showTheater: boolean }): string {
       : p.price_max && p.price_max !== p.price_min
         ? ` · ${p.price_min}–${p.price_max} €`
         : ` · ${p.price_min} €`;
-  const venue = opts.showTheater
-    ? ` _(${p.theater.name}${p.venue_room ? `, ${p.venue_room}` : ""})_`
-    : p.venue_room
-      ? ` _(${p.venue_room})_`
-      : "";
+  const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
+  const room = p.venue_room && !sameVenue ? p.venue_room : null;
+  const venue = opts.showTheater ? ` _(${p.theater.name}${room ? `, ${room}` : ""})_` : room ? ` _(${room})_` : "";
   const url = p.ticket_url ?? p.show.detail_url ?? "";
   const title = url ? `[${p.show.title}](${url})` : p.show.title;
   return `- **${time}** ${title}${subtitle}${venue}${price}${status}`;

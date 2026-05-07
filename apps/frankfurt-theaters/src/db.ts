@@ -90,7 +90,10 @@ export async function persistScrapeResult(
         p.time ?? null,
         p.end_time ?? null,
         p.end_date ?? null,
-        p.venue_room ?? null,
+        // Empty string instead of NULL so the (show_id, date, time, venue_room)
+        // unique constraint catches dupes — SQLite treats NULL != NULL in
+        // unique keys, which let hourly scrapes insert the same row repeatedly.
+        p.venue_room ?? "",
         p.provider_event_id ?? null,
         p.ticket_url ?? null,
         p.status ?? "unknown",

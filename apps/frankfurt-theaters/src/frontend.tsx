@@ -169,7 +169,11 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
   const { index } = opts;
   const time = p.time ?? "—";
   const endTime = p.end_time ? ` – ${p.end_time}` : "";
-  const room = p.venue_room ? escapeHtml(p.venue_room) : null;
+  // Some scrapers (Reservix listings) store the theater name itself as the
+  // venue room, which would render as "Die Käs · Die Käs". Drop the room
+  // when it's effectively the same string as the theater name.
+  const isSameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
+  const room = p.venue_room && !isSameVenue ? escapeHtml(p.venue_room) : null;
   const isStruck = p.status === "sold_out" || p.status === "cancelled";
   const subtitle = p.show.subtitle ? escapeHtml(p.show.subtitle).replace(/\s*<br\s*\/?>\s*/gi, " · ") : null;
   const showPrice = p.status !== "sold_out" && p.status !== "cancelled";
@@ -814,18 +818,23 @@ export function renderClientScript(): string {
   }
 
   // Deep-link to a single performance: /?date=…&item=perf-<id> or
-  // /?date=…#perf-<id> scrolls the row into view and pulses a highlight.
+  // /?date=…#perf-<id> scrolls the row into view, plays a 2.6s entry pulse,
+  // and leaves a persistent brick-red left bar so the target row stays
+  // visually distinguished until the user navigates to a different item.
   function highlightShareTarget(){
     var key = new URL(location.href).searchParams.get('item')
       || (location.hash && location.hash.replace(/^#/, ''));
+    // Clear any previously persistent target so we never have two highlighted.
+    document.querySelectorAll('.share-target').forEach(function(el){ el.classList.remove('share-target'); });
     if (!key) return;
     var el = document.querySelector('[data-share-key="' + key.replace(/"/g, '\\\\"') + '"]')
       || document.getElementById(key);
     if (!el) return;
     requestAnimationFrame(function(){
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('share-target');
       el.classList.remove('share-highlight');
-      void el.offsetWidth; // force reflow so the animation re-runs
+      void el.offsetWidth; // force reflow so the entry pulse re-runs
       el.classList.add('share-highlight');
       setTimeout(function(){ el.classList.remove('share-highlight'); }, 2600);
     });

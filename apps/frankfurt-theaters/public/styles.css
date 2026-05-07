@@ -926,19 +926,32 @@ button, a { -webkit-tap-highlight-color: transparent; }
   outline: none;
 }
 
+/* Floating toast — centered near the top so it's visible regardless of where
+   the share button was clicked. Slides down on enter, fades out on exit. */
 .footer__toast {
-  display: inline-block;
-  margin-top: 0.75rem;
+  position: fixed;
+  top: clamp(0.85rem, 2vw, 1.5rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(-0.6rem);
+  padding: 0.55rem 1.1rem;
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px -8px rgba(15, 10, 5, 0.4);
   opacity: 0;
-  transition: opacity 220ms ease;
+  transition: opacity 220ms ease, transform 220ms ease;
   pointer-events: none;
+  z-index: 60;
+  white-space: nowrap;
 }
-.footer__toast--visible { opacity: 1; }
+.footer__toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
 
 /* Per-row report button — small, muted, sits between Anfahrt and Karten */
 .report-btn {
@@ -1320,18 +1333,24 @@ textarea:focus-visible,
 
 /* ────────────────  Deep-link highlight  ──────────────── */
 
-/* When a performance is reached via ?item=perf-<id> or #perf-<id>, the row
-   pulses a soft brick-red wash for ~2.6s so it's findable at a glance. */
-.share-highlight {
-  animation: share-highlight 2.6s ease-out;
+/* When a performance is reached via ?item=perf-<id> or #perf-<id>:
+   - .share-highlight runs a 2.6s entry pulse (soft brick wash + left bar)
+   - .share-target keeps a persistent left bar so the row stays distinguished
+     until the user navigates to a different item or off the page. */
+.share-target {
   position: relative;
   z-index: 4;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.share-highlight {
+  animation: share-highlight 2.6s ease-out;
 }
 @keyframes share-highlight {
-  0%   { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
-  20%  { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
-  100% { background: transparent; box-shadow: inset 3px 0 0 transparent; }
+  0%   { background: var(--accent-soft); }
+  20%  { background: var(--accent-soft); }
+  100% { background: transparent; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .share-highlight { animation: none; outline: 1.5px solid var(--accent); outline-offset: 4px; }
+  .share-highlight { animation: none; }
+  .share-target { outline: 1.5px solid var(--accent); outline-offset: 4px; box-shadow: none; }
 }
