@@ -541,8 +541,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
     gap: 0.75rem 1.25rem;
   }
   .perf__rail {
-    grid-column: 1 / -1;
-    align-items: flex-start;
+    /* Align the rail with the body column so price + buttons start at the
+       same indent as the title above them, instead of at the row's left edge. */
+    grid-column: 2 / -1;
+    align-items: center;
     flex-direction: row;
     flex-wrap: wrap;
     gap: 0.85rem;
