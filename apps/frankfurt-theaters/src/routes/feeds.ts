@@ -127,7 +127,8 @@ function buildVevent(p: DayPerformance): string {
 
   const title = `${p.show.title}${p.show.subtitle ? ` — ${p.show.subtitle.replace(/\s*<br\s*\/?>\s*/gi, " · ")}` : ""}`;
   const summary = `SUMMARY:${icsEsc(title)}`;
-  const locParts = [p.theater.name, p.venue_room].filter((s): s is string => Boolean(s) && s !== p.theater.name);
+  const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
+  const locParts = [p.theater.name, sameVenue ? null : p.venue_room].filter((s): s is string => Boolean(s));
   const location = `LOCATION:${icsEsc([p.theater.name, ...locParts].join(", "))}`;
 
   const descLines: string[] = [];
@@ -170,7 +171,8 @@ function buildRss(performances: DayPerformance[]): string {
     const link = p.show.detail_url || p.ticket_url || `${APP_URL}/api/performance/${p.id}`;
     const title = p.show.title + (p.time ? ` — ${p.time} Uhr` : "");
     const descParts: string[] = [];
-    descParts.push(`${p.theater.name}${p.venue_room && p.venue_room !== p.theater.name ? `, ${p.venue_room}` : ""}`);
+    const sameRoom = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
+    descParts.push(`${p.theater.name}${p.venue_room && !sameRoom ? `, ${p.venue_room}` : ""}`);
     if (p.show.subtitle) descParts.push(p.show.subtitle.replace(/\s*<br\s*\/?>\s*/gi, " · "));
     if (p.status === "sold_out") descParts.push("Ausverkauft");
     else if (p.status === "cancelled") descParts.push("Entfällt");
