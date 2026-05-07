@@ -3,15 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && node scripts/inline-css.mjs",
-    "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && node scripts/inline-css.mjs",
-    "dev": "npm run css && wrangler dev",
-    "build": "npm run css",
-    "deploy": "npm run css && wrangler d1 migrations apply frankfurt-theaters-db --remote && wrangler deploy",
+    "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && bun scripts/inline-css.mjs",
+    "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && bun scripts/inline-css.mjs",
+    "dev": "bun css && wrangler dev",
+    "build": "bun css",
+    "deploy": "bun css && wrangler d1 migrations apply frankfurt-theaters-db --remote && wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply frankfurt-theaters-db --local",
     "db:migrate": "wrangler d1 migrations apply frankfurt-theaters-db --remote",
-    "lint": "../../node_modules/.bin/biome check src/",
-    "lint:fix": "../../node_modules/.bin/biome check --write src/",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
