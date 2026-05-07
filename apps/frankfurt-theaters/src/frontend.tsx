@@ -110,21 +110,28 @@ export function renderGrain(): string {
 }
 
 export function renderMasthead(args: {
+  /** Today's weekday + numeric in Europe/Berlin — a stable session anchor that
+   *  is never updated by HTMX swaps. Pass today's date here, not the URL date. */
   weekday: string;
   numeric: string;
   date: string;
-  isToday: boolean;
+  /** True iff the user is currently viewing today's programme. */
+  viewingToday: boolean;
   sublabel?: string;
 }): string {
   return `<header class="masthead" role="banner">
   <a class="masthead__brand" href="/" aria-label="Frankfurt Theater Startseite">
-    <h1 class="wordmark"><span>Frankfurt</span><span>Theater.</span></h1>
+    <h1 class="wordmark">
+      <span class="wordmark__line wordmark__line--1">Frankfurt</span>
+      <span class="wordmark__ins" aria-hidden="true">ins</span>
+      <span class="wordmark__line wordmark__line--2">Theater.</span>
+    </h1>
     <p class="tagline">${escapeHtml(args.sublabel ?? "Was heute auf den Frankfurter Bühnen läuft.")}</p>
   </a>
-  <div class="masthead__date">
+  <div class="masthead__date" aria-label="Heutiges Datum">
     <p class="masthead__weekday">${escapeHtml(args.weekday)}</p>
     <p class="masthead__numeric"><time datetime="${args.date}">${args.numeric}</time></p>
-    ${args.isToday ? '<p class="masthead__today">Heute</p>' : ""}
+    <p class="masthead__today ${args.viewingToday ? "" : "masthead__today--dim"}">Heute</p>
   </div>
 </header>`;
 }
@@ -490,11 +497,13 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
 
 export function renderPage(props: PageProps): string {
   const { date, today, performances, dateStrip } = props;
-  const isToday = date === today;
+  const viewingToday = date === today;
   const niceDate = fullGerman(date);
-  const dp = dateParts(date);
-  const headerWeekday = WEEKDAYS_LONG[dp.weekday];
-  const headerNumeric = `${pad2(dp.day)}.${pad2(dp.month + 1)}.${dp.year}`;
+  // Masthead always shows TODAY's date (a session-stable temporal anchor) —
+  // not the URL date, which is shown in the programme header below.
+  const td = dateParts(today);
+  const todayWeekday = WEEKDAYS_LONG[td.weekday];
+  const todayNumeric = `${pad2(td.day)}.${pad2(td.month + 1)}.${td.year}`;
 
   const head = renderHead({
     title: `Frankfurt Theater · ${niceDate}`,
@@ -510,7 +519,7 @@ ${head}
 </head>
 <body>
 ${renderGrain()}
-${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date, isToday })}
+${renderMasthead({ weekday: todayWeekday, numeric: todayNumeric, date: today, viewingToday })}
 ${renderDateStrip(dateStrip, date, today)}
 
 <main class="programme" id="programme">
@@ -536,16 +545,7 @@ export function renderClientScript(): string {
   return `<script>
   window.THEATER_LOC = ${locJson};
 
-  // Center the active date in the strip on load
-  (function(){
-    var strip = document.getElementById('datestrip');
-    if (!strip) return;
-    var active = strip.querySelector('.datetile--active');
-    if (active) {
-      var offset = active.offsetLeft - (strip.parentElement.clientWidth / 2) + (active.offsetWidth / 2);
-      strip.parentElement.scrollLeft = Math.max(0, offset);
-    }
-  })();
+  // Initial date-strip centering happens in syncDateStrip on load (further down).
 
   // Anfahrt — popover with RMV / Google Maps / Apple Maps deep-links
   (function(){
@@ -824,8 +824,12 @@ export function renderClientScript(): string {
   function highlightShareTarget(){
     var key = new URL(location.href).searchParams.get('item')
       || (location.hash && location.hash.replace(/^#/, ''));
-    // Clear any previously persistent target so we never have two highlighted.
-    document.querySelectorAll('.share-target').forEach(function(el){ el.classList.remove('share-target'); });
+    // Clear both classes from any previously highlighted row so only one
+    // target is ever decorated and the pulse re-runs on a fresh element.
+    document.querySelectorAll('.share-target, .share-highlight').forEach(function(el){
+      el.classList.remove('share-target');
+      el.classList.remove('share-highlight');
+    });
     if (!key) return;
     var el = document.querySelector('[data-share-key="' + key.replace(/"/g, '\\\\"') + '"]')
       || document.getElementById(key);
@@ -833,10 +837,10 @@ export function renderClientScript(): string {
     requestAnimationFrame(function(){
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.classList.add('share-target');
-      el.classList.remove('share-highlight');
-      void el.offsetWidth; // force reflow so the entry pulse re-runs
+      void el.offsetWidth; // force reflow so the entry pulse re-runs cleanly
       el.classList.add('share-highlight');
-      setTimeout(function(){ el.classList.remove('share-highlight'); }, 2600);
+      // No setTimeout removal — animation-fill-mode: forwards holds the end
+      // state, so the persistent .share-target bar stays visible without flicker.
     });
   }
   // Initial load + manual hash change. Slight delay on first paint so the
@@ -847,7 +851,22 @@ export function renderClientScript(): string {
   // Date strip — keep the active tile in sync with the URL across HTMX
   // swaps and browser back/forward. The strip lives outside the swap target,
   // so we have to move the .datetile--active class manually.
-  function syncDateStrip(){
+  function centerActiveTile(smooth){
+    var active = document.querySelector('#datestrip .datetile--active');
+    if (!active) return;
+    if (typeof active.scrollIntoView === 'function') {
+      try {
+        active.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest', inline: 'center' });
+        return;
+      } catch(e){}
+    }
+    // Fallback for browsers that don't honour the options object
+    var strip = active.parentElement;
+    if (!strip) return;
+    var offset = active.offsetLeft - (strip.parentElement.clientWidth / 2) + (active.offsetWidth / 2);
+    strip.parentElement.scrollLeft = Math.max(0, offset);
+  }
+  function syncDateStrip(smooth){
     var date = new URL(location.href).searchParams.get('date');
     if (!date) return;
     var strip = document.getElementById('datestrip');
@@ -857,6 +876,7 @@ export function renderClientScript(): string {
       t.classList.toggle('datetile--active', match);
       t.setAttribute('aria-current', match ? 'true' : 'false');
     });
+    centerActiveTile(smooth);
   }
   // Optimistic update on click — runs before HTMX fires so the tile feels snappy.
   document.addEventListener('click', function(e){
@@ -870,22 +890,28 @@ export function renderClientScript(): string {
     });
     tile.classList.add('datetile--active');
     tile.setAttribute('aria-current', 'true');
+    centerActiveTile(true);
   });
-  window.addEventListener('popstate', syncDateStrip);
+  window.addEventListener('popstate', function(){ syncDateStrip(true); });
 
   // Re-bind dynamic UI after HTMX swaps the programme content
   document.body.addEventListener('htmx:afterSwap', function(e){
     if (!e.detail || !e.detail.target) return;
     if (e.detail.target.id !== 'programme-content') return;
     initSearch();
-    syncDateStrip();
+    syncDateStrip(true);
     setTimeout(highlightShareTarget, 80);
     // Re-bind transit popover for newly rendered rows
     if (typeof window.__rebindTransit === 'function') window.__rebindTransit();
   });
 
-  if (document.readyState !== 'loading') initSearch();
-  else document.addEventListener('DOMContentLoaded', initSearch);
+  function onReady(){
+    initSearch();
+    // Center the initial active tile (instant scroll — no animation on first paint)
+    syncDateStrip(false);
+  }
+  if (document.readyState !== 'loading') onReady();
+  else document.addEventListener('DOMContentLoaded', onReady);
 
   // Theme toggle (light/dark, persisted to localStorage)
   (function(){

@@ -100,12 +100,28 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-style: italic;
   animation: rise 900ms cubic-bezier(0.2, 0.6, 0.2, 1) both;
 }
-.wordmark span:nth-child(1) { color: var(--ink); font-style: italic; }
-.wordmark span:nth-child(2) {
+.wordmark__line--1 { color: var(--ink); font-style: italic; }
+.wordmark__line--2 {
   color: var(--accent);
   font-style: normal;
   font-variation-settings: 'opsz' 144, 'wght' 700, 'SOFT' 60;
   margin-left: 0.07em;
+}
+/* Tiny "ins" wedged between the two big lines so the wordmark reads
+   "Frankfurt ins Theater." — matching the domain frankfurt.ins.theater
+   and the German phrase "ins Theater" (going to the theater). */
+.wordmark__ins {
+  font-family: var(--serif);
+  font-variation-settings: 'opsz' 24, 'wght' 380, 'SOFT' 80, 'WONK' 1;
+  font-style: italic;
+  font-size: 0.32em;
+  color: var(--accent);
+  letter-spacing: 0;
+  margin: 0.08em 0 0.05em 1.4em;
+  line-height: 1;
+  align-self: flex-start;
+  transform: rotate(-3deg);
+  user-select: none;
 }
 
 .tagline {
@@ -140,6 +156,15 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: 999px;
   font-size: 0.7rem;
   transform: rotate(-2deg);
+  transition: color 200ms ease, border-color 200ms ease, opacity 200ms ease;
+}
+/* When the user is browsing a different day, dim the "Heute" pill so it's
+   clear the masthead date is today's actual date (a session anchor) and
+   not the date currently being viewed. */
+.masthead__today--dim {
+  color: var(--ink-quiet);
+  border-color: var(--ink-faint);
+  opacity: 0.7;
 }
 
 /* ────────────────  Date strip  ──────────────── */
@@ -1343,7 +1368,9 @@ textarea:focus-visible,
   box-shadow: inset 3px 0 0 var(--accent);
 }
 .share-highlight {
-  animation: share-highlight 2.6s ease-out;
+  /* `forwards` holds the end state so removing the class later doesn't
+     cause a one-frame revert flash mid-fade. */
+  animation: share-highlight 2.6s ease-out forwards;
 }
 @keyframes share-highlight {
   0%   { background: var(--accent-soft); }
