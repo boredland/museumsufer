@@ -15,7 +15,8 @@ export interface TheaterConfig {
     | "komoedie"
     | "mousonturm"
     | "neues-theater-hoechst"
-    | "volksbuehne";
+    | "volksbuehne"
+    | "stalburg";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -88,5 +89,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://volksbuehne.net",
     ticketing_provider: "reservix",
     scraper: "volksbuehne",
+  },
+  {
+    slug: "stalburg-theater",
+    name: "Stalburg Theater",
+    address: "Glauburgstraße 80, 60318 Frankfurt am Main",
+    lat: 50.1294,
+    lon: 8.6885,
+    website_url: "https://stalburg.de",
+    ticketing_provider: "reservix",
+    scraper: "stalburg",
   },
 ];
