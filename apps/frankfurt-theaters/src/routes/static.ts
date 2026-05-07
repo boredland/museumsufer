@@ -70,7 +70,7 @@ GET /performance/{id}/feed.ics — single performance
 - Content (show titles, subtitles) is in German
 - Dates use ISO 8601 (YYYY-MM-DD); times are 24h HH:MM in Europe/Berlin
 - Performances list horizon: from today to ~60 days out
-- Data is refreshed daily at 5am UTC
+- Data refreshes hourly between 09:00 and 21:00 Europe/Berlin via a GitHub Action that regenerates the bundled scrape data and redeploys the worker
 - Sold-out performances expose status="sold_out" with no price; cancelled performances expose status="cancelled"
 `;
 

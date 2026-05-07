@@ -1,7 +1,6 @@
 import { buildUtm, dateOffset, icsEsc, slugify, todayIso, utcStamp, xmlEsc } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformanceById, getPerformancesInRange, getTheaterBySlug } from "../db";
-import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
 
@@ -22,7 +21,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.get("/feed.ics", async (c) => {
   const from = todayIso();
   const to = dateOffset(14);
-  const performances = await getPerformancesInRange(c.env.DB, from, to);
+  const performances = await getPerformancesInRange(from, to);
   return c.body(buildIcs(performances, "Frankfurt Theater"), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
@@ -34,7 +33,7 @@ app.get("/feed.ics", async (c) => {
 app.get("/feed.xml", async (c) => {
   const from = todayIso();
   const to = dateOffset(14);
-  const performances = await getPerformancesInRange(c.env.DB, from, to);
+  const performances = await getPerformancesInRange(from, to);
   return c.body(buildRss(performances), {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
@@ -48,13 +47,10 @@ app.get("/rss.xml", (c) => c.redirect("/feed.xml", 301));
 app.get("/theater/:slug/feed.ics", async (c) => {
   const slug = c.req.param("slug");
   if (!slug) return c.notFound();
-  const theater = await getTheaterBySlug(c.env.DB, slug);
-  if (!theater) {
-    const known = THEATERS.find((t) => t.slug === slug);
-    if (!known) return c.notFound();
-  }
-  const performances = await getPerformancesInRange(c.env.DB, todayIso(), dateOffset(60), slug);
-  const name = theater?.name ?? THEATERS.find((t) => t.slug === slug)?.name ?? slug;
+  const theater = await getTheaterBySlug(slug);
+  if (!theater) return c.notFound();
+  const performances = await getPerformancesInRange(todayIso(), dateOffset(60), slug);
+  const name = theater.name;
   return c.body(buildIcs(performances, name), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
@@ -68,7 +64,7 @@ app.get("/performance/:id/feed.ics", async (c) => {
   if (!idParam) return c.notFound();
   const id = parseInt(idParam, 10);
   if (!Number.isFinite(id)) return c.notFound();
-  const perf = await getPerformanceById(c.env.DB, id);
+  const perf = await getPerformanceById(id);
   if (!perf) return c.notFound();
   return c.body(buildIcs([perf], `${perf.theater.name} – ${perf.show.title}`), {
     headers: {

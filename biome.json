@@ -6,7 +6,8 @@
       "apps/**/src/**/*.ts",
       "apps/**/src/**/*.tsx",
       "apps/**/scripts/**/*.ts",
-      "packages/**/src/**/*.ts"
+      "packages/**/src/**/*.ts",
+      "!apps/frankfurt-theaters/src/scrape-data.ts"
     ]
   }
 }
