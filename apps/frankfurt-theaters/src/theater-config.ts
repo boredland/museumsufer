@@ -8,7 +8,7 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie" | "mousonturm";
+  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie" | "mousonturm" | "neues-theater-hoechst";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -61,5 +61,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.mousonturm.de",
     ticketing_provider: "reservix",
     scraper: "mousonturm",
+  },
+  {
+    slug: "neues-theater-hoechst",
+    name: "Neues Theater Höchst",
+    address: "Emmerich-Josef-Straße 46a, 65929 Frankfurt am Main",
+    lat: 50.1014,
+    lon: 8.5443,
+    website_url: "https://neues-theater.de",
+    ticketing_provider: "custom",
+    scraper: "neues-theater-hoechst",
   },
 ];
