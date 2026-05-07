@@ -1,7 +1,9 @@
 import { persistScrapeResult, upsertTheater } from "./db";
+import { scrapeAlteBruecke } from "./scrapers/alte-bruecke";
 import { scrapeDfdc } from "./scrapers/dfdc";
 import { scrapeDramatischeBuehne } from "./scrapers/dramatische-buehne";
 import { scrapeEnglishTheatre } from "./scrapers/english-theatre";
+import { scrapeGalli } from "./scrapers/galli";
 import { scrapeGallusTheater } from "./scrapers/gallus";
 import { scrapeInternationalesTheater } from "./scrapers/internationales-theater";
 import { scrapeKellertheater } from "./scrapers/kellertheater";
@@ -9,6 +11,7 @@ import { scrapeKomoedieFrankfurt } from "./scrapers/komoedie";
 import { scrapeMousonturm } from "./scrapers/mousonturm";
 import { scrapeNeuesTheaterHoechst } from "./scrapers/neues-theater-hoechst";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
+import { scrapePapageno } from "./scrapers/papageno";
 import { scrapeSchauspielFrankfurt } from "./scrapers/schauspiel";
 import { scrapeSchmiere } from "./scrapers/schmiere";
 import { scrapeStalburg } from "./scrapers/stalburg";
@@ -88,5 +91,11 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeTheaterhaus();
     case "internationales-theater":
       return scrapeInternationalesTheater();
+    case "papageno":
+      return scrapePapageno();
+    case "galli":
+      return scrapeGalli();
+    case "alte-bruecke":
+      return scrapeAlteBruecke();
   }
 }

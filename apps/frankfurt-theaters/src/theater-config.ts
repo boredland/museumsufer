@@ -25,7 +25,10 @@ export interface TheaterConfig {
     | "kellertheater"
     | "gallus"
     | "theaterhaus"
-    | "internationales-theater";
+    | "internationales-theater"
+    | "papageno"
+    | "galli"
+    | "alte-bruecke";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -198,5 +201,35 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.internationales-theater.de",
     ticketing_provider: "custom",
     scraper: "internationales-theater",
+  },
+  {
+    slug: "papageno-musiktheater",
+    name: "Papageno Musiktheater",
+    address: "Palmengartenstraße 11, 60325 Frankfurt am Main",
+    lat: 50.1228,
+    lon: 8.6533,
+    website_url: "https://www.papageno-theater.de",
+    ticketing_provider: "frankfurt_ticket",
+    scraper: "papageno",
+  },
+  {
+    slug: "galli-theater",
+    name: "Galli Theater Frankfurt",
+    address: "Hasengasse 2, 60311 Frankfurt am Main",
+    lat: 50.1116,
+    lon: 8.6841,
+    website_url: "https://www.galli-frankfurt.de",
+    ticketing_provider: "custom",
+    scraper: "galli",
+  },
+  {
+    slug: "theater-alte-bruecke",
+    name: "Theater Alte Brücke",
+    address: "Alte Brücke 4, 60594 Frankfurt am Main",
+    lat: 50.1078,
+    lon: 8.6874,
+    website_url: "https://www.theater-alte-bruecke.de",
+    ticketing_provider: "reservix",
+    scraper: "alte-bruecke",
   },
 ];
