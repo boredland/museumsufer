@@ -776,11 +776,41 @@ export function renderClientScript(): string {
     });
   }
 
+  // Date strip — keep the active tile in sync with the URL across HTMX
+  // swaps and browser back/forward. The strip lives outside the swap target,
+  // so we have to move the .datetile--active class manually.
+  function syncDateStrip(){
+    var date = new URL(location.href).searchParams.get('date');
+    if (!date) return;
+    var strip = document.getElementById('datestrip');
+    if (!strip) return;
+    strip.querySelectorAll('.datetile').forEach(function(t){
+      var match = (t.getAttribute('href') || '').indexOf('date=' + date) > -1;
+      t.classList.toggle('datetile--active', match);
+      t.setAttribute('aria-current', match ? 'true' : 'false');
+    });
+  }
+  // Optimistic update on click — runs before HTMX fires so the tile feels snappy.
+  document.addEventListener('click', function(e){
+    var tile = e.target.closest('.datetile');
+    if (!tile) return;
+    var strip = tile.parentElement;
+    if (!strip) return;
+    strip.querySelectorAll('.datetile--active').forEach(function(el){
+      el.classList.remove('datetile--active');
+      el.setAttribute('aria-current', 'false');
+    });
+    tile.classList.add('datetile--active');
+    tile.setAttribute('aria-current', 'true');
+  });
+  window.addEventListener('popstate', syncDateStrip);
+
   // Re-bind dynamic UI after HTMX swaps the programme content
   document.body.addEventListener('htmx:afterSwap', function(e){
     if (!e.detail || !e.detail.target) return;
     if (e.detail.target.id !== 'programme-content') return;
     initSearch();
+    syncDateStrip();
     // Re-bind transit popover for newly rendered rows
     if (typeof window.__rebindTransit === 'function') window.__rebindTransit();
   });
