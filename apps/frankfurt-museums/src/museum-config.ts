@@ -192,6 +192,9 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1143,
     lng: 8.6922,
     rmvStopLid: "A=1@O=Frankfurt (Main) Allerheiligentor@X=8693666@Y=50113316@U=80@L=3000523@",
+    // Events arrive via the parent's `juedisches` API + locationAlt-based slug override
+    // (fetchJuedisches in api-scrapers.ts), so don't double-scrape via the AI fallback.
+    skipEvents: true,
     exhibitionUrl: "https://www.juedischesmuseum.de/besuch/museum-judengasse/",
   },
   "junges-museum-frankfurt": {
