@@ -835,3 +835,59 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (min-width: 1024px) {
   .nav-popover__link--rmv-app { display: none; }
 }
+
+/* ────────────────  Legal / imprint page  ──────────────── */
+
+.masthead--legal { padding-bottom: 2rem; }
+
+.legal {
+  max-width: 42rem;
+  margin: 1rem auto 4rem;
+  padding: 0 var(--gut);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.legal__back {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 2rem;
+}
+.legal__back a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 0.05rem;
+  transition: color 200ms ease, border-color 200ms ease;
+}
+.legal__back a:hover { color: var(--accent); border-color: var(--accent); }
+
+.legal__title {
+  font-family: var(--serif);
+  font-variation-settings: 'opsz' 144, 'wght' 700, 'SOFT' 100;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1;
+  margin: 0 0 2rem;
+  letter-spacing: -0.015em;
+}
+
+.legal__block { margin: 0 0 1.75rem; }
+.legal__block p { margin: 0; }
+.legal__kicker {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 0.5rem;
+}
+.legal a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 1px;
+  transition: color 200ms ease;
+}
+.legal a:hover { color: var(--accent); }
