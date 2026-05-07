@@ -17,7 +17,8 @@ export type EventApiType =
   | "archaeologisches"
   | "fritz-bauer-wollheim"
   | "experiminta"
-  | "caricatura";
+  | "caricatura"
+  | "weltkulturen";
 
 export interface ProxyConfig {
   url: string;
@@ -147,11 +148,15 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.7643,
     rmvStopLid: "A=1@O=Offenbach (Main)-Senefelderquartier Friedensstraße@X=8766622@Y=50097864@U=80@L=3008612@",
     exhibitionUrl: "https://www.offenbach.de/microsite/haus_der_stadtgeschichte/ausstellungen/index.php",
+    // Offenbach city microsite, no event listing.
+    skipEvents: true,
   },
   "hindemith-kabinett": {
     lat: 50.1059,
     lng: 8.6969,
     rmvStopLid: "A=1@O=Frankfurt (Main) Zum Apothekerhof@X=8697953@Y=50105271@U=80@L=3001994@",
+    // Tiny venue inside the Kuhhirtenturm, no online events presence.
+    skipEvents: true,
   },
   "historisches-museum-frankfurt": {
     abbreviation: "HMF",
@@ -212,6 +217,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.77,
     rmvStopLid: "A=1@O=Offenbach (Main)-Mathildenviertel Tempelseestraße@X=8771234@Y=50101019@U=80@L=3002661@",
     exhibitionUrl: "https://www.offenbach.de/microsite/klingspor_museum/ausstellungen/index.php",
+    // Offenbach city microsite, no event listing path.
+    skipEvents: true,
   },
   "liebieghaus-skulpturensammlung": {
     abbreviation: "Liebieghaus",
@@ -313,6 +320,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.111,
     lng: 8.6846,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
+    // No standalone website with an event listing.
+    skipEvents: true,
   },
   "struwwelpeter-museum": {
     lat: 50.1112,
@@ -334,6 +343,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6779,
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
     exhibitionUrl: "https://weltkulturenmuseum.de/de/ausstellungen/",
+    eventApi: { type: "weltkulturen", endpoint: "https://weltkulturenmuseum.de/de/veranstaltungen" },
   },
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
