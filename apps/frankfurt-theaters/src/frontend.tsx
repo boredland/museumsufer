@@ -220,6 +220,10 @@ function renderAction(p: DayPerformance): string {
 
 function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
+  const reportSubject = encodeURIComponent(`Fehler: ${p.show.title} am ${p.date}`);
+  const reportBody = encodeURIComponent(
+    `Bühne: ${p.theater.name}\nVorstellung: ${p.show.title}${p.time ? ` um ${p.time} Uhr` : ""}\nDatum: ${p.date}\nLink: ${APP_URL}/api/performance/${p.id}\n\nWas stimmt nicht?\n`,
+  );
   return `<span class="nav-wrap">
     <button type="button" class="transit-btn" data-theater="${p.theater.slug}" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
       <span class="transit-btn__label">Anfahrt</span>
@@ -239,6 +243,9 @@ function renderTransit(p: DayPerformance): string {
       </a>
       <a role="menuitem" class="nav-popover__link" data-kind="apple" target="_blank" rel="noopener">
         <span class="nav-popover__icon" aria-hidden="true"></span> Apple Maps
+      </a>
+      <a role="menuitem" class="nav-popover__link nav-popover__link--report" href="mailto:feedback@ins.theater?subject=${reportSubject}&body=${reportBody}">
+        <span class="nav-popover__icon" aria-hidden="true">!</span> Fehler melden
       </a>
     </div>
   </span>`;
@@ -265,6 +272,16 @@ export function renderFooter(): string {
   <div>
     <p class="footer__rule"></p>
     <p>Eine Übersicht des Spielplans an Frankfurts Bühnen.</p>
+    <p class="footer__actions">
+      <button type="button" class="footer__action" data-action="share" aria-label="Diese Seite teilen">
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.5 5.5a2 2 0 1 0-1.7-3M4.5 10.5a2 2 0 1 0 0-3M11.5 14.5a2 2 0 1 0-1.7-3M5.6 8.4l4.8-2.8M5.6 9.6l4.8 2.8" stroke-linecap="round"/></svg>
+        <span>Teilen</span>
+      </button>
+      <a class="footer__action" href="mailto:feedback@ins.theater?subject=Feedback%20zu%20frankfurt.ins.theater&body=URL%3A%20${encodeURIComponent(APP_URL)}%0A%0A">
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
+        <span>Problem melden</span>
+      </a>
+    </p>
     <p class="footer__links">
       <a href="/api/docs">API</a>
       <span class="footer__sep">·</span>
@@ -279,6 +296,7 @@ export function renderFooter(): string {
         GitHub
       </a>
     </p>
+    <span class="footer__toast" role="status" aria-live="polite"></span>
   </div>
 </footer>`;
 }
@@ -474,6 +492,47 @@ export function renderClientScript(): string {
           fetchTransit(p.lat, p.lng, function(){ populatePopover(slug); });
         });
       });
+    });
+  })();
+
+  // Share — Web Share API on mobile, clipboard fallback on desktop
+  (function(){
+    var btn = document.querySelector('.footer__action[data-action="share"]');
+    if (!btn) return;
+    var toast = document.querySelector('.footer__toast');
+
+    function showToast(msg){
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.classList.add('footer__toast--visible');
+      setTimeout(function(){ toast.classList.remove('footer__toast--visible'); }, 2400);
+    }
+
+    btn.addEventListener('click', function(){
+      var url = location.href;
+      var title = document.title;
+      var prompt = 'Was läuft heute auf Frankfurter Bühnen? ' + url;
+      if (navigator.share) {
+        navigator.share({ title: title, text: prompt, url: url }).catch(function(){});
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(function(){
+          showToast('Link für KI-Suche kopiert');
+        }).catch(function(){
+          showToast('Kopieren fehlgeschlagen');
+        });
+        return;
+      }
+      // Last-resort fallback: select text in a hidden textarea
+      var ta = document.createElement('textarea');
+      ta.value = prompt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('Link kopiert'); } catch(e){}
+      document.body.removeChild(ta);
     });
   })();
 

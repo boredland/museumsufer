@@ -891,3 +891,68 @@ button, a { -webkit-tap-highlight-color: transparent; }
   transition: color 200ms ease;
 }
 .legal a:hover { color: var(--accent); }
+
+/* ────────────────  Footer actions (share, report)  ──────────────── */
+
+.footer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 1.25rem 0 0.5rem;
+}
+.footer__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.footer__action:hover,
+.footer__action:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.footer__toast {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 220ms ease;
+  pointer-events: none;
+}
+.footer__toast--visible { opacity: 1; }
+
+/* Report variant in nav popover */
+.nav-popover__link--report {
+  margin-top: 0.25rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-quiet);
+  font-size: 0.75rem;
+}
+.nav-popover__link--report:hover { color: var(--accent); background: transparent; }
+.nav-popover__link--report .nav-popover__icon {
+  border-color: var(--ink-quiet);
+  color: var(--ink-quiet);
+}
+.nav-popover__link--report:hover .nav-popover__icon {
+  border-color: var(--accent);
+  color: var(--accent);
+}
