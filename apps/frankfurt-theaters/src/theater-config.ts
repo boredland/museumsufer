@@ -8,7 +8,7 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie";
+  scraper: "schauspiel" | "oper" | "english-theatre" | "komoedie" | "mousonturm";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -51,5 +51,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://diekomoedie.de",
     ticketing_provider: "custom",
     scraper: "komoedie",
+  },
+  {
+    slug: "mousonturm",
+    name: "Künstlerhaus Mousonturm",
+    address: "Waldschmidtstraße 4, 60316 Frankfurt am Main",
+    lat: 50.1183,
+    lon: 8.7019,
+    website_url: "https://www.mousonturm.de",
+    ticketing_provider: "reservix",
+    scraper: "mousonturm",
   },
 ];
