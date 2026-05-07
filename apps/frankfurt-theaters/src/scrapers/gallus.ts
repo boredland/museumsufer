@@ -49,15 +49,33 @@ export function parseGallusHtml(html: string): ScrapeResult {
     if (date < today) continue;
 
     const time = nullIfMidnight(`${m[5].padStart(2, "0")}:${m[6]}`);
-    const artist = stripHtml(m[7]);
-    const titleRaw = stripHtml(m[8]);
-    const title = titleRaw || artist;
-    if (!title) continue;
-    const subtitle = artist && artist !== title ? artist : null;
+    const bold = stripHtml(m[7]);
+    const quoted = stripHtml(m[8]);
     const extraLabel = m[9] ? stripHtml(m[9]) : null;
     const ticketHref = m[10] ? decodeEntities(m[10]) : null;
 
-    const slug = `${slugify(artist || title)}-${slugify(title)}`.replace(/^-+|-+$/g, "");
+    // Standard row: <b>Artist</b> «Show Title» — quoted text wins.
+    // Festival/series row (Visionale, …): the <i> tag echoes the bold
+    // name, signalling that the bold IS the show title and the quoted
+    // text is just an episode/category label. Without this swap, every
+    // Visionale row renders as e.g. "Jugendliche 12-15 Jahre" with
+    // "Visionale" relegated to the byline.
+    const isSeriesRow = !!extraLabel && !!bold && extraLabel.toLowerCase().includes(bold.toLowerCase());
+    let title: string;
+    let subtitle: string | null;
+    if (isSeriesRow) {
+      title = bold;
+      subtitle = quoted || null;
+    } else {
+      title = quoted || bold;
+      subtitle = bold && bold !== title ? bold : null;
+    }
+    if (!title) continue;
+
+    // Slug always combines bold + quoted so series rows (Visionale →
+    // "Jugendliche 12-15 Jahre" / "Kinder bis 11 Jahre" / …) stay as
+    // distinct shows in the DB instead of collapsing into one.
+    const slug = `${slugify(bold)}-${slugify(quoted)}`.replace(/^-+|-+$/g, "");
     const dedup = `${slug}|${date}|${time ?? ""}`;
     if (seen.has(dedup)) continue;
     seen.add(dedup);
