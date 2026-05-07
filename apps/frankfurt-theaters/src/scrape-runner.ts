@@ -1,6 +1,7 @@
 import { persistScrapeResult, upsertTheater } from "./db";
 import { scrapeEnglishTheatre } from "./scrapers/english-theatre";
 import { scrapeKomoedieFrankfurt } from "./scrapers/komoedie";
+import { scrapeMousonturm } from "./scrapers/mousonturm";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
 import { scrapeSchauspielFrankfurt } from "./scrapers/schauspiel";
 import { THEATERS, type TheaterConfig } from "./theater-config";
@@ -49,5 +50,7 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeEnglishTheatre();
     case "komoedie":
       return scrapeKomoedieFrankfurt();
+    case "mousonturm":
+      return scrapeMousonturm();
   }
 }
