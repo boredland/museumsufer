@@ -1,4 +1,4 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { dateOffset, GERMAN_WEEKDAYS, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformancesInRange } from "../db";
 import {
@@ -100,7 +100,7 @@ app.get("/theater/:slug", async (c) => {
   });
 
   const dpToday = new Date(`${today}T12:00:00Z`);
-  const headerWeekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][dpToday.getUTCDay()];
+  const headerWeekday = GERMAN_WEEKDAYS[dpToday.getUTCDay()];
   const headerNumeric = `${pad2(dpToday.getUTCDate())}.${pad2(dpToday.getUTCMonth() + 1)}.${dpToday.getUTCFullYear()}`;
 
   return c.html(`<!doctype html>
@@ -110,7 +110,7 @@ ${head}
 </head>
 <body>
 ${renderGrain()}
-${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date: today, isToday: true, sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
+${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date: today, viewingToday: true, sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
 
 <main class="programme programme--theater">
   <header class="theater-hero">
