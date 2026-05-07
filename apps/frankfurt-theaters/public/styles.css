@@ -738,3 +738,100 @@ button, a { -webkit-tap-highlight-color: transparent; }
   transition: color 200ms ease, border-color 200ms ease;
 }
 .perf__venue a:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ────────────────  Navigation popover  ──────────────── */
+
+.nav-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-popover {
+  /* Native HTML popover; positioned by browser. We just style it. */
+  position: fixed;
+  inset: unset;
+  margin: 0;
+  padding: 0.6rem 0;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px -12px rgba(15, 10, 5, 0.35), 0 4px 8px -4px rgba(15, 10, 5, 0.2);
+  min-width: 14rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+.nav-popover::backdrop { background: rgba(15, 10, 5, 0.18); }
+/* Center the popover near the trigger using anchor positioning when supported */
+@supports (anchor-name: --x) {
+  .transit-btn { anchor-name: --transit-anchor; }
+  .nav-popover {
+    position-anchor: --transit-anchor;
+    top: anchor(bottom);
+    right: anchor(right);
+    margin-top: 0.4rem;
+  }
+}
+/* Browser fallback: the popover floats centered on screen. Acceptable for now. */
+
+.nav-popover__title {
+  font-family: var(--serif);
+  font-variation-settings: 'opsz' 24, 'wght' 600, 'SOFT' 100;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 0 0 0.1rem;
+  padding: 0 1rem;
+  color: var(--ink);
+}
+
+.nav-popover__transit {
+  margin: 0 0 0.55rem;
+  padding: 0 1rem 0.55rem;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+}
+.nav-popover__transit--ready { color: var(--accent); }
+.nav-popover__minutes::before { content: ""; }
+
+.nav-popover__link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  transition: background 160ms ease, color 160ms ease;
+}
+.nav-popover__link:hover,
+.nav-popover__link:focus-visible {
+  background: var(--accent-soft);
+  color: var(--accent);
+  outline: none;
+}
+.nav-popover__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+.nav-popover__link:hover .nav-popover__icon { border-color: var(--accent); color: var(--accent); }
+
+/* Hide RMV App on desktop (only useful on mobile where the deep link can launch the app) */
+@media (min-width: 1024px) {
+  .nav-popover__link--rmv-app { display: none; }
+}

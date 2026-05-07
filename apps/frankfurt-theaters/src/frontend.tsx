@@ -1,4 +1,5 @@
 import type { DateWithCount } from "./db";
+import { THEATERS } from "./theater-config";
 import type { Performance, Show, Theater } from "./types";
 
 export type DayPerformance = Performance & {
@@ -218,10 +219,29 @@ function renderAction(p: DayPerformance): string {
 }
 
 function renderTransit(p: DayPerformance): string {
-  return `<button type="button" class="transit-btn" data-theater="${p.theater.slug}" aria-label="Anfahrt mit ÖPNV anzeigen">
-    <span class="transit-btn__label">Anfahrt</span>
-    <span class="transit-btn__value" aria-live="polite"></span>
-  </button>`;
+  const popId = `nav-${p.id}`;
+  return `<span class="nav-wrap">
+    <button type="button" class="transit-btn" data-theater="${p.theater.slug}" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
+      <span class="transit-btn__label">Anfahrt</span>
+      <span class="transit-btn__value" aria-live="polite"></span>
+    </button>
+    <div id="${popId}" popover="auto" role="menu" class="nav-popover" data-theater="${p.theater.slug}">
+      <p class="nav-popover__title">${escapeHtml(p.theater.name)}</p>
+      <p class="nav-popover__transit"><span class="nav-popover__minutes" aria-live="polite">…</span></p>
+      <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-app" data-kind="rmv-app" target="_blank" rel="noopener">
+        <span class="nav-popover__icon" aria-hidden="true">▶</span> RMV App
+      </a>
+      <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-web" data-kind="rmv-web" target="_blank" rel="noopener">
+        <span class="nav-popover__icon" aria-hidden="true">◐</span> RMV Fahrplan
+      </a>
+      <a role="menuitem" class="nav-popover__link" data-kind="google" target="_blank" rel="noopener">
+        <span class="nav-popover__icon" aria-hidden="true">G</span> Google Maps
+      </a>
+      <a role="menuitem" class="nav-popover__link" data-kind="apple" target="_blank" rel="noopener">
+        <span class="nav-popover__icon" aria-hidden="true"></span> Apple Maps
+      </a>
+    </div>
+  </span>`;
 }
 
 function formatPriceRange(min: number | null, max: number | null): string | null {
@@ -315,7 +335,15 @@ ${renderClientScript()}
 }
 
 export function renderClientScript(): string {
+  const theaterLoc: Record<string, { name: string; lat: number; lng: number }> = {};
+  for (const t of THEATERS) {
+    theaterLoc[t.slug] = { name: t.name, lat: t.lat, lng: t.lon };
+  }
+  const locJson = JSON.stringify(theaterLoc).replace(/</g, "\\u003c");
+
   return `<script>
+  window.THEATER_LOC = ${locJson};
+
   // Center the active date in the strip on load
   (function(){
     var strip = document.getElementById('datestrip');
@@ -327,7 +355,7 @@ export function renderClientScript(): string {
     }
   })();
 
-  // Anfahrt — lazy ÖPNV transit time per theater
+  // Anfahrt — popover with RMV / Google Maps / Apple Maps + lazy ÖPNV minutes
   (function(){
     var btns = document.querySelectorAll('.transit-btn');
     if (!btns.length) return;
@@ -336,35 +364,79 @@ export function renderClientScript(): string {
 
     function snap(n){ return Math.round(n*500)/500; }
 
-    function fmt(min){
+    function fmtMin(min){
       if (min == null) return null;
-      if (min < 60) return min + ' min';
+      if (min < 60) return min + ' min mit ÖPNV';
       var h = Math.floor(min/60), m = min%60;
-      return h + 'h' + (m ? ' ' + m + 'm' : '');
+      return h + 'h' + (m ? ' ' + m + 'm' : '') + ' mit ÖPNV';
     }
 
-    function paint(){
+    function buildNavUrls(slug){
+      var t = window.THEATER_LOC[slug];
+      if (!t) return null;
+      var x = Math.round(t.lng * 1e6);
+      var y = Math.round(t.lat * 1e6);
+      var zid = 'A=2@O=' + t.name + '@X=' + x + '@Y=' + y + '@';
+      var enc = encodeURIComponent(zid);
+      return {
+        rmvApp: 'https://www.rmv.de/go/?ZID=' + enc,
+        rmvWeb: 'https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=' + enc,
+        google: 'https://www.google.com/maps/dir/?api=1&destination=' + t.lat + ',' + t.lng + '&travelmode=transit',
+        apple: 'https://maps.apple.com/?daddr=' + t.lat + ',' + t.lng + '&dirflg=r'
+      };
+    }
+
+    function populatePopover(slug){
+      var pop = document.querySelector('.nav-popover[data-theater="' + slug + '"]');
+      if (!pop) return;
+      var urls = buildNavUrls(slug);
+      if (!urls) return;
+      pop.querySelectorAll('a[data-kind]').forEach(function(a){
+        var kind = a.getAttribute('data-kind');
+        if (kind === 'rmv-app') a.href = urls.rmvApp;
+        else if (kind === 'rmv-web') a.href = urls.rmvWeb;
+        else if (kind === 'google') a.href = urls.google;
+        else if (kind === 'apple') a.href = urls.apple;
+      });
+      var minutesEl = pop.querySelector('.nav-popover__minutes');
+      var v = transit && transit[slug];
+      if (v != null) {
+        minutesEl.textContent = fmtMin(v);
+        minutesEl.parentElement.classList.add('nav-popover__transit--ready');
+      }
+    }
+
+    function paintAllButtons(){
       btns.forEach(function(b){
         var slug = b.getAttribute('data-theater');
         var v = transit && transit[slug];
         var label = b.querySelector('.transit-btn__label');
         var value = b.querySelector('.transit-btn__value');
-        if (v != null) {
+        if (v != null && label && value) {
           label.textContent = 'ÖPNV';
-          value.textContent = fmt(v);
+          value.textContent = (v < 60) ? (v + ' min') : Math.floor(v/60) + 'h' + (v%60 ? ' ' + (v%60) + 'm' : '');
           b.classList.add('transit-btn--ready');
+        }
+        // Also update any open popover for this slug
+        var pop = document.getElementById(b.getAttribute('data-popover-target'));
+        if (pop) {
+          var minutesEl = pop.querySelector('.nav-popover__minutes');
+          if (minutesEl && v != null) {
+            minutesEl.textContent = fmtMin(v);
+            minutesEl.parentElement.classList.add('nav-popover__transit--ready');
+          }
         }
       });
     }
 
-    function fetchTransit(lat, lng){
+    function fetchTransit(lat, lng, then){
       if (loading) return;
       loading = true;
       var key = 'transit_' + snap(lat) + '_' + snap(lng);
       var cached = null;
       try { cached = sessionStorage.getItem(key); } catch(e){}
       if (cached) {
-        try { transit = JSON.parse(cached); paint(); loading = false; return; } catch(e){}
+        try { transit = JSON.parse(cached); paintAllButtons(); loading = false; if (then) then(); return; } catch(e){}
       }
       fetch('/api/transit', {
         method: 'POST',
@@ -373,7 +445,8 @@ export function renderClientScript(): string {
       }).then(function(r){ return r.json(); }).then(function(d){
         transit = d || {};
         try { sessionStorage.setItem(key, JSON.stringify(transit)); } catch(e){}
-        paint();
+        paintAllButtons();
+        if (then) then();
       }).catch(function(){}).finally(function(){ loading = false; });
     }
 
@@ -387,17 +460,16 @@ export function renderClientScript(): string {
     }
 
     btns.forEach(function(b){
+      var slug = b.getAttribute('data-theater');
+      // Pre-populate map links so they work even without geolocation
+      populatePopover(slug);
       b.addEventListener('click', function(){
-        if (transit) return; // already painted
-        b.classList.add('transit-btn--pending');
+        // Re-populate (covers post-fetch ÖPNV minutes)
+        populatePopover(slug);
+        if (transit) return;
         ensureLocation(function(p){
-          if (!p) {
-            b.classList.remove('transit-btn--pending');
-            b.querySelector('.transit-btn__value').textContent = '—';
-            return;
-          }
-          fetchTransit(p.lat, p.lng);
-          b.classList.remove('transit-btn--pending');
+          if (!p) return;
+          fetchTransit(p.lat, p.lng, function(){ populatePopover(slug); });
         });
       });
     });
