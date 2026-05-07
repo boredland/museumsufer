@@ -23,7 +23,7 @@ export function renderDayMarkdown(date: string, performances: DayPerformance[]):
   }
   lines.push("");
   lines.push("---");
-  lines.push("Daten unter https://frankfurt.ins.theater/api/day?date=" + date);
+  lines.push(`Daten unter https://frankfurt.ins.theater/api/day?date=${date}`);
   return lines.join("\n");
 }
 

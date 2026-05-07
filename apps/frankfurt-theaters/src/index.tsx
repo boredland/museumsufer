@@ -27,6 +27,12 @@ app.use("*", async (c, next) => {
   c.header("X-Frame-Options", "DENY");
   c.header("X-Content-Type-Options", "nosniff");
   c.header("Referrer-Policy", "strict-origin-when-cross-origin");
+  // Keep crawl budget on content pages — JSON data endpoints are not for indexing.
+  // /api/docs is a content page (Scalar UI) and is allowlisted via the path check.
+  const path = new URL(c.req.url).pathname;
+  if (path.startsWith("/api/") && !path.startsWith("/api/docs")) {
+    c.header("X-Robots-Tag", "noindex");
+  }
   c.header(
     "Link",
     [
@@ -85,20 +91,19 @@ app.route("/", transitRoutes);
 app.route("/", imprintRoutes);
 app.route("/api/docs", docsRoutes);
 
+function requireScrapeAuth(c: { env: Env; req: { header(name: string): string | undefined } }): boolean {
+  if (!c.env.SCRAPE_SECRET) return false;
+  return c.req.header("authorization") === `Bearer ${c.env.SCRAPE_SECRET}`;
+}
+
 app.post("/scrape/all", async (c) => {
-  const auth = c.req.header("authorization");
-  if (c.env.SCRAPE_SECRET && auth !== `Bearer ${c.env.SCRAPE_SECRET}`) {
-    return c.json({ error: "unauthorized" }, 401);
-  }
+  if (!requireScrapeAuth(c)) return c.json({ error: "unauthorized" }, 401);
   const summary = await runAll(c.env);
   return c.json({ ok: true, summary });
 });
 
 app.post("/scrape/:slug", async (c) => {
-  const auth = c.req.header("authorization");
-  if (c.env.SCRAPE_SECRET && auth !== `Bearer ${c.env.SCRAPE_SECRET}`) {
-    return c.json({ error: "unauthorized" }, 401);
-  }
+  if (!requireScrapeAuth(c)) return c.json({ error: "unauthorized" }, 401);
   const summary = await runOne(c.env, c.req.param("slug"));
   return c.json({ ok: summary.ok, summary });
 });

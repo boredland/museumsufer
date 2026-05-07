@@ -107,9 +107,18 @@ function buildVevent(p: DayPerformance): string {
       const tEnd = p.end_time.replace(":", "");
       dtEnd = `DTEND;TZID=Europe/Berlin:${endDate}T${tEnd}00`;
     } else {
+      // Default duration 2h. Wrap to next day's date when crossing midnight.
       const [hh, mm] = p.time.split(":");
-      const endHour = (parseInt(hh, 10) + 2) % 24;
-      dtEnd = `DTEND;TZID=Europe/Berlin:${dtDate}T${String(endHour).padStart(2, "0")}${mm}00`;
+      const startHour = parseInt(hh, 10);
+      const endHourRaw = startHour + 2;
+      const endHour = endHourRaw % 24;
+      let endDateStr = dtDate;
+      if (endHourRaw >= 24) {
+        const next = new Date(`${p.date}T00:00:00Z`);
+        next.setUTCDate(next.getUTCDate() + 1);
+        endDateStr = next.toISOString().slice(0, 10).replace(/-/g, "");
+      }
+      dtEnd = `DTEND;TZID=Europe/Berlin:${endDateStr}T${String(endHour).padStart(2, "0")}${mm}00`;
     }
   } else {
     dtStart = `DTSTART;VALUE=DATE:${dtDate}`;
@@ -128,9 +137,10 @@ function buildVevent(p: DayPerformance): string {
   }
   descLines.push(`Status: ${p.status}`);
   if (p.ticket_url) descLines.push(p.ticket_url);
-  const description = descLines.length ? `DESCRIPTION:${icsEsc(descLines.join("\\n"))}` : "";
+  const description = descLines.length ? `DESCRIPTION:${icsEsc(descLines.join("\n"))}` : "";
 
-  const url = p.show.detail_url || p.ticket_url ? `URL:${p.show.detail_url ?? p.ticket_url}` : "";
+  const ticketUrl = p.show.detail_url ?? p.ticket_url ?? "";
+  const url = ticketUrl ? `URL:${icsEsc(ticketUrl)}` : "";
   const status = p.status === "cancelled" ? "STATUS:CANCELLED" : "STATUS:CONFIRMED";
   const uid = `UID:perf-${p.id}@frankfurt.ins.theater`;
   const dtstamp = `DTSTAMP:${utcStamp()}`;
@@ -145,7 +155,7 @@ function buildVevent(p: DayPerformance): string {
     summary,
     location,
     description,
-    url || `URL:${link}`,
+    url || `URL:${icsEsc(link)}`,
     status,
     "END:VEVENT",
   ]

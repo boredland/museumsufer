@@ -39,6 +39,7 @@ app.get("/theater/:slug", async (c) => {
     {
       "@context": "https://schema.org",
       "@type": "PerformingArtsTheater",
+      "@id": `${APP_URL}/theater/${slug}#theater`,
       name: config.name,
       url: `${APP_URL}/theater/${slug}`,
       address: config.address
@@ -91,6 +92,10 @@ app.get("/theater/:slug", async (c) => {
     }.`,
     canonical: `${APP_URL}/theater/${slug}`,
     jsonLd,
+    extraLinks: [
+      { rel: "alternate", type: "text/calendar", href: `/theater/${slug}/feed.ics`, title: `${config.name} – iCal` },
+      { rel: "alternate", type: "application/json", href: `/api/theater/${slug}`, title: `${config.name} – JSON` },
+    ],
   });
 
   const dpToday = new Date(`${today}T12:00:00Z`);
@@ -141,6 +146,8 @@ function pad2(n: number): string {
 }
 
 function renderGrouped(performances: DayPerformance[]): string {
+  // Group by date — only render dates that actually have a performance.
+  // (Audit found we were rendering 60 dates with ~23 empty stretches.)
   const byDate = new Map<string, DayPerformance[]>();
   for (const p of performances) {
     const arr = byDate.get(p.date);
@@ -149,23 +156,25 @@ function renderGrouped(performances: DayPerformance[]): string {
   }
   const groups: string[] = [];
   let i = 0;
+  const monthNames = [
+    "Januar",
+    "Februar",
+    "März",
+    "April",
+    "Mai",
+    "Juni",
+    "Juli",
+    "August",
+    "September",
+    "Oktober",
+    "November",
+    "Dezember",
+  ];
+  const weekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
   for (const [date, perfs] of byDate) {
+    if (!perfs.length) continue;
     const dp = new Date(`${date}T12:00:00Z`);
-    const wk = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"][dp.getUTCDay()];
-    const monthNames = [
-      "Januar",
-      "Februar",
-      "März",
-      "April",
-      "Mai",
-      "Juni",
-      "Juli",
-      "August",
-      "September",
-      "Oktober",
-      "November",
-      "Dezember",
-    ];
+    const wk = weekdays[dp.getUTCDay()];
     const month = monthNames[dp.getUTCMonth()];
     const day = dp.getUTCDate();
     groups.push(`<section class="theater-day">

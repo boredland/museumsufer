@@ -78,4 +78,29 @@ app.get("/api/performance/:id{[0-9]+}", async (c) => {
   return c.json({ performance: perf }, { headers: DAY_HEADERS });
 });
 
+app.post("/api/contact", async (c) => {
+  const body = (await c.req
+    .json<{
+      category?: string;
+      email?: string;
+      message?: string;
+      context?: string;
+    }>()
+    .catch(() => null)) as { category?: string; email?: string; message?: string; context?: string } | null;
+  if (!body?.message || body.message.length < 3) {
+    return c.json({ error: "message required" }, 400);
+  }
+  if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
+
+  const ua = c.req.header("user-agent") ?? null;
+  const pageUrl = c.req.header("referer") ?? null;
+  await c.env.DB.prepare(
+    `INSERT INTO feedback (category, email, message, context, user_agent, page_url) VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+  )
+    .bind(body.category ?? null, body.email ?? null, body.message, body.context ?? null, ua, pageUrl)
+    .run();
+
+  return c.json({ ok: true });
+});
+
 export default app;
