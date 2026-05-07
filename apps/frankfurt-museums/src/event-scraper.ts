@@ -1,33 +1,8 @@
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
-import { fetchPage } from "./fetch-utils";
-import { getMuseumConfig, MUSEUMS } from "./museum-config";
+import { getMuseumConfig } from "./museum-config";
 import { classifyEvent, normalizeUrl } from "./shared";
 import type { Env } from "./types";
-
-const PLACEHOLDER_TITLE_RE =
-  /^(event title|sample event|placeholder|untitled|tba|tbd|lorem|beispiel(?:event| ?titel)?|test event|veranstaltung \d+)\s*\d*\s*$/i;
-
-function isPlaceholderTitle(title: string): boolean {
-  return PLACEHOLDER_TITLE_RE.test(title.trim());
-}
-
-const EVENT_PAGE_PATHS = [
-  "/programm",
-  "/de/programm",
-  "/veranstaltungen",
-  "/de/veranstaltungen",
-  "/kalender",
-  "/de/kalender",
-  "/events",
-  "/de/events",
-  "/termine",
-  "/de/termine",
-  "/besuch/veranstaltungen",
-  "/de/besuch/veranstaltungen",
-  "/besuch/programm",
-  "/de/besuch/programm",
-];
 
 export async function scrapeMuseumWebsites(
   env: Env,
@@ -59,13 +34,6 @@ export async function scrapeMuseumWebsites(
   return { updated, events: totalEvents, enriched, api: apiCount };
 }
 
-async function sha256(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
 async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const results: R[] = new Array(items.length);
   let cursor = 0;
@@ -86,78 +54,66 @@ async function processMuseum(
 ): Promise<{ events: number; api: boolean }> {
   const museumConfig = getMuseumConfig(museum.slug);
 
-  if (museumConfig?.skipEvents && !museumConfig.eventApi) return { events: 0, api: false };
+  const eventApi = museumConfig?.eventApi;
+  if (!eventApi) return { events: 0, api: false };
 
-  if (museumConfig?.eventApi) {
-    const eventApi = museumConfig.eventApi;
-    const proxy =
-      museumConfig.proxy && env.FETCH_PROXY_URL
-        ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN }
-        : undefined;
-    const events = await fetchEventsFromApi(eventApi, proxy);
+  const proxy =
+    museumConfig?.proxy && env.FETCH_PROXY_URL ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN } : undefined;
+  const events = await fetchEventsFromApi(eventApi, proxy);
 
-    const validEvents = events
-      .filter((e) => e.title && e.date)
-      .map((e) => ({
-        ...e,
-        title: e.title.replace(/\\"/g, '"').replace(/\\'/g, "'"),
-        description: e.description ? e.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : e.description,
-      }));
+  const validEvents = events
+    .filter((e) => e.title && e.date)
+    .map((e) => ({
+      ...e,
+      title: e.title.replace(/\\"/g, '"').replace(/\\'/g, "'"),
+      description: e.description ? e.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : e.description,
+    }));
 
-    const overrideSlugs = Array.from(
-      new Set(validEvents.map((e) => e.museum_slug_override).filter((s): s is string => !!s)),
-    );
-    const overrideMap = new Map<string, number>();
-    if (overrideSlugs.length > 0) {
-      const placeholders = overrideSlugs.map(() => "?").join(",");
-      const { results } = await env.DB.prepare(`SELECT id, slug FROM museums WHERE slug IN (${placeholders})`)
-        .bind(...overrideSlugs)
-        .all<{ id: number; slug: string }>();
-      for (const r of results) overrideMap.set(r.slug, r.id);
-    }
-
-    const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price, category)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-       ON CONFLICT(museum_id, title, date) DO UPDATE SET
-         time = COALESCE(excluded.time, events.time),
-         end_time = COALESCE(excluded.end_time, events.end_time),
-         end_date = COALESCE(excluded.end_date, events.end_date),
-         description = COALESCE(excluded.description, events.description),
-         detail_url = COALESCE(excluded.detail_url, events.detail_url),
-         image_url = COALESCE(excluded.image_url, events.image_url),
-         price = COALESCE(excluded.price, events.price),
-         category = COALESCE(excluded.category, events.category),
-         updated_at = datetime('now')`;
-
-    const statements = validEvents.map((event) => {
-      const targetMuseumId = (event.museum_slug_override && overrideMap.get(event.museum_slug_override)) || museum.id;
-      return env.DB.prepare(insertSql).bind(
-        targetMuseumId,
-        event.title,
-        event.date,
-        event.time,
-        event.end_time,
-        event.end_date,
-        event.description,
-        eventApi.endpoint,
-        event.detail_url,
-        event.image_url,
-        event.price,
-        event.category || classifyEvent(event.title, event.description) || null,
-      );
-    });
-
-    if (statements.length > 0) await env.DB.batch(statements);
-    return { events: statements.length, api: statements.length > 0 };
+  const overrideSlugs = Array.from(
+    new Set(validEvents.map((e) => e.museum_slug_override).filter((s): s is string => !!s)),
+  );
+  const overrideMap = new Map<string, number>();
+  if (overrideSlugs.length > 0) {
+    const placeholders = overrideSlugs.map(() => "?").join(",");
+    const { results } = await env.DB.prepare(`SELECT id, slug FROM museums WHERE slug IN (${placeholders})`)
+      .bind(...overrideSlugs)
+      .all<{ id: number; slug: string }>();
+    for (const r of results) overrideMap.set(r.slug, r.id);
   }
 
-  if (!museum.website_url) return { events: 0, api: false };
+  const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price, category)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(museum_id, title, date) DO UPDATE SET
+       time = COALESCE(excluded.time, events.time),
+       end_time = COALESCE(excluded.end_time, events.end_time),
+       end_date = COALESCE(excluded.end_date, events.end_date),
+       description = COALESCE(excluded.description, events.description),
+       detail_url = COALESCE(excluded.detail_url, events.detail_url),
+       image_url = COALESCE(excluded.image_url, events.image_url),
+       price = COALESCE(excluded.price, events.price),
+       category = COALESCE(excluded.category, events.category),
+       updated_at = datetime('now')`;
 
-  const count = await scrapeMuseumEvents(
-    env,
-    museum as { id: number; name: string; slug: string; website_url: string },
-  );
-  return { events: count, api: false };
+  const statements = validEvents.map((event) => {
+    const targetMuseumId = (event.museum_slug_override && overrideMap.get(event.museum_slug_override)) || museum.id;
+    return env.DB.prepare(insertSql).bind(
+      targetMuseumId,
+      event.title,
+      event.date,
+      event.time,
+      event.end_time,
+      event.end_date,
+      event.description,
+      eventApi.endpoint,
+      event.detail_url,
+      event.image_url,
+      event.price,
+      event.category || classifyEvent(event.title, event.description) || null,
+    );
+  });
+
+  if (statements.length > 0) await env.DB.batch(statements);
+  return { events: statements.length, api: statements.length > 0 };
 }
 
 async function discoverWebsiteUrls(env: Env): Promise<void> {
@@ -184,138 +140,6 @@ async function discoverWebsiteUrls(env: Env): Promise<void> {
       console.error(`Failed to discover website for museum ${museum.id}:`, e);
     }
   }
-}
-
-interface ScrapedEvent {
-  title: string;
-  date: string;
-  time: string | null;
-  description: string | null;
-  category: string | null;
-}
-
-async function scrapeMuseumEvents(
-  env: Env,
-  museum: { id: number; name: string; slug: string; website_url: string },
-): Promise<number> {
-  const baseUrl = museum.website_url.replace(/\/$/, "");
-  const config = MUSEUMS[museum.slug];
-  const fetchOpts = config ? { spa: config.spa, proxy: config.proxy } : undefined;
-  let eventsHtml: string | null = null;
-  let eventsUrl: string | null = null;
-
-  const candidates = EVENT_PAGE_PATHS.map((path) => `${baseUrl}${path}`);
-  const results = await Promise.all(
-    candidates.map(async (url) => {
-      const html = await fetchPage(env, url, fetchOpts);
-      return html ? { url, html } : null;
-    }),
-  );
-  const found = results.find((r) => r !== null);
-  if (found) {
-    eventsHtml = found.html;
-    eventsUrl = found.url;
-  }
-
-  if (!eventsHtml || !eventsUrl) {
-    try {
-      const html = await fetchPage(env, baseUrl, fetchOpts);
-      if (html) {
-        const eventLink = findEventLink(html, baseUrl);
-        if (eventLink) {
-          eventsHtml = await fetchPage(env, eventLink, fetchOpts);
-          eventsUrl = eventLink;
-        }
-      }
-    } catch {
-      return 0;
-    }
-  }
-
-  if (!eventsHtml) return 0;
-
-  const cached = await env.DB.prepare("SELECT events_html_hash, events_scraped_at FROM museums WHERE id = ?")
-    .bind(museum.id)
-    .first<{ events_html_hash: string | null; events_scraped_at: string | null }>();
-  const hash = await sha256(stripHtmlToText(eventsHtml));
-  const now = Date.now();
-  const lastScrapedMs = cached?.events_scraped_at ? Date.parse(`${cached.events_scraped_at}Z`) : 0;
-  if (cached?.events_html_hash === hash && now - lastScrapedMs < 24 * 60 * 60 * 1000) {
-    return 0;
-  }
-
-  const pageLinks = extractPageLinks(eventsHtml, baseUrl);
-  const textContent = stripHtmlToText(eventsHtml);
-  if (textContent.length < 100) return 0;
-
-  const truncated = textContent.slice(0, 8000);
-
-  const result = (await env.AI.run("@cf/meta/llama-4-scout-17b-16e-instruct", {
-    max_tokens: 2048,
-    messages: [
-      {
-        role: "user",
-        content: `Extract upcoming events from this museum's program page. Today is ${todayIso()}.
-
-Rules:
-- Only extract concrete events with specific dates that appear verbatim in the text below.
-- Do NOT invent, paraphrase, or generate placeholder events. Never use generic titles like "Event Title 1", "Sample Event", "TBA", etc.
-- If the page has no concrete dated events, return [] — empty is the correct answer.
-- Skip permanent exhibitions and general descriptions.
-
-Return ONLY a JSON array, nothing else. Each element:
-{"title": <exact title>, "date": "YYYY-MM-DD", "time": "HH:MM" or null, "category": "Führung" | "Workshop" | "Vortrag" | "Konzert" | "Vernissage" | "Familie" | "Film" | null, "description": <short snippet> or null}
-
-Text content from ${museum.name} (${eventsUrl}):
-${truncated}`,
-      },
-    ],
-  })) as Record<string, unknown>;
-
-  await env.DB.prepare("UPDATE museums SET events_html_hash = ?, events_scraped_at = datetime('now') WHERE id = ?")
-    .bind(hash, museum.id)
-    .run();
-
-  const responseText = typeof result.response === "string" ? result.response : JSON.stringify(result);
-  const events = extractJson<ScrapedEvent[]>(responseText);
-  if (!events || events.length === 0) return 0;
-
-  const insertSql = `INSERT INTO events (museum_id, title, date, time, description, url, detail_url, category)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(museum_id, title, date) DO UPDATE SET
-       time = excluded.time,
-       description = excluded.description,
-       detail_url = COALESCE(excluded.detail_url, events.detail_url),
-       category = COALESCE(excluded.category, events.category),
-       updated_at = datetime('now')`;
-
-  const statements = events
-    .filter(
-      (event) =>
-        event.title &&
-        event.date &&
-        /^\d{4}-\d{2}-\d{2}$/.test(event.date) &&
-        !isPlaceholderTitle(event.title) &&
-        textContent.toLowerCase().includes(event.title.toLowerCase().slice(0, 12)),
-    )
-    .map((event) => {
-      const title = event.title.replace(/\\"/g, '"').replace(/\\'/g, "'");
-      const description = event.description ? event.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : null;
-      const detailUrl = matchLinkForTitle(title, pageLinks);
-      return env.DB.prepare(insertSql).bind(
-        museum.id,
-        title,
-        event.date,
-        event.time,
-        description,
-        eventsUrl,
-        detailUrl,
-        event.category || classifyEvent(title, description) || null,
-      );
-    });
-
-  if (statements.length > 0) await env.DB.batch(statements);
-  return statements.length;
 }
 
 async function enrichUpcomingEvents(env: Env): Promise<number> {
@@ -684,19 +508,6 @@ export function matchLinkForTitle(title: string, links: PageLink[]): string | nu
   }
 
   return bestMatch ? bestMatch.href : null;
-}
-
-function findEventLink(html: string, baseUrl: string): string | null {
-  const patterns = [/href="([^"]*(?:programm|veranstaltung|kalender|events)[^"]*)"/gi];
-  for (const pattern of patterns) {
-    const match = pattern.exec(html);
-    if (match) {
-      const href = match[1];
-      if (href.startsWith("http")) return href;
-      if (href.startsWith("/")) return `${baseUrl}${href}`;
-    }
-  }
-  return null;
 }
 
 export function stripHtmlToText(html: string): string {
