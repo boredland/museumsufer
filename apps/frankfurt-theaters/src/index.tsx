@@ -1,4 +1,4 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { renderPage, renderProgrammePartial } from "./frontend";
@@ -21,14 +21,12 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
+app.use("*", securityHeaders());
+
+// Theater-specific response headers: X-Robots-Tag on data API, Link header
+// pointing at the API discovery surfaces.
 app.use("*", async (c, next) => {
   await next();
-  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  c.header("X-Frame-Options", "DENY");
-  c.header("X-Content-Type-Options", "nosniff");
-  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
-  // Keep crawl budget on content pages — JSON data endpoints are not for indexing.
-  // /api/docs is a content page (Scalar UI) and is allowlisted via the path check.
   const path = new URL(c.req.url).pathname;
   if (path.startsWith("/api/") && !path.startsWith("/api/docs")) {
     c.header("X-Robots-Tag", "noindex");

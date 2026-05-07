@@ -1,3 +1,4 @@
+import { THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -11,7 +12,7 @@ import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 /** Theme initialization script to prevent flash of unstyled content */
-export const THEME_SCRIPT = `(function(){const t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}else if(t==='light'){document.documentElement.classList.add('light')}})()`;
+export const THEME_SCRIPT = THEME_FOUC_SCRIPT;
 
 /** Generates language parameter string for URLs */
 export function buildLangParam(locale: Locale): string {

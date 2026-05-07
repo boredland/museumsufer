@@ -1,8 +1,11 @@
+import { buildApiCatalog, buildManifest, buildRobotsTxt } from "@museumsufer/core";
 import { Hono } from "hono";
 import { todayIso } from "../date";
 import { MUSEUMS } from "../museum-config";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import type { Env } from "../types";
+
+const SITE_URL = "https://museumsufer.app";
 
 const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#f5f0eb"/>
@@ -19,20 +22,12 @@ const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="6
   </g>
 </svg>`;
 
-const MANIFEST = JSON.stringify({
-  id: "/",
+const MANIFEST = buildManifest({
   name: "Museumsufer Frankfurt",
-  short_name: "Museumsufer",
+  shortName: "Museumsufer",
   description: "Ausstellungen & Veranstaltungen am Frankfurter Museumsufer",
-  start_url: "/",
-  display: "standalone",
-  background_color: "#f5f0eb",
-  theme_color: "#f5f0eb",
-  icons: [
-    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-    { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any maskable" },
-    { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" },
-  ],
+  themeColor: "#f5f0eb",
+  backgroundColor: "#f5f0eb",
   screenshots: [
     { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "Museumsufer Frankfurt" },
     { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "Museumsufer Frankfurt" },
@@ -93,16 +88,8 @@ Returns: name, slug, museumsufer_url, website_url
 - Translations available via ?lang=en or ?lang=fr query parameter on the API
 `;
 
-const API_CATALOG = JSON.stringify({
-  linkset: [
-    {
-      anchor: "https://museumsufer.app/api/",
-      "service-desc": [{ href: "https://museumsufer.app/api/docs/openapi.json", type: "application/openapi+json" }],
-      "service-doc": [{ href: "https://museumsufer.app/api/docs", type: "text/html" }],
-      status: [{ href: "https://museumsufer.app/api/day", type: "application/json" }],
-    },
-  ],
-});
+const API_CATALOG = buildApiCatalog({ apiBase: SITE_URL });
+const ROBOTS_TXT = buildRobotsTxt({ siteUrl: SITE_URL });
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -119,36 +106,7 @@ app.get("/og-image.svg", (c) =>
   c.body(OG_IMAGE, { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } }),
 );
 
-app.get("/robots.txt", (c) =>
-  c.text(
-    [
-      "User-agent: GPTBot",
-      "Allow: /",
-      "",
-      "User-agent: OAI-SearchBot",
-      "Allow: /",
-      "",
-      "User-agent: ChatGPT-User",
-      "Allow: /",
-      "",
-      "User-agent: ClaudeBot",
-      "Allow: /",
-      "",
-      "User-agent: PerplexityBot",
-      "Allow: /",
-      "",
-      "User-agent: *",
-      "Allow: /",
-      "",
-      "Content-Signal: ai-train=no, search=yes, ai-input=yes",
-      "",
-      "Sitemap: https://museumsufer.app/sitemap.xml",
-      "# LLMs: https://museumsufer.app/llms.txt",
-      "",
-    ].join("\n"),
-    { headers: { "Cache-Control": "public, max-age=86400" } },
-  ),
-);
+app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
 
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();

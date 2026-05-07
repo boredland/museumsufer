@@ -1,4 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
+import { securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
@@ -50,17 +51,14 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Security headers — applied to every response
-app.use("*", async (c, next) => {
-  await next();
-  c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  c.header("X-Frame-Options", "DENY");
-  c.header("X-Content-Type-Options", "nosniff");
-  c.header("Referrer-Policy", "strict-origin-when-cross-origin");
-  c.header("Permissions-Policy", "geolocation=(self), microphone=(), camera=(), payment=()");
-  c.header(
-    "Content-Security-Policy",
-    [
+// Security headers — applied to every response. CSP keeps the inline-script
+// allowance for the FOUC bootstrap and Formspree form post; Permissions-Policy
+// keeps geolocation enabled for the transit-distance API on /api/transit.
+app.use(
+  "*",
+  securityHeaders({
+    permissionsPolicy: "geolocation=(self), microphone=(), camera=(), payment=()",
+    csp: [
       "default-src 'self'",
       "img-src 'self' data: https:",
       "font-src 'self' https://fonts.gstatic.com",
@@ -71,8 +69,8 @@ app.use("*", async (c, next) => {
       "base-uri 'self'",
       "form-action 'self' https://formspree.io",
     ].join("; "),
-  );
-});
+  }),
+);
 
 // CORS middleware - restrict to museumsufer.app
 app.use(
