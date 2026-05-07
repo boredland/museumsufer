@@ -5,6 +5,7 @@ import { scrapeMousonturm } from "./scrapers/mousonturm";
 import { scrapeNeuesTheaterHoechst } from "./scrapers/neues-theater-hoechst";
 import { scrapeOperFrankfurt } from "./scrapers/oper";
 import { scrapeSchauspielFrankfurt } from "./scrapers/schauspiel";
+import { scrapeVolksbuehne } from "./scrapers/volksbuehne";
 import { THEATERS, type TheaterConfig } from "./theater-config";
 import type { Env, ScrapeResult } from "./types";
 
@@ -55,5 +56,7 @@ async function runScraper(name: TheaterConfig["scraper"]): Promise<ScrapeResult>
       return scrapeMousonturm();
     case "neues-theater-hoechst":
       return scrapeNeuesTheaterHoechst();
+    case "volksbuehne":
+      return scrapeVolksbuehne();
   }
 }
