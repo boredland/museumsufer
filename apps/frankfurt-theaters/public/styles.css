@@ -446,10 +446,36 @@ button, a { -webkit-tap-highlight-color: transparent; }
   padding-top: 0.4rem;
 }
 /* Push the primary Karten action to the far right; everything else clusters left of it */
-.perf__rail .action { margin-left: auto; }
-/* On the rail, the ICS button no longer needs its own right margin */
+/* The rail's terminal slot — Karten action OR a sold-out/cancelled stamp —
+   gets pushed to the right edge. Inline stamps (e.g. "Restkarten") stay
+   clustered on the left next to the price. */
+.perf__rail .action,
+.perf__rail .stamp--terminus { margin-left: auto; }
 .perf__rail .ics-btn,
-.perf__rail .report-btn { margin-right: 0; }
+.perf__rail .report-btn,
+.perf__rail .share-btn { margin-right: 0; }
+
+/* Per-row share button (chain icon) — same dimensions as ics-btn / report-btn */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.share-btn:hover,
+.share-btn:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  outline: none;
+}
 .perf__price {
   margin: 0;
   font-family: var(--serif);
