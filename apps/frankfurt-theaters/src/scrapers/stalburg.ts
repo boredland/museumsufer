@@ -51,11 +51,30 @@ export async function scrapeStalburg(): Promise<ScrapeResult> {
     }
   }
 
+  await enrichWithDetailPages(showsBySlug);
+
   return {
     theater_slug: "stalburg-theater",
     shows: [...showsBySlug.values()],
     performances,
   };
+}
+
+/**
+ * Stalburg show detail pages carry a high-resolution production photo
+ * inside `<div class="hero-image"><img src="…">`. One fetch per show.
+ */
+async function enrichWithDetailPages(shows: Map<string, ScrapedShow>): Promise<void> {
+  for (const show of shows.values()) {
+    if (!show.detail_url || show.image_url) continue;
+    try {
+      const html = await fetchHtml(show.detail_url);
+      const m = html.match(/<div\s+class="hero-image">\s*<img[^>]+src="([^"]+)"/i);
+      if (m) show.image_url = m[1];
+    } catch (err) {
+      console.warn(`Stalburg detail enrichment failed for ${show.slug}:`, err);
+    }
+  }
 }
 
 async function fetchHtml(url: string): Promise<string> {

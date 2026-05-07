@@ -35,11 +35,60 @@ const GERMAN_MONTHS: Record<string, number> = {
 };
 
 export async function scrapeDramatischeBuehne(): Promise<ScrapeResult> {
-  const res = await fetch(PROGRAMM_URL, {
+  const html = await fetchHtml(PROGRAMM_URL);
+  const result = parseDramatischeBuehneHtml(html);
+  await enrichWithDetailPages(result);
+  return result;
+}
+
+async function fetchHtml(url: string): Promise<string> {
+  const res = await fetch(url, {
     headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
   });
-  if (!res.ok) throw new Error(`Dramatische Bühne fetch failed: ${res.status}`);
-  return parseDramatischeBuehneHtml(await res.text());
+  if (!res.ok) throw new Error(`fetch failed: ${url} → ${res.status}`);
+  return res.text();
+}
+
+/**
+ * The listing's image is a 300x293 thumbnail; detail pages have og:image
+ * (full size) and an "Eintritt"-style price block. Price values can be a
+ * range ("10-20 €") for pay-what-you-want bookings — we capture the
+ * minimum (cheapest) and maximum that appear next to "Eintritt".
+ */
+async function enrichWithDetailPages(result: ScrapeResult): Promise<void> {
+  for (const show of result.shows) {
+    if (!show.detail_url) continue;
+    try {
+      const html = await fetchHtml(show.detail_url);
+      const og = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i)?.[1];
+      if (og) show.image_url = og;
+      const range = parseEintrittRange(html);
+      if (range) {
+        for (const p of result.performances) {
+          if (p.show_slug === show.slug) {
+            p.price_min = range.min;
+            p.price_max = range.max;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`Dramatische Bühne detail enrichment failed for ${show.slug}:`, err);
+    }
+  }
+}
+
+function parseEintrittRange(html: string): { min: number; max: number } | null {
+  // Find the "Eintritt"-keyword section and harvest amounts within ~600 chars.
+  // The site writes prices either as "20 €" or "20 Euro" (verbose), and often
+  // lists pay-what-you-want tiers like 20/15/10/1 Euro.
+  const idx = html.search(/\bEintritt\b/i);
+  if (idx < 0) return null;
+  const window = html.slice(idx, idx + 800);
+  const values = [...window.matchAll(/(\d{1,3})\s*(?:€|Euro)\b/gi)]
+    .map((m) => parseInt(m[1], 10))
+    .filter((n) => n >= 1 && n <= 200);
+  if (values.length === 0) return null;
+  return { min: Math.min(...values), max: Math.max(...values) };
 }
 
 const ITEM_RE = /<ul\s+class=['"]eme_events_list['"]>([\s\S]*?)<\/ul>/i;
