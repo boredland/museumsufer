@@ -1,5 +1,5 @@
+import { todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
-import { todayIso } from "../date";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 

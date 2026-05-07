@@ -1,3 +1,11 @@
+/**
+ * HTML decoding and stripping with German named-entity support.
+ *
+ * Lifted from frankfurt-theaters/src/shared.ts where it was developed
+ * to handle the &auml;/&ouml;/&shy; escapes the museum scrapers also
+ * need but were silently dropping.
+ */
+
 const NAMED_ENTITIES: Record<string, string> = {
   nbsp: " ",
   shy: "­",
@@ -88,7 +96,8 @@ export function stripHtml(html: string): string {
     .trim();
 }
 
-export function truncate(text: string, maxLen = 800): string | null {
+/** Strip HTML, then truncate at the last whitespace before maxLen. Returns null on empty. */
+export function truncate(text: string, maxLen: number): string | null {
   const t = stripHtml(text);
   if (!t) return null;
   if (t.length <= maxLen) return t;
@@ -97,7 +106,8 @@ export function truncate(text: string, maxLen = 800): string | null {
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLen)}…`;
 }
 
-export function nullIfMidnight(time: string | null): string | null {
+export function nullIfMidnight(time: string | null | undefined): string | null {
+  if (!time) return null;
   return time === "00:00" ? null : time;
 }
 
@@ -116,8 +126,20 @@ export function slugify(input: string): string {
 
 export function normalizeUrl(url: string | null | undefined, base: string): string | null {
   if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  if (url.startsWith("//")) return `https:${url}`;
-  if (url.startsWith("/")) return `${base.replace(/\/$/, "")}${url}`;
-  return `${base.replace(/\/$/, "")}/${url}`;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed;
+  if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (trimmed.startsWith("/")) return `${base.replace(/\/$/, "")}${trimmed}`;
+  return `${base.replace(/\/$/, "")}/${trimmed}`;
+}
+
+/** Reject Reservix/CDN placeholders and obvious non-image URLs. */
+export function sanitizeImageUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  const u = url.trim();
+  if (!u) return null;
+  if (/^(data:|javascript:|about:)/i.test(u)) return null;
+  if (/blank-?image|placeholder|spacer\.gif/i.test(u)) return null;
+  return u;
 }

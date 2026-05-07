@@ -1,5 +1,4 @@
-import { todayIso } from "../date";
-import { decodeEntities, normalizeUrl, nullIfMidnight, slugify, stripHtml } from "../shared";
+import { decodeEntities, normalizeUrl, nullIfMidnight, slugify, stripHtml, todayIso } from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://stalburg.de";

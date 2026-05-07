@@ -1,5 +1,5 @@
+import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
-import { dateOffset, todayIso } from "../date";
 import { getPerformanceById, getPerformancesForDate, getPerformancesInRange, getTheaterBySlug } from "../db";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";

@@ -1,5 +1,4 @@
-import { todayIso } from "../date";
-import { decodeEntities, stripHtml, truncate } from "../shared";
+import { decodeEntities, stripHtml, todayIso, truncate } from "@museumsufer/core";
 import type { ScrapedPerformance, ScrapedShow, ScrapeResult } from "../types";
 
 const BASE = "https://www.theater-alte-bruecke.de";

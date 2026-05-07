@@ -1,5 +1,5 @@
+import { dateOffset, icsEsc, slugify, todayIso, utcStamp, xmlEsc } from "@museumsufer/core";
 import { Hono } from "hono";
-import { dateOffset, todayIso } from "../date";
 import { type DayPerformance, getPerformanceById, getPerformancesInRange, getTheaterBySlug } from "../db";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
@@ -163,10 +163,6 @@ function buildVevent(p: DayPerformance): string {
     .join("\r\n");
 }
 
-function utcStamp(): string {
-  return `${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "").slice(0, 15)}Z`;
-}
-
 function buildRss(performances: DayPerformance[]): string {
   const items = performances.map((p) => {
     const dateStr = p.time ? `${p.date}T${p.time}:00+02:00` : `${p.date}T00:00:00+02:00`;
@@ -207,25 +203,6 @@ ${items.join("\n")}
 </rss>`;
 }
 
-function xmlEsc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-function icsEsc(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
-}
-
 function slugForFile(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[äöü]/g, (m) => ({ ä: "ae", ö: "oe", ü: "ue" })[m] ?? m)
-    .replace(/ß/g, "ss")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 60);
+  return slugify(s).slice(0, 60);
 }
