@@ -1,4 +1,4 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { buildUtm, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformancesInRange } from "../db";
 import {
@@ -15,6 +15,8 @@ import { renderTheaterMarkdown, wantsMarkdown } from "../markdown";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
+
+const utm = buildUtm("frankfurt.ins.theater");
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -115,7 +117,7 @@ ${renderMasthead({ sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
     <h2 class="theater-hero__name">${escapeHtml(config.name)}</h2>
     ${config.address ? `<p class="theater-hero__address">${escapeHtml(config.address)}</p>` : ""}
     <p class="theater-hero__meta">
-      ${config.website_url ? `<a href="${escapeHtml(config.website_url)}" target="_blank" rel="noopener">Website ↗</a>` : ""}
+      ${config.website_url ? `<a href="${escapeHtml(utm(config.website_url, "theater_website"))}" target="_blank" rel="noopener">Website ↗</a>` : ""}
       <a href="/theater/${slug}/feed.ics">iCal abonnieren</a>
       <a href="/api/theater/${slug}">JSON</a>
     </p>

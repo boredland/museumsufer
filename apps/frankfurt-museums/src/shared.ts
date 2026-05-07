@@ -69,23 +69,6 @@ export function truncateHtml(text: string, maxLen = 500): string | null {
   return coreTruncate(text, maxLen);
 }
 
-/**
- * Stricter image-URL sanitiser than core's: requires `http(s)://` and a valid
- * `URL` constructor parse. Used by museum scrapers where HTML often contains
- * relative paths or junk that we don't want to ship to the proxy.
- */
-export function sanitizeImageUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  const cleaned = url.split(/\s+/)[0].trim().replace(/&amp;/g, "&");
-  if (!cleaned.startsWith("http")) return null;
-  try {
-    new URL(cleaned);
-    return cleaned;
-  } catch {
-    return null;
-  }
-}
-
 export function formatDateFull(iso: string, dateLocaleStr: string): string {
   if (!iso) return "";
   const d = new Date(`${iso}T00:00:00`);

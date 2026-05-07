@@ -1,5 +1,8 @@
+import { buildUtm } from "@museumsufer/core";
 import type { DayPerformance } from "./db";
 import type { TheaterConfig } from "./theater-config";
+
+const utm = buildUtm("frankfurt.ins.theater");
 
 /** Human + LLM-friendly markdown view of a day or theater page. */
 
@@ -30,7 +33,7 @@ export function renderDayMarkdown(date: string, performances: DayPerformance[]):
 export function renderTheaterMarkdown(config: TheaterConfig, performances: DayPerformance[]): string {
   const lines = [`# ${config.name}`, ""];
   if (config.address) lines.push(`_${config.address}_`);
-  if (config.website_url) lines.push(`Website: ${config.website_url}`);
+  if (config.website_url) lines.push(`Website: ${utm(config.website_url, "markdown")}`);
   lines.push("");
   if (!performances.length) {
     lines.push("_Noch kein angekündigtes Programm._");
@@ -74,7 +77,8 @@ function perfBullet(p: DayPerformance, opts: { showTheater: boolean }): string {
   const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
   const room = p.venue_room && !sameVenue ? p.venue_room : null;
   const venue = opts.showTheater ? ` _(${p.theater.name}${room ? `, ${room}` : ""})_` : room ? ` _(${room})_` : "";
-  const url = p.ticket_url ?? p.show.detail_url ?? "";
+  const urlSource = p.ticket_url ?? p.show.detail_url ?? "";
+  const url = urlSource ? utm(urlSource, "markdown") : "";
   const title = url ? `[${p.show.title}](${url})` : p.show.title;
   return `- **${time}** ${title}${subtitle}${venue}${price}${status}`;
 }

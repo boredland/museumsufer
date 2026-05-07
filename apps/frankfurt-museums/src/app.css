@@ -280,7 +280,6 @@ dialog::backdrop {
   font-feature-settings: "ss01" 1;
 }
 .anchor-headline em { font-style: normal; color: var(--color-river); }
-.anchor-headline .day-num { font-style: normal; font-feature-settings: "lnum" 1; }
 
 /* Section header — display, much louder */
 .section-eyebrow {

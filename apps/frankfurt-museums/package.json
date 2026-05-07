@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "css": "tailwindcss -i src/app.css -o public/styles.css --minify",
+    "css": "tailwindcss -i src/app.css -o public/styles.css --minify && node scripts/inline-css.mjs",
     "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
     "dev": "npm run css && wrangler dev",
     "build": "npm run css",

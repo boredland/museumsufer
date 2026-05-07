@@ -2,6 +2,7 @@ import {
   berlinHourMinute,
   buildGoogleCalendarUrl,
   buildOutlookCalendarUrl,
+  buildUtm,
   buildYahooCalendarUrl,
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
@@ -12,6 +13,7 @@ import {
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
 } from "@museumsufer/core";
 import type { DateWithCount } from "./db";
+import { INLINE_CSS } from "./styles-inline";
 import { THEATERS } from "./theater-config";
 import type { Performance, Show, Theater } from "./types";
 
@@ -29,6 +31,8 @@ interface PageProps {
 
 const APP_URL = "https://frankfurt.ins.theater";
 const REPO_URL = "https://github.com/boredland/museumsufer";
+
+const utm = buildUtm("frankfurt.ins.theater");
 
 function dateParts(iso: string) {
   const d = new Date(`${iso}T12:00:00Z`);
@@ -97,7 +101,7 @@ ${
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" /></noscript>
-<link rel="stylesheet" href="/styles.css" />
+<style>${INLINE_CSS}</style>
 <script src="/htmx.min.js" defer></script>
 <script src="/uFuzzy.iife.min.js" defer></script>
 ${jsonLdScripts}`;
@@ -173,7 +177,8 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
   const subtitle = p.show.subtitle ? escapeHtml(p.show.subtitle).replace(/\s*<br\s*\/?>\s*/gi, " · ") : null;
   const showPrice = p.status !== "sold_out" && p.status !== "cancelled";
   const price = showPrice ? formatPriceRange(p.price_min, p.price_max) : null;
-  const titleHref = p.show.detail_url ?? p.ticket_url ?? null;
+  const titleSource = p.show.detail_url ?? p.ticket_url ?? null;
+  const titleHref = titleSource ? utm(titleSource, p.show.detail_url ? "show_title" : "show_title_ticket") : null;
 
   // Sold-out and cancelled stamps live in the terminal (Karten) slot of the
   // rail so the layout matches available rows. Other statuses (e.g. few_left
@@ -250,7 +255,10 @@ function renderCalendarPopover(p: DayPerformance): string {
       .filter(Boolean)
       .join(", "),
     description: p.show.subtitle ?? null,
-    detail_url: p.show.detail_url ?? p.ticket_url ?? null,
+    detail_url: (() => {
+      const src = p.show.detail_url ?? p.ticket_url ?? null;
+      return src ? utm(src, "calendar") : null;
+    })(),
   };
   const google = escapeHtml(buildGoogleCalendarUrl(ev));
   const outlook = escapeHtml(buildOutlookCalendarUrl(ev));
@@ -285,7 +293,7 @@ function renderTerminus(p: DayPerformance): string {
     return `<span class="stamp stamp--cancelled stamp--terminus" aria-label="Abgesagt">Entfällt</span>`;
   }
   if (!p.ticket_url) return "";
-  return `<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
+  return `<a class="action" href="${escapeHtml(utm(p.ticket_url, "karten"))}" target="_blank" rel="noopener">
     <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
   </a>`;
 }

@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "css": "lightningcss-cli --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css",
-    "css:watch": "lightningcss-cli --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css",
+    "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && node scripts/inline-css.mjs",
+    "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && node scripts/inline-css.mjs",
     "dev": "npm run css && wrangler dev",
     "build": "npm run css",
     "deploy": "npm run css && wrangler d1 migrations apply frankfurt-theaters-db --remote && wrangler deploy",

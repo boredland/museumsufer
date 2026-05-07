@@ -544,7 +544,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: var(--ink-soft);
 }
 .footer__rule { display: block; height: 1.5px; width: 4rem; background: var(--accent); margin: 0 0 1.25rem; }
-.footer__small { font-size: 0.78rem; font-style: normal; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-quiet); margin-top: 0.75rem; }
 .footer a { border-bottom: 0.5px solid currentColor; }
 .footer a:hover { color: var(--accent); }
 
