@@ -70,6 +70,7 @@ export function renderHead(opts: HeadOptions): string {
     : "";
   return `<meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<script>(function(){try{var t=localStorage.getItem('theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&d))document.documentElement.classList.add('dark');else if(t==='light')document.documentElement.classList.add('light');}catch(e){}})();</script>
 <title>${escapeHtml(opts.title)}</title>
 <meta name="description" content="${escapeHtml(opts.description)}" />
 <link rel="canonical" href="${escapeHtml(opts.canonical)}" />
@@ -90,11 +91,17 @@ export function renderHead(opts: HeadOptions): string {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap" />
 <link rel="stylesheet" href="/styles.css" />
+<script src="/htmx.min.js" defer></script>
+<script src="/uFuzzy.iife.min.js" defer></script>
 ${jsonLdScripts}`;
 }
 
 export function renderGrain(): string {
-  return `<div class="grain" aria-hidden="true"></div>`;
+  return `<div class="grain" aria-hidden="true"></div>
+<button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbthema wechseln" title="Farbthema wechseln">
+  <svg class="theme-toggle__moon" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M11.5 11A6 6 0 0 1 5.4 4.7a.5.5 0 0 0-.7-.6A6.5 6.5 0 1 0 13.4 11.7a.5.5 0 0 0-.6-.7c-.4.1-.9.1-1.3 0Z"/></svg>
+  <svg class="theme-toggle__sun" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"/></svg>
+</button>`;
 }
 
 export function renderMasthead(args: {
@@ -120,6 +127,7 @@ export function renderMasthead(args: {
 export function renderDateStrip(strip: DateWithCount[], active: string, today: string, base: string = "/"): string {
   if (!strip.length) return "";
   const params = base.includes("?") ? "&" : "?";
+  const isHome = base === "/";
   return `<nav class="datestrip" aria-label="Spieltage">
   <div class="datestrip__inner" id="datestrip">
     ${strip
@@ -130,7 +138,10 @@ export function renderDateStrip(strip: DateWithCount[], active: string, today: s
         const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
           .filter(Boolean)
           .join(" ");
-        return `<a class="${cls}" href="${base}${params}date=${d.date}" aria-current="${isActive ? "true" : "false"}">
+        const htmxAttrs = isHome
+          ? ` hx-get="/partial/programme?date=${d.date}" hx-target="#programme-content" hx-swap="innerHTML show:#programme:top" hx-push-url="${base}${params}date=${d.date}"`
+          : "";
+        return `<a class="${cls}" href="${base}${params}date=${d.date}" aria-current="${isActive ? "true" : "false"}"${htmxAttrs}>
         <span class="datetile__weekday">${WEEKDAYS_SHORT[p.weekday]}</span>
         <span class="datetile__day">${p.day}</span>
         <span class="datetile__month">${MONTHS_LONG[p.month].slice(0, 3)}</span>
@@ -209,21 +220,25 @@ function renderStatusStamp(status: string): string {
 }
 
 function renderAction(p: DayPerformance): string {
+  const icsLink = `<a class="ics-btn" href="/performance/${p.id}/feed.ics" aria-label="Termin als iCal herunterladen" title="Zum Kalender hinzufügen">
+    <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">
+      <rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/>
+      <path d="M2.5 6h11M5.5 2v3M10.5 2v3M5 9h2M9 9h2M5 11h2" stroke-linecap="round"/>
+    </svg>
+  </a>`;
   if (p.status === "cancelled" || p.status === "sold_out") return "";
   if (p.ticket_url) {
-    return `<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
+    return `${icsLink}<a class="action" href="${escapeHtml(p.ticket_url)}" target="_blank" rel="noopener">
       <span>Karten</span><span class="action__arrow" aria-hidden="true">→</span>
     </a>`;
   }
-  return "";
+  return icsLink;
 }
 
 function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
-  const reportSubject = encodeURIComponent(`Fehler: ${p.show.title} am ${p.date}`);
-  const reportBody = encodeURIComponent(
-    `Bühne: ${p.theater.name}\nVorstellung: ${p.show.title}${p.time ? ` um ${p.time} Uhr` : ""}\nDatum: ${p.date}\nLink: ${APP_URL}/api/performance/${p.id}\n\nWas stimmt nicht?\n`,
-  );
+  const regarding = `${p.show.title} — ${p.theater.name}, ${p.date}${p.time ? ` ${p.time}` : ""}`;
+  const context = `${regarding} (${APP_URL}/api/performance/${p.id})`;
   return `<span class="nav-wrap">
     <button type="button" class="transit-btn" data-theater="${p.theater.slug}" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
       <span class="transit-btn__label">Anfahrt</span>
@@ -244,9 +259,12 @@ function renderTransit(p: DayPerformance): string {
       <a role="menuitem" class="nav-popover__link" data-kind="apple" target="_blank" rel="noopener">
         <span class="nav-popover__icon" aria-hidden="true"></span> Apple Maps
       </a>
-      <a role="menuitem" class="nav-popover__link nav-popover__link--report" href="mailto:feedback@ins.theater?subject=${reportSubject}&body=${reportBody}">
-        <span class="nav-popover__icon" aria-hidden="true">!</span> Fehler melden
-      </a>
+      <button type="button" role="menuitem" class="nav-popover__link nav-popover__link--report"
+        data-report-type="performance"
+        data-report-regarding="${escapeHtml(regarding)}"
+        data-report-context="${escapeHtml(context)}">
+        <span class="nav-popover__icon" aria-hidden="true">!</span> Fehler bei dieser Vorstellung melden
+      </button>
     </div>
   </span>`;
 }
@@ -277,10 +295,10 @@ export function renderFooter(): string {
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.5 5.5a2 2 0 1 0-1.7-3M4.5 10.5a2 2 0 1 0 0-3M11.5 14.5a2 2 0 1 0-1.7-3M5.6 8.4l4.8-2.8M5.6 9.6l4.8 2.8" stroke-linecap="round"/></svg>
         <span>Teilen</span>
       </button>
-      <a class="footer__action" href="mailto:feedback@ins.theater?subject=Feedback%20zu%20frankfurt.ins.theater&body=URL%3A%20${encodeURIComponent(APP_URL)}%0A%0A">
+      <button type="button" class="footer__action" data-contact-open aria-label="Problem melden">
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
         <span>Problem melden</span>
-      </a>
+      </button>
     </p>
     <p class="footer__links">
       <a href="/api/docs">API</a>
@@ -298,7 +316,85 @@ export function renderFooter(): string {
     </p>
     <span class="footer__toast" role="status" aria-live="polite"></span>
   </div>
-</footer>`;
+</footer>
+
+<dialog id="contact-dialog" class="contact-dialog">
+  <form id="contact-form" class="contact-form" novalidate>
+    <header class="contact-form__head">
+      <h2 class="contact-form__title">Feedback &amp; Korrekturen</h2>
+      <button type="button" class="contact-form__close" data-contact-close aria-label="Schließen">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <p class="contact-form__intro">Falsche Zeit, fehlende Vorstellung, Tippfehler? Wir freuen uns über jeden Hinweis.</p>
+
+    <div class="contact-form__regarding" id="contact-regarding" hidden>
+      <span class="contact-form__regarding-label">Betrifft</span>
+      <span id="contact-regarding-text"></span>
+    </div>
+
+    <label class="contact-form__field">
+      <span class="contact-form__label">Kategorie</span>
+      <select id="contact-category" name="category" required>
+        <option value="Vorstellung">Vorstellung — falsche Daten</option>
+        <option value="Bühne">Bühne — fehlt oder Korrektur</option>
+        <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
+      </select>
+    </label>
+
+    <label class="contact-form__field">
+      <span class="contact-form__label">E-Mail (optional, für Rückfragen)</span>
+      <input type="email" id="contact-email" name="email" placeholder="dein@email.de" />
+    </label>
+
+    <label class="contact-form__field">
+      <span class="contact-form__label">Nachricht</span>
+      <textarea id="contact-message" name="message" required rows="4" placeholder="Was stimmt nicht?"></textarea>
+    </label>
+
+    <input type="hidden" id="contact-context" name="context" />
+
+    <footer class="contact-form__foot">
+      <p id="contact-status" class="contact-form__status" hidden aria-live="polite"></p>
+      <button type="submit" id="contact-submit" class="contact-form__submit">Senden</button>
+    </footer>
+  </form>
+</dialog>`;
+}
+
+export function renderProgrammePartial(date: string, performances: DayPerformance[]): string {
+  const dp = dateParts(date);
+  const headerWeekday = WEEKDAYS_LONG[dp.weekday];
+  return `<header class="programme__header">
+    <p class="programme__line"></p>
+    <p class="programme__weekday">${headerWeekday}</p>
+    <h2 class="programme__date">
+      <span class="programme__day">${dp.day}.</span>
+      <span class="programme__month">${MONTHS_LONG[dp.month]}</span>
+      <span class="programme__year">${dp.year}</span>
+    </h2>
+    ${
+      performances.length > 1
+        ? `<div class="programme__search">
+            <input type="search" id="search-input" class="programme__search-input"
+              placeholder="Stück, Bühne, Stichwort durchsuchen…"
+              aria-label="Vorstellungen filtern"
+              autocomplete="off" />
+            <p class="programme__search-status" id="search-status" aria-live="polite"></p>
+          </div>`
+        : ""
+    }
+  </header>
+
+  ${
+    performances.length === 0
+      ? `<div class="empty">
+           <p class="empty__mark">∅</p>
+           <p>An diesem Tag keine Vorstellungen.</p>
+         </div>`
+      : `<ol class="performances" role="list" id="performances">${performances.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>`
+  }`;
 }
 
 export function renderPage(props: PageProps): string {
@@ -326,25 +422,10 @@ ${renderGrain()}
 ${renderMasthead({ weekday: headerWeekday, numeric: headerNumeric, date, isToday })}
 ${renderDateStrip(dateStrip, date, today)}
 
-<main class="programme">
-  <header class="programme__header">
-    <p class="programme__line"></p>
-    <p class="programme__weekday">${headerWeekday}</p>
-    <h2 class="programme__date">
-      <span class="programme__day">${dp.day}.</span>
-      <span class="programme__month">${MONTHS_LONG[dp.month]}</span>
-      <span class="programme__year">${dp.year}</span>
-    </h2>
-  </header>
-
-  ${
-    performances.length === 0
-      ? `<div class="empty">
-           <p class="empty__mark">∅</p>
-           <p>An diesem Tag keine Vorstellungen.</p>
-         </div>`
-      : `<ol class="performances" role="list">${performances.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>`
-  }
+<main class="programme" id="programme">
+  <div id="programme-content">
+    ${renderProgrammePartial(date, performances)}
+  </div>
 </main>
 
 ${renderFooter()}
@@ -377,8 +458,6 @@ export function renderClientScript(): string {
 
   // Anfahrt — popover with RMV / Google Maps / Apple Maps + lazy ÖPNV minutes
   (function(){
-    var btns = document.querySelectorAll('.transit-btn');
-    if (!btns.length) return;
     var transit = null; // { slug -> minutes }
     var loading = false;
 
@@ -427,6 +506,7 @@ export function renderClientScript(): string {
     }
 
     function paintAllButtons(){
+      var btns = document.querySelectorAll('.transit-btn');
       btns.forEach(function(b){
         var slug = b.getAttribute('data-theater');
         var v = transit && transit[slug];
@@ -437,7 +517,6 @@ export function renderClientScript(): string {
           value.textContent = (v < 60) ? (v + ' min') : Math.floor(v/60) + 'h' + (v%60 ? ' ' + (v%60) + 'm' : '');
           b.classList.add('transit-btn--ready');
         }
-        // Also update any open popover for this slug
         var pop = document.getElementById(b.getAttribute('data-popover-target'));
         if (pop) {
           var minutesEl = pop.querySelector('.nav-popover__minutes');
@@ -479,20 +558,45 @@ export function renderClientScript(): string {
       );
     }
 
-    btns.forEach(function(b){
-      var slug = b.getAttribute('data-theater');
-      // Pre-populate map links so they work even without geolocation
+    function rebindAll(){
+      // Pre-populate links on every nav popover currently in the DOM
+      document.querySelectorAll('.transit-btn').forEach(function(b){
+        populatePopover(b.getAttribute('data-theater'));
+      });
+    }
+
+    function positionPopover(btn){
+      var pop = document.getElementById(btn.getAttribute('data-popover-target') || btn.getAttribute('popovertarget'));
+      if (!pop) return;
+      var r = btn.getBoundingClientRect();
+      var w = pop.offsetWidth || 224;
+      var h = pop.offsetHeight || 280;
+      var maxLeft = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
+      // Flip above the trigger if there isn't enough room below
+      var spaceBelow = window.innerHeight - r.bottom;
+      var top = (spaceBelow >= h + 12) ? (r.bottom + 4) : Math.max(8, r.top - h - 4);
+      pop.style.top = top + 'px';
+      pop.style.left = maxLeft + 'px';
+      pop.style.right = 'auto';
+    }
+
+    // Event delegation — works for elements added later by HTMX swap
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('.transit-btn');
+      if (!btn) return;
+      var slug = btn.getAttribute('data-theater');
       populatePopover(slug);
-      b.addEventListener('click', function(){
-        // Re-populate (covers post-fetch ÖPNV minutes)
-        populatePopover(slug);
-        if (transit) return;
-        ensureLocation(function(p){
-          if (!p) return;
-          fetchTransit(p.lat, p.lng, function(){ populatePopover(slug); });
-        });
+      // Position the popover before native showing fires
+      requestAnimationFrame(function(){ positionPopover(btn); });
+      if (transit) return;
+      ensureLocation(function(p){
+        if (!p) return;
+        fetchTransit(p.lat, p.lng, function(){ populatePopover(slug); });
       });
     });
+
+    rebindAll();
+    window.__rebindTransit = rebindAll;
   })();
 
   // Share — Web Share API on mobile, clipboard fallback on desktop
@@ -533,6 +637,162 @@ export function renderClientScript(): string {
       ta.select();
       try { document.execCommand('copy'); showToast('Link kopiert'); } catch(e){}
       document.body.removeChild(ta);
+    });
+  })();
+
+  // Contact dialog (general feedback + per-perf report)
+  (function(){
+    var dlg = document.getElementById('contact-dialog');
+    if (!dlg) return;
+    var form = document.getElementById('contact-form');
+    var category = document.getElementById('contact-category');
+    var message = document.getElementById('contact-message');
+    var context = document.getElementById('contact-context');
+    var regarding = document.getElementById('contact-regarding');
+    var regardingText = document.getElementById('contact-regarding-text');
+    var status = document.getElementById('contact-status');
+    var submit = document.getElementById('contact-submit');
+
+    function open(prefill){
+      status.hidden = true;
+      status.textContent = '';
+      status.className = 'contact-form__status';
+      submit.disabled = false;
+      submit.textContent = 'Senden';
+      if (prefill && prefill.category) category.value = prefill.category;
+      if (prefill && prefill.regarding) {
+        regardingText.textContent = prefill.regarding;
+        context.value = prefill.context || prefill.regarding;
+        regarding.hidden = false;
+      } else {
+        regarding.hidden = true;
+        regardingText.textContent = '';
+        context.value = location.href;
+      }
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+      setTimeout(function(){ message.focus(); }, 50);
+    }
+
+    function close(){
+      if (typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+    }
+
+    document.addEventListener('click', function(e){
+      var openBtn = e.target.closest('[data-contact-open]');
+      if (openBtn) { e.preventDefault(); open(null); return; }
+      var closeBtn = e.target.closest('[data-contact-close]');
+      if (closeBtn) { e.preventDefault(); close(); return; }
+      var reportBtn = e.target.closest('[data-report-type]');
+      if (reportBtn) {
+        e.preventDefault();
+        var type = reportBtn.dataset.reportType;
+        var cat = type === 'theater' ? 'Bühne' : type === 'performance' ? 'Vorstellung' : 'Allgemein';
+        open({
+          category: cat,
+          regarding: reportBtn.dataset.reportRegarding || '',
+          context: reportBtn.dataset.reportContext || ''
+        });
+      }
+    });
+
+    dlg.addEventListener('click', function(e){
+      // Close on backdrop click
+      if (e.target === dlg) close();
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      submit.disabled = true;
+      submit.textContent = 'Wird gesendet…';
+      status.hidden = true;
+      var data = new FormData(form);
+      var payload = {};
+      data.forEach(function(v, k){ payload[k] = v; });
+      fetch('https://formspree.io/f/feedback@ins.theater', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function(r){
+        if (!r.ok) throw new Error('submit failed');
+        status.textContent = 'Danke — Hinweis ist angekommen.';
+        status.className = 'contact-form__status contact-form__status--ok';
+        status.hidden = false;
+        form.reset();
+        setTimeout(close, 1800);
+      }).catch(function(){
+        status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@ins.theater.';
+        status.className = 'contact-form__status contact-form__status--err';
+        status.hidden = false;
+        submit.disabled = false;
+        submit.textContent = 'Senden';
+      });
+    });
+  })();
+
+  // Client-side fuzzy search across visible performances
+  function initSearch(){
+    var input = document.getElementById('search-input');
+    var list = document.getElementById('performances');
+    var status = document.getElementById('search-status');
+    if (!input || !list || !window.uFuzzy) return;
+
+    var items = Array.prototype.slice.call(list.querySelectorAll('.perf'));
+    var haystack = items.map(function(li){
+      var t = (li.querySelector('.perf__title')||{}).textContent || '';
+      var v = (li.querySelector('.perf__venue')||{}).textContent || '';
+      var b = (li.querySelector('.perf__byline')||{}).textContent || '';
+      return (t + ' ' + v + ' ' + b).replace(/s+/g,' ').trim();
+    });
+    var fuzzy = new uFuzzy({ intraMode: 1, intraIns: 1, interIns: Infinity });
+
+    function applyFilter(){
+      var q = input.value.trim();
+      if (!q) {
+        items.forEach(function(li){ li.style.display = ''; });
+        if (status) status.textContent = '';
+        return;
+      }
+      var idxs = fuzzy.filter(haystack, q);
+      var keep = new Set(idxs || []);
+      var visible = 0;
+      items.forEach(function(li, i){
+        var match = keep.has(i);
+        li.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      if (status) status.textContent = visible + ' von ' + items.length + ' Treffern';
+    }
+
+    input.addEventListener('input', applyFilter);
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') { input.value = ''; applyFilter(); input.blur(); }
+    });
+  }
+
+  // Re-bind dynamic UI after HTMX swaps the programme content
+  document.body.addEventListener('htmx:afterSwap', function(e){
+    if (!e.detail || !e.detail.target) return;
+    if (e.detail.target.id !== 'programme-content') return;
+    initSearch();
+    // Re-bind transit popover for newly rendered rows
+    if (typeof window.__rebindTransit === 'function') window.__rebindTransit();
+  });
+
+  if (document.readyState !== 'loading') initSearch();
+  else document.addEventListener('DOMContentLoaded', initSearch);
+
+  // Theme toggle (light/dark, persisted to localStorage)
+  (function(){
+    var btn = document.querySelector('[data-theme-toggle]');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      var html = document.documentElement;
+      var isDark = html.classList.contains('dark');
+      html.classList.toggle('dark', !isDark);
+      html.classList.toggle('light', isDark);
+      try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
     });
   })();
 
