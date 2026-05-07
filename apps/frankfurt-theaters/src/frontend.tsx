@@ -188,7 +188,7 @@ export function renderPerformance(p: DayPerformance, opts: PerformanceRowOptions
         ${room ? `<span class="perf__sep">·</span><span>${room}</span>` : ""}
       </p>`;
 
-  return `<li class="perf perf--${p.status}" style="--i:${index}" data-perf-id="${p.id}" data-theater="${p.theater.slug}">
+  return `<li class="perf perf--${p.status}" id="perf-${p.id}" style="--i:${index}" data-perf-id="${p.id}" data-share-key="perf-${p.id}" data-theater="${p.theater.slug}">
     <div class="perf__when">
       ${dateLine}
       <span class="perf__index">${pad2(index + 1)}</span>
@@ -776,6 +776,28 @@ export function renderClientScript(): string {
     });
   }
 
+  // Deep-link to a single performance: /?date=…&item=perf-<id> or
+  // /?date=…#perf-<id> scrolls the row into view and pulses a highlight.
+  function highlightShareTarget(){
+    var key = new URL(location.href).searchParams.get('item')
+      || (location.hash && location.hash.replace(/^#/, ''));
+    if (!key) return;
+    var el = document.querySelector('[data-share-key="' + key.replace(/"/g, '\\\\"') + '"]')
+      || document.getElementById(key);
+    if (!el) return;
+    requestAnimationFrame(function(){
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.remove('share-highlight');
+      void el.offsetWidth; // force reflow so the animation re-runs
+      el.classList.add('share-highlight');
+      setTimeout(function(){ el.classList.remove('share-highlight'); }, 2600);
+    });
+  }
+  // Initial load + manual hash change. Slight delay on first paint so the
+  // programme content is laid out before we measure scroll position.
+  setTimeout(highlightShareTarget, 350);
+  window.addEventListener('hashchange', highlightShareTarget);
+
   // Date strip — keep the active tile in sync with the URL across HTMX
   // swaps and browser back/forward. The strip lives outside the swap target,
   // so we have to move the .datetile--active class manually.
@@ -811,6 +833,7 @@ export function renderClientScript(): string {
     if (e.detail.target.id !== 'programme-content') return;
     initSearch();
     syncDateStrip();
+    setTimeout(highlightShareTarget, 80);
     // Re-bind transit popover for newly rendered rows
     if (typeof window.__rebindTransit === 'function') window.__rebindTransit();
   });
