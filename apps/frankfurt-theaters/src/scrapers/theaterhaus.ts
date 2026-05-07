@@ -67,7 +67,7 @@ export function parseTheaterhausHtml(html: string): ScrapeResult {
     const ageBadge =
       stripHtml(block.match(/<a\s+class="badge[^"]*\baltersgruppen[^"]*"[^>]*>([\s\S]*?)<\/a>/i)?.[1] ?? "") || null;
 
-    const imgSrc = block.match(/<img[^>]+src="([^"]+\/fileadmin\/[^"]+)"/i)?.[1];
+    const imgSrc = block.match(/<img[^>]+src="((?:https?:\/\/[^"]+)?\/fileadmin\/[^"]+)"/i)?.[1];
 
     const statusText = stripHtml(block.match(/<div\s+class="status">\s*([\s\S]*?)\s*<\/div>/i)?.[1] ?? "");
     const status = mapStatus(statusText);
