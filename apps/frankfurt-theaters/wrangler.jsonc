@@ -4,7 +4,11 @@
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
   "triggers": {
-    "crons": ["0 5 * * *"]
+    // Hourly between 09:00 and 21:00 Europe/Berlin (CEST = UTC+2 in summer,
+    // so 07–19 UTC). 13 invocations per day. Shifts by one hour in winter
+    // (CET = UTC+1) — adjust to "0 8-20 * * *" if precise local timing
+    // matters during DST changeovers.
+    "crons": ["0 7-19 * * *"]
   },
   "d1_databases": [
     {
