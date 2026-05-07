@@ -151,7 +151,7 @@ export function renderDateStrip(strip: DateWithCount[], active: string, today: s
           .filter(Boolean)
           .join(" ");
         const htmxAttrs = isHome
-          ? ` hx-get="/partial/programme?date=${d.date}" hx-target="#programme-content" hx-swap="innerHTML show:#programme:top" hx-push-url="${base}${params}date=${d.date}"`
+          ? ` hx-get="/partial/programme?date=${d.date}" hx-target="#programme-content" hx-swap="innerHTML swap:80ms settle:20ms" hx-push-url="${base}${params}date=${d.date}"`
           : "";
         return `<a class="${cls}" href="${base}${params}date=${d.date}" aria-current="${isActive ? "true" : "false"}"${htmxAttrs}>
         <span class="datetile__weekday">${WEEKDAYS_SHORT[p.weekday]}</span>
@@ -302,6 +302,9 @@ function renderTerminus(p: DayPerformance): string {
   </a>`;
 }
 
+// Paper-airplane / navigation cursor — same glyph museumsufer uses for its
+// per-museum "navigate" trigger (apps/frankfurt-museums/src/icons.tsx).
+const ICON_NAVIGATE = `<svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>`;
 const ICON_RMV = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M19 16.94V8.5c0-2.79-2.61-3.4-5.5-3.5V3h-3v2C7.6 5.1 5 5.71 5 8.5v8.44c-.56.51-.97 1.18-1 1.97V21h4v-1h8v1h4v-2.09c-.03-.79-.44-1.46-1-1.97zM12 4.5c3.13.09 4 .84 4 1.5H8c0-.66.87-1.41 4-1.5zM7 8h10v5H7V8zm1.5 9c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm7 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>`;
 const ICON_GOOGLE = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.5"/></svg>`;
 const ICON_APPLE = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.23 0-1.44.65-2.2.46-3.06-.4C3.79 16.17 4.36 9.43 8.9 9.18c1.25.07 2.12.73 2.86.78.97-.2 1.9-.76 2.93-.69 1.24.1 2.17.58 2.79 1.48-2.56 1.53-1.95 4.89.58 5.83-.45 1.19-.99 2.38-1.95 3.72h-.06zM12.03 9.12C11.9 7.05 13.6 5.36 15.56 5.2c.29 2.38-2.16 4.16-3.53 3.92z"/></svg>`;
@@ -311,7 +314,8 @@ function renderTransit(p: DayPerformance): string {
   const popId = `nav-${p.id}`;
   return `<span class="nav-wrap">
     <button type="button" class="transit-btn" data-popover-target="${popId}" aria-label="Anfahrt zu ${escapeHtml(p.theater.name)}" popovertarget="${popId}" aria-haspopup="menu">
-      Anfahrt
+      <span class="transit-btn__icon" aria-hidden="true">${ICON_NAVIGATE}</span>
+      <span>Anfahrt</span>
     </button>
     <div id="${popId}" popover="auto" role="menu" class="nav-popover" data-theater="${p.theater.slug}">
       <a role="menuitem" class="nav-popover__link nav-popover__link--rmv-app" data-kind="rmv-app" target="_blank" rel="noopener">
@@ -367,10 +371,6 @@ export function renderFooter(): string {
     <p class="footer__rule"></p>
     <p>Eine Übersicht des Spielplans an Frankfurts Bühnen.</p>
     <p class="footer__actions">
-      <button type="button" class="footer__action" data-action="share" aria-label="Diese Seite teilen">
-        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11.5 5.5a2 2 0 1 0-1.7-3M4.5 10.5a2 2 0 1 0 0-3M11.5 14.5a2 2 0 1 0-1.7-3M5.6 8.4l4.8-2.8M5.6 9.6l4.8 2.8" stroke-linecap="round"/></svg>
-        <span>Teilen</span>
-      </button>
       <button type="button" class="footer__action" data-contact-open aria-label="Problem melden">
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
         <span>Problem melden</span>
@@ -638,18 +638,6 @@ export function renderClientScript(): string {
     try { document.execCommand('copy'); showToast(successMsg); } catch(e){}
     document.body.removeChild(ta);
   }
-
-  // Footer share button — copies an LLM-friendly prompt with the page URL
-  (function(){
-    var btn = document.querySelector('.footer__action[data-action="share"]');
-    if (!btn) return;
-    btn.addEventListener('click', function(){
-      var url = location.href;
-      var title = document.title;
-      var prompt = 'Was läuft heute auf Frankfurter Bühnen? ' + url;
-      copyOrShare({ title: title, text: prompt, url: url }, 'Link für KI-Suche kopiert');
-    });
-  })();
 
   // Per-row share — chain icon copies the deep-link to a single performance
   document.addEventListener('click', function(e){
