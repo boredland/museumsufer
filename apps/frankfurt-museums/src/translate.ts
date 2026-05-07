@@ -133,18 +133,6 @@ async function callDeepL(apiKeys: string, texts: string[], targetLang: string): 
   throw new Error("All DeepL API keys exhausted");
 }
 
-export async function getTranslation(env: Env, text: string | null, targetLang: string): Promise<string | null> {
-  if (!text) return null;
-  if (targetLang === "de") return text;
-
-  const hash = fnv1a(text);
-  const row = await env.DB.prepare("SELECT translated_text FROM translations WHERE source_hash = ? AND target_lang = ?")
-    .bind(hash, targetLang)
-    .first<{ translated_text: string }>();
-
-  return row?.translated_text ?? text;
-}
-
 export async function translateFields<T>(env: Env, items: T[], fields: string[], targetLang: string): Promise<T[]> {
   if (targetLang === "de") return items;
 

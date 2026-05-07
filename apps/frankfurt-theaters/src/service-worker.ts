@@ -3,18 +3,18 @@
  * /sw.js without an extra build step.
  *
  * Strategy:
- *  - Network-first for HTML (already), the API, AND /styles.css so CSS
- *    edits land within one navigation. Without this, cache-first served
- *    stale CSS for days because the cache version never changed.
+ *  - CSS is now inlined in <head> (see styles-inline.ts) so /styles.css
+ *    is no longer requested on page load. We drop it from the precache
+ *    list — keeping it would just waste bandwidth on install.
+ *  - Network-first for HTML and the API.
  *  - Stale-while-revalidate for the rest of /public/* (icons, OG image,
  *    fonts) — fast paint from cache, fresh copy in background.
- *  - Cache version bumped to v2 to evict any v1 caches lingering on
- *    returning visitors.
+ *  - Cache version bumped to v3 to evict the v2 cache that still held the
+ *    pre-inline /styles.css entry.
  */
 export const SERVICE_WORKER_JS = `
-const CACHE = 'ft-v2';
+const CACHE = 'ft-v3';
 const STATIC_ASSETS = [
-  '/styles.css',
   '/favicon.svg',
   '/mark.svg',
   '/icon-192.png',
@@ -70,9 +70,7 @@ self.addEventListener('fetch', function(event){
 
   var accept = req.headers.get('accept') || '';
   var isDoc = req.mode === 'navigate' || accept.includes('text/html') || url.pathname.startsWith('/api/');
-  // Treat the stylesheet as content-like: edits should land within a single
-  // navigation, not be locked to a stale cache for days.
-  if (isDoc || url.pathname === '/styles.css') {
+  if (isDoc) {
     event.respondWith(networkFirst(req));
     return;
   }

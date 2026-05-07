@@ -187,6 +187,3 @@ function mapStatus(state: string | null, ticketUrl: string | null): ScrapedPerfo
       return "available";
   }
 }
-
-// Re-export for tests
-export const _internals = { parseListing, parseEvents };

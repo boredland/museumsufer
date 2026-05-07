@@ -30,7 +30,8 @@ export interface TheaterConfig {
     | "galli"
     | "alte-bruecke"
     | "kaes"
-    | "lempenfieber";
+    | "lempenfieber"
+    | "landungsbruecken";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -253,5 +254,15 @@ export const THEATERS: TheaterConfig[] = [
     website_url: "https://www.lempenfieber.de",
     ticketing_provider: "reservix",
     scraper: "lempenfieber",
+  },
+  {
+    slug: "landungsbruecken",
+    name: "Landungsbrücken Frankfurt",
+    address: "Gutleutstraße 294, 60327 Frankfurt am Main",
+    lat: 50.0976,
+    lon: 8.6519,
+    website_url: "https://landungsbruecken.org",
+    ticketing_provider: "custom",
+    scraper: "landungsbruecken",
   },
 ];

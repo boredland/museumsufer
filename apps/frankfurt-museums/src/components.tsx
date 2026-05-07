@@ -1,3 +1,4 @@
+import { buildUtm } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
@@ -32,17 +33,7 @@ function searchHaystack(...parts: (string | null | undefined)[]): string {
     .toLowerCase();
 }
 
-function utm(url: string, content: string): string {
-  try {
-    const u = new URL(url);
-    u.searchParams.set("utm_source", "museumsufer.app");
-    u.searchParams.set("utm_medium", "referral");
-    u.searchParams.set("utm_content", content);
-    return u.toString();
-  } catch {
-    return url;
-  }
-}
+const utm = buildUtm("museumsufer.app");
 
 function ImagePlaceholder({ hero }: { hero?: boolean }) {
   const cls = hero

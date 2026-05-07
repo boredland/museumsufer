@@ -9,3 +9,4 @@ export * from "./robots";
 export * from "./security-headers";
 export * from "./theme-script";
 export * from "./user-agents";
+export * from "./utm";

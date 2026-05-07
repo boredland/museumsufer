@@ -20,12 +20,6 @@ export const emptyStateClass = "empty-state";
 export const descriptionClass =
   "text-xs leading-relaxed text-text-secondary mt-1.5 pt-1.5 border-t border-border-light font-display italic";
 
-export const infoSectionClass =
-  "mt-4 py-3 px-4 bg-surface rounded-xl shadow-card text-[0.8125rem] text-text-secondary border border-border-light";
-
-export const infoSummaryClass =
-  "cursor-pointer font-mono text-text-tertiary text-[0.6875rem] uppercase tracking-[0.16em]";
-
 export const kbdClass =
   "text-[0.625rem] text-text-tertiary border border-border rounded px-1.5 py-0.5 font-mono uppercase tracking-wider";
 

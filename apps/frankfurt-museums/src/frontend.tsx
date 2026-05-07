@@ -8,6 +8,7 @@ import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
+import { INLINE_CSS } from "./styles-inline";
 import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
@@ -105,8 +106,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       {jsonSchemas.map((schema) => (
         <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
       ))}
-      <link rel="preload" as="style" href="/styles.css" />
-      <link rel="stylesheet" href="/styles.css" />
+      <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
     </>
   );
 }

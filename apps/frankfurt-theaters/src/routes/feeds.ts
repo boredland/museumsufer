@@ -1,4 +1,4 @@
-import { dateOffset, icsEsc, slugify, todayIso, utcStamp, xmlEsc } from "@museumsufer/core";
+import { buildUtm, dateOffset, icsEsc, slugify, todayIso, utcStamp, xmlEsc } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformanceById, getPerformancesInRange, getTheaterBySlug } from "../db";
 import { THEATERS } from "../theater-config";
@@ -15,6 +15,8 @@ import { APP_URL } from "./static";
  * local clock time. Cancelled performances ship STATUS:CANCELLED so
  * subscribers see a strikethrough rather than a plain event.
  */
+const utm = buildUtm("frankfurt.ins.theater");
+
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/feed.ics", async (c) => {
@@ -137,10 +139,11 @@ function buildVevent(p: DayPerformance): string {
     descLines.push(p.price_max && p.price_max !== p.price_min ? `${p.price_min}–${p.price_max} €` : `${p.price_min} €`);
   }
   descLines.push(`Status: ${p.status}`);
-  if (p.ticket_url) descLines.push(p.ticket_url);
+  if (p.ticket_url) descLines.push(utm(p.ticket_url, "ics"));
   const description = descLines.length ? `DESCRIPTION:${icsEsc(descLines.join("\n"))}` : "";
 
-  const ticketUrl = p.show.detail_url ?? p.ticket_url ?? "";
+  const ticketUrlSource = p.show.detail_url ?? p.ticket_url ?? "";
+  const ticketUrl = ticketUrlSource ? utm(ticketUrlSource, "ics") : "";
   const url = ticketUrl ? `URL:${icsEsc(ticketUrl)}` : "";
   const status = p.status === "cancelled" ? "STATUS:CANCELLED" : "STATUS:CONFIRMED";
   const uid = `UID:perf-${p.id}@frankfurt.ins.theater`;
@@ -168,7 +171,8 @@ function buildRss(performances: DayPerformance[]): string {
   const items = performances.map((p) => {
     const dateStr = p.time ? `${p.date}T${p.time}:00+02:00` : `${p.date}T00:00:00+02:00`;
     const pubDate = new Date(dateStr).toUTCString();
-    const link = p.show.detail_url || p.ticket_url || `${APP_URL}/api/performance/${p.id}`;
+    const linkSource = p.show.detail_url || p.ticket_url;
+    const link = linkSource ? utm(linkSource, "rss") : `${APP_URL}/api/performance/${p.id}`;
     const title = p.show.title + (p.time ? ` — ${p.time} Uhr` : "");
     const descParts: string[] = [];
     const sameRoom = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
