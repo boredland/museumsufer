@@ -91,6 +91,7 @@ app.get("/theater/:slug", async (c) => {
       performances.length === 1 ? "" : "en"
     }.`,
     canonical: `${APP_URL}/theater/${slug}`,
+    ogImage: `${APP_URL}/theater/${slug}/og.svg`,
     jsonLd,
     extraLinks: [
       { rel: "alternate", type: "text/calendar", href: `/theater/${slug}/feed.ics`, title: `${config.name} – iCal` },

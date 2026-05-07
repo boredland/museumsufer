@@ -1,7 +1,18 @@
+import {
+  decodeEntities as coreDecodeEntities,
+  escapeHtml as coreEscapeHtml,
+  normalizeUrl as coreNormalizeUrl,
+  nullIfMidnight as coreNullIfMidnight,
+  stripHtml as coreStripHtml,
+  truncate as coreTruncate,
+} from "@museumsufer/core";
+
 export const MUSEUMSUFER_DE = "https://www.museumsufer.de";
 export const APP_URL = "https://museumsufer.app";
 export const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
+// Museums uses zero-padded month STRINGS (concatenated into ISO date strings),
+// while core/german uses NUMBERS. Different shape, so we keep them local.
 export const GERMAN_MONTHS_SHORT: Record<string, string> = {
   jan: "01",
   feb: "02",
@@ -33,36 +44,32 @@ export const GERMAN_MONTHS: Record<string, string> = {
   dezember: "12",
 };
 
-export function escHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
+// Re-export from @museumsufer/core. Existing call sites keep working.
+// `escHtml` keeps its old name; the new core version also escapes apostrophes,
+// which is a strict superset of what museums was doing.
+export const escHtml = coreEscapeHtml;
+export const nullIfMidnight = coreNullIfMidnight;
+export const normalizeUrl = coreNormalizeUrl;
+export const decodeEntities = coreDecodeEntities;
 
-export function stripHtml(text: string): string {
-  return text
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#\d+;/g, "")
-    .replace(/&[a-z]+;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+/**
+ * Strip HTML and decode entities. Core's implementation now preserves German
+ * named entities (`&auml;` → `ä`, `&szlig;` → `ß`, `&shy;`, …) where the
+ * previous local version silently dropped them. This is a strict
+ * UX improvement for scraped content.
+ */
+export const stripHtml = coreStripHtml;
 
+/** Backwards-compatible wrapper around `core.truncate`, keeping the 500-char default. */
 export function truncateHtml(text: string, maxLen = 500): string | null {
-  const stripped = stripHtml(text);
-  if (stripped.length === 0) return null;
-  if (stripped.length <= maxLen) return stripped;
-  const cut = stripped.lastIndexOf(" ", maxLen);
-  return `${stripped.slice(0, cut > 0 ? cut : maxLen)}…`;
+  return coreTruncate(text, maxLen);
 }
 
-export function nullIfMidnight(time: string | null | undefined): string | null {
-  if (!time || time === "00:00") return null;
-  return time;
-}
-
+/**
+ * Stricter image-URL sanitiser than core's: requires `http(s)://` and a valid
+ * `URL` constructor parse. Used by museum scrapers where HTML often contains
+ * relative paths or junk that we don't want to ship to the proxy.
+ */
 export function sanitizeImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
   const cleaned = url.split(/\s+/)[0].trim().replace(/&amp;/g, "&");
@@ -202,15 +209,6 @@ export function sortByPopularity<T extends { museum_slug?: string; museum_name?:
     if (pa !== pb) return pb - pa;
     return (a.museum_name || "").localeCompare(b.museum_name || "");
   });
-}
-
-export function normalizeUrl(url: string | null | undefined, baseUrl: string): string | null {
-  if (!url) return null;
-  url = url.trim();
-  if (url.startsWith("http")) return url;
-  if (url.startsWith("//")) return `https:${url}`;
-  if (url.startsWith("/")) return `${baseUrl.replace(/\/$/, "")}${url}`;
-  return `${baseUrl.replace(/\/$/, "")}/${url}`;
 }
 
 export function classifyEvent(title: string, description?: string | null): string | null {
