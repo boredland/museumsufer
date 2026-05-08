@@ -7,6 +7,7 @@ import PQueue from "p-queue";
 import { type ApiExhibition, fetchExhibitionsFromApi } from "./api-scrapers";
 import { todayIso } from "./date";
 import { MUSEUMS } from "./museum-config";
+import { logFail, logOk } from "./scrape-log";
 import type { ParsedExhibition, ParsedMuseum } from "./scraper";
 
 interface ProxyConfig {
@@ -39,10 +40,11 @@ export async function scrapeMuseumExhibitions(
     queue.add(async () => {
       try {
         const items = await fetchExhibitionsFromApi(config.exhibitionApi!, proxyArg);
-        for (const it of mapApiExhibitions(museum.slug, items, today)) out.push(it);
+        const mapped = mapApiExhibitions(museum.slug, items, today);
+        for (const it of mapped) out.push(it);
+        logOk("exhibitions", museum.slug, `${mapped.length} exhibitions`);
       } catch (e) {
-        const msg = `${museum.slug}: ${e instanceof Error ? e.message : String(e)}`;
-        console.error(`Exhibition scrape failed for ${msg}`);
+        logFail("exhibitions", museum.slug, e instanceof Error ? e.message : String(e));
       }
     });
   }

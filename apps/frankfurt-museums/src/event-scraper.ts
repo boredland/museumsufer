@@ -11,6 +11,7 @@ import PQueue from "p-queue";
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { getMuseumConfig } from "./museum-config";
+import { logFail, logInfo, logOk } from "./scrape-log";
 import type { ParsedMuseum } from "./scraper";
 import { classifyEvent, normalizeUrl } from "./shared";
 
@@ -52,18 +53,23 @@ export async function scrapeMuseumWebsites(
   const queue = new PQueue({ concurrency: CONCURRENCY });
   const all: ScrapedEvent[][] = [];
   for (const museum of museums.values()) {
+    const config = getMuseumConfig(museum.slug);
+    if (!config?.eventApi) continue; // skip silently — most museums don't have an API
     queue.add(async () => {
       try {
-        all.push(await scrapeOneMuseum(museum, opts.proxy));
+        const events = await scrapeOneMuseum(museum, opts.proxy);
+        all.push(events);
+        logOk("events", museum.slug, `${events.length} events`);
       } catch (e) {
-        console.error(`Failed to scrape events for ${museum.name}:`, e);
+        logFail("events", museum.slug, e instanceof Error ? e.message : String(e));
       }
     });
   }
   await queue.onIdle();
 
   const events = all.flat();
-  await enrichUpcomingEvents(events, opts.previous?.events ?? []);
+  const enriched = await enrichUpcomingEvents(events, opts.previous?.events ?? []);
+  logInfo(`events: enriched ${enriched} of next 7 days from detail pages`);
   return events;
 }
 
@@ -72,7 +78,7 @@ async function scrapeOneMuseum(museum: ParsedMuseum, proxy: ProxyConfig | undefi
   const eventApi = config?.eventApi;
   if (!eventApi) return [];
 
-  const proxyArg = config?.proxy && proxy?.url ? { url: proxy.url, token: proxy.token } : undefined;
+  const proxyArg = config.proxy && proxy?.url ? { url: proxy.url, token: proxy.token } : undefined;
   const apiEvents = await fetchEventsFromApi(eventApi, proxyArg);
 
   return apiEvents
@@ -140,7 +146,7 @@ async function discoverWebsiteUrls(museums: Map<string, ParsedMuseum>, previous:
 
 // ─── upcoming-event detail enrichment ─────────────────────────────────
 
-async function enrichUpcomingEvents(events: ScrapedEvent[], previousEvents: ScrapedEvent[]): Promise<void> {
+async function enrichUpcomingEvents(events: ScrapedEvent[], previousEvents: ScrapedEvent[]): Promise<number> {
   const today = todayIso();
   const weekAhead = dateOffset(7);
 
@@ -166,23 +172,42 @@ async function enrichUpcomingEvents(events: ScrapedEvent[], previousEvents: Scra
     )
     .slice(0, 30);
 
+  let enriched = 0;
   await Promise.all(
     candidates.map(async (ev) => {
       try {
         const details = await fetchEventDetails(ev.detail_url as string);
         if (!details) return;
-        if (details.price && !ev.price) ev.price = details.price;
-        if (details.image_url && !ev.image_url) ev.image_url = details.image_url;
-        if (details.time && !ev.time) ev.time = details.time;
+        let touched = false;
+        if (details.price && !ev.price) {
+          ev.price = details.price;
+          touched = true;
+        }
+        if (details.image_url && !ev.image_url) {
+          ev.image_url = details.image_url;
+          touched = true;
+        }
+        if (details.time && !ev.time) {
+          ev.time = details.time;
+          touched = true;
+        }
         if (details.end_time && !ev.end_time) {
           // Reject if it's <= the start time (likely an opening-hours range).
           const start = ev.time || details.time || null;
-          if (!start || details.end_time > start) ev.end_time = details.end_time;
+          if (!start || details.end_time > start) {
+            ev.end_time = details.end_time;
+            touched = true;
+          }
         }
-        if (details.description && !ev.description) ev.description = details.description;
+        if (details.description && !ev.description) {
+          ev.description = details.description;
+          touched = true;
+        }
+        if (touched) enriched++;
       } catch {}
     }),
   );
+  return enriched;
 }
 
 function keyForEvent(ev: ScrapedEvent): string {
