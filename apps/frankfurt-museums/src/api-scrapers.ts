@@ -53,6 +53,16 @@ export async function fetchExhibitionsFromApi(
   switch (config.type) {
     case "mmk-cms":
       return fetchMmkExhibitions(config.endpoint);
+    case "schirn":
+      return fetchSchirnExhibitions(config.endpoint);
+    case "weltkulturen":
+      return fetchWeltkulturenExhibitions(config.endpoint);
+    case "caricatura":
+      return fetchCaricaturaExhibitions(config.endpoint);
+    case "giersch":
+      return fetchGierschExhibitions(config.endpoint);
+    case "fff":
+      return fetchFffExhibitions(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -2304,6 +2314,447 @@ async function fetchMmkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       image_url: image ?? null,
       museum_slug_override: override,
     });
+  }
+  return out;
+}
+
+interface SchirnRange {
+  start_date: string | null;
+  end_date: string | null;
+}
+
+// "11.06. – 20.09.2026"  →  start 2026-06-11, end 2026-09-20.
+// "23.10. – 21.02.2027"  →  start 2026-10-23, end 2027-02-21 (start year inferred).
+function parseSchirnNumericRange(text: string): SchirnRange | null {
+  const m = text.match(/(\d{1,2})\.(\d{1,2})\.\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (!m) return null;
+  const [, sd, sm, ed, em, ey] = m;
+  const startYearNum = parseInt(em, 10) >= parseInt(sm, 10) ? parseInt(ey, 10) : parseInt(ey, 10) - 1;
+  return {
+    start_date: `${startYearNum}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`,
+    end_date: `${ey}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`,
+  };
+}
+
+// "Endet am 10. Mai" or "Endet am 10. Mai 2026" — start unknown, end-only.
+function parseSchirnEndet(text: string): SchirnRange | null {
+  const m = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)(?:\s*(\d{4}))?/);
+  if (!m) return null;
+  const month = GERMAN_MONTHS[m[2].toLowerCase()];
+  if (!month) return null;
+  const year = m[3] ?? String(inferYear(month, m[1]));
+  return { start_date: null, end_date: `${year}-${month}-${m[1].padStart(2, "0")}` };
+}
+
+async function fetchSchirnExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  // /programm/ lists currently-running exhibitions (with "Endet am" tags);
+  // /programm/kommende-ausstellungen/ lists upcoming ones (with date ranges).
+  // Both share the same card markup, so fetch both and dedupe by href.
+  const upcomingUrl = new URL("kommende-ausstellungen/", endpoint).toString();
+  const [currentRes, upcomingRes] = await Promise.all([
+    fetch(endpoint, { headers: { "User-Agent": USER_AGENT } }),
+    fetch(upcomingUrl, { headers: { "User-Agent": USER_AGENT } }),
+  ]);
+  const html = `${currentRes.ok ? await currentRes.text() : ""}\n${upcomingRes.ok ? await upcomingRes.text() : ""}`;
+
+  const today = todayIso();
+  const cardRe = /<a\s+href="([^"]+)"\s+class="wp-block-ho-teaser teaser teaser-exhibition[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = cardRe.exec(html);
+  while (m !== null) {
+    const [, href, body] = m;
+    if (seen.has(href)) {
+      m = cardRe.exec(html);
+      continue;
+    }
+    seen.add(href);
+
+    const bockInner = body.match(/<div[^>]*\bbockenheim-indicator\b[^>]*>([\s\S]*?)<\/div>/)?.[1] ?? "";
+    const isBockenheim = bockInner.trim().length > 0;
+
+    const title = body
+      .match(/class="[^"]*\bteaser-text-1\b[^"]*"[^>]*>([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = cardRe.exec(html);
+      continue;
+    }
+
+    const numeric = body.match(/<span class="hide-sm">([^<]+)<\/span>/)?.[1] ?? "";
+    const tag = body.match(/<span class="ho-tag-label">[\s\S]*?<\/span>/)?.[0] ?? "";
+    const range = parseSchirnNumericRange(numeric) ??
+      parseSchirnEndet(tag.replace(/<[^>]+>/g, " ")) ?? { start_date: null, end_date: null };
+
+    if (range.end_date && range.end_date < today) {
+      m = cardRe.exec(html);
+      continue;
+    }
+
+    const image = body.match(/<img[^>]+src="([^"]+)"/)?.[1] ?? null;
+    const detailUrl = href.startsWith("http") ? href : `https://www.schirn.de${href}`;
+
+    out.push({
+      title,
+      start_date: range.start_date,
+      end_date: range.end_date,
+      description: null,
+      detail_url: detailUrl,
+      image_url: image && /^https?:/.test(image) ? image : null,
+      museum_slug_override: isBockenheim ? "schirn-in-bockenheim" : undefined,
+    });
+    m = cardRe.exec(html);
+  }
+  return out;
+}
+
+async function fetchWeltkulturenExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  // /de/ausstellungen/ shows the current exhibition; /de/ausstellungen/vorschau/
+  // shows upcoming ones. Both share the same panel-item markup.
+  const upcomingUrl = new URL("vorschau/", endpoint).toString();
+  const [currentRes, upcomingRes] = await Promise.all([
+    fetch(endpoint, { headers: { "User-Agent": USER_AGENT } }),
+    fetch(upcomingUrl, { headers: { "User-Agent": USER_AGENT } }),
+  ]);
+  const html = `${currentRes.ok ? await currentRes.text() : ""}\n${upcomingRes.ok ? await upcomingRes.text() : ""}`;
+
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  const starts = [...html.matchAll(/class="panel-item[^"]*"/g)];
+  for (let i = 0; i < starts.length; i++) {
+    const start = starts[i].index ?? 0;
+    const end = i + 1 < starts.length ? (starts[i + 1].index ?? html.length) : html.length;
+    const block = html.slice(start, end);
+
+    const href = block.match(/<a\s+href="([^"]+)"/)?.[1];
+    if (!href || !/\/de\/ausstellungen\//.test(href) || seen.has(href)) continue;
+    seen.add(href);
+
+    const title = block
+      .match(/<h2>([\s\S]*?)<\/h2>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) continue;
+
+    const dateLine = block.match(/<span\s*class="date">\s*([^<]+)/)?.[1]?.trim() ?? "";
+    const dateMatch = dateLine.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s*bis\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    if (dateMatch) {
+      start_date = `${dateMatch[3]}-${dateMatch[2].padStart(2, "0")}-${dateMatch[1].padStart(2, "0")}`;
+      end_date = `${dateMatch[6]}-${dateMatch[5].padStart(2, "0")}-${dateMatch[4].padStart(2, "0")}`;
+      if (end_date < today) continue;
+    }
+
+    // Description is the <p> body before the date <span>.
+    const desc = block
+      .match(/<p>\s*([\s\S]*?)<span\s+class="date"/)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: desc ? truncateHtml(desc) : null,
+      detail_url: normalizeUrl(href, origin),
+      image_url: null,
+    });
+  }
+  return out;
+}
+
+interface CaricaturaRange {
+  start_date: string;
+  end_date: string;
+}
+
+function parseCaricaturaRange(badge: string): CaricaturaRange | null {
+  // "28. November 2025 – 7. Juni 2026" — long German format with month names.
+  const long = badge.match(
+    /(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})\s*[–-]\s*(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})/,
+  );
+  if (long) {
+    const sm = CARICATURA_GERMAN_MONTHS[long[2].toLowerCase()];
+    const em = CARICATURA_GERMAN_MONTHS[long[5].toLowerCase()];
+    if (sm && em) {
+      return {
+        start_date: `${long[3]}-${sm}-${long[1].padStart(2, "0")}`,
+        end_date: `${long[6]}-${em}-${long[4].padStart(2, "0")}`,
+      };
+    }
+  }
+  // "Laufzeit 6.3.2026 – 7.6.2026" — numeric format (with optional Laufzeit prefix).
+  const numeric = badge.match(/(?:Laufzeit\s+)?(\d{1,2})\.(\d{1,2})\.(\d{4})\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (numeric) {
+    const [, sd, sm, sy, ed, em, ey] = numeric;
+    return {
+      start_date: `${sy}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`,
+      end_date: `${ey}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`,
+    };
+  }
+  return null;
+}
+
+async function fetchCaricaturaExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  // Caricatura runs two parallel exhibition strands: a Sonderausstellung
+  // and the Caricatura Salon series. Each lives on its own page.
+  const sources = [
+    new URL("sonderausstellung/", endpoint).toString(),
+    new URL("caricatura-salon/", endpoint).toString(),
+  ];
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+
+  await Promise.all(
+    sources.map(async (url) => {
+      let html: string;
+      try {
+        const res = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+        if (!res.ok) return;
+        html = await res.text();
+      } catch {
+        return;
+      }
+
+      const badge = html.match(/<p class="badge">([^<]+)<\/p>/)?.[1]?.trim();
+      if (!badge) return;
+      const range = parseCaricaturaRange(badge);
+      if (!range || range.end_date < today) return;
+
+      const title = html
+        .match(/<h2 class="headline">([\s\S]*?)<\/h2>/)?.[1]
+        ?.replace(/<br\s*\/?>/gi, " ")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&[a-z]+;|&#\d+;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!title) return;
+
+      const subhead = html
+        .match(/<p class="subheadline">([\s\S]*?)<\/p>/)?.[1]
+        ?.replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const teaser = html
+        .match(/<div class="teaser_text">\s*(?:<p>\s*<\/p>\s*)*<p>([\s\S]*?)<\/p>/)?.[1]
+        ?.replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;|&[a-z]+;|&#\d+;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const description = [subhead, teaser].filter(Boolean).join(" — ") || null;
+
+      const imageMatch = html.match(/<img[^>]+class="img-responsive"[^>]+src="([^"]+)"/);
+      const imageUrl = imageMatch ? normalizeUrl(imageMatch[1], origin) : null;
+
+      out.push({
+        title,
+        start_date: range.start_date,
+        end_date: range.end_date,
+        description: description ? truncateHtml(description) : null,
+        detail_url: url,
+        image_url: imageUrl,
+      });
+    }),
+  );
+
+  return out;
+}
+
+interface GierschRange {
+  start_date: string;
+  end_date: string;
+}
+
+// "28.03.2026 - 06.09.2026" or "6.11.26 – 16.5.27" — both year forms.
+function parseGierschRange(text: string): GierschRange | null {
+  const m = text.match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if (!m) return null;
+  const [, sd, sm, sy, ed, em, ey] = m;
+  const expand = (y: string) => (y.length === 2 ? `20${y}` : y);
+  return {
+    start_date: `${expand(sy)}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`,
+    end_date: `${expand(ey)}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`,
+  };
+}
+
+async function fetchGierschExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  const push = (entry: ApiExhibition) => {
+    if (!entry.detail_url || seen.has(entry.detail_url)) return;
+    if (entry.end_date && entry.end_date < today) return;
+    seen.add(entry.detail_url);
+    out.push(entry);
+  };
+
+  // Hero teaser: the currently running exhibition.
+  const heroMatch = html.match(
+    /<div\s+class="ce\s+ce-hero-teaser[^"]*bgr-primary-exhibition[^"]*"[^>]*>[\s\S]*?<a\s+href="([^"]+)"[\s\S]*?<h4\s+class="teaser-date">([^<]+)<\/h4>[\s\S]*?<h1\s+class="teaser-title">([\s\S]*?)<\/h1>(?:[\s\S]*?<p\s+class="teaser-exerpt">([\s\S]*?)<\/p>)?/,
+  );
+  if (heroMatch) {
+    const range = parseGierschRange(heroMatch[2]);
+    if (range) {
+      const title = heroMatch[3]
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const subtitle = heroMatch[4]
+        ?.replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      push({
+        title,
+        start_date: range.start_date,
+        end_date: range.end_date,
+        description: subtitle || null,
+        detail_url: heroMatch[1],
+        image_url: null,
+      });
+    }
+  }
+
+  // Vorschau cards: each exhibition-teaser block.
+  const cardRe =
+    /<div\s+class="exhibition-teaser">[\s\S]*?<a\s+href="([^"]+)"[\s\S]*?(?:<img[^>]+src="([^"]+)"[^>]*\/?>[\s\S]*?)?<p\s+class="teaser-date">([^<]+)<\/p>\s*<h3\s+class="teaser-title">([\s\S]*?)<\/h3>(?:\s*<p\s+class="teaser-subtitle">([\s\S]*?)<\/p>)?/g;
+  let cm: RegExpExecArray | null = cardRe.exec(html);
+  while (cm !== null) {
+    const range = parseGierschRange(cm[3]);
+    if (range) {
+      const title = cm[4]
+        .replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const subtitle = cm[5]
+        ?.replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      push({
+        title,
+        start_date: range.start_date,
+        end_date: range.end_date,
+        description: subtitle || null,
+        detail_url: cm[1],
+        image_url: cm[2] ?? null,
+      });
+    }
+    cm = cardRe.exec(html);
+  }
+
+  return out;
+}
+
+async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const blockRe =
+    /<div\s+data-item-id="(\d+)"\s+class="CustomProduct[^"]*"[^>]*data-archive="(\d{4})"[^>]*>([\s\S]*?)<\/div>\s*(?=<div\s+data-item-id|<\/div>\s*<\/div>)/g;
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = blockRe.exec(html);
+  while (m !== null) {
+    const [, id, year, body] = m;
+    const teaser1 = body
+      .match(/<div class="teaserText1">([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!teaser1) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const pipe = teaser1.lastIndexOf("|");
+    if (pipe < 0) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const dateLine = teaser1.slice(0, pipe).trim();
+    const category = teaser1.slice(pipe + 1).trim();
+    if (!/^AUSSTELLUNG\b/i.test(category)) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    // "09.05. – 30.08.2026" — start has no year (assume same as end), end has year.
+    const range = dateLine.match(/(\d{1,2})\.(\d{1,2})\.\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (!range) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const [, sd, sm, ed, em, ey] = range;
+    const startYear = parseInt(em, 10) >= parseInt(sm, 10) ? parseInt(ey, 10) : parseInt(ey, 10) - 1;
+    const start_date = `${startYear}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`;
+    const end_date = `${ey}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`;
+    if (end_date < today) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const titleRaw =
+      body.match(/<div class="title">([\s\S]*?)<\/div>\s*(?:<div class="teaserText2"|<\/div>)/)?.[1] ?? "";
+    const title = titleRaw
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    // AUSSTELLUNG cards close with </div></a>; events close with </div></div>.
+    const description = body
+      .match(/<div class="teaserText2">([\s\S]*?)<\/div>\s*(?:<\/a>|<\/div>)/)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const hrefMatch = body.match(/<a\s+href="([^"]+)"/);
+    const detailUrl = hrefMatch ? normalizeUrl(hrefMatch[1], origin) : null;
+
+    const key = `${id}::${start_date}`;
+    if (seen.has(key)) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    seen.add(key);
+
+    // The data-archive year matches our extracted end year — no use yet.
+    void year;
+
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: description ? truncateHtml(description) : null,
+      detail_url: detailUrl,
+      image_url: null,
+    });
+    m = blockRe.exec(html);
   }
   return out;
 }
