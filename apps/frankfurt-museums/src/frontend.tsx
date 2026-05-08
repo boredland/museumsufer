@@ -315,36 +315,57 @@ function RiverNav({
   tr,
   activeDate,
   activeRange,
+  dateCounts,
 }: {
   locale: Locale;
   tr: Record<string, string>;
   activeDate: string;
   activeRange?: number;
+  /** Per-day event counts for the visible window. */
+  dateCounts: Array<{ date: string; count: number }>;
 }) {
   const dl = dateLocale(locale);
-  const now = berlinNow();
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const d = now.add(i, "day");
+  const todayIsoStr = berlinNow().format("YYYY-MM-DD");
+  // The bundle is already capped at +90 days at scrape time; use whatever
+  // the queries layer surfaces. Always include today even if no events,
+  // so the strip's "is-today" anchor is present.
+  const stops = [...dateCounts];
+  if (!stops.find((s) => s.date === todayIsoStr)) {
+    stops.unshift({ date: todayIsoStr, count: 0 });
+    stops.sort((a, b) => a.date.localeCompare(b.date));
+  }
+  const days = stops.map((s) => {
+    const d = berlinNow();
+    const [y, m, dd] = s.date.split("-").map(Number);
+    const date = d
+      .year(y)
+      .month(m - 1)
+      .date(dd);
+    const isToday = s.date === todayIsoStr;
     return {
-      iso: d.format("YYYY-MM-DD"),
-      weekday: i === 0 ? tr.today : d.toDate().toLocaleDateString(dl, { weekday: "short" }),
-      day: String(d.date()),
+      iso: s.date,
+      weekday: isToday ? tr.today : date.toDate().toLocaleDateString(dl, { weekday: "short" }),
+      day: String(date.date()),
+      month: date.toDate().toLocaleDateString(dl, { month: "short" }),
+      count: s.count,
+      isToday,
     };
   });
 
   return (
     <nav class="mb-7" aria-label={tr.dateNav}>
-      <div class="relative pb-3">
-        <div class="river-band absolute left-0 right-0 bottom-1.5" aria-hidden="true" />
-        <div class="relative flex items-end justify-between gap-0.5">
-          {days.map((d, i) => (
+      <div id="river-strip" class="river-strip">
+        <div class="river-strip__inner">
+          {days.map((d) => (
             <button
               type="button"
               data-date={d.iso}
-              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}${i === 0 ? " is-today" : ""}`}
+              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}${d.isToday ? " is-today" : ""}`}
             >
-              <span class="stop-day">{d.day}</span>
               <span class="stop-weekday">{d.weekday}</span>
+              <span class="stop-day">{d.day}</span>
+              <span class="stop-month">{d.month}</span>
+              <span class="stop-count">{d.count > 0 ? d.count : ""}</span>
             </button>
           ))}
         </div>
@@ -557,6 +578,7 @@ export function renderPage(
   museums?: Record<string, MuseumInfo>,
   _sort?: string,
   range?: number,
+  dateCounts: Array<{ date: string; count: number }> = [],
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
   const berlinOffset = getBerlinUtcOffset();
@@ -670,7 +692,13 @@ export function renderPage(
 
             <AskAI tr={tr} />
 
-            <RiverNav locale={locale} tr={tr} activeDate={initialData?.date || todayIso()} activeRange={range} />
+            <RiverNav
+              locale={locale}
+              tr={tr}
+              activeDate={initialData?.date || todayIso()}
+              activeRange={range}
+              dateCounts={dateCounts}
+            />
 
             <div class="anchor-headline mb-7 mt-8" id="date-label" aria-live="polite">
               {range

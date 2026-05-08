@@ -70,6 +70,22 @@ export async function getEventsForDate(date: string): Promise<Event[]> {
   return date === todayIso() ? filterPastEvents(out) : out;
 }
 
+/**
+ * Per-day event counts within `[startDate, endDate]`. Used by the
+ * river-strip date picker to surface "what's on" density at a glance.
+ * Counts all events in the day (no past-time filtering) — the strip
+ * is informational; the per-day view applies the time filter itself.
+ */
+export function getEventCountsByDate(startDate: string, endDate: string): Array<{ date: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const ev of SCRAPE_DATA.events) {
+    if (ev.date < startDate || ev.date > endDate) continue;
+    if (!MUSEUMS_BY_ID.has(ev.museum_id)) continue;
+    counts.set(ev.date, (counts.get(ev.date) ?? 0) + 1);
+  }
+  return [...counts.entries()].map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
+}
+
 export async function getEventsForRange(startDate: string, endDate: string): Promise<Event[]> {
   const today = todayIso();
   const todayInRange = startDate <= today && today <= endDate;

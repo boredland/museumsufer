@@ -7,6 +7,7 @@ import {
   attachLikeCounts,
   buildIcs,
   fetchDayData,
+  getEventCountsByDate,
   getEventsForDate,
   getExhibitionsForDate,
   getLikeCounts,
@@ -439,7 +440,11 @@ app.get(
       });
     }
 
-    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined, range), {
+    const today = todayIso();
+    const horizon = berlinNow().add(90, "day").format("YYYY-MM-DD");
+    const dateCounts = getEventCountsByDate(today, horizon);
+
+    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined, range, dateCounts), {
       headers: {
         "Content-Language": locale,
         Vary: "Accept, Accept-Language",
