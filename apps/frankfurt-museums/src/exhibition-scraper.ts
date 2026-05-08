@@ -27,7 +27,9 @@ export async function scrapeMuseumExhibitions(
     if (!config?.exhibitionApi) continue;
 
     try {
-      const items = await fetchExhibitionsFromApi(config.exhibitionApi);
+      const proxy =
+        config.proxy && env.FETCH_PROXY_URL ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN } : undefined;
+      const items = await fetchExhibitionsFromApi(config.exhibitionApi, proxy);
       const persisted = await persistExhibitions(env, museum, items, today);
       exhibitions += persisted;
       scraped++;
