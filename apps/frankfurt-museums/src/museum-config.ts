@@ -22,7 +22,8 @@ export type EventApiType =
   | "eventon"
   | "buergerstiftung"
   | "schirn"
-  | "mmk";
+  | "mmk"
+  | "giersch";
 
 export interface ProxyConfig {
   url: string;
@@ -268,8 +269,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6545,
     rmvStopLid: "A=1@O=Frankfurt (Main) Gutleut-/Heilbronner Straße@X=8654212@Y=50099751@U=80@L=3000016@",
     exhibitionUrl: "https://www.mggu.de/ausstellungen/",
-    // /de/programm and /de/veranstaltungen are SPA-rendered with no parseable dates.
-    skipEvents: true,
+    eventApi: { type: "giersch", endpoint: "https://www.mggu.de/veranstaltungen/" },
   },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
