@@ -141,6 +141,34 @@ details > summary::-webkit-details-marker { display: none; }
 }
 [open] > summary .disclosure-icon { transform: rotate(180deg); }
 
+/* FAQ toggle — geometric +/− that collapses on open. Two thick bars
+   crossed; the vertical one rotates flat into the horizontal on open. */
+.faq-toggle {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  color: inherit;
+  transition: color 0.15s ease;
+}
+.faq-toggle::before,
+.faq-toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.faq-toggle::after { transform: translateY(-50%) rotate(90deg); }
+details[open] > summary .faq-toggle::after {
+  transform: translateY(-50%) rotate(0);
+  opacity: 0;
+}
+
 .loading::after {
   content: '';
   display: inline-block;

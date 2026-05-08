@@ -129,36 +129,10 @@ const PASS_URLS: Record<Locale, { card: string; ticket: string }> = {
 function Mark({ class: cls }: { class?: string }) {
   return (
     <svg viewBox="0 0 96 80" role="img" aria-label="Museumsufer" class={cls} xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="mark-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="currentColor" stop-opacity="0.5" />
-          <stop offset="100%" stop-color="currentColor" stop-opacity="0" />
-        </linearGradient>
-        <clipPath id="mark-clip">
-          <rect x="0" y="48" width="96" height="40" />
-        </clipPath>
-      </defs>
+      <circle cx="48" cy="10" r="5" fill="#b45309" />
       <g fill="currentColor">
-        <path d="M48 6 L72 22 L24 22 Z" />
-        <rect x="22" y="24" width="52" height="3.5" />
-        <rect x="26" y="29" width="3.5" height="14" />
-        <rect x="35" y="29" width="3.5" height="14" />
-        <rect x="46.25" y="29" width="3.5" height="14" />
-        <rect x="57.5" y="29" width="3.5" height="14" />
-        <rect x="66.5" y="29" width="3.5" height="14" />
-        <rect x="20" y="44" width="56" height="3.5" />
-      </g>
-      <g clip-path="url(#mark-clip)">
-        <g fill="url(#mark-fade)">
-          <rect x="20" y="49" width="56" height="3.5" />
-          <rect x="26" y="53" width="3.5" height="14" />
-          <rect x="35" y="53" width="3.5" height="14" />
-          <rect x="46.25" y="53" width="3.5" height="14" />
-          <rect x="57.5" y="53" width="3.5" height="14" />
-          <rect x="66.5" y="53" width="3.5" height="14" />
-          <rect x="22" y="68" width="52" height="3.5" />
-          <path d="M48 86 L72 70 L24 70 Z" />
-        </g>
+        <path d="M 48 20 L 84 58 L 12 58 Z" />
+        <rect x="4" y="66" width="88" height="10" />
       </g>
     </svg>
   );
@@ -540,16 +514,32 @@ function FaqSection({ tr }: { tr: Record<string, string> }) {
     { q: tr.faq7Q, a: tr.faq7A },
   ];
   return (
-    <section class="mt-8">
-      <h2 class="font-display italic text-[1.25rem] leading-tight text-text-primary mb-4">{tr.faqTitle}</h2>
-      <dl class="flex flex-col gap-4">
-        {items.map((item) => (
-          <div>
-            <dt class="text-[0.8125rem] font-medium text-text-primary">{item.q}</dt>
-            <dd class="mt-1 text-[0.8125rem] text-text-secondary leading-relaxed">{item.a}</dd>
-          </div>
+    <section class="mt-12">
+      <header class="mb-5 flex items-baseline gap-3">
+        <span class="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-text-tertiary shrink-0">
+          {tr.faqTitle}
+        </span>
+        <span class="h-px flex-1 bg-river" aria-hidden="true" />
+        <span class="font-mono text-[0.625rem] tabular-nums text-text-tertiary shrink-0">
+          01 — {String(items.length).padStart(2, "0")}
+        </span>
+      </header>
+      <div class="border-b border-border-light">
+        {items.map((item, i) => (
+          <details class="border-t border-border-light group" open={i === 0}>
+            <summary class="flex items-start gap-4 py-4 cursor-pointer select-none list-none">
+              <span class="font-mono text-[0.6875rem] tracking-[0.16em] text-text-tertiary tabular-nums pt-[3px] w-7 shrink-0">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="flex-1 text-[0.9375rem] font-medium text-text-primary leading-snug group-hover:text-river transition-colors">
+                {item.q}
+              </h3>
+              <span class="faq-toggle shrink-0 mt-[6px] text-text-tertiary group-hover:text-river" aria-hidden="true" />
+            </summary>
+            <p class="pl-[2.75rem] pr-8 pb-5 text-[0.8125rem] text-text-secondary leading-relaxed">{item.a}</p>
+          </details>
         ))}
-      </dl>
+      </div>
     </section>
   );
 }
