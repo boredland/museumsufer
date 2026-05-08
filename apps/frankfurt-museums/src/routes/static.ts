@@ -84,7 +84,7 @@ Returns: name, slug, museumsufer_url, website_url
 - Times are in 24h format (HH:MM), timezone Europe/Berlin
 - Events are available for the next 7 days with the most detail (images, prices, deep links)
 - Exhibitions are available for any date (they span weeks/months)
-- Data is refreshed daily at 6am UTC
+- Data refreshes daily at 06:00 UTC via a GitHub Action that regenerates the bundled scrape data and redeploys the worker
 - Translations available via ?lang=en or ?lang=fr query parameter on the API
 `;
 
