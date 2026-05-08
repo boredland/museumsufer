@@ -128,19 +128,17 @@ function buildScrapeData(input: {
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  // Drop past exhibitions early.
+  // Drop past exhibitions early; fuzzy-dedup by title within the same
+  // museum (handles trailing-punctuation / whitespace divergence between
+  // museumsufer.de and museum-API copies of the same exhibition).
   const today = todayIso();
-  const seenExhibition = new Set<string>();
-  const exhibitions: Exhibition[] = [];
+  const exhibitionsRaw: Exhibition[] = [];
   for (const ex of input.exhibitions) {
     if (ex.end_date && ex.end_date < today) continue;
     const museumId = museumIdBySlug.get(ex.museum_slug);
     if (!museumId) continue;
-    const dedupKey = `${ex.museum_slug}|${ex.title.toLowerCase().trim()}`;
-    if (seenExhibition.has(dedupKey)) continue;
-    seenExhibition.add(dedupKey);
     const id = fnv1aInt(`${ex.museum_slug}|${ex.title}`);
-    exhibitions.push({
+    exhibitionsRaw.push({
       id,
       museum_id: museumId,
       title: ex.title,
@@ -151,26 +149,24 @@ function buildScrapeData(input: {
       ...(ex.detail_url ? { detail_url: ex.detail_url } : {}),
     });
   }
-  exhibitions.sort(
+  const exhibitions = deduplicateByTitle(exhibitionsRaw).sort(
     (a, b) =>
       (a.start_date ?? "").localeCompare(b.start_date ?? "") ||
       a.museum_id - b.museum_id ||
       a.title.localeCompare(b.title),
   );
 
-  // Drop events older than yesterday.
+  // Drop events older than yesterday + drop closure entries (museum
+  // opening-hours pages occasionally surface as "Geschlossen" events).
   const yesterday = addDays(today, -1);
-  const seenEvent = new Set<string>();
-  const eventList: Event[] = [];
+  const eventsRaw: Event[] = [];
   for (const ev of input.events) {
     if (ev.date < yesterday) continue;
+    if (CLOSURE_KEYWORDS.test(ev.title)) continue;
     const museumId = museumIdBySlug.get(ev.museum_slug);
     if (!museumId) continue;
-    const dedupKey = `${ev.museum_slug}|${ev.title.toLowerCase().trim()}|${ev.date}`;
-    if (seenEvent.has(dedupKey)) continue;
-    seenEvent.add(dedupKey);
     const id = fnv1aInt(`${ev.museum_slug}|${ev.title}|${ev.date}|${ev.time ?? ""}`);
-    eventList.push({
+    eventsRaw.push({
       id,
       museum_id: museumId,
       title: ev.title,
@@ -186,7 +182,11 @@ function buildScrapeData(input: {
       ...(ev.category ? { category: ev.category } : {}),
     });
   }
-  eventList.sort(
+  // Two-pass dedup mirrors the previous read-time logic: pass 1 collapses
+  // events with the same museum + normalized title; pass 2 collapses
+  // same-museum same-time entries whose titles share all significant
+  // words (e.g. "Workshop für Kinder" vs "Workshop für Kinder!").
+  const events = deduplicateEvents(deduplicateByTitle(eventsRaw)).sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
       (a.time ?? "").localeCompare(b.time ?? "") ||
@@ -201,7 +201,7 @@ function buildScrapeData(input: {
     if (ex.title) livingTexts.add(ex.title);
     if (ex.description) livingTexts.add(ex.description);
   }
-  for (const ev of eventList) {
+  for (const ev of events) {
     if (ev.title) livingTexts.add(ev.title);
     if (ev.description) livingTexts.add(ev.description);
   }
@@ -209,7 +209,61 @@ function buildScrapeData(input: {
     .filter((t) => livingTexts.has(t.source_text))
     .sort((a, b) => a.source_hash.localeCompare(b.source_hash) || a.target_lang.localeCompare(b.target_lang));
 
-  return { museums, exhibitions, events: eventList, translations };
+  return { museums, exhibitions, events, translations };
+}
+
+const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
+
+function normalizeForDedup(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[:.,;!?()[\]{}""„"''‚'«»‹›]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
+  const result: T[] = [];
+  for (const item of items) {
+    const norm = normalizeForDedup(item.title);
+    const dupeIdx = result.findIndex((e) => e.museum_id === item.museum_id && normalizeForDedup(e.title) === norm);
+    if (dupeIdx !== -1) {
+      if (item.id > result[dupeIdx].id) result[dupeIdx] = item;
+      continue;
+    }
+    result.push(item);
+  }
+  return result;
+}
+
+function deduplicateEvents<T extends { museum_id: number; title: string; id: number; time?: string | null }>(
+  events: T[],
+): T[] {
+  const result: T[] = [];
+  for (const ev of events) {
+    if (ev.time) {
+      const dupeIdx = result.findIndex(
+        (e) => e.museum_id === ev.museum_id && e.time === ev.time && wordsOverlap(e.title, ev.title),
+      );
+      if (dupeIdx !== -1) {
+        if (ev.id > result[dupeIdx].id) result[dupeIdx] = ev;
+        continue;
+      }
+    }
+    result.push(ev);
+  }
+  return result;
+}
+
+function wordsOverlap(a: string, b: string): boolean {
+  const na = normalizeForDedup(a);
+  const nb = normalizeForDedup(b);
+  if (na === nb) return true;
+  const wordsA = na.split(" ").filter((w) => w.length > 2);
+  const wordsB = nb.split(" ").filter((w) => w.length > 2);
+  if (wordsA.length === 0 || wordsB.length === 0) return false;
+  const [shorter, longerStr] = wordsA.length <= wordsB.length ? [wordsA, nb] : [wordsB, na];
+  return shorter.every((w) => longerStr.includes(w));
 }
 
 async function loadPreviousBundle(path: string): Promise<ScrapeData> {
