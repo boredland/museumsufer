@@ -1,4 +1,4 @@
-import { THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { LLM_SERVICES, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -400,24 +400,6 @@ function RiverNav({
 }
 
 function AskAI({ tr }: { tr: Record<string, string> }) {
-  const prompt = encodeURIComponent(tr.llmPrompt);
-  const services = [
-    {
-      id: "i-gemini",
-      name: "Gemini (Google AI Mode)",
-      href: `https://www.google.com/search?udm=50&q=${prompt}`,
-      color: "#4285F4",
-    },
-    // Universal links — desktop opens the web UI; iOS/Android route to
-    // the native app if installed. ChatGPT/Claude/Perplexity all moved
-    // their canonical hostname (chatgpt.com, claude.com, perplexity.ai
-    // root). Grok's standalone domain (grok.com) supports the q= param;
-    // the previous x.com/i/grok URL didn't pre-fill on mobile.
-    { id: "i-chatgpt", name: "ChatGPT", href: `https://chatgpt.com/?q=${prompt}`, color: "#10A37F" },
-    { id: "i-claude", name: "Claude", href: `https://claude.com/new?q=${prompt}`, color: "#D97757" },
-    { id: "i-perplexity", name: "Perplexity", href: `https://www.perplexity.ai/?q=${prompt}`, color: "#1FB8CD" },
-    { id: "i-grok", name: "Grok", href: `https://grok.com/?q=${prompt}`, color: "currentColor" },
-  ];
   return (
     <section
       class="my-7 py-3 px-4 bg-surface rounded-xl border border-border-light flex items-center gap-3 flex-wrap max-[480px]:gap-2 max-[480px]:py-2.5 max-[480px]:px-3"
@@ -427,9 +409,9 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
         {tr.llmTip}
       </span>
       <div class="flex items-center gap-1 ml-auto">
-        {services.map((s) => (
+        {LLM_SERVICES.map((s) => (
           <a
-            href={s.href}
+            href={s.buildUrl(tr.llmPrompt)}
             target="_blank"
             rel="noopener"
             aria-label={s.name}
@@ -438,7 +420,7 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
             style={`color:${s.color}`}
           >
             <svg aria-hidden="true" class="w-3 h-3 fill-current">
-              <use href={`#${s.id}`} />
+              <use href={`#i-${s.id}`} />
             </svg>
           </a>
         ))}
