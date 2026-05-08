@@ -79,77 +79,6 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Landau in der Pfalz",
     },
     {
-      category: "gedenken",
-      date: "2026-05-08",
-      description: "Gedenkveranstaltung am Tag der Befreiung",
-      detail_url: "https://kulturnetz-landau.de/veranstaltung/landauerinnert-7oo6/",
-      id: 4251687186,
-      image_url: "https://kulturnetz-landau.de/media/c/images/events/niewieder/d9ff248f9b016df33d17f1ae516453c9.jpg",
-      source: "kulturnetz",
-      source_uid: "landauerinnert-7oo6",
-      time: "15:00",
-      title: "#LandauErinnert",
-      venue: "Landau",
-    },
-    {
-      category: "gedenken",
-      date: "2026-05-08",
-      description:
-        "Am 8. Mai wird in Landau innegehalten: Die Stadt lädt an diesem Tag dazu ein, gemeinsam zu erinnern, ins Gespräch zu kommen und ein Zeichen für eine lebendige Erinnerungskultur zu setzen. Die offene Gedenkveranstaltung am Tag der Befreiung beginnt am Freitag, 8. Mai, um 15 Uhr an der Gedenkskulptur »Nie wieder« von Künstler Karlheinz Zwick im Durchgang der Siebenpfeiffer-Allee auf dem früheren LGS-Gelände.",
-      detail_url:
-        "https://www.landau.de/Tourismus-Kultur/Veranstaltungen/-LandauErinnert-Stadt-Landau-l%C3%A4dt-zum-gemeinsamen-Gedenken-am-Tag-der-Befreiung-ein.php?object=tx,2644.4.1&ModID=11&FID=2644.5488.1&NavID=2644.11&La=1&bn=1",
-      end_time: "15:00",
-      id: 2720492268,
-      image_url: "https://www.landau.de/media/custom/2644_16448_1_g.JPG?1777563781",
-      source: "landau-de",
-      source_uid: "2644.5488.1",
-      time: "15:00",
-      title: "#LandauErinnert: Stadt Landau lädt zum gemeinsamen Gedenken am Tag der Befreiung ein",
-      venue:
-        "an der Gedenkskulptur »Nie wieder« von Künstler Karlheinz Zwick im Durchgang der Siebenpfeiffer-Allee auf dem früheren LGS-Gelände",
-    },
-    {
-      category: "theater",
-      date: "2026-05-08",
-      description: "Musik-Stationentheater",
-      detail_url: "https://kulturnetz-landau.de/veranstaltung/im-rausch-der-zwanziger-berlin-neukastel-slevogt-7og6/",
-      id: 3524175016,
-      image_url: "https://kulturnetz-landau.de/media/c/images/events/slevogt/70be4cdf1854d4370df9f7fd455a64b7.jpg",
-      source: "kulturnetz",
-      source_uid: "im-rausch-der-zwanziger-berlin-neukastel-slevogt-7og6",
-      time: "18:30",
-      title: "Im Rausch der Zwanziger: Berlin. Neukastel. Slevogt.",
-      venue: "Slevogthof",
-    },
-    {
-      category: "konzert",
-      date: "2026-05-08",
-      description: "Swing, blues, bossa, boogie woogie",
-      detail_url: "https://kulturnetz-landau.de/veranstaltung/swingtonic-dr-blue-gv6d/",
-      id: 2276693050,
-      image_url:
-        "https://kulturnetz-landau.de/media/c/images/events/swing_W7ImoMN/436fe24fa280a55065764f79a56b98fc.jpg",
-      source: "kulturnetz",
-      source_uid: "swingtonic-dr-blue-gv6d",
-      time: "19:00",
-      title: "swingTonic & Dr. Blue",
-      venue: "Atelier-Salon",
-    },
-    {
-      category: "konzert",
-      date: "2026-05-08",
-      description: "Raus aus den Kellern, rauf auf die Bühne!",
-      detail_url: "https://kulturnetz-landau.de/veranstaltung/offene-buehne-zrp5/",
-      id: 2593735064,
-      image_url:
-        "https://kulturnetz-landau.de/media/c/images/events/fef26d11a0cc385929c1e6cf5ac207da_65vb3Tx/cb1ef09a46a9f81dc4e4b518d1d05450.jpg",
-      source: "kulturnetz",
-      source_uid: "offene-buehne-zrp5",
-      time: "20:00",
-      title: "Offene Bühne",
-      venue: "Das Haus (Südstern e.V.)",
-    },
-    {
       category: "feste",
       date: "2026-05-09",
       description: "Am 09.05.26 öffnen rund 80 Höfe ihre Pforte.",
@@ -258,6 +187,675 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "19:00",
       title: "Thalamus",
       venue: "atelier29",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/amselkerwe-2026-05-09/veranstaltungsdatum.html",
+      id: 3761694435,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/f/csm_150e134a-ab48-4471-9c8f-fcb8771bd223_f4cfb1417f.jpg",
+      source: "suew",
+      source_uid: "amselkerwe-2026-05-09",
+      title: "Amselkerwe",
+      venue: "Ortsgemeinde Knöringen, Knöringen",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/atelier29-thalamus-2026-05-09/veranstaltungsdatum.html",
+      id: 2330138996,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/4/csm_00bdb4dc-48d5-47cf-bce7-dda87cb8c9ed_4a1fb60eb1.png",
+      source: "suew",
+      source_uid: "atelier29-thalamus-2026-05-09",
+      title: "atelier29: Thalamus",
+      venue: "Atelier 29, Weinstr. 29",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-09/veranstaltungsdatum.html",
+      id: 3349364496,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-09",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-09/veranstaltungsdatum.html",
+      id: 827341432,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-09",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-von-rolf-grosskopf-2026-05-09/veranstaltungsdatum.html",
+      id: 905411980,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/6/csm_9e48e76f-3c18-41a6-a1fd-1646673dec20_126e1f699a.png",
+      source: "suew",
+      source_uid: "ausstellung-von-rolf-grosskopf-2026-05-09",
+      title: "Ausstellung von Rolf Großkopf",
+      venue: "Werner Brand Kunststiftung Bienchenhof, Hauptstraße 3",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-zwischengefuehl-2026-05-09/veranstaltungsdatum.html",
+      id: 3622316420,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/c/csm_c478c5ef-4309-47f9-b228-5389ff335469_cb238b5e47.jpg",
+      source: "suew",
+      source_uid: "ausstellung-zwischengefuehl-2026-05-09",
+      title: 'Ausstellung: "Zwischengefühl"',
+      venue: "Strieffler Haus der Künste, Löhlstraße 3",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/bunkerfuehrung-2026-05-09/veranstaltungsdatum.html",
+      id: 3395166836,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/b/csm_9e2f98a4-e930-4ed8-b55d-efdb15f53459_980fb5df87.jpg",
+      source: "suew",
+      source_uid: "bunkerfuehrung-2026-05-09",
+      title: "Bunkerführung",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-09/veranstaltungsdatum.html",
+      id: 520344536,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-09",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/die-burg-trifels-und-das-dritte-reic-2026-05-09/veranstaltungsdatum.html",
+      id: 535998868,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/f/e/csm_0673d82b-0656-4ddb-b470-7a61c219fe97_4edea0ddbe.jpg",
+      source: "suew",
+      source_uid: "die-burg-trifels-und-das-dritte-reic-2026-05-09",
+      title: "Die Burg Trifels und das Dritte Reich",
+      venue: "Reichsburg Trifels, Trifelsstraße",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-09",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ein-tag-im-park-2026-05-09-01/veranstaltungsdatum.html",
+      id: 2441054892,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/2/csm_d3cbc2e9-2e87-4a15-8b76-ceb28c31c6c2_efe3fe6b43.jpg",
+      source: "suew",
+      source_uid: "ein-tag-im-park-2026-05-09-01",
+      title: "Ein Tag im Park",
+      venue: "Markwardanlage, Kurpark (Ecke Bindersbacherstraße)",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-09/veranstaltungsdatum.html",
+      id: 2981714260,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-09",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Wandern",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/explore-the-kiesbuckel-2026-05-09/veranstaltungsdatum.html",
+      id: 4286423992,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/7/csm_83ed5315-bdc4-45ab-ba1a-540bcfc4a157_e3cf7f73b3.png",
+      source: "suew",
+      source_uid: "explore-the-kiesbuckel-2026-05-09",
+      title: "Explore the Kiesbuckel",
+      venue: "Naturfreundehaus Kiesbuckel, Kiesbuckel 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Zirkus",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/farbenspiel-gold-edition-im-circus-2026-05-09/veranstaltungsdatum.html",
+      id: 1351139012,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/c/csm_4b03259d-43d1-4555-84d3-a4ce70644e89_0adfc75193.jpg",
+      source: "suew",
+      source_uid: "farbenspiel-gold-edition-im-circus-2026-05-09",
+      title: "Farbenspiel Gold Edition im Circus Krone",
+      venue: "Neuer Messplatz / Alfred-Nobel-Platz, Marie-Curie-Straße",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-09",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-09/veranstaltungsdatum.html",
+      id: 575953416,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-09",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "theater",
+      date: "2026-05-09",
+      description: "Volkstheater",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/gastspiel-saal-46-maria-stuart-im-b-2026-05-09/veranstaltungsdatum.html",
+      id: 948083420,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/2/csm_e208d2e4-48a1-4bbc-bb26-a7ce75cdf979_4b8a388af6.jpg",
+      source: "suew",
+      source_uid: "gastspiel-saal-46-maria-stuart-im-b-2026-05-09",
+      title: "Gastspiel: Saal_46 Maria Stuart im Bayrischen Hof",
+      venue: "Chawwerusch Theater, Obere Hauptstraße 14",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/historische-stadtfuehrung-edenkoben-2026-05-09/veranstaltungsdatum.html",
+      id: 2405146311,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/e/csm_40aceee7-39e5-4e38-aff9-0dec647ecf2a_0b0090ee20.jpg",
+      source: "suew",
+      source_uid: "historische-stadtfuehrung-edenkoben-2026-05-09",
+      title: 'Historische Stadtführung Edenkoben "vun allem ebbes"',
+      venue: "I-Punkt, Weinstr. 86",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/historische-stadtfuehrung-landau-2026-05-09/veranstaltungsdatum.html",
+      id: 3256953380,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/6/csm_cae39912-542b-4f96-87bf-c61025140268_52fda9e001.jpg",
+      source: "suew",
+      source_uid: "historische-stadtfuehrung-landau-2026-05-09",
+      title: "Historische Stadtführung Landau",
+      venue: "Neues Rathaus, Marktstraße 50",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/hoffest-weinhaus-spiess-2026-05-09/veranstaltungsdatum.html",
+      id: 1900942835,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/3/csm_8cf00efa-9d8c-4ec8-a7ae-8c8b59ed9517_134d09d375.png",
+      source: "suew",
+      source_uid: "hoffest-weinhaus-spiess-2026-05-09",
+      title: "Hoffest Weinhaus Spieß",
+      venue: "Wein- und Gästehaus Spieß, Schloßstr. 11A",
+    },
+    {
+      category: "theater",
+      date: "2026-05-09",
+      description: "Sprechtheater / Schauspiel",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/im-rausch-der-zwanziger-auf-dem-slev-2026-05-09/veranstaltungsdatum.html",
+      id: 1031278999,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/b/csm_52b1ed11-0c43-4383-8234-704cb36b0975_d39a044e8f.jpg",
+      source: "suew",
+      source_uid: "im-rausch-der-zwanziger-auf-dem-slev-2026-05-09",
+      title: "Im Rausch der Zwanziger auf dem Slevogthof",
+      venue: "Slevogthof Schlossgut Neukastel, Slevogthof",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-09",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/indie-paunk-night-2026-05-09/veranstaltungsdatum.html",
+      id: 1099209220,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/c/csm_b5ee5ed5-a021-4f87-aa4c-8c6793a18618_75859f9fba.jpg",
+      source: "suew",
+      source_uid: "indie-paunk-night-2026-05-09",
+      title: "Indie Paunk Night",
+      venue: "MaRock Bar, Martin-Luther-Straße 45b",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-2026-2026-05-09/veranstaltungsdatum.html",
+      id: 392429020,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_0d732e9e-a9fe-401d-8836-c71bd82daaab_69441be418.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-2026-2026-05-09",
+      title: "Jahrgangspräsentation 2026",
+      venue: "Weingut Erich Stachel, Bahnhofstraße 40",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-weingut-moewes-2026-05-09/veranstaltungsdatum.html",
+      id: 3921228332,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/f/9/csm_d85cc975-a420-4f9a-a9b7-0a73c5b4dc79_856d16a4af.png",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-weingut-moewes-2026-05-09",
+      title: "Jahrgangsverkostung Weingut Möwes",
+      venue: "Weingut Möwes GdbR, Hübühl 10",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-09",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/konzert-barocke-klaenge-neu-geweb-2026-05-09/veranstaltungsdatum.html",
+      id: 2099446915,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/9/csm_f9d1f1e6-5e21-4e3e-9b4a-f256d2c24167_76ff88be88.jpg",
+      source: "suew",
+      source_uid: "konzert-barocke-klaenge-neu-geweb-2026-05-09",
+      title: "Konzert „Barocke Klänge neu gewebt“ – Akkordeon trifft Barock“",
+      venue: "Protestantische Kirche Gleiszellen, Winzergasse 2",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-09",
+      description: "Klassik",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/konzert-der-gesellschaft-fuer-musikf-2026-05-09/veranstaltungsdatum.html",
+      id: 1935138975,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/2/csm_fb3e4693-7bdc-4288-afbb-9b9240c54f07_ed9ce589f7.jpg",
+      source: "suew",
+      source_uid: "konzert-der-gesellschaft-fuer-musikf-2026-05-09",
+      title: "Konzert der Gesellschaft für Musikfreunde: „Saiten und Tasten im Dialog“",
+      venue: "Heiner-Geißler-Saal, Herzog-Wolfgang-Straße 5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Diverse Messen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kristalltage-annweiler-2026-05-09/veranstaltungsdatum.html",
+      id: 936000700,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_6c4b1154-cfb6-4408-aaa3-9b50b59ad4a5_d49742485f.jpg",
+      source: "suew",
+      source_uid: "kristalltage-annweiler-2026-05-09",
+      title: "Kristalltage Annweiler",
+      venue: "Hohenstaufensaal, Landauerstr. 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kroenungsfeier-weinprinzessin-der-ur-2026-05-09/veranstaltungsdatum.html",
+      id: 2103881336,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/4/csm_fc8b8019-22cf-49ec-ac68-499d1cc605d3_e7576c1486.jpg",
+      source: "suew",
+      source_uid: "kroenungsfeier-weinprinzessin-der-ur-2026-05-09",
+      title: "Krönungsfeier Weinprinzessin der Urlaubsregion Offenbach / Queich",
+      venue: "Dorfgemeinschaftshaus Hochstadt, Hauptstraße 200",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Kirmes",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kuckuckskerwe-2026-05-09/veranstaltungsdatum.html",
+      id: 2488683036,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_d0144e3d-e6ab-493d-80aa-61faff415f54_f2e5c64ce9.jpg",
+      source: "suew",
+      source_uid: "kuckuckskerwe-2026-05-09",
+      title: "Kuckuckskerwe",
+      venue: "Ortsgemeinde Wernersberg, Zum Geierstein 11",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kulinarische-gaestefuehrung-2026-05-09/veranstaltungsdatum.html",
+      id: 2445463484,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/9/csm_4066adbf-2e3f-489a-bc00-a28a8809adca_55d9f5a57d.jpg",
+      source: "suew",
+      source_uid: "kulinarische-gaestefuehrung-2026-05-09",
+      title: "Kulinarische Gästeführung",
+      venue: "Stiftskirchenplatz, Marktstr. 93",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-09",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kurs-wild-wilder-wildkraeuter-2026-05-09/veranstaltungsdatum.html",
+      id: 3417924496,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/7/csm_156b85a9-9c40-4925-8f6d-f06d4066cc47_86aa2e1bb7.jpeg",
+      source: "suew",
+      source_uid: "kurs-wild-wilder-wildkraeuter-2026-05-09",
+      title: "Kurs: Wild, wilder, Wildkräuter – sammeln, zubereiten und essen",
+      venue: "URSAM Natur- und Lebenspfade e.V., Nauweg 66",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/landaus-unterwelt-lunette-41-2026-05-09/veranstaltungsdatum.html",
+      id: 2449044632,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/5/csm_d82b7ab5-23e9-419d-8e21-c9c8a570ea29_06f160d00e.jpg",
+      source: "suew",
+      source_uid: "landaus-unterwelt-lunette-41-2026-05-09",
+      title: "Landaus Unterwelt - Lunette 41 -",
+      venue: "Obertorplatz, Ecke Reiterstr./Xylanderstr., 76829 Landau in der Pfalz",
+    },
+    {
+      category: "theater",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/lesung-heinz-rudolf-kunze-liest-geb-2026-05-09/veranstaltungsdatum.html",
+      id: 1157618149,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/1/csm_709eb157-3928-4b53-acb3-ff1f6f5a94ca_81941e0854.jpg",
+      source: "suew",
+      source_uid: "lesung-heinz-rudolf-kunze-liest-geb-2026-05-09",
+      title: "LESUNG: Heinz Rudolf Kunze liest Gebrauchsgegensta",
+      venue: "Universum THEATER LANDAU, Königstr. 48/50",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Geführte Wanderungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/lieblingsplaetzel-2026-05-09/veranstaltungsdatum.html",
+      id: 4065845348,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/4/csm_b113e3ce-847a-43f0-a752-99393dbfcc86_23d46e3320.jpg",
+      source: "suew",
+      source_uid: "lieblingsplaetzel-2026-05-09",
+      title: "Lieblingsplätzel",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/lydia-benecke-psychopathinnen-2026-05-09/veranstaltungsdatum.html",
+      id: 3527863652,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/9/csm_29b96459-58e9-40a3-886d-8eef1e6c7bf5_82681549a8.jpg",
+      source: "suew",
+      source_uid: "lydia-benecke-psychopathinnen-2026-05-09",
+      title: 'Lydia Benecke - "PsychopathINNEN"',
+      venue: "Haus des Gastes, Rötzweg 7",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/maikammer-erleben-historische-schae-2026-05-09/veranstaltungsdatum.html",
+      id: 3827338356,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/e/csm_fce6a201-597a-4daa-b4f6-12aefd571f04_88ba385c10.jpg",
+      source: "suew",
+      source_uid: "maikammer-erleben-historische-schae-2026-05-09",
+      title: "Maikammer erleben: Historische Schätze und versteckte Highlights",
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-09",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/matcha-charm-im-liva-cafe-2026-05-09/veranstaltungsdatum.html",
+      id: 1332179744,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/3/csm_7e5fefd1-b4b9-4c42-8bce-b2e9d9675f5a_f72c9b0ea2.png",
+      source: "suew",
+      source_uid: "matcha-charm-im-liva-cafe-2026-05-09",
+      title: "Matcha & Charm im Liva Café",
+      venue: "Liva Cafe, Westbahnstr. 31",
+    },
+    {
+      category: "sport",
+      date: "2026-05-09",
+      description: "Golf / Minigolf",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/minigolfturnier-2026-05-09/veranstaltungsdatum.html",
+      id: 1657822912,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/3/csm_94411a68-d742-498d-8315-96c349ca8ce6_8eb485aa25.jpg",
+      source: "suew",
+      source_uid: "minigolfturnier-2026-05-09",
+      title: "Minigolfturnier",
+      venue: "Weinstube Pfalzgenuss im Kurpark, Minigolfanlage im Kurpark",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-09-01/veranstaltungsdatum.html",
+      id: 1868927763,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-09-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/musik-im-glas-2026-05-09/veranstaltungsdatum.html",
+      id: 2935008508,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/1/csm_88ac8a69-b126-40f8-ab44-e3e0fb1cd84e_364e0e4ab3.jpg",
+      source: "suew",
+      source_uid: "musik-im-glas-2026-05-09",
+      title: "Musik im Glas",
+      venue: "Weingut Spiegel, Am Weißen Kreuz 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/raum-ausstellung-im-haus-zum-maulb-2026-05-09/veranstaltungsdatum.html",
+      id: 2368635000,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/2/csm_8f5fe6b7-8200-41dd-8eb9-f1b648f9fa24_cc2e87131c.jpg",
+      source: "suew",
+      source_uid: "raum-ausstellung-im-haus-zum-maulb-2026-05-09",
+      title: "Raum - Ausstellung im Haus zum Maulbeerbaum",
+      venue: "Haus zum Maulbeerbaum eG, Kramstraße 25",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/regelmaessige-burgfuehrung-trifels-2026-05-09/veranstaltungsdatum.html",
+      id: 896216600,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/e/csm_87c9a4d6-efc2-4614-9335-cb7dd86fff7c_fac47ceaba.jpg",
+      source: "suew",
+      source_uid: "regelmaessige-burgfuehrung-trifels-2026-05-09",
+      title: "Regelmäßige Burgführung Trifels",
+      venue: "Reichsfeste Trifels, Trifelsstraße",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/rollende-weinproben-mit-dem-schoppen-2026-05-09/veranstaltungsdatum.html",
+      id: 4218079100,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/b/csm_9da61bc5-294e-4e8c-8757-453de86fcf16_9f9bffefe8.jpg",
+      source: "suew",
+      source_uid: "rollende-weinproben-mit-dem-schoppen-2026-05-09",
+      title: "Rollende Weinproben mit dem Schoppenbähnel Pfeffer-Express",
+      venue: "Elmar-Weiller-Festhalle, Bonifatiusstraße 22",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-09",
+      description: "Weinseminar",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sektmacher-stellen-sie-ihre-eigene-2026-05-09/veranstaltungsdatum.html",
+      id: 949057448,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/a/csm_c0089446-5db4-4824-a7f8-5b4fcb517987_089e785440.jpg",
+      source: "suew",
+      source_uid: "sektmacher-stellen-sie-ihre-eigene-2026-05-09",
+      title: "Sektmacher - Stellt eure eigene Flasche Sekt her!",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-09",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-09/veranstaltungsdatum.html",
+      id: 3622358728,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-09",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-09",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/solo-ausstellung-gedankenpalast-2026-05-09/veranstaltungsdatum.html",
+      id: 2635851392,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/0/csm_8065b716-43a0-4a4b-868e-c28ef3a089f6_79a9d17d00.png",
+      source: "suew",
+      source_uid: "solo-ausstellung-gedankenpalast-2026-05-09",
+      title: 'Solo-Ausstellung "Gedankenpalast"',
+      venue: "Aparte Kunst Galerie, Alberecht Dürer Str. 16",
+    },
+    {
+      category: "nachtleben",
+      date: "2026-05-09",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/soupe-salon-vol-3-2026-05-09/veranstaltungsdatum.html",
+      id: 1512806115,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/4/csm_6bda2975-0fab-4aac-b473-ae44d410fbc8_cc602d873c.jpg",
+      source: "suew",
+      source_uid: "soupe-salon-vol-3-2026-05-09",
+      title: "Soupe Salon Vol. 3 mit Afterwork Party",
+      venue: "Weingut Jakob Gerau, An 44 Nr. 39a",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-09",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/weingutsfuehrung-durch-den-holzfassk-2026-05-09/veranstaltungsdatum.html",
+      id: 2083395980,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/1/csm_5a0bfcdb-737f-4c3d-8c8f-41f058f9bcd8_887c4c268b.jpg",
+      source: "suew",
+      source_uid: "weingutsfuehrung-durch-den-holzfassk-2026-05-09",
+      title: "Weingutsführung durch den Holzfasskeller, Weingut Bernhard Koch",
+      venue: "Weingut Bernhard Koch, Weinstr. 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-09",
+      description: "Bauernmarkt",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wochenmarkt-auf-dem-landauer-rathaus-2026-05-09/veranstaltungsdatum.html",
+      id: 1322553988,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/b/csm_c6f9644a-68c7-4617-9731-6b2acefd9cab_13eafd6473.jpg",
+      source: "suew",
+      source_uid: "wochenmarkt-auf-dem-landauer-rathaus-2026-05-09",
+      title: "Wochenmarkt auf dem Landauer Rathausplatz",
+      venue: "Rathausplatz Landau, Marktstraße 50",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-09",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/zoo-mint-mach-pass-2026-05-09/veranstaltungsdatum.html",
+      id: 910744747,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/7/csm_87adfb9d-8b94-4f3f-b3cd-7e8867cab06d_64644188c1.jpg",
+      source: "suew",
+      source_uid: "zoo-mint-mach-pass-2026-05-09",
+      title: 'Zoo "MINT-Mach-Pass"',
+      venue: "Zoo Landau, Hindenburgstraße 12",
     },
     {
       category: "literatur",
@@ -375,6 +973,879 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "atelier29",
     },
     {
+      category: "ausstellung",
+      date: "2026-05-10",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cartoons-in-der-galerie-neumue-2026-05-10/veranstaltungsdatum.html",
+      id: 3935492460,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/2/csm_410fc6bf-c49f-4c44-b8ac-1ec3244affef_4c7afa23c5.jpg",
+      source: "suew",
+      source_uid: "cartoons-in-der-galerie-neumue-2026-05-10",
+      title: "„Cartoons“ in der Galerie Neumühle",
+      venue: "Galerie Neumühle, Klosterstr. 173",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-10",
+      description: "Kirchenmusik",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mala-moja-fruehlingskonzert-am-mut-2026-05-10/veranstaltungsdatum.html",
+      id: 4158877840,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_da9c9db3-7a90-49f9-b339-ddefb5513ad9_7867b89ed8.jpeg",
+      source: "suew",
+      source_uid: "mala-moja-fruehlingskonzert-am-mut-2026-05-10",
+      title: '"Mala moja" Frühlingskonzert am Muttertag',
+      venue: "Augustinerkirche, Köngistr. 23",
+    },
+    {
+      category: "feste",
+      date: "2026-05-10",
+      description: "Pfälzer Feste für Alle",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/21-deutsch-franzoesischer-bauernmar-2026-05-10/veranstaltungsdatum.html",
+      id: 58771612,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/6/csm_2bfb96d2-f526-41de-9a6c-f4e7b0d5e0d7_d16bb077b6.jpg",
+      source: "suew",
+      source_uid: "21-deutsch-franzoesischer-bauernmar-2026-05-10",
+      title: "21. Deutsch-Französischer Bauernmarkt mit verkaufsoffenem Sonntag",
+      venue: "Schlossplatz, Königstraße 61",
+    },
+    {
+      category: "feste",
+      date: "2026-05-10",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/amselkerwe-2026-05-10/veranstaltungsdatum.html",
+      id: 3979950577,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/f/csm_150e134a-ab48-4471-9c8f-fcb8771bd223_f4cfb1417f.jpg",
+      source: "suew",
+      source_uid: "amselkerwe-2026-05-10",
+      title: "Amselkerwe",
+      venue: "Ortsgemeinde Knöringen, Knöringen",
+    },
+    {
+      category: "tanz",
+      date: "2026-05-10",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/atelier29-die-nacht-der-tango-gitar-2026-05-10/veranstaltungsdatum.html",
+      id: 1259615808,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/d/csm_c5ff8113-ef3f-4ea5-a706-7e0f187f4105_7774beb5d3.jpg",
+      source: "suew",
+      source_uid: "atelier29-die-nacht-der-tango-gitar-2026-05-10",
+      title: "atelier29: Die Nacht der Tango-Gitarre 2",
+      venue: "Atelier 29, Weinstr. 29",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonntags-ausschank-an-der-pergol-2026-05-10/veranstaltungsdatum.html",
+      id: 3154199388,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/4/csm_b2cd7134-4ef2-4d7d-9ca6-a067bdb9f2e0_26d4708871.jpg",
+      source: "suew",
+      source_uid: "sonntags-ausschank-an-der-pergol-2026-05-10",
+      title: "Ausschank an der Pergola in Nußdorf",
+      venue: "Weinerlebnispfad Nußdorf, Weinbergslage »Kaiserberg«",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-10",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-von-rolf-grosskopf-2026-05-10/veranstaltungsdatum.html",
+      id: 872003836,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/6/csm_9e48e76f-3c18-41a6-a1fd-1646673dec20_126e1f699a.png",
+      source: "suew",
+      source_uid: "ausstellung-von-rolf-grosskopf-2026-05-10",
+      title: "Ausstellung von Rolf Großkopf",
+      venue: "Werner Brand Kunststiftung Bienchenhof, Hauptstraße 3",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-10",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-zwischengefuehl-2026-05-10/veranstaltungsdatum.html",
+      id: 3840572560,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/c/csm_c478c5ef-4309-47f9-b228-5389ff335469_cb238b5e47.jpg",
+      source: "suew",
+      source_uid: "ausstellung-zwischengefuehl-2026-05-10",
+      title: 'Ausstellung: "Zwischengefühl"',
+      venue: "Strieffler Haus der Künste, Löhlstraße 3",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/brunch-zum-muttertag-2026-05-10/veranstaltungsdatum.html",
+      id: 1490665064,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/a/csm_bd4d87a8-7e0f-47aa-a18d-e20721f38a28_4460f9bfd7.png",
+      source: "suew",
+      source_uid: "brunch-zum-muttertag-2026-05-10",
+      title: "Brunch zum Muttertag",
+      venue: "Toms Näschtl, Thomas-Nast-Str. 22",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cato-bontjes-van-beek-die-vergesse-2026-05-10/veranstaltungsdatum.html",
+      id: 2808488692,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/0/csm_b388a022-64d6-467a-b2e2-532b6c802788_07ee871a38.jpg",
+      source: "suew",
+      source_uid: "cato-bontjes-van-beek-die-vergesse-2026-05-10",
+      title: "Cato Bontjes van Beek - Die vergessene Widerstandskämpferin",
+      venue: "Frank-Loebsches-Haus, Kaufhausgasse 9",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-10",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/chansons-am-muttertag-2026-05-10/veranstaltungsdatum.html",
+      id: 937269956,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/f/csm_d0ee0d60-36af-4655-8d57-c1caad538fbc_bbc42b5b4c.jpg",
+      source: "suew",
+      source_uid: "chansons-am-muttertag-2026-05-10",
+      title: "CHANSONS am MUTTERTAG",
+      venue: "Alte Elektro-Werkstatt, Danziger Straße 7",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-10/veranstaltungsdatum.html",
+      id: 486936392,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-10",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Führungen für Kinder",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/entdeckertour-auf-burg-trifels-2026-05-10/veranstaltungsdatum.html",
+      id: 3531834980,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/5/csm_176e7caa-f15a-4111-a4a7-92b3e25afd04_6fa498d0ec.jpg",
+      source: "suew",
+      source_uid: "entdeckertour-auf-burg-trifels-2026-05-10",
+      title: "Entdeckertour auf Burg Trifels",
+      venue: "Reichsburg Trifels, Trifelsstraße",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Wandern",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/explore-the-kiesbuckel-2026-05-10/veranstaltungsdatum.html",
+      id: 2105583784,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/7/csm_83ed5315-bdc4-45ab-ba1a-540bcfc4a157_e3cf7f73b3.png",
+      source: "suew",
+      source_uid: "explore-the-kiesbuckel-2026-05-10",
+      title: "Explore the Kiesbuckel",
+      venue: "Naturfreundehaus Kiesbuckel, Kiesbuckel 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Zirkus",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/farbenspiel-gold-edition-im-circus-2026-05-10/veranstaltungsdatum.html",
+      id: 1418102392,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/c/csm_4b03259d-43d1-4555-84d3-a4ce70644e89_0adfc75193.jpg",
+      source: "suew",
+      source_uid: "farbenspiel-gold-edition-im-circus-2026-05-10",
+      title: "Farbenspiel Gold Edition im Circus Krone",
+      venue: "Neuer Messplatz / Alfred-Nobel-Platz, Marie-Curie-Straße",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-10",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-10/veranstaltungsdatum.html",
+      id: 542545272,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-10",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "theater",
+      date: "2026-05-10",
+      description: "Volkstheater",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/gastspiel-saal-46-maria-stuart-im-b-2026-05-10/veranstaltungsdatum.html",
+      id: 914675276,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/2/csm_e208d2e4-48a1-4bbc-bb26-a7ce75cdf979_4b8a388af6.jpg",
+      source: "suew",
+      source_uid: "gastspiel-saal-46-maria-stuart-im-b-2026-05-10",
+      title: "Gastspiel: Saal_46 Maria Stuart im Bayrischen Hof",
+      venue: "Chawwerusch Theater, Obere Hauptstraße 14",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/gerberfuehrung-durch-annweiler-am-tr-2026-05-10/veranstaltungsdatum.html",
+      id: 1251124260,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/3/csm_b4595c67-269d-4330-8fdc-d90aa3d53577_c523a749fa.jpg",
+      source: "suew",
+      source_uid: "gerberfuehrung-durch-annweiler-am-tr-2026-05-10",
+      title: "Gerberführung durch Annweiler am Trifels",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "theater",
+      date: "2026-05-10",
+      description: "Sprechtheater / Schauspiel",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/im-rausch-der-zwanziger-auf-dem-slev-2026-05-10/veranstaltungsdatum.html",
+      id: 997870856,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/b/csm_52b1ed11-0c43-4383-8234-704cb36b0975_d39a044e8f.jpg",
+      source: "suew",
+      source_uid: "im-rausch-der-zwanziger-auf-dem-slev-2026-05-10",
+      title: "Im Rausch der Zwanziger auf dem Slevogthof",
+      venue: "Slevogthof Schlossgut Neukastel, Slevogthof",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-10",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kinderprogramm-tierischer-muttertag-2026-05-10/veranstaltungsdatum.html",
+      id: 3857102300,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/9/csm_5826f298-d903-46ed-ae1d-49c3e16e507a_ba88b2a0f4.jpg",
+      source: "suew",
+      source_uid: "kinderprogramm-tierischer-muttertag-2026-05-10",
+      title: "Kinderprogramm: Tierischer Muttertag",
+      venue: "Wild- und Wanderpark Silz, 76857 Silz",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-10",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/klassische-klavier-improvisation-2026-05-10/veranstaltungsdatum.html",
+      id: 2660374984,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/8/csm_bb7bfb0d-d7ac-42bf-8b69-a5adb9a8a339_b01e14aa89.jpg",
+      source: "suew",
+      source_uid: "klassische-klavier-improvisation-2026-05-10",
+      title: "Klassische Klavier-Improvisation",
+      venue: "prot Kirchengemeinde Annweiler, Kirchgasse 9",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Diverse Messen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kristalltage-annweiler-2026-05-10/veranstaltungsdatum.html",
+      id: 902592556,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_6c4b1154-cfb6-4408-aaa3-9b50b59ad4a5_d49742485f.jpg",
+      source: "suew",
+      source_uid: "kristalltage-annweiler-2026-05-10",
+      title: "Kristalltage Annweiler",
+      venue: "Hohenstaufensaal, Landauerstr. 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-10",
+      description: "Kirmes",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kuckuckskerwe-2026-05-10/veranstaltungsdatum.html",
+      id: 2438497272,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_d0144e3d-e6ab-493d-80aa-61faff415f54_f2e5c64ce9.jpg",
+      source: "suew",
+      source_uid: "kuckuckskerwe-2026-05-10",
+      title: "Kuckuckskerwe",
+      venue: "Ortsgemeinde Wernersberg, Zum Geierstein 11",
+    },
+    {
+      category: "literatur",
+      date: "2026-05-10",
+      description: "Autorenlesung / Vortrag",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/lesung-gedenken-an-die-buecherverbr-2026-05-10/veranstaltungsdatum.html",
+      id: 3473425188,
+      image_url: "https://www.suedlicheweinstrasse.de/static/_processed_/b/f/csm_fallback_e202184936.jpg",
+      source: "suew",
+      source_uid: "lesung-gedenken-an-die-buecherverbr-2026-05-10",
+      title: "Lesung: Gedenken an die Bücherverbrennung 1933",
+      venue: "Frank-Loebsches-Haus, Kaufhausgasse 9",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-10",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/malbrunch-am-muttertag-2026-05-10/veranstaltungsdatum.html",
+      id: 4068124616,
+      image_url: "https://www.suedlicheweinstrasse.de/static/_processed_/b/f/csm_fallback_e202184936.jpg",
+      source: "suew",
+      source_uid: "malbrunch-am-muttertag-2026-05-10",
+      title: "MALBRUNCH am Muttertag",
+      venue: "Atelier Art, Trifelsstr. 8",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-10-01/veranstaltungsdatum.html",
+      id: 868156572,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-10-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "feste",
+      date: "2026-05-10",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/musik-im-glas-2026-05-10/veranstaltungsdatum.html",
+      id: 2901600364,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/1/csm_88ac8a69-b126-40f8-ab44-e3e0fb1cd84e_364e0e4ab3.jpg",
+      source: "suew",
+      source_uid: "musik-im-glas-2026-05-10",
+      title: "Musik im Glas",
+      venue: "Weingut Spiegel, Am Weißen Kreuz 1",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-10/veranstaltungsdatum.html",
+      id: 3588950584,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-10",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Wandern",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonn-feiertage-am-hirzeckhaus-2026-05-10/veranstaltungsdatum.html",
+      id: 2267432892,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/1/csm_bc2809e6-691c-447b-8298-0ac7b582c439_206ada2ad4.jpg",
+      source: "suew",
+      source_uid: "sonn-feiertage-am-hirzeckhaus-2026-05-10",
+      title: "Sonn- & Feiertage am Hirzeckhaus",
+    },
+    {
+      category: "feste",
+      date: "2026-05-10",
+      description: "Kultur & Kulinarik",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sparkling-twenties-2026-05-10/veranstaltungsdatum.html",
+      id: 3585155984,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/8/csm_e3db3e36-1e0c-4575-a2a3-b788212a1858_cc5c1682be.jpg",
+      source: "suew",
+      source_uid: "sparkling-twenties-2026-05-10",
+      title: "Sparkling Twenties",
+      venue: "Jugendstil-Festhalle, Mahlastr. 3",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/stadtfuehrung-in-bad-bergzabern-2026-05-10/veranstaltungsdatum.html",
+      id: 1757957321,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/6/csm_46beaaca-f698-4b9b-af81-113145bb50a4_5ac740ce2f.jpg",
+      source: "suew",
+      source_uid: "stadtfuehrung-in-bad-bergzabern-2026-05-10",
+      title: "Stadtführung in Bad Bergzabern",
+      venue: "Tourist-Information Bad Bergzaberner Land, Kurtalstr. 27",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/treidlerweg-in-den-hoerdter-rheinaue-2026-05-10/veranstaltungsdatum.html",
+      id: 36031688,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/2/csm_6c627138-0294-4a40-86dd-7f526610c074_3a64f9ba21.jpg",
+      source: "suew",
+      source_uid: "treidlerweg-in-den-hoerdter-rheinaue-2026-05-10",
+      title: "Treidlerweg in den Hördter Rheinauen",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-10",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/waldbaden-erlebe-mit-mir-die-kraft-2026-05-10/veranstaltungsdatum.html",
+      id: 575693424,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_c03a2fcc-9a9e-4157-bc05-4d04d68c4d16_ca5a47879d.jpg",
+      source: "suew",
+      source_uid: "waldbaden-erlebe-mit-mir-die-kraft-2026-05-10",
+      title: "Waldbaden: Erlebe mit mir die Kraft des Waldes",
+      venue: "Joseph-Meyer-Str. 25, 76835 Weyher",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/westwallmuseum-2026-05-10/veranstaltungsdatum.html",
+      id: 2167004688,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/1/csm_136b0c41-0954-4270-88b3-31a40834b0ad_3277cec4c7.jpg",
+      source: "suew",
+      source_uid: "westwallmuseum-2026-05-10",
+      title: "Westwallmuseum",
+      venue: "Westwallmuseum Bad Bergzabern, Kurfürstenstraße 21",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-10",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/winzerausschank-sonnenberghuette-2026-05-10/veranstaltungsdatum.html",
+      id: 2893604568,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/7/csm_587b8a93-4333-4134-a951-7d5f72d0901e_af31d215b2.jpg",
+      source: "suew",
+      source_uid: "winzerausschank-sonnenberghuette-2026-05-10",
+      title: "Winzerausschank Sonnenberghütte",
+      venue: "Sonnenberghütte, Sonnenberg 3",
+    },
+    {
+      category: "feste",
+      date: "2026-05-11",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/amselkerwe-2026-05-11/veranstaltungsdatum.html",
+      id: 3963172958,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/f/csm_150e134a-ab48-4471-9c8f-fcb8771bd223_f4cfb1417f.jpg",
+      source: "suew",
+      source_uid: "amselkerwe-2026-05-11",
+      title: "Amselkerwe",
+      venue: "Ortsgemeinde Knöringen, Knöringen",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-11",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-pingpong-der-pigmente-2026-05-11/veranstaltungsdatum.html",
+      id: 3332003568,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/6/csm_665468f3-c052-4f76-b9ed-0598052003c4_20c3c1a605.png",
+      source: "suew",
+      source_uid: "ausstellung-pingpong-der-pigmente-2026-05-11",
+      title: 'Ausstellung "Pingpong der Pigmente"',
+      venue: "Berufsgenossenschaft BG RCI, Obere Mühle 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-11",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-11/veranstaltungsdatum.html",
+      id: 916860004,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-11",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-11",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-11/veranstaltungsdatum.html",
+      id: 2958246140,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-11",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-11",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-11/veranstaltungsdatum.html",
+      id: 503714012,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-11",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-11",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-11/veranstaltungsdatum.html",
+      id: 1086093576,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-11",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-11",
+      description: "Kirmes",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kuckuckskerwe-2026-05-11/veranstaltungsdatum.html",
+      id: 2421719656,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_d0144e3d-e6ab-493d-80aa-61faff415f54_f2e5c64ce9.jpg",
+      source: "suew",
+      source_uid: "kuckuckskerwe-2026-05-11",
+      title: "Kuckuckskerwe",
+      venue: "Ortsgemeinde Wernersberg, Zum Geierstein 11",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-11",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mint-mach-pass-der-rptu-kinder-uni-2026-05-11/veranstaltungsdatum.html",
+      id: 85830586,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/f/c/csm_9448c423-c14a-4498-854e-85d348d6c18e_946e69c32c.png",
+      source: "suew",
+      source_uid: "mint-mach-pass-der-rptu-kinder-uni-2026-05-11",
+      title: "MINT-Mach-Pass der RPTU Kinder-Uni - Auf den Spuren des Klima",
+      venue: "RPTU in Landau, Fortstraße 7",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-11",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-11-01/veranstaltungsdatum.html",
+      id: 3980026196,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-11-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-11",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-11/veranstaltungsdatum.html",
+      id: 3605728204,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-11",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-12",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-pingpong-der-pigmente-2026-05-12/veranstaltungsdatum.html",
+      id: 3348781184,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/6/csm_665468f3-c052-4f76-b9ed-0598052003c4_20c3c1a605.png",
+      source: "suew",
+      source_uid: "ausstellung-pingpong-der-pigmente-2026-05-12",
+      title: 'Ausstellung "Pingpong der Pigmente"',
+      venue: "Berufsgenossenschaft BG RCI, Obere Mühle 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-12",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-12/veranstaltungsdatum.html",
+      id: 933637622,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-12",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-12",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-12/veranstaltungsdatum.html",
+      id: 2975023760,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-12",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-12",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/benefiz-ausstellung-farbtraeumen-2026-05-12/veranstaltungsdatum.html",
+      id: 2015848216,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/7/csm_f3e34f62-b94e-4e2d-a12c-d361aef10885_458c4239df.jpg",
+      source: "suew",
+      source_uid: "benefiz-ausstellung-farbtraeumen-2026-05-12",
+      title: "Benefiz-Ausstellung „Farbträumen“",
+      venue: "Haus des Gastes, Rötzweg 7",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-12",
+      description: "Kultur & Kulinarik",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/bergzaberner-erlebnistour-mit-dem-2026-05-12/veranstaltungsdatum.html",
+      id: 1376193022,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/0/csm_6677496b-eb89-4f40-8ec1-6da0e6bd9e55_ef3396880b.jpeg",
+      source: "suew",
+      source_uid: "bergzaberner-erlebnistour-mit-dem-2026-05-12",
+      title: "Bergzaberner Erlebnistour - mit dem Pfeffer Express",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-12",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-12/veranstaltungsdatum.html",
+      id: 520491632,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-12",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-12",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-12/veranstaltungsdatum.html",
+      id: 1102871192,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-12",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "literatur",
+      date: "2026-05-12",
+      description: "Autorenlesung / Vortrag",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/fahrrad-anfaengerinnenkurs-2026-05-12/veranstaltungsdatum.html",
+      id: 870668540,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_47e4407a-afcf-4a19-920a-3e68b23b3023_36c832fe28.png",
+      source: "suew",
+      source_uid: "fahrrad-anfaengerinnenkurs-2026-05-12",
+      title: "Fahrrad Anfängerinnenkurs",
+      venue: "Haus der Jugend - Jugendförderung, Markstr. 40",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-12",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-12/veranstaltungsdatum.html",
+      id: 576100512,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-12",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-12",
+      description: "Wellness / Entspannung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/klangschalen-und-atemmeditationen-2026-05-12/veranstaltungsdatum.html",
+      id: 3781530,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/5/csm_997e9b35-5c09-4246-937a-a5d426380415_4b3d4316f9.jpg",
+      source: "suew",
+      source_uid: "klangschalen-und-atemmeditationen-2026-05-12",
+      title: "Klangschalen- und Atemmeditationen",
+      venue: "Salzgrotte Maikammer, Schwimmbadstraße 6",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-12",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/maikammer-erleben-historische-schae-2026-05-12/veranstaltungsdatum.html",
+      id: 4095927354,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/e/csm_fce6a201-597a-4daa-b4f6-12aefd571f04_88ba385c10.jpg",
+      source: "suew",
+      source_uid: "maikammer-erleben-historische-schae-2026-05-12",
+      title: "Maikammer erleben: Historische Schätze und versteckte Highlights",
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-12",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mint-mach-pass-der-rptu-kinder-uni-2026-05-12/veranstaltungsdatum.html",
+      id: 69052968,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/6/csm_98ad73a8-5244-446a-a707-58f37352e569_9a626c6379.png",
+      source: "suew",
+      source_uid: "mint-mach-pass-der-rptu-kinder-uni-2026-05-12",
+      title: "MINT-Mach-Pass der RPTU Kinder-Uni - Programmieren mit Calliope mini",
+      venue: "RPTU in Landau, Fortstraße 7",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-12",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-12-01/veranstaltungsdatum.html",
+      id: 2039385471,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-12-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-12",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/pfaelzer-klimagipfel-wettergeschich-2026-05-12/veranstaltungsdatum.html",
+      id: 1583026778,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/8/csm_b5759a8c-3e17-4e9d-9cbb-035b8373d7f5_ca3728f374.jpg",
+      source: "suew",
+      source_uid: "pfaelzer-klimagipfel-wettergeschich-2026-05-12",
+      title: "Pfälzer Klimagipfel: Wettergeschichten, atemberaubende Aussichten & genussvolle",
+      venue: "Kalmithaus, Kalmitgipfel",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-12",
+      description: "Fahrradtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/radtour-2026-05-12/veranstaltungsdatum.html",
+      id: 1899979134,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/0/csm_fb79eb5e-0114-4ef2-8cc0-f93d86f87707_60ec9a1c59.jpg",
+      source: "suew",
+      source_uid: "radtour-2026-05-12",
+      title: "Radtour",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-12",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-12/veranstaltungsdatum.html",
+      id: 3622505822,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-12",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-12",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonderausstellung-fossilien-ein-2026-05-12/veranstaltungsdatum.html",
+      id: 4122178688,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/2/csm_4c0d3324-d890-4a91-890d-64c9b81cdcab_336bbcbe86.jpg",
+      source: "suew",
+      source_uid: "sonderausstellung-fossilien-ein-2026-05-12",
+      title: "Sonderausstellung „Fossilien - Eine spannende Reise durch die Erdgeschichte“",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "feste",
+      date: "2026-05-12",
+      description: "Bauernmarkt",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wochenmarkt-auf-dem-landauer-rathaus-2026-05-12/veranstaltungsdatum.html",
+      id: 1591142984,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/b/csm_c6f9644a-68c7-4617-9731-6b2acefd9cab_13eafd6473.jpg",
+      source: "suew",
+      source_uid: "wochenmarkt-auf-dem-landauer-rathaus-2026-05-12",
+      title: "Wochenmarkt auf dem Landauer Rathausplatz",
+      venue: "Rathausplatz Landau, Marktstraße 50",
+    },
+    {
       category: "sport",
       date: "2026-05-13",
       description:
@@ -402,6 +1873,590 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:30",
       title: "Regio Rock",
       venue: "Das Haus (Südstern e.V.)",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cartoons-in-der-galerie-neumue-2026-05-13/veranstaltungsdatum.html",
+      id: 3985825317,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/2/csm_410fc6bf-c49f-4c44-b8ac-1ec3244affef_4c7afa23c5.jpg",
+      source: "suew",
+      source_uid: "cartoons-in-der-galerie-neumue-2026-05-13",
+      title: "„Cartoons“ in der Galerie Neumühle",
+      venue: "Galerie Neumühle, Klosterstr. 173",
+    },
+    {
+      category: "feste",
+      date: "2026-05-13",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/after-work-party-2026-05-13/veranstaltungsdatum.html",
+      id: 3922354492,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/8/csm_dc4d495f-d633-403d-9956-39d9a1287c58_a19228e20e.jpg",
+      source: "suew",
+      source_uid: "after-work-party-2026-05-13",
+      title: "After Work Party",
+      venue: "Wein- und Gästehaus Zöller, Marktstraße 16",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-ns-psychiatrie-in-der-p-2026-05-13-01/veranstaltungsdatum.html",
+      id: 2595588188,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/4/csm_a351e1ea-f463-4f3a-accf-49494f2f5f89_35a3a051f2.jpg",
+      source: "suew",
+      source_uid: "ausstellung-ns-psychiatrie-in-der-p-2026-05-13-01",
+      title: 'Ausstellung "NS-Psychiatrie in der Pfalz"',
+      venue: "Pfalzklinikum Klingenmünster, Weinstraße 100",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-pingpong-der-pigmente-2026-05-13/veranstaltungsdatum.html",
+      id: 3365558804,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/6/csm_665468f3-c052-4f76-b9ed-0598052003c4_20c3c1a605.png",
+      source: "suew",
+      source_uid: "ausstellung-pingpong-der-pigmente-2026-05-13",
+      title: 'Ausstellung "Pingpong der Pigmente"',
+      venue: "Berufsgenossenschaft BG RCI, Obere Mühle 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-13/veranstaltungsdatum.html",
+      id: 950415240,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-13",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-von-rolf-grosskopf-2026-05-13/veranstaltungsdatum.html",
+      id: 922336692,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/6/csm_9e48e76f-3c18-41a6-a1fd-1646673dec20_126e1f699a.png",
+      source: "suew",
+      source_uid: "ausstellung-von-rolf-grosskopf-2026-05-13",
+      title: "Ausstellung von Rolf Großkopf",
+      venue: "Werner Brand Kunststiftung Bienchenhof, Hauptstraße 3",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/benefiz-ausstellung-farbtraeumen-2026-05-13/veranstaltungsdatum.html",
+      id: 2032625832,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/7/csm_f3e34f62-b94e-4e2d-a12c-d361aef10885_458c4239df.jpg",
+      source: "suew",
+      source_uid: "benefiz-ausstellung-farbtraeumen-2026-05-13",
+      title: "Benefiz-Ausstellung „Farbträumen“",
+      venue: "Haus des Gastes, Rötzweg 7",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-13",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-13/veranstaltungsdatum.html",
+      id: 537269248,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-13",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-13",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-13/veranstaltungsdatum.html",
+      id: 1119648812,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-13",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "literatur",
+      date: "2026-05-13",
+      description: "Autorenlesung / Vortrag",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/fahrrad-anfaengerinnenkurs-2026-05-13/veranstaltungsdatum.html",
+      id: 853890920,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_47e4407a-afcf-4a19-920a-3e68b23b3023_36c832fe28.png",
+      source: "suew",
+      source_uid: "fahrrad-anfaengerinnenkurs-2026-05-13",
+      title: "Fahrrad Anfängerinnenkurs",
+      venue: "Haus der Jugend - Jugendförderung, Markstr. 40",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-13",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-13/veranstaltungsdatum.html",
+      id: 592878128,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-13",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-13",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/let-there-be-rock-die-rocknacht-in-2026-05-13/veranstaltungsdatum.html",
+      id: 3581336096,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/b/csm_942fe625-7339-4166-a794-91869dd97994_c40a455181.jpg",
+      source: "suew",
+      source_uid: "let-there-be-rock-die-rocknacht-in-2026-05-13",
+      title: "Let There Be Rock - Die Rocknacht in der Alm",
+      venue: "ALM Landau, Albert Einstein Straße 6a",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-13",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-13-01/veranstaltungsdatum.html",
+      id: 1911421767,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-13-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-13",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/pfalzgenuss-live-musik-im-kurpark-2026-05-13/veranstaltungsdatum.html",
+      id: 31893368,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/e/csm_c0b91178-8a68-4c04-8390-9ca85b379f2e_cc7f1b2a58.jpg",
+      source: "suew",
+      source_uid: "pfalzgenuss-live-musik-im-kurpark-2026-05-13",
+      title: 'Pfalzgenuss -Live Musik im Kurpark - "The Twins"',
+      venue: "Weinstube Pfalzgenuss im Kurpark, Minigolfanlage im Kurpark",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-13",
+      description: "Wellness / Entspannung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ritual-cacao-ceremony-mit-klangmedit-2026-05-13/veranstaltungsdatum.html",
+      id: 11053880,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/a/csm_1dd48d0d-4dad-4886-80d6-8ddb27483e06_98ffc4e957.png",
+      source: "suew",
+      source_uid: "ritual-cacao-ceremony-mit-klangmedit-2026-05-13",
+      title: "Ritual Cacao Ceremony mit Klangmeditation",
+      venue: "Hotel-Restaurant Winzerhof, Maikammerer Straße 22",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-13",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-13/veranstaltungsdatum.html",
+      id: 3639283440,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-13",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-13",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonderausstellung-fossilien-ein-2026-05-13/veranstaltungsdatum.html",
+      id: 4138956308,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/2/csm_4c0d3324-d890-4a91-890d-64c9b81cdcab_336bbcbe86.jpg",
+      source: "suew",
+      source_uid: "sonderausstellung-fossilien-ein-2026-05-13",
+      title: "Sonderausstellung „Fossilien - Eine spannende Reise durch die Erdgeschichte“",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-13",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/storchentour-2026-05-13/veranstaltungsdatum.html",
+      id: 459212456,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/2/csm_94d508a5-877c-48d1-b2c6-894b8f818057_822fc67300.jpg",
+      source: "suew",
+      source_uid: "storchentour-2026-05-13",
+      title: "Storchentour",
+      venue: "Rheinland-Pfälzisches Storchenzentrum - Aktion PfalzStorch e.V., Kirchstr. 1",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-13",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/whisky-tasting-2026-05-13/veranstaltungsdatum.html",
+      id: 4247946412,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/d/csm_2c8e9901-8dae-47b6-8284-eaa657603167_e42d48757b.jpg",
+      source: "suew",
+      source_uid: "whisky-tasting-2026-05-13",
+      title: "Whisky Tasting",
+      venue: "Eiswerkstatt, Längelsstraße 7",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-14",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cartoons-in-der-galerie-neumue-2026-05-14/veranstaltungsdatum.html",
+      id: 3868381984,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/2/csm_410fc6bf-c49f-4c44-b8ac-1ec3244affef_4c7afa23c5.jpg",
+      source: "suew",
+      source_uid: "cartoons-in-der-galerie-neumue-2026-05-14",
+      title: "„Cartoons“ in der Galerie Neumühle",
+      venue: "Galerie Neumühle, Klosterstr. 173",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonntags-ausschank-an-der-pergol-2026-05-14/veranstaltungsdatum.html",
+      id: 3087088912,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/4/csm_b2cd7134-4ef2-4d7d-9ca6-a067bdb9f2e0_26d4708871.jpg",
+      source: "suew",
+      source_uid: "sonntags-ausschank-an-der-pergol-2026-05-14",
+      title: "Ausschank an der Pergola in Nußdorf",
+      venue: "Weinerlebnispfad Nußdorf, Weinbergslage »Kaiserberg«",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-14",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-pingpong-der-pigmente-2026-05-14/veranstaltungsdatum.html",
+      id: 3248115472,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/6/csm_665468f3-c052-4f76-b9ed-0598052003c4_20c3c1a605.png",
+      source: "suew",
+      source_uid: "ausstellung-pingpong-der-pigmente-2026-05-14",
+      title: 'Ausstellung "Pingpong der Pigmente"',
+      venue: "Berufsgenossenschaft BG RCI, Obere Mühle 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-14",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-14/veranstaltungsdatum.html",
+      id: 967192860,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-14",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-14",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-14/veranstaltungsdatum.html",
+      id: 3008578996,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-14",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-14",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-14/veranstaltungsdatum.html",
+      id: 554046868,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-14",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-14",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistag-am-josefshof-2026-05-14/veranstaltungsdatum.html",
+      id: 1675088592,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/1/csm_78e5858b-6ac7-42f9-91e1-3cc59e68cfd2_6e87afe3cf.jpg",
+      source: "suew",
+      source_uid: "erlebnistag-am-josefshof-2026-05-14",
+      title: "Erlebnistag am Josefshof",
+      venue: "Hofgemeinschaft Josefshof, Josefshof 1",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-14",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-14/veranstaltungsdatum.html",
+      id: 1002205480,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-14",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-14",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-14/veranstaltungsdatum.html",
+      id: 609655748,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-14",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-2026-2026-05-14/veranstaltungsdatum.html",
+      id: 291910400,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/2/csm_ad2d30e4-8733-4d50-85d9-8620c88664ec_3f835bad24.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-2026-2026-05-14",
+      title: "Jahrgangspräsentation 2026 - Weinhof Scheu",
+      venue: "Weinhof Scheu, Hauptstrasse 33",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-im-weingut-ec-2026-05-14/veranstaltungsdatum.html",
+      id: 3925614380,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/8/csm_53dfb880-aa11-425e-acc7-4a8a11745dd8_3d339ae50a.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-im-weingut-ec-2026-05-14",
+      title: "Jahrgangspräsentation im Weingut Eck",
+      venue: "Weingut Eck, Leinsweilerstraße 31",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-im-weingut-kr-2026-05-14/veranstaltungsdatum.html",
+      id: 3918904584,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/b/csm_ddd9dc0a-d2c0-4429-811d-713f0954a8b1_0897c0be31.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-im-weingut-kr-2026-05-14",
+      title: "Jahrgangspräsentation im Weingut Kranz",
+      venue: "Weingut Kranz, Mörzheimerstr. 2",
+    },
+    {
+      category: "feste",
+      date: "2026-05-14",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-hoffest-im-wei-2026-05-14/veranstaltungsdatum.html",
+      id: 1260473436,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/7/csm_b77c5ce3-c29e-4938-991a-cd8e8e2bd8b2_2dd88690e4.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-hoffest-im-wei-2026-05-14",
+      title: "Jahrgangsverkostung & Hoffest im Weingut Silbernagel",
+      venue: "Weingut Silbernagel, Zittergasse 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-weingut-katrin-w-2026-05-14/veranstaltungsdatum.html",
+      id: 2027569572,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/f/csm_8620d5b7-538e-4a10-89b4-6c548fee41c6_716d4a04fe.png",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-weingut-katrin-w-2026-05-14",
+      title: "Jahrgangsverkostung Weingut Katrin Wind",
+      venue: "Weingut Katrin Wind, Nauweg 6",
+    },
+    {
+      category: "feste",
+      date: "2026-05-14",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/maifest-in-maikammer-2026-05-14/veranstaltungsdatum.html",
+      id: 185014180,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/f/csm_265b9b37-0655-455a-aba6-0164e05bfc7a_eb4d5f0f4f.jpg",
+      source: "suew",
+      source_uid: "maifest-in-maikammer-2026-05-14",
+      title: "Maifest in Maikammer",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-14-01/veranstaltungsdatum.html",
+      id: 4151305448,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-14-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-14/veranstaltungsdatum.html",
+      id: 3656061060,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-14",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-14",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonderausstellung-fossilien-ein-2026-05-14/veranstaltungsdatum.html",
+      id: 4021512976,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/2/csm_4c0d3324-d890-4a91-890d-64c9b81cdcab_336bbcbe86.jpg",
+      source: "suew",
+      source_uid: "sonderausstellung-fossilien-ein-2026-05-14",
+      title: "Sonderausstellung „Fossilien - Eine spannende Reise durch die Erdgeschichte“",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Wandern",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonn-feiertage-am-hirzeckhaus-2026-05-14/veranstaltungsdatum.html",
+      id: 2200322416,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/1/csm_bc2809e6-691c-447b-8298-0ac7b582c439_206ada2ad4.jpg",
+      source: "suew",
+      source_uid: "sonn-feiertage-am-hirzeckhaus-2026-05-14",
+      title: "Sonn- & Feiertage am Hirzeckhaus",
+    },
+    {
+      category: "feste",
+      date: "2026-05-14",
+      description: "Kulinarisches Fest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/vatertag-auf-der-madenburg-2026-05-14/veranstaltungsdatum.html",
+      id: 2634161104,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/a/csm_72a427a5-0b48-45e0-abea-8013aa0d2732_537f2087b0.jpg",
+      source: "suew",
+      source_uid: "vatertag-auf-der-madenburg-2026-05-14",
+      title: "Vatertag auf der Madenburg",
+      venue: "Madenburg",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/westwallmuseum-2026-05-14/veranstaltungsdatum.html",
+      id: 2234115164,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/e/1/csm_136b0c41-0954-4270-88b3-31a40834b0ad_3277cec4c7.jpg",
+      source: "suew",
+      source_uid: "westwallmuseum-2026-05-14",
+      title: "Westwallmuseum",
+      venue: "Westwallmuseum Bad Bergzabern, Kurfürstenstraße 21",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/winzerausschank-sonnenberghuette-2026-05-14/veranstaltungsdatum.html",
+      id: 2960715044,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/7/csm_587b8a93-4333-4134-a951-7d5f72d0901e_af31d215b2.jpg",
+      source: "suew",
+      source_uid: "winzerausschank-sonnenberghuette-2026-05-14",
+      title: "Winzerausschank Sonnenberghütte",
+      venue: "Sonnenberghütte, Sonnenberg 3",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-14",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wollmesheimer-weinvielfalt-2026-05-14/veranstaltungsdatum.html",
+      id: 2084351088,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/f/csm_0e2a4858-41f8-4cea-b254-12a29d09e630_a5b5f1586b.jpg",
+      source: "suew",
+      source_uid: "wollmesheimer-weinvielfalt-2026-05-14",
+      title: "Wollmesheimer Weinvielfalt",
+      venue: "Weindorf Landau Wollmesheim, Wollmesheimer Hauptstraße",
     },
     {
       category: "kino",
@@ -459,6 +2514,450 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:15",
       title: "The History of Sound",
       venue: "Universum Theater Landau",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cartoons-in-der-galerie-neumue-2026-05-15/veranstaltungsdatum.html",
+      id: 3885159603,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/2/csm_410fc6bf-c49f-4c44-b8ac-1ec3244affef_4c7afa23c5.jpg",
+      source: "suew",
+      source_uid: "cartoons-in-der-galerie-neumue-2026-05-15",
+      title: "„Cartoons“ in der Galerie Neumühle",
+      venue: "Galerie Neumühle, Klosterstr. 173",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/flammkuchen-satt-all-you-can-eat-2026-05-15/veranstaltungsdatum.html",
+      id: 767507636,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/a/csm_2f943969-b9be-496e-b0fa-64ae9607733c_b21f266a58.jpg",
+      source: "suew",
+      source_uid: "flammkuchen-satt-all-you-can-eat-2026-05-15",
+      title: '"Flammkuchen satt -All you can eat" im Pfalzgenuss im Kurpark',
+      venue: "Weinstube Pfalzgenuss im Kurpark, Minigolfanlage im Kurpark",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-pingpong-der-pigmente-2026-05-15/veranstaltungsdatum.html",
+      id: 3264893092,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/6/csm_665468f3-c052-4f76-b9ed-0598052003c4_20c3c1a605.png",
+      source: "suew",
+      source_uid: "ausstellung-pingpong-der-pigmente-2026-05-15",
+      title: 'Ausstellung "Pingpong der Pigmente"',
+      venue: "Berufsgenossenschaft BG RCI, Obere Mühle 1",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-15/veranstaltungsdatum.html",
+      id: 983970480,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-15",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-15/veranstaltungsdatum.html",
+      id: 3025356616,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-15",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-die-bunten-zwanziger-2026-05-15/veranstaltungsdatum.html",
+      id: 3078435119,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/6/csm_ed3f5bcd-4b0e-4e74-a84f-83224ecd03b8_ca43d55a50.jpg",
+      source: "suew",
+      source_uid: "ausstellung-die-bunten-zwanziger-2026-05-15",
+      title: 'Ausstellung: "Die bunten Zwanziger - Zwischen Euphorie und Erschöpfung"',
+      venue: "Städtische Galerie Villa Streccius, Südring 20",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-zwischengefuehl-2026-05-15/veranstaltungsdatum.html",
+      id: 3890905418,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/c/csm_c478c5ef-4309-47f9-b228-5389ff335469_cb238b5e47.jpg",
+      source: "suew",
+      source_uid: "ausstellung-zwischengefuehl-2026-05-15",
+      title: 'Ausstellung: "Zwischengefühl"',
+      venue: "Strieffler Haus der Künste, Löhlstraße 3",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/benefiz-ausstellung-farbtraeumen-2026-05-15/veranstaltungsdatum.html",
+      id: 2066181072,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/7/csm_f3e34f62-b94e-4e2d-a12c-d361aef10885_458c4239df.jpg",
+      source: "suew",
+      source_uid: "benefiz-ausstellung-farbtraeumen-2026-05-15",
+      title: "Benefiz-Ausstellung „Farbträumen“",
+      venue: "Haus des Gastes, Rötzweg 7",
+    },
+    {
+      category: "theater",
+      date: "2026-05-15",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/chawwerusch-theater-lila-leuchtfeue-2026-05-15/veranstaltungsdatum.html",
+      id: 3803068192,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/f/csm_f58c7a09-cd14-4afd-8732-aef88aa76343_7f70352c03.jpg",
+      source: "suew",
+      source_uid: "chawwerusch-theater-lila-leuchtfeue-2026-05-15",
+      title: "Chawwerusch Theater: Lila Leuchtfeuer (7+)",
+      venue: "Chawwerusch Theater, Obere Hauptstraße 14",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-15",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-15/veranstaltungsdatum.html",
+      id: 570824488,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-15",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-15",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-15/veranstaltungsdatum.html",
+      id: 1018983100,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-15",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-15",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-15/veranstaltungsdatum.html",
+      id: 626433368,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-15",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-15",
+      description: "Geführte Wanderungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/genuss-hopping-2026-05-15/veranstaltungsdatum.html",
+      id: 2150475388,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/1/csm_937a5019-3cb1-4dc8-a51e-49fa37b22b22_e94ade05c6.jpg",
+      source: "suew",
+      source_uid: "genuss-hopping-2026-05-15",
+      title: "Genuss Hopping",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-2026-2026-05-15/veranstaltungsdatum.html",
+      id: 308688020,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/2/csm_ad2d30e4-8733-4d50-85d9-8620c88664ec_3f835bad24.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-2026-2026-05-15",
+      title: "Jahrgangspräsentation 2026 - Weinhof Scheu",
+      venue: "Weinhof Scheu, Hauptstrasse 33",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-im-weingut-gi-2026-05-15/veranstaltungsdatum.html",
+      id: 1132109024,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/2/csm_6812c748-aea2-4af0-86ca-fc80f1b56ddc_68130c3518.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-im-weingut-gi-2026-05-15",
+      title: "Jahrgangspräsentation im Weingut Gies-Düppel",
+      venue: "Weingut Gies-Düppel, Am Rosenberg 5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-im-weingut-kr-2026-05-15/veranstaltungsdatum.html",
+      id: 3935682203,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/b/csm_ddd9dc0a-d2c0-4429-811d-713f0954a8b1_0897c0be31.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-im-weingut-kr-2026-05-15",
+      title: "Jahrgangspräsentation im Weingut Kranz",
+      venue: "Weingut Kranz, Mörzheimerstr. 2",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsprobe-im-wilhelmshof-2026-05-15/veranstaltungsdatum.html",
+      id: 3602576768,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/a/csm_44aec855-f254-4279-aaf1-796e04bad64e_895fba8312.jpg",
+      source: "suew",
+      source_uid: "jahrgangsprobe-im-wilhelmshof-2026-05-15",
+      title: "Jahrgangsprobe im Wilhelmshof",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-hoffest-im-wei-2026-05-15/veranstaltungsdatum.html",
+      id: 1243695816,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/7/csm_b77c5ce3-c29e-4938-991a-cd8e8e2bd8b2_2dd88690e4.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-hoffest-im-wei-2026-05-15",
+      title: "Jahrgangsverkostung & Hoffest im Weingut Silbernagel",
+      venue: "Weingut Silbernagel, Zittergasse 4",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-im-weingut-hecht-2026-05-15/veranstaltungsdatum.html",
+      id: 1685410228,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/c/csm_7c41ba58-933f-466c-a9c7-d8a2c6f43011_c9164789d1.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-im-weingut-hecht-2026-05-15",
+      title: "Jahrgangsverkostung im Weingut Hechtmann",
+      venue: "Weingut Hechtmann GbR, Alte Schulgasse 4-5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-im-weingut-schmi-2026-05-15/veranstaltungsdatum.html",
+      id: 2850790502,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/1/csm_53048e1f-e46f-4f41-91c9-56becb4ed102_9dab820ee7.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-im-weingut-schmi-2026-05-15",
+      title: "Jahrgangsverkostung im Weingut Schmitzer-Julier",
+      venue: "Weingut Schmitzer-Julier, Landauer Str. 17",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-15",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/landauer-parks-im-wechsel-der-jahres-2026-05-15/veranstaltungsdatum.html",
+      id: 1270188128,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/7/csm_6afe2f7f-be19-4c8c-9ae5-87c11f4fc186_30a13b201f.jpg",
+      source: "suew",
+      source_uid: "landauer-parks-im-wechsel-der-jahres-2026-05-15",
+      title: "Landauer Parks im Wechsel der Jahreszeiten",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/maifest-in-maikammer-2026-05-15/veranstaltungsdatum.html",
+      id: 201791799,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/f/csm_265b9b37-0655-455a-aba6-0164e05bfc7a_eb4d5f0f4f.jpg",
+      source: "suew",
+      source_uid: "maifest-in-maikammer-2026-05-15",
+      title: "Maifest in Maikammer",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-15",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/marktmusiken-2026-2026-05-15/veranstaltungsdatum.html",
+      id: 2717871804,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/5/csm_47288683-9ece-47c1-b0f1-6e9db41d279d_716b0a1b34.jpg",
+      source: "suew",
+      source_uid: "marktmusiken-2026-2026-05-15",
+      title: "Marktmusiken 2026",
+      venue: "Marktkirche Bad Bergzabern, Marktplatz",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-15-01/veranstaltungsdatum.html",
+      id: 97535660,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-15-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "vortrag",
+      date: "2026-05-15",
+      description: "Vortrag",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/pastakurs-von-stefanie-fritzsche-2026-05-15/veranstaltungsdatum.html",
+      id: 1448244459,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/b/csm_e0b0592b-10e7-4bc7-982e-bc29a58daac5_d46f3a3d26.jpg",
+      source: "suew",
+      source_uid: "pastakurs-von-stefanie-fritzsche-2026-05-15",
+      title: "Pastakurs von Stefanie Fritzsche",
+      venue: "Ruderclub - Coworking & Event Space, Husarengasse 6",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-15/veranstaltungsdatum.html",
+      id: 3672838680,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-15",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-15",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonderausstellung-fossilien-ein-2026-05-15/veranstaltungsdatum.html",
+      id: 4038290596,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/2/csm_4c0d3324-d890-4a91-890d-64c9b81cdcab_336bbcbe86.jpg",
+      source: "suew",
+      source_uid: "sonderausstellung-fossilien-ein-2026-05-15",
+      title: "Sonderausstellung „Fossilien - Eine spannende Reise durch die Erdgeschichte“",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/spargel-x-wein-vol-1-weingut-emil-2026-05-15/veranstaltungsdatum.html",
+      id: 463790460,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/f/csm_239eac76-6bad-4265-9f00-c83d28f8acb2_27333c5e5d.jpg",
+      source: "suew",
+      source_uid: "spargel-x-wein-vol-1-weingut-emil-2026-05-15",
+      title: "Spargel X Wein VOL. 1: Weingut Emil Bauer",
+      venue: "Weingut Emil Bauer, Geißelgasse 33",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/weinzeit-verkosten-geniessen-2026-05-15/veranstaltungsdatum.html",
+      id: 1420244736,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/a/csm_d3129807-5fdb-41b6-ba2a-a52ce6413880_aacacbce5f.jpg",
+      source: "suew",
+      source_uid: "weinzeit-verkosten-geniessen-2026-05-15",
+      title: "WeinZeit Verkosten & Genießen",
+      venue: "Weingut Knöll & Vogel, Klingweg 3",
+    },
+    {
+      category: "feste",
+      date: "2026-05-15",
+      description: "Bauernmarkt",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wochenmarkt-in-annweiler-am-trifels-2026-05-15/veranstaltungsdatum.html",
+      id: 4108872494,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/5/csm_125c3a83-72bf-48e2-a50e-a3fb8cc6852d_257ea44024.jpg",
+      source: "suew",
+      source_uid: "wochenmarkt-in-annweiler-am-trifels-2026-05-15",
+      title: "Wochenmarkt in Annweiler am Trifels",
+      venue: "Stadt Annweiler am Trifels, Hauptstr. 20",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-15",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wollmesheimer-weinvielfalt-2026-05-15/veranstaltungsdatum.html",
+      id: 2101128708,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/f/csm_0e2a4858-41f8-4cea-b254-12a29d09e630_a5b5f1586b.jpg",
+      source: "suew",
+      source_uid: "wollmesheimer-weinvielfalt-2026-05-15",
+      title: "Wollmesheimer Weinvielfalt",
+      venue: "Weindorf Landau Wollmesheim, Wollmesheimer Hauptstraße",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-15",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/zooschule-ferienprogramm-fit-fuer-2026-05-15/veranstaltungsdatum.html",
+      id: 2473508840,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/5/csm_5873da82-e422-4d94-8aa2-fbfe9073b734_6f067cc1fe.jpg",
+      source: "suew",
+      source_uid: "zooschule-ferienprogramm-fit-fuer-2026-05-15",
+      title: "Zooschule FERIENPROGRAMM „Fit für die Zukunft“ im Jahr 2026",
+      venue: "Zoo Landau, Hindenburgstraße 12",
     },
     {
       category: "sonstiges",
@@ -560,6 +3059,160 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Villa Streccius",
     },
     {
+      category: "konzert",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/5-hainfelder-jazztage-im-atelier-29-2026-05-16/veranstaltungsdatum.html",
+      id: 2066023400,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/8/csm_26935e79-5b96-4c62-872e-ffa91d4d2961_c1417949d3.png",
+      source: "suew",
+      source_uid: "5-hainfelder-jazztage-im-atelier-29-2026-05-16",
+      title: "5. Hainfelder Jazztage im atelier 29-Johanna Summer Jakob Manz",
+      venue: "Atelier 29, Weinstr. 29",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-16",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/adventures-of-beep-boop-guido-moebi-2026-05-16/veranstaltungsdatum.html",
+      id: 3666978914,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/3/csm_a07804f4-8ad1-4f25-96f2-ff26e9936b7b_b878de2ed8.jpg",
+      source: "suew",
+      source_uid: "adventures-of-beep-boop-guido-moebi-2026-05-16",
+      title: "Adventures of Beep Boop: Guido Möbius",
+      venue: "Schief und Schepp, Stadtschreibergasse 3",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausschank-weingut-katrin-wind-2026-05-16/veranstaltungsdatum.html",
+      id: 4189046016,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/3/csm_1eee7e68-b42a-4324-a5e0-321bdd229b15_81260f8333.png",
+      source: "suew",
+      source_uid: "ausschank-weingut-katrin-wind-2026-05-16",
+      title: "Ausschank Weingut Katrin Wind",
+      venue: "Weingut Katrin Wind, Nauweg 6",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-schick-bis-ins-genick-2026-05-16/veranstaltungsdatum.html",
+      id: 1000748098,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/6/csm_a1e054f3-bda5-4e03-ac6f-23c29d73101d_7bce376971.jpeg",
+      source: "suew",
+      source_uid: "ausstellung-schick-bis-ins-genick-2026-05-16",
+      title: 'Ausstellung "Schick bis ins Genick"',
+      venue: "Touristinformation Maikammer, Marktstraße 5",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-suchtbilder-2026-05-16/veranstaltungsdatum.html",
+      id: 3042134232,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/3/csm_18bff207-dd37-47c2-a507-a9e193cd58ba_fe5d01e3d7.png",
+      source: "suew",
+      source_uid: "ausstellung-suchtbilder-2026-05-16",
+      title: 'Ausstellung "Suchtbilder"',
+      venue: "Stadtbibliothek, Heinrich-Heine-Platz 10",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-von-rolf-grosskopf-2026-05-16/veranstaltungsdatum.html",
+      id: 838448600,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/6/csm_9e48e76f-3c18-41a6-a1fd-1646673dec20_126e1f699a.png",
+      source: "suew",
+      source_uid: "ausstellung-von-rolf-grosskopf-2026-05-16",
+      title: "Ausstellung von Rolf Großkopf",
+      venue: "Werner Brand Kunststiftung Bienchenhof, Hauptstraße 3",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-die-bunten-zwanziger-2026-05-16/veranstaltungsdatum.html",
+      id: 3095212738,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/6/csm_ed3f5bcd-4b0e-4e74-a84f-83224ecd03b8_ca43d55a50.jpg",
+      source: "suew",
+      source_uid: "ausstellung-die-bunten-zwanziger-2026-05-16",
+      title: 'Ausstellung: "Die bunten Zwanziger - Zwischen Euphorie und Erschöpfung"',
+      venue: "Städtische Galerie Villa Streccius, Südring 20",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ausstellung-zwischengefuehl-2026-05-16/veranstaltungsdatum.html",
+      id: 3874127800,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/c/csm_c478c5ef-4309-47f9-b228-5389ff335469_cb238b5e47.jpg",
+      source: "suew",
+      source_uid: "ausstellung-zwischengefuehl-2026-05-16",
+      title: 'Ausstellung: "Zwischengefühl"',
+      venue: "Strieffler Haus der Künste, Löhlstraße 3",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/burg-meistersel-gefuehrte-besich-2026-05-16/veranstaltungsdatum.html",
+      id: 115895594,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_ecaa40c3-94a1-47c3-888d-870a4fb93c27_78369ee4dd.jpg",
+      source: "suew",
+      source_uid: "burg-meistersel-gefuehrte-besich-2026-05-16",
+      title: "Burg Meistersel – geführte Besichtigung der Burgruine",
+      venue: "Burgruine Meistersel, 76857 Ramberg in der Pfalz",
+    },
+    {
+      category: "theater",
+      date: "2026-05-16",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/chawwerusch-theater-lila-leuchtfeue-2026-05-16/veranstaltungsdatum.html",
+      id: 3819845808,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/f/csm_f58c7a09-cd14-4afd-8732-aef88aa76343_7f70352c03.jpg",
+      source: "suew",
+      source_uid: "chawwerusch-theater-lila-leuchtfeue-2026-05-16",
+      title: "Chawwerusch Theater: Lila Leuchtfeuer (7+)",
+      venue: "Chawwerusch Theater, Obere Hauptstraße 14",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Diverse Ausflüge/Exkursionen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/der-pfaelzer-bulli-quickie-2026-05-16/veranstaltungsdatum.html",
+      id: 587602104,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/7/csm_d5e2173e-87ad-41d2-b890-34b66fd5ffad_65f0bead1e.png",
+      source: "suew",
+      source_uid: "der-pfaelzer-bulli-quickie-2026-05-16",
+      title: "Der Pfälzer Bulli-Quickie",
+      venue: "Palatina Events, Alter Messplatz, Nordring 5",
+    },
+    {
       category: "ausstellung",
       date: "2026-05-16",
       description: "Sommerausstellung des Landauer Kunstvereins",
@@ -572,6 +3225,533 @@ export const SCRAPE_DATA: ScrapeData = {
       source_uid: "/ausstellung/die-bunten-zwanziger-zwischen-euphorie-und-erschoepfung-9py2/",
       title: "Die bunten Zwanziger - Zwischen Euphorie und Erschöpfung",
       venue: "Städtische Galerie Villa Streccius",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/die-fabelhafte-tour-und-ein-hoffest-2026-05-16/veranstaltungsdatum.html",
+      id: 1304668598,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/b/csm_6adc9ef6-9787-4960-9915-f05782cf6c2b_56a1b23330.png",
+      source: "suew",
+      source_uid: "die-fabelhafte-tour-und-ein-hoffest-2026-05-16",
+      title: "Die Fabelhafte Tour und ein Hoffest beim Weingut Meyer",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Wanderung / Bergtour",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/erlebnistour-weinwanderung-20-2026-05-16/veranstaltungsdatum.html",
+      id: 1035760720,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/6/csm_66681d01-2189-4968-b280-339fd8422602_72904df2dd.jpg",
+      source: "suew",
+      source_uid: "erlebnistour-weinwanderung-20-2026-05-16",
+      title: "Erlebnistour: Weinwanderung 2.0",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-16",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/felsklettern-2026-05-16/veranstaltungsdatum.html",
+      id: 2287391286,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/e/csm_0bdd126f-106b-4471-8af3-f1c5976b0eda_47ffc94b36.jpg",
+      source: "suew",
+      source_uid: "felsklettern-2026-05-16",
+      title: "Felsklettern",
+    },
+    {
+      category: "kurse",
+      date: "2026-05-16",
+      description: "Diverse Kurse/Seminare/Workshops",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/foto-ausstellung-eine-mystische-rei-2026-05-16/veranstaltungsdatum.html",
+      id: 643210984,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/5/csm_5af19678-0223-4503-8b52-a2900ac7dec9_fa301e18b7.jpg",
+      source: "suew",
+      source_uid: "foto-ausstellung-eine-mystische-rei-2026-05-16",
+      title: 'Foto-Ausstellung "Eine mystische Reise durch den Pfälzerwald"',
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/fruehlingsgefuehle-auf-der-madenburg-2026-05-16/veranstaltungsdatum.html",
+      id: 1434817132,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_6845155b-e6cc-4003-9ce4-e903a70372a6_2861a4941b.jpg",
+      source: "suew",
+      source_uid: "fruehlingsgefuehle-auf-der-madenburg-2026-05-16",
+      title: "Frühlingsgefühle auf der Madenburg",
+      venue: "Madenburg",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/fuehrung-auf-dem-auerochsenweg-2026-05-16/veranstaltungsdatum.html",
+      id: 2365946758,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/1/csm_e4d376ee-725c-4747-96d1-8194c8c4c617_fc78b1698e.jpg",
+      source: "suew",
+      source_uid: "fuehrung-auf-dem-auerochsenweg-2026-05-16",
+      title: "Führung auf dem Auerochsenweg",
+    },
+    {
+      category: "theater",
+      date: "2026-05-16",
+      description: "Sprechtheater / Schauspiel",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/heinrich-einfach-ausgeklammert-2026-05-16/veranstaltungsdatum.html",
+      id: 245343096,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/0/csm_28d9ecd0-3ea5-4050-9c8a-64c82bfc29f4_08a19715a5.jpg",
+      source: "suew",
+      source_uid: "heinrich-einfach-ausgeklammert-2026-05-16",
+      title: "Heinrich. Einfach ausgeklammert.",
+      venue: "Reichsburg Trifels, Trifelsstraße",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/historische-stadtfuehrung-edenkoben-2026-05-16/veranstaltungsdatum.html",
+      id: 89687794,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/e/csm_40aceee7-39e5-4e38-aff9-0dec647ecf2a_0b0090ee20.jpg",
+      source: "suew",
+      source_uid: "historische-stadtfuehrung-edenkoben-2026-05-16",
+      title: 'Historische Stadtführung Edenkoben "vun allem ebbes"',
+      venue: "I-Punkt, Weinstr. 86",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/historische-stadtfuehrung-landau-2026-05-16/veranstaltungsdatum.html",
+      id: 3022213808,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/6/csm_cae39912-542b-4f96-87bf-c61025140268_52fda9e001.jpg",
+      source: "suew",
+      source_uid: "historische-stadtfuehrung-landau-2026-05-16",
+      title: "Historische Stadtführung Landau",
+      venue: "Neues Rathaus, Marktstraße 50",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/hoffest-im-weingut-wachner-2026-05-16/veranstaltungsdatum.html",
+      id: 1140988624,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/f/6/csm_7c669151-2e3a-4102-9b5d-2efe42d32236_c662e39f30.png",
+      source: "suew",
+      source_uid: "hoffest-im-weingut-wachner-2026-05-16",
+      title: "Hoffest im Weingut Wachner",
+      venue: "Weingut Wachner, Böhlweg 25",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/hoffest-mit-jahrgangspraesentation-i-2026-05-16-01/veranstaltungsdatum.html",
+      id: 148625236,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_c7822fde-acb2-478a-a418-2ba109d3d6e5_f78f9fce8e.jpg",
+      source: "suew",
+      source_uid: "hoffest-mit-jahrgangspraesentation-i-2026-05-16-01",
+      title: "Hoffest mit Jahrgangspräsentation im Weingut Meyer",
+      venue: "Weingut Karl-Heinz und Andreas Meyer, Bahnhofstraße 10",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-2026-2026-05-16/veranstaltungsdatum.html",
+      id: 325465638,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/2/csm_ad2d30e4-8733-4d50-85d9-8620c88664ec_3f835bad24.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-2026-2026-05-16",
+      title: "Jahrgangspräsentation 2026 - Weinhof Scheu",
+      venue: "Weinhof Scheu, Hauptstrasse 33",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangspraesentation-im-weingut-gi-2026-05-16/veranstaltungsdatum.html",
+      id: 1148886642,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/3/2/csm_6812c748-aea2-4af0-86ca-fc80f1b56ddc_68130c3518.jpg",
+      source: "suew",
+      source_uid: "jahrgangspraesentation-im-weingut-gi-2026-05-16",
+      title: "Jahrgangspräsentation im Weingut Gies-Düppel",
+      venue: "Weingut Gies-Düppel, Am Rosenberg 5",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsprobe-im-wilhelmshof-2026-05-16/veranstaltungsdatum.html",
+      id: 3619354384,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/a/csm_44aec855-f254-4279-aaf1-796e04bad64e_895fba8312.jpg",
+      source: "suew",
+      source_uid: "jahrgangsprobe-im-wilhelmshof-2026-05-16",
+      title: "Jahrgangsprobe im Wilhelmshof",
+      venue: "Sekt- und Weingut Wilhelmshof, Queichstraße 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-hoffest-im-wei-2026-05-16/veranstaltungsdatum.html",
+      id: 1294028672,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/7/csm_b77c5ce3-c29e-4938-991a-cd8e8e2bd8b2_2dd88690e4.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-hoffest-im-wei-2026-05-16",
+      title: "Jahrgangsverkostung & Hoffest im Weingut Silbernagel",
+      venue: "Weingut Silbernagel, Zittergasse 4",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-im-weingut-hecht-2026-05-16/veranstaltungsdatum.html",
+      id: 1702187846,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/c/csm_7c41ba58-933f-466c-a9c7-d8a2c6f43011_c9164789d1.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-im-weingut-hecht-2026-05-16",
+      title: "Jahrgangsverkostung im Weingut Hechtmann",
+      venue: "Weingut Hechtmann GbR, Alte Schulgasse 4-5",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Weinprobe",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/jahrgangsverkostung-im-weingut-schmi-2026-05-16/veranstaltungsdatum.html",
+      id: 2834012883,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/1/csm_53048e1f-e46f-4f41-91c9-56becb4ed102_9dab820ee7.jpg",
+      source: "suew",
+      source_uid: "jahrgangsverkostung-im-weingut-schmi-2026-05-16",
+      title: "Jahrgangsverkostung im Weingut Schmitzer-Julier",
+      venue: "Weingut Schmitzer-Julier, Landauer Str. 17",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kreativ-handwerkermarkt-im-naturm-2026-05-16/veranstaltungsdatum.html",
+      id: 1638397518,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/e/csm_9f584260-e3b2-48d2-92ff-b2d7fce9925e_ef26ab44fa.jpg",
+      source: "suew",
+      source_uid: "kreativ-handwerkermarkt-im-naturm-2026-05-16",
+      title: "Kreativ- & Handwerkermarkt im Naturmöbelhaus",
+      venue: "Naturmöbelhaus Heinrich, Brückwiesenstraße 4",
+    },
+    {
+      category: "theater",
+      date: "2026-05-16",
+      description: "Sprechtheater / Schauspiel",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/krimi-dinner-das-geheimnis-vom-trif-2026-05-16/veranstaltungsdatum.html",
+      id: 751321600,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/d/e/csm_551e9e92-bd5d-4e61-9073-804e1602679a_c3c97e8946.jpg",
+      source: "suew",
+      source_uid: "krimi-dinner-das-geheimnis-vom-trif-2026-05-16",
+      title: "Krimi-Dinner: Das Geheimnis vom Trifels - Eine mörderische Familienfeier",
+      venue: "Hohenstaufensaal, Landauerstr. 1",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kulinarische-gaestefuehrung-2026-05-16/veranstaltungsdatum.html",
+      id: 2378500104,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/9/csm_4066adbf-2e3f-489a-bc00-a28a8809adca_55d9f5a57d.jpg",
+      source: "suew",
+      source_uid: "kulinarische-gaestefuehrung-2026-05-16",
+      title: "Kulinarische Gästeführung",
+      venue: "Stiftskirchenplatz, Marktstr. 93",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/landaus-unterwelt-lunette-41-2026-05-16/veranstaltungsdatum.html",
+      id: 2633745536,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/5/csm_d82b7ab5-23e9-419d-8e21-c9c8a570ea29_06f160d00e.jpg",
+      source: "suew",
+      source_uid: "landaus-unterwelt-lunette-41-2026-05-16",
+      title: "Landaus Unterwelt - Lunette 41 -",
+      venue: "Obertorplatz, Ecke Reiterstr./Xylanderstr., 76829 Landau in der Pfalz",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Weinfest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/maifest-in-maikammer-2026-05-16-01/veranstaltungsdatum.html",
+      id: 2554780788,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/f/csm_265b9b37-0655-455a-aba6-0164e05bfc7a_eb4d5f0f4f.jpg",
+      source: "suew",
+      source_uid: "maifest-in-maikammer-2026-05-16-01",
+      title: "Maifest in Maikammer",
+    },
+    {
+      category: "sport",
+      date: "2026-05-16",
+      description: "Golf / Minigolf",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/minigolfturnier-2026-05-16/veranstaltungsdatum.html",
+      id: 1758341528,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/3/csm_94411a68-d742-498d-8315-96c349ca8ce6_8eb485aa25.jpg",
+      source: "suew",
+      source_uid: "minigolfturnier-2026-05-16",
+      title: "Minigolfturnier",
+      venue: "Weinstube Pfalzgenuss im Kurpark, Minigolfanlage im Kurpark",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-16-01/veranstaltungsdatum.html",
+      id: 1254225216,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-16-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "theater",
+      date: "2026-05-16",
+      description: "Kino",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/nationaltheater-mannheim-lucrezia-b-2026-05-16/veranstaltungsdatum.html",
+      id: 1970277781,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/8/5/csm_844a4e9b-4290-4efb-9bcd-5b5296348586_cc4f750ae7.jpg",
+      source: "suew",
+      source_uid: "nationaltheater-mannheim-lucrezia-b-2026-05-16",
+      title: "Nationaltheater Mannheim: Lucrezia Borgia (Opernfilm)",
+      venue: "Universum THEATER LANDAU, Königstr. 48/50",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/neu-tonis-tasting-room-2026-05-16/veranstaltungsdatum.html",
+      id: 3038829322,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/a/d/csm_71b30745-f5e5-4b84-9a28-648afff87022_de0949f778.jpg",
+      source: "suew",
+      source_uid: "neu-tonis-tasting-room-2026-05-16",
+      title: "NEU: Toni's Tasting Room",
+      venue: "Weingut Wilker, Hauptstraße 30",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/raum-ausstellung-im-haus-zum-maulb-2026-05-16/veranstaltungsdatum.html",
+      id: 288460506,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/2/csm_8f5fe6b7-8200-41dd-8eb9-f1b648f9fa24_cc2e87131c.jpg",
+      source: "suew",
+      source_uid: "raum-ausstellung-im-haus-zum-maulb-2026-05-16",
+      title: "Raum - Ausstellung im Haus zum Maulbeerbaum",
+      venue: "Haus zum Maulbeerbaum eG, Kramstraße 25",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Besichtigung / Führung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/regelmaessige-burgfuehrung-trifels-2026-05-16/veranstaltungsdatum.html",
+      id: 745365124,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/0/e/csm_87c9a4d6-efc2-4614-9335-cb7dd86fff7c_fac47ceaba.jpg",
+      source: "suew",
+      source_uid: "regelmaessige-burgfuehrung-trifels-2026-05-16",
+      title: "Regelmäßige Burgführung Trifels",
+      venue: "Reichsfeste Trifels, Trifelsstraße",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Kulturen / Geschichte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/skulpturengarten-2026-2026-05-16/veranstaltungsdatum.html",
+      id: 3689616298,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/2/c/csm_3a3023b2-a78d-416b-8c45-060ce9ff859a_4931392c05.jpg",
+      source: "suew",
+      source_uid: "skulpturengarten-2026-2026-05-16",
+      title: "Skulpturengarten 2026",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/so-schmeckt-der-sommer-2026-05-16-01/veranstaltungsdatum.html",
+      id: 1031309971,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/9/b/csm_a62bcb76-3480-451a-8e0c-07755698a3a0_4936420028.jpg",
+      source: "suew",
+      source_uid: "so-schmeckt-der-sommer-2026-05-16-01",
+      title: "So schmeckt der Sommer",
+      venue: "Wein- und Sekthaus Schreieck, Hartmannstraße 38",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Kunst",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/solo-ausstellung-gedankenpalast-2026-05-16/veranstaltungsdatum.html",
+      id: 2434667056,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/0/csm_8065b716-43a0-4a4b-868e-c28ef3a089f6_79a9d17d00.png",
+      source: "suew",
+      source_uid: "solo-ausstellung-gedankenpalast-2026-05-16",
+      title: 'Solo-Ausstellung "Gedankenpalast"',
+      venue: "Aparte Kunst Galerie, Alberecht Dürer Str. 16",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-16",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/sonderausstellung-fossilien-ein-2026-05-16/veranstaltungsdatum.html",
+      id: 4055068216,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/2/csm_4c0d3324-d890-4a91-890d-64c9b81cdcab_336bbcbe86.jpg",
+      source: "suew",
+      source_uid: "sonderausstellung-fossilien-ein-2026-05-16",
+      title: "Sonderausstellung „Fossilien - Eine spannende Reise durch die Erdgeschichte“",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/spargel-x-wein-vol-1-weingut-emil-2026-05-16/veranstaltungsdatum.html",
+      id: 480568080,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/f/csm_239eac76-6bad-4265-9f00-c83d28f8acb2_27333c5e5d.jpg",
+      source: "suew",
+      source_uid: "spargel-x-wein-vol-1-weingut-emil-2026-05-16",
+      title: "Spargel X Wein VOL. 1: Weingut Emil Bauer",
+      venue: "Weingut Emil Bauer, Geißelgasse 33",
+    },
+    {
+      category: "nachtleben",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/ue30-party-2026-05-16/veranstaltungsdatum.html",
+      id: 4149874632,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/6/csm_84ef2888-3769-4ac2-b6d3-4e38e3b05fba_128a0fcfc5.jpg",
+      source: "suew",
+      source_uid: "ue30-party-2026-05-16",
+      title: "Ü30 Party",
+      venue: "ALM Landau, Albert Einstein Straße 6a",
+    },
+    {
+      category: "konzert",
+      date: "2026-05-16",
+      description: "Musikveranstaltung / Konzerte",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/watchparty-marock-2026-05-16/veranstaltungsdatum.html",
+      id: 956646944,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/1/csm_8bc8d7d7-ea11-453d-b576-dac0afb2238c_0656c52a77.png",
+      source: "suew",
+      source_uid: "watchparty-marock-2026-05-16",
+      title: "Watchparty Marock",
+      venue: "MaRock Bar, Martin-Luther-Straße 45b",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Geführte Wanderungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wein-wandern-weingeschichten-2026-05-16/veranstaltungsdatum.html",
+      id: 3224117318,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/6/5/csm_6f5c7901-50b7-4237-b856-479d8d1291e6_770e612ae8.jpg",
+      source: "suew",
+      source_uid: "wein-wandern-weingeschichten-2026-05-16",
+      title: "Wein, Wandern & Weingeschichte(n)",
+      venue: "Marienkapelle, Friedhofstraße",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-16",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/weingutsfuehrung-2026-05-16/veranstaltungsdatum.html",
+      id: 2062884152,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/3/csm_767a25b7-2459-4889-9018-d63b2f2c15db_02bfb9fe56.jpg",
+      source: "suew",
+      source_uid: "weingutsfuehrung-2026-05-16",
+      title: "Weingutsführung im Wein- und Sekthaus Schreieck",
+      venue: "Wein- und Sekthaus Schreieck, Hartmannstraße 38",
+    },
+    {
+      category: "feste",
+      date: "2026-05-16",
+      description: "Bauernmarkt",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wochenmarkt-auf-dem-landauer-rathaus-2026-05-16/veranstaltungsdatum.html",
+      id: 1524032512,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/1/b/csm_c6f9644a-68c7-4617-9731-6b2acefd9cab_13eafd6473.jpg",
+      source: "suew",
+      source_uid: "wochenmarkt-auf-dem-landauer-rathaus-2026-05-16",
+      title: "Wochenmarkt auf dem Landauer Rathausplatz",
+      venue: "Rathausplatz Landau, Marktstraße 50",
     },
     {
       category: "kurse",
@@ -632,6 +3812,104 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Universum Theater Landau",
     },
     {
+      category: "ausstellung",
+      date: "2026-05-17",
+      description: "Diverse Ausstellungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/cartoons-in-der-galerie-neumue-2026-05-17/veranstaltungsdatum.html",
+      id: 3918714841,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/c/2/csm_410fc6bf-c49f-4c44-b8ac-1ec3244affef_4c7afa23c5.jpg",
+      source: "suew",
+      source_uid: "cartoons-in-der-galerie-neumue-2026-05-17",
+      title: "„Cartoons“ in der Galerie Neumühle",
+      venue: "Galerie Neumühle, Klosterstr. 173",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-17",
+      description: "Geführte Wanderung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/albtalwanderweg-bei-karlsruhe-10-km-2026-05-17/veranstaltungsdatum.html",
+      id: 4110713448,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/5/8/csm_31c0f4d8-d92a-4d36-a6ca-6b4b26c49315_67b67a484b.png",
+      source: "suew",
+      source_uid: "albtalwanderweg-bei-karlsruhe-10-km-2026-05-17",
+      title: "Albtalwanderweg bei Karlsruhe (10 km)",
+      venue: "Parkplatz am Ortseingang, Hauptstraße 13",
+    },
+    {
+      category: "feste",
+      date: "2026-05-17",
+      description: "Hoffest",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/hoffest-mit-jahrgangspraesentation-i-2026-05-17-01/veranstaltungsdatum.html",
+      id: 35111844,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/9/csm_c7822fde-acb2-478a-a418-2ba109d3d6e5_f78f9fce8e.jpg",
+      source: "suew",
+      source_uid: "hoffest-mit-jahrgangspraesentation-i-2026-05-17-01",
+      title: "Hoffest mit Jahrgangspräsentation im Weingut Meyer",
+      venue: "Weingut Karl-Heinz und Andreas Meyer, Bahnhofstraße 10",
+    },
+    {
+      category: "junge-kultur",
+      date: "2026-05-17",
+      description: "Kinder- & Familienveranstaltungen",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/internationaler-museumstag-2026-05-17/veranstaltungsdatum.html",
+      id: 2307088581,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/7/a/csm_43a8de13-f5e8-4d8c-9aa8-5487e4c7065b_3490d25a36.jpg",
+      source: "suew",
+      source_uid: "internationaler-museumstag-2026-05-17",
+      title: "Internationaler Museumstag",
+      venue: "Museum unterm Trifels, Am Schipkapass 4",
+    },
+    {
+      category: "feste",
+      date: "2026-05-17",
+      description: "Veranstaltung",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/kostuemfuehrung-freiheitskaempferi-2026-05-17/veranstaltungsdatum.html",
+      id: 889078436,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/4/0/csm_2e10eeff-169f-4e31-9056-88722a961d93_8b5809b63c.jpg",
+      source: "suew",
+      source_uid: "kostuemfuehrung-freiheitskaempferi-2026-05-17",
+      title: 'Kostümführung: "Freiheitskämpferin Anna"',
+      venue: "StadtLeben Landau in der Pfalz GmbH, Marktstr. 50",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-17",
+      description: "Rundfahrten",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/mit-dem-oldtimerbulli-durch-die-pfal-2026-05-17-01/veranstaltungsdatum.html",
+      id: 4146727104,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/0/csm_c5bc616d-bacd-402b-99d9-64b1b50075aa_296234c06b.jpg",
+      source: "suew",
+      source_uid: "mit-dem-oldtimerbulli-durch-die-pfal-2026-05-17-01",
+      title: "Mit dem Oldtimerbulli durch die Pfalz und das Elsass",
+      venue: "Palatina Events Abfahrt, Nordring 5",
+    },
+    {
+      category: "exkursion",
+      date: "2026-05-17",
+      description: "Wandern",
+      detail_url:
+        "https://www.suedlicheweinstrasse.de/veranstaltungen/uebersicht/wanderungen-pfaelzerwald-verein-rosc-2026-05-17/veranstaltungsdatum.html",
+      id: 1915743052,
+      image_url:
+        "https://www.suedlicheweinstrasse.de/typo3temp/assets/_processed_/b/d/csm_cf9ba7b7-eed4-4f58-a03f-28f13bfa9a58_4445e49b9a.jpg",
+      source: "suew",
+      source_uid: "wanderungen-pfaelzerwald-verein-rosc-2026-05-17",
+      title: "Wanderungen Pfälzerwald Verein Roschbach",
+      venue: "Pfälzerwald-Verein Roschbach, Am Simonsgarten 26",
+    },
+    {
       category: "exkursion",
       date: "2026-05-18",
       description:
@@ -646,6 +3924,18 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "17:00",
       title: "Geführte Radtour: Volle Energie",
       venue: "Treffpunkt: BBS Parkplatz Heinrich-Strieffler-Weg",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-05-19",
+      detail_url: "https://rptu.de/newsroom/veranstaltungen/detail/news/studieninfotag-landau",
+      id: 2585458072,
+      organizer: "RPTU Kaiserslautern-Landau",
+      source: "rptu-campuskultur",
+      source_uid: "news-18050",
+      time: "08:45",
+      title: "Studieninfotag (Landau)",
+      venue: "RPTU Landau",
     },
     {
       category: "sonstiges",
@@ -674,6 +3964,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "09:00",
       title: "Landauer Demokratiefest",
       venue: "Rathausplatz",
+    },
+    {
+      category: "feste",
+      date: "2026-05-20",
+      description:
+        "Am 20. Mai findet das Landauer Demokratiefest im Zeichen von Beteiligung, Vielfalt und Zusammenhalt statt. Auch in diesem Jahr engagiert sich Friedensakademie Rheinland-Pfalz mit einem Stand auf dem Rathausplatz. Außerdem bietet die Friedensakademie drei Workshops an, die sich an Schüler*innen und Lehrkräfte richten.",
+      detail_url:
+        "https://rptu.de/newsroom/veranstaltungen/detail/news/workshops-der-friedensakademie-auf-dem-landauer-demokratiefest",
+      id: 63089207,
+      organizer: "RPTU Kaiserslautern-Landau",
+      source: "rptu-campuskultur",
+      source_uid: "news-19335",
+      time: "09:00",
+      title: "Workshops der Friedensakademie auf dem Landauer Demokratiefest",
+      venue: "RPTU Landau",
     },
     {
       category: "literatur",
@@ -872,6 +4177,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "19:00",
       title: "Adrian Rinck und das A.R.T. Trio",
       venue: "atelier29",
+    },
+    {
+      category: "ausstellung",
+      date: "2026-05-27",
+      description:
+        "Demokratie wird für und von Menschen gemacht. Die Sonderausstellung „Köpfe der Demokratie. Starke Stimmen für ein Leben in Freiheit“ stellt sie vor. Es sind Frauen und Männer aus mehr als zwei Jahrhunderten, darunter Politikerinnen und Widerstandskämpfer, Frauenrechtlerinnen und Wissenschaftler, Aktivistinnen und couragierte Privatpersonen. Was sie eint, ist der Einsatz für gesellschaftliche Teilhabe und ein gerechteres Miteinander. Zeichnungen von Simon Schwartz, einem der renommiertesten…",
+      detail_url: "https://hambacher-schloss.de/events/ausstellungseroeffnung-schwestern-zerreisst-eure-ketten-529/",
+      id: 2866730702,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/05/homepage.jpg",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=5172",
+      time: "19:00",
+      title: "Ausstellungseröffnung: „Köpfe der Demokratie. Starke Stimmen für ein Leben in Freiheit“",
+      venue: "Hambacher Schloss",
     },
     {
       category: "vortrag",
@@ -1100,6 +4420,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "19:00",
       title: "Olaf Polziehn",
       venue: "atelier29",
+    },
+    {
+      category: "feste",
+      date: "2026-05-29",
+      description:
+        "EIN WOCHENENDE VOLLER MUSIK, BEGEGNUNG, KUNST UND ENGAGEMENT: LAUT, SICHTBAR UND GEMEINSAM. Vom 29. bis 31. Mai 2026 laden die Stadt Neustadt an der Weinstraße und die Stiftung Hambacher Schloss zu „1832. Das Fest der Demokratie“ ein. Damals kamen Menschen aus allen Teilen der Gesellschaft zusammen, um Freiheit und Mitbestimmung einzufordern – laut, sichtbar und gemeinsam. Diese Idee lebt weiter: Unter dem Motto: „Freiheit pflanzen“ wird die Innenstadt ebenso wie das Hambacher Schloss zum…",
+      detail_url: "https://hambacher-schloss.de/events/1832dasfest/",
+      end_date: "2026-05-31",
+      id: 1046303560,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/02/Logo-Demokratiefest-scaled.png",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=5022",
+      title: "1832. Das Fest der Demokratie",
+      venue: "Hambacher Schloss",
     },
     {
       category: "ausstellung",
@@ -1766,6 +5101,18 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "sonstiges",
       date: "2026-06-29",
+      detail_url: "https://rptu.de/newsroom/veranstaltungen/detail/news/sommerferienbetreuung-2026-2",
+      id: 2923010976,
+      organizer: "RPTU Kaiserslautern-Landau",
+      source: "rptu-campuskultur",
+      source_uid: "news-18871",
+      time: "08:30",
+      title: "Sommerferienbetreuung 2026 RPTU in Landau",
+      venue: "RPTU Landau",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-06-29",
       description: "Analoge Auszeit",
       detail_url: "https://kulturnetz-landau.de/veranstaltung/vinyl-cafe-rwm5/",
       id: 3285432184,
@@ -2028,7 +5375,7 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Landau in der Pfalz",
     },
     {
-      category: "kabarett",
+      category: "gedenken",
       date: "2026-09-03",
       description: "Die Comedy-Reihe in Landau!",
       detail_url: "https://kulturnetz-landau.de/veranstaltung/comedy-am-westbahnhof-326j/",
@@ -2054,6 +5401,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:00",
       title: "Offene Bühne",
       venue: "Das Haus (Südstern e.V.)",
+    },
+    {
+      category: "theater",
+      date: "2026-09-13",
+      description:
+        "Hoch oben im Norden, wo Schnee und Eis ewig sind, wohnt Lars, der kleine Eisbär. Lars kann schon auf dem Rücken seines Vaters reiten und mit einer Pfote Fische fangen. Nur schwimmen, das kann er noch nicht so gut. Eines Tages passiert etwas Schreckliches. Lars treibt ganz allein auf einer Eisscholle hinaus aufs Meer. Und erlebt sein erstes großes Abenteuer. Ein Stück für die ganz Kleinen ab 3 Jahren. Darüber, wie schön es ist, die Welt zu entdecken. Und über das schönste Wort, wenn man genug…",
+      detail_url: "https://hambacher-schloss.de/events/der-kleine-eisbaer/",
+      id: 429489486,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/01/Eisbaer-03-1.webp",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=4946",
+      time: "11:00",
+      title: "Kindertheater: „Der kleine Eisbär“",
+      venue: "Hambacher Schloss",
     },
     {
       category: "tanz",
@@ -2296,6 +5658,21 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Altes Kaufhaus",
     },
     {
+      category: "theater",
+      date: "2026-10-18",
+      description:
+        "…bis er merkt, dass man sich den größten Schatz nicht klauen kann. Alles könnte so schön sein. In dem kleinen wunderbaren Land bei Igel, Maulwurf, Hase, Eule, Dachs, Fuchs, Wolf, Schaf, Bär und Wildschwein spielen alle glücklich und friedlich miteinander. Nur der kleine Rabe Socke kann das „Stibitzen“ einfach nicht lassen. Immer wieder erfindet er neue Tricks, wie er seinen Freunden die Spielsachen wegnehmen kann, und je mehr er erbeutet hat, desto größer wird seine Gier. Mit jedem Trick wird…",
+      detail_url: "https://hambacher-schloss.de/events/rabe-socke/",
+      id: 176692368,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/01/tearticolo_rabe_socke_02jpg.jpg",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=4938",
+      time: "11:00",
+      title: "Kindertheater: „Alles meins!“, sagt der kleine Rabe Socke…",
+      venue: "Hambacher Schloss",
+    },
+    {
       category: "feste",
       date: "2026-10-18",
       description:
@@ -2326,7 +5703,7 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Kulturzentrum Altes Kaufhaus",
     },
     {
-      category: "kabarett",
+      category: "gedenken",
       date: "2026-11-05",
       description: "Die Comedy-Reihe in Landau!",
       detail_url: "https://kulturnetz-landau.de/veranstaltung/comedy-am-westbahnhof-mxmq/",
@@ -2352,6 +5729,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:00",
       title: "Offene Bühne",
       venue: "Das Haus (Südstern e.V.)",
+    },
+    {
+      category: "theater",
+      date: "2026-11-08",
+      description:
+        "Mit Musik, Marionetten und einer kleinen Maus wird ein bekanntes Märchen neu erzählt: Wie ein listiger Kater den armen Müller Andreas zum Grafen von Carrabas macht – voller Witz, Herz und Magie für die ganze Familie. Ein Gastspiel des Dornerei-Theaters mit Puppen für Kinder ab 4 Jahren. Dauer: ca. 45 Minuten Spielort: Siebenpfeiffer-Saal im Hambacher Schloss Karten zu 6,50 € (Kinder) und 9,50 € (Erwachsene) gibt es hier: Oder direkt bei einer Vorverkaufsstelle in Neustadt an der Weinstraße:…",
+      detail_url: "https://hambacher-schloss.de/events/der-gestiefelte-kater/",
+      id: 76320844,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/01/VA-HP.jpg",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=4914",
+      time: "11:00",
+      title: "Kindertheater: „Der gestiefelte Kater“",
+      venue: "Hambacher Schloss",
     },
     {
       category: "tanz",
@@ -2389,6 +5781,19 @@ export const SCRAPE_DATA: ScrapeData = {
       source: "landau-de",
       source_uid: "2644.5263.1",
       title: "Tanzcaf&eacute; 60 plus",
+    },
+    {
+      category: "sonstiges",
+      date: "2026-11-09",
+      detail_url:
+        "https://rptu.de/newsroom/veranstaltungen/detail/news/sneak-peek-studium-schnupperlehrveranstaltungen-am-campus-landau",
+      id: 974719292,
+      organizer: "RPTU Kaiserslautern-Landau",
+      source: "rptu-campuskultur",
+      source_uid: "news-19461",
+      time: "09:00",
+      title: "Sneak Peek Studium - Schnupperlehrveranstaltungen am Campus Landau",
+      venue: "RPTU Landau",
     },
     {
       category: "sonstiges",
@@ -2476,6 +5881,21 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:00",
       title: "Offene Bühne",
       venue: "Haus am Westbahnhof",
+    },
+    {
+      category: "theater",
+      date: "2026-12-13",
+      description:
+        "Weit, weit im Norden, wo der erste Schnee fällt, wenn bei uns noch Sommer ist, lebt ein kleiner Weihnachtsmann. Er freut sich auf die Reise zu den Kindern wie kein anderer Weihnachtsmann auf der Welt. Doch da sind auch die großen Weihnachtsmänner, die meinen, dafür sei er noch zu klein… Ein besinnlich-heiteres Stück mit einem Spieler, Puppen und Musik für Kinder ab 4 Jahren. Ein Gastspiel des ChausséeTheaters nach dem gleichnamigen Kinderbuch von Anu Stohner und Henrike Wilson.…",
+      detail_url: "https://hambacher-schloss.de/events/der-kleine-weihnachtsmann/",
+      id: 378170892,
+      image_url: "https://hambacher-schloss.de/wp-content/uploads/2026/01/KleiWeih1.jpg",
+      organizer: "Stiftung Hambacher Schloss",
+      source: "hambacher-schloss",
+      source_uid: "https://hambacher-schloss.de/?post_type=mec-events&#038;p=4925",
+      time: "11:00",
+      title: "Kindertheater: „Der kleine Weihnachtsmann“",
+      venue: "Hambacher Schloss",
     },
     {
       category: "tanz",
@@ -2606,5 +6026,5 @@ export const SCRAPE_DATA: ScrapeData = {
       venue: "Jugendstil Festhalle",
     },
   ],
-  generatedAt: "2026-05-08T21:32:18.427Z",
+  generatedAt: "2026-05-08T22:19:32.121Z",
 };

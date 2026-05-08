@@ -1,11 +1,14 @@
 #!/usr/bin/env bun
 /**
- * landau.today scrape pipeline. Drives the two source scrapers in parallel
+ * landau.today scrape pipeline. Drives all source scrapers in parallel
  * and writes a typed `src/scrape-data.ts` bundle. Designed for the GitHub
  * Action and for local one-off runs.
  *
- *   1. scrapeKulturnetz()  — kulturnetz-landau.de (Django, schema.org microdata)
- *   2. scrapeLandauDe()    — www.landau.de (Advantic CMS, ICS feed + HTML cards)
+ *   1. scrapeKulturnetz()        — kulturnetz-landau.de (Django, schema.org microdata)
+ *   2. scrapeLandauDe()          — www.landau.de (Advantic CMS, ICS feed + HTML cards)
+ *   3. scrapeHambacherSchloss()  — hambacher-schloss.de (WP / MEC RSS)
+ *   4. scrapeRptu()              — rptu.de (university RSS, Landau-filtered)
+ *   5. scrapeSuew()              — suedlicheweinstrasse.de (TYPO3 sfcontenthub)
  *
  * Stable ids are FNV-1a hashes of `(source | source_uid)`. Past events are
  * pruned at scrape time so the worker never has to.
@@ -14,8 +17,11 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
+import { scrapeHambacherSchloss } from "../src/scrapers/hambacher-schloss";
 import { scrapeKulturnetz } from "../src/scrapers/kulturnetz";
 import { scrapeLandauDe } from "../src/scrapers/landau-de";
+import { scrapeRptu } from "../src/scrapers/rptu";
+import { scrapeSuew } from "../src/scrapers/suew";
 import type { Event, ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -24,12 +30,15 @@ const dataPath = resolve(root, "src/scrape-data.ts");
 
 const startMain = Date.now();
 
-const [knl, lde] = await Promise.all([
+const [knl, lde, hbs, rptu, suew] = await Promise.all([
   stage("kulturnetz", () => scrapeKulturnetz()),
   stage("landau.de", () => scrapeLandauDe()),
+  stage("hambacher-schloss", () => scrapeHambacherSchloss()),
+  stage("rptu", () => scrapeRptu()),
+  stage("suew", () => scrapeSuew()),
 ]);
 
-const merged = mergeAndId([...knl, ...lde]);
+const merged = mergeAndId([...knl, ...lde, ...hbs, ...rptu, ...suew]);
 const today = todayIso();
 const future = merged.filter((ev) => (ev.end_date ?? ev.date) >= today);
 future.sort(eventSort);
