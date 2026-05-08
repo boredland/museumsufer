@@ -25,18 +25,20 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 
 | File | Purpose |
 |---|---|
-| `apps/frankfurt-museums/src/index.tsx` | Hono app, routes, cron handler, SSR with inline data. |
-| `apps/frankfurt-museums/src/routes/scrape.ts` | Auth-protected scrape endpoints (`POST /scrape/*`). |
+| `apps/frankfurt-museums/src/index.tsx` | Hono app, routes, SSR with inline data. (No cron handler — scraping moved to GH Actions.) |
+| `apps/frankfurt-museums/src/queries.ts` | In-memory query layer over the bundled SCRAPE_DATA — replaces all the old D1 SELECTs. |
+| `apps/frankfurt-museums/src/scrape-data.ts` | Auto-generated bundle of museums + events + exhibitions + translations. Regenerated daily by `.github/workflows/scrape.yml`. |
+| `apps/frankfurt-museums/scripts/scrape.ts` | Linear, pure-function scrape pipeline run by the GitHub Action. |
 | `apps/frankfurt-museums/src/routes/feeds.ts` | RSS and ICS feed endpoints. |
 | `apps/frankfurt-museums/src/routes/static.ts` | Static assets (robots.txt, sitemap, manifest, llms.txt, OG image). |
 | `apps/frankfurt-museums/src/frontend.tsx` | SSR JSX: i18n (DE/EN/FR), Fuse.js search, distance sorting, visited tracking, JSON-LD. |
 | `apps/frankfurt-museums/src/components.tsx` | Shared JSX components. |
 | `apps/frankfurt-museums/src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
-| `apps/frankfurt-museums/src/scraper.ts` | Scrapes museumsufer.de for museums and exhibitions. Deterministic — no AI. |
+| `apps/frankfurt-museums/src/scraper.ts` | **Pure-function** scrape of museumsufer.de — no D1, returns ParsedMuseum/ParsedExhibition arrays. |
 | `apps/frankfurt-museums/src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
 | `apps/frankfurt-museums/src/api-scrapers.ts` | 16 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`, `dff-kino`. Each returns `ApiEvent[]`. |
-| `apps/frankfurt-museums/src/event-scraper.ts` | Orchestrator: API-first with AI fallback, link matching, detail page enrichment. |
-| `apps/frankfurt-museums/src/translate.ts` | DeepL translation pipeline with SHA-256 hash-based D1 caching. DE→EN/FR. |
+| `apps/frankfurt-museums/src/event-scraper.ts` | **Pure-function** event orchestrator: API-only (AI fallback removed), 7-day detail-page enrichment. |
+| `apps/frankfurt-museums/src/translate.ts` | Two faces: `translateFields()` (worker, reads SCRAPE_DATA) + `translateEvents()` (script, calls DeepL). |
 | `apps/frankfurt-museums/src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
 | `apps/frankfurt-museums/src/health-check.ts` | Source health checks for all structured endpoints + museumsufer.de. |
 
@@ -187,8 +189,8 @@ if (!time && ev.event_desc) {
 
 Before shipping a new scraper:
 
-1. **Manual run:** `curl -X POST https://museumsufer.app/scrape/events -H "Authorization: Bearer $SCRAPE_SECRET"` and check logs for parse errors.
-2. **Spot-check DB:** Query a few events: `SELECT title, date, time FROM events WHERE museum_id = ? LIMIT 5`. Look for NULL dates, midnight times, or dates in titles.
+1. **Manual run:** `bun run -F @museumsufer/frankfurt-museums scrape` (or `gh workflow run scrape.yml -f app=museums`) and check stderr for parse errors.
+2. **Spot-check the bundle:** `grep -c "your-museum-slug" apps/frankfurt-museums/src/scrape-data.ts` — check event/exhibition counts. Inspect a few records by skimming the file.
 3. **Check frontend:** Visit https://museumsufer.app?lang=de, search by museum name, verify dates display correctly without times if `time IS NULL`.
 4. **Regression test:** If fixing an existing scraper, ensure at least as many events are extracted (check event count delta).
 
@@ -258,36 +260,27 @@ time: nullIfMidnight(ev.start_date?.slice(11, 16) || null)
 
 ### Manually triggering scrapes
 
+The scrape pipeline runs in GitHub Actions, not on the worker — there's
+no `/scrape/*` HTTP endpoint and no `SCRAPE_SECRET`. Trigger it via:
+
 ```bash
-curl -X POST https://museumsufer.app/scrape \
-  -H "Authorization: Bearer $SCRAPE_SECRET"
+# Run the workflow on demand (requires gh CLI):
+gh workflow run scrape.yml -f app=museums
 
-curl -X POST https://museumsufer.app/scrape/events \
-  -H "Authorization: Bearer $SCRAPE_SECRET"
-
-curl -X POST https://museumsufer.app/scrape/exhibitions \
-  -H "Authorization: Bearer $SCRAPE_SECRET"
-
-curl -X POST https://museumsufer.app/scrape/translate \
-  -H "Authorization: Bearer $SCRAPE_SECRET"
+# Or run locally — writes a fresh src/scrape-data.ts:
+bun run -F @museumsufer/frankfurt-museums scrape
 ```
+
+GH Actions secrets used: `DEEPL_API_KEYS`, `FETCH_PROXY_URL`,
+`FETCH_PROXY_TOKEN`. The worker no longer reads any of them.
 
 ### Full re-scrape (wipe + rebuild)
 
-When scraping logic has changed significantly and stale data needs to be flushed:
-
-```bash
-# 1. Set a SCRAPE_SECRET if not already set
-openssl rand -hex 32 | npx wrangler secret put SCRAPE_SECRET --name museumsufer
-
-# 2. Wipe the table (events, exhibitions, or both)
-npx wrangler d1 execute museumsufer-db --remote --command "DELETE FROM events;"
-npx wrangler d1 execute museumsufer-db --remote --command "DELETE FROM exhibitions;"
-
-# 3. Trigger re-scrape
-curl -s -X POST "https://museumsufer.app/scrape/events" -H "Authorization: Bearer $SCRAPE_SECRET"
-curl -s -X POST "https://museumsufer.app/scrape/exhibitions" -H "Authorization: Bearer $SCRAPE_SECRET"
-```
+The bundled `src/scrape-data.ts` is wholly regenerated each run, so a
+fresh `bun scripts/scrape.ts` (or workflow_dispatch) is the equivalent
+of "wipe + rebuild". The previous bundle still seeds sticky fields
+(image_url, website_url) and the DeepL cache; delete `src/scrape-data.ts`
+locally if you want a truly cold start.
 
 ### Running migrations
 
@@ -317,4 +310,7 @@ wrangler d1 execute museumsufer-db --remote --file=./migrations/NNNN_name.sql
 
 ## Deployment
 
-Automated on git push. D1 database ID in `wrangler.toml`. Secrets via `wrangler secret put`.
+Automated on git push (Cloudflare git integration). D1 database ID in
+`wrangler.jsonc` — only used for the `likes` table now. The scrape
+pipeline runs in GitHub Actions, not on the worker; its DeepL/proxy
+secrets live in GH Secrets, not `wrangler secret put`.
