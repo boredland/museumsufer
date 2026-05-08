@@ -3,6 +3,7 @@
  * picked up by the museumsufer.de directory in `scrape()`, fall back to
  * the per-museum exhibitionApi configured in museum-config.ts. No D1.
  */
+import PQueue from "p-queue";
 import { type ApiExhibition, fetchExhibitionsFromApi } from "./api-scrapers";
 import { todayIso } from "./date";
 import { MUSEUMS } from "./museum-config";
@@ -12,6 +13,8 @@ interface ProxyConfig {
   url?: string;
   token?: string;
 }
+
+const CONCURRENCY = 5;
 
 export async function scrapeMuseumExhibitions(
   museums: Map<string, ParsedMuseum>,
@@ -25,23 +28,25 @@ export async function scrapeMuseumExhibitions(
   }
 
   const out: ParsedExhibition[] = [];
-  const errors: string[] = [];
+  const queue = new PQueue({ concurrency: CONCURRENCY });
 
   for (const museum of museums.values()) {
     if (haveActiveBySlug.has(museum.slug)) continue;
     const config = MUSEUMS[museum.slug];
     if (!config?.exhibitionApi) continue;
+    const proxyArg = config.proxy && opts.proxy?.url ? { url: opts.proxy.url, token: opts.proxy.token } : undefined;
 
-    try {
-      const proxyArg = config.proxy && opts.proxy?.url ? { url: opts.proxy.url, token: opts.proxy.token } : undefined;
-      const items = await fetchExhibitionsFromApi(config.exhibitionApi, proxyArg);
-      for (const it of mapApiExhibitions(museum.slug, items, today)) out.push(it);
-    } catch (e) {
-      const msg = `${museum.slug}: ${e instanceof Error ? e.message : String(e)}`;
-      console.error(`Exhibition scrape failed for ${msg}`);
-      errors.push(msg);
-    }
+    queue.add(async () => {
+      try {
+        const items = await fetchExhibitionsFromApi(config.exhibitionApi!, proxyArg);
+        for (const it of mapApiExhibitions(museum.slug, items, today)) out.push(it);
+      } catch (e) {
+        const msg = `${museum.slug}: ${e instanceof Error ? e.message : String(e)}`;
+        console.error(`Exhibition scrape failed for ${msg}`);
+      }
+    });
   }
+  await queue.onIdle();
 
   return out;
 }
