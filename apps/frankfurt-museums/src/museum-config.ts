@@ -36,7 +36,11 @@ export type ExhibitionApiType =
   | "staedel"
   | "liebieghaus"
   | "historisches"
-  | "senckenberg";
+  | "senckenberg"
+  | "juedisches"
+  | "mak"
+  | "ledermuseum"
+  | "fkv";
 
 export interface ProxyConfig {
   url: string;
@@ -110,6 +114,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Offenbach (Main)-Zentrum Hauptbahnhof@X=8760662@Y=50099643@U=80@L=3002501@",
     exhibitionUrl: "https://www.ledermuseum.de/ausstellungen",
     eventApi: { type: "ledermuseum", endpoint: "https://www.ledermuseum.de/programm" },
+    exhibitionApi: { type: "ledermuseum", endpoint: "https://www.ledermuseum.de/ausstellungen" },
   },
   "deutsches-romantik-museum": {
     lat: 50.1118,
@@ -163,6 +168,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Hospital Zum Heiligen Geist@X=8692722@Y=50110637@U=80@L=3000524@",
     exhibitionUrl: "https://www.fkv.de/exhibitions-current-preview/",
     eventApi: { type: "fkv", endpoint: "https://www.fkv.de/current-events/" },
+    exhibitionApi: { type: "fkv", endpoint: "https://www.fkv.de/exhibitions-current-preview/" },
   },
   "geldmuseum-der-deutschen-bundesbank": {
     lat: 50.1283,
@@ -227,6 +233,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
       type: "juedisches",
       endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records%5BL%5D=0&records%5Buid%5D=329",
     },
+    exhibitionApi: { type: "juedisches", endpoint: "https://www.juedischesmuseum.de/besuch/ausstellungen" },
   },
   "juedisches-museum-museum-judengasse-frankfurt": {
     group: "jmf",
@@ -278,6 +285,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
     exhibitionUrl: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/",
     eventApi: { type: "mak", endpoint: "https://www.museumangewandtekunst.de/de/kalender/" },
+    exhibitionApi: { type: "mak", endpoint: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/" },
   },
   "museum-fuer-kommunikation-frankfurt": {
     abbreviation: "MFK",
