@@ -10,9 +10,8 @@
  *   batch-calls DeepL for misses, and returns the merged translation
  *   array to bundle into scrape-data.ts.
  */
-import { fnv1a } from "@museumsufer/core";
+import { fnv1a, logFail, logOk } from "@museumsufer/core";
 import { getTranslation } from "./queries";
-import { logFail, logOk } from "./scrape-log";
 import type { Env, Translation } from "./types";
 
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";

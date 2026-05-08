@@ -1,14 +1,8 @@
-/** stderr line logger shared by the scrape pipeline. Format mirrors
- *  the theaters scrape output:
- *
- *    [scrape] events: senckenberg-naturmuseum  ok — 14 events
- *    [scrape] events: comedy-hall              FAIL — fetch failed: 503
- *
- *  The worker imports translate.ts (which imports this file) for the
- *  request-time `translateFields()` path, but `process` doesn't exist
- *  in the Workers runtime. The typeof guard below makes this a no-op
- *  there; only the Bun-driven scrape script actually emits lines.
- */
+/** stderr line logger shared by both apps' scrape scripts. The worker
+ *  occasionally imports modules that import this (e.g. translate.ts via
+ *  the museums request-time `translateFields()` path), but `process`
+ *  doesn't exist in the Workers runtime — the typeof guard makes this
+ *  a no-op there. */
 declare const process: { stderr: { write(s: string): void } } | undefined;
 
 const PAD = 36;

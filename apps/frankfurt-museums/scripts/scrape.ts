@@ -20,7 +20,7 @@ import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fnv1aInt } from "@museumsufer/core";
+import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
 import { scrapeMuseumWebsites } from "../src/event-scraper";
 import { scrapeMuseumExhibitions } from "../src/exhibition-scraper";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
@@ -30,6 +30,10 @@ import type { Event, Exhibition, Museum, ScrapeData, Translation } from "../src/
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const dataPath = resolve(root, "src/scrape-data.ts");
+
+// Hoisted above the top-level await so `buildScrapeData()` sees them
+// initialised — `const` is in TDZ at module-eval start, `function` is not.
+const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
 
 const previous = await loadPreviousBundle(dataPath);
 log(
@@ -212,8 +216,6 @@ function buildScrapeData(input: {
   return { museums, exhibitions, events, translations };
 }
 
-const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
-
 function normalizeForDedup(title: string): string {
   return title
     .toLowerCase()
@@ -222,48 +224,68 @@ function normalizeForDedup(title: string): string {
     .trim();
 }
 
+/** O(n) collapse of items sharing a `(museum_id, normalized title)` key —
+ *  keeps the highest-id item per group. Replaces the read-time fuzzy
+ *  dedup that used to walk the result array on every request. */
 function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
-  const result: T[] = [];
+  const byKey = new Map<string, T>();
   for (const item of items) {
-    const norm = normalizeForDedup(item.title);
-    const dupeIdx = result.findIndex((e) => e.museum_id === item.museum_id && normalizeForDedup(e.title) === norm);
-    if (dupeIdx !== -1) {
-      if (item.id > result[dupeIdx].id) result[dupeIdx] = item;
-      continue;
-    }
-    result.push(item);
+    const key = `${item.museum_id}|${normalizeForDedup(item.title)}`;
+    const existing = byKey.get(key);
+    if (!existing || item.id > existing.id) byKey.set(key, item);
   }
-  return result;
+  return [...byKey.values()];
 }
 
+/** Cross-feed dedup: same museum + same time + sufficiently overlapping
+ *  titles collapse into the highest-id row. This is O(n²) on the same-time
+ *  partition only (events sharing a single timestamp at one museum) — at
+ *  museumsufer's scale that's typically <5 candidates per partition. */
 function deduplicateEvents<T extends { museum_id: number; title: string; id: number; time?: string | null }>(
   events: T[],
 ): T[] {
-  const result: T[] = [];
-  for (const ev of events) {
-    if (ev.time) {
-      const dupeIdx = result.findIndex(
-        (e) => e.museum_id === ev.museum_id && e.time === ev.time && wordsOverlap(e.title, ev.title),
-      );
-      if (dupeIdx !== -1) {
-        if (ev.id > result[dupeIdx].id) result[dupeIdx] = ev;
-        continue;
-      }
+  // Pre-normalise once.
+  const annotated = events.map((ev) => ({ ev, words: significantWords(ev.title) }));
+
+  // Index by (museum_id, time) so the inner overlap-check only scans the
+  // small same-bucket partition.
+  const buckets = new Map<string, typeof annotated>();
+  const passthrough: T[] = [];
+  for (const a of annotated) {
+    if (!a.ev.time) {
+      passthrough.push(a.ev);
+      continue;
     }
-    result.push(ev);
+    const key = `${a.ev.museum_id}|${a.ev.time}`;
+    const bucket = buckets.get(key);
+    if (bucket) bucket.push(a);
+    else buckets.set(key, [a]);
   }
-  return result;
+
+  const out: T[] = [...passthrough];
+  for (const bucket of buckets.values()) {
+    const kept: typeof bucket = [];
+    for (const a of bucket) {
+      const dupeIdx = kept.findIndex((b) => wordsOverlapPrenormalised(a.words, b.words));
+      if (dupeIdx === -1) kept.push(a);
+      else if (a.ev.id > kept[dupeIdx].ev.id) kept[dupeIdx] = a;
+    }
+    for (const a of kept) out.push(a.ev);
+  }
+  return out;
 }
 
-function wordsOverlap(a: string, b: string): boolean {
-  const na = normalizeForDedup(a);
-  const nb = normalizeForDedup(b);
-  if (na === nb) return true;
-  const wordsA = na.split(" ").filter((w) => w.length > 2);
-  const wordsB = nb.split(" ").filter((w) => w.length > 2);
-  if (wordsA.length === 0 || wordsB.length === 0) return false;
-  const [shorter, longerStr] = wordsA.length <= wordsB.length ? [wordsA, nb] : [wordsB, na];
-  return shorter.every((w) => longerStr.includes(w));
+function significantWords(title: string): string[] {
+  return normalizeForDedup(title)
+    .split(" ")
+    .filter((w) => w.length > 2);
+}
+
+function wordsOverlapPrenormalised(a: string[], b: string[]): boolean {
+  if (a.length === 0 || b.length === 0) return false;
+  const [shorter, longer] = a.length <= b.length ? [a, b] : [b, a];
+  const longerSet = new Set(longer);
+  return shorter.every((w) => longerSet.has(w));
 }
 
 async function loadPreviousBundle(path: string): Promise<ScrapeData> {
@@ -308,45 +330,16 @@ function slugFromMuseumId(museumId: number, museums: Museum[]): string {
 }
 
 function generateModule(data: ScrapeData): string {
-  const opts = { stripNulls: true };
-  const museumsJson = data.museums.map((m) => stringifyRecord(m, opts)).join(",\n    ");
-  const exhibitionsJson = data.exhibitions.map((e) => stringifyRecord(e, opts)).join(",\n    ");
-  const eventsJson = data.events.map((e) => stringifyRecord(e, opts)).join(",\n    ");
-  const translationsJson = data.translations.map((t) => stringifyRecord(t, opts)).join(",\n    ");
   return `// Auto-generated by scripts/scrape.ts — do not edit by hand.
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
-  museums: [
-    ${museumsJson}
-  ],
-  exhibitions: [
-    ${exhibitionsJson}
-  ],
-  events: [
-    ${eventsJson}
-  ],
-  translations: [
-    ${translationsJson}
-  ],
+${bundleSection("museums", data.museums)}
+${bundleSection("exhibitions", data.exhibitions)}
+${bundleSection("events", data.events)}
+${bundleSection("translations", data.translations)}
 };
 `;
-}
-
-function stringifyRecord(record: Record<string, unknown>, opts?: { stripNulls?: boolean }): string {
-  const entries = Object.entries(record)
-    .filter(([, v]) => {
-      if (v === undefined) return false;
-      if (opts?.stripNulls && v === null) return false;
-      return true;
-    })
-    .sort(([a], [b]) => a.localeCompare(b));
-  const parts = entries.map(([k, v]) => `${JSON.stringify(k)}:${JSON.stringify(v)}`);
-  return `{${parts.join(",")}}`;
-}
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function addDays(iso: string, days: number): string {

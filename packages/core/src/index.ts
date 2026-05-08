@@ -1,4 +1,5 @@
 export * from "./api-catalog";
+export * from "./bundle-writer";
 export * from "./calendar";
 export * from "./date";
 export * from "./escape";
@@ -7,7 +8,9 @@ export * from "./hash";
 export * from "./html";
 export * from "./manifest";
 export * from "./robots";
+export * from "./scrape-log";
 export * from "./security-headers";
+export * from "./sort";
 export * from "./theme-script";
 export * from "./user-agents";
 export * from "./utm";

@@ -3,11 +3,12 @@
  * picked up by the museumsufer.de directory in `scrape()`, fall back to
  * the per-museum exhibitionApi configured in museum-config.ts. No D1.
  */
+
+import { logFail, logOk } from "@museumsufer/core";
 import PQueue from "p-queue";
 import { type ApiExhibition, fetchExhibitionsFromApi } from "./api-scrapers";
 import { todayIso } from "./date";
 import { MUSEUMS } from "./museum-config";
-import { logFail, logOk } from "./scrape-log";
 import type { ParsedExhibition, ParsedMuseum } from "./scraper";
 
 interface ProxyConfig {
