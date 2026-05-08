@@ -26,7 +26,7 @@ export type EventApiType =
   | "giersch"
   | "fff";
 
-export type ExhibitionApiType = "mmk-cms";
+export type ExhibitionApiType = "mmk-cms" | "schirn" | "weltkulturen" | "caricatura" | "giersch" | "fff";
 
 export interface ProxyConfig {
   url: string;
@@ -84,6 +84,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
     eventApi: { type: "caricatura", endpoint: "https://caricatura-museum.de/veranstaltungen" },
+    exhibitionApi: { type: "caricatura", endpoint: "https://caricatura-museum.de/ausstellungen/" },
   },
   "deutsches-architekturmuseum": {
     abbreviation: "DAM",
@@ -135,6 +136,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz/Stoltzestraße@X=8688874@Y=50112606@U=80@L=3060775@",
     exhibitionUrl: "https://www.fffrankfurt.org/aktuell/",
     eventApi: { type: "fff", endpoint: "https://www.fffrankfurt.org/aktuell/" },
+    exhibitionApi: { type: "fff", endpoint: "https://www.fffrankfurt.org/aktuell/" },
   },
   "frankfurter-goethe-haus": {
     lat: 50.1113,
@@ -276,6 +278,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Gutleut-/Heilbronner Straße@X=8654212@Y=50099751@U=80@L=3000016@",
     exhibitionUrl: "https://www.mggu.de/ausstellungen/",
     eventApi: { type: "giersch", endpoint: "https://www.mggu.de/veranstaltungen/" },
+    exhibitionApi: { type: "giersch", endpoint: "https://www.mggu.de/ausstellungen/" },
   },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
@@ -321,6 +324,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Hohenstaufenstraße@X=8657655@Y=50110826@U=80@L=3001938@",
     exhibitionUrl: "https://www.schirn.de/ausstellung/",
     eventApi: { type: "schirn", endpoint: "https://www.schirn.de/de/veranstaltungen/" },
+    exhibitionApi: { type: "schirn", endpoint: "https://www.schirn.de/programm/" },
   },
   "schirn-in-bockenheim": {
     lat: 50.1102,
@@ -382,6 +386,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
     exhibitionUrl: "https://weltkulturenmuseum.de/de/ausstellungen/",
     eventApi: { type: "weltkulturen", endpoint: "https://weltkulturenmuseum.de/de/veranstaltungen" },
+    exhibitionApi: { type: "weltkulturen", endpoint: "https://weltkulturenmuseum.de/de/ausstellungen/" },
   },
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
