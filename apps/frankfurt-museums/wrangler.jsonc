@@ -3,9 +3,10 @@
   "name": "museumsufer",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
-  "compatibility_flags": ["nodejs_compat"],
   // Scraping moved to .github/workflows/scrape.yml (museums job) — the
-  // worker no longer scrapes. Daily 06:00 UTC cron lives in the workflow.
+  // worker no longer scrapes. No `nodejs_compat` because the worker runtime
+  // path has zero Node API usage; the scrape script (which does) runs in Bun
+  // on GitHub Actions, not in the Worker.
   "d1_databases": [
     {
       "binding": "DB",
