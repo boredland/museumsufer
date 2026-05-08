@@ -3,7 +3,6 @@
   "name": "landau-today",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
-  "compatibility_flags": ["nodejs_compat"],
   "routes": [
     { "pattern": "landau.today", "custom_domain": true },
     { "pattern": "www.landau.today", "custom_domain": true }
