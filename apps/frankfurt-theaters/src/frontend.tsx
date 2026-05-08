@@ -6,6 +6,7 @@ import {
   buildYahooCalendarUrl,
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
+  dateOffset,
   LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
@@ -479,7 +480,11 @@ export function renderProgrammePartial(date: string, performances: DayPerformanc
     visible.length === 0
       ? `<div class="empty">
            <p class="empty__mark">∅</p>
-           <p>${hidden > 0 ? "Heute keine kommenden Vorstellungen mehr." : "An diesem Tag keine Vorstellungen."}</p>
+           <p>${
+             hidden > 0
+               ? `Heute keine kommenden Vorstellungen mehr. ${renderTomorrowLink()}`
+               : "An diesem Tag keine Vorstellungen."
+           }</p>
          </div>`
       : `<ol class="performances" role="list" id="performances">${visible.map((p, i) => renderPerformance(p, { index: i })).join("")}</ol>
          ${
@@ -488,6 +493,11 @@ export function renderProgrammePartial(date: string, performances: DayPerformanc
              : ""
          }`
   }`;
+}
+
+function renderTomorrowLink(): string {
+  const tomorrow = dateOffset(1);
+  return `<a class="empty__next" href="/?date=${tomorrow}" hx-get="/partial/programme?date=${tomorrow}" hx-target="#programme-content" hx-swap="innerHTML swap:80ms settle:20ms" hx-push-url="/?date=${tomorrow}">Spielplan für morgen →</a>`;
 }
 
 function filterPastForToday(date: string, performances: DayPerformance[]): DayPerformance[] {
