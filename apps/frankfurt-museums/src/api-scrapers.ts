@@ -63,6 +63,14 @@ export async function fetchExhibitionsFromApi(
       return fetchGierschExhibitions(config.endpoint);
     case "fff":
       return fetchFffExhibitions(config.endpoint);
+    case "staedel":
+      return fetchStaedelExhibitions(config.endpoint);
+    case "liebieghaus":
+      return fetchLiebieghausExhibitions(config.endpoint);
+    case "historisches":
+      return fetchHistorischesExhibitions(config.endpoint);
+    case "senckenberg":
+      return fetchSenckenbergExhibitions(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -2755,6 +2763,246 @@ async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       image_url: null,
     });
     m = blockRe.exec(html);
+  }
+  return out;
+}
+
+interface StaedelExhibition {
+  url?: string;
+  id?: number;
+  title?: string;
+}
+
+async function fetchStaedelExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  // The /api/finder endpoint lists exhibition URLs but no dates;
+  // each detail page carries a JSON-LD <script @type="Event"> with
+  // startDate/endDate, which is the cleanest source.
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const data = (await res.json()) as { exhibitions?: StaedelExhibition[]; aliases?: Record<string, string> };
+  const items = data.exhibitions ?? [];
+  if (items.length === 0) return [];
+
+  const webBase = data.aliases?.["@web"] || "https://www.staedelmuseum.de";
+  const today = todayIso();
+
+  const candidates = items
+    .filter((it) => it.url && it.title && !/dauerausstellung|sammlung/i.test(it.title))
+    .map((it) => ({
+      url: it.url!.startsWith("@web") ? it.url!.replace("@web", webBase) : it.url!,
+      title: it.title!,
+    }));
+
+  const detailHtmls = await Promise.all(
+    candidates.map(async (c) => {
+      try {
+        const r = await fetch(c.url, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? await r.text() : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  return candidates.flatMap((c, i): ApiExhibition[] => {
+    const html = detailHtmls[i];
+    if (!html) return [];
+    const event = collectEventJsonLd(html).find((e) => /Exhibition|Event/.test(String(e["@type"] ?? "")));
+    if (!event) return [];
+
+    const start = event.startDate ? splitJsonLdDate(event.startDate) : null;
+    const end = event.endDate ? splitJsonLdDate(event.endDate) : null;
+    if (end?.date && end.date < today) return [];
+
+    const image = Array.isArray(event.image)
+      ? event.image[0]
+      : typeof event.image === "object" && event.image
+        ? event.image.url
+        : event.image;
+
+    return [
+      {
+        title: stripHtml(event.name ?? c.title),
+        start_date: start?.date ?? null,
+        end_date: end?.date ?? null,
+        description: event.description ? truncateHtml(stripHtml(event.description)) : null,
+        detail_url: event.url ?? c.url,
+        image_url: typeof image === "string" ? image : null,
+      },
+    ];
+  });
+}
+
+async function fetchLiebieghausExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const itemRe = /<li class="lh-exhibitions__item[^"]*">([\s\S]*?)<\/li>/g;
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = itemRe.exec(html);
+  while (m !== null) {
+    const body = m[1];
+    const href = body.match(/href="([^"]+)"/)?.[1];
+    if (!href || seen.has(href)) {
+      m = itemRe.exec(html);
+      continue;
+    }
+    const title = body
+      .match(/<div class="lh-teaser__title">([^<]+)<\/div>/)?.[1]
+      ?.replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const subtitle = body
+      .match(/<div class="lh-teaser__subtitle">([^<]+)<\/div>/)?.[1]
+      ?.replace(/&ndash;/g, "–")
+      .trim();
+    if (!title) {
+      m = itemRe.exec(html);
+      continue;
+    }
+
+    // The permanent collections (Antike, Mittelalter, ...) carry no subtitle.
+    if (!subtitle) {
+      m = itemRe.exec(html);
+      continue;
+    }
+
+    const range = subtitle.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    if (range) {
+      start_date = `${range[3]}-${range[2].padStart(2, "0")}-${range[1].padStart(2, "0")}`;
+      end_date = `${range[6]}-${range[5].padStart(2, "0")}-${range[4].padStart(2, "0")}`;
+      if (end_date < today) {
+        m = itemRe.exec(html);
+        continue;
+      }
+    }
+
+    seen.add(href);
+    const image = body.match(/data-src-set="([^\s",]+)/)?.[1] ?? null;
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: null,
+      detail_url: normalizeUrl(href, origin),
+      image_url: image ? normalizeUrl(image, origin) : null,
+    });
+    m = itemRe.exec(html);
+  }
+  return out;
+}
+
+async function fetchHistorischesExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint);
+  if (!res.ok) return [];
+  const data = (await res.json()) as { events?: HistorischesEvent[] };
+  const events = data.events ?? [];
+  if (events.length === 0) return [];
+
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  // The /api/calendar?type=specialExhibition feed mixes actual exhibitions
+  // with single-day programme entries that share the type. Real exhibitions
+  // run for weeks at minimum.
+  const MIN_DURATION_SECONDS = 7 * 24 * 60 * 60;
+
+  for (const ev of events) {
+    if (!ev.title || !ev.dateStart || !ev.dateEnd) continue;
+    if (ev.dateEnd - ev.dateStart < MIN_DURATION_SECONDS) continue;
+    const start_date = toBerlinDate(new Date(ev.dateStart * 1000));
+    const end_date = toBerlinDate(new Date(ev.dateEnd * 1000));
+    if (end_date < today) continue;
+    if (HISTORISCHES_TITLE_BLOCKLIST.some((b) => ev.title!.toLowerCase().includes(b))) continue;
+
+    const key = `${ev.title}::${start_date}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const locationSlug = ev.locations?.[0] ? HISTORISCHES_LOCATION_SLUGS[ev.locations[0]] : undefined;
+    out.push({
+      title: ev.title,
+      start_date,
+      end_date,
+      description: ev.summary ? truncateHtml(stripHtml(ev.summary)) : null,
+      detail_url: ev.url ?? null,
+      image_url: ev.image ?? null,
+      museum_slug_override: locationSlug,
+    });
+  }
+  return out;
+}
+
+interface SenckenbergExhibition {
+  id?: number;
+  link?: string;
+  title?: { rendered?: string };
+  class_list?: string[];
+}
+
+async function fetchSenckenbergExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
+  if (!res.ok) return [];
+  const items = (await res.json()) as SenckenbergExhibition[];
+  if (!Array.isArray(items)) return [];
+
+  const today = todayIso();
+  // Only Sonderausstellungen (temporary) — Dauerausstellungen and Vorschau are
+  // tagged via class_list; the WP REST response carries no dates, so each
+  // detail page must be fetched for the runtime.
+  const candidates = items
+    .filter((it) => it.class_list?.some((c) => c === "exhibition_type-sonderausstellung"))
+    .filter((it) => it.link && it.title?.rendered);
+
+  const detailHtmls = await Promise.all(
+    candidates.map(async (c) => {
+      try {
+        const r = await fetch(c.link!, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? await r.text() : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const out: ApiExhibition[] = [];
+  for (let i = 0; i < candidates.length; i++) {
+    const c = candidates[i];
+    const html = detailHtmls[i];
+    if (!html) continue;
+
+    const dateLine = html
+      .match(/<p class="date">([\s\S]*?)<\/p>/)?.[1]
+      ?.replace(/&nbsp;|&thinsp;|&[a-z]+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!dateLine) continue;
+
+    const range = dateLine.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*[—–-]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+    if (!range) continue;
+    const start_date = `${range[3]}-${range[2].padStart(2, "0")}-${range[1].padStart(2, "0")}`;
+    const end_date = `${range[6]}-${range[5].padStart(2, "0")}-${range[4].padStart(2, "0")}`;
+    if (end_date < today) continue;
+
+    const title = stripHtml(c.title!.rendered!).trim();
+    const ogImage = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/)?.[1] ?? null;
+
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: null,
+      detail_url: c.link!,
+      image_url: ogImage,
+    });
   }
   return out;
 }
