@@ -1165,12 +1165,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
 /* ────────────────  Theme toggle button  ──────────────── */
 
 .theme-toggle {
-  position: fixed;
-  /* Floor lifted from 0.85rem → 1rem so the toggle clears the wordmark's
-     left-edge gutter on mobile and reads as deliberately offset, not
-     accidentally tucked into the bezel. */
-  top: clamp(1rem, 2vw, 1.25rem);
-  right: clamp(1rem, 2vw, 1.25rem);
+  /* Absolute-positioned to the masthead's top-right corner. Used to be
+     fixed-to-viewport which kept it sticky during scroll; now it sits
+     in the layout's top-right and scrolls with the page. The masthead
+     already has `position: relative` so the anchor resolves there. */
+  position: absolute;
+  top: clamp(1rem, 2vw, 1.5rem);
+  right: var(--gut);
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 999px;
