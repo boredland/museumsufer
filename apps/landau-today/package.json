@@ -1,0 +1,29 @@
+{
+  "name": "@museumsufer/landau-today",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i src/app.css -o public/styles.css --minify",
+    "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
+    "dev": "bun css && wrangler dev",
+    "build": "bun css",
+    "deploy": "bun css && wrangler deploy",
+    "scrape": "bun scripts/scrape.ts",
+    "lint": "biome check src/ scripts/",
+    "lint:fix": "biome check --write src/ scripts/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@museumsufer/core": "*",
+    "dayjs": "^1.11.20",
+    "hono": "^4.12.15"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250410.0",
+    "@museumsufer/tsconfig": "*",
+    "@tailwindcss/cli": "^4.2.4",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.83.0"
+  }
+}

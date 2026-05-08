@@ -59,6 +59,23 @@
         "wrangler": "^4.83.0",
       },
     },
+    "apps/landau-today": {
+      "name": "@museumsufer/landau-today",
+      "version": "0.0.1",
+      "dependencies": {
+        "@museumsufer/core": "*",
+        "dayjs": "^1.11.20",
+        "hono": "^4.12.15",
+      },
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4.20250410.0",
+        "@museumsufer/tsconfig": "*",
+        "@tailwindcss/cli": "^4.2.4",
+        "tailwindcss": "^4.2.4",
+        "typescript": "^5.8.3",
+        "wrangler": "^4.83.0",
+      },
+    },
     "packages/config": {
       "name": "@museumsufer/tsconfig",
       "version": "0.0.0",
@@ -235,6 +252,8 @@
     "@museumsufer/frankfurt-museums": ["@museumsufer/frankfurt-museums@workspace:apps/frankfurt-museums"],
 
     "@museumsufer/frankfurt-theaters": ["@museumsufer/frankfurt-theaters@workspace:apps/frankfurt-theaters"],
+
+    "@museumsufer/landau-today": ["@museumsufer/landau-today@workspace:apps/landau-today"],
 
     "@museumsufer/tsconfig": ["@museumsufer/tsconfig@workspace:packages/config"],
 

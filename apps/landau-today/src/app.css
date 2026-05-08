@@ -1,0 +1,498 @@
+@import "tailwindcss";
+
+@theme {
+  /* Heimatzeitung × Weinetikett palette ─────────────────────────────
+     paper       — aged sandstone, dominant background
+     paper-2     — deeper bone, layered surfaces (broadside cards)
+     ink         — warm printer's black, all body copy
+     rule        — hairline grey for inter-row dividers
+     rotwein     — aged red (evening / performative categories)
+     ocker       — Pfälzer ocher (warm / festive categories)
+     reblaus     — dusty vine green (outdoors)
+     schiefer    — slate (memorial only)
+     ─────────────────────────────────────────────────────────────── */
+  --color-paper: #f2ead3;
+  --color-paper-2: #ebe1c5;
+  --color-ink: #1b1715;
+  --color-ink-soft: #5a5048;
+  --color-rule: #c8bda0;
+  --color-rotwein: #5c1f2e;
+  --color-ocker: #b88438;
+  --color-reblaus: #5c7a5b;
+  --color-schiefer: #4f5159;
+
+  --font-display: "Bodoni Moda", "Bodoni Moda SC", "GFS Bodoni", "Didot", serif;
+  --font-body: "Newsreader", "Source Serif Pro", "Georgia", serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-body);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    /* Letterpress impression noise — barely visible, but the eye reads
+       "ink on stock" instead of "pixels on screen". */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.045 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
+    font-feature-settings: "onum" 1, "kern" 1, "liga" 1;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--color-rotwein); color: var(--color-paper); }
+  a { color: inherit; text-decoration: none; }
+  /* Italic shift on hover is the only "interactive" signal anywhere on
+     the page. Body italic stays at the same weight; the eye registers
+     the shift the way a finger feels grain on letterpress. */
+  a.t-shift:hover .t-title { font-style: italic; }
+}
+
+/* ── masthead ─────────────────────────────────────────────────────── */
+.masthead {
+  text-align: center;
+  padding: 2.25rem 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-ink);
+  margin-bottom: 1.25rem;
+}
+.masthead h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: normal;
+  font-size: clamp(2.25rem, 7vw, 4.5rem);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  font-feature-settings: "onum" 0, "lnum" 1;
+  margin: 0;
+}
+.masthead h1 .ampersand {
+  font-style: italic;
+  font-weight: 400;
+  margin: 0 0.05em;
+  color: var(--color-rotwein);
+}
+.masthead .subtitle {
+  margin-top: 0.5rem;
+  font-style: italic;
+  color: var(--color-ink-soft);
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+}
+.masthead .colophon {
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+}
+
+/* ── chip row + date strip ───────────────────────────────────────── */
+.strip {
+  position: relative;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0.6rem 0;
+  margin-bottom: 0.75rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+}
+.strip-rail {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 1rem;
+}
+.strip-rail::-webkit-scrollbar { display: none; }
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-ink);
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  white-space: nowrap;
+  color: var(--color-ink);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.chip:hover { background: color-mix(in oklab, var(--color-ink) 8%, transparent); }
+.chip.active { background: var(--color-rotwein); color: var(--color-paper); border-color: var(--color-rotwein); }
+.chip .glyph {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  line-height: 1;
+  position: relative;
+  top: 0.05em;
+}
+.chip .count {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-feature-settings: "onum" 1;
+  letter-spacing: 0;
+  color: color-mix(in oklab, currentColor 60%, transparent);
+}
+.chip.m-rotwein .glyph { color: var(--color-rotwein); }
+.chip.m-ocker .glyph   { color: var(--color-ocker); }
+.chip.m-reblaus .glyph { color: var(--color-reblaus); }
+.chip.m-schiefer .glyph{ color: var(--color-schiefer); }
+.chip.active .glyph    { color: inherit !important; }
+
+/* ── date strip ──────────────────────────────────────────────────── */
+.dates {
+  position: relative;
+  margin-bottom: 1.5rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
+}
+.dates-rail {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0.4rem 1rem 0.6rem;
+}
+.dates-rail::-webkit-scrollbar { display: none; }
+
+.day {
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3rem;
+  padding: 0.35rem 0.5rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  position: relative;
+}
+.day .day-name {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+}
+.day .day-num {
+  font-family: var(--font-body);
+  font-feature-settings: "onum" 1, "lnum" 0, "tnum" 1;
+  font-size: 1.7rem;
+  line-height: 1.05;
+  margin-top: 0.05rem;
+}
+.day .day-month {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+  margin-top: 0.05rem;
+}
+.day.empty { opacity: 0.35; }
+.day.active::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 0.05rem;
+  height: 2px;
+  background: var(--color-rotwein);
+}
+.day.is-today .day-name { color: var(--color-rotwein); }
+
+/* ── headline rule + counters ───────────────────────────────────── */
+.day-headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-ink);
+  padding-bottom: 0.4rem;
+  margin: 0 0 0.9rem;
+}
+.day-headline h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  line-height: 1;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+.day-headline .meta {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+}
+
+/* ── ledger row (the core list item) ────────────────────────────── */
+.ledger {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--color-rule);
+  align-items: baseline;
+}
+.ledger:last-child { border-bottom: 0; }
+.ledger .time {
+  font-family: var(--font-body);
+  font-feature-settings: "onum" 1, "tnum" 1, "lnum" 0;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  color: var(--color-ink);
+  letter-spacing: 0.01em;
+  text-align: right;
+  padding-right: 0.85rem;
+  border-right: 1px solid var(--color-rule);
+}
+.ledger .time.allday {
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  letter-spacing: 0.06em;
+  font-feature-settings: "smcp" 1;
+}
+.ledger .body { min-width: 0; }
+.ledger .title-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+.ledger .ornament {
+  color: var(--color-rotwein);
+  font-size: 0.95rem;
+  position: relative;
+  top: -0.05em;
+}
+.ledger .t-title {
+  font-family: var(--font-body);
+  font-feature-settings: "onum" 1;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-ink);
+  letter-spacing: -0.005em;
+}
+.ledger .meta-line {
+  margin-top: 0.15rem;
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "onum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  color: var(--color-ink-soft);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.7rem;
+}
+.ledger .meta-line .sep::before { content: "·"; padding-right: 0.5rem; color: var(--color-rule); }
+.ledger .desc {
+  margin-top: 0.35rem;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--color-ink-soft);
+  font-feature-settings: "onum" 1;
+}
+.ledger .cat-glyph {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-ink);
+  align-self: center;
+  margin-left: 0.3rem;
+}
+.ledger.m-rotwein .cat-glyph { color: var(--color-rotwein); }
+.ledger.m-ocker .cat-glyph   { color: var(--color-ocker); }
+.ledger.m-reblaus .cat-glyph { color: var(--color-reblaus); }
+.ledger.m-schiefer .cat-glyph{ color: var(--color-schiefer); }
+
+@media (max-width: 540px) {
+  .ledger { grid-template-columns: 3.5rem 1fr auto; gap: 0.75rem; }
+  .ledger .time { font-size: 1.05rem; padding-right: 0.55rem; }
+  .ledger .t-title { font-size: 1rem; }
+}
+
+/* ── broadside (full-width image card) ──────────────────────────── */
+.broadside {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-ink);
+  background: var(--color-paper-2);
+  position: relative;
+}
+.broadside .image {
+  background-size: cover;
+  background-position: center;
+  min-height: 16rem;
+  filter: saturate(0.85) contrast(1.05);
+}
+.broadside .copy {
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.broadside .copy .eyebrow {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+}
+.broadside .copy h3 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0.2rem 0 0.4rem;
+}
+.broadside .copy .desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--color-ink);
+  font-feature-settings: "onum" 1;
+}
+.broadside .copy .meta-line {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--color-ink-soft);
+}
+@media (max-width: 720px) {
+  .broadside { grid-template-columns: 1fr; }
+  .broadside .image { min-height: 11rem; }
+}
+
+/* ── ornaments + dividers ───────────────────────────────────────── */
+.divider {
+  margin: 1.5rem 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--color-rule);
+  letter-spacing: 1.5em;
+}
+
+/* ── empty state ────────────────────────────────────────────────── */
+.empty {
+  padding: 3rem 1rem;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-ink-soft);
+  font-size: 1.1rem;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+  margin: 1rem 0;
+}
+.empty::before { content: "❦"; display: block; font-size: 1.5rem; color: var(--color-rotwein); margin-bottom: 0.5rem; }
+
+/* ── footer / colophon ──────────────────────────────────────────── */
+.colophon-foot {
+  margin: 4rem 0 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-ink);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+}
+.colophon-foot a:hover { color: var(--color-rotwein); }
+
+/* ── motion choreography (entrance only) ────────────────────────── */
+@keyframes ink-up {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: none; }
+}
+.ink-up { animation: ink-up 0.4s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .ink-up { animation: none; }
+}
+
+/* ── event detail ───────────────────────────────────────────────── */
+.event-detail {
+  max-width: 38rem;
+  margin: 1.5rem auto 4rem;
+}
+.event-detail .eyebrow {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 0.5rem;
+}
+.event-detail h1 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
+}
+.event-detail .when {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-feature-settings: "onum" 1;
+  margin-bottom: 0.5rem;
+}
+.event-detail .where {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  letter-spacing: 0.13em;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-ink-soft);
+}
+.event-detail img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 1rem 0 1.5rem;
+  border: 1px solid var(--color-rule);
+  filter: saturate(0.9);
+}
+.event-detail .body-copy {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  font-feature-settings: "onum" 1;
+}
+.event-detail .actions {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  letter-spacing: 0.16em;
+  font-size: 0.75rem;
+}
+.event-detail .actions a { border-bottom: 1px solid var(--color-ink); padding-bottom: 0.1rem; }
+.event-detail .actions a:hover { color: var(--color-rotwein); border-color: var(--color-rotwein); }
