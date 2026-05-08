@@ -43,7 +43,9 @@ export type ExhibitionApiType =
   | "fkv"
   | "fdh"
   | "dff"
-  | "archaeologisches";
+  | "archaeologisches"
+  | "dam-tribe"
+  | "mfk";
 
 export interface ProxyConfig {
   url: string;
@@ -114,6 +116,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dam-online.de/programm/ausstellungen/",
     eventApi: { type: "tribe-events", endpoint: "https://dam-online.de/wp-json/tribe/events/v1/events" },
+    // The /programm/ausstellungen/ page renders the same Tribe entries with
+    // JSON-LD Event blocks; exhibitions vs single-day workshops are
+    // distinguished by duration (>=7 days).
+    exhibitionApi: { type: "dam-tribe", endpoint: "https://www.dam-online.de/programm/ausstellungen/" },
   },
   "deutsches-ledermuseum-of": {
     lat: 50.0984,
@@ -304,6 +310,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Baseler Platz@X=8664792@Y=50104507@U=80@L=3000025@",
     exhibitionUrl: "https://www.mfk-frankfurt.de/ausstellungen/",
     eventApi: { type: "my-calendar", endpoint: "https://www.mfk-frankfurt.de/wp-json/my-calendar/v1/events" },
+    exhibitionApi: { type: "mfk", endpoint: "https://www.mfk-frankfurt.de/ausstellungen/" },
   },
   "museum-giersch-der-goethe-universitaet": {
     lat: 50.0986,

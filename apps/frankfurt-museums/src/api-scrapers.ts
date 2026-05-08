@@ -85,6 +85,10 @@ export async function fetchExhibitionsFromApi(
       return fetchDffExhibitions(config.endpoint);
     case "archaeologisches":
       return fetchArchaeologischesExhibitions(config.endpoint);
+    case "dam-tribe":
+      return fetchDamTribeExhibitions(config.endpoint);
+    case "mfk":
+      return fetchMfkExhibitions(config.endpoint);
     default: {
       void proxy;
       const _exhaustive: never = config.type;
@@ -3563,6 +3567,151 @@ async function fetchArchaeologischesExhibitions(endpoint: string): Promise<ApiEx
       detail_url: url,
       image_url: ogImage,
     });
+  }
+  return out;
+}
+
+async function fetchDamTribeExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+  // Page renders the same Tribe entries used for events; real exhibitions
+  // span weeks at minimum, while single-day workshops share the markup.
+  const MIN_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+
+  for (const ev of collectEventJsonLd(html)) {
+    if (!ev.startDate || !ev.endDate) continue;
+    const start = new Date(ev.startDate);
+    const end = new Date(ev.endDate);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) continue;
+    if (end.getTime() - start.getTime() < MIN_DURATION_MS) continue;
+
+    const start_date = toBerlinDate(start);
+    const end_date = toBerlinDate(end);
+    if (end_date < today) continue;
+    const url = ev.url ?? null;
+    if (url && seen.has(url)) continue;
+    if (url) seen.add(url);
+
+    const name = stripHtml(ev.name ?? "").trim();
+    if (!name) continue;
+    const image = Array.isArray(ev.image)
+      ? ev.image[0]
+      : typeof ev.image === "object" && ev.image
+        ? ev.image.url
+        : ev.image;
+
+    out.push({
+      title: name,
+      start_date,
+      end_date,
+      description: ev.description ? truncateHtml(stripHtml(ev.description)) : null,
+      detail_url: url,
+      image_url: typeof image === "string" ? image : null,
+    });
+  }
+  return out;
+}
+
+interface MfkRange {
+  start_date: string | null;
+  end_date: string | null;
+}
+
+function parseMfkDate(text: string): MfkRange | null {
+  const norm = text.replace(/\s+/g, " ").trim();
+
+  // "30. Januar bis 26. Juli 2026" — same year on end (or both fully specified)
+  // "9. Oktober 2025 bis 6. September 2026" — both years
+  const range = norm.match(
+    /(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)(?:\s+(\d{4}))?\s+bis\s+(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})/,
+  );
+  if (range) {
+    const sm = GERMAN_MONTHS[range[2].toLowerCase()];
+    const em = GERMAN_MONTHS[range[5].toLowerCase()];
+    if (sm && em) {
+      const startYear = range[3] ?? range[6];
+      return {
+        start_date: `${startYear}-${sm}-${range[1].padStart(2, "0")}`,
+        end_date: `${range[6]}-${em}-${range[4].padStart(2, "0")}`,
+      };
+    }
+  }
+
+  // "ab 28. Mai 2026" / "seit 3. Dezember 2025"
+  const startOnly = norm.match(/(?:ab|seit)\s+(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})/i);
+  if (startOnly) {
+    const m = GERMAN_MONTHS[startOnly[2].toLowerCase()];
+    if (m) return { start_date: `${startOnly[3]}-${m}-${startOnly[1].padStart(2, "0")}`, end_date: null };
+  }
+
+  // "ab Oktober 2026" — month-only opening
+  const monthOnly = norm.match(/ab\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})/i);
+  if (monthOnly) {
+    const m = GERMAN_MONTHS[monthOnly[1].toLowerCase()];
+    if (m) return { start_date: `${monthOnly[2]}-${m}-01`, end_date: null };
+  }
+
+  return null;
+}
+
+async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  const slideRe =
+    /<div class="wp-block-cb-slide-v2[^"]*">[\s\S]*?<a\s+href="(https:\/\/www\.mfk-frankfurt\.de\/[^"]+)"(?:[^>]*)?>[\s\S]*?(?:<img[^>]+(?:src|data-src)="([^"]+)"[^>]*\/?>[\s\S]*?)?<h3[^>]*>([\s\S]*?)<\/h3>[\s\S]*?<p[^>]*>([^<]+)<\/p>/g;
+
+  let m: RegExpExecArray | null = slideRe.exec(html);
+  while (m !== null) {
+    const [, href, image, titleHtml, dateText] = m;
+    if (seen.has(href)) {
+      m = slideRe.exec(html);
+      continue;
+    }
+    if (/dauerausstellung|archiv|amateurfunkstation|nachrichten|kunstraeume/i.test(href)) {
+      m = slideRe.exec(html);
+      continue;
+    }
+
+    const range = parseMfkDate(dateText);
+    if (!range || !range.start_date) {
+      m = slideRe.exec(html);
+      continue;
+    }
+    if (range.end_date && range.end_date < today) {
+      m = slideRe.exec(html);
+      continue;
+    }
+
+    const title = titleHtml
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = slideRe.exec(html);
+      continue;
+    }
+
+    seen.add(href);
+    out.push({
+      title,
+      start_date: range.start_date,
+      end_date: range.end_date,
+      description: null,
+      detail_url: href,
+      image_url: image ?? null,
+    });
+    m = slideRe.exec(html);
   }
   return out;
 }
