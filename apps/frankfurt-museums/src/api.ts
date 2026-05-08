@@ -1,9 +1,12 @@
-import { berlinHourMinute, dateOffset, todayIso } from "./date";
+import { dateOffset, todayIso } from "./date";
 import type { Locale } from "./i18n";
 import { MUSEUMS } from "./museum-config";
+import { getAllMuseums, getEventById, getEventsForDate, getEventsForRange, getExhibitionsForDate } from "./queries";
 import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
 import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
+
+export { getEventsForDate, getEventsForRange, getExhibitionsForDate };
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";
@@ -71,7 +74,7 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
 
   if (path === "/api/events") {
     const date = url.searchParams.get("date") || todayIso();
-    const events = proxyImages(await getEventsForDate(env, date));
+    const events = proxyImages(await getEventsForDate(date));
     const counts = await getLikeCounts(
       env,
       "event",
@@ -84,7 +87,7 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
 
   if (path === "/api/exhibitions") {
     const date = url.searchParams.get("date") || todayIso();
-    const exhibitions = proxyImages(await getExhibitionsForDate(env, date));
+    const exhibitions = proxyImages(await getExhibitionsForDate(date));
     const counts = await getLikeCounts(
       env,
       "exhibition",
@@ -96,16 +99,12 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
   }
 
   if (path === "/api/museums") {
-    const { results } = await env.DB.prepare("SELECT * FROM museums ORDER BY name").all();
-    return json(results, 200, CACHE_MUSEUMS);
+    return json(getAllMuseums(), 200, CACHE_MUSEUMS);
   }
 
   if (path === "/api/day") {
     const date = url.searchParams.get("date") || todayIso();
-    const [rawExhibitions, rawEvents] = await Promise.all([
-      getExhibitionsForDate(env, date),
-      getEventsForDate(env, date),
-    ]);
+    const [rawExhibitions, rawEvents] = await Promise.all([getExhibitionsForDate(date), getEventsForDate(date)]);
     const exhibitions = proxyImages(rawExhibitions);
     const events = proxyImages(rawEvents);
     const [exhCounts, evCounts] = await Promise.all([
@@ -140,11 +139,7 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
   const eventIcsMatch = path.match(/^\/api\/event\/(\d+)\.ics$/);
   if (eventIcsMatch) {
     const id = parseInt(eventIcsMatch[1], 10);
-    const ev = await env.DB.prepare(
-      "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?",
-    )
-      .bind(id)
-      .first<Event & { museum_name: string }>();
+    const ev = await getEventById(id);
     if (!ev) return json({ error: "not found" }, 404);
     return new Response(buildIcs([ev]), {
       headers: {
@@ -158,18 +153,18 @@ export async function handleApi(request: Request, env: Env, locale = "de"): Prom
   return json({ error: "not found" }, 404);
 }
 
-export async function handleFeeds(request: Request, env: Env): Promise<Response | null> {
+export async function handleFeeds(request: Request): Promise<Response | null> {
   const url = new URL(request.url);
 
   if (url.pathname === "/feed.xml" || url.pathname === "/rss.xml") {
-    const events = await getUpcomingEvents(env, 7);
+    const events = await getUpcomingEvents(7);
     return new Response(buildRss(events), {
       headers: { "Content-Type": "application/rss+xml; charset=utf-8", "Cache-Control": CACHE_FEEDS },
     });
   }
 
   if (url.pathname === "/feed.ics" || url.pathname === "/calendar.ics") {
-    const events = await getUpcomingEvents(env, 7);
+    const events = await getUpcomingEvents(7);
     return new Response(buildIcs(events), {
       headers: { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": CACHE_FEEDS },
     });
@@ -207,8 +202,8 @@ export async function fetchDayData(
   endDate?: string,
 ): Promise<{ date: string; exhibitions: ExhibitionWithLikes[]; events: EventWithLikes[] }> {
   const [rawExhibitions, rawEvents] = await Promise.all([
-    getExhibitionsForDate(env, date),
-    endDate ? getEventsForRange(env, date, endDate) : getEventsForDate(env, date),
+    getExhibitionsForDate(date),
+    endDate ? getEventsForRange(date, endDate) : getEventsForDate(date),
   ]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
@@ -249,148 +244,20 @@ export async function fetchDayData(
   return { date, exhibitions: finalExh, events: finalEv };
 }
 
-function fallbackMuseumImage<T extends { image_url: string | null; museum_image_url: string | null }>(
-  items: T[],
-): Omit<T, "museum_image_url">[] {
-  return items.map(({ museum_image_url, ...rest }) => ({
-    ...rest,
-    image_url: rest.image_url || museum_image_url,
-  })) as Omit<T, "museum_image_url">[];
-}
-
-function normalizeForDedup(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[:.,;!?()[\]{}""„"''‚'«»‹›]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
-  const result: T[] = [];
-  for (const item of items) {
-    const norm = normalizeForDedup(item.title);
-    const dupeIdx = result.findIndex((e) => e.museum_id === item.museum_id && normalizeForDedup(e.title) === norm);
-    if (dupeIdx !== -1) {
-      if (item.id > result[dupeIdx].id) result[dupeIdx] = item;
-      continue;
-    }
-    result.push(item);
-  }
-  return result;
-}
-
-function deduplicateEvents(events: Event[]): Event[] {
-  const afterTitleDedup = deduplicateByTitle(events);
-  const result: Event[] = [];
-  for (const ev of afterTitleDedup) {
-    if (ev.time) {
-      const timeDupeIdx = result.findIndex(
-        (e) => e.museum_id === ev.museum_id && e.time === ev.time && wordsOverlap(e.title, ev.title),
-      );
-      if (timeDupeIdx !== -1) {
-        if (ev.id > result[timeDupeIdx].id) result[timeDupeIdx] = ev;
-        continue;
-      }
-    }
-    result.push(ev);
-  }
-  return result;
-}
-
-function wordsOverlap(a: string, b: string): boolean {
-  const na = normalizeForDedup(a);
-  const nb = normalizeForDedup(b);
-  if (na === nb) return true;
-  const wordsA = na.split(" ").filter((w) => w.length > 2);
-  const wordsB = nb.split(" ").filter((w) => w.length > 2);
-  if (wordsA.length === 0 || wordsB.length === 0) return false;
-  const [shorter, longerStr] = wordsA.length <= wordsB.length ? [wordsA, nb] : [wordsB, na];
-  return shorter.every((w) => longerStr.includes(w));
-}
-
-export async function getExhibitionsForDate(env: Env, date: string): Promise<Exhibition[]> {
-  const { results } = await env.DB.prepare(
-    `SELECT e.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
-     FROM exhibitions e
-     JOIN museums m ON e.museum_id = m.id
-     WHERE e.start_date IS NOT NULL AND e.end_date IS NOT NULL
-       AND e.start_date <= ?
-       AND e.end_date >= ?
-     ORDER BY m.slug, e.title`,
-  )
-    .bind(date, date)
-    .all<Exhibition & { museum_image_url: string | null }>();
-  return deduplicateByTitle(fallbackMuseumImage(results));
-}
-
-const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
-
-export async function getEventsForDate(env: Env, date: string): Promise<Event[]> {
-  const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
-     FROM events ev
-     JOIN museums m ON ev.museum_id = m.id
-     WHERE ev.date = ?
-     ORDER BY ev.time, m.name`,
-  )
-    .bind(date)
-    .all<Event & { museum_image_url: string | null }>();
-
-  const filtered = fallbackMuseumImage(results).filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
-  const deduped = deduplicateEvents(filtered);
-  if (date === todayIso()) {
-    return filterPastEvents(deduped);
-  }
-  return deduped;
-}
-
-export async function getEventsForRange(env: Env, startDate: string, endDate: string): Promise<Event[]> {
-  const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug, m.image_url as museum_image_url
-     FROM events ev
-     JOIN museums m ON ev.museum_id = m.id
-     WHERE ev.date >= ? AND ev.date <= ?
-     ORDER BY ev.date, ev.time, m.name`,
-  )
-    .bind(startDate, endDate)
-    .all<Event & { museum_image_url: string | null }>();
-
-  const filtered = fallbackMuseumImage(results).filter((ev) => !CLOSURE_KEYWORDS.test(ev.title));
-  const deduped = deduplicateEvents(filtered);
-  const today = todayIso();
-  if (startDate <= today && today <= endDate) {
-    const past = deduped.filter((ev) => ev.date < today);
-    const todayEvents = filterPastEvents(deduped.filter((ev) => ev.date === today));
-    const future = deduped.filter((ev) => ev.date > today);
-    return [...past, ...todayEvents, ...future];
-  }
-  return deduped;
-}
-
 let museumMapCache: { data: Record<string, MuseumInfo>; ts: number } | null = null;
 
-export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>> {
+export async function getMuseumMap(): Promise<Record<string, MuseumInfo>> {
   if (museumMapCache && Date.now() - museumMapCache.ts < 3600_000) return museumMapCache.data;
 
-  const { results } = await env.DB.prepare(
-    "SELECT slug, name, website_url, description, image_url FROM museums ORDER BY name",
-  ).all<{
-    slug: string;
-    name: string;
-    website_url: string | null;
-    description: string | null;
-    image_url: string | null;
-  }>();
   const map: Record<string, MuseumInfo> = {};
-  for (const m of results) {
+  for (const m of getAllMuseums()) {
     const config = MUSEUMS[m.slug];
     if (config?.hidden) continue;
     const info: MuseumInfo = {
       name: m.name,
-      website: m.website_url,
-      description: m.description,
-      image_url: m.image_url,
+      website: m.website_url ?? null,
+      description: m.description ?? null,
+      image_url: m.image_url ?? null,
     };
     if (config?.name) info.museumsufer = false;
     map[m.slug] = info;
@@ -399,40 +266,11 @@ export async function getMuseumMap(env: Env): Promise<Record<string, MuseumInfo>
   return map;
 }
 
-function filterPastEvents(events: Event[]): Event[] {
-  const { hour, minute } = berlinHourMinute();
-  let nowMinutes = hour * 60 + minute;
-  if (nowMinutes < 360) nowMinutes += 24 * 60;
-
-  return events.filter((ev) => {
-    if (!ev.time) return true;
-
-    if (ev.end_time) {
-      const [eh, em] = ev.end_time.split(":").map(Number);
-      let endMinutes = eh * 60 + em;
-      if (endMinutes < 360) endMinutes += 24 * 60;
-      return nowMinutes < endMinutes;
-    }
-
-    const [h, m] = ev.time.split(":").map(Number);
-    const assumedEnd = h * 60 + m + 180;
-    return nowMinutes < assumedEnd;
-  });
-}
-
-async function getUpcomingEvents(env: Env, days: number): Promise<(Event & { museum_name: string })[]> {
+async function getUpcomingEvents(days: number): Promise<(Event & { museum_name: string })[]> {
   const today = todayIso();
   const end = dateOffset(days);
-  const { results } = await env.DB.prepare(
-    `SELECT ev.*, m.name as museum_name, m.slug as museum_slug
-     FROM events ev
-     JOIN museums m ON ev.museum_id = m.id
-     WHERE ev.date >= ? AND ev.date <= ?
-     ORDER BY ev.date, ev.time, m.name`,
-  )
-    .bind(today, end)
-    .all<Event & { museum_name: string }>();
-  return results;
+  const events = await getEventsForRange(today, end);
+  return events.filter((ev): ev is Event & { museum_name: string } => Boolean(ev.museum_name));
 }
 
 function buildRss(events: (Event & { museum_name: string })[]): string {

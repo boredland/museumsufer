@@ -1,37 +1,63 @@
+/**
+ * Pure-function event scraper. Per-museum: dispatches to the typed API
+ * parser in api-scrapers.ts, normalises into the bundle's Event shape,
+ * optionally enriches the next 7 days from detail pages. No D1.
+ *
+ * The script wires the result into SCRAPE_DATA. Previous-bundle data is
+ * passed in to gate the website-URL discovery (sticky once found) and
+ * enrichment passes (don't re-fetch already-enriched events).
+ */
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { getMuseumConfig } from "./museum-config";
+import type { ParsedMuseum } from "./scraper";
 import { classifyEvent, normalizeUrl } from "./shared";
-import type { Env } from "./types";
 
+export interface ScrapedEvent {
+  museum_slug: string;
+  title: string;
+  date: string;
+  time: string | null;
+  end_time: string | null;
+  end_date: string | null;
+  description: string | null;
+  url: string | null;
+  detail_url: string | null;
+  image_url: string | null;
+  price: string | null;
+  category: string | null;
+}
+
+export interface PreviousEvents {
+  events: ScrapedEvent[];
+  museums: ParsedMuseum[];
+}
+
+interface ProxyConfig {
+  url?: string;
+  token?: string;
+}
+
+/** Fetch every museum's events, optionally enrich the next 7 days. The
+ *  museums list is mutated in place to fill missing `website_url`s. */
 export async function scrapeMuseumWebsites(
-  env: Env,
-): Promise<{ updated: number; events: number; enriched: number; api: number }> {
-  await discoverWebsiteUrls(env);
+  museums: Map<string, ParsedMuseum>,
+  opts: { previous?: PreviousEvents; proxy?: ProxyConfig } = {},
+): Promise<ScrapedEvent[]> {
+  await discoverWebsiteUrls(museums, opts.previous?.museums ?? []);
 
-  const { results: museums } = await env.DB.prepare("SELECT id, name, slug, website_url FROM museums").all<{
-    id: number;
-    name: string;
-    slug: string;
-    website_url: string | null;
-  }>();
-
-  const results = await runWithConcurrency(museums, 5, async (museum) => {
+  const all = await runWithConcurrency([...museums.values()], 5, async (museum) => {
     try {
-      return await processMuseum(env, museum);
+      return await scrapeOneMuseum(museum, opts.proxy);
     } catch (e) {
       console.error(`Failed to scrape events for ${museum.name}:`, e);
-      return { events: 0, api: false };
+      return [];
     }
   });
 
-  const totalEvents = results.reduce((sum, r) => sum + r.events, 0);
-  const updated = results.filter((r) => r.events > 0).length;
-  const apiCount = results.filter((r) => r.api).length;
-
-  const enriched = await enrichUpcomingEvents(env);
-
-  return { updated, events: totalEvents, enriched, api: apiCount };
+  const events = all.flat();
+  await enrichUpcomingEvents(events, opts.previous?.events ?? []);
+  return events;
 }
 
 async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
@@ -48,189 +74,152 @@ async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T)
   return results;
 }
 
-async function processMuseum(
-  env: Env,
-  museum: { id: number; name: string; slug: string; website_url: string | null },
-): Promise<{ events: number; api: boolean }> {
-  const museumConfig = getMuseumConfig(museum.slug);
+async function scrapeOneMuseum(museum: ParsedMuseum, proxy: ProxyConfig | undefined): Promise<ScrapedEvent[]> {
+  const config = getMuseumConfig(museum.slug);
+  const eventApi = config?.eventApi;
+  if (!eventApi) return [];
 
-  const eventApi = museumConfig?.eventApi;
-  if (!eventApi) return { events: 0, api: false };
+  const proxyArg = config?.proxy && proxy?.url ? { url: proxy.url, token: proxy.token } : undefined;
+  const apiEvents = await fetchEventsFromApi(eventApi, proxyArg);
 
-  const proxy =
-    museumConfig?.proxy && env.FETCH_PROXY_URL ? { url: env.FETCH_PROXY_URL, token: env.FETCH_PROXY_TOKEN } : undefined;
-  const events = await fetchEventsFromApi(eventApi, proxy);
-
-  const validEvents = events
+  return apiEvents
     .filter((e) => e.title && e.date)
-    .map((e) => ({
-      ...e,
-      title: e.title.replace(/\\"/g, '"').replace(/\\'/g, "'"),
-      description: e.description ? e.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : e.description,
-    }));
-
-  const overrideSlugs = Array.from(
-    new Set(validEvents.map((e) => e.museum_slug_override).filter((s): s is string => !!s)),
-  );
-  const overrideMap = new Map<string, number>();
-  if (overrideSlugs.length > 0) {
-    const placeholders = overrideSlugs.map(() => "?").join(",");
-    const { results } = await env.DB.prepare(`SELECT id, slug FROM museums WHERE slug IN (${placeholders})`)
-      .bind(...overrideSlugs)
-      .all<{ id: number; slug: string }>();
-    for (const r of results) overrideMap.set(r.slug, r.id);
-  }
-
-  const insertSql = `INSERT INTO events (museum_id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price, category)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(museum_id, title, date) DO UPDATE SET
-       time = COALESCE(excluded.time, events.time),
-       end_time = COALESCE(excluded.end_time, events.end_time),
-       end_date = COALESCE(excluded.end_date, events.end_date),
-       description = COALESCE(excluded.description, events.description),
-       detail_url = COALESCE(excluded.detail_url, events.detail_url),
-       image_url = COALESCE(excluded.image_url, events.image_url),
-       price = COALESCE(excluded.price, events.price),
-       category = COALESCE(excluded.category, events.category),
-       updated_at = datetime('now')`;
-
-  const statements = validEvents.map((event) => {
-    const targetMuseumId = (event.museum_slug_override && overrideMap.get(event.museum_slug_override)) || museum.id;
-    return env.DB.prepare(insertSql).bind(
-      targetMuseumId,
-      event.title,
-      event.date,
-      event.time,
-      event.end_time,
-      event.end_date,
-      event.description,
-      eventApi.endpoint,
-      event.detail_url,
-      event.image_url,
-      event.price,
-      event.category || classifyEvent(event.title, event.description) || null,
+    .map(
+      (e): ScrapedEvent => ({
+        // The override slug is honoured at the dump stage by mapping to a
+        // resolvable museum slug — for now we record it in the same shape.
+        museum_slug: e.museum_slug_override || museum.slug,
+        title: e.title.replace(/\\"/g, '"').replace(/\\'/g, "'"),
+        date: e.date,
+        time: e.time,
+        end_time: e.end_time,
+        end_date: e.end_date,
+        description: e.description ? e.description.replace(/\\"/g, '"').replace(/\\'/g, "'") : e.description,
+        url: eventApi.endpoint,
+        detail_url: e.detail_url,
+        image_url: e.image_url,
+        price: e.price,
+        category: e.category || classifyEvent(e.title, e.description) || null,
+      }),
     );
-  });
-
-  if (statements.length > 0) await env.DB.batch(statements);
-  return { events: statements.length, api: statements.length > 0 };
 }
 
-async function discoverWebsiteUrls(env: Env): Promise<void> {
-  const { results: museums } = await env.DB.prepare(
-    "SELECT id, museumsufer_url FROM museums WHERE website_url IS NULL AND museumsufer_url LIKE '%museumsufer.de%'",
-  ).all<{ id: number; museumsufer_url: string }>();
+// ─── website_url discovery ────────────────────────────────────────────
 
-  for (const museum of museums) {
-    try {
-      const res = await fetch(museum.museumsufer_url);
-      if (!res.ok) continue;
-      const html = await res.text();
+async function discoverWebsiteUrls(museums: Map<string, ParsedMuseum>, previous: ParsedMuseum[]): Promise<void> {
+  const previousBySlug = new Map(previous.map((m) => [m.slug, m]));
 
-      const match = html.match(/href="(https?:\/\/[^"]+)"[^>]*class="[^"]*margRight15\s+externelLink/);
-      if (!match) continue;
-
-      const websiteUrl = match[1];
-      if (websiteUrl.includes("kultur-frankfurt.de")) continue;
-
-      await env.DB.prepare("UPDATE museums SET website_url = ?, updated_at = datetime('now') WHERE id = ?")
-        .bind(websiteUrl, museum.id)
-        .run();
-    } catch (e) {
-      console.error(`Failed to discover website for museum ${museum.id}:`, e);
+  const needsLookup: ParsedMuseum[] = [];
+  for (const m of museums.values()) {
+    if (m.website_url) continue;
+    const prev = previousBySlug.get(m.slug);
+    if (prev?.website_url) {
+      m.website_url = prev.website_url; // sticky
+      continue;
     }
+    if (m.museumsufer_url.includes("museumsufer.de")) needsLookup.push(m);
   }
-}
 
-async function enrichUpcomingEvents(env: Env): Promise<number> {
-  const today = todayIso();
-  const weekAhead = dateOffset(7);
-
-  const { results: events } = await env.DB.prepare(
-    `SELECT ev.id, ev.detail_url, ev.title, ev.price, ev.image_url, ev.time, ev.end_time, ev.description, m.name as museum_name, m.website_url
-     FROM events ev
-     JOIN museums m ON ev.museum_id = m.id
-     WHERE ev.date >= ? AND ev.date <= ?
-       AND ev.detail_url IS NOT NULL
-       AND (ev.price IS NULL OR ev.image_url IS NULL OR ev.time IS NULL OR ev.description IS NULL)
-     LIMIT 30`,
-  )
-    .bind(today, weekAhead)
-    .all<{
-      id: number;
-      detail_url: string;
-      title: string;
-      price: string | null;
-      image_url: string | null;
-      time: string | null;
-      end_time: string | null;
-      description: string | null;
-      museum_name: string;
-      website_url: string;
-    }>();
-
-  const detailResults = await Promise.all(
-    events.map(async (event) => {
+  const fetched = await Promise.all(
+    needsLookup.map(async (museum) => {
       try {
-        return await fetchEventDetails(env, event.detail_url, event.title, event.museum_name, event.website_url);
-      } catch {
+        const res = await fetch(museum.museumsufer_url);
+        if (!res.ok) return null;
+        const html = await res.text();
+        const match = html.match(/href="(https?:\/\/[^"]+)"[^>]*class="[^"]*margRight15\s+externelLink/);
+        if (!match) return null;
+        const websiteUrl = match[1];
+        if (websiteUrl.includes("kultur-frankfurt.de")) return null;
+        return { slug: museum.slug, websiteUrl };
+      } catch (e) {
+        console.error(`Failed to discover website for museum ${museum.slug}:`, e);
         return null;
       }
     }),
   );
 
-  const statements: D1PreparedStatement[] = [];
-  let enriched = 0;
-  for (let i = 0; i < events.length; i++) {
-    const event = events[i];
-    const details = detailResults[i];
-    if (!details) continue;
+  for (const f of fetched) {
+    if (!f) continue;
+    const m = museums.get(f.slug);
+    if (m) m.website_url = f.websiteUrl;
+  }
+}
 
-    const updates: string[] = [];
-    const values: (string | null)[] = [];
+// ─── upcoming-event detail enrichment ─────────────────────────────────
 
-    if (details.price && !event.price) {
-      updates.push("price = ?");
-      values.push(details.price);
-    }
-    if (details.image_url && !event.image_url) {
-      updates.push("image_url = ?");
-      values.push(details.image_url);
-    }
-    if (details.time && !event.time) {
-      updates.push("time = ?");
-      values.push(details.time);
-    }
-    if (details.end_time && !event.end_time) {
-      // Reject if it's <= the start time (e.g. the regex matched a museum
-      // opening-hours range, not the event's own time slot).
-      const start = event.time || details.time || null;
-      if (!start || details.end_time > start) {
-        updates.push("end_time = ?");
-        values.push(details.end_time);
-      }
-    }
-    if (details.description && !event.description) {
-      updates.push("description = ?");
-      values.push(details.description);
-    }
+async function enrichUpcomingEvents(events: ScrapedEvent[], previousEvents: ScrapedEvent[]): Promise<void> {
+  const today = todayIso();
+  const weekAhead = dateOffset(7);
 
-    if (updates.length === 0) {
-      statements.push(
-        env.DB.prepare(
-          "UPDATE events SET price = COALESCE(price, ''), description = COALESCE(description, ''), updated_at = datetime('now') WHERE id = ?",
-        ).bind(event.id),
-      );
-      continue;
-    }
-
-    updates.push("updated_at = datetime('now')");
-    statements.push(env.DB.prepare(`UPDATE events SET ${updates.join(", ")} WHERE id = ?`).bind(...values, event.id));
-    enriched++;
+  // Carry over previous enrichment so we don't re-fetch the same detail pages.
+  const previousByKey = new Map(previousEvents.map((e) => [keyForEvent(e), e]));
+  for (const ev of events) {
+    const prev = previousByKey.get(keyForEvent(ev));
+    if (!prev) continue;
+    ev.price ??= prev.price;
+    ev.image_url ??= prev.image_url;
+    ev.time ??= prev.time;
+    ev.end_time ??= prev.end_time;
+    ev.description ??= prev.description;
   }
 
-  if (statements.length > 0) await env.DB.batch(statements);
-  return enriched;
+  const candidates = events
+    .filter(
+      (ev) =>
+        ev.date >= today &&
+        ev.date <= weekAhead &&
+        ev.detail_url &&
+        (ev.price === null || ev.image_url === null || ev.time === null || ev.description === null),
+    )
+    .slice(0, 30);
+
+  await Promise.all(
+    candidates.map(async (ev) => {
+      try {
+        const details = await fetchEventDetails(ev.detail_url as string);
+        if (!details) return;
+        if (details.price && !ev.price) ev.price = details.price;
+        if (details.image_url && !ev.image_url) ev.image_url = details.image_url;
+        if (details.time && !ev.time) ev.time = details.time;
+        if (details.end_time && !ev.end_time) {
+          // Reject if it's <= the start time (likely an opening-hours range).
+          const start = ev.time || details.time || null;
+          if (!start || details.end_time > start) ev.end_time = details.end_time;
+        }
+        if (details.description && !ev.description) ev.description = details.description;
+      } catch {}
+    }),
+  );
+}
+
+function keyForEvent(ev: ScrapedEvent): string {
+  return `${ev.museum_slug}|${ev.title}|${ev.date}`;
+}
+
+async function fetchEventDetails(detailUrl: string): Promise<{
+  price: string | null;
+  image_url: string | null;
+  time: string | null;
+  end_time: string | null;
+  description: string | null;
+} | null> {
+  let html: string;
+  try {
+    const res = await fetch(detailUrl, { redirect: "follow" });
+    if (!res.ok) return null;
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+    html = await res.text();
+  } catch {
+    return null;
+  }
+
+  const imageUrl = extractImageFromHtml(html, detailUrl);
+  const { time, end_time } = extractTimeFromHtml(html);
+  const description = extractDescriptionFromHtml(html, "");
+  const price = extractPriceFromHtml(html);
+
+  return { price, image_url: imageUrl, time, end_time, description };
 }
 
 function extractTimeFromHtml(html: string): { time: string | null; end_time: string | null } {
@@ -255,38 +244,6 @@ function extractTimeFromHtml(html: string): { time: string | null; end_time: str
     return { time: commaMatch[1].replace(".", ":"), end_time: null };
   }
   return { time: null, end_time: null };
-}
-
-async function fetchEventDetails(
-  _env: Env,
-  detailUrl: string,
-  title: string,
-  _museumName: string,
-  _websiteUrl: string,
-): Promise<{
-  price: string | null;
-  image_url: string | null;
-  time: string | null;
-  end_time: string | null;
-  description: string | null;
-} | null> {
-  let html: string;
-  try {
-    const res = await fetch(detailUrl, { redirect: "follow" });
-    if (!res.ok) return null;
-    const contentType = res.headers.get("content-type") || "";
-    if (!contentType.includes("text/html")) return null;
-    html = await res.text();
-  } catch {
-    return null;
-  }
-
-  const imageUrl = extractImageFromHtml(html, detailUrl);
-  const { time, end_time } = extractTimeFromHtml(html);
-  const description = extractDescriptionFromHtml(html, title);
-  const price = extractPriceFromHtml(html);
-
-  return { price, image_url: imageUrl, time, end_time, description };
 }
 
 const AMOUNT = String.raw`\d+(?:[.,]\d{1,2})?(?:,-)?`;
@@ -413,12 +370,14 @@ export function extractImageFromHtml(html: string, pageUrl: string): string | nu
     html.match(/<main[\s\S]*?<\/main>/i)?.[0] || html.match(/<article[\s\S]*?<\/article>/i)?.[0] || html;
 
   const imgRe = /<img[^>]+src="([^"]+)"/gi;
-  let match;
-  while ((match = imgRe.exec(mainContent)) !== null) {
+  let match: RegExpExecArray | null = imgRe.exec(mainContent);
+  while (match !== null) {
     const src = match[1];
-    if (!isContentImage(src)) continue;
-    const url = normalizeUrl(src, baseUrl);
-    if (url && isSameDomain(url, pageDomain)) return url;
+    if (isContentImage(src)) {
+      const url = normalizeUrl(src, baseUrl);
+      if (url && isSameDomain(url, pageDomain)) return url;
+    }
+    match = imgRe.exec(mainContent);
   }
 
   return null;

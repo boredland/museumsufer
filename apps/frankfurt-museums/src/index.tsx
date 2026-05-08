@@ -17,8 +17,6 @@ import {
 } from "./api";
 import { ContentBody } from "./components";
 import { berlinNow, todayIso } from "./date";
-import { scrapeMuseumWebsites } from "./event-scraper";
-import { scrapeMuseumExhibitions } from "./exhibition-scraper";
 import { type InitialData, renderPage } from "./frontend";
 import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
@@ -26,11 +24,9 @@ import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import imprintRoute from "./routes/imprint";
 import museumRoute from "./routes/museum";
-import scrapeRoute from "./routes/scrape";
 import staticRoute from "./routes/static";
-import { scrape } from "./scraper";
 import { formatDateFull } from "./shared";
-import { translateEvents, translateFields } from "./translate";
+import { translateFields } from "./translate";
 import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 const dayQuery = z.object({
@@ -87,7 +83,6 @@ app.route("/", feedsRoute);
 app.route("/", imprintRoute);
 app.route("/", museumRoute);
 app.route("/api/docs", docsRoute);
-app.route("/scrape", scrapeRoute);
 
 app.get("/img/*", async (c) => {
   const response = await handleImageProxy(c.req.raw, c.env);
@@ -209,7 +204,7 @@ app.post("/api/like", async (c) => {
 app.get("/api/events", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const events = proxyImages(await getEventsForDate(c.env, date));
+  const events = proxyImages(await getEventsForDate(date));
   const counts = await getLikeCounts(
     c.env,
     "event",
@@ -225,7 +220,7 @@ app.get("/api/events", async (c) => {
 app.get("/api/exhibitions", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const exhibitions = proxyImages(await getExhibitionsForDate(c.env, date));
+  const exhibitions = proxyImages(await getExhibitionsForDate(date));
   const counts = await getLikeCounts(
     c.env,
     "exhibition",
@@ -248,10 +243,7 @@ app.get("/api/museums", async (c) => {
 app.get("/api/day", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const [rawExhibitions, rawEvents] = await Promise.all([
-    getExhibitionsForDate(c.env, date),
-    getEventsForDate(c.env, date),
-  ]);
+  const [rawExhibitions, rawEvents] = await Promise.all([getExhibitionsForDate(date), getEventsForDate(date)]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
   const [exhCounts, evCounts] = await Promise.all([
@@ -418,7 +410,7 @@ app.get(
           .format("YYYY-MM-DD")
       : undefined;
     let initialData: InitialData | undefined;
-    const museums = await getMuseumMap(c.env).catch(() => ({}));
+    const museums = await getMuseumMap().catch(() => ({}));
     try {
       initialData = await fetchDayData(c.env, date, locale, endDate);
     } catch (e) {
@@ -458,18 +450,9 @@ app.get(
   },
 );
 
-export default {
-  fetch: (request: Request, env: Env, ctx: ExecutionContext) => app.fetch(request, env, ctx),
-  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(
-      scrape(env)
-        .catch((e) => console.error("scrape failed:", e))
-        .then(() => scrapeMuseumExhibitions(env))
-        .catch((e) => console.error("exhibition scrape failed:", e))
-        .then(() => scrapeMuseumWebsites(env))
-        .catch((e) => console.error("event scrape failed:", e))
-        .then(() => translateEvents(env))
-        .catch((e) => console.error("translation failed:", e)),
-    );
-  },
-} satisfies ExportedHandler<Env>;
+// Scraping moved to .github/workflows/scrape.yml (museums job) — it runs
+// scripts/scrape.ts in Bun against an in-memory SQLite, regenerates
+// src/scrape-data.ts, and pushes if anything changed. No more
+// SCRAPE_SECRET, /scrape/* routes, or scheduled() handler in the worker.
+
+export default app;

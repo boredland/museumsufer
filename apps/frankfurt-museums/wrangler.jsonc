@@ -4,9 +4,8 @@
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
   "compatibility_flags": ["nodejs_compat"],
-  "triggers": {
-    "crons": ["0 6 * * *"]
-  },
+  // Scraping moved to .github/workflows/scrape.yml (museums job) — the
+  // worker no longer scrapes. Daily 06:00 UTC cron lives in the workflow.
   "d1_databases": [
     {
       "binding": "DB",
@@ -16,12 +15,8 @@
   ],
   "assets": {
     "directory": "./public",
-    "binding": "ASSETS",
     "html_handling": "none",
     "not_found_handling": "none"
-  },
-  "browser": {
-    "binding": "BROWSER"
   },
   "observability": {
     "enabled": false,

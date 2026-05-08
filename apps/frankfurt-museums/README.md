@@ -4,56 +4,43 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 
 **Live:** https://museumsufer.app
 
+## Architecture
+
+```
+GitHub Action (.github/workflows/scrape.yml, museums job)
+  ↓ daily 06:00 UTC
+  ↓ runs `bun apps/frankfurt-museums/scripts/scrape.ts`
+  ↓ in-memory SQLite (bun:sqlite) + the existing 4-stage pipeline
+  ↓ writes apps/frankfurt-museums/src/scrape-data.ts (typed module)
+  ↓ commits + pushes if content actually changed
+Cloudflare git integration
+  ↓ redeploys the worker with the new bundled data
+Worker
+  ↓ imports SCRAPE_DATA, in-memory filters serve every read path
+```
+
+The worker has **no D1 path for scraped data** — `museums`, `events`,
+`exhibitions`, and `translations` were dropped in migration `0012`. The
+only remaining D1 table is `likes` (request-time user writes).
+
 ## Features
 
-- Scrapes ~40 museums from museumsufer.de
-- Fetches events from 15 museums via structured APIs, ~22 more via AI-assisted HTML scraping
-- Enriches upcoming events with prices, images, and deep links from detail pages
+- ~40 museums + ~700 events + 36+ exhibitions, refreshed daily
+- 4-stage scrape pipeline (museumsufer.de → exhibition APIs → event APIs → DeepL)
 - Frontend with i18n (DE/EN/FR), fuzzy search, distance sorting, calendar downloads
 - RSS (`/feed.xml`) and ICS (`/feed.ics`) feeds
 - Image proxy with edge caching
 - Installable as a PWA with offline support
-- Daily cron refresh (6am UTC) with health check GitHub Action at 8am UTC
+- Health check GitHub Action runs at 08:00 UTC and opens an issue on regressions
 
 ## Tech stack
 
 - **Runtime:** Cloudflare Workers (TypeScript)
 - **Framework:** [Hono](https://hono.dev) with Zod validation
-- **Database:** Cloudflare D1 (SQLite)
-- **AI:** Cloudflare Workers AI (`llama-4-scout-17b`) for parsing museum websites without APIs
-- **Translation:** DeepL API with D1 hash-based caching (DE → EN/FR)
-- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, Fuse.js search
-- **Cron:** Daily scrape at 6am UTC, health check GitHub Action at 8am UTC
-
-## Architecture
-
-```
-src/
-  index.tsx           Hono app, routes, cron handler, SSR
-  routes/
-    scrape.ts         Auth-protected scrape endpoints
-    feeds.ts          RSS and ICS feeds
-    static.ts         robots.txt, sitemap, manifest, llms.txt, OG image
-  frontend.tsx        Single-page HTML with i18n, search, distance sorting
-  components.tsx      Shared JSX components
-  api.ts              JSON API with SWR caching and past-event filtering
-  scraper.ts          Museums + exhibitions from museumsufer.de
-  museum-config.ts    Museum coordinates, API endpoints, scraping config
-  api-scrapers.ts     Typed parsers for each museum API format
-  event-scraper.ts    Orchestrator: API-first with AI fallback, detail page enrichment
-  exhibition-scraper.ts  Exhibition scraping from museum websites
-  translate.ts        DeepL translation pipeline with SHA-256 caching
-  i18n.ts             Translations (DE/EN/FR) and locale detection
-  date.ts             dayjs-based Berlin timezone utilities
-  shared.ts           Shared constants and utilities
-  image-proxy.ts      Edge-cached image proxy with dynamic domain allowlist
-  health-check.ts     Source health checks for all scraping endpoints
-  types.ts            Env interface and data types
-scripts/
-  health-check.ts     CLI runner for health checks
-migrations/
-  *.sql               D1 schema migrations
-```
+- **Database:** Cloudflare D1 (only `likes` now — scraped data lives in `src/scrape-data.ts`)
+- **Translation:** DeepL via the GH-Action scrape; cache rides in the bundled module
+- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, Fuse.js
+- **Tooling:** [Bun](https://bun.sh) (replaces npm/tsx)
 
 ## API
 
@@ -68,71 +55,41 @@ migrations/
 | `GET /feed.ics` | 1h | ICS calendar feed (next 7 days) |
 | `GET /llms.txt` | 24h | API description for LLM agents |
 | `GET /img/:encoded-url` | 7d | Proxied museum image |
-| `POST /scrape` | — | Trigger museum + exhibition scrape (auth required) |
-| `POST /scrape/events` | — | Trigger event scrape (auth required) |
+| `POST /api/like` | — | Like an exhibition or event |
 
-Scrape endpoints require `Authorization: Bearer <SCRAPE_SECRET>`. The cron trigger bypasses auth.
+There are no `/scrape/*` endpoints anymore — the pipeline runs in GitHub Actions.
 
-## Event sources
+## First-time setup
 
-### Structured APIs (15 museums)
+```bash
+# 1. Install Bun (once per machine)
+mise use -g bun@latest
 
-| Museum | API type |
-|---|---|
-| Städel Museum | Custom JSON (`/de/api/finder`) |
-| Historisches Museum Frankfurt (+ Junges Museum, Porzellan Museum) | Custom JSON (`/api/calendar`) |
-| Jüdisches Museum + Museum Judengasse | TYPO3 feed.json |
-| Deutsches Architekturmuseum (DAM) | Tribe Events (WP) |
-| DFF – Deutsches Filminstitut & Filmmuseum | Tribe Events (WP) |
-| Senckenberg Naturmuseum | WP REST + ACF |
-| Museum für Kommunikation Frankfurt | My Calendar (WP) |
-| Liebieghaus Skulpturensammlung | schema.org HTML |
-| Museum Angewandte Kunst | Structured HTML |
-| Institut für Stadtgeschichte | RSS feed |
-| Dommuseum Frankfurt | TYPO3 Calendarize ICS |
-| Deutsches Ledermuseum (Offenbach) | Kirby CMS HTML |
-| Bibelhaus ErlebnisMuseum | Structured HTML |
-| Frankfurter Kunstverein | WP HTML |
-| Deutsches Romantik-Museum + Goethe-Haus | FDH CMS (two-step) |
+# 2. Create the D1 database (first time only) — only used for `likes`
+bunx wrangler d1 create museumsufer-db
+# Update database_id in wrangler.jsonc
 
-### AI-scraped (~22 museums)
-
-Museums with a website but no structured API. Events are extracted using Workers AI (Llama 4 Scout 17B).
-
-Archäologisches Museum, Caricatura Museum, Eintracht Frankfurt Museum, Fotografie Forum Frankfurt, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte (Offenbach), Hindemith Kabinett, Ikonenmuseum, Klingspor Museum (Offenbach), MGGU – Museum Giersch, MMK (Museum/Tower/Zollamt), MOMEM, Museum Sinclair-Haus (Bad Homburg), Portikus, SCHIRN Kunsthalle Frankfurt, Stoltze-Museum, Struwwelpeter Museum, Weltkulturen Museum
+# 3. Apply migrations
+bun run db:migrate:local
+bun run db:migrate
+```
 
 ## Development
 
 ```bash
-npm install
+bun install                 # from repo root
 
-# Set up local D1
-npm run db:migrate:local
+# Start the worker
+bun run -F @museumsufer/frankfurt-museums dev
 
-# Start dev server
-npm run dev
+# Run a one-shot scrape locally and regenerate src/scrape-data.ts:
+bun run -F @museumsufer/frankfurt-museums scrape
+# (DeepL translations skipped unless DEEPL_API_KEYS is set in your shell)
 
-# Seed data (no auth needed locally without SCRAPE_SECRET)
-curl -X POST http://localhost:8787/scrape
-curl -X POST http://localhost:8787/scrape/events
-
-# Run health checks
-npm run health-check
+# Health check
+bun run -F @museumsufer/frankfurt-museums health-check
 ```
 
-## Deployment
-
-```bash
-# Create D1 database (first time only)
-wrangler d1 create museumsufer-db
-# Update database_id in wrangler.toml
-
-# Run migrations
-npm run db:migrate
-
-# Set scrape auth secret
-wrangler secret put SCRAPE_SECRET
-
-# Deploy (automated on git push)
-npm run deploy
-```
+The GitHub Action runs the same `scripts/scrape.ts` daily — there's no
+longer a `SCRAPE_SECRET` to manage. Required GH Actions secrets:
+`DEEPL_API_KEYS`, `FETCH_PROXY_URL`, `FETCH_PROXY_TOKEN`.
