@@ -15,6 +15,7 @@
     "./german": "./src/german.ts",
     "./hash": "./src/hash.ts",
     "./html": "./src/html.ts",
+    "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
     "./robots": "./src/robots.ts",
     "./scrape-log": "./src/scrape-log.ts",
