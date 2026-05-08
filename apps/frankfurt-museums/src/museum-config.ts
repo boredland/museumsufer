@@ -21,7 +21,8 @@ export type EventApiType =
   | "weltkulturen"
   | "eventon"
   | "buergerstiftung"
-  | "schirn";
+  | "schirn"
+  | "mmk";
 
 export interface ProxyConfig {
   url: string;
@@ -278,8 +279,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz@X=8687993@Y=50112552@U=80@L=3000522@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
-    // mmk.art is a JS-rendered SPA, no parseable event listing.
-    skipEvents: true,
+    // The cms.mmk.art /whats-on/ feed returns events for all three MMK
+    // venues; fetchMmk routes them to zollamt-mmk / tower-mmk via
+    // related_venues + museum_slug_override.
+    eventApi: { type: "mmk", endpoint: "https://cms.mmk.art/whats-on/" },
   },
   "museum-sinclair-haus-bad-homburg": {
     lat: 50.2267,
@@ -362,7 +365,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Weserstraße@X=8668837@Y=50109918@U=80@L=3060766@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
-    // mmk.art is a JS-rendered SPA, no parseable event listing.
+    // Events arrive via the parent's mmk API + related_venues slug override.
     skipEvents: true,
   },
   "weltkulturen-museum": {
@@ -380,7 +383,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     spa: true,
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
-    // mmk.art is a JS-rendered SPA, no parseable event listing.
+    // Events arrive via the parent's mmk API + related_venues slug override.
     skipEvents: true,
   },
 
