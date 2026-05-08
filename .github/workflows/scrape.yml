@@ -47,7 +47,15 @@ jobs:
             exit 0
           fi
           git commit -m "data(theaters): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          push_with_retry() {
+            for attempt in 1 2 3; do
+              if git pull --rebase origin main && git push; then return 0; fi
+              echo "push attempt $attempt failed, retrying"
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+          push_with_retry
 
   museums:
     if: |
@@ -82,4 +90,9 @@ jobs:
             exit 0
           fi
           git commit -m "data(museums): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push; then exit 0; fi
+            echo "push attempt $attempt failed, retrying"
+            sleep $((attempt * 2))
+          done
+          exit 1
