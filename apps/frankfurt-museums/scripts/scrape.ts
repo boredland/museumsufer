@@ -132,13 +132,16 @@ function buildScrapeData(input: {
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  // Drop past exhibitions early; fuzzy-dedup by title within the same
-  // museum (handles trailing-punctuation / whitespace divergence between
-  // museumsufer.de and museum-API copies of the same exhibition).
+  // Drop past exhibitions and ones starting more than 90 days out;
+  // fuzzy-dedup by title within the same museum (handles trailing-
+  // punctuation / whitespace divergence between museumsufer.de and
+  // museum-API copies of the same exhibition).
   const today = todayIso();
+  const horizon = addDays(today, 90);
   const exhibitionsRaw: Exhibition[] = [];
   for (const ex of input.exhibitions) {
     if (ex.end_date && ex.end_date < today) continue;
+    if (ex.start_date && ex.start_date > horizon) continue;
     const museumId = museumIdBySlug.get(ex.museum_slug);
     if (!museumId) continue;
     const id = fnv1aInt(`${ex.museum_slug}|${ex.title}`);
@@ -160,12 +163,14 @@ function buildScrapeData(input: {
       a.title.localeCompare(b.title),
   );
 
-  // Drop events older than yesterday + drop closure entries (museum
-  // opening-hours pages occasionally surface as "Geschlossen" events).
+  // Drop events outside the [yesterday, today + 90d] window + closure
+  // entries (museum opening-hours pages occasionally surface as
+  // "Geschlossen" events).
   const yesterday = addDays(today, -1);
   const eventsRaw: Event[] = [];
   for (const ev of input.events) {
     if (ev.date < yesterday) continue;
+    if (ev.date > horizon) continue;
     if (CLOSURE_KEYWORDS.test(ev.title)) continue;
     const museumId = museumIdBySlug.get(ev.museum_slug);
     if (!museumId) continue;
