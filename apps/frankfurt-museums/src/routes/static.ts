@@ -9,17 +9,17 @@ const SITE_URL = "https://museumsufer.app";
 
 const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#f5f0eb"/>
-  <rect x="0" y="0" width="1200" height="6" fill="#b45309"/>
-  <text x="600" y="260" text-anchor="middle" font-family="system-ui,sans-serif" font-size="72" font-weight="700" fill="#1c1917" letter-spacing="-2">Museumsufer Frankfurt</text>
-  <text x="600" y="330" text-anchor="middle" font-family="system-ui,sans-serif" font-size="32" fill="#78716c">Ausstellungen &amp; Veranstaltungen</text>
-  <text x="600" y="400" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#b45309">museumsufer.app</text>
-  <g transform="translate(564, 475)">
-    <rect x="-30" y="-25" width="60" height="60" rx="10" fill="#b45309"/>
-    <g transform="scale(2.2) translate(-12,-14.5)" fill="white">
-      <path d="M12 1L2 6v2h20V6L12 1zm0 2.26L18.47 6H5.53L12 3.26zM2 17v2h20v-2H2zm2-7v7h2v-7H6zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2zm4 0v7h2v-7h-2z"/>
-    </g>
-    <path d="M-26,27 Q-16,23 -6,27 Q4,31 14,27 Q20,24.5 26,27" fill="none" stroke="#93c5fd" stroke-width="3.3" stroke-linecap="round"/>
+  <g transform="translate(180, 175)">
+    <circle cx="40" cy="14" r="14" fill="#b45309"/>
+    <path d="M 40 42 L 100 110 L -20 110 Z" fill="#1f3a52"/>
+    <rect x="-32" y="124" width="144" height="22" fill="#1f3a52"/>
   </g>
+  <text x="380" y="265" font-family="system-ui,sans-serif" font-size="84" font-weight="700" fill="#1c1917" letter-spacing="-3">Museumsufer</text>
+  <text x="380" y="340" font-family="system-ui,sans-serif" font-size="84" font-weight="300" fill="#1f3a52" letter-spacing="-3">Frankfurt</text>
+  <rect x="380" y="380" width="120" height="6" fill="#b45309"/>
+  <text x="380" y="430" font-family="system-ui,sans-serif" font-size="28" fill="#57534e">Ausstellungen und Veranstaltungen</text>
+  <text x="380" y="468" font-family="system-ui,sans-serif" font-size="28" fill="#57534e">am Frankfurter Museumsufer</text>
+  <text x="380" y="555" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#b45309" letter-spacing="2">MUSEUMSUFER.APP</text>
 </svg>`;
 
 const MANIFEST = buildManifest({
