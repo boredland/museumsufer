@@ -81,6 +81,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchSchirn(config.endpoint);
     case "mmk":
       return fetchMmk(config.endpoint);
+    case "giersch":
+      return fetchGiersch(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1977,6 +1979,92 @@ async function fetchMmk(endpoint: string): Promise<ApiEvent[]> {
       category,
       museum_slug_override: override,
     });
+  }
+  return events;
+}
+
+const GIERSCH_CATEGORY_MAP: Record<string, string> = {
+  event: "Sonstiges",
+  film: "Film",
+  führung: "Führung",
+  "öffentliche führung": "Führung",
+  workshop: "Workshop",
+  kinderprogramm: "Familie",
+  vortrag: "Vortrag",
+  konzert: "Konzert",
+  vernissage: "Vernissage",
+};
+
+async function fetchGiersch(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const blockRe = /<div\s+class="calendar-entry"[\s\S]*?<\/div>\s*<\/a>\s*<\/div>/g;
+  const events: ApiEvent[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = blockRe.exec(html);
+  while (m !== null) {
+    const block = m[0];
+    // The href carries `?event=<unix-timestamp>`, the most reliable date+time source.
+    const tsMatch = block.match(/href="([^"]+\?event=(\d+)[^"]*)"/);
+    if (!tsMatch) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const detailUrl = tsMatch[1];
+    // The site stores wall-clock Berlin times as UTC unix timestamps
+    // (e.g. "11:00 Uhr" → 1778410800 = 11:00:00 UTC), so read date and
+    // time off the UTC fields directly rather than toBerlin*.
+    const start = new Date(parseInt(tsMatch[2], 10) * 1000);
+    const date = `${start.getUTCFullYear()}-${String(start.getUTCMonth() + 1).padStart(2, "0")}-${String(start.getUTCDate()).padStart(2, "0")}`;
+    if (date < today) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const time = nullIfMidnight(
+      `${String(start.getUTCHours()).padStart(2, "0")}:${String(start.getUTCMinutes()).padStart(2, "0")}`,
+    );
+
+    const title = block
+      .match(/<h3 class="entry-title">([\s\S]*?)<\/h3>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const subtitle = block.match(/<p class="entry-subtitle">([^<]+)<\/p>/)?.[1]?.trim() ?? null;
+    // The subtitle is a comma-separated category list (e.g. "Event, Führung").
+    // Use the first entry as the canonical category.
+    const firstCat = subtitle?.split(/[,/]/)[0]?.trim().toLowerCase();
+    const category = (firstCat && GIERSCH_CATEGORY_MAP[firstCat]) || classifyEvent(title, subtitle) || null;
+
+    const key = `${title}::${date}`;
+    if (seen.has(key)) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    seen.add(key);
+
+    events.push({
+      title,
+      date,
+      time,
+      end_time: null,
+      end_date: null,
+      description: null,
+      detail_url: detailUrl,
+      image_url: null,
+      price: null,
+      category,
+    });
+    m = blockRe.exec(html);
   }
   return events;
 }
