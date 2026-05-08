@@ -75,6 +75,49 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background-position: 0 0, 1px 2px;
 }
 
+/* "Frag eine KI" row — sits between the date-strip and the programme.
+   Centered eyebrow label + a row of small circular service buttons in
+   the same idiom as the per-row icon buttons (transit, ICS, share,
+   report). The brand color of each service is applied per-button via
+   inline style so hover lands in-brand. */
+.askai {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 1.5rem var(--gut) 0;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.askai__label {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.askai__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.askai__svc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  color: var(--ink-soft);
+  background: transparent;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.askai__svc:hover { border-color: currentColor; background: rgba(255, 255, 255, 0.06); }
+
 /* Top-of-viewport indeterminate progress bar — driven by htmx lifecycle
    events on body[data-loading]. Hidden by default; on loading=true a
    1.5px brick-red sliver paces left→right. Sits above the grain so it's
