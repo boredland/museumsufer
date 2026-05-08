@@ -197,11 +197,10 @@ function ThemeToggle({ tr }: { tr: Record<string, string> }) {
     <button
       type="button"
       id="theme-toggle"
-      class="flex items-center gap-1.5 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary hover:text-river transition-colors cursor-pointer"
+      class="inline-flex items-center justify-center text-text-tertiary hover:text-river transition-colors cursor-pointer p-1 -m-1"
       title={tr.switchTheme}
+      aria-label={tr.switchTheme}
     >
-      <span class="dark:hidden">{tr.themeDark}</span>
-      <span class="hidden dark:inline">{tr.themeLight}</span>
       <svg
         viewBox="0 0 24 24"
         fill="none"
