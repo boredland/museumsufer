@@ -22,7 +22,8 @@
     "./security-headers": "./src/security-headers.ts",
     "./sort": "./src/sort.ts",
     "./theme-script": "./src/theme-script.ts",
-    "./user-agents": "./src/user-agents.ts"
+    "./user-agents": "./src/user-agents.ts",
+    "./webmcp": "./src/webmcp.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

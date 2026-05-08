@@ -3,6 +3,7 @@ import {
   buildGoogleCalendarUrl,
   buildOutlookCalendarUrl,
   buildUtm,
+  buildWebMcpScript,
   buildYahooCalendarUrl,
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
@@ -13,6 +14,7 @@ import {
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
+  type WebMcpToolDef,
 } from "@museumsufer/core";
 import type { DateWithCount, DayPerformance } from "./db";
 import { INLINE_CSS } from "./styles-inline";
@@ -611,6 +613,90 @@ ${renderClientScript()}
 </html>`;
 }
 
+const WEBMCP_TOOLS: WebMcpToolDef[] = [
+  {
+    name: "get_performances",
+    description:
+      "Get theater performances on a specific date in Frankfurt. Returns titles, times, theaters, prices, and ticket links.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
+      },
+    },
+    executeBody: `var params = new URLSearchParams();
+      if (input.date) params.set('date', input.date);
+      return fetch('/api/day?' + params).then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "get_performances_range",
+    description:
+      "Get all theater performances within a date range, optionally filtered by theater slug. Max 60-day span.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        from: { type: "string", description: "ISO start date (YYYY-MM-DD). Defaults to today." },
+        to: { type: "string", description: "ISO end date (YYYY-MM-DD). Defaults to +14 days." },
+        theater: { type: "string", description: "Optional theater slug to filter by." },
+      },
+    },
+    executeBody: `var params = new URLSearchParams();
+      if (input.from) params.set('from', input.from);
+      if (input.to) params.set('to', input.to);
+      if (input.theater) params.set('theater', input.theater);
+      return fetch('/api/performances?' + params).then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "get_theaters",
+    description: "Get all Frankfurt theaters with names, slugs, addresses, websites, and ticketing providers.",
+    inputSchema: { type: "object", properties: {} },
+    executeBody: `return fetch('/api/theaters').then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "get_theater",
+    description: "Get a single theater's details and its upcoming performances (next 60 days) by slug.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        slug: { type: "string", description: "Theater slug, e.g. 'schauspiel-frankfurt'." },
+      },
+      required: ["slug"],
+    },
+    executeBody: `if (!input.slug) return Promise.reject(new Error('slug required'));
+      return fetch('/api/theater/' + encodeURIComponent(input.slug)).then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "search_performances",
+    description:
+      "Search visible performances on the page by keyword (title, theater, byline). Filters the list and returns matches.",
+    inputSchema: {
+      type: "object",
+      properties: { query: { type: "string", description: "Search term" } },
+      required: ["query"],
+    },
+    executeBody: `var searchInput = document.getElementById('search-input');
+      if (searchInput) {
+        searchInput.value = input.query;
+        searchInput.dispatchEvent(new Event('input'));
+      }
+      var rows = document.querySelectorAll('#performances .perf:not([hidden])');
+      var results = [];
+      rows.forEach(function(el) {
+        var title = el.querySelector('.perf__title');
+        var venue = el.querySelector('.perf__venue');
+        var time = el.querySelector('.perf__time .t1');
+        results.push({
+          title: title ? title.textContent.trim() : '',
+          venue: venue ? venue.textContent.trim() : '',
+          time: time ? time.textContent.trim() : ''
+        });
+      });
+      return Promise.resolve({ query: input.query, count: results.length, results: results.slice(0, 20) });`,
+  },
+];
+
+const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
+
 export function renderClientScript(): string {
   const theaterLoc: Record<string, { name: string; lat: number; lng: number }> = {};
   for (const t of THEATERS) {
@@ -620,6 +706,8 @@ export function renderClientScript(): string {
 
   return `<script>
   window.THEATER_LOC = ${locJson};
+
+  ${WEBMCP_SCRIPT}
 
   // Initial date-strip centering happens in syncDateStrip on load (further down).
 
