@@ -20,9 +20,6 @@
     "html_handling": "none",
     "not_found_handling": "none"
   },
-  "ai": {
-    "binding": "AI"
-  },
   "browser": {
     "binding": "BROWSER"
   },

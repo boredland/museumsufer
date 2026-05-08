@@ -26,6 +26,8 @@ export type EventApiType =
   | "giersch"
   | "fff";
 
+export type ExhibitionApiType = "mmk-cms";
+
 export interface ProxyConfig {
   url: string;
   token?: string;
@@ -48,6 +50,10 @@ export interface MuseumConfig {
   exhibitionUrl?: string;
   eventApi?: {
     type: EventApiType;
+    endpoint: string;
+  };
+  exhibitionApi?: {
+    type: ExhibitionApiType;
     endpoint: string;
   };
 }
@@ -281,8 +287,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.mmk.art/de/whats-on",
     // The cms.mmk.art /whats-on/ feed returns events for all three MMK
     // venues; fetchMmk routes them to zollamt-mmk / tower-mmk via
-    // related_venues + museum_slug_override.
+    // related_venues + museum_slug_override. The /exhibitions/ feed is
+    // structurally identical for upcoming exhibitions.
     eventApi: { type: "mmk", endpoint: "https://cms.mmk.art/whats-on/" },
+    exhibitionApi: { type: "mmk-cms", endpoint: "https://cms.mmk.art/exhibitions/" },
   },
   "museum-sinclair-haus-bad-homburg": {
     lat: 50.2267,
