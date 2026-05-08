@@ -26,7 +26,17 @@ export type EventApiType =
   | "giersch"
   | "fff";
 
-export type ExhibitionApiType = "mmk-cms" | "schirn" | "weltkulturen" | "caricatura" | "giersch" | "fff";
+export type ExhibitionApiType =
+  | "mmk-cms"
+  | "schirn"
+  | "weltkulturen"
+  | "caricatura"
+  | "giersch"
+  | "fff"
+  | "staedel"
+  | "liebieghaus"
+  | "historisches"
+  | "senckenberg";
 
 export interface ProxyConfig {
   url: string;
@@ -184,6 +194,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Römer/Paulskirche@X=8682007@Y=50110934@U=80@L=3000002@",
     exhibitionUrl: "https://historisches-museum-frankfurt.de/de/",
     eventApi: { type: "historisches", endpoint: "https://historisches-museum-frankfurt.de/api/calendar" },
+    exhibitionApi: {
+      type: "historisches",
+      endpoint: "https://historisches-museum-frankfurt.de/api/calendar?type=specialExhibition",
+    },
   },
   "ikonenmuseum-frankfurt": {
     lat: 50.1058,
@@ -246,6 +260,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Zanderstraße@X=8658976@Y=50099922@U=80@L=3001978@",
     exhibitionUrl: "https://www.liebieghaus.de/de/ausstellungen/",
     eventApi: { type: "liebieghaus", endpoint: "https://www.liebieghaus.de/de/kalender" },
+    exhibitionApi: { type: "liebieghaus", endpoint: "https://www.liebieghaus.de/de/ausstellungen/" },
   },
   "momem-museum-of-modern-electronic-music": {
     abbreviation: "MOMEM",
@@ -345,6 +360,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
       type: "senckenberg",
       endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/events?per_page=100",
     },
+    exhibitionApi: {
+      type: "senckenberg",
+      endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/exhibition?per_page=100",
+    },
   },
   "staedel-museum": {
     abbreviation: "Städel",
@@ -353,6 +372,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Otto-Hahn-Platz@X=8675678@Y=50101864@U=80@L=3000922@",
     exhibitionUrl: "https://www.staedelmuseum.de/de/ausstellungen-programm",
     eventApi: { type: "staedel", endpoint: "https://www.staedelmuseum.de/de/api/finder" },
+    exhibitionApi: { type: "staedel", endpoint: "https://www.staedelmuseum.de/de/api/finder" },
   },
   "stoltze-museum": {
     lat: 50.111,
