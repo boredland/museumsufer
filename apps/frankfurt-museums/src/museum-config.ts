@@ -470,18 +470,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.frankfurter-buergerstiftung.de/programm/ausstellungen",
     eventApi: { type: "buergerstiftung", endpoint: "https://www.frankfurter-buergerstiftung.de/programm/" },
   },
-  palmengarten: {
-    name: "Palmengarten",
-    description: "Botanischer Garten mit tropischen Gewächshäusern und Freilandanlagen.",
-    image: "https://www.palmengarten.de/fileadmin/user_upload/Bilder/Kalender/fuehrungen_2023/imGartenSummts.jpg",
-    website: "https://www.palmengarten.de/",
-    lat: 50.1237,
-    lng: 8.656,
-    rmvStopLid: "A=1@O=Frankfurt (Main) Botanischer Garten@X=8654383@Y=50126171@U=80@L=3000215@",
-    exhibitionUrl: "https://www.palmengarten.de/de/aktuelles.html",
-    // /de/veranstaltungen has no parseable dates in static HTML.
-    skipEvents: true,
-  },
   "wollheim-memorial-frankfurt": {
     name: "Wollheim Memorial",
     description:
