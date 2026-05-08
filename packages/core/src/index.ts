@@ -15,3 +15,4 @@ export * from "./sort";
 export * from "./theme-script";
 export * from "./user-agents";
 export * from "./utm";
+export * from "./webmcp";
