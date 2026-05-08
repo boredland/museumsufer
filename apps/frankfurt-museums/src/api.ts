@@ -1,12 +1,19 @@
 import { dateOffset, todayIso } from "./date";
 import type { Locale } from "./i18n";
 import { MUSEUMS } from "./museum-config";
-import { getAllMuseums, getEventById, getEventsForDate, getEventsForRange, getExhibitionsForDate } from "./queries";
+import {
+  getAllMuseums,
+  getEventById,
+  getEventCountsByDate,
+  getEventsForDate,
+  getEventsForRange,
+  getExhibitionsForDate,
+} from "./queries";
 import { APP_URL, escHtml } from "./shared";
 import { translateFields } from "./translate";
 import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
 
-export { getEventsForDate, getEventsForRange, getExhibitionsForDate };
+export { getEventCountsByDate, getEventsForDate, getEventsForRange, getExhibitionsForDate };
 
 const CACHE_EVENTS = "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600";
 const CACHE_EXHIBITIONS = "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600";

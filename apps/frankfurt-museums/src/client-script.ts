@@ -176,6 +176,19 @@ export const CLIENT_SCRIPT = `
       updateLangLinks();
     }
 
+    function centerActiveStop(smooth) {
+      var active = document.querySelector('#river-strip .date-stop.active');
+      if (!active) return;
+      try {
+        active.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest', inline: 'center' });
+        return;
+      } catch (e) {}
+      // Fallback for browsers that don't honour the options object
+      var strip = active.parentElement;
+      if (!strip) return;
+      var offset = active.offsetLeft - (strip.clientWidth / 2) + (active.offsetWidth / 2);
+      strip.scrollLeft = Math.max(0, offset);
+    }
     function setActiveDate(date) {
       document.querySelectorAll('[data-date]').forEach(function(btn) {
         btn.classList.toggle('active', btn.dataset.date === date);
@@ -186,6 +199,7 @@ export const CLIENT_SCRIPT = `
         up.classList.toggle('active', on);
         up.setAttribute('aria-pressed', on ? 'true' : 'false');
       }
+      centerActiveStop(true);
     }
 
     function loadDay(date) {
@@ -534,6 +548,8 @@ export const CLIENT_SCRIPT = `
       hydrateSectionStates();
       updateLangLinks();
       document.body.classList.add('hydrated');
+      // Center the active date stop on first paint (no animation).
+      centerActiveStop(false);
     } else if (content) {
       loadDay(clientToday);
     } else {
