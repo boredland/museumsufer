@@ -79,6 +79,12 @@ export async function fetchExhibitionsFromApi(
       return fetchLedermuseumExhibitions(config.endpoint);
     case "fkv":
       return fetchFkvExhibitions(config.endpoint);
+    case "fdh":
+      return fetchFdhExhibitions(config.endpoint);
+    case "dff":
+      return fetchDffExhibitions(config.endpoint);
+    case "archaeologisches":
+      return fetchArchaeologischesExhibitions(config.endpoint);
     default: {
       void proxy;
       const _exhaustive: never = config.type;
@@ -3343,6 +3349,220 @@ async function fetchFkvExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       image_url: image,
     });
     m = cardRe.exec(html);
+  }
+  return out;
+}
+
+async function fetchFdhExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const cardRe = /<a\s+href="([^"]+)"\s+class="o-exhibition">([\s\S]*?)<\/a>/g;
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = cardRe.exec(html);
+  while (m !== null) {
+    const [, href, body] = m;
+    if (seen.has(href)) {
+      m = cardRe.exec(html);
+      continue;
+    }
+
+    const pre = body
+      .match(/<p class="e-header__pre">([\s\S]*?)<\/p>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!pre || /Dauerausstellung/i.test(pre)) {
+      m = cardRe.exec(html);
+      continue;
+    }
+
+    // "12.03. – 17.05.2026" — start has no year, end carries it; assume same year.
+    const range = pre.match(/(\d{1,2})\.(\d{1,2})\.\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (!range) {
+      m = cardRe.exec(html);
+      continue;
+    }
+    const [, sd, sm, ed, em, ey] = range;
+    const startYear = parseInt(em, 10) >= parseInt(sm, 10) ? parseInt(ey, 10) : parseInt(ey, 10) - 1;
+    const start_date = `${startYear}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`;
+    const end_date = `${ey}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`;
+    if (end_date < today) {
+      m = cardRe.exec(html);
+      continue;
+    }
+
+    const main = body
+      .match(/<h2 class="e-header__main">([\s\S]*?)<\/h2>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const sub = body
+      .match(/<h3 class="e-header__sub">([\s\S]*?)<\/h3>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!main) {
+      m = cardRe.exec(html);
+      continue;
+    }
+    const title = sub ? `${main}: ${sub}` : main;
+    const image = body.match(/<img[^>]+(?:data-src|src)="([^"]+)"/)?.[1] ?? null;
+
+    seen.add(href);
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: null,
+      detail_url: normalizeUrl(href, origin),
+      image_url: image && !image.startsWith("data:") ? normalizeUrl(image, origin) : null,
+    });
+    m = cardRe.exec(html);
+  }
+  return out;
+}
+
+async function fetchDffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  // Walk all /ausstellung/{slug}/ links, dedupe, drop the dauerausstellung
+  // and virtuelle/online entries — those don't represent dated runs.
+  const links = new Set<string>();
+  for (const m of html.matchAll(/href="(https:\/\/www\.dff\.film\/ausstellung\/[a-z0-9-]+\/)"/g)) {
+    const url = m[1];
+    if (/\/dauerausstellung\//.test(url)) continue;
+    links.add(url);
+  }
+  if (links.size === 0) return [];
+
+  const today = todayIso();
+  const detailHtmls = await Promise.all(
+    [...links].map(async (url) => {
+      try {
+        const r = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? { url, html: await r.text() } : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const out: ApiExhibition[] = [];
+  for (const entry of detailHtmls) {
+    if (!entry) continue;
+    const { url, html: detail } = entry;
+
+    // og:description on a Sonderausstellung carries the runtime, e.g.
+    //   "Sonderausstellung: 11. März bis 18. Oktober 2026 im DFF – ..."
+    const desc = detail.match(/<meta\s+(?:property|name)="og:description"\s+content="([^"]+)"/)?.[1];
+    if (!desc || !/Sonderausstellung/i.test(desc)) continue;
+
+    const range = desc.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s+bis\s+(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s+(\d{4})/);
+    if (!range) continue;
+    const sm = GERMAN_MONTHS[range[2].toLowerCase()];
+    const em = GERMAN_MONTHS[range[4].toLowerCase()];
+    if (!sm || !em) continue;
+    const start_date = `${range[5]}-${sm}-${range[1].padStart(2, "0")}`;
+    const end_date = `${range[5]}-${em}-${range[3].padStart(2, "0")}`;
+    if (end_date < today) continue;
+
+    const ogTitle = detail.match(/<meta\s+(?:property|name)="og:title"\s+content="([^"]+)"/)?.[1];
+    const titleRaw = ogTitle ?? detail.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "";
+    const title = stripHtml(titleRaw)
+      .replace(/\s*-\s*DFF\.FILM\s*$/i, "")
+      .trim();
+    if (!title) continue;
+
+    const ogImage = detail.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/)?.[1] ?? null;
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: null,
+      detail_url: url,
+      image_url: ogImage,
+    });
+  }
+  return out;
+}
+
+async function fetchArchaeologischesExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  // Listing page links to /index.php/de/ausstellungen/{slug} — drop archive,
+  // dauerausstellung, and self-references; the slug list is short, so fetch
+  // all and filter by detected runtime.
+  const links = new Set<string>();
+  for (const m of html.matchAll(/href="(\/index\.php\/de\/ausstellungen\/[a-z0-9-]+)"/g)) {
+    const path = m[1];
+    if (/\/(archiv|dauerausstellung|sonderausstellung)/.test(path)) continue;
+    links.add(`${origin}${path}`);
+  }
+  if (links.size === 0) return [];
+
+  const today = todayIso();
+  const detailHtmls = await Promise.all(
+    [...links].map(async (url) => {
+      try {
+        const r = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? { url, html: await r.text() } : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  const out: ApiExhibition[] = [];
+  for (const entry of detailHtmls) {
+    if (!entry) continue;
+    const { url, html: detail } = entry;
+
+    // Headline carries the title; first paragraph carries "DD. Monat YYYY – DD. Monat YYYY".
+    const title = detail
+      .match(/<h1[^>]*itemprop="headline"[^>]*>([\s\S]*?)<\/h1>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) continue;
+
+    const bodyText = detail
+      .match(/<div[^>]+itemprop="articleBody"[^>]*>([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;|&[a-z]+;/gi, " ")
+      .replace(/\s+/g, " ");
+    if (!bodyText) continue;
+
+    const range = bodyText.match(
+      /(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})\s*[–-]\s*(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})/,
+    );
+    if (!range) continue;
+    const sm = GERMAN_MONTHS[range[2].toLowerCase()];
+    const em = GERMAN_MONTHS[range[5].toLowerCase()];
+    if (!sm || !em) continue;
+    const start_date = `${range[3]}-${sm}-${range[1].padStart(2, "0")}`;
+    const end_date = `${range[6]}-${em}-${range[4].padStart(2, "0")}`;
+    if (end_date < today) continue;
+
+    const ogImage = detail.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/)?.[1] ?? null;
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: null,
+      detail_url: url,
+      image_url: ogImage,
+    });
   }
   return out;
 }
