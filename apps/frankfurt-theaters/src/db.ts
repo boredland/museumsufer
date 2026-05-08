@@ -14,6 +14,7 @@ import type { Performance, Show } from "./types";
  */
 
 const SHOWS_BY_ID = new Map<number, Show>(SCRAPE_DATA.shows.map((s) => [s.id, s]));
+const PERFORMANCES_BY_ID = new Map<number, Performance>(SCRAPE_DATA.performances.map((p) => [p.id, p]));
 const THEATERS_BY_SLUG = new Map<string, TheaterConfig>(THEATERS.map((t) => [t.slug, t]));
 
 export interface DateWithCount {
@@ -89,10 +90,8 @@ export async function getPerformancesInRange(
 /** A single performance by its synthetic ID — used by `/api/performance/{id}`,
  *  `/performance/{id}/feed.ics`, deep-link share URLs, and JSON-LD output. */
 export async function getPerformanceById(id: number): Promise<DayPerformance | null> {
-  for (const p of SCRAPE_DATA.performances) {
-    if (p.id === id) return joinPerformance(p);
-  }
-  return null;
+  const p = PERFORMANCES_BY_ID.get(id);
+  return p ? joinPerformance(p) : null;
 }
 
 /** Theater by slug. Returns the TheaterConfig directly — no DB. */
