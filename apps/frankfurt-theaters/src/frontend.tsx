@@ -373,6 +373,68 @@ export function renderAskAi(): string {
 </section>`;
 }
 
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
+const FAQ_ITEMS: FaqItem[] = [
+  {
+    q: "Welche Bühnen sind hier vertreten?",
+    a: "Die Seite bündelt rund zwei Dutzend Frankfurter Häuser — von Schauspiel Frankfurt, Oper Frankfurt und English Theatre über die Komödie und Die Käs bis zu freien Bühnen wie dem Gallus Theater, dem Mousonturm oder der Brotfabrik. Auch Tanz und Musical sind dabei.",
+  },
+  {
+    q: "Wie aktuell ist der Spielplan?",
+    a: "Die Daten werden stündlich zwischen 09 und 21 Uhr direkt von den Webseiten der Häuser abgerufen. Änderungen wie Absagen oder ausverkaufte Vorstellungen erscheinen normalerweise innerhalb einer Stunde.",
+  },
+  {
+    q: "Kann ich hier Karten kaufen?",
+    a: "Nein — die Tickets-Schaltfläche an jeder Vorstellung führt direkt auf die Buchungsseite des jeweiligen Hauses. Diese Seite ist keine Verkaufsplattform und nimmt keine Provision.",
+  },
+  {
+    q: "Ist die Seite kostenlos?",
+    a: "Ja, frankfurt.ins.theater ist vollständig kostenlos, ohne Registrierung und ohne App-Store. Die Seite läuft als Progressive Web App direkt im Browser.",
+  },
+  {
+    q: "Was ist mit Vorstellungen, die schon angefangen haben?",
+    a: "Auf dem heutigen Spielplan werden Vorstellungen 30 Minuten nach Beginn ausgeblendet, damit nur noch erreichbare Termine sichtbar sind. Eine kleine Notiz unter der Liste zeigt, wie viele bereits gestartet sind.",
+  },
+  {
+    q: "Wie geht die Seite mit meinen Daten um?",
+    a: "Es werden keine personenbezogenen Daten erhoben. Feedback-Nachrichten werden nur dann gespeichert, wenn du sie selbst absendest. Die Seite verwendet weder Tracking noch Analyse-Cookies.",
+  },
+  {
+    q: "Warum diese Seite?",
+    a: "Frankfurt hat eine ungewöhnlich dichte Theaterlandschaft, aber keinen gemeinsamen Spielplan. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Programmheft für die ganze Stadt.",
+  },
+];
+
+export function renderFaq(): string {
+  const items = FAQ_ITEMS.map(
+    (item) => `<div class="faq__item">
+      <dt class="faq__q">${coreEscapeHtml(item.q)}</dt>
+      <dd class="faq__a">${coreEscapeHtml(item.a)}</dd>
+    </div>`,
+  ).join("");
+  return `<section class="faq" aria-labelledby="faq-title">
+    <p class="faq__rule"></p>
+    <h2 class="faq__title" id="faq-title">Häufige Fragen</h2>
+    <dl class="faq__list">${items}</dl>
+  </section>`;
+}
+
+export function buildFaqJsonLd(): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ_ITEMS.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+}
+
 export function renderFooter(): string {
   return `<footer class="footer">
   <div>
@@ -539,6 +601,8 @@ ${renderAskAi()}
     ${renderProgrammePartial(date, performances)}
   </div>
 </main>
+
+${renderFaq()}
 
 ${renderFooter()}
 
@@ -972,7 +1036,7 @@ export function buildHomeJsonLd(date: string, performances: DayPerformance[]): R
       "query-input": "required name=date",
     },
   };
-  return [website, itemList];
+  return [website, itemList, buildFaqJsonLd()];
 }
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {
