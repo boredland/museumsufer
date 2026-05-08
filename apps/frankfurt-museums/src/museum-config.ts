@@ -40,7 +40,10 @@ export type ExhibitionApiType =
   | "juedisches"
   | "mak"
   | "ledermuseum"
-  | "fkv";
+  | "fkv"
+  | "fdh"
+  | "dff"
+  | "archaeologisches";
 
 export interface ProxyConfig {
   url: string;
@@ -82,6 +85,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
       type: "archaeologisches",
       endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/kalender",
     },
+    exhibitionApi: {
+      type: "archaeologisches",
+      endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen",
+    },
   },
   "bibelhaus-erlebnismuseum": {
     lat: 50.1044,
@@ -122,6 +129,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Roßmarkt@X=8676029@Y=50112525@U=80@L=3000013@",
     exhibitionUrl: "https://deutsches-romantik-museum.de/ausstellungen/",
     eventApi: { type: "fdh", endpoint: "https://deutsches-romantik-museum.de/programm/" },
+    exhibitionApi: { type: "fdh", endpoint: "https://deutsches-romantik-museum.de/ausstellungen/" },
   },
   "dff-deutsches-filminstitut-filmmuseum": {
     abbreviation: "DFF",
@@ -130,6 +138,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dff.film/besuch/ausstellungen/",
     eventApi: { type: "dff-kino", endpoint: "https://booking.cinetixx.de/api/cinemas/events/cinema/2038440885" },
+    exhibitionApi: { type: "dff", endpoint: "https://www.dff.film/besuch/ausstellungen/" },
   },
   "dommuseum-frankfurt": {
     lat: 50.1114,
@@ -160,6 +169,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     hidden: true,
     exhibitionUrl: "https://frankfurter-goethe-haus.de/ausstellung/",
     eventApi: { type: "fdh", endpoint: "https://www.goethehaus-frankfurt.de/programm/" },
+    exhibitionApi: { type: "fdh", endpoint: "https://frankfurter-goethe-haus.de/ausstellung/" },
   },
   "frankfurter-kunstverein": {
     abbreviation: "FKV",
