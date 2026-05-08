@@ -1,6 +1,6 @@
 import { dateOffset, inferYear, toBerlinDate, toBerlinTime, todayIso } from "./date";
 import { proxyFetch } from "./fetch-utils";
-import type { EventApiType, ProxyConfig } from "./museum-config";
+import type { EventApiType, ExhibitionApiType, ProxyConfig } from "./museum-config";
 import {
   classifyEvent,
   GERMAN_MONTHS,
@@ -29,6 +29,35 @@ export interface ApiEvent {
 export interface EventApiConfig {
   type: EventApiType;
   endpoint: string;
+}
+
+export interface ApiExhibition {
+  title: string;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  detail_url: string | null;
+  image_url: string | null;
+  museum_slug_override?: string;
+}
+
+export interface ExhibitionApiConfig {
+  type: ExhibitionApiType;
+  endpoint: string;
+}
+
+export async function fetchExhibitionsFromApi(
+  config: ExhibitionApiConfig,
+  _proxy?: ProxyConfig,
+): Promise<ApiExhibition[]> {
+  switch (config.type) {
+    case "mmk-cms":
+      return fetchMmkExhibitions(config.endpoint);
+    default: {
+      const _exhaustive: never = config.type;
+      return [];
+    }
+  }
 }
 
 export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyConfig): Promise<ApiEvent[]> {
@@ -2234,4 +2263,47 @@ async function fetchFff(endpoint: string): Promise<ApiEvent[]> {
     m = blockRe.exec(html);
   }
   return events;
+}
+
+interface MmkExhibitionItem extends MmkItem {
+  image_large?: { src?: string } | false | null;
+}
+
+async function fetchMmkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
+  if (!res.ok) return [];
+  const data = (await res.json()) as { items_upcoming?: MmkExhibitionItem[] };
+  const items = data.items_upcoming ?? [];
+  const today = todayIso();
+  const detailOrigin = new URL(endpoint).origin.replace(/\/\/cms\./, "//www.");
+
+  const out: ApiExhibition[] = [];
+  for (const it of items) {
+    const title = it.title?.de?.trim();
+    const startTs = it.date?.timestamp;
+    const endTs = it.date_end && typeof it.date_end === "object" ? it.date_end.timestamp : undefined;
+    if (!title || !startTs) continue;
+
+    const start_date = toBerlinDate(new Date(startTs * 1000));
+    const end_date = endTs ? toBerlinDate(new Date(endTs * 1000)) : null;
+    if (end_date && end_date < today) continue;
+
+    const venueName = it.related_venues?.[0]?.name;
+    const slug = venueName ? MMK_VENUE_TO_SLUG[venueName] : undefined;
+    const override = slug && slug !== "museum-mmk-museum-mmk-fuer-moderne-kunst" ? slug : undefined;
+
+    const subtitle = it.subtitle && typeof it.subtitle === "object" ? it.subtitle.de?.trim() : null;
+    const image = it.image_large && typeof it.image_large === "object" ? it.image_large.src : null;
+
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: subtitle ? truncateHtml(subtitle) : null,
+      detail_url: it.path ? `${detailOrigin}${it.path}` : null,
+      image_url: image ?? null,
+      museum_slug_override: override,
+    });
+  }
+  return out;
 }
