@@ -12,6 +12,7 @@
  */
 import { fnv1a } from "@museumsufer/core";
 import { getTranslation } from "./queries";
+import { logFail, logOk } from "./scrape-log";
 import type { Env, Translation } from "./types";
 
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
@@ -70,8 +71,12 @@ export async function translateEvents(opts: {
       if (merged.has(`${hash}|${langLower}`)) continue;
       missing.push({ hash, text });
     }
-    if (missing.length === 0) continue;
+    if (missing.length === 0) {
+      logOk("deepl", langLower, "0 new strings (cache hit)");
+      continue;
+    }
 
+    let translatedCount = 0;
     for (let i = 0; i < missing.length; i += BATCH_SIZE) {
       const batch = missing.slice(i, i + BATCH_SIZE);
       try {
@@ -89,12 +94,14 @@ export async function translateEvents(opts: {
             source_text: b.text,
             translated_text: translations[j],
           });
+          translatedCount++;
         }
       } catch (e) {
-        console.error(`DeepL translation failed for ${lang}:`, e);
+        logFail("deepl", langLower, e instanceof Error ? e.message : String(e));
         break;
       }
     }
+    logOk("deepl", langLower, `${translatedCount}/${missing.length} new strings translated`);
   }
 
   return [...merged.values()];

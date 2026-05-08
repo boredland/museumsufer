@@ -8,6 +8,7 @@
  * fails).
  */
 import { getManualMuseums, WIKIPEDIA_IMAGE_URL_OVERRIDES, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
+import { logInfo } from "./scrape-log";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 
 const BASE_URL = MUSEUMSUFER_DE;
@@ -55,11 +56,17 @@ export async function scrape(opts: { previous?: PreviousData } = {}): Promise<{
   for (const m of [...directoryMuseums, ...manualMuseums]) {
     museumsBySlug.set(m.slug, m);
   }
+  logInfo(
+    `directory: ${museumsBySlug.size} museums (${directoryMuseums.length} from museumsufer.de + ${manualMuseums.length} manual)`,
+  );
 
-  await refreshWikipediaImages(museumsBySlug, previous?.museums ?? []);
+  const wikiCount = await refreshWikipediaImages(museumsBySlug, previous?.museums ?? []);
+  if (wikiCount > 0) logInfo(`directory: ${wikiCount} Wikipedia image lookups`);
 
   const directoryExhibitions = await scrapeExhibitions(museumsBySlug);
-  await enrichExhibitionDescriptions(directoryExhibitions, previous?.exhibitions ?? []);
+  logInfo(`directory: ${directoryExhibitions.length} exhibitions from museumsufer.de`);
+  const enriched = await enrichExhibitionDescriptions(directoryExhibitions, previous?.exhibitions ?? []);
+  if (enriched > 0) logInfo(`directory: ${enriched} exhibition descriptions enriched`);
 
   return { museums: [...museumsBySlug.values()], exhibitions: directoryExhibitions };
 }
@@ -163,18 +170,18 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
   return null;
 }
 
-async function refreshWikipediaImages(museums: Map<string, ParsedMuseum>, previous: ParsedMuseum[]): Promise<void> {
+async function refreshWikipediaImages(museums: Map<string, ParsedMuseum>, previous: ParsedMuseum[]): Promise<number> {
   const previousBySlug = new Map(previous.map((m) => [m.slug, m]));
+  let networkLookups = 0;
   const lookups = await Promise.all(
     [...museums.values()].map(async (m) => {
       const direct = WIKIPEDIA_IMAGE_URL_OVERRIDES[m.slug];
       if (direct) return { slug: m.slug, image: direct };
-      // Skip the lookup if we already have an image — Wikipedia rarely
-      // changes museum article images, and we have a previous-bundle copy.
       if (m.image_url) return { slug: m.slug, image: m.image_url };
       if (previousBySlug.get(m.slug)?.image_url) {
         return { slug: m.slug, image: previousBySlug.get(m.slug)!.image_url };
       }
+      networkLookups++;
       const image = await lookupWikipediaImage(WIKIPEDIA_TITLE_OVERRIDES[m.slug] || m.name).catch(() => null);
       return { slug: m.slug, image };
     }),
@@ -184,6 +191,7 @@ async function refreshWikipediaImages(museums: Map<string, ParsedMuseum>, previo
     const m = museums.get(slug);
     if (m) m.image_url = image;
   }
+  return networkLookups;
 }
 
 // ─── exhibitions ──────────────────────────────────────────────────────
@@ -354,7 +362,7 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
 async function enrichExhibitionDescriptions(
   exhibitions: ParsedExhibition[],
   previous: ParsedExhibition[],
-): Promise<void> {
+): Promise<number> {
   const previousByDetailUrl = new Map(previous.map((e) => [e.detail_url, e]));
 
   // Carry over previous-bundle descriptions; only fetch fresh for ones still
@@ -369,6 +377,7 @@ async function enrichExhibitionDescriptions(
     .filter((ex) => !ex.description && ex.detail_url.includes("museumsufer.de"))
     .slice(0, 20);
 
+  let enriched = 0;
   await Promise.all(
     needsFetch.map(async (ex) => {
       try {
@@ -387,9 +396,11 @@ async function enrichExhibitionDescriptions(
         );
         if (description.length < 20) return;
         ex.description = description;
+        enriched++;
       } catch {}
     }),
   );
+  return enriched;
 }
 
 // ─── small utils ──────────────────────────────────────────────────────
