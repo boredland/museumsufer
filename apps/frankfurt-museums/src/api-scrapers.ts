@@ -79,6 +79,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchBuergerstiftung(config.endpoint);
     case "schirn":
       return fetchSchirn(config.endpoint);
+    case "mmk":
+      return fetchMmk(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -1868,6 +1870,113 @@ async function fetchSchirn(endpoint: string): Promise<ApiEvent[]> {
       museum_slug_override: isBockenheim ? "schirn-in-bockenheim" : undefined,
     });
     m = cardRe.exec(html);
+  }
+  return events;
+}
+
+interface MmkLocalized {
+  de?: string;
+  en?: string;
+}
+
+interface MmkItem {
+  id: number;
+  title: MmkLocalized;
+  subtitle?: MmkLocalized | false | null;
+  path?: string;
+  date?: { timestamp?: number; de?: string; en?: string };
+  date_end?: { timestamp?: number; de?: string; en?: string } | false | null;
+  time?: MmkLocalized | false | null;
+  time_end?: MmkLocalized | false | null;
+  image?: { src?: string } | false | null;
+  related_venues?: Array<{ name?: string }>;
+  related_events_categories?: Array<{ name?: string }>;
+}
+
+const MMK_VENUE_TO_SLUG: Record<string, string> = {
+  museum: "museum-mmk-museum-mmk-fuer-moderne-kunst",
+  zollamt: "zollamt-mmk-museum-mmk-fuer-moderne-kunst",
+  tower: "tower-mmk-museum-mmk-fuer-moderne-kunst",
+};
+
+const MMK_CATEGORY_MAP: Record<string, string> = {
+  tour: "Führung",
+  kinderfuhrung: "Führung",
+  workshop: "Workshop",
+  talk: "Vortrag",
+  podium: "Vortrag",
+  vortrag: "Vortrag",
+  lesung: "Vortrag",
+  buchvorstellung: "Vortrag",
+  symposium: "Vortrag",
+  screening: "Film",
+  performance: "Konzert",
+  eroffnung: "Vernissage",
+};
+
+function mmkTimeFromString(raw: string | undefined | null | false): string | null {
+  if (!raw) return null;
+  const m = raw.match(/(\d{1,2}):(\d{2})/);
+  return m ? `${m[1].padStart(2, "0")}:${m[2]}` : null;
+}
+
+async function fetchMmk(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
+  if (!res.ok) return [];
+  const data = (await res.json()) as { items?: MmkItem[] };
+  const items = data.items ?? [];
+  const today = todayIso();
+  // The endpoint is the CMS JSON host (cms.mmk.art); detail URLs need to
+  // point at the user-facing site so visitors get the rendered page.
+  const detailOrigin = new URL(endpoint).origin.replace(/\/\/cms\./, "//www.");
+
+  const events: ApiEvent[] = [];
+  for (const it of items) {
+    const ts = it.date?.timestamp;
+    if (!ts) continue;
+    const start = new Date(ts * 1000);
+    const date = toBerlinDate(start);
+    if (date < today) continue;
+
+    const title = it.title?.de?.trim();
+    if (!title) continue;
+
+    const time = mmkTimeFromString(it.time && typeof it.time === "object" ? it.time.de : null);
+    const endTime = mmkTimeFromString(it.time_end && typeof it.time_end === "object" ? it.time_end.de : null);
+
+    let endDate: string | null = null;
+    if (it.date_end && typeof it.date_end === "object" && it.date_end.timestamp) {
+      const ed = toBerlinDate(new Date(it.date_end.timestamp * 1000));
+      if (ed !== date) endDate = ed;
+    }
+
+    const venueName = it.related_venues?.[0]?.name;
+    const slug = venueName ? MMK_VENUE_TO_SLUG[venueName] : undefined;
+    const override = slug && slug !== "museum-mmk-museum-mmk-fuer-moderne-kunst" ? slug : undefined;
+
+    const categoryName = it.related_events_categories?.[0]?.name;
+    const category =
+      (categoryName && MMK_CATEGORY_MAP[categoryName]) ||
+      classifyEvent(title, it.subtitle && typeof it.subtitle === "object" ? (it.subtitle.de ?? null) : null) ||
+      null;
+
+    const subtitle = it.subtitle && typeof it.subtitle === "object" ? it.subtitle.de?.trim() : null;
+    const imageSrc = it.image && typeof it.image === "object" ? it.image.src : null;
+    const detailUrl = it.path ? `${detailOrigin}${it.path}` : null;
+
+    events.push({
+      title,
+      date,
+      time,
+      end_time: endTime,
+      end_date: endDate,
+      description: subtitle ? truncateHtml(subtitle) : null,
+      detail_url: detailUrl,
+      image_url: imageSrc ?? null,
+      price: null,
+      category,
+      museum_slug_override: override,
+    });
   }
   return events;
 }
