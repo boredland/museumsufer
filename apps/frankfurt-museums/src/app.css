@@ -339,10 +339,17 @@ dialog::backdrop {
   border-color: var(--color-river);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-river) 18%, transparent);
 }
+.date-stop.is-today {
+  /* The strip's __inner has overflow-x:auto, which clips the y-axis
+     too. The "today" dot ducks into the tile (positive top) so its
+     halo doesn't get clipped against the scroll container. */
+  padding-top: 0.85rem;
+}
+.date-stop.is-today > .stop-weekday { color: var(--color-accent); font-weight: 600; }
 .date-stop.is-today::before {
   content: '';
   position: absolute;
-  top: 0;
+  top: 0.3rem;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
