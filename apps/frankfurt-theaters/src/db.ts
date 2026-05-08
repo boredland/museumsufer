@@ -1,3 +1,4 @@
+import { compareNullsLast } from "@museumsufer/core";
 import { SCRAPE_DATA } from "./scrape-data";
 import { THEATERS, type TheaterConfig } from "./theater-config";
 import type { Performance, Show } from "./types";
@@ -39,14 +40,6 @@ function joinPerformance(p: Performance): DayPerformance | null {
   };
 }
 
-function compareTime(a: string | null | undefined, b: string | null | undefined): number {
-  // NULL/undefined last (matches the old SQL `ORDER BY time NULLS LAST`).
-  if (a === b) return 0;
-  if (a == null) return 1;
-  if (b == null) return -1;
-  return a.localeCompare(b);
-}
-
 /** Performances on a given ISO date, sorted by start time then theater/show. */
 export async function getPerformancesForDate(date: string): Promise<DayPerformance[]> {
   const out: DayPerformance[] = [];
@@ -57,7 +50,7 @@ export async function getPerformancesForDate(date: string): Promise<DayPerforman
   }
   return out.sort(
     (a, b) =>
-      compareTime(a.time, b.time) ||
+      compareNullsLast(a.time, b.time) ||
       a.theater.name.localeCompare(b.theater.name) ||
       a.show.title.localeCompare(b.show.title),
   );
@@ -81,7 +74,7 @@ export async function getPerformancesInRange(
   return out.sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
-      compareTime(a.time, b.time) ||
+      compareNullsLast(a.time, b.time) ||
       a.theater.name.localeCompare(b.theater.name) ||
       a.show.title.localeCompare(b.show.title),
   );

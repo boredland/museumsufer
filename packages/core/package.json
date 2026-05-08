@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./api-catalog": "./src/api-catalog.ts",
+    "./bundle-writer": "./src/bundle-writer.ts",
     "./calendar": "./src/calendar.ts",
     "./date": "./src/date.ts",
     "./escape": "./src/escape.ts",
@@ -16,7 +17,9 @@
     "./html": "./src/html.ts",
     "./manifest": "./src/manifest.ts",
     "./robots": "./src/robots.ts",
+    "./scrape-log": "./src/scrape-log.ts",
     "./security-headers": "./src/security-headers.ts",
+    "./sort": "./src/sort.ts",
     "./theme-script": "./src/theme-script.ts",
     "./user-agents": "./src/user-agents.ts"
   },

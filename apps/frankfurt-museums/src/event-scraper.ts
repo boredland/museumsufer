@@ -7,11 +7,12 @@
  * passed in to gate the website-URL discovery (sticky once found) and
  * enrichment passes (don't re-fetch already-enriched events).
  */
+
+import { logFail, logInfo, logOk } from "@museumsufer/core";
 import PQueue from "p-queue";
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { getMuseumConfig } from "./museum-config";
-import { logFail, logInfo, logOk } from "./scrape-log";
 import type { ParsedMuseum } from "./scraper";
 import { classifyEvent, normalizeUrl } from "./shared";
 

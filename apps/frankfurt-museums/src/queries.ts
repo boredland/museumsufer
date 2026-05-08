@@ -12,7 +12,8 @@
  *
  * `likes` is the only D1 path left (user-submitted, mutable).
  */
-import { berlinHourMinute } from "./date";
+import { compareNullsLast } from "@museumsufer/core";
+import { berlinHourMinute, todayIso } from "./date";
 import { SCRAPE_DATA } from "./scrape-data";
 import type { Event, Exhibition, Museum, Translation } from "./types";
 
@@ -65,28 +66,33 @@ export async function getEventsForDate(date: string): Promise<Event[]> {
     const joined = joinMuseum(ev);
     if (joined) out.push(joined);
   }
-  out.sort((a, b) => compareTime(a.time, b.time) || a.museum_name.localeCompare(b.museum_name));
-  return date === todayIsoLocal() ? filterPastEvents(out) : out;
+  out.sort((a, b) => compareNullsLast(a.time, b.time) || a.museum_name.localeCompare(b.museum_name));
+  return date === todayIso() ? filterPastEvents(out) : out;
 }
 
 export async function getEventsForRange(startDate: string, endDate: string): Promise<Event[]> {
-  const out: Joined<Event>[] = [];
+  const today = todayIso();
+  const todayInRange = startDate <= today && today <= endDate;
+  // Single pass: collect into past/today/future buckets so the today
+  // slice can have its own filter applied without re-walking the array.
+  const past: Joined<Event>[] = [];
+  const todays: Joined<Event>[] = [];
+  const future: Joined<Event>[] = [];
   for (const ev of SCRAPE_DATA.events) {
     if (ev.date < startDate || ev.date > endDate) continue;
     const joined = joinMuseum(ev);
-    if (joined) out.push(joined);
+    if (!joined) continue;
+    if (!todayInRange) future.push(joined);
+    else if (joined.date < today) past.push(joined);
+    else if (joined.date === today) todays.push(joined);
+    else future.push(joined);
   }
-  out.sort(
-    (a, b) => a.date.localeCompare(b.date) || compareTime(a.time, b.time) || a.museum_name.localeCompare(b.museum_name),
-  );
-  const today = todayIsoLocal();
-  if (startDate <= today && today <= endDate) {
-    const past = out.filter((ev) => ev.date < today);
-    const todayEvents = filterPastEvents(out.filter((ev) => ev.date === today));
-    const future = out.filter((ev) => ev.date > today);
-    return [...past, ...todayEvents, ...future];
-  }
-  return out;
+  const sortFn = (a: Joined<Event>, b: Joined<Event>) =>
+    a.date.localeCompare(b.date) || compareNullsLast(a.time, b.time) || a.museum_name.localeCompare(b.museum_name);
+  past.sort(sortFn);
+  todays.sort(sortFn);
+  future.sort(sortFn);
+  return todayInRange ? [...past, ...filterPastEvents(todays), ...future] : future;
 }
 
 export async function getEventById(id: number): Promise<(Event & { museum_name: string }) | null> {
@@ -115,19 +121,6 @@ export async function getExhibitionById(id: number): Promise<(Exhibition & { mus
 }
 
 // ─── helpers ────────────────────────────────────────────────────────
-
-function compareTime(a: string | null | undefined, b: string | null | undefined): number {
-  if (a === b) return 0;
-  if (a == null) return 1;
-  if (b == null) return -1;
-  return a.localeCompare(b);
-}
-
-function todayIsoLocal(): string {
-  // Inline to avoid a circular import via ./date — date.ts pulls in
-  // i18n which pulls in components; keep this layer dependency-free.
-  return new Date().toISOString().slice(0, 10);
-}
 
 /** Hide events whose start/end has already passed. Depends on the current
  *  Berlin clock, so it has to live at request time (the bundle is shared

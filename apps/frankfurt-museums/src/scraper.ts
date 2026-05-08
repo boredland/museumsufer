@@ -7,8 +7,9 @@
  * the script level (e.g., to keep Wikipedia images sticky when a lookup
  * fails).
  */
+
+import { logInfo } from "@museumsufer/core";
 import { getManualMuseums, WIKIPEDIA_IMAGE_URL_OVERRIDES, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
-import { logInfo } from "./scrape-log";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 
 const BASE_URL = MUSEUMSUFER_DE;
