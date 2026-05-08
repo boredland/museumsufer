@@ -21,6 +21,7 @@
     "@scalar/hono-api-reference": "^0.10.14",
     "dayjs": "^1.11.20",
     "hono": "^4.12.15",
+    "p-queue": "^9.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -1,9 +1,10 @@
 #!/usr/bin/env bun
 /**
- * Walks every theater config, calls the matching scraper module, and
- * writes the aggregated result to src/scrape-data.ts. Designed to run
- * from a GitHub Action — no D1, no SCRAPE_SECRET, no Cloudflare runtime
- * dependencies. Bun runs this file natively (no tsx).
+ * Walks every theater config, calls the matching scraper module via a
+ * concurrency-limited queue, and writes the aggregated result to
+ * src/scrape-data.ts. Designed to run from a GitHub Action — no D1, no
+ * SCRAPE_SECRET, no Cloudflare runtime dependencies. Bun runs the file
+ * natively (no tsx).
  *
  * Output is deterministic: stable IDs (FNV-1a hashes), sorted arrays,
  * sorted object keys. Two consecutive runs on identical upstream data
@@ -14,6 +15,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fnv1aInt, todayIso } from "@museumsufer/core";
+import PQueue from "p-queue";
 import { runScraper } from "../src/scrape-runner";
 import { THEATERS } from "../src/theater-config";
 import type { Performance, ScrapeData, Show } from "../src/types";
@@ -21,66 +23,88 @@ import type { Performance, ScrapeData, Show } from "../src/types";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
+const CONCURRENCY = 5;
 
-async function main() {
+await main();
+
+async function main(): Promise<void> {
   const showsById = new Map<number, Show>();
   const allPerformances: Performance[] = [];
   let okCount = 0;
   let failCount = 0;
 
+  const queue = new PQueue({ concurrency: CONCURRENCY });
   for (const t of THEATERS) {
-    process.stderr.write(`[scrape] ${t.slug.padEnd(36, " ")} `);
-    try {
-      const result = await runScraper(t.scraper);
-
-      for (const s of result.shows) {
-        const showId = fnv1aInt(`${t.slug}|${s.slug}`);
-        if (showsById.has(showId)) continue;
-        showsById.set(showId, {
-          id: showId,
-          theater_slug: t.slug,
-          slug: s.slug,
-          title: s.title,
-          subtitle: s.subtitle ?? null,
-          description: s.description ?? null,
-          language: s.language ?? null,
-          age_recommendation: s.age_recommendation ?? null,
-          image_url: s.image_url ?? null,
-          detail_url: s.detail_url ?? null,
-          season: s.season ?? null,
-        });
+    queue.add(async () => {
+      try {
+        const result = await runScraper(t.scraper);
+        ingest(t.slug, result, showsById, allPerformances);
+        log(`${t.slug.padEnd(36, " ")} ok — ${result.shows.length} shows, ${result.performances.length} perfs`);
+        okCount++;
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        log(`${t.slug.padEnd(36, " ")} FAIL — ${msg}`);
+        failCount++;
       }
+    });
+  }
+  await queue.onIdle();
 
-      for (const p of result.performances) {
-        if (p.date < today) continue;
-        const showId = fnv1aInt(`${t.slug}|${p.show_slug}`);
-        const id = fnv1aInt(`${t.slug}|${p.show_slug}|${p.date}|${p.time ?? ""}|${p.venue_room ?? ""}`);
-        allPerformances.push({
-          id,
-          show_id: showId,
-          date: p.date,
-          time: p.time,
-          end_time: p.end_time ?? null,
-          end_date: p.end_date ?? null,
-          venue_room: p.venue_room ?? null,
-          provider_event_id: p.provider_event_id ?? null,
-          ticket_url: p.ticket_url ?? null,
-          status: p.status ?? "unknown",
-          price_min: p.price_min ?? null,
-          price_max: p.price_max ?? null,
-        });
-      }
+  const data: ScrapeData = buildScrapeData(showsById, allPerformances);
+  await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
 
-      process.stderr.write(`ok — ${result.shows.length} shows, ${result.performances.length} perfs\n`);
-      okCount++;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      process.stderr.write(`FAIL — ${msg}\n`);
-      failCount++;
-    }
+  log(
+    `${okCount}/${THEATERS.length} ok, ${failCount} failed — wrote src/scrape-data.ts (${data.shows.length} shows, ${data.performances.length} perfs)`,
+  );
+  if (failCount > 0 && okCount === 0) process.exit(1);
+}
+
+function ingest(
+  theaterSlug: string,
+  result: Awaited<ReturnType<typeof runScraper>>,
+  showsById: Map<number, Show>,
+  allPerformances: Performance[],
+): void {
+  for (const s of result.shows) {
+    const showId = fnv1aInt(`${theaterSlug}|${s.slug}`);
+    if (showsById.has(showId)) continue;
+    showsById.set(showId, {
+      id: showId,
+      theater_slug: theaterSlug,
+      slug: s.slug,
+      title: s.title,
+      subtitle: s.subtitle ?? null,
+      description: s.description ?? null,
+      language: s.language ?? null,
+      age_recommendation: s.age_recommendation ?? null,
+      image_url: s.image_url ?? null,
+      detail_url: s.detail_url ?? null,
+      season: s.season ?? null,
+    });
   }
 
-  // Stable ordering — performances sort by date/time, shows by theater then slug.
+  for (const p of result.performances) {
+    if (p.date < today) continue;
+    const showId = fnv1aInt(`${theaterSlug}|${p.show_slug}`);
+    const id = fnv1aInt(`${theaterSlug}|${p.show_slug}|${p.date}|${p.time ?? ""}|${p.venue_room ?? ""}`);
+    allPerformances.push({
+      id,
+      show_id: showId,
+      date: p.date,
+      time: p.time,
+      end_time: p.end_time ?? null,
+      end_date: p.end_date ?? null,
+      venue_room: p.venue_room ?? null,
+      provider_event_id: p.provider_event_id ?? null,
+      ticket_url: p.ticket_url ?? null,
+      status: p.status ?? "unknown",
+      price_min: p.price_min ?? null,
+      price_max: p.price_max ?? null,
+    });
+  }
+}
+
+function buildScrapeData(showsById: Map<number, Show>, allPerformances: Performance[]): ScrapeData {
   const shows = [...showsById.values()].sort(
     (a, b) => a.theater_slug.localeCompare(b.theater_slug) || a.slug.localeCompare(b.slug),
   );
@@ -93,15 +117,7 @@ async function main() {
       a.show_id - b.show_id ||
       (a.venue_room ?? "").localeCompare(b.venue_room ?? ""),
   );
-
-  const data: ScrapeData = { shows, performances };
-  await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
-
-  process.stderr.write(
-    `\n[scrape] ${okCount}/${THEATERS.length} ok, ${failCount} failed — wrote src/scrape-data.ts (${shows.length} shows, ${performances.length} perfs)\n`,
-  );
-
-  if (failCount > 0 && okCount === 0) process.exit(1);
+  return { shows, performances };
 }
 
 function generateModule(data: ScrapeData): string {
@@ -137,7 +153,6 @@ function stringifyRecord(record: Record<string, unknown>): string {
   return `{${parts.join(",")}}`;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+function log(msg: string): void {
+  process.stderr.write(`[scrape] ${msg}\n`);
+}

@@ -7,11 +7,14 @@
  * passed in to gate the website-URL discovery (sticky once found) and
  * enrichment passes (don't re-fetch already-enriched events).
  */
+import PQueue from "p-queue";
 import { fetchEventsFromApi } from "./api-scrapers";
 import { dateOffset, todayIso } from "./date";
 import { getMuseumConfig } from "./museum-config";
 import type { ParsedMuseum } from "./scraper";
 import { classifyEvent, normalizeUrl } from "./shared";
+
+const CONCURRENCY = 5;
 
 export interface ScrapedEvent {
   museum_slug: string;
@@ -46,32 +49,22 @@ export async function scrapeMuseumWebsites(
 ): Promise<ScrapedEvent[]> {
   await discoverWebsiteUrls(museums, opts.previous?.museums ?? []);
 
-  const all = await runWithConcurrency([...museums.values()], 5, async (museum) => {
-    try {
-      return await scrapeOneMuseum(museum, opts.proxy);
-    } catch (e) {
-      console.error(`Failed to scrape events for ${museum.name}:`, e);
-      return [];
-    }
-  });
+  const queue = new PQueue({ concurrency: CONCURRENCY });
+  const all: ScrapedEvent[][] = [];
+  for (const museum of museums.values()) {
+    queue.add(async () => {
+      try {
+        all.push(await scrapeOneMuseum(museum, opts.proxy));
+      } catch (e) {
+        console.error(`Failed to scrape events for ${museum.name}:`, e);
+      }
+    });
+  }
+  await queue.onIdle();
 
   const events = all.flat();
   await enrichUpcomingEvents(events, opts.previous?.events ?? []);
   return events;
-}
-
-async function runWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = cursor++;
-      if (i >= items.length) return;
-      results[i] = await fn(items[i]);
-    }
-  });
-  await Promise.all(workers);
-  return results;
 }
 
 async function scrapeOneMuseum(museum: ParsedMuseum, proxy: ProxyConfig | undefined): Promise<ScrapedEvent[]> {
