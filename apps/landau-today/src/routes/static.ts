@@ -30,8 +30,11 @@ const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="6
 
 const LLMS_TXT = `# landau.today
 
-> Aggregierter Veranstaltungskalender für Landau in der Pfalz und das Landauer Land.
-> Quellen: Kulturnetz Landau (kulturnetz-landau.de) und Stadt Landau (landau.de).
+> Aggregierter Veranstaltungskalender für Landau in der Pfalz und die Südliche Weinstraße.
+> Quellen: Kulturnetz Landau (kulturnetz-landau.de), Stadt Landau (landau.de),
+> Stiftung Hambacher Schloss (hambacher-schloss.de),
+> RPTU Kaiserslautern-Landau (rptu.de, gefiltert auf Landau),
+> Südliche Weinstraße Tourismus (suedlicheweinstrasse.de).
 
 Contact: hello@landau.today
 Source: https://github.com/boredland/museumsufer/tree/main/apps/landau-today
@@ -116,7 +119,7 @@ ${urls
 
 app.get("/impressum", (c) =>
   c.html(
-    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Impressum · landau.today</title><link rel="stylesheet" href="/styles.css"></head><body><header class="masthead"><h1><a href="/">Landau<span class="ampersand">&amp;</span>heute</a></h1></header><main class="event-detail" style="padding:0 1rem"><h1>Impressum</h1><p class="body-copy">landau.today ist ein nicht-kommerzielles, redaktionell gepflegtes Verzeichnis öffentlicher Veranstaltungen in Landau in der Pfalz und im Landauer Land. Inhalte werden täglich aus den frei zugänglichen Quellen <a href="https://kulturnetz-landau.de" rel="external">kulturnetz-landau.de</a> und <a href="https://www.landau.de/Tourismus-Kultur/Veranstaltungen/" rel="external">landau.de</a> aggregiert.</p><p class="body-copy">Für Inhalte und Aktualität haften die jeweiligen Originalquellen. Hinweise oder Korrekturen bitte per E-Mail an <a href="mailto:hello@landau.today">hello@landau.today</a>.</p><div class="actions"><a href="/">Zurück</a></div></main></body></html>`,
+    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Impressum · landau.today</title><link rel="stylesheet" href="/styles.css"></head><body><header class="masthead"><h1><a href="/">Landau<span class="ampersand">&amp;</span>heute</a></h1></header><main class="event-detail" style="padding:0 1rem"><h1>Impressum</h1><p class="body-copy">landau.today ist ein nicht-kommerzielles, redaktionell gepflegtes Verzeichnis öffentlicher Veranstaltungen in Landau in der Pfalz und der Südlichen Weinstraße. Inhalte werden täglich aus den frei zugänglichen Quellen <a href="https://kulturnetz-landau.de" rel="external">kulturnetz-landau.de</a>, <a href="https://www.landau.de/Tourismus-Kultur/Veranstaltungen/" rel="external">landau.de</a>, <a href="https://hambacher-schloss.de" rel="external">hambacher-schloss.de</a>, <a href="https://rptu.de" rel="external">rptu.de</a> (gefiltert auf Landau) und <a href="https://www.suedlicheweinstrasse.de" rel="external">suedlicheweinstrasse.de</a> aggregiert.</p><p class="body-copy">Für Inhalte und Aktualität haften die jeweiligen Originalquellen. Hinweise oder Korrekturen bitte per E-Mail an <a href="mailto:hello@landau.today">hello@landau.today</a>.</p><div class="actions"><a href="/">Zurück</a></div></main></body></html>`,
     200,
     { "Cache-Control": "public, max-age=3600" },
   ),

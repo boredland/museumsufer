@@ -1,7 +1,13 @@
 // biome-ignore lint/complexity/noBannedTypes: empty Env shape — no D1 / no secrets bound to the worker. Reserve for future bindings.
 export type Env = {};
 
-export type EventSource = "kulturnetz" | "landau-de";
+export type EventSource =
+  | "kulturnetz"
+  | "landau-de"
+  | "hambacher-schloss"
+  | "rptu-campuskultur"
+  | "suew"
+  | "stiftskirche";
 
 /**
  * A single event in Landau. Multi-day events (Ausstellung, Festival) are
