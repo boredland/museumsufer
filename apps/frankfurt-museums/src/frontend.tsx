@@ -356,18 +356,20 @@ function RiverNav({
     <nav class="mb-7" aria-label={tr.dateNav}>
       <div id="river-strip" class="river-strip">
         <div class="river-strip__inner">
-          {days.map((d) => (
-            <button
-              type="button"
-              data-date={d.iso}
-              class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}${d.isToday ? " is-today" : ""}`}
-            >
-              <span class="stop-weekday">{d.weekday}</span>
-              <span class="stop-day">{d.day}</span>
-              <span class="stop-month">{d.month}</span>
-              <span class="stop-count">{d.count > 0 ? d.count : ""}</span>
-            </button>
-          ))}
+          <div class="river-strip__rail">
+            {days.map((d) => (
+              <button
+                type="button"
+                data-date={d.iso}
+                class={`date-stop${!activeRange && d.iso === activeDate ? " active" : ""}${d.isToday ? " is-today" : ""}`}
+              >
+                <span class="stop-weekday">{d.weekday}</span>
+                <span class="stop-day">{d.day}</span>
+                <span class="stop-month">{d.month}</span>
+                <span class="stop-count">{d.count > 0 ? d.count : ""}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <div class="flex items-center gap-2 mt-5 flex-wrap">

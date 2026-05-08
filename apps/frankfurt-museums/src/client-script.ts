@@ -183,8 +183,11 @@ export const CLIENT_SCRIPT = `
         active.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest', inline: 'center' });
         return;
       } catch (e) {}
-      // Fallback for browsers that don't honour the options object
-      var strip = active.parentElement;
+      // Fallback for browsers that don't honour the options object —
+      // the scrollable element is the strip's __inner, not the rail
+      // that wraps the tiles.
+      var rail = active.parentElement;
+      var strip = rail && rail.parentElement;
       if (!strip) return;
       var offset = active.offsetLeft - (strip.clientWidth / 2) + (active.offsetWidth / 2);
       strip.scrollLeft = Math.max(0, offset);

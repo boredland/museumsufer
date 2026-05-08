@@ -231,21 +231,26 @@ dialog::backdrop {
   mask-image: linear-gradient(90deg, transparent 0, #000 1.5rem, #000 calc(100% - 1.5rem), transparent 100%);
 }
 .river-strip__inner {
-  display: flex;
-  align-items: flex-end;
-  gap: 0;
-  padding: 0 1rem 0.6rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-padding: 50%;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  position: relative;
 }
 .river-strip__inner::-webkit-scrollbar { display: none; }
-/* The river-band runs along the bottom of the strip, anchored to the
-   scroll content so it stretches across the full date range. */
-.river-strip__inner::before {
+/* The rail is the actual flex row, sized to its content. The river-band
+   pseudo-elements anchor to it (not to .river-strip__inner) so they
+   stretch across every date, not just the visible viewport. */
+.river-strip__rail {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  padding: 0 1rem 0.6rem;
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+}
+.river-strip__rail::before {
   content: '';
   position: absolute;
   left: 1rem;
@@ -255,7 +260,7 @@ dialog::backdrop {
   background: linear-gradient(90deg, transparent 0%, var(--color-river-light) 2%, var(--color-river-light) 98%, transparent 100%);
   pointer-events: none;
 }
-.river-strip__inner::after {
+.river-strip__rail::after {
   content: '';
   position: absolute;
   left: 1rem;
@@ -269,7 +274,7 @@ dialog::backdrop {
   pointer-events: none;
 }
 @media (prefers-color-scheme: dark) {
-  .river-strip__inner::after {
+  .river-strip__rail::after {
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='4' viewBox='0 0 80 4' fill='none' stroke='%2386b3d8' stroke-opacity='0.6' stroke-width='1.5' stroke-linecap='round'><path d='M0 2 Q 10 0 20 2 T 40 2 T 60 2 T 80 2'/></svg>");
   }
 }
