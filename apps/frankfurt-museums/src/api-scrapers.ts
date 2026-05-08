@@ -83,6 +83,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchMmk(config.endpoint);
     case "giersch":
       return fetchGiersch(config.endpoint);
+    case "fff":
+      return fetchFff(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -2063,6 +2065,171 @@ async function fetchGiersch(endpoint: string): Promise<ApiEvent[]> {
       image_url: null,
       price: null,
       category,
+    });
+    m = blockRe.exec(html);
+  }
+  return events;
+}
+
+const FFF_CATEGORY_MAP: Record<string, string> = {
+  vernissage: "Vernissage",
+  eröffnung: "Vernissage",
+  workshop: "Workshop",
+  "city walk workshop": "Workshop",
+  "öffentliche führung": "Führung",
+  "öffentliche führung durch": "Führung",
+  führung: "Führung",
+  galerierundgang: "Führung",
+  kuratorinnenführung: "Führung",
+  kuratorenführung: "Führung",
+  "fff akademie unterwegs": "Vortrag",
+  vortrag: "Vortrag",
+  talk: "Vortrag",
+  "artist talk": "Vortrag",
+  buchvorstellung: "Vortrag",
+  konzert: "Konzert",
+  film: "Film",
+  screening: "Film",
+};
+
+function classifyFff(prefix: string): string | null {
+  const norm = prefix.toLowerCase().trim();
+  for (const [key, value] of Object.entries(FFF_CATEGORY_MAP)) {
+    if (norm.startsWith(key)) return value;
+  }
+  return null;
+}
+
+interface FffParsed {
+  date: string;
+  end_date: string | null;
+  time: string | null;
+  end_time: string | null;
+}
+
+function parseFffDateLine(line: string, year: string): FffParsed | null {
+  // Strip the optional weekday prefix ("FR, " or "SA/SO, ").
+  const stripped = line.replace(/^[A-ZÄÖÜ]{2}(?:\/[A-ZÄÖÜ]{2})?,\s*/, "");
+
+  // Multi-day: "09./10.05." → start 09.05, end 10.05.
+  const multiDay = stripped.match(/^(\d{1,2})\.\/(\d{1,2})\.(\d{1,2})\.\s*,?\s*(.*)$/);
+  if (multiDay) {
+    const month = multiDay[3].padStart(2, "0");
+    const date = `${year}-${month}-${multiDay[1].padStart(2, "0")}`;
+    const end_date = `${year}-${month}-${multiDay[2].padStart(2, "0")}`;
+    const { time, end_time } = parseFffTime(multiDay[4] ?? "");
+    return { date, end_date, time, end_time };
+  }
+
+  // Single day: "09.05." with optional time.
+  const single = stripped.match(/^(\d{1,2})\.(\d{1,2})\.\s*,?\s*(.*)$/);
+  if (single) {
+    const date = `${year}-${single[2].padStart(2, "0")}-${single[1].padStart(2, "0")}`;
+    const { time, end_time } = parseFffTime(single[3] ?? "");
+    return { date, end_date: null, time, end_time };
+  }
+
+  return null;
+}
+
+function parseFffTime(rest: string): { time: string | null; end_time: string | null } {
+  // "19 Uhr", "10–17 Uhr", "10:30 Uhr", "10:00–17:30 Uhr", "17 UHR"
+  const range = rest.match(/(\d{1,2})(?::(\d{2}))?\s*[–-]\s*(\d{1,2})(?::(\d{2}))?\s*Uhr/i);
+  if (range) {
+    return {
+      time: `${range[1].padStart(2, "0")}:${range[2] ?? "00"}`,
+      end_time: `${range[3].padStart(2, "0")}:${range[4] ?? "00"}`,
+    };
+  }
+  const single = rest.match(/(\d{1,2})(?::(\d{2}))?\s*Uhr/i);
+  if (single) return { time: `${single[1].padStart(2, "0")}:${single[2] ?? "00"}`, end_time: null };
+  return { time: null, end_time: null };
+}
+
+async function fetchFff(endpoint: string): Promise<ApiEvent[]> {
+  const origin = new URL(endpoint).origin;
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+
+  const today = todayIso();
+  const blockRe =
+    /<div\s+data-item-id="(\d+)"\s+class="CustomProduct[^"]*"[^>]*data-archive="(\d{4})"[^>]*>([\s\S]*?)<\/div>\s*(?=<div\s+data-item-id|<\/div>\s*<\/div>)/g;
+  const events: ApiEvent[] = [];
+  const seen = new Set<string>();
+
+  let m: RegExpExecArray | null = blockRe.exec(html);
+  while (m !== null) {
+    const [, id, year, body] = m;
+    const teaser1 = body
+      .match(/<div class="teaserText1">([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!teaser1) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    // Split "{date+time} | {category prefix}" — exhibitions ("AUSSTELLUNG")
+    // share the markup but represent a runtime, not an event, so skip them.
+    const pipeIdx = teaser1.lastIndexOf("|");
+    if (pipeIdx < 0) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    const dateLine = teaser1.slice(0, pipeIdx).trim();
+    const categoryLine = teaser1.slice(pipeIdx + 1).trim();
+    if (/^AUSSTELLUNG\b/i.test(categoryLine)) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const parsed = parseFffDateLine(dateLine, year);
+    if (!parsed || parsed.date < today) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const titleRaw =
+      body.match(/<div class="title">([\s\S]*?)<\/div>\s*(?:<div class="teaserText2"|<\/div>)/)?.[1] ?? "";
+    const title = titleRaw
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z]+;|&#\d+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) {
+      m = blockRe.exec(html);
+      continue;
+    }
+
+    const description = body
+      .match(/<div class="teaserText2">([\s\S]*?)<\/div>\s*<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    const hrefMatch = body.match(/<a\s+href="([^"]+)"/);
+    const detailUrl = hrefMatch ? normalizeUrl(hrefMatch[1], origin) : null;
+
+    const key = `${id}::${parsed.date}`;
+    if (seen.has(key)) {
+      m = blockRe.exec(html);
+      continue;
+    }
+    seen.add(key);
+
+    events.push({
+      title,
+      date: parsed.date,
+      time: parsed.time,
+      end_time: parsed.end_time,
+      end_date: parsed.end_date,
+      description: description ? truncateHtml(description) : null,
+      detail_url: detailUrl,
+      image_url: null,
+      price: null,
+      category: classifyFff(categoryLine) || classifyEvent(title, description ?? null) || null,
     });
     m = blockRe.exec(html);
   }

@@ -23,7 +23,8 @@ export type EventApiType =
   | "buergerstiftung"
   | "schirn"
   | "mmk"
-  | "giersch";
+  | "giersch"
+  | "fff";
 
 export interface ProxyConfig {
   url: string;
@@ -127,8 +128,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6907,
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz/Stoltzestraße@X=8688874@Y=50112606@U=80@L=3060775@",
     exhibitionUrl: "https://www.fffrankfurt.org/aktuell/",
-    // /events and /kalender are SPA-rendered with no parseable dates.
-    skipEvents: true,
+    eventApi: { type: "fff", endpoint: "https://www.fffrankfurt.org/aktuell/" },
   },
   "frankfurter-goethe-haus": {
     lat: 50.1113,
