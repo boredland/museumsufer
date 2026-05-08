@@ -1,4 +1,4 @@
-import { LLM_SERVICES, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { buildFaqPageSchema, type FaqItem, LLM_SERVICES, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -503,8 +503,8 @@ function AboutSection({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-function FaqSection({ tr }: { tr: Record<string, string> }) {
-  const items = [
+function faqItems(tr: Record<string, string>): FaqItem[] {
+  return [
     { q: tr.faq1Q, a: tr.faq1A },
     { q: tr.faq2Q, a: tr.faq2A },
     { q: tr.faq3Q, a: tr.faq3A },
@@ -513,6 +513,10 @@ function FaqSection({ tr }: { tr: Record<string, string> }) {
     { q: tr.faq6Q, a: tr.faq6A },
     { q: tr.faq7Q, a: tr.faq7A },
   ];
+}
+
+function FaqSection({ tr }: { tr: Record<string, string> }) {
+  const items = faqItems(tr);
   return (
     <section class="mt-12">
       <header class="mb-5 flex items-baseline gap-3">
@@ -609,19 +613,7 @@ export function renderPage(
   const publisherSchema = JSON.stringify(personSchema);
   const orgSchemaJson = JSON.stringify(orgSchema);
   const webAppSchemaJson = JSON.stringify(webAppSchema);
-  const faqSchema = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      { "@type": "Question", name: tr.faq1Q, acceptedAnswer: { "@type": "Answer", text: tr.faq1A } },
-      { "@type": "Question", name: tr.faq2Q, acceptedAnswer: { "@type": "Answer", text: tr.faq2A } },
-      { "@type": "Question", name: tr.faq3Q, acceptedAnswer: { "@type": "Answer", text: tr.faq3A } },
-      { "@type": "Question", name: tr.faq4Q, acceptedAnswer: { "@type": "Answer", text: tr.faq4A } },
-      { "@type": "Question", name: tr.faq5Q, acceptedAnswer: { "@type": "Answer", text: tr.faq5A } },
-      { "@type": "Question", name: tr.faq6Q, acceptedAnswer: { "@type": "Answer", text: tr.faq6A } },
-      { "@type": "Question", name: tr.faq7Q, acceptedAnswer: { "@type": "Answer", text: tr.faq7A } },
-    ],
-  });
+  const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr)));
 
   const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
   const jsonSchemas = [
