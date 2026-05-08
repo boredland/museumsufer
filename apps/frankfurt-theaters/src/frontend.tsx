@@ -1,5 +1,6 @@
 import {
   berlinHourMinute,
+  buildFaqPageSchema,
   buildGoogleCalendarUrl,
   buildOutlookCalendarUrl,
   buildUtm,
@@ -8,6 +9,7 @@ import {
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
   dateOffset,
+  type FaqItem,
   LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
@@ -375,11 +377,6 @@ export function renderAskAi(): string {
 </section>`;
 }
 
-interface FaqItem {
-  q: string;
-  a: string;
-}
-
 const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Welche Bühnen sind hier vertreten?",
@@ -412,29 +409,27 @@ const FAQ_ITEMS: FaqItem[] = [
 ];
 
 export function renderFaq(): string {
-  const items = FAQ_ITEMS.map(
-    (item) => `<div class="faq__item">
-      <dt class="faq__q">${coreEscapeHtml(item.q)}</dt>
-      <dd class="faq__a">${coreEscapeHtml(item.a)}</dd>
-    </div>`,
-  ).join("");
+  const total = String(FAQ_ITEMS.length).padStart(2, "0");
+  const items = FAQ_ITEMS.map((item, i) => {
+    const num = String(i + 1).padStart(2, "0");
+    const open = i === 0 ? " open" : "";
+    return `<details class="faq__item"${open}>
+      <summary class="faq__row">
+        <span class="faq__num" aria-hidden="true">${num}</span>
+        <h3 class="faq__q">${coreEscapeHtml(item.q)}</h3>
+        <span class="faq__toggle" aria-hidden="true"></span>
+      </summary>
+      <p class="faq__a">${coreEscapeHtml(item.a)}</p>
+    </details>`;
+  }).join("");
   return `<section class="faq" aria-labelledby="faq-title">
-    <p class="faq__rule"></p>
-    <h2 class="faq__title" id="faq-title">Häufige Fragen</h2>
-    <dl class="faq__list">${items}</dl>
+    <header class="faq__head">
+      <span class="faq__kicker" id="faq-title">Häufige Fragen</span>
+      <span class="faq__rule" aria-hidden="true"></span>
+      <span class="faq__count">01 — ${total}</span>
+    </header>
+    <div class="faq__list">${items}</div>
   </section>`;
-}
-
-export function buildFaqJsonLd(): Record<string, unknown> {
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      "@type": "Question",
-      name: item.q,
-      acceptedAnswer: { "@type": "Answer", text: item.a },
-    })),
-  };
 }
 
 export function renderFooter(): string {
@@ -1124,7 +1119,7 @@ export function buildHomeJsonLd(date: string, performances: DayPerformance[]): R
       "query-input": "required name=date",
     },
   };
-  return [website, itemList, buildFaqJsonLd()];
+  return [website, itemList, buildFaqPageSchema(FAQ_ITEMS)];
 }
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {

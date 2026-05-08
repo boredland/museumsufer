@@ -3,6 +3,7 @@ export * from "./bundle-writer";
 export * from "./calendar";
 export * from "./date";
 export * from "./escape";
+export * from "./faq";
 export * from "./german";
 export * from "./hash";
 export * from "./html";
