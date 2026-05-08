@@ -4,6 +4,15 @@ export const CLIENT_SCRIPT = `
       if (!htmxReady) { htmxReady = true; htmx.config.globalViewTransitions = true; }
     });
 
+    // Top-of-viewport progress bar — shows during the htmx fetch so date
+    // swaps don't feel inert while the network is in flight.
+    document.body.addEventListener('htmx:beforeRequest', function(){
+      document.body.dataset.loading = 'true';
+    });
+    document.body.addEventListener('htmx:afterRequest', function(){
+      delete document.body.dataset.loading;
+    });
+
     var cachedPos = sessionStorage.getItem('userPos');
     let userPos = cachedPos ? JSON.parse(cachedPos) : null;
     let sortByDistance = false;

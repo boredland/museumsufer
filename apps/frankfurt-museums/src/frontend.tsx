@@ -657,6 +657,7 @@ export function renderPage(
         </head>
         <body>
           <IconSprite />
+          <div class="progress-bar" aria-hidden="true" />
           <a
             href="#content"
             class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-river focus:text-bg focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
