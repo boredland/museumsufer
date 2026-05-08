@@ -404,9 +404,9 @@ function ExhibitionCard({
           class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
         >
           <CardImage
-            src={ex.image_url}
+            src={ex.image_url ?? null}
             alt={ex.title}
-            detailUrl={ex.detail_url}
+            detailUrl={ex.detail_url ?? null}
             lazy={idx > 2}
             utmContent="exhibition_image"
             hero={hero}
@@ -432,7 +432,7 @@ function ExhibitionCard({
             )}
           </p>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
-            <EndingBadge endDate={ex.end_date} todayIso={todayIso} tr={tr} />
+            <EndingBadge endDate={ex.end_date ?? null} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
@@ -481,9 +481,21 @@ const calLinkClass =
   "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
 
 function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, string> }) {
-  const googleUrl = buildCalendarUrl(ev);
-  const outlookUrl = buildOutlookUrl(ev);
-  const yahooUrl = buildYahooUrl(ev);
+  // CalendarEvent (in @museumsufer/core) uses `string | null` semantics.
+  // Our optional Event fields land as `string | undefined` after stripping;
+  // coerce here so the helper signatures stay narrow.
+  const calEv = {
+    date: ev.date,
+    time: ev.time ?? null,
+    end_time: ev.end_time ?? null,
+    end_date: ev.end_date ?? null,
+    title: ev.title,
+    description: ev.description ?? null,
+    detail_url: ev.detail_url ?? null,
+  };
+  const googleUrl = buildCalendarUrl(calEv);
+  const outlookUrl = buildOutlookUrl(calEv);
+  const yahooUrl = buildYahooUrl(calEv);
   const icsUrl = `/api/event/${ev.id}.ics`;
 
   const popId = `cal-${ev.id}`;
@@ -540,7 +552,7 @@ function EventCard({
   hero?: boolean;
 }) {
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
-  const linkUrl = ev.detail_url || ev.url;
+  const linkUrl = ev.detail_url || ev.url || null;
   const hero = heroProp !== undefined ? heroProp : idx === 0;
   const titleContent = linkUrl ? (
     <a href={utm(linkUrl, "event_title")} target="_blank" rel="noopener" class={titleLinkClass}>
@@ -563,7 +575,7 @@ function EventCard({
           class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
         >
           <CardImage
-            src={ev.image_url}
+            src={ev.image_url ?? null}
             alt={ev.title}
             detailUrl={linkUrl}
             lazy={idx > 2}
@@ -594,7 +606,7 @@ function EventCard({
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />
-            <EventTag category={ev.category} tr={tr} />
+            <EventTag category={ev.category ?? null} tr={tr} />
             {ev.price && (
               <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
             )}

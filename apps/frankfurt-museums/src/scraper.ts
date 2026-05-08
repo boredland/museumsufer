@@ -1,23 +1,120 @@
+/**
+ * Pure-function scrape of museumsufer.de — the canonical source of the
+ * museum directory and its currently-running exhibitions. No D1, no
+ * env.DB; the script wires the result into the bundled SCRAPE_DATA.
+ *
+ * Each call returns a fresh dataset; previous-bundle merging happens at
+ * the script level (e.g., to keep Wikipedia images sticky when a lookup
+ * fails).
+ */
 import { getManualMuseums, WIKIPEDIA_IMAGE_URL_OVERRIDES, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
-import type { Env } from "./types";
 
 const BASE_URL = MUSEUMSUFER_DE;
 const EXHIBITIONS_URL = `${BASE_URL}/de/ausstellungen-und-veranstaltungen/aktuelle-ausstellungen/`;
 const MUSEUMS_URL = `${BASE_URL}/de/museen/`;
 
-export async function scrape(
-  env: Env,
-): Promise<{ exhibitions: number; museums: number; enriched: number; wikipediaImages: number }> {
-  const museumsCount = await scrapeMuseums(env);
-  await syncManualMuseums(env);
-  const exhibitionsCount = await scrapeExhibitions(env);
-  const enriched = await enrichExhibitionDescriptions(env);
-  const wikipediaImages = await refreshWikipediaImages(env);
-  return { exhibitions: exhibitionsCount, museums: museumsCount, enriched, wikipediaImages };
+const WIKIPEDIA_UA = "Museumsufer/1.0 (https://museumsufer.app; jonas@bgdlabs.com)";
+
+export interface ParsedMuseum {
+  name: string;
+  slug: string;
+  museumsufer_url: string;
+  description: string | null;
+  image_url: string | null;
+  website_url?: string | null;
 }
 
-const WIKIPEDIA_UA = "Museumsufer/1.0 (https://museumsufer.app; jonas@bgdlabs.com)";
+export interface ParsedExhibition {
+  museum_slug: string;
+  title: string;
+  start_date: string | null;
+  end_date: string | null;
+  description: string | null;
+  image_url: string | null;
+  detail_url: string;
+}
+
+export interface PreviousData {
+  museums: ParsedMuseum[];
+  exhibitions: ParsedExhibition[];
+}
+
+/** Top-level entry: scrapes the directory + Wikipedia + exhibition descriptions.
+ *  `previous` lets us preserve sticky fields (website_url, image_url) when a
+ *  lookup fails this run. */
+export async function scrape(opts: { previous?: PreviousData } = {}): Promise<{
+  museums: ParsedMuseum[];
+  exhibitions: ParsedExhibition[];
+}> {
+  const previous = opts.previous;
+
+  const directoryMuseums = await scrapeMuseums();
+  const manualMuseums = manualMuseumsAsParsed();
+  const museumsBySlug = new Map<string, ParsedMuseum>();
+  for (const m of [...directoryMuseums, ...manualMuseums]) {
+    museumsBySlug.set(m.slug, m);
+  }
+
+  await refreshWikipediaImages(museumsBySlug, previous?.museums ?? []);
+
+  const directoryExhibitions = await scrapeExhibitions(museumsBySlug);
+  await enrichExhibitionDescriptions(directoryExhibitions, previous?.exhibitions ?? []);
+
+  return { museums: [...museumsBySlug.values()], exhibitions: directoryExhibitions };
+}
+
+// ─── museums ──────────────────────────────────────────────────────────
+
+interface MuseumMapEntry {
+  id: number;
+  name: string;
+  description: string;
+  teaser_img: string;
+  url: string;
+  tags: string;
+}
+
+async function scrapeMuseums(): Promise<ParsedMuseum[]> {
+  const res = await fetch(MUSEUMS_URL);
+  if (!res.ok) throw new Error(`Failed to fetch museums: ${res.status}`);
+  const html = await res.text();
+
+  const startMarker = "museumMapConfig = ";
+  const startIdx = html.indexOf(startMarker);
+  if (startIdx === -1) throw new Error("Could not find museumMapConfig");
+  const jsonStart = startIdx + startMarker.length;
+  const scriptEnd = html.indexOf("</script>", jsonStart);
+  const jsonStr = html.slice(jsonStart, scriptEnd).replace(/;\s*$/, "").trim();
+  if (!jsonStr.startsWith("{")) throw new Error("Could not find museumMapConfig JSON");
+
+  const config = JSON.parse(jsonStr) as { museums: MuseumMapEntry[] };
+
+  return config.museums.map((m): ParsedMuseum => {
+    const slug = m.url.replace(/^\/de\/museen\//, "").replace(/\/$/, "");
+    const name = m.name.replace(/\s+/g, " ").trim();
+    return {
+      slug,
+      name,
+      museumsufer_url: `${BASE_URL}${m.url}`,
+      description: m.description?.replace(/\s+/g, " ").trim() || null,
+      image_url: m.teaser_img ? `${BASE_URL}/media/sliderimages/${m.teaser_img}` : null,
+    };
+  });
+}
+
+function manualMuseumsAsParsed(): ParsedMuseum[] {
+  return getManualMuseums().map((m) => ({
+    slug: m.slug,
+    name: m.name,
+    museumsufer_url: "",
+    description: m.description ?? null,
+    image_url: m.image ?? null,
+    website_url: m.website ?? null,
+  }));
+}
+
+// ─── Wikipedia image enrichment ───────────────────────────────────────
 
 async function lookupWikipediaImage(name: string): Promise<string | null> {
   const summary = async (title: string): Promise<string | null> => {
@@ -43,9 +140,7 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
   }
 
   // Conservative opensearch: only accept a result whose title contains every
-  // significant token (≥3 letters) of the cleaned source name. Prevents
-  // matches like "ZOLLAMT MMK" → "Zollamt (Kempten)" while still catching
-  // "MUSEUM MMK" → "Museum MMK für Moderne Kunst".
+  // significant token (≥3 letters) of the cleaned source name.
   const tokens = (cleaned.toLowerCase().match(/\p{L}+/gu) || []).filter((t) => t.length >= 3);
   if (tokens.length === 0) return null;
   try {
@@ -68,87 +163,101 @@ async function lookupWikipediaImage(name: string): Promise<string | null> {
   return null;
 }
 
-async function refreshWikipediaImages(env: Env): Promise<number> {
-  const { results } = await env.DB.prepare("SELECT id, slug, name FROM museums").all<{
-    id: number;
-    slug: string;
-    name: string;
-  }>();
+async function refreshWikipediaImages(museums: Map<string, ParsedMuseum>, previous: ParsedMuseum[]): Promise<void> {
+  const previousBySlug = new Map(previous.map((m) => [m.slug, m]));
   const lookups = await Promise.all(
-    results.map(async (m) => {
+    [...museums.values()].map(async (m) => {
       const direct = WIKIPEDIA_IMAGE_URL_OVERRIDES[m.slug];
-      if (direct) return { id: m.id, image: direct };
+      if (direct) return { slug: m.slug, image: direct };
+      // Skip the lookup if we already have an image — Wikipedia rarely
+      // changes museum article images, and we have a previous-bundle copy.
+      if (m.image_url) return { slug: m.slug, image: m.image_url };
+      if (previousBySlug.get(m.slug)?.image_url) {
+        return { slug: m.slug, image: previousBySlug.get(m.slug)!.image_url };
+      }
       const image = await lookupWikipediaImage(WIKIPEDIA_TITLE_OVERRIDES[m.slug] || m.name).catch(() => null);
-      return { id: m.id, image };
+      return { slug: m.slug, image };
     }),
   );
-  const updates = lookups.filter((l): l is { id: number; image: string } => !!l.image);
-  if (updates.length === 0) return 0;
-  await env.DB.batch(
-    updates.map((u) =>
-      env.DB.prepare("UPDATE museums SET image_url = ?, updated_at = datetime('now') WHERE id = ?").bind(u.image, u.id),
-    ),
-  );
-  return updates.length;
+  for (const { slug, image } of lookups) {
+    if (!image) continue;
+    const m = museums.get(slug);
+    if (m) m.image_url = image;
+  }
 }
 
-async function syncManualMuseums(env: Env): Promise<void> {
-  const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url, website_url, description, image_url) VALUES (?, ?, '', ?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, website_url = excluded.website_url,
-     description = COALESCE(excluded.description, museums.description),
-     image_url = COALESCE(excluded.image_url, museums.image_url),
-     updated_at = datetime('now')`,
-  );
-  const ops = getManualMuseums().map((m) => stmt.bind(m.name, m.slug, m.website, m.description, m.image));
-  if (ops.length > 0) await env.DB.batch(ops);
-}
+// ─── exhibitions ──────────────────────────────────────────────────────
 
-interface MuseumMapEntry {
-  id: number;
-  name: string;
-  description: string;
-  teaser_img: string;
-  url: string;
-  tags: string;
-}
-
-async function scrapeMuseums(env: Env): Promise<number> {
-  const res = await fetch(MUSEUMS_URL);
-  if (!res.ok) throw new Error(`Failed to fetch museums: ${res.status}`);
+async function scrapeExhibitions(museums: Map<string, ParsedMuseum>): Promise<ParsedExhibition[]> {
+  const res = await fetch(EXHIBITIONS_URL);
+  if (!res.ok) throw new Error(`Failed to fetch exhibitions: ${res.status}`);
   const html = await res.text();
 
-  const startMarker = "museumMapConfig = ";
-  const startIdx = html.indexOf(startMarker);
-  if (startIdx === -1) throw new Error("Could not find museumMapConfig");
-  const jsonStart = startIdx + startMarker.length;
-  const scriptEnd = html.indexOf("</script>", jsonStart);
-  const jsonStr = html.slice(jsonStart, scriptEnd).replace(/;\s*$/, "").trim();
-  if (!jsonStr.startsWith("{")) throw new Error("Could not find museumMapConfig JSON");
+  const parsed = parseExhibitions(html);
 
-  const config = JSON.parse(jsonStr) as { museums: MuseumMapEntry[] };
-  const museums = config.museums;
-
-  const stmt = env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url, description, image_url) VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET name = excluded.name, description = excluded.description, image_url = excluded.image_url, updated_at = datetime('now')`,
-  );
-
-  const ops = museums.map((m) => {
-    const slug = m.url.replace(/^\/de\/museen\//, "").replace(/\/$/, "");
-    // The source HTML occasionally embeds line breaks inside the name (e.g.
-    // "Klingspor Museum –\r\nOffenbach am Main"); collapse runs of whitespace.
-    const name = m.name.replace(/\s+/g, " ").trim();
-    const desc = m.description?.replace(/\s+/g, " ").trim() || null;
-    const img = m.teaser_img ? `${BASE_URL}/media/sliderimages/${m.teaser_img}` : null;
-    return stmt.bind(name, slug, `${BASE_URL}${m.url}`, desc, img);
-  });
-
-  await env.DB.batch(ops);
-  return museums.length;
+  const out: ParsedExhibition[] = [];
+  for (const teaser of parsed) {
+    const museumSlug = resolveMuseumSlug(teaser.museum_name, museums) ?? synthesiseMuseum(teaser.museum_name, museums);
+    out.push({
+      museum_slug: museumSlug,
+      title: teaser.title,
+      start_date: teaser.start_date,
+      end_date: teaser.end_date,
+      description: null,
+      image_url: teaser.image_url,
+      detail_url: teaser.detail_url,
+    });
+  }
+  return out;
 }
 
-interface ParsedExhibition {
+function synthesiseMuseum(museumName: string, museums: Map<string, ParsedMuseum>): string {
+  const slug = slugify(museumName);
+  if (!museums.has(slug)) {
+    museums.set(slug, {
+      slug,
+      name: museumName,
+      museumsufer_url: `${BASE_URL}/de/museen/${slug}/`,
+      description: null,
+      image_url: null,
+    });
+  }
+  return slug;
+}
+
+function resolveMuseumSlug(museumName: string, museums: Map<string, ParsedMuseum>): string | null {
+  const slug = slugify(museumName);
+  if (museums.has(slug)) return slug;
+
+  const nameNorm = museumName.toLowerCase().trim();
+  const slugParts = slug.split("-");
+
+  let bestMatch: { slug: string; score: number } | null = null;
+  for (const m of museums.values()) {
+    const mNameNorm = m.name.toLowerCase().trim();
+    if (mNameNorm === nameNorm) return m.slug;
+
+    if (mNameNorm.includes(nameNorm) || nameNorm.includes(mNameNorm)) {
+      const score = Math.min(nameNorm.length, mNameNorm.length);
+      if (!bestMatch || score > bestMatch.score) bestMatch = { slug: m.slug, score };
+      continue;
+    }
+
+    const mSlugParts = m.slug.split("-");
+    let matching = 0;
+    for (let i = 0; i < Math.min(slugParts.length, mSlugParts.length); i++) {
+      if (slugParts[i] === mSlugParts[i] || normalizeStem(slugParts[i]) === normalizeStem(mSlugParts[i])) matching++;
+      else break;
+    }
+    if (matching >= 2 && (!bestMatch || matching > bestMatch.score)) {
+      bestMatch = { slug: m.slug, score: matching };
+    }
+  }
+
+  return bestMatch?.slug ?? null;
+}
+
+interface ScrapedTeaser {
   title: string;
   museum_name: string;
   start_date: string | null;
@@ -157,101 +266,13 @@ interface ParsedExhibition {
   detail_url: string;
 }
 
-async function scrapeExhibitions(env: Env): Promise<number> {
-  const res = await fetch(EXHIBITIONS_URL);
-  if (!res.ok) throw new Error(`Failed to fetch exhibitions: ${res.status}`);
-  const html = await res.text();
-
-  const exhibitions = parseExhibitions(html);
-  if (exhibitions.length === 0) return 0;
-
-  for (const ex of exhibitions) {
-    const museumId = await resolveMuseumId(env, ex.museum_name);
-
-    await env.DB.prepare(
-      `INSERT INTO exhibitions (museum_id, title, start_date, end_date, image_url, detail_url)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT(museum_id, title) DO UPDATE SET
-         start_date = excluded.start_date,
-         end_date = excluded.end_date,
-         image_url = excluded.image_url,
-         detail_url = excluded.detail_url,
-         updated_at = datetime('now')`,
-    )
-      .bind(museumId, ex.title, ex.start_date, ex.end_date, ex.image_url, ex.detail_url)
-      .run();
-  }
-
-  return exhibitions.length;
-}
-
-let museumListCache: Array<{ id: number; name: string; slug: string }> | null = null;
-
-async function resolveMuseumId(env: Env, museumName: string): Promise<number> {
-  const slug = slugify(museumName);
-  const nameNorm = museumName.toLowerCase().trim();
-
-  const bySlug = await env.DB.prepare("SELECT id FROM museums WHERE slug = ?").bind(slug).first<{ id: number }>();
-  if (bySlug) return bySlug.id;
-
-  if (!museumListCache) {
-    const { results } = await env.DB.prepare("SELECT id, name, slug FROM museums").all<{
-      id: number;
-      name: string;
-      slug: string;
-    }>();
-    museumListCache = results;
-  }
-  const allMuseums = museumListCache;
-
-  let bestMatch: { id: number; score: number } | null = null;
-  const slugParts = slug.split("-");
-
-  for (const m of allMuseums) {
-    const mSlugParts = m.slug.split("-");
-    const mNameNorm = m.name.toLowerCase().trim();
-
-    if (mNameNorm === nameNorm) return m.id;
-
-    if (mNameNorm.includes(nameNorm) || nameNorm.includes(mNameNorm)) {
-      const score = Math.min(nameNorm.length, mNameNorm.length);
-      if (!bestMatch || score > bestMatch.score) {
-        bestMatch = { id: m.id, score };
-      }
-      continue;
-    }
-
-    let matching = 0;
-    for (let i = 0; i < Math.min(slugParts.length, mSlugParts.length); i++) {
-      if (slugParts[i] === mSlugParts[i] || normalizeStem(slugParts[i]) === normalizeStem(mSlugParts[i])) matching++;
-      else break;
-    }
-    if (matching >= 2 && (!bestMatch || matching > bestMatch.score)) {
-      bestMatch = { id: m.id, score: matching };
-    }
-  }
-
-  if (bestMatch) return bestMatch.id;
-
-  const inserted = await env.DB.prepare(
-    `INSERT INTO museums (name, slug, museumsufer_url) VALUES (?, ?, ?)
-     ON CONFLICT(slug) DO UPDATE SET updated_at = datetime('now')
-     RETURNING id`,
-  )
-    .bind(museumName, slug, `${BASE_URL}/de/museen/${slug}/`)
-    .first<{ id: number }>();
-  if (!inserted) throw new Error(`Failed to insert museum: ${museumName}`);
-  museumListCache = null;
-  return inserted.id;
-}
-
-function parseExhibitions(html: string): ParsedExhibition[] {
-  const results: ParsedExhibition[] = [];
+function parseExhibitions(html: string): ScrapedTeaser[] {
+  const results: ScrapedTeaser[] = [];
 
   const blockRe =
     /<a\s+href="(\/de\/ausstellungen-und-veranstaltungen\/ausstellungen\/[^"]+)">\s*<div class="teaserBox">([\s\S]*?)<\/div>\s*<\/a>/g;
-  let blockMatch;
-  while ((blockMatch = blockRe.exec(html)) !== null) {
+  let blockMatch: RegExpExecArray | null = blockRe.exec(html);
+  while (blockMatch !== null) {
     const detailUrl = blockMatch[1];
     const inner = blockMatch[2];
 
@@ -259,25 +280,26 @@ function parseExhibitions(html: string): ParsedExhibition[] {
     const titleMatch = inner.match(/<h2[^>]*class="[^"]*teaserHeadline[^"]*"[^>]*>([\s\S]*?)<\/h2>/);
     const textMatch = inner.match(/<p[^>]*class="[^"]*teaserText[^"]*"[^>]*>([\s\S]*?)<\/p>/);
 
-    if (!titleMatch || !textMatch) continue;
+    if (titleMatch && textMatch) {
+      const title = decodeHtmlEntities(titleMatch[1].trim());
+      const textContent = textMatch[1].trim();
+      const parts = textContent.split(/<br\s*\/?>/);
 
-    const title = decodeHtmlEntities(titleMatch[1].trim());
-    const textContent = textMatch[1].trim();
-    const parts = textContent.split(/<br\s*\/?>/);
+      const dateStr = parts[0]?.trim() || "";
+      const museumName = decodeHtmlEntities(parts[1]?.trim() || "Unknown");
 
-    const dateStr = parts[0]?.trim() || "";
-    const museumName = decodeHtmlEntities(parts[1]?.trim() || "Unknown");
+      const { start, end } = parseGermanDateRange(dateStr);
 
-    const { start, end } = parseGermanDateRange(dateStr);
-
-    results.push({
-      title,
-      museum_name: museumName,
-      start_date: start,
-      end_date: end,
-      image_url: imgMatch ? `${BASE_URL}${imgMatch[1]}` : null,
-      detail_url: `${BASE_URL}${detailUrl}`,
-    });
+      results.push({
+        title,
+        museum_name: museumName,
+        start_date: start,
+        end_date: end,
+        image_url: imgMatch ? `${BASE_URL}${imgMatch[1]}` : null,
+        detail_url: `${BASE_URL}${detailUrl}`,
+      });
+    }
+    blockMatch = blockRe.exec(html);
   }
 
   return results;
@@ -289,9 +311,6 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
     .replace(/\s+/g, " ")
     .trim();
 
-  // "DD. Month YYYY" (single date)
-  // "DD. Month - DD. Month YYYY"
-  // "DD. Month YYYY - DD. Month YYYY"
   const M = "[\\wäöüÄÖÜß]+";
   const rangeMatch = cleaned.match(
     new RegExp(`(\\d{1,2})\\.\\s*(${M})\\s*(?:(\\d{4}))?\\s*[-–]\\s*(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`),
@@ -310,7 +329,6 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
     };
   }
 
-  // Open-ended: "Ab DD. Month YYYY"
   const openMatch = cleaned.match(new RegExp(`^[Aa]b\\s+(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`));
   if (openMatch) {
     const [, day, monthName, year] = openMatch;
@@ -319,7 +337,6 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
     return { start: `${year}-${month}-${day.padStart(2, "0")}`, end: null };
   }
 
-  // Single date: "DD. Month YYYY"
   const singleMatch = cleaned.match(new RegExp(`(\\d{1,2})\\.\\s*(${M})\\s*(\\d{4})`));
   if (singleMatch) {
     const [, day, monthName, year] = singleMatch;
@@ -331,6 +348,51 @@ function parseGermanDateRange(text: string): { start: string | null; end: string
 
   return { start: null, end: null };
 }
+
+// ─── exhibition descriptions (museumsufer.de detail pages) ────────────
+
+async function enrichExhibitionDescriptions(
+  exhibitions: ParsedExhibition[],
+  previous: ParsedExhibition[],
+): Promise<void> {
+  const previousByDetailUrl = new Map(previous.map((e) => [e.detail_url, e]));
+
+  // Carry over previous-bundle descriptions; only fetch fresh for ones still
+  // missing. Cap fresh fetches per run at 20 (matches the previous SQL LIMIT).
+  for (const ex of exhibitions) {
+    if (ex.description) continue;
+    const prev = previousByDetailUrl.get(ex.detail_url);
+    if (prev?.description) ex.description = prev.description;
+  }
+
+  const needsFetch = exhibitions
+    .filter((ex) => !ex.description && ex.detail_url.includes("museumsufer.de"))
+    .slice(0, 20);
+
+  await Promise.all(
+    needsFetch.map(async (ex) => {
+      try {
+        const res = await fetch(ex.detail_url);
+        if (!res.ok) return;
+        const html = await res.text();
+        const containerMatch = html.match(
+          /<div class="textContainer[^"]*">\s*<div class="textPanel">([\s\S]*?)<\/div>/,
+        );
+        if (!containerMatch) return;
+        const description = decodeHtmlEntities(
+          containerMatch[1]
+            .replace(/<[^>]+>/g, " ")
+            .replace(/\s+/g, " ")
+            .trim(),
+        );
+        if (description.length < 20) return;
+        ex.description = description;
+      } catch {}
+    }),
+  );
+}
+
+// ─── small utils ──────────────────────────────────────────────────────
 
 function decodeHtmlEntities(text: string): string {
   return text
@@ -354,38 +416,6 @@ function decodeHtmlEntities(text: string): string {
 
 function normalizeStem(word: string): string {
   return word.replace(/en$/, "").replace(/es$/, "").replace(/er$/, "").replace(/em$/, "");
-}
-
-async function enrichExhibitionDescriptions(env: Env): Promise<number> {
-  const { results } = await env.DB.prepare(
-    "SELECT id, detail_url FROM exhibitions WHERE description IS NULL AND detail_url LIKE '%museumsufer.de%' LIMIT 20",
-  ).all<{ id: number; detail_url: string }>();
-
-  let enriched = 0;
-  for (const ex of results) {
-    try {
-      const res = await fetch(ex.detail_url);
-      if (!res.ok) continue;
-      const html = await res.text();
-
-      const containerMatch = html.match(/<div class="textContainer[^"]*">\s*<div class="textPanel">([\s\S]*?)<\/div>/);
-      if (!containerMatch) continue;
-
-      const description = decodeHtmlEntities(
-        containerMatch[1]
-          .replace(/<[^>]+>/g, " ")
-          .replace(/\s+/g, " ")
-          .trim(),
-      );
-      if (description.length < 20) continue;
-
-      await env.DB.prepare("UPDATE exhibitions SET description = ?, updated_at = datetime('now') WHERE id = ?")
-        .bind(description, ex.id)
-        .run();
-      enriched++;
-    } catch {}
-  }
-  return enriched;
 }
 
 function slugify(text: string): string {

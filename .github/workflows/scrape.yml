@@ -3,11 +3,11 @@ name: scrape
 on:
   schedule:
     - cron: "0 7-19 * * *" # theaters — hourly 09–21 CEST (07–19 UTC)
-    # - cron: "0 6 * * *"   # museums (future) — daily 08 CEST
+    - cron: "0 6 * * *" # museums  — daily 08 CEST (06 UTC)
   workflow_dispatch:
     inputs:
       app:
-        description: "Workspace to scrape (theaters | all). Defaults to all."
+        description: "Workspace to scrape (theaters | museums | all). Defaults to all."
         required: false
         default: "all"
 
@@ -47,4 +47,39 @@ jobs:
             exit 0
           fi
           git commit -m "data(theaters): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push
+
+  museums:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.app == 'museums' || inputs.app == 'all'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run scraper
+        working-directory: apps/frankfurt-museums
+        env:
+          DEEPL_API_KEYS: ${{ secrets.DEEPL_API_KEYS }}
+          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
+          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
+        run: bun scripts/scrape.ts
+
+      - name: Commit if changed
+        run: |
+          git config user.name "scrape-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/frankfurt-museums/src/scrape-data.ts
+          if git diff --cached --quiet; then
+            echo "no diff, skipping commit"
+            exit 0
+          fi
+          git commit -m "data(museums): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
           git push

@@ -1,95 +1,103 @@
+/**
+ * Two-faced translation module:
+ *
+ * - `translateFields()` runs at request time inside the worker. It reads
+ *   pre-computed translations from the bundled SCRAPE_DATA via the
+ *   queries module — no DeepL call, no DB hit.
+ *
+ * - `translateEvents()` runs in the GitHub Action (scripts/scrape.ts).
+ *   It collects untranslated strings from the freshly-scraped data,
+ *   batch-calls DeepL for misses, and returns the merged translation
+ *   array to bundle into scrape-data.ts.
+ */
 import { fnv1a } from "@museumsufer/core";
-import type { Env } from "./types";
+import { getTranslation } from "./queries";
+import type { Env, Translation } from "./types";
 
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
 const BATCH_SIZE = 50;
 
-export async function translateEvents(env: Env): Promise<{ translated: number }> {
-  if (!env.DEEPL_API_KEYS) return { translated: 0 };
+export async function translateFields<T>(_env: Env, items: T[], fields: string[], targetLang: string): Promise<T[]> {
+  if (targetLang === "de") return items;
 
-  const targets = ["EN", "FR"] as const;
-  let translated = 0;
-
-  for (const targetLang of targets) {
-    const count = await translateUntranslated(env, targetLang);
-    translated += count;
-  }
-
-  return { translated };
+  return items.map((item) => {
+    const translated = { ...item } as Record<string, unknown>;
+    for (const field of fields) {
+      const text = (item as Record<string, unknown>)[field] as string | null;
+      if (!text) continue;
+      const hit = getTranslation(fnv1a(text), targetLang);
+      if (hit !== undefined) translated[field] = hit;
+    }
+    return translated as T;
+  });
 }
 
-async function translateUntranslated(env: Env, targetLang: string): Promise<number> {
-  const texts = await getUntranslatedTexts(env, targetLang);
-  if (texts.length === 0) return 0;
+interface TranslatableItem {
+  title?: string | null;
+  description?: string | null;
+}
 
-  let count = 0;
-  for (let i = 0; i < texts.length; i += BATCH_SIZE) {
-    const batch = texts.slice(i, i + BATCH_SIZE);
-    const sourceTexts = batch.map((t) => t.text);
+export async function translateEvents(opts: {
+  events: TranslatableItem[];
+  exhibitions: TranslatableItem[];
+  museums: TranslatableItem[];
+  existing: Translation[];
+  apiKeys?: string;
+}): Promise<Translation[]> {
+  const targets = ["EN", "FR"] as const;
+  const merged = new Map<string, Translation>(opts.existing.map((t) => [`${t.source_hash}|${t.target_lang}`, t]));
+  if (!opts.apiKeys) return [...merged.values()];
 
-    try {
-      const translations = await callDeepL(env.DEEPL_API_KEYS!, sourceTexts, targetLang);
-      if (translations.length !== batch.length) continue;
+  // Collect every distinct source string from the current scrape.
+  const sourceTexts = new Map<string, string>();
+  const collect = (text: string | null | undefined) => {
+    if (!text) return;
+    const trimmed = text.trim();
+    if (trimmed.length < 3) return;
+    sourceTexts.set(fnv1a(trimmed), trimmed);
+  };
+  for (const e of opts.events) {
+    collect(e.title);
+    collect(e.description);
+  }
+  for (const ex of opts.exhibitions) collect(ex.title);
+  for (const m of opts.museums) collect(m.description);
 
-      const stmts = batch.map((t, j) =>
-        env.DB.prepare(
-          `INSERT INTO translations (source_hash, target_lang, source_text, translated_text)
-           VALUES (?, ?, ?, ?)
-           ON CONFLICT(source_hash, target_lang) DO UPDATE SET
-             translated_text = excluded.translated_text`,
-        ).bind(t.hash, targetLang.toLowerCase(), t.text, translations[j]),
-      );
+  for (const lang of targets) {
+    const langLower = lang.toLowerCase();
+    const missing: { hash: string; text: string }[] = [];
+    for (const [hash, text] of sourceTexts) {
+      if (merged.has(`${hash}|${langLower}`)) continue;
+      missing.push({ hash, text });
+    }
+    if (missing.length === 0) continue;
 
-      await env.DB.batch(stmts);
-      count += batch.length;
-    } catch (e) {
-      console.error(`DeepL translation failed for ${targetLang}:`, e);
-      break;
+    for (let i = 0; i < missing.length; i += BATCH_SIZE) {
+      const batch = missing.slice(i, i + BATCH_SIZE);
+      try {
+        const translations = await callDeepL(
+          opts.apiKeys,
+          batch.map((b) => b.text),
+          lang,
+        );
+        if (translations.length !== batch.length) continue;
+        for (let j = 0; j < batch.length; j++) {
+          const b = batch[j];
+          merged.set(`${b.hash}|${langLower}`, {
+            source_hash: b.hash,
+            target_lang: langLower,
+            source_text: b.text,
+            translated_text: translations[j],
+          });
+        }
+      } catch (e) {
+        console.error(`DeepL translation failed for ${lang}:`, e);
+        break;
+      }
     }
   }
 
-  return count;
-}
-
-async function getUntranslatedTexts(env: Env, targetLang: string): Promise<Array<{ hash: string; text: string }>> {
-  const { results: eventTexts } = await env.DB.prepare(
-    "SELECT DISTINCT title as text FROM events WHERE title != '' UNION SELECT DISTINCT description as text FROM events WHERE description IS NOT NULL AND description != ''",
-  ).all<{ text: string }>();
-
-  const { results: exhibTexts } = await env.DB.prepare(
-    "SELECT DISTINCT title as text FROM exhibitions WHERE title != ''",
-  ).all<{ text: string }>();
-
-  const { results: museumTexts } = await env.DB.prepare(
-    "SELECT DISTINCT description as text FROM museums WHERE description IS NOT NULL AND description != ''",
-  ).all<{ text: string }>();
-
-  const allTexts = [...eventTexts, ...exhibTexts, ...museumTexts];
-  const seen = new Set<string>();
-  const candidates: Array<{ hash: string; text: string }> = [];
-
-  for (const row of allTexts) {
-    if (!row.text || row.text.length < 3 || seen.has(row.text)) continue;
-    seen.add(row.text);
-    const hash = fnv1a(row.text);
-    candidates.push({ hash, text: row.text });
-  }
-
-  if (candidates.length === 0) return [];
-
-  const existing = new Set<string>();
-  for (let i = 0; i < candidates.length; i += 50) {
-    const batch = candidates.slice(i, i + 50);
-    const placeholders = batch.map(() => "?").join(",");
-    const { results } = await env.DB.prepare(
-      `SELECT source_hash FROM translations WHERE source_hash IN (${placeholders}) AND target_lang = ?`,
-    )
-      .bind(...batch.map((c) => c.hash), targetLang.toLowerCase())
-      .all<{ source_hash: string }>();
-    for (const r of results) existing.add(r.source_hash);
-  }
-
-  return candidates.filter((c) => !existing.has(c.hash)).slice(0, 200);
+  return [...merged.values()];
 }
 
 async function callDeepL(apiKeys: string, texts: string[], targetLang: string): Promise<string[]> {
@@ -97,15 +105,14 @@ async function callDeepL(apiKeys: string, texts: string[], targetLang: string): 
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
+  // Random shuffle so transient quota errors hit a different key first.
   for (let i = keys.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [keys[i], keys[j]] = [keys[j], keys[i]];
   }
 
   const params = new URLSearchParams();
-  for (const text of texts) {
-    params.append("text", text);
-  }
+  for (const text of texts) params.append("text", text);
   params.append("source_lang", "DE");
   params.append("target_lang", targetLang);
   const body = params.toString();
@@ -119,12 +126,10 @@ async function callDeepL(apiKeys: string, texts: string[], targetLang: string): 
       },
       body,
     });
-
     if (res.ok) {
       const data = (await res.json()) as { translations: Array<{ text: string }> };
       return data.translations.map((t) => t.text);
     }
-
     console.warn(`DeepL key ${key.slice(0, 8)}… failed with ${res.status}`);
     if (res.status === 456 || res.status === 403) continue;
     const errorBody = await res.text();
@@ -132,55 +137,4 @@ async function callDeepL(apiKeys: string, texts: string[], targetLang: string): 
   }
 
   throw new Error("All DeepL API keys exhausted");
-}
-
-export async function translateFields<T>(env: Env, items: T[], fields: string[], targetLang: string): Promise<T[]> {
-  if (targetLang === "de") return items;
-
-  const hashes = new Map<string, string>();
-  const toFetch = new Set<string>();
-  const rec = items as Record<string, unknown>[];
-
-  for (let idx = 0; idx < rec.length; idx++) {
-    for (const field of fields) {
-      const text = rec[idx][field] as string | null;
-      if (!text) continue;
-      const hash = fnv1a(text);
-      hashes.set(`${field}-${idx}`, hash);
-      toFetch.add(hash);
-    }
-  }
-
-  if (toFetch.size === 0) return items;
-
-  const hashList = [...toFetch];
-  const translations = new Map<string, string>();
-
-  for (let i = 0; i < hashList.length; i += 50) {
-    const batch = hashList.slice(i, i + 50);
-    const placeholders = batch.map(() => "?").join(",");
-    const { results } = await env.DB.prepare(
-      `SELECT source_hash, translated_text FROM translations
-       WHERE source_hash IN (${placeholders}) AND target_lang = ?`,
-    )
-      .bind(...batch, targetLang)
-      .all<{ source_hash: string; translated_text: string }>();
-
-    for (const row of results) {
-      translations.set(row.source_hash, row.translated_text);
-    }
-  }
-
-  return items.map((item, idx) => {
-    const translated = { ...item } as Record<string, unknown>;
-    for (const field of fields) {
-      const text = (item as Record<string, unknown>)[field] as string | null;
-      if (!text) continue;
-      const hash = hashes.get(`${field}-${idx}`);
-      if (hash && translations.has(hash)) {
-        translated[field] = translations.get(hash);
-      }
-    }
-    return translated as T;
-  });
 }

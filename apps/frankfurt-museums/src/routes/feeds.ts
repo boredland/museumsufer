@@ -5,7 +5,7 @@ import type { Env } from "../types";
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/feed.xml", async (c) => {
-  const response = await handleFeeds(c.req.raw, c.env);
+  const response = await handleFeeds(c.req.raw);
   return response ?? c.notFound();
 });
 
@@ -14,7 +14,7 @@ app.get("/rss.xml", (c) => {
 });
 
 app.get("/feed.ics", async (c) => {
-  const response = await handleFeeds(c.req.raw, c.env);
+  const response = await handleFeeds(c.req.raw);
   return response ?? c.notFound();
 });
 
