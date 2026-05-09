@@ -680,21 +680,83 @@
   .ink-up { animation: none; }
 }
 
-/** Cross-document view transitions — opt in same-origin navigations
- *  to the View Transitions API. The browser fades #content out, swaps
- *  the document, then fades the new #content in. Replaces the
- *  fetch/htmx-swap idiom museumsufer carries with a much smaller
- *  surface area; browsers without VT support fall back to a normal
- *  full-nav. */
-@view-transition { navigation: auto; }
-#content { view-transition-name: content; }
+/** htmx swap transition — pairs with `hx-swap="innerHTML transition:true"`
+ *  on chip + date links. htmx wraps the swap in document.startViewTransition()
+ *  when supported, so the inner content fades over the cross-fade rather
+ *  than flashing. The masthead, search bar, footer, and FAQ stay in place
+ *  because they live outside #content-body. */
+#content-body { view-transition-name: content-body; }
 @keyframes content-fade-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes content-fade-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-2px); } }
-::view-transition-old(content) { animation: content-fade-out 0.18s ease-out both; }
-::view-transition-new(content) { animation: content-fade-in  0.22s ease-out both; }
+::view-transition-old(content-body) { animation: content-fade-out 0.18s ease-out both; }
+::view-transition-new(content-body) { animation: content-fade-in  0.22s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(content),
-  ::view-transition-new(content) { animation: none; }
+  ::view-transition-old(content-body),
+  ::view-transition-new(content-body) { animation: none; }
+}
+
+/** Highlight-on-arrival pulse — rotwein outline that fades over 2.5 s
+ *  when the URL has ?highlight=<id> on load (or after htmx:afterSwap).
+ *  The outline animates rather than the row itself so the page text
+ *  doesn't shift, and the scrollMargin keeps the row away from the
+ *  sticky-ish chip strip if we ever add one. */
+@keyframes highlight-pulse {
+  0%   { box-shadow: 0 0 0 0 var(--color-rotwein), 0 0 0 0 transparent; background-color: color-mix(in oklab, var(--color-rotwein) 12%, transparent); }
+  60%  { box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-rotwein) 35%, transparent), 0 0 0 0 transparent; background-color: color-mix(in oklab, var(--color-rotwein) 6%, transparent); }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent; background-color: transparent; }
+}
+.highlight-pulse {
+  animation: highlight-pulse 2.5s ease-out;
+  scroll-margin-top: 1.5rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .highlight-pulse { animation: none; outline: 2px solid var(--color-rotwein); outline-offset: 4px; }
+}
+
+/** Toast for per-row "Link kopiert" feedback (clipboard fallback path).
+ *  Same vocabulary as the event-detail share toast. */
+.share-toast-row {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--color-ink);
+  z-index: 60;
+  animation: ink-up 0.25s ease-out both;
+}
+
+/** Per-row share button — copies a deep-link to the row (with
+ *  ?highlight=<id>) so it scrolls to + pulses on arrival. Lives next to
+ *  the visited toggle on the right edge; smaller than the visited check
+ *  and uses an arrow glyph that reads as "link out". */
+.share-row {
+  position: absolute;
+  top: 50%;
+  right: -3.4rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  color: transparent;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  opacity: 0;
+}
+.ledger-wrap:hover .share-row { opacity: 0.55; }
+.share-row:hover { color: var(--color-ink-soft); border-color: var(--color-ink-soft); opacity: 1; }
+@media (max-width: 720px) {
+  .share-row { right: 1.7rem; }
+  .ledger-wrap:hover .share-row, .share-row { opacity: 0.5; }
 }
 
 /* ── event detail ───────────────────────────────────────────────── */

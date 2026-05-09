@@ -41,7 +41,7 @@ interface PageProps {
 }
 
 export function renderPage(props: PageProps): string {
-  const { date, category, events, categoryCounts, dateCounts } = props;
+  const { date, category, events } = props;
   const cat = category ? CATEGORY_BY_SLUG.get(category) : undefined;
   const isHome = !category && date === todayIso();
   const title = cat
@@ -83,6 +83,7 @@ export function renderPage(props: PageProps): string {
 />
 <link rel="stylesheet" href="/styles.css" />
 <script>${THEME_FOUC_SCRIPT}</script>
+<script src="/htmx.min.js" defer></script>
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${faqLd}</script>
 </head>
@@ -106,12 +107,9 @@ export function renderPage(props: PageProps): string {
   </button>
 </header>
 <main id="content" style="max-width:48rem;margin:0 auto;padding:0 1rem">
-${render(<ChipRow active={category} date={date} counts={categoryCounts} />, "ink-up", 60)}
-${render(<DateStrip current={date} category={category} counts={dateCounts} />, "ink-up", 120)}
-${render(<DayHeadline date={date} total={events.length} />, "ink-up", 180)}
-<section class="ink-up" style="animation-delay:240ms">
-${render(<EventList events={events} date={date} />, "")}
-</section>
+<div id="content-body">
+${renderPartial(props)}
+</div>
 ${renderFaq(FAQ)}
 </main>
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
@@ -125,6 +123,9 @@ ${SW_REGISTER_SCRIPT}
 ${THEME_TOGGLE_SCRIPT}
 ${SEARCH_SCRIPT}
 ${VISITED_SCRIPT}
+${ROW_SHARE_SCRIPT}
+${HIGHLIGHT_SCRIPT}
+${HTMX_AFTER_SWAP_SCRIPT}
 </body>
 </html>`;
 }
@@ -143,7 +144,10 @@ if ('serviceWorker' in navigator) {
  *  focuses the input; empty query restores everything. Words are
  *  AND-matched so "konzert stiftskirche" only shows rows containing
  *  both. Lifted from museumsufer's `applySearchFilter` minus the
- *  Fuse.js dep — substring is fine at our event count. */
+ *  Fuse.js dep — substring is fine at our event count.
+ *
+ *  Re-applied after every htmx:afterSwap by HTMX_AFTER_SWAP_SCRIPT —
+ *  exposed as window.__landauApplySearch so the swap hook can call it. */
 const SEARCH_SCRIPT = `<script>
 (function(){
   var input = document.querySelector('.js-search');
@@ -163,6 +167,7 @@ const SEARCH_SCRIPT = `<script>
     var empty = document.querySelector('.search-empty');
     if (empty) empty.hidden = !(q.length > 0 && !anyVisible);
   }
+  window.__landauApplySearch = apply;
   input.addEventListener('input', apply);
   input.addEventListener('keydown', function(e){
     if (e.key === 'Escape') { input.value = ''; apply(); input.blur(); }
@@ -177,7 +182,10 @@ const SEARCH_SCRIPT = `<script>
  *  per-row ✓ to toggle; visited rows fade and the row class flips so the
  *  user can quickly skim "what's left". Survives navigation but lives
  *  per-browser; no server-side persistence (user explicitly opted out
- *  of likes early in the project). Lifted from museumsufer. */
+ *  of likes early in the project). Lifted from museumsufer.
+ *
+ *  paint() exposed as window.__landauPaintVisited so HTMX_AFTER_SWAP
+ *  can re-paint after a partial swap brings new rows in. */
 const VISITED_SCRIPT = `<script>
 (function(){
   var KEY = 'landau-today-visited';
@@ -195,6 +203,7 @@ const VISITED_SCRIPT = `<script>
       else node.removeAttribute('data-visited');
     });
   }
+  window.__landauPaintVisited = paint;
   paint();
   document.addEventListener('click', function(e){
     var btn = e.target.closest && e.target.closest('.js-visited');
@@ -209,6 +218,103 @@ const VISITED_SCRIPT = `<script>
     paint();
   });
 })();
+</script>`;
+
+/** Per-row share — appends ?highlight=<id> to the current URL and
+ *  shares it (or copies it). Pairs with HIGHLIGHT_SCRIPT to give
+ *  recipients a "scroll to + pulse" landing experience. Toast lives
+ *  in a small floating element seeded once per page. */
+const ROW_SHARE_SCRIPT = `<script>
+(function(){
+  function ensureToast(){
+    var t = document.querySelector('.share-toast-row');
+    if (t) return t;
+    t = document.createElement('div');
+    t.className = 'share-toast-row';
+    t.hidden = true;
+    document.body.appendChild(t);
+    return t;
+  }
+  function flash(msg){
+    var t = ensureToast();
+    t.textContent = msg;
+    t.hidden = false;
+    setTimeout(function(){ t.hidden = true; }, 1800);
+  }
+  function buildUrl(id){
+    var u = new URL(location.href);
+    u.searchParams.set('highlight', id);
+    return u.toString();
+  }
+  function onShareRow(btn){
+    var id = btn.dataset.id;
+    var title = btn.dataset.title || 'Veranstaltung';
+    var url = buildUrl(id);
+    if (navigator.share) {
+      navigator.share({ title: title, url: url }).catch(function(){});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function(){ flash('Link kopiert'); }).catch(function(){});
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); flash('Link kopiert'); } catch(_){}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('.js-share-row');
+    if (btn) { e.preventDefault(); e.stopPropagation(); onShareRow(btn); }
+  });
+})();
+</script>`;
+
+/** Highlight-on-arrival pulse. When the URL carries `?highlight=<id>`
+ *  (typically from a per-row share button), scroll the matching ledger
+ *  row into view and pulse it with a rotwein outline. Strips the
+ *  param from the URL after the pulse so the highlight doesn't replay
+ *  on subsequent navigations. */
+const HIGHLIGHT_SCRIPT = `<script>
+(function(){
+  function highlightFromUrl(){
+    var params = new URLSearchParams(location.search);
+    var id = params.get('highlight');
+    if (!id) return;
+    var node = document.querySelector('[data-id="' + CSS.escape(id) + '"]');
+    if (!node) return;
+    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    node.classList.add('highlight-pulse');
+    setTimeout(function(){ node.classList.remove('highlight-pulse'); }, 2500);
+    // Strip the highlight param from the URL so refresh doesn't replay.
+    params.delete('highlight');
+    var clean = location.pathname + (params.toString() ? '?' + params.toString() : '');
+    history.replaceState(null, '', clean);
+  }
+  window.__landauHighlight = highlightFromUrl;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', highlightFromUrl);
+  } else {
+    highlightFromUrl();
+  }
+})();
+</script>`;
+
+/** htmx:afterSwap hook — re-applies the page's stateful client features
+ *  (search filter, visited paint, highlight pulse) once new rows have
+ *  been grafted into #content-body. Without this the search query
+ *  appears to "reset" when the user changes date/category, and visited
+ *  marks vanish from the new rows. */
+const HTMX_AFTER_SWAP_SCRIPT = `<script>
+document.body.addEventListener('htmx:afterSwap', function(){
+  if (window.__landauApplySearch) window.__landauApplySearch();
+  if (window.__landauPaintVisited) window.__landauPaintVisited();
+  if (window.__landauHighlight) window.__landauHighlight();
+});
 </script>`;
 
 /** Theme toggle — flips between .light and .dark on <html>; the FOUC
@@ -329,6 +435,21 @@ function render(node: unknown, _cls: string, delayMs?: number): string {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** Render the swappable content body — chip row, date strip, day
+ *  headline, event list. This is what htmx grafts in on date/chip
+ *  clicks, and it's also what the full-page renderer wraps in
+ *  `<div id="content-body">` so the markup is identical between full
+ *  and partial responses. */
+export function renderPartial(props: PageProps): string {
+  const { date, category, events, categoryCounts, dateCounts } = props;
+  return [
+    render(<ChipRow active={category} date={date} counts={categoryCounts} />, "ink-up", 60),
+    render(<DateStrip current={date} category={category} counts={dateCounts} />, "ink-up", 120),
+    render(<DayHeadline date={date} total={events.length} />, "ink-up", 180),
+    `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} />, "")}</section>`,
+  ].join("\n");
 }
 
 /** FAQ accordion — native <details>/<summary> so it works without JS;
