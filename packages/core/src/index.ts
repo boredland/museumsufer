@@ -12,6 +12,7 @@ export * from "./manifest";
 export * from "./robots";
 export * from "./scrape-log";
 export * from "./security-headers";
+export * from "./service-worker";
 export * from "./sort";
 export * from "./theme-script";
 export * from "./user-agents";

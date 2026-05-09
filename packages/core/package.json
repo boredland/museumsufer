@@ -21,6 +21,7 @@
     "./robots": "./src/robots.ts",
     "./scrape-log": "./src/scrape-log.ts",
     "./security-headers": "./src/security-headers.ts",
+    "./service-worker": "./src/service-worker.ts",
     "./sort": "./src/sort.ts",
     "./theme-script": "./src/theme-script.ts",
     "./user-agents": "./src/user-agents.ts",

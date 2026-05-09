@@ -1,12 +1,13 @@
 /**
- * Cross-vendor "Add to calendar" URL builders. Originally lived in
- * frankfurt-museums/src/shared.ts; lifted to core so the theaters app
- * can reuse them for its calendar popover.
+ * Cross-vendor "Add to calendar" URL builders + RFC-5545 ICS emitters.
+ * Originally split across each app's own helpers; lifted to core so all
+ * three apps share one implementation.
  *
  * `location` is the human-readable venue label (museum name, theater
  * name + room, etc.). The original museums shape called it
  * `museum_name`; renamed here to keep the helper neutral.
  */
+import { icsEsc, utcStamp, xmlEsc } from "./escape";
 
 export interface CalendarEvent {
   date: string;
@@ -103,4 +104,111 @@ export function buildYahooCalendarUrl(ev: CalendarEvent): string {
     desc: eventDesc(ev),
   });
   return `https://calendar.yahoo.com/?${params.toString()}`;
+}
+
+// ─── ICS / RFC 5545 ──────────────────────────────────────────────────
+
+export interface IcsEventInput extends CalendarEvent {
+  /** Stable cross-run UID — typically `${id}@${host}`. */
+  uid: string;
+  /** Optional URL field on the VEVENT. Falls back to `detail_url`. */
+  url?: string;
+}
+
+/** Emit a single VEVENT block (no surrounding VCALENDAR). All-day events
+ *  use VALUE=DATE; timed events use TZID=Europe/Berlin which the calling
+ *  feed must declare in its VTIMEZONE block (or rely on consumer
+ *  fallback — most do). */
+export function buildIcsVevent(ev: IcsEventInput): string {
+  const dt = (date: string, time?: string | null) =>
+    date.replace(/-/g, "") + (time ? `T${time.replace(":", "")}00` : "");
+  const stamp = utcStamp();
+  const lines: string[] = [
+    "BEGIN:VEVENT",
+    `UID:${ev.uid}`,
+    `DTSTAMP:${stamp}`,
+    ev.time ? `DTSTART;TZID=Europe/Berlin:${dt(ev.date, ev.time)}` : `DTSTART;VALUE=DATE:${dt(ev.date)}`,
+  ];
+  if (ev.end_date || ev.end_time) {
+    lines.push(
+      ev.end_time
+        ? `DTEND;TZID=Europe/Berlin:${dt(ev.end_date ?? ev.date, ev.end_time)}`
+        : `DTEND;VALUE=DATE:${dt(ev.end_date ?? ev.date)}`,
+    );
+  }
+  lines.push(`SUMMARY:${icsEsc(ev.title)}`);
+  if (ev.location) lines.push(`LOCATION:${icsEsc(ev.location)}`);
+  if (ev.description) lines.push(`DESCRIPTION:${icsEsc(ev.description)}`);
+  const url = ev.url ?? ev.detail_url;
+  if (url) lines.push(`URL:${url}`);
+  lines.push("END:VEVENT");
+  return lines.join("\r\n");
+}
+
+export interface IcsCalendarOptions {
+  /** PRODID — published calendar identifier (e.g., "-//landau.today//EN"). */
+  prodId: string;
+  /** X-WR-CALNAME — human-readable calendar name in the consumer UI. */
+  name?: string;
+  events: IcsEventInput[];
+}
+
+export function buildIcsCalendar(opts: IcsCalendarOptions): string {
+  const head = ["BEGIN:VCALENDAR", `PRODID:${opts.prodId}`, "VERSION:2.0", "CALSCALE:GREGORIAN"];
+  if (opts.name) head.push(`X-WR-CALNAME:${icsEsc(opts.name)}`);
+  return [...head, ...opts.events.map(buildIcsVevent), "END:VCALENDAR"].join("\r\n");
+}
+
+// ─── RSS 2.0 ─────────────────────────────────────────────────────────
+
+export interface RssItem {
+  title: string;
+  link: string;
+  description?: string;
+  pubDate?: Date | string;
+  category?: string;
+  guid?: string;
+}
+
+export interface RssChannelOptions {
+  title: string;
+  link: string;
+  description: string;
+  /** Self-link href to advertise via <atom:link rel="self">. */
+  selfLink: string;
+  language?: string;
+  items: RssItem[];
+}
+
+export function buildRssFeed(opts: RssChannelOptions): string {
+  const itemsXml = opts.items
+    .map((item) => {
+      const pubDate =
+        item.pubDate instanceof Date ? item.pubDate.toUTCString() : (item.pubDate ?? new Date().toUTCString());
+      const guid = item.guid ?? item.link;
+      return [
+        "<item>",
+        `<title>${xmlEsc(item.title)}</title>`,
+        `<link>${xmlEsc(item.link)}</link>`,
+        `<guid isPermaLink="true">${xmlEsc(guid)}</guid>`,
+        `<pubDate>${pubDate}</pubDate>`,
+        item.category ? `<category>${xmlEsc(item.category)}</category>` : "",
+        item.description ? `<description>${xmlEsc(item.description)}</description>` : "",
+        "</item>",
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>${xmlEsc(opts.title)}</title>
+<link>${xmlEsc(opts.link)}</link>
+<atom:link href="${xmlEsc(opts.selfLink)}" rel="self" type="application/rss+xml" />
+<description>${xmlEsc(opts.description)}</description>
+<language>${opts.language ?? "de-de"}</language>
+${itemsXml}
+</channel>
+</rss>`;
 }

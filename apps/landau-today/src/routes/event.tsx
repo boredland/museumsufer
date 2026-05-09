@@ -1,4 +1,9 @@
-import { buildGoogleCalendarUrl, buildOutlookCalendarUrl, buildYahooCalendarUrl } from "@museumsufer/core";
+import {
+  buildGoogleCalendarUrl,
+  buildIcsCalendar,
+  buildOutlookCalendarUrl,
+  buildYahooCalendarUrl,
+} from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORY_BY_SLUG } from "../categories";
 import { todayIso } from "../date";
@@ -206,34 +211,22 @@ ${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` :
 }
 
 function buildIcsForOne(ev: Event): string {
-  const dt = (date: string, time?: string) => date.replace(/-/g, "") + (time ? `T${time.replace(":", "")}00` : "");
-  const stamp = `${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`;
-  const lines = [
-    "BEGIN:VCALENDAR",
-    "PRODID:-//landau.today//EN",
-    "VERSION:2.0",
-    "CALSCALE:GREGORIAN",
-    "BEGIN:VEVENT",
-    `UID:${ev.id}@landau.today`,
-    `DTSTAMP:${stamp}`,
-    ev.time ? `DTSTART;TZID=Europe/Berlin:${dt(ev.date, ev.time)}` : `DTSTART;VALUE=DATE:${dt(ev.date)}`,
-    ev.end_date || ev.end_time
-      ? ev.end_time
-        ? `DTEND;TZID=Europe/Berlin:${dt(ev.end_date ?? ev.date, ev.end_time)}`
-        : `DTEND;VALUE=DATE:${dt(ev.end_date ?? ev.date)}`
-      : "",
-    `SUMMARY:${icsEscape(ev.title)}`,
-    ev.venue ? `LOCATION:${icsEscape(ev.venue)}` : "",
-    ev.description ? `DESCRIPTION:${icsEscape(ev.description)}` : "",
-    `URL:${APP_URL}/event/${ev.id}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ];
-  return lines.filter(Boolean).join("\r\n");
-}
-
-function icsEscape(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return buildIcsCalendar({
+    prodId: "-//landau.today//EN",
+    events: [
+      {
+        uid: `${ev.id}@landau.today`,
+        date: ev.date,
+        time: ev.time ?? null,
+        end_date: ev.end_date ?? null,
+        end_time: ev.end_time ?? null,
+        title: ev.title,
+        location: ev.venue,
+        description: ev.description ?? null,
+        detail_url: `${APP_URL}/event/${ev.id}`,
+      },
+    ],
+  });
 }
 
 function esc(s: string): string {
