@@ -78,9 +78,92 @@ ${render(<EventList events={events} date={date} />, "")}
     <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
   </span>
 </footer>
+${NEAR_ME_SCRIPT}
 </body>
 </html>`;
 }
+
+/** "In der Nähe" — client-side haversine sort. Pulls geolocation, sorts
+ *  every `[data-lat][data-lng]` card within its parent by distance, and
+ *  injects a small distance badge. Toggle the chip again to undo.
+ *  Lifted from museumsufer's sortCardsByDistance with the transit-time
+ *  roundtrip stripped (we don't have a regional API equivalent). */
+const NEAR_ME_SCRIPT = `<script>
+(function(){
+  var R = 6371; // km
+  function hav(a, b, c, d) {
+    var dLat = (c - a) * Math.PI / 180;
+    var dLng = (d - b) * Math.PI / 180;
+    var s = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(s)));
+  }
+  function fmt(km) {
+    if (km < 1) return Math.round(km * 1000) + ' m';
+    if (km < 10) return km.toFixed(1).replace('.', ',') + ' km';
+    return Math.round(km) + ' km';
+  }
+  function clearBadges() {
+    document.querySelectorAll('.near-badge').forEach(function(n){ n.remove(); });
+  }
+  function restore() {
+    // Restore original DOM order via the index we stamped at boot.
+    document.querySelectorAll('[data-near-parent]').forEach(function(parent){
+      var rows = Array.from(parent.querySelectorAll('[data-near-orig]'));
+      rows.sort(function(a, b){ return Number(a.dataset.nearOrig) - Number(b.dataset.nearOrig); });
+      rows.forEach(function(r){ parent.appendChild(r); });
+    });
+  }
+  // Stamp original order so we can restore on toggle-off.
+  document.querySelectorAll('section').forEach(function(parent){
+    var rows = parent.querySelectorAll('[data-lat][data-lng]');
+    if (rows.length === 0) return;
+    parent.setAttribute('data-near-parent', '');
+    Array.from(rows).forEach(function(r, i){ r.setAttribute('data-near-orig', String(i)); });
+  });
+  function activate(lat, lng) {
+    document.querySelectorAll('[data-near-parent]').forEach(function(parent){
+      var rows = Array.from(parent.querySelectorAll('[data-lat][data-lng]'));
+      var withDist = rows.map(function(r){
+        var d = hav(lat, lng, parseFloat(r.dataset.lat), parseFloat(r.dataset.lng));
+        return { node: r, d: d };
+      });
+      withDist.sort(function(a, b){ return a.d - b.d; });
+      withDist.forEach(function(item){
+        parent.appendChild(item.node);
+        var b = document.createElement('span');
+        b.className = 'near-badge';
+        b.textContent = fmt(item.d);
+        var glyph = item.node.querySelector('.cat-glyph');
+        if (glyph) glyph.parentNode.insertBefore(b, glyph);
+        else item.node.appendChild(b);
+      });
+    });
+  }
+  function onToggle(btn) {
+    var pressed = btn.getAttribute('aria-pressed') === 'true';
+    if (pressed) {
+      btn.setAttribute('aria-pressed', 'false');
+      clearBadges();
+      restore();
+      return;
+    }
+    if (!navigator.geolocation) return;
+    btn.classList.add('chip--loading');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      btn.classList.remove('chip--loading');
+      btn.setAttribute('aria-pressed', 'true');
+      clearBadges();
+      activate(pos.coords.latitude, pos.coords.longitude);
+    }, function(){
+      btn.classList.remove('chip--loading');
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('.js-near');
+    if (btn) { e.preventDefault(); onToggle(btn); }
+  });
+})();
+</script>`;
 
 // Wrap each section in its own .ink-up so the page composes top-down
 // like a freshly inked broadsheet. The animation delays cap at 240ms so

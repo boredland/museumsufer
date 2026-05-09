@@ -37,6 +37,12 @@ export interface Event {
   price?: string;
   /** Editorial highlight from upstream (e.g., Kulturnetz "Tipp"). */
   featured?: boolean;
+  /** Venue coordinates — set by the scrape-time geocoder when the
+   *  (venue, city) pair resolves against Nominatim. Used client-side for
+   *  the "in der Nähe" sort. Optional — events whose venue can't be
+   *  geocoded sort to the bottom when distance-sort is active. */
+  lat?: number;
+  lng?: number;
 }
 
 export interface ScrapeData {

@@ -155,39 +155,9 @@ automatically.
 
 ## Possible future work
 
-Worthwhile candidates ported from `frankfurt-museums`, ranked by ROI:
-
-1. **Fuzzy search** (`Fuse.js` + Cmd-K) — 414 events deserve an in-page
-   search. Largest UX win available.
-2. **Health-check workflow** — `bun health-check` validates each
-   upstream returns expected fields; GH Action opens an issue on
-   regressions. Catches silent breakage when a source changes its URL or
-   markup. Already exists for the other apps.
-3. **PWA / service worker** — manifest is served but the SW was dropped
-   when scaffolding. Re-adding `src/service-worker.ts` plus
-   `bun screenshots:manifest` makes the app installable.
-4. **htmx partial swap** — date-strip and chip-row clicks could swap
-   `<main>` instead of full-navigating. Theaters already does this for
-   the date strip; idiom is well-established in this repo.
-5. **Dark theme** — many Konzert / Nachtleben events are evening-only;
-   a paper-on-ink inversion of the current palette would suit. CSS
-   variables are already structured for it (`--color-paper`/`--color-ink`).
-6. **FAQ accordion** — both sister apps recently grew an FAQ section in
-   matching idiom (Bauhaus-geometric for museums, Programmheft for
-   theaters). A Heimatzeitung-style FAQ would round out the SEO surface.
-7. **`/api/docs`** — OpenAPI reference page via `@scalar/hono-api-reference`.
-   Cheap; pairs nicely with the existing `/llms.txt`.
-8. **Share-this-event** with `navigator.share` + clipboard fallback +
-   highlight-on-arrival pulse. Small but polished.
-
-Explicitly **NOT** worth porting (Frankfurt-specific or out of scope):
-- Distance / RMV transit (different transit authority; the city is
-  walkable anyway)
-- DeepL translation (DE-only is on-brand for the Pfälzer
-  Heimatzeitung framing)
-- Like counter (user explicitly opted out)
-- AI-fallback scraping (every source we have is structurally clean)
-- Multi-museum config layer (events carry their own venue/source/city)
+See [TODO.md](TODO.md) for the live port roadmap (with checked-off
+items as they ship). Already in production: VRN navigate-to-destination,
+Web Share, sort-by-location with Nominatim-geocoded venues.
 
 ## Layout
 

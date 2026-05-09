@@ -145,6 +145,36 @@
 .chip.m-schiefer .glyph{ color: var(--color-schiefer); }
 .chip.active .glyph    { color: inherit !important; }
 
+/** "In der Nähe" pill — same chip vocabulary, but a button with a state
+    flip when sort-by-location is active. Compass glyph in reblaus picks
+    up the same outdoor mood used by Sport / Exkursion. */
+.chip--near {
+  cursor: pointer;
+  border-style: dashed;
+}
+.chip--near .glyph { color: var(--color-reblaus); }
+.chip--near[aria-pressed="true"] {
+  background: var(--color-reblaus);
+  color: var(--color-paper);
+  border-color: var(--color-reblaus);
+  border-style: solid;
+}
+.chip--near[aria-pressed="true"] .glyph { color: inherit; }
+.chip--loading .glyph { animation: ink-up 0.6s ease-in-out infinite alternate; }
+
+/** Distance badge injected client-side after a near-me sort. Sits to the
+    left of the category glyph in the same baseline so the row keeps its
+    rhythm. */
+.near-badge {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  color: var(--color-reblaus);
+  margin-right: 0.35rem;
+  white-space: nowrap;
+}
+
 /* ── date strip ──────────────────────────────────────────────────── */
 .dates {
   position: relative;

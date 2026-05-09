@@ -17,6 +17,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
+import { GEOCODE_CACHE } from "../src/geocode-cache";
 import { scrapeHambacherSchloss } from "../src/scrapers/hambacher-schloss";
 import { scrapeKulturnetz } from "../src/scrapers/kulturnetz";
 import { scrapeLandauDe } from "../src/scrapers/landau-de";
@@ -28,6 +29,7 @@ import type { Event, ScrapeData } from "../src/types";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const dataPath = resolve(root, "src/scrape-data.ts");
+const geocodeCachePath = resolve(root, "src/geocode-cache.ts");
 
 /** Source priority for cross-source dedup. Lower wins. Kulturnetz first
  *  because its categorisation is most reliable; landau.de second because
@@ -44,6 +46,13 @@ const SOURCE_RANK: Record<Event["source"], number> = {
   stiftskirche: 6,
 };
 
+const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
+/** Nominatim's usage policy is 1 req/s with an identifying User-Agent.
+ *  We respect both — the cache means this only matters for cold starts
+ *  on net-new venues, not the hot daily path. */
+const NOMINATIM_DELAY_MS = 1100;
+const NOMINATIM_USER_AGENT = "landau.today (https://landau.today; hello@landau.today)";
+
 const startMain = Date.now();
 
 const [knl, lde, hbs, rptu, suew, pfalz] = await Promise.all([
@@ -59,6 +68,8 @@ const merged = mergeAndId([...knl, ...lde, ...hbs, ...rptu, ...suew, ...pfalz]);
 const today = todayIso();
 const future = merged.filter((ev) => (ev.end_date ?? ev.date) >= today);
 future.sort(eventSort);
+
+await stage("geocode", () => geocodeAll(future));
 
 await writeBundle(future);
 
@@ -246,6 +257,115 @@ function coreTitle(s: string): string {
   const m = s.match(/^([\p{L}\d ]{2,30})\s*[:—–-]\s+(.+)$/u);
   if (m) return normalizeTitle(m[2]);
   return normalizeTitle(s);
+}
+
+// ─── geocoding ──────────────────────────────────────────────────────
+
+interface GeocodeResult {
+  lat: number;
+  lng: number;
+}
+
+async function geocodeAll(events: Event[]): Promise<void> {
+  const cache = { ...GEOCODE_CACHE };
+  const cacheHits: string[] = [];
+  const newQueries: { key: string; venue: string; city: string }[] = [];
+
+  for (const ev of events) {
+    if (!ev.venue) continue;
+    const key = cacheKey(ev.venue, ev.city);
+    if (cache[key]) {
+      cacheHits.push(key);
+      continue;
+    }
+    if (newQueries.find((q) => q.key === key)) continue;
+    newQueries.push({ key, venue: ev.venue, city: ev.city ?? "Landau in der Pfalz" });
+  }
+
+  log(`  geocode cache: ${cacheHits.length} hit, ${newQueries.length} to fetch`);
+
+  for (const q of newQueries) {
+    const result = await geocodeOne(q.venue, q.city);
+    if (result) cache[q.key] = [round6(result.lat), round6(result.lng)];
+    // Tombstone misses so we don't keep retrying every day. Use [0, 0] as
+    // sentinel; client-side sort already excludes that pair.
+    else cache[q.key] = [0, 0];
+    await sleep(NOMINATIM_DELAY_MS);
+  }
+
+  // Inject coords back onto events and write the cache module.
+  for (const ev of events) {
+    if (!ev.venue) continue;
+    const coords = cache[cacheKey(ev.venue, ev.city)];
+    if (!coords || (coords[0] === 0 && coords[1] === 0)) continue;
+    ev.lat = coords[0];
+    ev.lng = coords[1];
+  }
+  await writeGeocodeCache(cache);
+}
+
+async function geocodeOne(venue: string, city: string): Promise<GeocodeResult | null> {
+  // Two-tier query: prefer "<venue>, <city>", fall back to just "<city>"
+  // if the venue search yields nothing. Constraining to Germany keeps
+  // ambiguous venue names (e.g., "Stadtbibliothek") on the right
+  // continent.
+  const queries = [`${venue}, ${city}, Deutschland`, `${city}, Deutschland`];
+  for (const q of queries) {
+    const url = `${NOMINATIM_URL}?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=de`;
+    try {
+      const res = await fetch(url, { headers: { "User-Agent": NOMINATIM_USER_AGENT } });
+      if (!res.ok) {
+        log(`  nominatim ${res.status} for "${q}"`);
+        continue;
+      }
+      const data = (await res.json()) as Array<{ lat: string; lon: string }>;
+      if (data.length === 0) continue;
+      const lat = Number(data[0].lat);
+      const lng = Number(data[0].lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      return { lat, lng };
+    } catch (err) {
+      log(`  nominatim error for "${q}": ${(err as Error).message}`);
+    }
+    await sleep(NOMINATIM_DELAY_MS);
+  }
+  return null;
+}
+
+function cacheKey(venue: string, city?: string): string {
+  return `${venue.toLowerCase().trim()}|${(city ?? "").toLowerCase().trim()}`;
+}
+
+function round6(n: number): number {
+  return Math.round(n * 1e6) / 1e6;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function writeGeocodeCache(cache: Record<string, [number, number]>): Promise<void> {
+  // Sort keys alphabetically so the diff is reviewable across runs.
+  const entries = Object.keys(cache)
+    .sort()
+    .map((k) => `  ${JSON.stringify(k)}: [${cache[k][0]}, ${cache[k][1]}],`);
+  const lines = [
+    "/* AUTO-GENERATED by scripts/scrape.ts — do not edit by hand. */",
+    "",
+    "/**",
+    ' * Persistent geocode cache: normalised "<venue>|<city>" → [lat, lng].',
+    " *",
+    " * Geocoding runs against OSM Nominatim, which is free but rate-limited",
+    " * (1 req/s). We cache results across scrape runs so a daily run only",
+    " * geocodes net-new venues. A [0, 0] tombstone marks venues Nominatim",
+    " * couldn't resolve so we don't keep retrying.",
+    " */",
+    "export const GEOCODE_CACHE: Record<string, [number, number]> = {",
+    ...entries,
+    "};",
+    "",
+  ];
+  await writeFile(geocodeCachePath, lines.join("\n"), "utf8");
 }
 
 function eventSort(a: Event, b: Event): number {

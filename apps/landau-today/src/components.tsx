@@ -41,6 +41,14 @@ export function ChipRow({ active, date, counts }: ChipRowProps) {
             </a>
           );
         })}
+        {/* "Near me" toggle — purely client-side; sorts ledger rows by
+            haversine distance against the user's coordinates. */}
+        <button type="button" class="chip chip--near js-near" aria-pressed="false">
+          <span class="glyph" aria-hidden="true">
+            ⌖
+          </span>
+          <span class="t-label">In der Nähe</span>
+        </button>
       </div>
     </nav>
   );
@@ -136,8 +144,12 @@ export function Ledger({ ev }: LedgerProps) {
     ev.price || null,
   ];
   const visible = meta.filter((s): s is string => !!s);
+  const geoAttrs =
+    typeof ev.lat === "number" && typeof ev.lng === "number"
+      ? { "data-lat": String(ev.lat), "data-lng": String(ev.lng) }
+      : {};
   return (
-    <a class={`ledger m-${cat.mood} t-shift`} href={`/event/${ev.id}`} data-cat={cat.slug}>
+    <a class={`ledger m-${cat.mood} t-shift`} href={`/event/${ev.id}`} data-cat={cat.slug} {...geoAttrs}>
       <div class={`time${time ? "" : " allday"}`}>
         {time ?? (isOpen ? "ganztags" : "ganztags")}
         {ev.end_time && ev.end_time !== ev.time ? (
@@ -179,8 +191,12 @@ export function Broadside({ ev }: BroadsideProps) {
   const cat = categoryFor(ev.category);
   const img = imageProxyUrl(ev.image_url);
   const time = formatTime(ev.time);
+  const geoAttrs =
+    typeof ev.lat === "number" && typeof ev.lng === "number"
+      ? { "data-lat": String(ev.lat), "data-lng": String(ev.lng) }
+      : {};
   return (
-    <a class="broadside t-shift" href={`/event/${ev.id}`}>
+    <a class="broadside t-shift" href={`/event/${ev.id}`} {...geoAttrs}>
       {img ? (
         <div class="image" style={`background-image:url('${img}')`} aria-hidden="true" />
       ) : (
