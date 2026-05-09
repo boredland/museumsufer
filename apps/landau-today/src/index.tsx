@@ -5,6 +5,7 @@ import { todayIso } from "./date";
 import { renderPage } from "./frontend";
 import { handleImageProxy } from "./image-proxy";
 import { getCategoryCountsForDate, getEventCountsByDate, getEventsForDate } from "./queries";
+import docsRoute from "./routes/docs";
 import eventRoute from "./routes/event";
 import feedsRoute from "./routes/feeds";
 import staticRoute from "./routes/static";
@@ -33,6 +34,7 @@ app.use(
 app.route("/", staticRoute);
 app.route("/", feedsRoute);
 app.route("/", eventRoute);
+app.route("/api/docs", docsRoute);
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 

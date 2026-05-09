@@ -2,6 +2,7 @@ import { buildManifest, buildRobotsTxt } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORIES } from "../categories";
 import { todayIso } from "../date";
+import { SERVICE_WORKER_JS } from "../service-worker";
 import { APP_URL } from "../shared";
 import type { Env } from "../types";
 
@@ -75,6 +76,12 @@ app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "
 app.get("/manifest.json", (c) =>
   c.body(MANIFEST, {
     headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
+  }),
+);
+
+app.get("/sw.js", (c) =>
+  c.body(SERVICE_WORKER_JS, {
+    headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
   }),
 );
 
