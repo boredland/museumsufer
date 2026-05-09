@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Heimatzeitung × Weinetikett palette ─────────────────────────────
      paper       — aged sandstone, dominant background
@@ -25,6 +27,47 @@
   --font-body: "Newsreader", "Source Serif Pro", "Georgia", serif;
 }
 
+/** Dark mode — paper inverts to ink, ink to paper, accent stays warm.
+    Activated either by OS preference (prefers-color-scheme) or the
+    user's stored override (.dark on <html>). The light/dark vocabulary
+    matches museumsufer + theaters so the FOUC bootstrap from
+    @museumsufer/core/theme-script can drive it. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #1a1611;
+    --color-paper-2: #221d18;
+    --color-ink: #f1e9d0;
+    --color-ink-soft: #b9ad96;
+    --color-rule: #3a3128;
+    --color-rotwein: #c46d7c;
+    --color-ocker: #d6a058;
+    --color-reblaus: #8aac88;
+    --color-schiefer: #8c8e96;
+  }
+}
+:root.dark {
+  --color-paper: #1a1611;
+  --color-paper-2: #221d18;
+  --color-ink: #f1e9d0;
+  --color-ink-soft: #b9ad96;
+  --color-rule: #3a3128;
+  --color-rotwein: #c46d7c;
+  --color-ocker: #d6a058;
+  --color-reblaus: #8aac88;
+  --color-schiefer: #8c8e96;
+}
+:root.light {
+  --color-paper: #f2ead3;
+  --color-paper-2: #ebe1c5;
+  --color-ink: #1b1715;
+  --color-ink-soft: #5a5048;
+  --color-rule: #c8bda0;
+  --color-rotwein: #5c1f2e;
+  --color-ocker: #b88438;
+  --color-reblaus: #5c7a5b;
+  --color-schiefer: #4f5159;
+}
+
 @layer base {
   body {
     font-family: var(--font-body);
@@ -46,6 +89,89 @@
      the page. Body italic stays at the same weight; the eye registers
      the shift the way a finger feels grain on letterpress. */
   a.t-shift:hover .t-title { font-style: italic; }
+}
+
+/** Search bar — sits above the masthead in the same paper colour, so
+    the eye reads it as a tool-bar above the editorial content rather
+    than part of it. Hairline border-bottom only; rounded corners stay
+    forbidden. ⌘K shortcut hint as a small kbd at the right. */
+.search-bar {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  border-bottom: 1px solid var(--color-rule);
+  position: relative;
+}
+.search-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-ink);
+  padding: 0.15rem 0;
+  font-feature-settings: "onum" 1;
+}
+.search-input::placeholder { color: var(--color-ink-soft); font-style: italic; }
+.search-kbd {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--color-rule);
+}
+.search-empty {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+}
+[data-search-hidden] { display: none !important; }
+
+/** Visited toggle — sits OUTSIDE the anchor so a click on it doesn't
+    fight the anchor's navigation default. Wrapper is the row container
+    (with data-id / data-search / lat/lng); the anchor + button are
+    siblings inside it, the button absolutely positioned over the
+    cat-glyph corner. */
+.ledger-wrap {
+  position: relative;
+}
+.visited-toggle {
+  position: absolute;
+  top: 50%;
+  right: -1.7rem;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: transparent;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  opacity: 0.55;
+}
+.ledger-wrap:hover .visited-toggle { opacity: 1; }
+.visited-toggle:hover { color: var(--color-ink-soft); border-color: var(--color-ink-soft); }
+[data-visited] .visited-toggle {
+  background: var(--color-rotwein);
+  border-color: var(--color-rotwein);
+  color: var(--color-paper);
+  opacity: 1;
+}
+[data-visited] .ledger { opacity: 0.45; }
+@media (max-width: 720px) {
+  /* On narrow viewports there's no room outside the row — tuck the
+     toggle inside on the right edge instead. */
+  .visited-toggle { right: 0.25rem; }
 }
 
 /* ── masthead ─────────────────────────────────────────────────────── */
@@ -86,6 +212,30 @@
   letter-spacing: 0.18em;
   color: var(--color-ink-soft);
 }
+
+/** Theme toggle — top-right of the masthead. Sun/moon glyph in the
+    rotwein accent; flips to ocker in dark mode. Tiny, unobtrusive. */
+.theme-toggle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: 1px solid var(--color-rule);
+  color: var(--color-ink);
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.theme-toggle:hover { border-color: var(--color-ink); color: var(--color-rotwein); }
+.theme-toggle .icon-sun { display: inline; }
+.theme-toggle .icon-moon { display: none; }
+:where(.dark) .theme-toggle .icon-sun { display: none; }
+:where(.dark) .theme-toggle .icon-moon { display: inline; }
+.masthead { position: relative; }
 
 /* ── chip row + date strip ───────────────────────────────────────── */
 .strip {
@@ -161,6 +311,71 @@
 }
 .chip--near[aria-pressed="true"] .glyph { color: inherit; }
 .chip--loading .glyph { animation: ink-up 0.6s ease-in-out infinite alternate; }
+
+/** FAQ — native <details>/<summary> with the same hairline-rule
+    vocabulary as the ledger rows. The toggle is the cross/dash glyph
+    used elsewhere on the site (museums + theaters carry the same idiom). */
+.faq {
+  margin-top: 3rem;
+  border-top: 1px solid var(--color-ink);
+  padding-top: 1.5rem;
+}
+.faq-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  letter-spacing: -0.005em;
+  margin: 0 0 1rem;
+}
+.faq-item {
+  border-bottom: 1px solid var(--color-rule);
+}
+.faq-item > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  font-family: var(--font-body);
+  font-feature-settings: "onum" 1;
+  font-size: 1.05rem;
+  color: var(--color-ink);
+}
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-item > summary:hover { color: var(--color-rotwein); }
+.faq-toggle {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  color: var(--color-ink-soft);
+}
+.faq-toggle::before,
+.faq-toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 1.5px;
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.faq-toggle::after { transform: translateY(-50%) rotate(90deg); }
+.faq-item[open] > summary .faq-toggle::after {
+  transform: translateY(-50%) rotate(0);
+  opacity: 0;
+}
+.faq-a {
+  padding: 0 0 1rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+}
 
 /** Distance badge injected client-side after a near-me sort. Sits to the
     left of the category glyph in the same baseline so the row keeps its
@@ -463,6 +678,23 @@
 .ink-up { animation: ink-up 0.4s ease-out both; }
 @media (prefers-reduced-motion: reduce) {
   .ink-up { animation: none; }
+}
+
+/** Cross-document view transitions — opt in same-origin navigations
+ *  to the View Transitions API. The browser fades #content out, swaps
+ *  the document, then fades the new #content in. Replaces the
+ *  fetch/htmx-swap idiom museumsufer carries with a much smaller
+ *  surface area; browsers without VT support fall back to a normal
+ *  full-nav. */
+@view-transition { navigation: auto; }
+#content { view-transition-name: content; }
+@keyframes content-fade-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes content-fade-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-2px); } }
+::view-transition-old(content) { animation: content-fade-out 0.18s ease-out both; }
+::view-transition-new(content) { animation: content-fade-in  0.22s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(content),
+  ::view-transition-new(content) { animation: none; }
 }
 
 /* ── event detail ───────────────────────────────────────────────── */

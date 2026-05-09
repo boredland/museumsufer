@@ -9,12 +9,14 @@
     "build": "bun css",
     "deploy": "bun css && wrangler deploy",
     "scrape": "bun scripts/scrape.ts",
+    "health-check": "bun scripts/health-check.ts",
     "lint": "biome check src/ scripts/",
     "lint:fix": "biome check --write src/ scripts/",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@museumsufer/core": "*",
+    "@scalar/hono-api-reference": "^0.10.11",
     "dayjs": "^1.11.20",
     "hono": "^4.12.15"
   },

@@ -3,6 +3,9 @@
 Items to port from `frankfurt-museums` (and a few from `frankfurt-theaters`),
 ranked by ROI for landau.today. Tick when shipped.
 
+All initial port targets are now live; remaining items are speculative
+follow-ups, not blockers.
+
 ## Done
 
 - [x] **VRN navigate-to-destination** — per-event "Anfahrt VRN ÖPNV"
@@ -11,72 +14,62 @@ ranked by ROI for landau.today. Tick when shipped.
       Maps directions link as fallback.
 - [x] **Web Share API** — `Teilen` button on the event detail page with
       `navigator.share` → clipboard fallback → `execCommand('copy')`
-      fallback. Same idiom as theaters'. Already present in museums and
-      theaters.
+      fallback. Same idiom as theaters'.
 - [x] **Sort by location ("In der Nähe")** — chip-row toggle that pulls
       `navigator.geolocation` and re-orders ledger rows by haversine
       distance against the venue. Distance badges injected client-side.
       Venue coords come from a scrape-time Nominatim pass cached in
-      `src/geocode-cache.ts` so daily runs only geocode net-new venues.
-      Lifted client logic from museumsufer's `sortCardsByDistance`,
-      stripped the regional transit-time roundtrip (no VRN equivalent
-      of RMV's `mgate.exe`).
+      `src/geocode-cache.ts`.
+- [x] **PWA / service worker** — `src/service-worker.ts` served as
+      `/sw.js`; network-first for navigations + API, cache-first for
+      `/img/*`. Manifest already wired.
+- [x] **`/api/docs`** — Scalar OpenAPI reference at `/api/docs` and
+      machine-readable spec at `/api/docs/openapi.json`. Pairs with the
+      existing `/llms.txt`.
+- [x] **Visited tracking** — `localStorage`-persisted set of event IDs
+      with a per-row ✓ toggle. Visited rows fade to 0.45 opacity. Toggle
+      restructured outside the anchor so it doesn't fight the row's
+      navigation default.
+- [x] **Dark theme** — paper-on-ink inversion of the light palette.
+      Driven by `prefers-color-scheme` + a manual toggle button in the
+      masthead; FOUC bootstrap from `@museumsufer/core/theme-script`
+      reads the persisted choice before first paint.
+- [x] **FAQ accordion** — six Heimatzeitung-style Q&A entries on the
+      home page; FAQPage JSON-LD via `@museumsufer/core/faq` for SEO.
+- [x] **Fuzzy search (⌘K)** — substring + AND-token match across every
+      `[data-search]` ledger row. Lighter than museums' Fuse.js — at
+      ~400 events, substring is plenty. Same UX shape (Cmd-K focus,
+      Escape clear).
+- [x] **Health-check workflow** — `bun run health-check` probes each
+      upstream for the markers our scrapers actually depend on. Picked
+      up automatically by the existing `Source Health Check` GH
+      workflow (turbo dispatches per-app).
+- [x] **Partial swap** — shipped as View Transitions API rather than
+      htmx; cross-document `@view-transition: navigation: auto` plus
+      `view-transition-name: content` smooths every same-origin
+      navigation with a fade. Browsers without VT support fall back to
+      a normal full-nav. Far less code than htmx for the same end-user
+      effect.
 
 ## Backlog
 
-### High ROI
+Speculative follow-ups; nothing here is on the critical path.
 
-- [ ] **Fuzzy search (Fuse.js + ⌘K shortcut)**
-      → 408 events deserve in-page search. Largest UX win available.
-      Lift `client-script.ts` `applySearchFilter` + `normalizeQuery` from
-      museums; build the index from `SCRAPE_DATA.events` at page load.
-
-- [ ] **Health-check workflow**
-      → `bun health-check` validates each upstream returns expected
-      fields; GH Action opens an issue on regressions. Catches silent
-      breakage when a source changes URL/markup. Adapt
-      `apps/frankfurt-museums/src/health-check.ts`. Runs at 08:00 UTC
-      after the scrape.
-
-- [ ] **PWA / service worker**
-      → manifest is already served but the SW was dropped during
-      scaffolding. Restore `src/service-worker.ts` (the cloned file from
-      museums) plus `bun screenshots:manifest` to populate the
-      `screenshots` array. Makes the app installable.
-
-### Medium ROI
-
-- [ ] **htmx partial swap on date-strip and chip clicks**
-      → date-strip/chip clicks could swap `<main>` instead of full-nav.
-      Theaters does this; idiom is well-established. Adapt
-      `apps/frankfurt-museums/src/index.tsx:/partial/content`.
-
-- [ ] **Dark theme**
-      → many Konzert / Nachtleben events are evening-only; a paper-on-ink
-      inversion of the current palette suits. CSS variables already
-      structured (`--color-paper`/`--color-ink`). Adapt
-      `theme-script` from `@museumsufer/core` for FOUC-free toggle.
-
-- [ ] **FAQ accordion**
-      → both sister apps recently grew matching-idiom FAQ sections.
-      Heimatzeitung-style FAQ rounds out SEO + answers common questions
-      ("warum nicht <Ort>?", "wie kann ich Veranstaltungen melden?"…).
-      Reuse `@museumsufer/core/faq` JSON-LD builder.
-
-### Low ROI / nice-to-have
-
-- [ ] **`/api/docs`** (OpenAPI reference)
-      → via `@scalar/hono-api-reference`. Cheap; pairs with `/llms.txt`.
-      Adapt `apps/frankfurt-museums/src/routes/docs.ts`.
-
-- [ ] **Highlight-on-arrival pulse** when a shared URL targets a specific
-      event in the list. Nice with the share button. Already lives in
-      museums' `client-script.ts:highlightShareTarget`.
-
-- [ ] **Visited tracking** ("ich war da" checkmarks, localStorage)
-      → less obviously useful for landau where most events are one-off
-      single performances rather than long-running exhibitions, but
-      cheap to port.
+- [ ] **Highlight-on-arrival pulse** — landau.today's share button
+      links to `/event/<id>` (a dedicated page), so there's no "scroll
+      to and pulse this row" interaction the way museums has it. Could
+      revisit if we ever embed event highlights in the day list.
+- [ ] **`bun screenshots:manifest`** — the PWA manifest is wired, but
+      its `screenshots` array is empty. Generating mobile/wide
+      screenshots via Playwright (museums has the script) would round
+      out the install prompt on Android.
+- [ ] **Fuse.js upgrade** — current substring search is fine at ~400
+      events; bring in Fuse.js if the corpus grows past ~5k or if users
+      ask for typo-tolerance.
+- [ ] **htmx for in-page partial swap** — View Transitions covers the
+      common case. htmx would only be worth it if we need to swap a
+      sub-region without reloading the rest (e.g., live-updating the
+      date counts during a long browsing session). Not currently needed.
 
 ## Explicitly NOT porting
 
