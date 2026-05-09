@@ -1090,7 +1090,7 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-const GERMAN_WEEKDAYS = /^(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+/;
+const _GERMAN_WEEKDAYS = /^(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag)\s+/;
 
 interface CinetixxShow {
   id: number;
@@ -3684,7 +3684,7 @@ async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
     }
 
     const range = parseMfkDate(dateText);
-    if (!range || !range.start_date) {
+    if (!range?.start_date) {
       m = slideRe.exec(html);
       continue;
     }

@@ -1,3 +1,4 @@
+import { buildIcsCalendar } from "@museumsufer/core";
 import { dateOffset, todayIso } from "./date";
 import type { Locale } from "./i18n";
 import { MUSEUMS } from "./museum-config";
@@ -309,39 +310,21 @@ ${items.join("\n")}
 }
 
 export function buildIcs(events: (Event & { museum_name: string })[]): string {
-  const vevents = events.map((ev) => {
-    const dtDate = ev.date.replace(/-/g, "");
-    let dtStart: string;
-    let dtEnd: string;
-
-    if (ev.time) {
-      dtStart = `DTSTART;TZID=Europe/Berlin:${dtDate}T${ev.time.replace(":", "")}00`;
-      if (ev.end_time) {
-        const endDtDate = ev.end_date ? ev.end_date.replace(/-/g, "") : dtDate;
-        dtEnd = `DTEND;TZID=Europe/Berlin:${endDtDate}T${ev.end_time.replace(":", "")}00`;
-      } else {
-        const h = (parseInt(ev.time.split(":")[0], 10) + 1) % 24;
-        dtEnd = `DTEND;TZID=Europe/Berlin:${dtDate}T${h.toString().padStart(2, "0")}${ev.time.split(":")[1]}00`;
-      }
-    } else {
-      dtStart = `DTSTART;VALUE=DATE:${dtDate}`;
-      dtEnd = `DTEND;VALUE=DATE:${dtDate}`;
-    }
-
-    const uid = `museumsufer-${ev.id}@museumsufer.app`;
-    const summary = icsEsc(ev.title);
-    const location = icsEsc(ev.museum_name);
-    const desc = ev.description ? `DESCRIPTION:${icsEsc(ev.description)}\r\n` : "";
-    const url = ev.detail_url || ev.url ? `URL:${ev.detail_url || ev.url}\r\n` : "";
-
-    return `BEGIN:VEVENT\r\n${dtStart}\r\n${dtEnd}\r\nSUMMARY:${summary}\r\nLOCATION:${location}\r\n${desc}${url}UID:${uid}\r\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "").slice(0, 15)}Z\r\nEND:VEVENT`;
+  return buildIcsCalendar({
+    prodId: "-//Museumsufer Frankfurt//DE",
+    name: "Museumsufer Frankfurt",
+    events: events.map((ev) => ({
+      uid: `museumsufer-${ev.id}@museumsufer.app`,
+      date: ev.date,
+      time: ev.time ?? null,
+      end_date: ev.end_date ?? null,
+      end_time: ev.end_time ?? null,
+      title: ev.title,
+      location: ev.museum_name,
+      description: ev.description ?? null,
+      detail_url: ev.detail_url ?? ev.url ?? null,
+    })),
   });
-
-  return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Museumsufer Frankfurt//DE\r\nX-WR-CALNAME:Museumsufer Frankfurt\r\nX-WR-TIMEZONE:Europe/Berlin\r\nMETHOD:PUBLISH\r\n${vevents.join("\r\n")}\r\nEND:VCALENDAR`;
-}
-
-function icsEsc(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 
 export function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {

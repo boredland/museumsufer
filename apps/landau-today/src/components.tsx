@@ -29,6 +29,20 @@ export function ChipRow({ active, date, counts }: ChipRowProps) {
   return (
     <nav class="strip" aria-label="Kategorie">
       <div class="strip-rail">
+        {/* "Near me" lives at the head of the rail — it's a tool, not a
+            category, and sticky-positioned so it stays visible while
+            the user scrolls horizontally through the category chips. */}
+        <button
+          type="button"
+          class="chip chip--near js-near"
+          aria-pressed="false"
+          title="Sortiert nach Entfernung zu deinem Standort"
+        >
+          <span class="glyph" aria-hidden="true">
+            ⌖
+          </span>
+          <span class="t-label">In der Nähe</span>
+        </button>
         <a
           class={`chip ${active ? "" : "active"}`}
           href={`/?date=${date}`}
@@ -56,14 +70,6 @@ export function ChipRow({ active, date, counts }: ChipRowProps) {
             </a>
           );
         })}
-        {/* "Near me" toggle — purely client-side; sorts ledger rows by
-            haversine distance against the user's coordinates. */}
-        <button type="button" class="chip chip--near js-near" aria-pressed="false">
-          <span class="glyph" aria-hidden="true">
-            ⌖
-          </span>
-          <span class="t-label">In der Nähe</span>
-        </button>
       </div>
     </nav>
   );

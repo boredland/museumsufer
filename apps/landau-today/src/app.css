@@ -336,22 +336,60 @@
 .chip.m-schiefer .glyph{ color: var(--color-schiefer); }
 .chip.active .glyph    { color: inherit !important; }
 
-/** "In der Nähe" pill — same chip vocabulary, but a button with a state
-    flip when sort-by-location is active. Compass glyph in reblaus picks
-    up the same outdoor mood used by Sport / Exkursion. */
+/** "In der Nähe" — distinguished from category chips by:
+    1. position-sticky to the left edge of the rail, so it stays visible
+       while the user scrolls through the categories,
+    2. a faint reblaus-tinted background at rest (not just an outline) to
+       read as a tool rather than a filter,
+    3. a small leading rule + paper "wedge" so the sticky chip doesn't
+       smear into the chips passing under it during scroll.
+
+    Pressed state inverts to filled reblaus to mirror the category chip's
+    .active vocabulary. */
 .chip--near {
   cursor: pointer;
-  border-style: dashed;
+  position: sticky;
+  left: 1rem;
+  z-index: 2;
+  background: color-mix(in oklab, var(--color-reblaus) 14%, var(--color-paper));
+  border-color: var(--color-reblaus);
+  /* Paper-coloured shadow on the trailing edge masks chips scrolling
+     under the sticky button so they don't smear visually. */
+  box-shadow: 0.5rem 0 0 0 var(--color-paper);
 }
-.chip--near .glyph { color: var(--color-reblaus); }
+.chip--near::before {
+  /* Hairline rule on the trailing edge separates sticky chip from the
+     scrolling row underneath — same hairline vocabulary used elsewhere. */
+  content: "";
+  position: absolute;
+  right: -0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-rule);
+}
+.chip--near .glyph {
+  color: var(--color-reblaus);
+  font-size: 1.05rem;
+}
+.chip--near:hover {
+  background: color-mix(in oklab, var(--color-reblaus) 22%, var(--color-paper));
+}
 .chip--near[aria-pressed="true"] {
   background: var(--color-reblaus);
   color: var(--color-paper);
   border-color: var(--color-reblaus);
-  border-style: solid;
 }
 .chip--near[aria-pressed="true"] .glyph { color: inherit; }
-.chip--loading .glyph { animation: ink-up 0.6s ease-in-out infinite alternate; }
+.chip--near[aria-pressed="true"]::before { background: var(--color-reblaus); }
+.chip--loading .glyph { animation: near-spin 0.9s linear infinite; }
+@keyframes near-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip--loading .glyph { animation: none; opacity: 0.5; }
+}
 
 /** FAQ — native <details>/<summary> with the same hairline-rule
     vocabulary as the ledger rows. The toggle is the cross/dash glyph
