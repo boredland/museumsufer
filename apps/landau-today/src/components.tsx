@@ -245,7 +245,14 @@ export function Broadside({ ev }: BroadsideProps) {
   return (
     <a class="broadside t-shift" href={`/event/${ev.id}`} {...geoAttrs}>
       {img ? (
-        <div class="image" style={`background-image:url('${img}')`} aria-hidden="true" />
+        // CSS background-image can't be lazy-loaded; render an <img>
+        // and place it absolutely so it still fills the broadside
+        // tile but participates in the browser's lazy-load + decoding
+        // pipeline. Saves bandwidth on the events users never scroll
+        // far enough to see.
+        <div class="image" aria-hidden="true">
+          <img class="broadside-img" src={img} alt="" loading="lazy" decoding="async" />
+        </div>
       ) : (
         <div class="image" style="background:var(--color-paper-2)" aria-hidden="true" />
       )}
