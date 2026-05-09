@@ -40,7 +40,6 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 | `apps/frankfurt-museums/src/event-scraper.ts` | **Pure-function** event orchestrator: API-only (AI fallback removed), 7-day detail-page enrichment. |
 | `apps/frankfurt-museums/src/translate.ts` | Two faces: `translateFields()` (worker, reads SCRAPE_DATA) + `translateEvents()` (script, calls DeepL). |
 | `apps/frankfurt-museums/src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
-| `apps/frankfurt-museums/src/health-check.ts` | Source health checks for all structured endpoints + museumsufer.de. |
 
 ## Event scraping: three tiers
 
@@ -255,8 +254,7 @@ time: nullIfMidnight(ev.start_date?.slice(11, 16) || null)
 1. Find the endpoint (check `/wp-json/`, embedded JSON, network requests)
 2. Add slug + endpoint to `MUSEUM_APIS` in `apps/frankfurt-museums/src/museum-apis.ts`
 3. Add parser in `apps/frankfurt-museums/src/api-scrapers.ts` (or reuse existing type like `tribe-events`)
-4. Add health check case in `apps/frankfurt-museums/src/health-check.ts`
-5. Add exhaustive switch case — TypeScript will error if you forget
+4. Add exhaustive switch case — TypeScript will error if you forget
 
 ### Manually triggering scrapes
 

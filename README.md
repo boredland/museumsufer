@@ -34,7 +34,7 @@ Generic upstream-fetch proxy used by museums when a museum API blocks edge fetch
 - Tailwind v4 (museums) / hand-rolled lightningcss (theaters)
 - [Bun](https://bun.sh) for tooling — installs, scripts, the scrape pipeline (`bun:sqlite`-free, pure-function)
 - Turborepo workspaces
-- GitHub Actions for scrape + health-check; Cloudflare git integration for deploys
+- GitHub Actions for scrape; Cloudflare git integration for deploys
 
 ## Common commands
 

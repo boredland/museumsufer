@@ -40,10 +40,6 @@ follow-ups, not blockers.
       `[data-search]` ledger row. Lighter than museums' Fuse.js — at
       ~400 events, substring is plenty. Same UX shape (Cmd-K focus,
       Escape clear).
-- [x] **Health-check workflow** — `bun run health-check` probes each
-      upstream for the markers our scrapers actually depend on. Picked
-      up automatically by the existing `Source Health Check` GH
-      workflow (turbo dispatches per-app).
 - [x] **Partial swap** — shipped as View Transitions API rather than
       htmx; cross-document `@view-transition: navigation: auto` plus
       `view-transition-name: content` smooths every same-origin

@@ -85,9 +85,6 @@ bun run -F @museumsufer/frankfurt-museums dev
 # Run a one-shot scrape locally and regenerate src/scrape-data.ts:
 bun run -F @museumsufer/frankfurt-museums scrape
 # (DeepL translations skipped unless DEEPL_API_KEYS is set in your shell)
-
-# Health check
-bun run -F @museumsufer/frankfurt-museums health-check
 ```
 
 The GitHub Action runs the same `scripts/scrape.ts` daily — there's no
