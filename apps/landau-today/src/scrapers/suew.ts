@@ -157,8 +157,11 @@ function parseDateFromSlug(slug: string): string | undefined {
 
 function toEvent(card: ParsedCard): Omit<Event, "id"> {
   // Venue lines are typically: ["Veranstaltungsort", "Stadt", "PLZ Stadt"].
-  // Fold them into a single venue string, dropping the duplicate city tail.
-  const venue = formatVenue(card.venueLines);
+  // Surface venue and city as separate fields so the meta line can show
+  // "<venue> · <city>" — the city disambiguates outlying SÜW villages
+  // ("Bornheim", "Edenkoben") from Landau-proper events.
+  const venue = card.venueLines[0] || undefined;
+  const city = pickCity(card.venueLines);
   const description = card.category ? `${card.category}${venue ? ` · ${venue}` : ""}` : undefined;
   const category = mapCategory(card.category, card.title, description);
   return {
@@ -168,20 +171,25 @@ function toEvent(card: ParsedCard): Omit<Event, "id"> {
     date: card.date,
     category,
     ...(venue ? { venue } : {}),
+    ...(city ? { city } : {}),
     ...(card.category ? { description: truncate(card.category, 200) || undefined } : {}),
     detail_url: card.url,
     ...(card.imageUrl ? { image_url: card.imageUrl } : {}),
   };
 }
 
-function formatVenue(lines: string[]): string | undefined {
-  if (lines.length === 0) return undefined;
-  const place = lines[0];
-  // Last line is usually "PLZ Stadt"; the line before it the city alone.
-  // Drop those if they duplicate. Otherwise show "Veranstaltungsort, Stadt".
-  const city = lines.length > 1 ? lines[1] : undefined;
-  if (city && city !== place) return `${place}, ${city}`;
-  return place;
+/** Pick the city name from the address lines. The line layout varies:
+ *  ["Venue", "City", "PLZ City"] for tourist offices, or
+ *  ["Venue", "Street N", "PLZ City"] for private venues. We anchor on the
+ *  last line that starts with a 5-digit PLZ — that's deterministically the
+ *  city — and fall back to the second line only if no PLZ line exists. */
+function pickCity(lines: string[]): string | undefined {
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const m = lines[i].match(/^\d{5}\s+(.+)$/);
+    if (m) return m[1].trim();
+  }
+  if (lines.length >= 2 && !/^\d/.test(lines[1])) return lines[1];
+  return undefined;
 }
 
 /** Map upstream German category labels → our 16-slug taxonomy. SÜW uses

@@ -25,6 +25,7 @@ interface ParsedEvent {
   startTime?: string;
   endDate?: string;
   venue?: string;
+  city?: string;
   description?: string;
   image?: string;
   category: string;
@@ -85,6 +86,11 @@ function parseCard(card: string, upstreamCat: string): ParsedEvent | null {
 
   const endDateAttr = match(card, /itemprop="endDate"\s+content="([^"]+)"/i);
   const venue = decode(match(card, /itemprop="location"[^>]*>([\s\S]*?)<\/span>/i));
+  // The location span carries the full address in its `content` attribute
+  // ("Limburgstraße 1, 76829 Landau in der Pfalz"). Pull the city out of
+  // the trailing "PLZ City…" segment so the renderer can show it.
+  const fullAddress = match(card, /itemprop="location"[^>]*content="([^"]+)"/i);
+  const city = extractCityFromAddress(fullAddress) || extractCityFromVenueName(venue);
   const image = match(card, /background-image:\s*url\(\s*['"]?([^'")]+)['"]?\s*\)/i);
   const description = decode(match(card, /<p\s+class="text-base[^"]*"[^>]*>([\s\S]*?)<\/p>/i));
 
@@ -101,12 +107,57 @@ function parseCard(card: string, upstreamCat: string): ParsedEvent | null {
     startTime: startDateAttr.length > 10 ? startDateAttr.slice(11, 16) : undefined,
     endDate: endDateAttr ? endDateAttr.slice(0, 10) : undefined,
     venue: venue ? stripHtml(venue).trim() : undefined,
+    city,
     description: description ? stripHtml(description).trim().slice(0, 500) : undefined,
     image: image ? new URL(image, BASE).toString() : undefined,
     category: KULTURNETZ_CATEGORY_MAP[upstreamCat] || mapVisibleCategory(visibleCat) || "sonstiges",
     // slug used for stable id downstream:
     ...({ _slug: slug } as object),
   } as ParsedEvent & { _slug: string };
+}
+
+/** Pull a city name from a free-form address. Kulturnetz writes them as
+ *  "Street N, PLZ City" (sometimes with sub-locality). We take everything
+ *  after the last 5-digit ZIP, falling back to the last comma-segment. */
+function extractCityFromAddress(addr?: string): string | undefined {
+  if (!addr) return undefined;
+  const cleaned = decodeEntities(addr).trim();
+  const m = cleaned.match(/\b\d{5}\s+(.+?)\s*$/);
+  if (m) return m[1].trim();
+  const parts = cleaned
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1] : undefined;
+}
+
+/** Last-ditch fallback: some Kulturnetz venues encode the city in the
+ *  display name ("Matthäuskirche Landau", "Stiftskirche Landau"). Take a
+ *  trailing token if it matches a known village in the Landau area. */
+const KNOWN_LANDAU_AREA_TOWNS = [
+  "Landau",
+  "Mörzheim",
+  "Wollmesheim",
+  "Nußdorf",
+  "Godramstein",
+  "Dammheim",
+  "Queichheim",
+  "Arzheim",
+  "Birkweiler",
+  "Leinsweiler",
+  "Frankweiler",
+  "Annweiler",
+  "Bornheim",
+  "Bellheim",
+  "Edenkoben",
+  "Maikammer",
+];
+function extractCityFromVenueName(venue?: string): string | undefined {
+  if (!venue) return undefined;
+  for (const town of KNOWN_LANDAU_AREA_TOWNS) {
+    if (new RegExp(`\\b${town}\\b`).test(venue)) return town === "Landau" ? "Landau in der Pfalz" : town;
+  }
+  return undefined;
 }
 
 function mapVisibleCategory(label?: string): string | undefined {
@@ -127,6 +178,7 @@ function toEvent(p: ParsedEvent): Omit<Event, "id"> {
     ...(p.endDate && p.endDate !== p.startDate ? { end_date: p.endDate } : {}),
     category: p.category,
     ...(p.venue ? { venue: p.venue } : {}),
+    ...(p.city ? { city: p.city } : {}),
     ...(p.description ? { description: p.description } : {}),
     detail_url: detailUrl,
     ...(p.image ? { image_url: p.image } : {}),

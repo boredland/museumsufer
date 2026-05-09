@@ -201,7 +201,7 @@ function toEvent(ics: IcsEvent, card?: HtmlCard): Omit<Event, "id"> {
   const start = parseIcsDateTime(ics.dtstart);
   const end = ics.dtend ? parseIcsDateTime(ics.dtend) : undefined;
   const description = ics.description?.replace(/\s+/g, " ").trim().slice(0, 500) || undefined;
-  const venue = parseIcsLocation(ics.location);
+  const { venue, city } = parseIcsLocation(ics.location);
   const category = classifyEventByText(ics.summary, description);
   const detailUrl = card?.detailUrl ?? `${BASE}/Tourismus-Kultur/Veranstaltungen/`;
   return {
@@ -214,6 +214,7 @@ function toEvent(ics: IcsEvent, card?: HtmlCard): Omit<Event, "id"> {
     ...(end?.time ? { end_time: end.time } : {}),
     category,
     ...(venue ? { venue } : {}),
+    ...(city ? { city } : {}),
     ...(description ? { description } : {}),
     detail_url: detailUrl,
     ...(card?.imageUrl ? { image_url: card.imageUrl } : {}),
@@ -230,6 +231,7 @@ function htmlOnlyEvent(card: HtmlCard): Omit<Event, "id"> | null {
     date: dt.start,
     ...(dt.end && dt.end !== dt.start ? { end_date: dt.end } : {}),
     category: classifyEventByText(card.title),
+    city: "Landau in der Pfalz",
     detail_url: card.detailUrl,
     ...(card.imageUrl ? { image_url: card.imageUrl } : {}),
   };
@@ -245,20 +247,26 @@ function parseGermanDateRange(text?: string): { start: string; end?: string } | 
   return { start, end };
 }
 
-function parseIcsLocation(loc?: string): string | undefined {
-  if (!loc) return undefined;
-  // Format: "Ortschaft, Veranstaltungsort" — keep just the venue, drop the
-  // city ("Landau in der Pfalz" / "Landau-Mörzheim") since the whole site
-  // is geofenced to Landau anyway.
+function parseIcsLocation(loc?: string): { venue?: string; city?: string } {
+  if (!loc) return {};
+  // Format: "Ortschaft, Veranstaltungsort" — split into both fields so the
+  // renderer can show "Stadtbibliothek · Landau" instead of stripping the
+  // city away (which used to be fine when this app was Landau-only, but
+  // now there are nearby villages from other sources we want to disambiguate
+  // against).
   const parts = loc
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  if (parts.length === 0) return undefined;
-  if (parts.length === 1) return parts[0];
-  // Drop a leading city token if it looks like "Landau…"
-  if (/^Landau/i.test(parts[0])) return parts.slice(1).join(", ");
-  return loc.trim();
+  if (parts.length === 0) return {};
+  if (parts.length === 1) return { venue: parts[0] };
+  // Format is "<city>, <venue>" most of the time. If the leading token
+  // starts with "Landau", it's the city; otherwise treat the whole string
+  // as venue and leave city empty.
+  if (/^Landau/i.test(parts[0])) {
+    return { city: parts[0], venue: parts.slice(1).join(", ") };
+  }
+  return { venue: loc.trim() };
 }
 
 // ─── small helpers (avoid pulling DOMParser) ─────────────────────────
