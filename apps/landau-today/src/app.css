@@ -494,5 +494,50 @@
   letter-spacing: 0.16em;
   font-size: 0.75rem;
 }
-.event-detail .actions a { border-bottom: 1px solid var(--color-ink); padding-bottom: 0.1rem; }
-.event-detail .actions a:hover { color: var(--color-rotwein); border-color: var(--color-rotwein); }
+.event-detail .actions--group {
+  margin-top: 1.25rem;
+  align-items: baseline;
+  gap: 1rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--color-rule);
+}
+.event-detail .actions__label {
+  color: var(--color-ink-soft);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  flex: 0 0 5rem;
+}
+.event-detail .actions a,
+.event-detail .actions .action-btn {
+  border-bottom: 1px solid var(--color-ink);
+  padding-bottom: 0.1rem;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.event-detail .actions a:hover,
+.event-detail .actions .action-btn:hover {
+  color: var(--color-rotwein);
+  border-color: var(--color-rotwein);
+}
+
+/** Share-feedback toast — small, anchored bottom-center, fades in via the
+ *  same ink-up keyframe used elsewhere on the page so it doesn't introduce
+ *  a new motion vocabulary. */
+.share-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translateX(-50%);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  letter-spacing: 0.16em;
+  font-size: 0.7rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--color-ink);
+  z-index: 50;
+  animation: ink-up 0.25s ease-out both;
+}

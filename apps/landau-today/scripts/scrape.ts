@@ -83,7 +83,7 @@ async function stage<T>(label: string, fn: () => Promise<T>): Promise<T> {
 }
 
 function mergeAndId(events: Omit<Event, "id">[]): Event[] {
-  // Three-pass dedup. The same event surfaces in different shapes across
+  // Four-pass dedup. The same event surfaces in different shapes across
   // sources, so we try increasingly tolerant matches:
   //
   // Pass 1: bit-identical submissions — group by (date, strict-normalised
@@ -94,9 +94,12 @@ function mergeAndId(events: Omit<Event, "id">[]): Event[] {
   //         title, e.g., "atelier29: Thalamus" vs Kulturnetz's "Thalamus".
   // Pass 3: multi-day vs per-occurrence — landau.de records a long-running
   //         Ausstellung once with `end_date`, while SÜW emits one record
-  //         per day. After passes 1–2 we still have both shapes; we then
-  //         drop the single-day records whose title matches a multi-day
-  //         record covering the same date.
+  //         per day. We drop the single-day records whose title matches a
+  //         multi-day record covering the same date.
+  // Pass 4: title-prefix overlap on same (date, time) — one source uses
+  //         the title only, another appends "- Subtitle" with extra detail.
+  //         Drop the longer-titled duplicate and keep the canonical short
+  //         form; merge end_time / image_url / city up if missing.
   //
   // Within each group the lowest-ranked source wins (see SOURCE_RANK).
   const stamped = events.map((ev) => ({ ...ev, id: fnv1aInt(`${ev.source}|${ev.source_uid}`) }));
@@ -125,7 +128,76 @@ function mergeAndId(events: Omit<Event, "id">[]): Event[] {
       byCore.set(key, ev);
     }
   }
-  return collapseMultiDayDuplicates([...byCore.values()]);
+  const afterMultiDay = collapseMultiDayDuplicates([...byCore.values()]);
+  return collapseTitlePrefixDuplicates(afterMultiDay);
+}
+
+/** Pass 4: when two events share the same date AND time AND one's
+ *  normalised title is a strict prefix of the other's, treat them as the
+ *  same event. The shorter title is canonical (e.g., Kulturnetz's
+ *  "Dialog statt Rache" vs landau.de's "Dialog statt Rache - Eine
+ *  Israelin und eine Palästinenserin in Trauer …"); merge missing
+ *  end_time / image_url / city / description from the longer record so
+ *  no upstream detail is lost. */
+function collapseTitlePrefixDuplicates(events: Event[]): Event[] {
+  // Group by (date, time?). No time → treat as "all-day" bucket.
+  const groups = new Map<string, Event[]>();
+  for (const ev of events) {
+    const key = `${ev.date}|${ev.time ?? ""}`;
+    const list = groups.get(key);
+    if (list) list.push(ev);
+    else groups.set(key, [ev]);
+  }
+  const dropped = new Set<number>();
+  const merged = new Map<number, Event>();
+  for (const list of groups.values()) {
+    if (list.length < 2) continue;
+    // Sort shortest title first so prefix checks run from canonical → variant.
+    const sorted = [...list].sort((a, b) => a.title.length - b.title.length);
+    for (let i = 0; i < sorted.length; i++) {
+      for (let j = i + 1; j < sorted.length; j++) {
+        const shorter = sorted[i];
+        const longer = sorted[j];
+        if (dropped.has(longer.id) || dropped.has(shorter.id)) continue;
+        if (!isTitlePrefixOf(shorter.title, longer.title)) continue;
+        // Keep the shorter; merge any field the shorter is missing from the
+        // longer. Mutating the value in-map keeps the iteration stable.
+        const enriched = mergeMissingFields(merged.get(shorter.id) ?? shorter, longer);
+        merged.set(shorter.id, enriched);
+        dropped.add(longer.id);
+      }
+    }
+  }
+  return events.filter((ev) => !dropped.has(ev.id)).map((ev) => merged.get(ev.id) ?? ev);
+}
+
+/** True when normalize(short) is a strict prefix of normalize(long) AND
+ *  the long has at least one extra word. Avoids merging unrelated events
+ *  whose titles happen to start with the same word. */
+function isTitlePrefixOf(short: string, long: string): boolean {
+  const s = normalizeTitle(short);
+  const l = normalizeTitle(long);
+  if (s.length === 0 || l.length === 0 || s.length >= l.length) return false;
+  if (!l.startsWith(s)) return false;
+  // Demand a word boundary right after the short title; "abend" must not
+  // match "abendlich".
+  const next = l[s.length];
+  return next === " ";
+}
+
+/** Copy `extra` fields onto `base` only when `base` has them undefined.
+ *  We never overwrite — the canonical short-titled record stays in charge
+ *  of its primary fields. */
+function mergeMissingFields(base: Event, extra: Event): Event {
+  const out = { ...base };
+  if (!out.end_time && extra.end_time) out.end_time = extra.end_time;
+  if (!out.end_date && extra.end_date) out.end_date = extra.end_date;
+  if (!out.image_url && extra.image_url) out.image_url = extra.image_url;
+  if (!out.city && extra.city) out.city = extra.city;
+  if (!out.organizer && extra.organizer) out.organizer = extra.organizer;
+  if (!out.price && extra.price) out.price = extra.price;
+  if (!out.description && extra.description) out.description = extra.description;
+  return out;
 }
 
 /** When a multi-day event (with `end_date`) and a per-day event share the
