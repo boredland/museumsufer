@@ -1,6 +1,7 @@
 import { buildManifest, buildRobotsTxt } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORIES } from "../categories";
+import { CLIENT_SCRIPT } from "../client-script";
 import { todayIso } from "../date";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import { APP_URL } from "../shared";
@@ -82,6 +83,15 @@ app.get("/manifest.json", (c) =>
 app.get("/sw.js", (c) =>
   c.body(SERVICE_WORKER_JS, {
     headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
+  }),
+);
+
+app.get("/client.js", (c) =>
+  c.body(CLIENT_SCRIPT, {
+    headers: {
+      "Content-Type": "application/javascript",
+      "Cache-Control": "public, max-age=300, s-maxage=3600",
+    },
   }),
 );
 

@@ -72,7 +72,14 @@ function renderEventPage(ev: Event): string {
       ? {
           "@type": "Place",
           name: ev.venue,
-          address: { "@type": "PostalAddress", addressLocality: "Landau in der Pfalz", addressCountry: "DE" },
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: ev.city || "Landau in der Pfalz",
+            addressCountry: "DE",
+          },
+          ...(typeof ev.lat === "number" && typeof ev.lng === "number"
+            ? { geo: { "@type": "GeoCoordinates", latitude: ev.lat, longitude: ev.lng } }
+            : {}),
         }
       : undefined,
     image: ev.image_url || undefined,
@@ -80,18 +87,32 @@ function renderEventPage(ev: Event): string {
     organizer: ev.organizer ? { "@type": "Organization", name: ev.organizer } : undefined,
     url: `${APP_URL}/event/${ev.id}`,
     offers: ev.price ? { "@type": "Offer", price: ev.price } : undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+  });
+  const breadcrumbLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "landau.today", item: APP_URL },
+      { "@type": "ListItem", position: 2, name: cat.label, item: `${APP_URL}/c/${cat.slug}` },
+      { "@type": "ListItem", position: 3, name: ev.title, item: `${APP_URL}/event/${ev.id}` },
+    ],
   });
   const title = `${ev.title} — landau.today`;
+  // SERP descriptions truncate around ~155 chars; trim defensively so we
+  // don't end on a half-word.
+  const metaDescription = trimToWords(ev.description ?? `${ev.title} — ${when} in ${ev.city ?? "Landau"}.`, 155);
   return `<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>${esc(title)}</title>
-<meta name="description" content="${esc(ev.description?.slice(0, 200) ?? `${ev.title} — ${when} in Landau.`)}" />
+<meta name="description" content="${esc(metaDescription)}" />
 <meta name="theme-color" content="#f2ead3" />
 <meta property="og:title" content="${esc(title)}" />
-<meta property="og:description" content="${esc(ev.description?.slice(0, 200) ?? "")}" />
+<meta property="og:description" content="${esc(metaDescription)}" />
 <meta property="og:type" content="event" />
 ${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` : ""}
 <link rel="canonical" href="${APP_URL}/event/${ev.id}" />
@@ -104,6 +125,7 @@ ${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` :
 />
 <link rel="stylesheet" href="/styles.css" />
 <script type="application/ld+json">${ldJson}</script>
+<script type="application/ld+json">${breadcrumbLd}</script>
 </head>
 <body>
 <header class="masthead">
@@ -118,7 +140,7 @@ ${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` :
   <h1>${esc(ev.title)}</h1>
   <p class="when">${esc(when)}${time ? ` · ${time}${endTime ? `–${endTime}` : ""} Uhr` : ""}</p>
   ${ev.venue ? `<p class="where">${esc(ev.venue)}${ev.organizer && ev.organizer !== ev.venue ? ` · ${esc(ev.organizer)}` : ""}</p>` : ""}
-  ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" />` : ""}
+  ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" loading="lazy" decoding="async" />` : ""}
   ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}
   ${ev.price ? `<p class="when" style="margin-top:1rem"><em>${esc(ev.price)}</em></p>` : ""}
   <div class="actions actions--group">
@@ -216,4 +238,15 @@ function icsEscape(s: string): string {
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** Trim a string to ≤ maxLen characters at the nearest word boundary
+ *  and append a single ellipsis when we cut. SERP meta descriptions
+ *  truncate around 155 chars; doing the cut server-side keeps the
+ *  ending coherent rather than chopping mid-word. */
+function trimToWords(s: string, maxLen: number): string {
+  if (s.length <= maxLen) return s;
+  const slice = s.slice(0, maxLen - 1);
+  const lastSpace = slice.lastIndexOf(" ");
+  return `${(lastSpace > maxLen * 0.6 ? slice.slice(0, lastSpace) : slice).trimEnd()}…`;
 }
