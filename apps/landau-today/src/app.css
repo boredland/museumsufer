@@ -272,10 +272,15 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .theme-toggle:hover { border-color: var(--color-ink); color: var(--color-rotwein); }
-.theme-toggle .icon-sun { display: inline; }
-.theme-toggle .icon-moon { display: none; }
-:where(.dark) .theme-toggle .icon-sun { display: none; }
-:where(.dark) .theme-toggle .icon-moon { display: inline; }
+/* Show the icon for the *target* theme — the action you'd take, not the
+   current state. Light mode → moon (= "click to go dark"); dark mode →
+   sun (= "click to go light"). The previous "current state" convention
+   read as broken to users who expected the button to advertise its
+   action. */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: inline; }
+:where(.dark) .theme-toggle .icon-sun { display: inline; }
+:where(.dark) .theme-toggle .icon-moon { display: none; }
 .masthead { position: relative; }
 
 /* ── chip row + date strip ───────────────────────────────────────── */
