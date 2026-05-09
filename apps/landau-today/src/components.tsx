@@ -21,10 +21,20 @@ interface ChipRowProps {
 
 export function ChipRow({ active, date, counts }: ChipRowProps) {
   const total = [...counts.values()].reduce((a, b) => a + b, 0);
+  // Anchors are htmx-boosted to swap #content-body in place — see
+  // src/index.tsx /partial/content. Falls back to a normal full-nav
+  // if htmx isn't loaded (or for shift/cmd-clicks, which htmx
+  // forwards to the browser).
+  const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
   return (
     <nav class="strip" aria-label="Kategorie">
       <div class="strip-rail">
-        <a class={`chip ${active ? "" : "active"}`} href={`/?date=${date}`}>
+        <a
+          class={`chip ${active ? "" : "active"}`}
+          href={`/?date=${date}`}
+          hx-get={`/partial/content?date=${date}`}
+          {...hxAttrs}
+        >
           <span class="t-label">Alle</span>
           {total > 0 ? <span class="count">{total}</span> : null}
         </a>
@@ -32,7 +42,12 @@ export function ChipRow({ active, date, counts }: ChipRowProps) {
           const n = counts.get(cat.slug) ?? 0;
           if (n === 0 && active !== cat.slug) return null;
           return (
-            <a class={`chip m-${cat.mood} ${active === cat.slug ? "active" : ""}`} href={`/c/${cat.slug}?date=${date}`}>
+            <a
+              class={`chip m-${cat.mood} ${active === cat.slug ? "active" : ""}`}
+              href={`/c/${cat.slug}?date=${date}`}
+              hx-get={`/partial/content?category=${cat.slug}&date=${date}`}
+              {...hxAttrs}
+            >
               <span class="glyph" aria-hidden="true">
                 {cat.glyph}
               </span>
@@ -70,18 +85,24 @@ export function DateStrip({ current, category, counts, daysAhead = 21 }: DateStr
     d.setUTCDate(d.getUTCDate() + i);
     days.push(d.toISOString().slice(0, 10));
   }
+  const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
   return (
     <nav class="dates" aria-label="Datum">
       <div class="dates-rail">
         {days.map((iso) => {
           const n = counts.get(iso) ?? 0;
           const href = category ? `/c/${category}?date=${iso}` : `/?date=${iso}`;
+          const partial = category
+            ? `/partial/content?category=${category}&date=${iso}`
+            : `/partial/content?date=${iso}`;
           return (
             <a
               class={`day ${iso === current ? "active" : ""} ${iso === today ? "is-today" : ""} ${
                 n === 0 ? "empty" : ""
               }`}
               href={href}
+              hx-get={partial}
+              {...hxAttrs}
               aria-current={iso === current ? "date" : undefined}
             >
               <span class="day-name">{weekdayShort(iso)}</span>
@@ -191,6 +212,16 @@ export function Ledger({ ev }: LedgerProps) {
         data-id={String(ev.id)}
       >
         ✓
+      </button>
+      <button
+        type="button"
+        class="share-row js-share-row"
+        aria-label="Direktlink kopieren"
+        title="Direktlink kopieren"
+        data-id={String(ev.id)}
+        data-title={ev.title}
+      >
+        ↗
       </button>
     </div>
   );

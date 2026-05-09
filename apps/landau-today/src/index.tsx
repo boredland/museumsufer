@@ -2,7 +2,7 @@ import { securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { isCategorySlug } from "./categories";
 import { todayIso } from "./date";
-import { renderPage } from "./frontend";
+import { renderPage, renderPartial } from "./frontend";
 import { handleImageProxy } from "./image-proxy";
 import { getCategoryCountsForDate, getEventCountsByDate, getEventsForDate } from "./queries";
 import docsRoute from "./routes/docs";
@@ -38,25 +38,44 @@ app.route("/api/docs", docsRoute);
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
-// Home + category routes share a single renderer.
-function renderForCategory(c: import("hono").Context, category?: string) {
+// Home + category routes share a single renderer. /partial/content
+// always returns just the swappable inner body so htmx can graft it
+// into #content-body without flickering the masthead, search bar, or
+// footer. The full-page routes serve renderPage() unconditionally —
+// even when called by htmx — because the page entry shouldn't depend
+// on a header that proxies/CDN caches might strip.
+function buildProps(c: import("hono").Context, category?: string) {
   const date = c.req.query("date") || todayIso();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.html(`<p>Ungültiges Datum.</p>`, 400);
-  if (category && !isCategorySlug(category)) return c.html(`<p>Unbekannte Kategorie.</p>`, 404);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  if (category && !isCategorySlug(category)) return null;
   const events = getEventsForDate(date, category);
   const categoryCounts = getCategoryCountsForDate(date);
   const horizon = new Date(`${todayIso()}T12:00:00Z`);
   horizon.setUTCDate(horizon.getUTCDate() + 21);
   const dateCounts = getEventCountsByDate(todayIso(), horizon.toISOString().slice(0, 10));
-  const html = renderPage({ date, category, events, categoryCounts, dateCounts });
-  return c.html(html, 200, {
-    "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
-    "Content-Language": "de",
-  });
+  return { date, category, events, categoryCounts, dateCounts };
+}
+
+const PAGE_HEADERS = {
+  "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
+  "Content-Language": "de",
+};
+
+function renderForCategory(c: import("hono").Context, category?: string) {
+  const props = buildProps(c, category);
+  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
+  return c.html(renderPage(props), 200, PAGE_HEADERS);
 }
 
 app.get("/", (c) => renderForCategory(c));
 app.get("/c/:cat", (c) => renderForCategory(c, c.req.param("cat")));
+
+app.get("/partial/content", (c) => {
+  const cat = c.req.query("category");
+  const props = buildProps(c, cat);
+  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
+  return c.html(renderPartial(props), 200, PAGE_HEADERS);
+});
 
 // JSON for clients / agents.
 app.get("/api/day", (c) => {
