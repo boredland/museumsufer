@@ -9,7 +9,6 @@
     "build": "bun css",
     "deploy": "bun css && wrangler deploy",
     "scrape": "bun scripts/scrape.ts",
-    "health-check": "bun scripts/health-check.ts",
     "lint": "biome check src/ scripts/",
     "lint:fix": "biome check --write src/ scripts/",
     "typecheck": "tsc --noEmit"

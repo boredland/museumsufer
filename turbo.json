@@ -34,9 +34,6 @@
     "db:migrate:local": {
       "cache": false
     },
-    "health-check": {
-      "cache": false
-    },
     "screenshot": {
       "cache": false
     },

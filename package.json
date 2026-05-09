@@ -13,7 +13,6 @@
     "lint:fix": "turbo run lint:fix",
     "typecheck": "turbo run typecheck",
     "deploy": "turbo run deploy",
-    "health-check": "turbo run health-check",
     "screenshot": "turbo run screenshot",
     "screenshots:manifest": "turbo run screenshots:manifest",
     "db:migrate:local": "turbo run db:migrate:local",
