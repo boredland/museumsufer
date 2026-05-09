@@ -13,6 +13,14 @@ ranked by ROI for landau.today. Tick when shipped.
       `navigator.share` → clipboard fallback → `execCommand('copy')`
       fallback. Same idiom as theaters'. Already present in museums and
       theaters.
+- [x] **Sort by location ("In der Nähe")** — chip-row toggle that pulls
+      `navigator.geolocation` and re-orders ledger rows by haversine
+      distance against the venue. Distance badges injected client-side.
+      Venue coords come from a scrape-time Nominatim pass cached in
+      `src/geocode-cache.ts` so daily runs only geocode net-new venues.
+      Lifted client logic from museumsufer's `sortCardsByDistance`,
+      stripped the regional transit-time roundtrip (no VRN equivalent
+      of RMV's `mgate.exe`).
 
 ## Backlog
 

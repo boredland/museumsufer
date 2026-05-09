@@ -15,7 +15,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use(
   "*",
   securityHeaders({
-    permissionsPolicy: "geolocation=(), microphone=(), camera=(), payment=()",
+    permissionsPolicy: "geolocation=(self), microphone=(), camera=(), payment=()",
     csp: [
       "default-src 'self'",
       "img-src 'self' data: https:",
