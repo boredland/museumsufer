@@ -4,7 +4,15 @@ import { CATEGORY_BY_SLUG } from "../categories";
 import { todayIso } from "../date";
 import { imageProxyUrl } from "../image-proxy";
 import { getEventById } from "../queries";
-import { APP_URL, formatDateLong, formatDateRange, formatTime, weekdayShort } from "../shared";
+import {
+  APP_URL,
+  buildGoogleMapsUrl,
+  buildVrnUrl,
+  formatDateLong,
+  formatDateRange,
+  formatTime,
+  weekdayShort,
+} from "../shared";
 import type { Env, Event } from "../types";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -51,6 +59,9 @@ function renderEventPage(ev: Event): string {
     detail_url: ev.detail_url,
   };
   const img = imageProxyUrl(ev.image_url);
+  const vrnUrl = buildVrnUrl(ev.venue, ev.city);
+  const mapsUrl = buildGoogleMapsUrl(ev.venue, ev.city);
+  const shareUrl = `${APP_URL}/event/${ev.id}`;
   const ldJson = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "Event",
@@ -110,14 +121,60 @@ ${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` :
   ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" />` : ""}
   ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}
   ${ev.price ? `<p class="when" style="margin-top:1rem"><em>${esc(ev.price)}</em></p>` : ""}
-  <div class="actions">
-    <a href="${esc(ev.detail_url)}" rel="external">Quelle ansehen</a>
-    <a href="/event/${ev.id}.ics">.ics herunterladen</a>
-    <a href="${esc(buildGoogleCalendarUrl(calEv))}" rel="external">Google Kalender</a>
+  <div class="actions actions--group">
+    <span class="actions__label">Anfahrt</span>
+    ${vrnUrl ? `<a href="${esc(vrnUrl)}" rel="external">VRN ÖPNV</a>` : ""}
+    ${mapsUrl ? `<a href="${esc(mapsUrl)}" rel="external">Google Maps</a>` : ""}
+  </div>
+  <div class="actions actions--group">
+    <span class="actions__label">Kalender</span>
+    <a href="/event/${ev.id}.ics">.ics</a>
+    <a href="${esc(buildGoogleCalendarUrl(calEv))}" rel="external">Google</a>
     <a href="${esc(buildOutlookCalendarUrl(calEv))}" rel="external">Outlook</a>
     <a href="${esc(buildYahooCalendarUrl(calEv))}" rel="external">Yahoo</a>
   </div>
+  <div class="actions actions--group">
+    <span class="actions__label">Mehr</span>
+    <a href="${esc(ev.detail_url)}" rel="external">Quelle ansehen</a>
+    <button type="button" class="action-btn js-share" data-url="${esc(shareUrl)}" data-title="${esc(ev.title)}">Teilen</button>
+  </div>
+  <div class="share-toast" hidden>Link kopiert</div>
 </main>
+<script>
+(function(){
+  // Share via the Web Share API where available; otherwise copy the URL
+  // to the clipboard and surface a small toast. Same idiom as theaters.
+  function showToast(){
+    var t = document.querySelector('.share-toast');
+    if (!t) return;
+    t.hidden = false;
+    setTimeout(function(){ t.hidden = true; }, 2000);
+  }
+  function onShare(btn){
+    var payload = { title: btn.dataset.title, url: btn.dataset.url };
+    if (navigator.share) {
+      navigator.share(payload).catch(function(){});
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(payload.url).then(showToast).catch(function(){});
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = payload.url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('.js-share');
+    if (btn) { e.preventDefault(); onShare(btn); }
+  });
+})();
+</script>
 <footer class="colophon-foot" style="max-width:38rem;margin:0 auto;padding:0 1rem 2rem">
   <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
   <span><a href="/">Zurück zum Programm</a></span>

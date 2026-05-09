@@ -73,3 +73,30 @@ export function relativeDayLabel(iso: string, today: string): string | null {
   if (diffDays === 2) return "Übermorgen";
   return null;
 }
+
+/** Compose a destination string for trip-planner URLs. We rarely have a
+ *  full street address — venue name + city is fuzzy-searchable enough for
+ *  both VRN and Google Maps. */
+function destinationString(venue?: string, city?: string): string | null {
+  const parts = [venue, city].filter((s): s is string => !!s && s.trim().length > 0);
+  if (parts.length === 0) return null;
+  return parts.join(", ");
+}
+
+/** VRN (Verkehrsverbund Rhein-Neckar) trip planner deep-link. Landau and
+ *  the Südliche Weinstraße are inside VRN territory, so this is the
+ *  region-correct equivalent of museumsufer's RMV link. */
+export function buildVrnUrl(venue?: string, city?: string): string | null {
+  const dest = destinationString(venue, city);
+  if (!dest) return null;
+  return `https://www.vrn.de/mng/#/XSLT_TRIP_REQUEST2?restriction=0&dest=${encodeURIComponent(dest)}&isDeparture=true`;
+}
+
+/** Google Maps directions deep-link. Falls back to a query-string
+ *  destination when we don't have lat/lng — Google's geocoder handles
+ *  "Venue, City" reasonably well. */
+export function buildGoogleMapsUrl(venue?: string, city?: string): string | null {
+  const dest = destinationString(venue, city);
+  if (!dest) return null;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
+}
