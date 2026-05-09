@@ -22,8 +22,8 @@ export function renderPage(props: PageProps): string {
       ? "landau.today — Veranstaltungen heute in Landau in der Pfalz"
       : `${formatDateLong(date)} · landau.today`;
   const description = cat
-    ? `${cat.label} in Landau in der Pfalz: alle Veranstaltungen am ${formatDateLong(date)}.`
-    : "Alle Veranstaltungen in Landau in der Pfalz und im Landauer Land — Konzert, Theater, Tanz, Lesung, Festival, Ausstellung. Aus Kulturnetz Landau und Stadt Landau.";
+    ? `${cat.label} in Landau in der Pfalz und an der Südlichen Weinstraße: alle Veranstaltungen am ${formatDateLong(date)}.`
+    : "Veranstaltungen in Landau in der Pfalz und an der Südlichen Weinstraße — Konzert, Theater, Tanz, Lesung, Weinfest, Ausstellung, Stadtführung. Täglich aggregiert aus Kulturnetz Landau, Stadt Landau, Hambacher Schloss, RPTU, Pfalz.de und der SÜW-Tourismus.";
   const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}` : `${APP_URL}/?date=${date}`;
   const jsonLd = buildJsonLd(events.slice(0, 50));
 

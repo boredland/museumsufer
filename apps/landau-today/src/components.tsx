@@ -104,6 +104,16 @@ function categoryFor(slug: string): CategoryDef {
   return CATEGORY_BY_SLUG.get(slug) ?? CATEGORY_BY_SLUG.get("sonstiges")!;
 }
 
+/** True when the venue label already contains the city name — avoids
+ *  rendering "Stiftskirche Landau · Landau in der Pfalz" with the
+ *  city echoed twice. Match on the bare town name, not the full
+ *  "Landau in der Pfalz" form. */
+function venueIncludesCity(venue: string | undefined, city: string): boolean {
+  if (!venue) return false;
+  const bare = city.replace(/\s+in der Pfalz$/i, "").replace(/^Landau-/, "");
+  return new RegExp(`\\b${bare}\\b`, "i").test(venue);
+}
+
 interface LedgerProps {
   ev: Event;
 }
@@ -116,8 +126,12 @@ export function Ledger({ ev }: LedgerProps) {
   const cat = categoryFor(ev.category);
   const time = formatTime(ev.time);
   const isOpen = !!ev.end_date && !time;
+  // Order: venue, city (only if it's not already echoed inside the venue
+  // string), organizer (only if distinct from venue), price.
+  const cityVisible = ev.city && !venueIncludesCity(ev.venue, ev.city) ? ev.city : null;
   const meta: (string | null)[] = [
     ev.venue || null,
+    cityVisible,
     ev.organizer && ev.organizer !== ev.venue ? ev.organizer : null,
     ev.price || null,
   ];
@@ -182,6 +196,7 @@ export function Broadside({ ev }: BroadsideProps) {
         {ev.description ? <p class="desc">{ev.description}</p> : null}
         <div class="meta-line">
           {ev.venue ?? "Landau"}
+          {ev.city && !venueIncludesCity(ev.venue, ev.city) ? ` · ${ev.city}` : ""}
           {ev.price ? ` · ${ev.price}` : ""}
         </div>
       </div>

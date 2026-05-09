@@ -122,6 +122,7 @@ function toEvent(item: MecItem): Omit<Event, "id"> {
     ...(endTime ? { end_time: endTime } : {}),
     category,
     venue: VENUE,
+    city: "Neustadt-Hambach",
     organizer: "Stiftung Hambacher Schloss",
     ...(item.description ? { description: item.description } : {}),
     detail_url: item.link,

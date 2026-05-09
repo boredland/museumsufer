@@ -100,6 +100,7 @@ function toEvent(item: RssItem): Omit<Event, "id"> {
     ...(time ? { time } : {}),
     category,
     venue: "RPTU Landau",
+    city: "Landau in der Pfalz",
     organizer: "RPTU Kaiserslautern-Landau",
     ...(description ? { description } : {}),
     detail_url: item.link,

@@ -7,6 +7,7 @@ export type EventSource =
   | "hambacher-schloss"
   | "rptu-campuskultur"
   | "suew"
+  | "pfalz-de"
   | "stiftskirche";
 
 /**
@@ -26,6 +27,9 @@ export interface Event {
   end_time?: string;
   category: string;
   venue?: string;
+  /** City / village name. Used in the meta line so the user can tell
+   *  Landau-proper events apart from outlying SÜW villages at a glance. */
+  city?: string;
   organizer?: string;
   description?: string;
   detail_url: string;
