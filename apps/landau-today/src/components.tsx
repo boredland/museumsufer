@@ -178,60 +178,66 @@ export function Ledger({ ev }: LedgerProps) {
     typeof ev.lat === "number" && typeof ev.lng === "number"
       ? { "data-lat": String(ev.lat), "data-lng": String(ev.lng) }
       : {};
+  // Card-link pattern: a single anchor wraps the title (and provides
+  // the row's main click-target via a ::before that stretches across
+  // the whole .ledger). The visited + share buttons live inside the
+  // title-line as siblings of the link, raised above the stretched
+  // ::before via z-index so their clicks aren't intercepted.
   return (
     <div
-      class={`ledger-wrap m-${cat.mood}`}
+      class={`ledger m-${cat.mood}`}
       data-id={String(ev.id)}
       data-search={`${ev.title} ${ev.venue ?? ""} ${ev.city ?? ""} ${cat.label}`.toLowerCase()}
+      data-cat={cat.slug}
       {...geoAttrs}
     >
-      <a class={`ledger m-${cat.mood} t-shift`} href={`/event/${ev.id}`} data-cat={cat.slug}>
-        <div class={`time${time ? "" : " allday"}`}>
-          {time ?? (isOpen ? "ganztags" : "ganztags")}
-          {ev.end_time && ev.end_time !== ev.time ? (
-            <div style="font-size:0.7em;opacity:0.6">– {formatTime(ev.end_time)}</div>
-          ) : null}
-        </div>
-        <div class="body">
-          <div class="title-line">
+      <div class={`time${time ? "" : " allday"}`}>
+        {time ?? (isOpen ? "ganztags" : "ganztags")}
+        {ev.end_time && ev.end_time !== ev.time ? (
+          <div style="font-size:0.7em;opacity:0.6">– {formatTime(ev.end_time)}</div>
+        ) : null}
+      </div>
+      <div class="body">
+        <div class="title-line">
+          <a class="t-title-link t-shift" href={`/event/${ev.id}`}>
             {ev.featured ? (
               <span class="ornament" aria-hidden="true">
                 ❦
               </span>
             ) : null}
             <span class="t-title">{ev.title}</span>
-          </div>
-          {visible.length > 0 ? (
-            <div class="meta-line">
-              {visible.map((s, i) => (
-                <span class={i === 0 ? "" : "sep"}>{s}</span>
-              ))}
-            </div>
-          ) : null}
+          </a>
+          <button
+            type="button"
+            class="row-action js-share-row"
+            aria-label="Direktlink kopieren"
+            title="Direktlink kopieren"
+            data-id={String(ev.id)}
+            data-title={ev.title}
+          >
+            ↗
+          </button>
+          <button
+            type="button"
+            class="row-action js-visited"
+            aria-label="Als besucht markieren"
+            title="Als besucht markieren"
+            data-id={String(ev.id)}
+          >
+            ✓
+          </button>
         </div>
-        <span class="cat-glyph" title={cat.label} role="img" aria-label={cat.label}>
-          {cat.glyph}
-        </span>
-      </a>
-      <button
-        type="button"
-        class="visited-toggle js-visited"
-        aria-label="Als besucht markieren"
-        title="Als besucht markieren"
-        data-id={String(ev.id)}
-      >
-        ✓
-      </button>
-      <button
-        type="button"
-        class="share-row js-share-row"
-        aria-label="Direktlink kopieren"
-        title="Direktlink kopieren"
-        data-id={String(ev.id)}
-        data-title={ev.title}
-      >
-        ↗
-      </button>
+        {visible.length > 0 ? (
+          <div class="meta-line">
+            {visible.map((s, i) => (
+              <span class={i === 0 ? "" : "sep"}>{s}</span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <span class="cat-glyph" title={cat.label} role="img" aria-label={cat.label}>
+        {cat.glyph}
+      </span>
     </div>
   );
 }
