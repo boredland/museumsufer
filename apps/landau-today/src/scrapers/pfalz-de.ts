@@ -27,9 +27,11 @@ const OCCURRENCE_HORIZON_DAYS = 30;
 const FETCH_CONCURRENCY = 6;
 
 /** Slug-keyword filter — first cheap pass against the sitemap. We keep it
- *  inclusive (anything that *could* be Landau-area) and re-verify by city
- *  after fetching. Names normalised to ASCII so we hit umlaut variants too. */
+ *  inclusive (anything that *could* be Landau-area or Neustadt-area) and
+ *  re-verify by city after fetching. Names normalised to ASCII so we
+ *  hit umlaut variants too. */
 const SLUG_KEYWORDS = [
+  // Landau + Stadtdörfer
   "landau",
   "moerzheim",
   "morzheim",
@@ -39,13 +41,29 @@ const SLUG_KEYWORDS = [
   "dammheim",
   "queichheim",
   "arzheim",
+  // Tight ring around Landau (already in our SÜW ingestion)
   "birkweiler",
   "ranschbach",
+  // Neustadt an der Weinstraße + Stadtteile — pairs with our Hambacher
+  // Schloss source which already lives in this orbit. ~20 km from Landau
+  // but tightly linked culturally (Hambacher Fest, Musikfest, Pfälzer
+  // Weinkönigin etc.).
+  "neustadt",
+  "hambach",
+  "gimmeldingen",
+  "mussbach",
+  "haardt",
+  "diedesfeld",
+  "koenigsbach",
+  "konigsbach",
+  "geinsheim",
+  "lachen-speyer",
 ];
 
-/** City allowlist for the post-fetch verification step. Keep this in
- *  Landau-Land + the Südliche Weinstraße ring; anything else in the Pfalz
- *  belongs on a different site. */
+/** City allowlist for the post-fetch verification step. Exact matches go
+ *  in here; broader prefix-based matches (e.g., any city starting with
+ *  "Neustadt") are handled by `cityMatches()` below so we don't have to
+ *  enumerate every transliteration. */
 const CITY_ALLOWLIST = new Set([
   "Landau in der Pfalz",
   "Landau",
@@ -58,7 +76,24 @@ const CITY_ALLOWLIST = new Set([
   "Landau-Arzheim",
   "Birkweiler",
   "Ranschbach",
+  "Hambach an der Weinstraße",
+  "Haardt",
+  "Mußbach",
+  "Diedesfeld",
+  "Gimmeldingen",
+  "Königsbach",
+  "Lachen-Speyerdorf",
+  "Geinsheim",
+  "Duttweiler",
 ]);
+
+const CITY_PREFIXES = ["Neustadt"]; // catches "Neustadt an der Weinstraße", "Neustadt a.d. W.", etc.
+
+function cityMatches(city: string | undefined): boolean {
+  if (!city) return false;
+  if (CITY_ALLOWLIST.has(city)) return true;
+  return CITY_PREFIXES.some((p) => city.startsWith(p));
+}
 
 interface DetailPage {
   slug: string;
@@ -93,7 +128,7 @@ export async function scrapePfalzDe(opts: PfalzDeOptions = {}): Promise<Omit<Eve
 
   const events: Omit<Event, "id">[] = [];
   for (const page of detailPages) {
-    if (!page.city || !CITY_ALLOWLIST.has(page.city)) continue;
+    if (!cityMatches(page.city)) continue;
     for (const ev of expandOccurrences(page, today, horizon)) {
       events.push(ev);
     }
