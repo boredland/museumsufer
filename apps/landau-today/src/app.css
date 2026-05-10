@@ -176,44 +176,59 @@
 }
 [data-search-hidden] { display: none !important; }
 
-/** Visited toggle — sits OUTSIDE the anchor so a click on it doesn't
-    fight the anchor's navigation default. Wrapper is the row container
-    (with data-id / data-search / lat/lng); the anchor + button are
-    siblings inside it, the button absolutely positioned over the
-    cat-glyph corner. */
-.ledger-wrap {
+/** Card-link pattern for ledger rows. The .ledger row is the layout
+ *  container; the title is its own anchor (.t-title-link). The
+ *  anchor's ::before stretches to cover the entire row so clicks on
+ *  the time / venue / glyph still navigate to the event detail. The
+ *  inline action buttons (✓ visited, ↗ share) live as siblings of the
+ *  title link inside .title-line; z-index raises them above the
+ *  stretched ::before so their clicks are caught by the buttons, not
+ *  by the link. */
+.ledger { position: relative; }
+.t-title-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
   position: relative;
+  text-decoration: none;
+  color: inherit;
 }
-.visited-toggle {
+.t-title-link::before {
+  content: "";
   position: absolute;
-  top: 50%;
-  right: -1.7rem;
-  transform: translateY(-50%);
+  inset: -0.85rem -1rem; /* extend past row's vertical padding so any click anywhere on the row navigates */
+  z-index: 0;
+}
+.title-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.title-line > .t-title-link { flex: 1 1 auto; min-width: 0; }
+.row-action {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
   background: transparent;
   border: 1px solid var(--color-rule);
   width: 1.25rem;
   height: 1.25rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1;
-  color: transparent;
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
-  opacity: 0.55;
+  color: var(--color-ink-soft);
+  font-family: var(--font-body);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.ledger-wrap:hover .visited-toggle { opacity: 1; }
-.visited-toggle:hover { color: var(--color-ink-soft); border-color: var(--color-ink-soft); }
-[data-visited] .visited-toggle {
+.row-action:hover { color: var(--color-ink); border-color: var(--color-ink); }
+[data-visited] .js-visited {
   background: var(--color-rotwein);
   border-color: var(--color-rotwein);
   color: var(--color-paper);
-  opacity: 1;
 }
-[data-visited] .ledger { opacity: 0.45; }
-@media (max-width: 720px) {
-  /* On narrow viewports there's no room outside the row — tuck the
-     toggle inside on the right edge instead. */
-  .visited-toggle { right: 0.25rem; }
-}
+[data-visited] .body, [data-visited] .time { opacity: 0.45; }
 
 /* ── masthead ─────────────────────────────────────────────────────── */
 .masthead {
@@ -601,8 +616,9 @@
 .ledger .title-line {
   display: flex;
   align-items: baseline;
-  gap: 0.45rem;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 .ledger .ornament {
   color: var(--color-rotwein);
@@ -809,14 +825,8 @@ body.htmx-request .htmx-progress::before {
   body.htmx-request .htmx-progress::before { animation: none; transform: translateX(0); width: 100%; }
 }
 
-/** Visited + share toggles: on touch (no hover), reveal at low opacity
- *  always so they're discoverable. The extra space at the right of the
- *  ledger is plenty wide on desktop, but cramped on mobile, so we tuck
- *  inside on narrow viewports (already wired in earlier rules). */
-@media (hover: none) {
-  .visited-toggle { opacity: 0.6; }
-  .share-row { opacity: 0.45; }
-}
+/* (Legacy hover-only opacity rules dropped — .row-action buttons are
+   always visible inline with the title.) */
 
 /** Date strip scroll affordance: edge fades hint there's more content
  *  off-screen. Already partially handled by the mask gradient on
@@ -890,32 +900,10 @@ body.htmx-request .htmx-progress::before {
   animation: ink-up 0.25s ease-out both;
 }
 
-/** Per-row share button — copies a deep-link to the row (with
- *  ?highlight=<id>) so it scrolls to + pulses on arrival. Lives next to
- *  the visited toggle on the right edge; smaller than the visited check
- *  and uses an arrow glyph that reads as "link out". */
-.share-row {
-  position: absolute;
-  top: 50%;
-  right: -3.4rem;
-  transform: translateY(-50%);
-  background: transparent;
-  border: 1px solid var(--color-rule);
-  width: 1.25rem;
-  height: 1.25rem;
-  font-size: 0.75rem;
-  line-height: 1;
-  color: transparent;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
-  opacity: 0;
-}
-.ledger-wrap:hover .share-row { opacity: 0.55; }
-.share-row:hover { color: var(--color-ink-soft); border-color: var(--color-ink-soft); opacity: 1; }
-@media (max-width: 720px) {
-  .share-row { right: 1.7rem; }
-  .ledger-wrap:hover .share-row, .share-row { opacity: 0.5; }
-}
+/* .share-row + .ledger-wrap absolute-positioned chrome was replaced by
+   .row-action inline buttons inside .title-line — see the card-link
+   block above. The legacy rules used to fade the buttons in on hover
+   only; users couldn't find them on touch. */
 
 /* ── event detail ───────────────────────────────────────────────── */
 .event-detail {
