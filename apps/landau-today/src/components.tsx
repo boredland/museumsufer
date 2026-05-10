@@ -29,20 +29,6 @@ export function ChipRow({ active, date, counts }: ChipRowProps) {
   return (
     <nav class="strip" aria-label="Kategorie">
       <div class="strip-rail">
-        {/* "Near me" lives at the head of the rail — it's a tool, not a
-            category, and sticky-positioned so it stays visible while
-            the user scrolls horizontally through the category chips. */}
-        <button
-          type="button"
-          class="chip chip--near js-near"
-          aria-pressed="false"
-          title="Sortiert nach Entfernung zu deinem Standort"
-        >
-          <span class="glyph" aria-hidden="true">
-            ⌖
-          </span>
-          <span class="t-label">In der Nähe</span>
-        </button>
         <a
           class={`chip ${active ? "" : "active"}`}
           href={`/?date=${date}`}
@@ -128,9 +114,26 @@ export function DayHeadline({ date, total }: { date: string; total: number }) {
   return (
     <div class="day-headline">
       <h2>{rel ?? formatDateLong(date)}</h2>
-      <span class="meta">
-        {total} {total === 1 ? "Veranstaltung" : "Veranstaltungen"}
-      </span>
+      <div class="day-headline-meta">
+        {/* "Near me" is a sort tool, not a category filter, so it lives
+            with the day metadata rather than in the chip strip — pairs
+            visually with the event count and stays out of the way while
+            the user picks categories. */}
+        <button
+          type="button"
+          class="near-toggle js-near"
+          aria-pressed="false"
+          title="Sortiert nach Entfernung zu deinem Standort"
+        >
+          <span class="glyph" aria-hidden="true">
+            ⌖
+          </span>
+          <span>In der Nähe</span>
+        </button>
+        <span class="meta">
+          {total} {total === 1 ? "Veranstaltung" : "Veranstaltungen"}
+        </span>
+      </div>
     </div>
   );
 }

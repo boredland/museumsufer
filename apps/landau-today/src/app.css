@@ -341,58 +341,54 @@
 .chip.m-schiefer .glyph{ color: var(--color-schiefer); }
 .chip.active .glyph    { color: inherit !important; }
 
-/** "In der Nähe" — distinguished from category chips by:
-    1. position-sticky to the left edge of the rail, so it stays visible
-       while the user scrolls through the categories,
-    2. a faint reblaus-tinted background at rest (not just an outline) to
-       read as a tool rather than a filter,
-    3. a small leading rule + paper "wedge" so the sticky chip doesn't
-       smear into the chips passing under it during scroll.
-
-    Pressed state inverts to filled reblaus to mirror the category chip's
-    .active vocabulary. */
-.chip--near {
+/** "In der Nähe" sort toggle — lives in the day-headline next to the
+    event count. Visually a small caps text-button rather than a chip,
+    so the eye reads it as "sort by distance" not "filter to one
+    category". Pressed state fills with reblaus and reverses the text
+    to paper, matching chip.active vocabulary. */
+.near-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  background: transparent;
+  border: 1px solid var(--color-rule);
   cursor: pointer;
-  position: sticky;
-  left: 1rem;
-  z-index: 2;
-  background: color-mix(in oklab, var(--color-reblaus) 14%, var(--color-paper));
-  border-color: var(--color-reblaus);
-  /* Paper-coloured shadow on the trailing edge masks chips scrolling
-     under the sticky button so they don't smear visually. */
-  box-shadow: 0.5rem 0 0 0 var(--color-paper);
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--color-ink-soft);
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
-.chip--near::before {
-  /* Hairline rule on the trailing edge separates sticky chip from the
-     scrolling row underneath — same hairline vocabulary used elsewhere. */
-  content: "";
-  position: absolute;
-  right: -0.5rem;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--color-rule);
-}
-.chip--near .glyph {
+.near-toggle .glyph {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0;
   color: var(--color-reblaus);
-  font-size: 1.05rem;
+  position: relative;
+  top: 0.05em;
 }
-.chip--near:hover {
-  background: color-mix(in oklab, var(--color-reblaus) 22%, var(--color-paper));
+.near-toggle:hover {
+  color: var(--color-ink);
+  border-color: var(--color-reblaus);
 }
-.chip--near[aria-pressed="true"] {
+.near-toggle[aria-pressed="true"] {
   background: var(--color-reblaus);
   color: var(--color-paper);
   border-color: var(--color-reblaus);
 }
-.chip--near[aria-pressed="true"] .glyph { color: inherit; }
-.chip--near[aria-pressed="true"]::before { background: var(--color-reblaus); }
+.near-toggle[aria-pressed="true"] .glyph { color: inherit; }
+.near-toggle.chip--loading .glyph { animation: near-spin 0.9s linear infinite; }
+/* Legacy class so the existing client-script (which adds .chip--loading
+   while geolocation resolves) keeps working without renaming. */
 .chip--loading .glyph { animation: near-spin 0.9s linear infinite; }
 @keyframes near-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
 @media (prefers-reduced-motion: reduce) {
+  .near-toggle.chip--loading .glyph,
   .chip--loading .glyph { animation: none; opacity: 0.5; }
 }
 
@@ -564,6 +560,13 @@
   letter-spacing: 0.18em;
   color: var(--color-ink-soft);
   white-space: nowrap;
+}
+.day-headline-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* ── ledger row (the core list item) ────────────────────────────── */

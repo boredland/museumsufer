@@ -27,9 +27,11 @@ const OCCURRENCE_HORIZON_DAYS = 30;
 const FETCH_CONCURRENCY = 6;
 
 /** Slug-keyword filter — first cheap pass against the sitemap. We keep it
- *  inclusive (anything that *could* be Landau-area or Neustadt-area) and
- *  re-verify by city after fetching. Names normalised to ASCII so we
- *  hit umlaut variants too. */
+ *  inclusive (anything that *could* be Landau ↔ Neustadt corridor) and
+ *  re-verify by city after fetching. The corridor covers ~25 km of the
+ *  Südliche Weinstraße north-south axis, matching the editorial scope
+ *  ("Veranstaltungsblatt für die Südliche Weinstraße"). Names
+ *  normalised to ASCII so we hit umlaut variants too. */
 const SLUG_KEYWORDS = [
   // Landau + Stadtdörfer
   "landau",
@@ -41,13 +43,31 @@ const SLUG_KEYWORDS = [
   "dammheim",
   "queichheim",
   "arzheim",
-  // Tight ring around Landau (already in our SÜW ingestion)
+  // Tight ring around Landau
   "birkweiler",
   "ranschbach",
-  // Neustadt an der Weinstraße + Stadtteile — pairs with our Hambacher
-  // Schloss source which already lives in this orbit. ~20 km from Landau
-  // but tightly linked culturally (Hambacher Fest, Musikfest, Pfälzer
-  // Weinkönigin etc.).
+  "frankweiler",
+  "siebeldingen",
+  "leinsweiler",
+  "eschbach",
+  // The Weinstraße corridor north of Landau toward Neustadt
+  "bornheim",
+  "knoeringen",
+  "knoringen",
+  "roschbach",
+  "hainfeld",
+  "edesheim",
+  "edenkoben",
+  "rhodt",
+  "rietburg",
+  "weyher",
+  "burrweiler",
+  "gleisweiler",
+  "kirrweiler",
+  "maikammer",
+  "sankt-martin",
+  "st-martin",
+  // Neustadt an der Weinstraße + Stadtteile
   "neustadt",
   "hambach",
   "gimmeldingen",
@@ -62,9 +82,10 @@ const SLUG_KEYWORDS = [
 
 /** City allowlist for the post-fetch verification step. Exact matches go
  *  in here; broader prefix-based matches (e.g., any city starting with
- *  "Neustadt") are handled by `cityMatches()` below so we don't have to
- *  enumerate every transliteration. */
+ *  "Neustadt" or "Edenkoben") are handled by `cityMatches()` below so we
+ *  don't have to enumerate every transliteration. */
 const CITY_ALLOWLIST = new Set([
+  // Landau
   "Landau in der Pfalz",
   "Landau",
   "Landau-Mörzheim",
@@ -74,8 +95,29 @@ const CITY_ALLOWLIST = new Set([
   "Landau-Dammheim",
   "Landau-Queichheim",
   "Landau-Arzheim",
+  // Tight ring
   "Birkweiler",
   "Ranschbach",
+  "Frankweiler",
+  "Siebeldingen",
+  "Leinsweiler",
+  "Eschbach",
+  // Corridor
+  "Bornheim",
+  "Knöringen",
+  "Roschbach",
+  "Hainfeld",
+  "Edesheim",
+  "Rhodt unter Rietburg",
+  "Weyher",
+  "Weyher in der Pfalz",
+  "Burrweiler",
+  "Gleisweiler",
+  "Kirrweiler",
+  "Maikammer",
+  "St. Martin",
+  "Sankt Martin",
+  // Neustadt
   "Hambach an der Weinstraße",
   "Haardt",
   "Mußbach",
@@ -87,7 +129,11 @@ const CITY_ALLOWLIST = new Set([
   "Duttweiler",
 ]);
 
-const CITY_PREFIXES = ["Neustadt"]; // catches "Neustadt an der Weinstraße", "Neustadt a.d. W.", etc.
+/** Prefix matches catch every transliteration pfalz.de uses for the
+ *  larger towns (e.g. "Edenkoben-Mittelstreuth", "Neustadt a.d. W.",
+ *  "Weyher i.d. Pfalz"). Keep the list short — anything matching here
+ *  is implicitly trusted, so don't add ambiguous prefixes. */
+const CITY_PREFIXES = ["Neustadt", "Edenkoben"];
 
 function cityMatches(city: string | undefined): boolean {
   if (!city) return false;
