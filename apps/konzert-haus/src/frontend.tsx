@@ -3,6 +3,7 @@ import {
   escapeHtml as coreEscapeHtml,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
+  todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
 } from "@museumsufer/core";
@@ -181,6 +182,72 @@ export interface EventRowOptions {
   hideVenue?: boolean;
 }
 
+/**
+ * Germany observes CEST (+02:00) between the last Sunday of March and the
+ * last Sunday of October, CET (+01:00) otherwise.
+ */
+function berlinOffsetFor(date: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return "+01:00";
+  const lastSundayUtc = (y: number, m: number): number => {
+    const last = new Date(Date.UTC(y, m, 0));
+    return last.getUTCDate() - last.getUTCDay();
+  };
+  const dstStart = lastSundayUtc(year, 3);
+  const dstEnd = lastSundayUtc(year, 10);
+  if (month > 3 && month < 10) return "+02:00";
+  if (month < 3 || month > 10) return "+01:00";
+  if (month === 3) return day >= dstStart ? "+02:00" : "+01:00";
+  return day < dstEnd ? "+02:00" : "+01:00";
+}
+
+function capitalize(s: string): string {
+  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
+  const offset = berlinOffsetFor(e.date);
+  const startTime = e.time ?? "00:00";
+  const jsonLd: Record<string, unknown> = {
+    "@context": "https://schema.org",
+    "@type": "MusicEvent",
+    name: e.title,
+    startDate: `${e.date}T${startTime}:00${offset}`,
+    location: {
+      "@type": "MusicVenue",
+      name: e.venue.name,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: e.venue.address,
+        addressLocality: capitalize(e.venue.city),
+        addressCountry: "DE",
+      },
+    },
+    url: `${APP_URL}/tag/${e.date}#event-${e.id}`,
+  };
+  const description = e.description ?? e.subtitle ?? e.performers;
+  if (description) jsonLd.description = description;
+  if (e.end_time && e.time) jsonLd.endDate = `${e.date}T${e.end_time}:00${offset}`;
+  if (e.performers) jsonLd.performer = [{ "@type": "PerformingGroup", name: e.performers }];
+  if (e.ticket_url) {
+    const offer: Record<string, unknown> = {
+      "@type": "Offer",
+      url: e.ticket_url,
+      priceCurrency: "EUR",
+      validFrom: todayIso(),
+    };
+    if (e.price_min != null) offer.price = String(e.price_min);
+    jsonLd.offers = offer;
+  }
+  if (e.image_url) jsonLd.image = e.image_url;
+  return jsonLd;
+}
+
+function renderEventJsonLd(e: DayEvent): string {
+  const json = JSON.stringify(buildEventJsonLd(e)).replace(/</g, "\\u003c");
+  return `<script type="application/ld+json" data-id="${e.id}">${json}</script>`;
+}
+
 export function renderEvent(e: DayEvent, opts: EventRowOptions): string {
   const time = e.time ?? "—";
   const endTime = e.end_time ? `bis ${e.end_time}` : "";
@@ -202,6 +269,7 @@ export function renderEvent(e: DayEvent, opts: EventRowOptions): string {
       </p>`;
 
   return `<li class="concert" id="event-${e.id}" style="--i:${opts.index}">
+    ${renderEventJsonLd(e)}
     <div class="concert__when">
       <span class="concert__time">${escapeHtml(time)}</span>
       ${endTime ? `<span class="concert__time-end">${escapeHtml(endTime)}</span>` : ""}

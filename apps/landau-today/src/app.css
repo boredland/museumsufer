@@ -1011,3 +1011,62 @@ body.htmx-request .htmx-progress::before {
   z-index: 50;
   animation: ink-up 0.25s ease-out both;
 }
+
+#digest-dialog::backdrop {
+  background: rgb(from var(--color-ink) r g b / 0.5);
+  backdrop-filter: blur(2px);
+}
+.digest-option {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.7rem;
+  row-gap: 0.1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 0.4rem;
+  background: var(--color-paper-2);
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease;
+}
+.digest-option:hover {
+  border-color: var(--color-rotwein);
+}
+.digest-option:has(input:checked) {
+  border-color: var(--color-rotwein);
+  background: rgb(from var(--color-rotwein) r g b / 0.08);
+}
+.digest-option input[type="checkbox"] {
+  grid-row: 1 / 3;
+  align-self: center;
+  margin: 0;
+  accent-color: var(--color-rotwein);
+  cursor: pointer;
+}
+.digest-option__main {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+.digest-option__title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+}
+.digest-option__time {
+  font-family: var(--font-body);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  color: rgb(from var(--color-ink) r g b / 0.55);
+}
+.digest-option__sub {
+  grid-column: 2;
+  font-size: 0.8125rem;
+  color: rgb(from var(--color-ink) r g b / 0.75);
+  line-height: 1.35;
+}

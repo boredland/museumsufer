@@ -2,12 +2,14 @@ import { securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { isCategorySlug } from "./categories";
 import { todayIso } from "./date";
+import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderPartial } from "./frontend";
 import { handleImageProxy } from "./image-proxy";
 import { getCategoryCountsForDate, getEventCountsByDate, getEventsForDate } from "./queries";
 import docsRoute from "./routes/docs";
 import eventRoute from "./routes/event";
 import feedsRoute from "./routes/feeds";
+import pushRoute from "./routes/push";
 import staticRoute from "./routes/static";
 import type { Env } from "./types";
 
@@ -32,6 +34,7 @@ app.use(
 );
 
 app.route("/", staticRoute);
+app.route("/", pushRoute);
 app.route("/", feedsRoute);
 app.route("/", eventRoute);
 app.route("/api/docs", docsRoute);
@@ -100,4 +103,11 @@ app.notFound((c) => {
   );
 });
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const schedule = scheduleForNow(new Date());
+    if (!schedule) return;
+    ctx.waitUntil(dispatchDigest(env, schedule));
+  },
+};
