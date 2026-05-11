@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "konzert-haus",
+  "main": "src/index.tsx",
+  "compatibility_date": "2025-04-01",
+  // Scraping happens in .github/workflows/scrape.yml — the GH Action
+  // regenerates src/scrape-data.ts and pushes; CF redeploys on push.
+  // Host routes are added separately once DNS is wired:
+  //   frankfurt.konzert.haus/*
+  //   konzert.haus/* (apex → 301 to frankfurt.konzert.haus, handled in worker)
+  "assets": {
+    "directory": "./public",
+    "html_handling": "none",
+    "not_found_handling": "none"
+  },
+  "observability": {
+    "enabled": false,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    }
+  }
+}

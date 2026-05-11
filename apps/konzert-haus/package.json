@@ -1,0 +1,32 @@
+{
+  "name": "@museumsufer/konzert-haus",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && bun scripts/inline-css.mjs",
+    "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/styles.css && bun scripts/inline-css.mjs",
+    "dev": "bun css && wrangler dev",
+    "build": "bun css",
+    "deploy": "bun css && wrangler deploy",
+    "scrape": "bun scripts/scrape.ts",
+    "lint": "biome check src/ scripts/",
+    "lint:fix": "biome check --write src/ scripts/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
+    "@museumsufer/core": "*",
+    "@scalar/hono-api-reference": "^0.10.14",
+    "dayjs": "^1.11.20",
+    "hono": "^4.12.15",
+    "p-queue": "^9.0.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250410.0",
+    "@museumsufer/tsconfig": "*",
+    "lightningcss-cli": "^1.32.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.83.0"
+  }
+}
