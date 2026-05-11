@@ -5,8 +5,8 @@ import { buildServiceWorkerJs } from "@museumsufer/core";
  *  per-app-ness reduces to picking unique cache names + the navigation
  *  prefixes the SW should treat as "home routes". */
 export const SERVICE_WORKER_JS = buildServiceWorkerJs({
-  cacheName: "landau-today-v1",
-  apiCacheName: "landau-today-api-v1",
+  cacheName: "landau-today-v2",
+  apiCacheName: "landau-today-api-v2",
   shellUrls: ["/", "/manifest.json", "/styles.css"],
   navigationPrefixes: ["/", "/c/"],
 });

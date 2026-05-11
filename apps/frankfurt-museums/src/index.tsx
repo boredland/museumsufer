@@ -18,6 +18,7 @@ import {
 } from "./api";
 import { ContentBody } from "./components";
 import { berlinNow, todayIso } from "./date";
+import { dispatchDigest, scheduleForNow } from "./digest";
 import { type InitialData, renderPage } from "./frontend";
 import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
@@ -25,6 +26,7 @@ import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import imprintRoute from "./routes/imprint";
 import museumRoute from "./routes/museum";
+import pushRoute from "./routes/push";
 import staticRoute from "./routes/static";
 import { formatDateFull } from "./shared";
 import { translateFields } from "./translate";
@@ -80,6 +82,7 @@ app.use(
 );
 
 app.route("/", staticRoute);
+app.route("/", pushRoute);
 app.route("/", feedsRoute);
 app.route("/", imprintRoute);
 app.route("/", museumRoute);
@@ -455,9 +458,17 @@ app.get(
   },
 );
 
-// Scraping moved to .github/workflows/scrape.yml (museums job) — it runs
-// scripts/scrape.ts in Bun against an in-memory SQLite, regenerates
-// src/scrape-data.ts, and pushes if anything changed. No more
-// SCRAPE_SECRET, /scrape/* routes, or scheduled() handler in the worker.
+// Scraping moved to .github/workflows/scrape.yml (museums job) — no
+// SCRAPE_SECRET / /scrape/* routes. The scheduled() handler is back, but
+// only for digest push delivery (see ./digest.ts). Triggers fire at both
+// CET and CEST candidate UTC times; scheduleForNow() picks the right
+// digest based on the local Europe/Berlin hour.
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const schedule = scheduleForNow(new Date());
+    if (!schedule) return;
+    ctx.waitUntil(dispatchDigest(env, schedule));
+  },
+};
