@@ -116,9 +116,62 @@ ${renderFaq(FAQ)}
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
   <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
   <span>
-    <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
+    <button type="button" data-digest-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Push abonnieren</button> · <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
   </span>
 </footer>
+
+<dialog id="digest-dialog" style="margin:auto;padding:0;border:1px solid var(--color-rule);border-radius:0.5rem;background:var(--color-paper);color:var(--color-ink);width:min(28rem,calc(100vw - 2rem));box-shadow:0 16px 48px -16px rgb(from var(--color-ink) r g b / 0.35);">
+  <form id="digest-form" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;font-family:var(--font-body)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">Veranstaltungen abonnieren</h2>
+      <button type="button" data-digest-close aria-label="Schließen" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
+    </div>
+
+    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.</p>
+
+    <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem" aria-label="Digest-Zeitpunkte">
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="morning" />
+        <span class="digest-option__main">
+          <span class="digest-option__title">Jeden Morgen</span>
+          <span class="digest-option__time">07:00</span>
+        </span>
+        <span class="digest-option__sub">Heutige Termine</span>
+      </label>
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="afternoon" />
+        <span class="digest-option__main">
+          <span class="digest-option__title">Jeden Nachmittag</span>
+          <span class="digest-option__time">17:00</span>
+        </span>
+        <span class="digest-option__sub">Was läuft heute Abend?</span>
+      </label>
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="weekly" />
+        <span class="digest-option__main">
+          <span class="digest-option__title">Sonntag-Digest</span>
+          <span class="digest-option__time">So 09:00</span>
+        </span>
+        <span class="digest-option__sub">Wochenüberblick</span>
+      </label>
+    </fieldset>
+
+    <div id="digest-ios-hint" hidden style="padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:rgb(from var(--color-ink) r g b / 0.8)">
+      <strong style="font-weight:600">Auf iPhone/iPad:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das App-Icon — erst dann sind Push-Nachrichten möglich.
+    </div>
+
+    <div id="digest-unsupported" hidden style="padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:var(--color-rotwein)">
+      Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-top:0.25rem">
+      <p id="digest-status" hidden style="margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0" aria-live="polite"></p>
+      <button type="button" id="digest-unsubscribe-all" hidden style="background:transparent;border:0;padding:0.5rem 0;font-size:0.6875rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55);cursor:pointer;font-family:var(--font-body)">Alle abbestellen</button>
+      <button type="submit" id="digest-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">Abonnieren</button>
+    </div>
+  </form>
+</dialog>
+
 <script src="/client.js" defer></script>
 </body>
 </html>`;
