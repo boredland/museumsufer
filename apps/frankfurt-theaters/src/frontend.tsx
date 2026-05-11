@@ -444,6 +444,8 @@ export function renderFooter(): string {
       </button>
     </p>
     <p class="footer__links">
+      <a href="https://museumsufer.app" target="_blank" rel="noopener">Museumsufer</a>
+      <span class="footer__sep">·</span>
       <a href="/api/docs">API</a>
       <span class="footer__sep">·</span>
       <a href="/feed.ics">iCal</a>

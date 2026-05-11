@@ -13,12 +13,14 @@
  *    pre-inline /styles.css entry.
  */
 export const SERVICE_WORKER_JS = `
-const CACHE = 'ft-v3';
+const CACHE = 'ft-v4';
 const STATIC_ASSETS = [
   '/favicon.svg',
   '/mark.svg',
   '/icon-192.png',
   '/icon-512.png',
+  '/icon-192-maskable.png',
+  '/icon-512-maskable.png',
   '/og-image.png',
   '/manifest.json',
 ];

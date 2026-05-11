@@ -182,6 +182,7 @@ const de: Translations = {
   categoryFamilie: "Familie",
   categoryVernissage: "Vernissage",
   categoryKonzert: "Konzert",
+  sisterSite: "Theater-Spielplan",
 };
 
 const en: Translations = {
@@ -334,6 +335,7 @@ const en: Translations = {
   categoryFamilie: "Family",
   categoryVernissage: "Vernissage",
   categoryKonzert: "Concert",
+  sisterSite: "Theater Schedule",
 };
 
 const fr: Translations = {
@@ -486,6 +488,7 @@ const fr: Translations = {
   categoryFamilie: "Famille",
   categoryVernissage: "Vernissage",
   categoryKonzert: "Concert",
+  sisterSite: "Programme théâtre",
 };
 
 const ALL: Record<Locale, Translations> = { de, en, fr };
