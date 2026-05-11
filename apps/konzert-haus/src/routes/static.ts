@@ -1,4 +1,4 @@
-import { buildApiCatalog, buildManifest, buildRobotsTxt, todayIso } from "@museumsufer/core";
+import { buildApiCatalog, buildManifest, buildRobotsTxt, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { VENUES } from "../concert-config";
 import { type Env, GENRES } from "../types";
@@ -89,10 +89,20 @@ app.get("/sitemap.xml", (c) => {
     (g) => `  <url>
     <loc>${APP_URL}/genre/${g}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`,
   ).join("\n");
+  const dateUrls = Array.from({ length: 60 }, (_, i) => dateOffset(i))
+    .map(
+      (d) => `  <url>
+    <loc>${APP_URL}/tag/${d}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>`,
+    )
+    .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -104,14 +114,17 @@ app.get("/sitemap.xml", (c) => {
   </url>
   <url>
     <loc>${APP_URL}/api/docs</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>${APP_URL}/impressum</loc>
+    <lastmod>${today}</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+${dateUrls}
 ${venueUrls}
 ${genreUrls}
 </urlset>`;
