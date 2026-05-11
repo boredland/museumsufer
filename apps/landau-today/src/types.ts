@@ -1,5 +1,9 @@
-// biome-ignore lint/complexity/noBannedTypes: empty Env shape — no D1 / no secrets bound to the worker. Reserve for future bindings.
-export type Env = {};
+export interface Env {
+  DB: D1Database;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
+}
 
 export type EventSource =
   | "kulturnetz"
