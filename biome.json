@@ -8,7 +8,8 @@
       "apps/**/scripts/**/*.ts",
       "packages/**/src/**/*.ts",
       "!apps/frankfurt-theaters/src/scrape-data.ts",
-      "!apps/frankfurt-museums/src/scrape-data.ts"
+      "!apps/frankfurt-museums/src/scrape-data.ts",
+      "!apps/konzert-haus/src/scrape-data.ts"
     ]
   }
 }

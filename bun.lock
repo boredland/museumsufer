@@ -59,6 +59,26 @@
         "wrangler": "^4.83.0",
       },
     },
+    "apps/konzert-haus": {
+      "name": "@museumsufer/konzert-haus",
+      "version": "0.0.1",
+      "dependencies": {
+        "@hono/zod-validator": "^0.7.6",
+        "@museumsufer/core": "*",
+        "@scalar/hono-api-reference": "^0.10.14",
+        "dayjs": "^1.11.20",
+        "hono": "^4.12.15",
+        "p-queue": "^9.0.0",
+        "zod": "^4.3.6",
+      },
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4.20250410.0",
+        "@museumsufer/tsconfig": "*",
+        "lightningcss-cli": "^1.32.0",
+        "typescript": "^5.8.3",
+        "wrangler": "^4.83.0",
+      },
+    },
     "apps/landau-today": {
       "name": "@museumsufer/landau-today",
       "version": "0.0.1",
@@ -253,6 +273,8 @@
     "@museumsufer/frankfurt-museums": ["@museumsufer/frankfurt-museums@workspace:apps/frankfurt-museums"],
 
     "@museumsufer/frankfurt-theaters": ["@museumsufer/frankfurt-theaters@workspace:apps/frankfurt-theaters"],
+
+    "@museumsufer/konzert-haus": ["@museumsufer/konzert-haus@workspace:apps/konzert-haus"],
 
     "@museumsufer/landau-today": ["@museumsufer/landau-today@workspace:apps/landau-today"],
 

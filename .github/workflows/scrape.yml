@@ -2,12 +2,12 @@ name: scrape
 
 on:
   schedule:
-    - cron: "0 7-19 * * *" # theaters — hourly 09–21 CEST (07–19 UTC)
+    - cron: "0 7-19 * * *" # theaters + konzert-haus — hourly 09–21 CEST (07–19 UTC)
     - cron: "30 6 * * *" # landau   — daily 08:30 CEST (06:30 UTC)
   workflow_dispatch:
     inputs:
       app:
-        description: "Workspace to scrape (theaters | museums | landau | all). Defaults to all."
+        description: "Workspace to scrape (theaters | konzert-haus | museums | landau | all). Defaults to all."
         required: false
         default: "all"
 
@@ -132,3 +132,41 @@ jobs:
             sleep $((attempt * 2))
           done
           exit 1
+
+  konzert-haus:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 7-19 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.app == 'konzert-haus' || inputs.app == 'all'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run scraper
+        working-directory: apps/konzert-haus
+        run: bun scripts/scrape.ts
+
+      - name: Commit if changed
+        run: |
+          git config user.name "scrape-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/konzert-haus/src/scrape-data.ts
+          if git diff --cached --quiet; then
+            echo "no diff, skipping commit"
+            exit 0
+          fi
+          git commit -m "data(konzert-haus): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
+          push_with_retry() {
+            for attempt in 1 2 3; do
+              if git pull --rebase origin main && git push; then return 0; fi
+              echo "push attempt $attempt failed, retrying"
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+          push_with_retry
