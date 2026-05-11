@@ -1,6 +1,7 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
+import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
@@ -8,6 +9,7 @@ import docsRoutes from "./routes/docs";
 import feedsRoutes from "./routes/feeds";
 import imprintRoutes from "./routes/imprint";
 import ogRoutes from "./routes/og";
+import pushRoutes from "./routes/push";
 import staticRoutes from "./routes/static";
 import theaterRoutes from "./routes/theater";
 import { SERVICE_WORKER_JS } from "./service-worker";
@@ -82,6 +84,7 @@ app.get("/partial/programme", async (c) => {
 
 app.route("/", staticRoutes);
 app.route("/", apiRoutes);
+app.route("/", pushRoutes);
 app.route("/", feedsRoutes);
 app.route("/", theaterRoutes);
 app.route("/", imprintRoutes);
@@ -90,7 +93,19 @@ app.route("/api/docs", docsRoutes);
 
 // Scraping moved to a GitHub Action (.github/workflows/scrape.yml) — it runs
 // scripts/scrape.ts in Bun, regenerates src/scrape-data.ts, and commits to
-// trigger a Cloudflare redeploy. No more SCRAPE_SECRET, /scrape/* routes,
-// or scheduled() handler in the worker.
+// trigger a Cloudflare redeploy. No SCRAPE_SECRET / /scrape/* routes.
+//
+// The scheduled() handler is back, but only for digest push delivery —
+// see ./digest.ts. Triggers are declared in wrangler.jsonc and fire at
+// both CET and CEST candidate UTC times; scheduleForNow() picks the right
+// digest based on the local Europe/Berlin hour and ignores the off-cycle
+// firing.
 
-export default app;
+export default {
+  fetch: app.fetch,
+  async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const schedule = scheduleForNow(new Date());
+    if (!schedule) return;
+    ctx.waitUntil(dispatchDigest(env, schedule));
+  },
+};

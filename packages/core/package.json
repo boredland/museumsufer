@@ -18,6 +18,7 @@
     "./html": "./src/html.ts",
     "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
+    "./push": "./src/push.ts",
     "./robots": "./src/robots.ts",
     "./scrape-log": "./src/scrape-log.ts",
     "./security-headers": "./src/security-headers.ts",
