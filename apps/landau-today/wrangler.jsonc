@@ -8,7 +8,19 @@
     { "pattern": "www.landau.today", "custom_domain": true }
   ],
   // Scraping moved to .github/workflows/scrape.yml — the worker no longer
-  // scrapes. Daily cron lives in the workflow.
+  // scrapes. The scheduled() handler is for digest push delivery only
+  // (see src/digest.ts). Triggers fire at both CET and CEST candidate
+  // UTC times; the handler picks the right local Berlin hour.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "landau-today-db",
+      "database_id": "07ac3318-d5ad-41d6-a537-b2f2d324b5af"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 5,6 * * *", "0 15,16 * * *", "0 7,8 * * SUN"]
+  },
   "assets": {
     "directory": "./public",
     "html_handling": "none",

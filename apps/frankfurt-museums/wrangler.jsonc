@@ -7,6 +7,13 @@
   // worker no longer scrapes. No `nodejs_compat` because the worker runtime
   // path has zero Node API usage; the scrape script (which does) runs in Bun
   // on GitHub Actions, not in the Worker.
+  //
+  // Digest cron — fires at the UTC candidates for both CET and CEST; the
+  // handler in src/index.tsx checks the local Europe/Berlin hour and only
+  // dispatches when it matches. Morning 07:00, afternoon 17:00, Sunday 09:00.
+  "triggers": {
+    "crons": ["0 5,6 * * *", "0 15,16 * * *", "0 7,8 * * SUN"]
+  },
   "d1_databases": [
     {
       "binding": "DB",

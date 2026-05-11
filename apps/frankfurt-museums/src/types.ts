@@ -7,6 +7,9 @@ export interface Env {
   FETCH_PROXY_URL?: string;
   FETCH_PROXY_TOKEN?: string;
   DEEPL_API_KEYS?: string;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
 }
 
 export interface MuseumInfo {
