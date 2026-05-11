@@ -94,5 +94,78 @@ async function cacheFirst(request, cacheName) {
     return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
   }
 }
+
+self.addEventListener('push', (e) => {
+  let data = {};
+  try { data = e.data ? e.data.json() : {}; } catch (_) {}
+  const title = data.title || 'Update';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/icon-192.png',
+    badge: data.badge || '/icon-192.png',
+    tag: data.tag || 'digest',
+    renotify: true,
+    data: { url: data.url || '/' },
+  };
+  e.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const target = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const c of clients) {
+        if (new URL(c.url).origin === self.location.origin && 'focus' in c) {
+          c.navigate(target).catch(() => {});
+          return c.focus();
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow(target);
+    })
+  );
+});
+
+self.addEventListener('pushsubscriptionchange', (e) => {
+  e.waitUntil((async () => {
+    try {
+      const keyRes = await fetch('/api/push/key');
+      if (!keyRes.ok) return;
+      const key = (await keyRes.json()).publicKey;
+      const newSub = await self.registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(key),
+      });
+      let schedules = ['morning'];
+      if (e.oldSubscription) {
+        const meRes = await fetch('/api/push/me?endpoint=' + encodeURIComponent(e.oldSubscription.endpoint));
+        if (meRes.ok) {
+          const me = await meRes.json();
+          if (me.schedules && me.schedules.length) schedules = me.schedules;
+        }
+        await fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: e.oldSubscription.endpoint }),
+        });
+      }
+      const json = newSub.toJSON();
+      await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules }),
+      });
+    } catch (_) {}
+  })());
+});
+
+function urlBase64ToUint8Array(s) {
+  const pad = '='.repeat((4 - s.length % 4) % 4);
+  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
 `;
 }

@@ -24,6 +24,7 @@ app.get("/spielort/:slug", (c) => {
     });
   }
 
+  const addressLocality = venue.city.length ? venue.city[0].toUpperCase() + venue.city.slice(1) : venue.city;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "MusicVenue",
@@ -33,7 +34,7 @@ app.get("/spielort/:slug", (c) => {
     address: {
       "@type": "PostalAddress",
       streetAddress: venue.address,
-      addressLocality: venue.city,
+      addressLocality,
       addressCountry: "DE",
     },
     geo: { "@type": "GeoCoordinates", latitude: venue.lat, longitude: venue.lon },
