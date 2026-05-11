@@ -403,6 +403,129 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
   );
 }
 
+/** Digest subscription dialog — Web Push opt-in with schedule picker */
+export function DigestDialog({ tr }: { tr: Record<string, string> }) {
+  const optionClass =
+    "grid grid-cols-[1.1rem_1fr] gap-x-3 gap-y-0.5 items-baseline px-3.5 py-3 rounded-lg border border-border bg-surface cursor-pointer transition-colors hover:border-river has-[input:checked]:border-river has-[input:checked]:bg-river/10";
+  return (
+    <dialog
+      id="digest-dialog"
+      class="m-auto p-0 bg-bg text-text-primary rounded-xl shadow-search border border-border max-w-[440px] w-[calc(100%-2rem)] backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+    >
+      <form id="digest-form" class="flex flex-col p-6 gap-4 max-[480px]:p-5 max-[480px]:gap-3.5">
+        <div class="flex items-start justify-between gap-4">
+          <h2 class="font-display italic text-[1.4rem] leading-tight text-text-primary">{tr.digestTitle}</h2>
+          <button
+            type="button"
+            data-digest-close
+            aria-label={tr.contactClose}
+            class="text-text-tertiary hover:text-river bg-transparent border-0 p-1 -m-1 cursor-pointer transition-colors shrink-0"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+              <path d={ICON.close} />
+            </svg>
+          </button>
+        </div>
+
+        <p class="text-[0.875rem] leading-snug text-text-secondary">{tr.digestIntro}</p>
+
+        <fieldset class="flex flex-col gap-2 border-0 p-0 m-0" aria-label={tr.digestTitle}>
+          <label class={optionClass}>
+            <input
+              type="checkbox"
+              name="schedule"
+              value="morning"
+              class="row-span-2 self-center accent-river cursor-pointer m-0"
+            />
+            <span class="flex items-baseline justify-between gap-3">
+              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedMorning}</span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
+                {tr.digestSchedMorningTime}
+              </span>
+            </span>
+            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
+              {tr.digestSchedMorningDesc}
+            </span>
+          </label>
+          <label class={optionClass}>
+            <input
+              type="checkbox"
+              name="schedule"
+              value="afternoon"
+              class="row-span-2 self-center accent-river cursor-pointer m-0"
+            />
+            <span class="flex items-baseline justify-between gap-3">
+              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedAfternoon}</span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
+                {tr.digestSchedAfternoonTime}
+              </span>
+            </span>
+            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
+              {tr.digestSchedAfternoonDesc}
+            </span>
+          </label>
+          <label class={optionClass}>
+            <input
+              type="checkbox"
+              name="schedule"
+              value="weekly"
+              class="row-span-2 self-center accent-river cursor-pointer m-0"
+            />
+            <span class="flex items-baseline justify-between gap-3">
+              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedWeekly}</span>
+              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
+                {tr.digestSchedWeeklyTime}
+              </span>
+            </span>
+            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
+              {tr.digestSchedWeeklyDesc}
+            </span>
+          </label>
+        </fieldset>
+
+        <div
+          id="digest-ios-hint"
+          hidden
+          class="px-3.5 py-2.5 text-[0.8125rem] leading-snug text-text-secondary bg-surface border border-border-light rounded-lg"
+          dangerouslySetInnerHTML={{ __html: tr.digestIosHint }}
+        />
+
+        <div
+          id="digest-unsupported"
+          hidden
+          class="px-3.5 py-2.5 text-[0.8125rem] leading-snug text-error bg-surface border border-border-light rounded-lg"
+        >
+          {tr.digestUnsupported}
+        </div>
+
+        <div class="flex items-center justify-between gap-4 mt-1">
+          <p
+            id="digest-status"
+            hidden
+            class="text-[0.75rem] text-text-secondary leading-snug min-w-0"
+            aria-live="polite"
+          />
+          <button
+            type="button"
+            id="digest-unsubscribe-all"
+            hidden
+            class="bg-transparent border-0 p-2 cursor-pointer font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary hover:text-error transition-colors"
+          >
+            {tr.digestUnsubAll}
+          </button>
+          <button
+            type="submit"
+            id="digest-submit"
+            class="ml-auto shrink-0 text-sm font-medium py-2 px-5 rounded-full no-underline whitespace-nowrap border border-river text-river bg-transparent transition-colors cursor-pointer hover:bg-river hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {tr.digestSubscribe}
+          </button>
+        </div>
+      </form>
+    </dialog>
+  );
+}
+
 /** Contact dialog for submitting feedback, missing events, or museum corrections */
 export function ContactDialog({ tr }: { tr: Record<string, string> }) {
   const inputClass =
@@ -726,6 +849,13 @@ export function renderPage(
                 </a>
                 <button
                   type="button"
+                  data-digest-open
+                  class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
+                >
+                  {tr.digestOpen}
+                </button>
+                <button
+                  type="button"
                   data-contact-open
                   class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
                 >
@@ -769,6 +899,7 @@ export function renderPage(
           </div>
 
           <ContactDialog tr={tr} />
+          <DigestDialog tr={tr} />
 
           <script
             dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale, initialDate: initialData?.date }) }}
