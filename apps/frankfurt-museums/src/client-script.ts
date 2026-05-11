@@ -964,5 +964,182 @@ export const CLIENT_SCRIPT = `
       });
     }
 
+    var digestDialog = document.getElementById('digest-dialog');
+    if (digestDialog) {
+      var digestForm = document.getElementById('digest-form');
+      var digestStatus = document.getElementById('digest-status');
+      var digestSubmit = document.getElementById('digest-submit');
+      var digestUnsubAll = document.getElementById('digest-unsubscribe-all');
+      var digestIos = document.getElementById('digest-ios-hint');
+      var digestUnsupported = document.getElementById('digest-unsupported');
+      var digestBoxes = digestForm.querySelectorAll('input[name="schedule"]');
+
+      function digestChecked() {
+        var out = [];
+        digestBoxes.forEach(function(b) { if (b.checked) out.push(b.value); });
+        return out;
+      }
+      function digestSetChecked(values) {
+        digestBoxes.forEach(function(b) { b.checked = values.indexOf(b.value) !== -1; });
+      }
+      function digestSetStatus(msg, kind) {
+        if (!msg) { digestStatus.hidden = true; digestStatus.textContent = ''; digestStatus.className = 'text-[0.75rem] leading-snug min-w-0 text-text-secondary'; return; }
+        digestStatus.hidden = false;
+        digestStatus.textContent = msg;
+        digestStatus.className = 'text-[0.75rem] leading-snug min-w-0 ' + (kind === 'ok' ? 'text-river' : kind === 'err' ? 'text-red-700 dark:text-red-500' : 'text-text-secondary');
+      }
+      function digestB64ToBytes(s) {
+        var pad = '='.repeat((4 - s.length % 4) % 4);
+        var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+        var bin = atob(b64);
+        var out = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
+      function digestIosNonStandalone() {
+        var ua = navigator.userAgent || '';
+        var isIos = /iP(hone|od|ad)/.test(ua) || (ua.includes('Mac') && 'ontouchend' in document);
+        if (!isIos) return false;
+        var standalone = window.navigator.standalone === true
+          || window.matchMedia('(display-mode: standalone)').matches;
+        return !standalone;
+      }
+      function digestSupports() {
+        return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+      }
+      function digestCurrentSub() {
+        return navigator.serviceWorker.ready.then(function(reg) { return reg.pushManager.getSubscription(); });
+      }
+      function digestOpen() {
+        digestSetStatus('');
+        digestSubmit.disabled = false;
+        digestSubmit.textContent = T.digestSubscribe;
+        digestUnsubAll.hidden = true;
+        digestSetChecked([]);
+        digestIos.hidden = true;
+        digestUnsupported.hidden = true;
+
+        if (!digestSupports()) {
+          if (digestIosNonStandalone()) digestIos.hidden = false;
+          else digestUnsupported.hidden = false;
+          digestSubmit.disabled = true;
+        } else if (digestIosNonStandalone()) {
+          digestIos.hidden = false;
+          digestSubmit.disabled = true;
+        } else {
+          digestCurrentSub().then(function(existing) {
+            if (!existing) return;
+            return fetch('/api/push/me?endpoint=' + encodeURIComponent(existing.endpoint))
+              .then(function(r) { return r.ok ? r.json() : null; })
+              .then(function(me) {
+                if (me && me.schedules && me.schedules.length) {
+                  digestSetChecked(me.schedules);
+                  digestSubmit.textContent = T.digestSave;
+                  digestUnsubAll.hidden = false;
+                }
+              });
+          }).catch(function() {});
+        }
+
+        if (typeof digestDialog.showModal === 'function') digestDialog.showModal();
+        else digestDialog.setAttribute('open', '');
+      }
+      function digestClose() {
+        if (typeof digestDialog.close === 'function') digestDialog.close();
+        else digestDialog.removeAttribute('open');
+      }
+      function digestSubmitFlow() {
+        var sched = digestChecked();
+        digestSubmit.disabled = true;
+        digestSubmit.textContent = sched.length === 0 ? T.digestUnsubscribing : T.digestSaving;
+        digestSetStatus('');
+
+        digestCurrentSub().then(function(existing) {
+          if (sched.length === 0) {
+            if (!existing) return null;
+            return fetch('/api/push/unsubscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: existing.endpoint })
+            }).then(function() { return existing.unsubscribe().catch(function() {}); })
+              .then(function() { return 'unsubscribed'; });
+          }
+
+          function continueWithSub(sub) {
+            var json = sub.toJSON();
+            return fetch('/api/push/subscribe', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+            }).then(function(r) {
+              if (!r.ok) throw new Error('save-failed');
+              return 'saved';
+            });
+          }
+
+          if (existing) return continueWithSub(existing);
+          if (Notification.permission === 'denied') throw new Error('permission-denied');
+          var permP = Notification.permission === 'granted'
+            ? Promise.resolve('granted')
+            : Notification.requestPermission();
+          return permP.then(function(p) {
+            if (p !== 'granted') throw new Error('permission-denied');
+            return fetch('/api/push/key').then(function(r) {
+              if (!r.ok) throw new Error('key-failed');
+              return r.json();
+            });
+          }).then(function(data) {
+            return navigator.serviceWorker.ready.then(function(reg) {
+              return reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: digestB64ToBytes(data.publicKey)
+              });
+            });
+          }).then(continueWithSub);
+        }).then(function(outcome) {
+          digestSetStatus(T.digestSuccess, 'ok');
+          if (outcome === 'saved') {
+            digestSubmit.textContent = T.digestSave;
+            digestUnsubAll.hidden = false;
+          }
+          setTimeout(digestClose, 1200);
+        }).catch(function(err) {
+          var msg = T.digestError;
+          if (err && err.message === 'permission-denied') msg = T.digestPermDenied;
+          digestSetStatus(msg, 'err');
+          digestSubmit.disabled = false;
+          var resched = digestChecked();
+          digestSubmit.textContent = resched.length === 0
+            ? T.digestUnsub
+            : (digestUnsubAll.hidden ? T.digestSubscribe : T.digestSave);
+        });
+      }
+
+      document.addEventListener('click', function(e) {
+        var openBtn = e.target.closest('[data-digest-open]');
+        if (openBtn) { e.preventDefault(); digestOpen(); return; }
+        var closeBtn = e.target.closest('[data-digest-close]');
+        if (closeBtn) { e.preventDefault(); digestClose(); return; }
+      });
+      digestDialog.addEventListener('click', function(e) {
+        if (e.target === digestDialog) digestClose();
+      });
+      digestForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        digestSubmitFlow();
+      });
+      digestUnsubAll.addEventListener('click', function(e) {
+        e.preventDefault();
+        digestSetChecked([]);
+        digestSubmitFlow();
+      });
+      digestForm.addEventListener('change', function() {
+        if (digestSubmit.disabled) return;
+        var sched = digestChecked();
+        if (sched.length === 0 && !digestUnsubAll.hidden) digestSubmit.textContent = T.digestUnsub;
+        else digestSubmit.textContent = digestUnsubAll.hidden ? T.digestSubscribe : T.digestSave;
+      });
+    }
+
     ${WEBMCP_SCRIPT}
 `;

@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
 import PQueue from "p-queue";
 import { VENUES, type VenueConfig } from "../src/concert-config";
+import { dedupEvents } from "../src/dedup";
 import { classify } from "../src/genre-heuristics";
 import { runScraper } from "../src/scrape-runner";
 import type { Event, ScrapeData, ScrapedEvent } from "../src/types";
@@ -84,7 +85,8 @@ function ingest(venue: VenueConfig, scraped: ScrapedEvent[], eventsById: Map<num
 }
 
 function buildScrapeData(eventsById: Map<number, Event>): ScrapeData {
-  const events = [...eventsById.values()].sort(
+  const deduped = dedupEvents([...eventsById.values()]);
+  const events = deduped.sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
       (a.time ?? "").localeCompare(b.time ?? "") ||
