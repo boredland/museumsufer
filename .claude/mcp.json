@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "domain-search": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "domain-search-mcp@latest"]
+    }
+  }
+}
