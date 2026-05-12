@@ -2,8 +2,32 @@ import { buildFaqPageSchema, type FaqItem, THEME_FOUC_SCRIPT } from "@museumsufe
 import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
+import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { APP_URL, formatDateLong } from "./shared";
 import type { Event } from "./types";
+
+function langSuffix(locale: Locale, sep: "?" | "&" = "?"): string {
+  return locale === DEFAULT_LOCALE ? "" : `${sep}lang=${locale}`;
+}
+
+function buildHreflangs(currentPath: string): string {
+  return SUPPORTED_LOCALES.map((l) => {
+    const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
+    const sep = stripped.includes("?") ? "&" : "?";
+    const href = `${APP_URL}${l === DEFAULT_LOCALE ? stripped : `${stripped}${sep}lang=${l}`}`;
+    return `<link rel="alternate" hreflang="${l}" href="${href}" />`;
+  }).join("\n");
+}
+
+function buildLangSwitchHtml(locale: Locale, currentPath: string): string {
+  const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
+  const sep = stripped.includes("?") ? "&" : "?";
+  return SUPPORTED_LOCALES.map((l) => {
+    const href = l === DEFAULT_LOCALE ? stripped || "/" : `${stripped || "/"}${sep}lang=${l}`;
+    const cls = l === locale ? "langswitch__a langswitch__a--active" : "langswitch__a";
+    return `<a href="${href}" class="${cls}" hreflang="${l}"${l === locale ? ' aria-current="page"' : ""}>${l.toUpperCase()}</a>`;
+  }).join("");
+}
 
 const FAQ: FaqItem[] = [
   {
@@ -39,26 +63,29 @@ interface PageProps {
   categoryCounts: Map<string, number>;
   dateCounts: Map<string, number>;
   turnstileSiteKey: string;
+  locale: Locale;
+  tr: Translations;
 }
 
 export function renderPage(props: PageProps): string {
-  const { date, category, events, turnstileSiteKey } = props;
+  const { date, category, events, turnstileSiteKey, locale, tr } = props;
   const cat = category ? CATEGORY_BY_SLUG.get(category) : undefined;
   const isHome = !category && date === todayIso();
   const title = cat
     ? `${cat.label} — ${formatDateLong(date)} · landau.today`
     : isHome
-      ? "landau.today — Veranstaltungen heute in Landau in der Pfalz"
+      ? tr.homeTitle
       : `${formatDateLong(date)} · landau.today`;
-  const description = cat
-    ? `${cat.label} in Landau in der Pfalz und an der Südlichen Weinstraße: alle Veranstaltungen am ${formatDateLong(date)}.`
-    : "Veranstaltungen in Landau in der Pfalz und an der Südlichen Weinstraße — Konzert, Theater, Tanz, Lesung, Weinfest, Ausstellung, Stadtführung. Täglich aggregiert aus Kulturnetz Landau, Stadt Landau, Hambacher Schloss, RPTU, Pfalz.de und der SÜW-Tourismus.";
-  const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}` : `${APP_URL}/?date=${date}`;
+  const description = cat ? `${cat.label} — ${formatDateLong(date)}. ${tr.homeDescription}` : tr.homeDescription;
+  const lang = langSuffix(locale);
+  const langAmp = langSuffix(locale, "&");
+  const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}${langAmp}` : `${APP_URL}/?date=${date}${langAmp}`;
+  const currentPath = cat ? `/c/${cat.slug}?date=${date}` : `/?date=${date}`;
   const jsonLd = buildJsonLd(events.slice(0, 50));
   const faqLd = JSON.stringify(buildFaqPageSchema(FAQ));
 
   return `<!doctype html>
-<html lang="de">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -70,8 +97,10 @@ export function renderPage(props: PageProps): string {
 <meta property="og:type" content="website" />
 <meta property="og:url" content="${escapeHtml(canonical)}" />
 <meta property="og:image" content="${APP_URL}/og.svg" />
+<meta property="og:locale" content="${locale === "fr" ? "fr_FR" : "de_DE"}" />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="canonical" href="${escapeHtml(canonical)}" />
+${buildHreflangs(currentPath)}
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="manifest" href="/manifest.json" />
 <link rel="alternate" type="application/rss+xml" title="landau.today RSS" href="/feed.xml" />
@@ -90,21 +119,22 @@ export function renderPage(props: PageProps): string {
 <script type="application/ld+json">${faqLd}</script>
 </head>
 <body>
-<a class="sr-only" href="#content">Zum Inhalt</a>
+<a class="sr-only" href="#content">${escapeHtml(tr.skipToContent)}</a>
 <div class="htmx-progress" aria-hidden="true"></div>
 <div class="search-bar ink-up" style="animation-delay:0ms">
-  <label for="q" class="sr-only">Suchen</label>
-  <input id="q" type="search" class="search-input js-search" placeholder="Suchen — Konzert, Theater, Veranstalter, Ort …" autocomplete="off" />
+  <label for="q" class="sr-only">${escapeHtml(tr.searchLabel)}</label>
+  <input id="q" type="search" class="search-input js-search" placeholder="${escapeHtml(tr.searchPlaceholder)}" autocomplete="off" />
   <kbd class="search-kbd">⌘K</kbd>
-  <span class="search-empty" hidden>Keine Treffer</span>
+  <span class="search-empty" hidden>${escapeHtml(tr.searchEmpty)}</span>
 </div>
 <header class="masthead ink-up" style="animation-delay:0ms">
   <h1>
-    <a href="/">Landau<span class="ampersand">&amp;</span>heute</a>
+    <a href="/${lang}">Landau<span class="ampersand">&amp;</span>heute</a>
   </h1>
-  <p class="subtitle">Veranstaltungsblatt für die Südliche Weinstraße</p>
+  <p class="subtitle">${escapeHtml(tr.subtitle)}</p>
   <p class="colophon">${escapeHtml(formatDateLong(todayIso()))}</p>
-  <button type="button" class="theme-toggle js-theme" aria-label="Hell/Dunkel wechseln" title="Hell/Dunkel">
+  <nav class="langswitch" aria-label="Language">${buildLangSwitchHtml(locale, currentPath)}</nav>
+  <button type="button" class="theme-toggle js-theme" aria-label="${escapeHtml(tr.themeToggle)}" title="${escapeHtml(tr.themeToggle)}">
     <span class="icon-sun" aria-hidden="true">☀</span>
     <span class="icon-moon" aria-hidden="true">☾</span>
   </button>
@@ -116,9 +146,9 @@ ${renderPartial(props)}
 ${renderFaq(FAQ)}
 </main>
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
-  <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
+  <span>${escapeHtml(tr.footerLine)}</span>
   <span>
-    <button type="button" data-digest-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Push abonnieren</button> · <button type="button" data-contact-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Problem melden</button> · <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
+    <button type="button" data-digest-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">${escapeHtml(tr.digestSubscribe)}</button> · <button type="button" data-contact-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">${escapeHtml(tr.reportProblem)}</button> · <a href="/feed.ics">${escapeHtml(tr.subscribeCalendar)}</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum${lang}">${escapeHtml(tr.imprint)}</a>
   </span>
 </footer>
 

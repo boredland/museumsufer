@@ -4,6 +4,7 @@ import { isCategorySlug } from "./categories";
 import { todayIso } from "./date";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderPartial } from "./frontend";
+import { detectLocale, getTranslations } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import { getCategoryCountsForDate, getEventCountsByDate, getEventsForDate } from "./queries";
 import apiRoute from "./routes/api";
@@ -73,19 +74,34 @@ function buildProps(c: import("hono").Context<{ Bindings: Env }>, category?: str
   const horizon = new Date(`${todayIso()}T12:00:00Z`);
   horizon.setUTCDate(horizon.getUTCDate() + 21);
   const dateCounts = getEventCountsByDate(todayIso(), horizon.toISOString().slice(0, 10));
-  return { date, category, events, categoryCounts, dateCounts, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY };
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  return {
+    date,
+    category,
+    events,
+    categoryCounts,
+    dateCounts,
+    turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
+    locale,
+    tr,
+  };
+}
+
+function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, category?: string) {
+  const props = buildProps(c, category);
+  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
+  return c.html(renderPage(props), 200, {
+    "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
+    "Content-Language": props.locale,
+    Vary: "Accept-Language",
+  });
 }
 
 const PAGE_HEADERS = {
   "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
   "Content-Language": "de",
 };
-
-function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, category?: string) {
-  const props = buildProps(c, category);
-  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
-  return c.html(renderPage(props), 200, PAGE_HEADERS);
-}
 
 app.get("/", (c) => renderForCategory(c));
 app.get("/c/:cat", (c) => renderForCategory(c, c.req.param("cat")));

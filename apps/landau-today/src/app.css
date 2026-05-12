@@ -298,6 +298,30 @@
 :where(.dark) .theme-toggle .icon-moon { display: none; }
 .masthead { position: relative; }
 
+.langswitch {
+  position: absolute;
+  top: 1rem;
+  right: 3.5rem;
+  display: inline-flex;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-soft);
+}
+.langswitch__a {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.1rem 0.05rem;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.langswitch__a:hover { color: var(--color-rotwein); }
+.langswitch__a--active {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-rotwein);
+}
+
 /* ── chip row + date strip ───────────────────────────────────────── */
 .strip {
   position: relative;
