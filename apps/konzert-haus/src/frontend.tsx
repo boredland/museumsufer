@@ -318,6 +318,17 @@ function formatPriceRange(min?: number | null, max?: number | null): string | nu
 
 export const escapeHtml = coreEscapeHtml;
 
+export function renderDigestCue(): string {
+  return `<button type="button" class="digest-cue" data-digest-open aria-label="Push-Nachrichten zu Konzerten abonnieren">
+  <span class="digest-cue__mark" aria-hidden="true">※</span>
+  <span class="digest-cue__kicker">Push-Digest</span>
+  <span class="digest-cue__rule" aria-hidden="true"></span>
+  <span class="digest-cue__text">Erfahre morgens, was heute klingt.</span>
+  <span class="digest-cue__schedules" aria-hidden="true">07 · 17 · So 09</span>
+  <span class="digest-cue__chevron" aria-hidden="true">→</span>
+</button>`;
+}
+
 export function renderDigestDialog(): string {
   return `<dialog id="digest-dialog" class="contact-dialog">
   <form id="digest-form" class="contact-form" novalidate>
@@ -795,6 +806,7 @@ ${renderGrain()}
 ${renderMasthead()}
 ${renderGenreFilter(date, genre)}
 ${renderDateStrip(dateStrip, date, today)}
+${renderDigestCue()}
 
 <main class="programme" id="programme">
   <div id="programme-content">

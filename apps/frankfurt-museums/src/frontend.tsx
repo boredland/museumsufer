@@ -797,6 +797,26 @@ export function renderPage(
               dateCounts={dateCounts}
             />
 
+            <button
+              type="button"
+              class="digest-cue"
+              data-digest-open
+              aria-label="Push-Nachrichten zu Museen abonnieren"
+            >
+              <span class="digest-cue__mark" aria-hidden="true">
+                ※
+              </span>
+              <span class="digest-cue__kicker">Push-Digest</span>
+              <span class="digest-cue__rule" aria-hidden="true" />
+              <span class="digest-cue__text">Erfahre morgens, was heute am Museumsufer offen ist.</span>
+              <span class="digest-cue__schedules" aria-hidden="true">
+                07 · 17 · So 09
+              </span>
+              <span class="digest-cue__chevron" aria-hidden="true">
+                →
+              </span>
+            </button>
+
             <div class="anchor-headline mb-7 mt-8" id="date-label" aria-live="polite">
               {range
                 ? tr.upcomingDays.replace("{n}", String(range))
