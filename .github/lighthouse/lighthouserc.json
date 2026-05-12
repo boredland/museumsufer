@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/GoogleChrome/lighthouse-ci/main/types/lhci.schema.json",
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "settings": {
+        "preset": "desktop",
+        "throttling": {
+          "rttMs": 40,
+          "throughputKbps": 10240,
+          "cpuSlowdownMultiplier": 1
+        },
+        "skipAudits": ["uses-http2"]
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.85, "aggregationMethod": "median" }],
+        "categories:accessibility": ["error", { "minScore": 0.95, "aggregationMethod": "median" }],
+        "categories:best-practices": ["warn", { "minScore": 0.95, "aggregationMethod": "median" }],
+        "categories:seo": ["error", { "minScore": 0.95, "aggregationMethod": "median" }],
+
+        "largest-contentful-paint": ["warn", { "maxNumericValue": 2500, "aggregationMethod": "median" }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1, "aggregationMethod": "median" }],
+        "total-blocking-time": ["warn", { "maxNumericValue": 200, "aggregationMethod": "median" }],
+        "speed-index": ["warn", { "maxNumericValue": 3500, "aggregationMethod": "median" }],
+
+        "errors-in-console": "off",
+        "csp-xss": "off",
+        "is-on-https": "error",
+        "viewport": "error",
+        "html-has-lang": "error",
+        "document-title": "error",
+        "meta-description": "error",
+        "image-alt": "warn",
+        "color-contrast": "warn"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

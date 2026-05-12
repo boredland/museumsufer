@@ -1,0 +1,62 @@
+name: lighthouse
+
+# Runs Lighthouse against the four live production sites and asserts the
+# scores defined in .github/lighthouse/lighthouserc.json. Fails the job
+# when a budget (perf, a11y, SEO, CWV) regresses. Three runs per URL,
+# median-smoothed.
+#
+# Triggers: every push to main (catches deploy regressions), nightly cron
+# (catches infra regressions that aren't tied to our code), and manual
+# dispatch.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Only the four app workspaces + shared core can affect Lighthouse
+      # output. Skip the workflow on changes that can't move the needle
+      # (docs, top-level config, the scrape workflow itself).
+      - "apps/**"
+      - "packages/**"
+      - ".github/lighthouse/**"
+      - ".github/workflows/lighthouse.yml"
+  schedule:
+    - cron: "0 6 * * *" # 06:00 UTC — after the morning digest fires
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Cancel in-flight runs for the same ref when a new push lands, but
+  # don't cancel the scheduled run — they're cheap and uncoupled.
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: ${{ matrix.site.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One app regressing shouldn't mask the other three.
+      fail-fast: false
+      matrix:
+        site:
+          - { name: museums, url: "https://museumsufer.app/" }
+          - { name: theaters, url: "https://frankfurt.ins.theater/" }
+          - { name: konzert-haus, url: "https://frankfurt.konzert.haus/" }
+          - { name: landau, url: "https://landau.today/" }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait 60s for Cloudflare deploy
+        if: github.event_name == 'push'
+        run: sleep 60
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: ${{ matrix.site.url }}
+          configPath: ./.github/lighthouse/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
