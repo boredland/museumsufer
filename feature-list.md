@@ -38,6 +38,7 @@ Aggregated programme for Frankfurt's Museumsufer district (museums + exhibitions
 - Per-event/exhibition like buttons (AJAX)
 - Share menus building Google / Outlook / Yahoo calendar deep-links (UTM-tagged)
 - Push digest signup dialog with per-museum filters and 3 schedules
+- "Problem melden" contact dialog (Turnstile-gated) — feedback / error reports / suggestions → `feedback@ins.museum`
 - Client-side search (NFD + diacritic-strip)
 - "Ask your AI" deep-links — pre-filled day-context prompt routed to Gemini AI Mode, ChatGPT, Claude, Perplexity, Grok (shared via `packages/core/src/llm-services.ts`)
 - FAQ section (6 collapsible Q&A) with `FAQPage` JSON-LD emitted via `packages/core/src/faq.ts`
