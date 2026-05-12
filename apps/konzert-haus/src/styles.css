@@ -760,6 +760,42 @@ body::before {
   font-style: italic;
   color: var(--felt-soft);
 }
+
+/* ────────────────  Sibling-apps strap  ──────────────── */
+/* Cross-link to the Frankfurt theatre + museum sites. Sits after the
+   concert list as a quiet editorial suggestion. */
+.programme__siblings {
+  margin: clamp(3rem, 6vw, 4.5rem) auto 1rem;
+  padding: 0 var(--gut);
+  max-width: 38rem;
+  text-align: center;
+}
+.programme__siblings-rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  width: 4rem;
+  margin: 0 auto 1.25rem;
+  opacity: 0.6;
+}
+.programme__siblings-prompt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--felt-soft);
+  text-wrap: balance;
+  margin: 0;
+}
+.programme__siblings-prompt a {
+  color: var(--brass);
+  text-decoration: underline;
+  text-decoration-color: rgb(from var(--brass) r g b / 0.35);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+.programme__siblings-prompt a:hover {
+  text-decoration-color: var(--brass);
+}
 .empty__mark {
   font-size: 3rem;
   color: var(--felt-quiet);

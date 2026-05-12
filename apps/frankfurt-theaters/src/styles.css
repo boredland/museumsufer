@@ -1768,6 +1768,43 @@ textarea:focus-visible,
   text-align: center;
 }
 
+/* ────────────────  Sibling-apps strap  ──────────────── */
+/* Editorial cross-link below the performance list. Italic serif quietly
+   offers the visitor a Konzert or Museumsbesuch when the day's theatre
+   programme isn't a match. */
+.programme__siblings {
+  margin: clamp(3rem, 6vw, 4.5rem) auto 1rem;
+  padding: 0 var(--gut);
+  max-width: 38rem;
+  text-align: center;
+}
+.programme__siblings-rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  width: 4rem;
+  margin: 0 auto 1.25rem;
+  opacity: 0.6;
+}
+.programme__siblings-prompt {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  text-wrap: balance;
+  margin: 0;
+}
+.programme__siblings-prompt a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: rgb(from var(--accent) r g b / 0.35);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s;
+}
+.programme__siblings-prompt a:hover {
+  text-decoration-color: var(--accent);
+}
+
 /* ────────────────  Deep-link highlight  ──────────────── */
 
 /* When a performance is reached via ?item=perf-<id> or #perf-<id>:

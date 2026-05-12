@@ -941,14 +941,6 @@ export function renderPage(
                 </button>
               </div>
               <div class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
-                <a
-                  href="https://frankfurt.ins.theater"
-                  target="_blank"
-                  rel="noopener"
-                  class="no-underline hover:text-river"
-                >
-                  {tr.sisterSite}
-                </a>
                 <a href="/api/docs" class="no-underline hover:text-river">
                   API
                 </a>

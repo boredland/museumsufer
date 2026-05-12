@@ -772,6 +772,35 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
   );
 }
 
+/**
+ * Quiet editorial cross-link to the two sibling Frankfurt apps. Sits
+ * after the events + exhibitions block — a soft suggestion for visitors
+ * who didn't find anything in today's museum line-up. Renders the
+ * `siblingTemplate` translation with `{first}` / `{second}` replaced by
+ * the two anchor links.
+ */
+function SiblingStrap({ tr }: { tr: Record<string, string> }) {
+  const template = tr.siblingTemplate;
+  const [before, midRaw] = template.split("{first}");
+  const [mid, after] = (midRaw ?? "").split("{second}");
+  return (
+    <section class="my-12 max-w-prose mx-auto text-center">
+      <hr class="mx-auto w-12 border-t border-border opacity-50 mb-6" />
+      <p class="font-display italic text-text-secondary text-base leading-relaxed">
+        {before}
+        <a href="https://frankfurt.ins.theater" class="text-river hover:underline">
+          {tr.siblingTheaterLabel}
+        </a>
+        {mid}
+        <a href="https://frankfurt.konzert.haus" class="text-river hover:underline">
+          {tr.siblingKonzertLabel}
+        </a>
+        {after}
+      </p>
+    </section>
+  );
+}
+
 /** Main content section with events and exhibitions — used on landing page and partial updates */
 export function ContentBody({
   events,
@@ -844,6 +873,8 @@ export function ContentBody({
           </ul>
         )}
       </Section>
+
+      <SiblingStrap tr={tr} />
     </>
   );
 }
