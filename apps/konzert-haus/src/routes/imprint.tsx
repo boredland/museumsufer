@@ -1,3 +1,4 @@
+import { buildImprintSections } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { Footer, Grain, Head } from "../frontend";
@@ -10,6 +11,16 @@ const OPERATOR = {
   email: "feedback@konzert.haus",
   city: "Frankfurt am Main, Germany",
 };
+
+const SECTIONS = buildImprintSections({
+  operator: OPERATOR,
+  dataSourceCopy:
+    "Konzerttermine, Programme und Kartenpreise werden automatisiert von den öffentlichen Webseiten der jeweiligen " +
+    "Spielorte aggregiert. Die Rechte an den Inhalten verbleiben bei den jeweiligen Veranstaltern. Diese Seite hat " +
+    "keinerlei kommerzielle Beziehung zu den gelisteten Häusern und übernimmt keine Verantwortung für die Richtigkeit " +
+    "der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf auf der Webseite des Veranstalters.",
+  sourceUrl: `${REPO_URL}/tree/main/apps/konzert-haus`,
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -44,39 +55,32 @@ app.get("/impressum", (c) =>
               <a href="/">← Zum Programm</a>
             </p>
             <h2>Impressum</h2>
-
-            <h3>Anbieter (TMG §5)</h3>
-            <p>
-              {OPERATOR.name}
-              <br />
-              {OPERATOR.city}
-            </p>
-
-            <h3>Kontakt</h3>
-            <p>
-              <a href={`mailto:${OPERATOR.email}`}>{OPERATOR.email}</a>
-            </p>
-
-            <h3>Inhaltlich Verantwortlicher gemäß §18 Abs. 2 MStV</h3>
-            <p>
-              {OPERATOR.name}, {OPERATOR.city}
-            </p>
-
-            <h3>Datenherkunft</h3>
-            <p>
-              Konzerttermine, Programme und Kartenpreise werden automatisiert von den öffentlichen Webseiten der
-              jeweiligen Spielorte aggregiert. Die Rechte an den Inhalten verbleiben bei den jeweiligen Veranstaltern.
-              Diese Seite hat keinerlei kommerzielle Beziehung zu den gelisteten Häusern und übernimmt keine
-              Verantwortung für die Richtigkeit der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf
-              auf der Webseite des Veranstalters.
-            </p>
-
-            <h3>Quellcode</h3>
-            <p>
-              <a href={`${REPO_URL}/tree/main/apps/konzert-haus`} target="_blank" rel="noopener">
-                {REPO_URL.replace("https://", "")}
-              </a>
-            </p>
+            {SECTIONS.map((s) => (
+              <section key={s.heading}>
+                <h3>{s.heading}</h3>
+                {s.body.length > 0 ? (
+                  <p>
+                    {s.body.map((line, i) => (
+                      <>
+                        {i > 0 ? <br /> : null}
+                        {line}
+                      </>
+                    ))}
+                  </p>
+                ) : null}
+                {s.links?.map((l) => (
+                  <p key={l.href}>
+                    <a
+                      href={l.href}
+                      target={l.external ? "_blank" : undefined}
+                      rel={l.external ? "noopener" : undefined}
+                    >
+                      {l.label}
+                    </a>
+                  </p>
+                ))}
+              </section>
+            ))}
           </main>
           <Footer tr={getTranslations(DEFAULT_LOCALE)} locale={DEFAULT_LOCALE} />
         </body>

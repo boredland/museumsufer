@@ -1,3 +1,4 @@
+import { buildImprintSections, type ImprintLabels } from "@museumsufer/core";
 import { Hono } from "hono";
 import { detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
 import { APP_URL } from "../shared";
@@ -10,6 +11,14 @@ const OPERATOR = {
 };
 
 const REPO_URL = "https://github.com/boredland/museumsufer";
+
+const SOURCE_COPY_DE =
+  "Veranstaltungstermine werden automatisiert aus öffentlichen Quellen aggregiert: " +
+  "Kulturnetz Landau, Stadt Landau, Stiftung Hambacher Schloss, RPTU Kaiserslautern-Landau, " +
+  "Pfalz.de und Südliche Weinstraße Tourismus. Die Rechte an den Inhalten verbleiben " +
+  "bei den jeweiligen Veranstaltern. Diese Seite hat keinerlei kommerzielle Beziehung zu " +
+  "den gelisteten Veranstaltern und übernimmt keine Verantwortung für die Richtigkeit " +
+  "der angezeigten Daten — bitte prüfen Sie alle Angaben vor Ihrem Besuch beim Veranstalter.";
 
 const app = new Hono<{ Bindings: Env }>();
 

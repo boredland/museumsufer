@@ -1,3 +1,4 @@
+import { buildImprintSections } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { ClientScript, Footer, Grain, Head } from "../frontend";
@@ -9,6 +10,17 @@ const OPERATOR = {
   email: "feedback@ins.theater",
   city: "Frankfurt am Main, Germany",
 };
+
+const SECTIONS = buildImprintSections({
+  operator: OPERATOR,
+  dataSourceCopy:
+    "Spielpläne, Vorstellungstermine, Kartenpreise und Verfügbarkeiten werden automatisiert von den öffentlichen " +
+    "Webseiten der jeweiligen Frankfurter Bühnen aggregiert. Die Rechte an den Inhalten verbleiben bei den jeweiligen " +
+    "Häusern. Diese Seite hat keinerlei kommerzielle Beziehung zu den gelisteten Theatern und übernimmt keine " +
+    "Verantwortung für die Richtigkeit der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf auf " +
+    "der Webseite des Hauses.",
+  sourceUrl: `${REPO_URL}/tree/main/apps/frankfurt-theaters`,
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -44,56 +56,32 @@ app.get("/impressum", (c) => {
             </p>
             <h2 class="legal__title">Impressum</h2>
 
-            <section class="legal__block">
-              <h3 class="legal__kicker">Anbieter (TMG §5)</h3>
-              <p>
-                {OPERATOR.name}
-                <br />
-                {OPERATOR.city}
-              </p>
-            </section>
-
-            <section class="legal__block">
-              <h3 class="legal__kicker">Kontakt</h3>
-              <p>
-                <a href={`mailto:${OPERATOR.email}`}>{OPERATOR.email}</a>
-              </p>
-            </section>
-
-            <section class="legal__block">
-              <h3 class="legal__kicker">Inhaltlich Verantwortlicher gemäß §18 Abs. 2 MStV</h3>
-              <p>
-                {OPERATOR.name}, {OPERATOR.city}
-              </p>
-            </section>
-
-            <section class="legal__block">
-              <h3 class="legal__kicker">Datenherkunft</h3>
-              <p>
-                Spielpläne, Vorstellungstermine, Kartenpreise und Verfügbarkeiten werden automatisiert von den
-                öffentlichen Webseiten der jeweiligen Frankfurter Bühnen aggregiert. Die Rechte an den Inhalten
-                verbleiben bei den jeweiligen Häusern. Diese Seite hat keinerlei kommerzielle Beziehung zu den
-                gelisteten Theatern und übernimmt keine Verantwortung für die Richtigkeit der angezeigten Daten — bitte
-                prüfen Sie alle Angaben vor dem Kartenkauf auf der Webseite des Hauses.
-              </p>
-            </section>
-
-            <section class="legal__block">
-              <h3 class="legal__kicker">Haftungsausschluss</h3>
-              <p>
-                Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links.
-                Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
-              </p>
-            </section>
-
-            <section class="legal__block">
-              <h3 class="legal__kicker">Quellcode</h3>
-              <p>
-                <a href={`${REPO_URL}/tree/main/apps/frankfurt-theaters`} target="_blank" rel="noopener">
-                  {REPO_URL.replace("https://", "")}
-                </a>
-              </p>
-            </section>
+            {SECTIONS.map((s) => (
+              <section key={s.heading} class="legal__block">
+                <h3 class="legal__kicker">{s.heading}</h3>
+                {s.body.length > 0 ? (
+                  <p>
+                    {s.body.map((line, i) => (
+                      <>
+                        {i > 0 ? <br /> : null}
+                        {line}
+                      </>
+                    ))}
+                  </p>
+                ) : null}
+                {s.links?.map((l) => (
+                  <p key={l.href}>
+                    <a
+                      href={l.href}
+                      target={l.external ? "_blank" : undefined}
+                      rel={l.external ? "noopener" : undefined}
+                    >
+                      {l.label}
+                    </a>
+                  </p>
+                ))}
+              </section>
+            ))}
           </main>
           <Footer turnstileSiteKey={turnstileSiteKey} />
           <ClientScript />

@@ -19,6 +19,7 @@
     "./html": "./src/html.ts",
     "./htmx-lifecycle": "./src/htmx-lifecycle.ts",
     "./i18n": "./src/i18n.ts",
+    "./imprint": "./src/imprint.ts",
     "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
     "./markdown": "./src/markdown.ts",
