@@ -168,7 +168,7 @@ ${buildHreflangs(`/event/${ev.id}`)}
   <h1>${esc(ev.title)}</h1>
   <p class="when">${esc(when)}${time ? ` · ${time}${endTime && !sameTime ? `–${endTime}` : ""}${tr.timeSuffix ? ` ${esc(tr.timeSuffix)}` : ""}` : ""}</p>
   ${ev.venue ? `<p class="where">${esc(ev.venue)}${ev.organizer && ev.organizer !== ev.venue ? ` · ${esc(ev.organizer)}` : ""}</p>` : ""}
-  ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" loading="lazy" decoding="async" />` : ""}
+  ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" width="800" height="450" loading="lazy" decoding="async" style="width:100%;height:auto;aspect-ratio:16/9;object-fit:cover" />` : ""}
   ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}
   ${ev.price ? `<p class="when" style="margin-top:1rem"><em>${esc(ev.price)}</em></p>` : ""}
   <div class="actions actions--group">
