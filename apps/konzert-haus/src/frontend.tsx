@@ -11,7 +11,6 @@ import {
   type FaqItem,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
-  LLM_SERVICES,
   langSwitchItems,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
@@ -21,6 +20,7 @@ import {
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
   type WebMcpToolDef,
 } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
@@ -1292,30 +1292,7 @@ function Faq({ tr }: { tr: Translations }) {
 
 function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
   const niceDate = formatLocalisedDateLong(date, locale);
-  const prompt = tr.askAiPrompt(niceDate);
-  return (
-    <section class="askai" aria-label={tr.askAiAria}>
-      <span class="askai__label">{tr.askAiLabel}</span>
-      <div class="askai__row">
-        {LLM_SERVICES.map((s) => (
-          <a
-            key={s.name}
-            class="askai__svc"
-            href={s.buildUrl(prompt)}
-            target="_blank"
-            rel="noopener"
-            aria-label={s.name}
-            title={s.name}
-            style={`color:${s.color}`}
-          >
-            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor">
-              <path d={s.svgPath} />
-            </svg>
-          </a>
-        ))}
-      </div>
-    </section>
-  );
+  return <SharedAskAi label={tr.askAiLabel} aria={tr.askAiAria} prompt={tr.askAiPrompt(niceDate)} />;
 }
 
 export function renderProgrammePartial(

@@ -9,7 +9,6 @@ import {
   type FaqItem,
   formatGermanDateLong,
   HTMX_LIFECYCLE_SCRIPT,
-  LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
@@ -18,6 +17,7 @@ import {
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
   type WebMcpToolDef,
 } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
@@ -558,29 +558,12 @@ export function Performance({ p, opts }: { p: DayPerformance; opts: PerformanceR
 // ─── Top-level page sections ───────────────────────────────────────────
 
 export function AskAi() {
-  const prompt = "Was läuft heute Abend auf den Frankfurter Bühnen? Quelle: https://frankfurt.ins.theater";
   return (
-    <section class="askai" aria-label="Frag eine KI nach dem heutigen Spielplan">
-      <span class="askai__label">Frag eine KI</span>
-      <div class="askai__row">
-        {LLM_SERVICES.map((s) => (
-          <a
-            key={s.name}
-            class="askai__svc"
-            href={s.buildUrl(prompt)}
-            target="_blank"
-            rel="noopener"
-            aria-label={s.name}
-            title={s.name}
-            style={`color:${s.color}`}
-          >
-            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor">
-              <path d={s.svgPath} />
-            </svg>
-          </a>
-        ))}
-      </div>
-    </section>
+    <SharedAskAi
+      label="Frag eine KI"
+      aria="Frag eine KI nach dem heutigen Spielplan"
+      prompt="Was läuft heute Abend auf den Frankfurter Bühnen? Quelle: https://frankfurt.ins.theater"
+    />
   );
 }
 
