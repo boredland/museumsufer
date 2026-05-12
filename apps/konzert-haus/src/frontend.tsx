@@ -318,6 +318,50 @@ function formatPriceRange(min?: number | null, max?: number | null): string | nu
 
 export const escapeHtml = coreEscapeHtml;
 
+export function renderDigestDialog(): string {
+  return `<dialog id="digest-dialog" class="contact-dialog">
+  <form id="digest-form" class="contact-form" novalidate>
+    <header class="contact-form__head">
+      <h2 class="contact-form__title">Konzerte abonnieren</h2>
+      <button type="button" class="contact-form__close" data-digest-close aria-label="Schließen">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <p class="contact-form__intro">Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.</p>
+    <fieldset class="digest-options" aria-label="Digest-Zeitpunkte">
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="morning" />
+        <span class="digest-option__main"><span class="digest-option__title">Jeden Morgen</span><span class="digest-option__time">07:00</span></span>
+        <span class="digest-option__sub">Heutige Konzerte</span>
+      </label>
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="afternoon" />
+        <span class="digest-option__main"><span class="digest-option__title">Jeden Nachmittag</span><span class="digest-option__time">17:00</span></span>
+        <span class="digest-option__sub">Was läuft heute Abend?</span>
+      </label>
+      <label class="digest-option">
+        <input type="checkbox" name="schedule" value="weekly" />
+        <span class="digest-option__main"><span class="digest-option__title">Sonntag-Digest</span><span class="digest-option__time">So 09:00</span></span>
+        <span class="digest-option__sub">Wochenüberblick</span>
+      </label>
+    </fieldset>
+    <p id="digest-ios-hint" class="contact-form__regarding" hidden>
+      <span class="contact-form__regarding-label">iPhone</span>
+      <span>Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.</span>
+    </p>
+    <p id="digest-unsupported" class="contact-form__regarding" hidden>
+      <span class="contact-form__regarding-label">Browser</span>
+      <span>Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.</span>
+    </p>
+    <footer class="contact-form__foot">
+      <p id="digest-status" class="contact-form__status" hidden aria-live="polite"></p>
+      <button type="button" id="digest-unsubscribe-all" hidden class="contact-form__submit" style="background:transparent;color:var(--felt-soft);border-color:var(--rule)">Alle abbestellen</button>
+      <button type="submit" id="digest-submit" class="contact-form__submit">Abonnieren</button>
+    </footer>
+  </form>
+</dialog>`;
+}
+
 export function renderContactDialog(opts: { turnstileSiteKey?: string } = {}): string {
   return `<dialog id="contact-dialog" class="contact-dialog">
   <form id="contact-form" class="contact-form" novalidate>
@@ -364,6 +408,9 @@ ${
 
 export function renderClientBehaviors(): string {
   return `<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
+}
 (function(){
   var btn = document.querySelector('[data-theme-toggle]');
   if (btn) btn.addEventListener('click', function(){
@@ -535,6 +582,148 @@ export function renderClientBehaviors(): string {
       });
     });
   })();
+
+  // Digest dialog — Web Push subscription management
+  (function(){
+    var dlg = document.getElementById('digest-dialog');
+    if (!dlg) return;
+    var form = document.getElementById('digest-form');
+    var status = document.getElementById('digest-status');
+    var submit = document.getElementById('digest-submit');
+    var unsubBtn = document.getElementById('digest-unsubscribe-all');
+    var iosHint = document.getElementById('digest-ios-hint');
+    var unsupported = document.getElementById('digest-unsupported');
+    var boxes = form.querySelectorAll('input[name="schedule"]');
+
+    function checked(){
+      var out = [];
+      boxes.forEach(function(b){ if (b.checked) out.push(b.value); });
+      return out;
+    }
+    function setChecked(values){
+      boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
+    }
+    function setStatus(msg, kind){
+      if (!msg){ status.hidden = true; status.textContent = ''; status.className = 'contact-form__status'; return; }
+      status.hidden = false;
+      status.textContent = msg;
+      status.className = 'contact-form__status' + (kind === 'ok' ? ' contact-form__status--ok' : kind === 'err' ? ' contact-form__status--err' : '');
+    }
+    function b64ToBytes(s){
+      var pad = '='.repeat((4 - s.length % 4) % 4);
+      var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+      var bin = atob(b64);
+      var out = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+    function iosNonStandalone(){
+      var ua = navigator.userAgent || '';
+      var isIos = /iP(hone|od|ad)/.test(ua) || (ua.indexOf('Mac') >= 0 && 'ontouchend' in document);
+      if (!isIos) return false;
+      var standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+      return !standalone;
+    }
+    function supports(){
+      return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    }
+    function currentSub(){
+      return navigator.serviceWorker.ready.then(function(reg){ return reg.pushManager.getSubscription(); });
+    }
+    function openDialog(){
+      setStatus('');
+      submit.disabled = false; submit.textContent = 'Abonnieren';
+      unsubBtn.hidden = true;
+      setChecked([]);
+      iosHint.hidden = true; unsupported.hidden = true;
+      if (!supports()){
+        if (iosNonStandalone()) iosHint.hidden = false; else unsupported.hidden = false;
+        submit.disabled = true;
+      } else if (iosNonStandalone()){
+        iosHint.hidden = false; submit.disabled = true;
+      } else {
+        currentSub().then(function(existing){
+          if (!existing) return;
+          return fetch('/api/push/me?endpoint=' + encodeURIComponent(existing.endpoint))
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(me){
+              if (me && me.schedules && me.schedules.length){
+                setChecked(me.schedules);
+                submit.textContent = 'Speichern';
+                unsubBtn.hidden = false;
+              }
+            });
+        }).catch(function(){});
+      }
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+    }
+    function closeDialog(){
+      if (typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+    }
+    function submitFlow(){
+      var sched = checked();
+      submit.disabled = true;
+      submit.textContent = sched.length === 0 ? 'Wird abbestellt…' : 'Wird gespeichert…';
+      setStatus('');
+      currentSub().then(function(existing){
+        if (sched.length === 0){
+          if (!existing) return null;
+          return fetch('/api/push/unsubscribe', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: existing.endpoint })
+          }).then(function(){ return existing.unsubscribe().catch(function(){}); })
+            .then(function(){ return 'unsubscribed'; });
+        }
+        function withSub(sub){
+          var json = sub.toJSON();
+          return fetch('/api/push/subscribe', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+          }).then(function(r){ if (!r.ok) throw new Error('save-failed'); return 'saved'; });
+        }
+        if (existing) return withSub(existing);
+        if (Notification.permission === 'denied') throw new Error('permission-denied');
+        var permP = Notification.permission === 'granted' ? Promise.resolve('granted') : Notification.requestPermission();
+        return permP.then(function(p){
+          if (p !== 'granted') throw new Error('permission-denied');
+          return fetch('/api/push/key').then(function(r){ if (!r.ok) throw new Error('key-failed'); return r.json(); });
+        }).then(function(data){
+          return navigator.serviceWorker.ready.then(function(reg){
+            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(data.publicKey) });
+          });
+        }).then(withSub);
+      }).then(function(outcome){
+        setStatus(outcome === 'unsubscribed' ? 'Abbestellt.' : 'Gespeichert.', 'ok');
+        if (outcome === 'saved'){ submit.textContent = 'Speichern'; unsubBtn.hidden = false; }
+        setTimeout(closeDialog, 1200);
+      }).catch(function(err){
+        var msg = 'Speichern fehlgeschlagen.';
+        if (err && err.message === 'permission-denied') msg = 'Benachrichtigungen wurden blockiert. Erlaube sie in den Browser-Einstellungen.';
+        setStatus(msg, 'err');
+        submit.disabled = false;
+        var resched = checked();
+        submit.textContent = resched.length === 0 ? 'Abbestellen' : (unsubBtn.hidden ? 'Abonnieren' : 'Speichern');
+      });
+    }
+
+    document.addEventListener('click', function(e){
+      var openBtn = e.target.closest && e.target.closest('[data-digest-open]');
+      if (openBtn){ e.preventDefault(); openDialog(); return; }
+      var closeBtn = e.target.closest && e.target.closest('[data-digest-close]');
+      if (closeBtn){ e.preventDefault(); closeDialog(); return; }
+    });
+    dlg.addEventListener('click', function(e){ if (e.target === dlg) closeDialog(); });
+    form.addEventListener('submit', function(e){ e.preventDefault(); submitFlow(); });
+    unsubBtn.addEventListener('click', function(e){ e.preventDefault(); setChecked([]); submitFlow(); });
+    form.addEventListener('change', function(){
+      if (submit.disabled) return;
+      var sched = checked();
+      if (sched.length === 0 && !unsubBtn.hidden) submit.textContent = 'Abbestellen';
+      else submit.textContent = unsubBtn.hidden ? 'Abonnieren' : 'Speichern';
+    });
+  })();
 })();
 </script>`;
 }
@@ -544,6 +733,10 @@ export function renderFooter(): string {
   <span class="footer__rule"></span>
   <p>konzert.haus — Konzerte in Frankfurt und Umgebung.<br>Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik.</p>
   <div class="footer__actions">
+    <button type="button" class="footer__action" data-digest-open aria-label="Push-Nachrichten abonnieren">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1.5a4 4 0 0 0-4 4v3l-1.5 2.5h11L12 8.5v-3a4 4 0 0 0-4-4z" stroke-linejoin="round"/><path d="M6 13a2 2 0 0 0 4 0" stroke-linecap="round"/></svg>
+      <span>Push abonnieren</span>
+    </button>
     <button type="button" class="footer__action" data-contact-open aria-label="Problem melden">
       <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
       <span>Problem melden</span>
@@ -611,6 +804,7 @@ ${renderDateStrip(dateStrip, date, today)}
 
 ${renderFooter()}
 ${renderContactDialog({ turnstileSiteKey })}
+${renderDigestDialog()}
 ${renderClientBehaviors()}
 </body>
 </html>`;

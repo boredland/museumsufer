@@ -1,6 +1,11 @@
-import type { FeedbackEnv } from "@museumsufer/core";
+import type { FeedbackEnv, PushEnv } from "@museumsufer/core";
 
-export type Env = FeedbackEnv;
+export interface Env extends FeedbackEnv, PushEnv {
+  DB: D1Database;
+  VAPID_PUBLIC_KEY?: string;
+  VAPID_PRIVATE_KEY?: string;
+  VAPID_SUBJECT?: string;
+}
 
 export type Genre = "classical" | "jazz" | "sacred" | "world" | "experimental" | "chamber";
 
