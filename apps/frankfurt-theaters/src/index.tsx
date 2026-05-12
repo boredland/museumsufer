@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
+import { handleImageProxy } from "./image-proxy";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
@@ -58,6 +59,8 @@ app.use("*", async (c, next) => {
 });
 
 app.get("/healthz", (c) => c.json({ ok: true }));
+
+app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
 app.get("/", async (c) => {
   const date = c.req.query("date") || todayIso();
