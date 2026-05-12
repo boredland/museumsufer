@@ -25,6 +25,9 @@ const SOURCE: EventSource = "pfalz-de";
 const SITEMAP_URL = "https://www.pfalz.de/sitemap.xml";
 const OCCURRENCE_HORIZON_DAYS = 30;
 const FETCH_CONCURRENCY = 6;
+/** Cap the whole scraper. pfalz.de has flaked into 30+ min stalls;
+ *  past this budget we bail with whatever we collected so far. */
+const OVERALL_BUDGET_MS = 4 * 60 * 1000;
 
 /** Slug-keyword filter — first cheap pass against the sitemap. We keep it
  *  inclusive (anything that *could* be Landau ↔ Neustadt corridor) and
@@ -161,14 +164,27 @@ export interface PfalzDeOptions {
 }
 
 export async function scrapePfalzDe(opts: PfalzDeOptions = {}): Promise<Omit<Event, "id">[]> {
+  const budget = AbortSignal.timeout(OVERALL_BUDGET_MS);
+  return Promise.race([
+    scrapePfalzDeInner(opts, budget),
+    new Promise<Omit<Event, "id">[]>((resolve) => {
+      budget.addEventListener("abort", () => {
+        console.warn(`pfalz-de: overall budget of ${OVERALL_BUDGET_MS}ms exhausted, returning partial`);
+        resolve([]);
+      });
+    }),
+  ]);
+}
+
+async function scrapePfalzDeInner(opts: PfalzDeOptions, budget: AbortSignal): Promise<Omit<Event, "id">[]> {
   const fetchImpl = opts.fetchImpl ?? fetch;
   const horizonDays = opts.horizonDays ?? OCCURRENCE_HORIZON_DAYS;
   const concurrency = opts.concurrency ?? FETCH_CONCURRENCY;
 
   const candidates = await fetchSitemapUrls(fetchImpl);
-  if (candidates.length === 0) return [];
+  if (candidates.length === 0 || budget.aborted) return [];
 
-  const detailPages = await fetchAllDetailPages(fetchImpl, candidates, concurrency);
+  const detailPages = await fetchAllDetailPages(fetchImpl, candidates, concurrency, budget);
   const today = todayIso();
   const horizon = addDaysIso(today, horizonDays);
 
@@ -184,12 +200,8 @@ export async function scrapePfalzDe(opts: PfalzDeOptions = {}): Promise<Omit<Eve
 
 async function fetchSitemapUrls(fetchImpl: typeof fetch): Promise<string[]> {
   try {
-    const res = await fetchWithTimeout(fetchImpl, SITEMAP_URL, 20_000);
-    if (!res.ok) {
-      console.warn(`pfalz-de sitemap: HTTP ${res.status}`);
-      return [];
-    }
-    const xml = await res.text();
+    const xml = await fetchTextWithTimeout(fetchImpl, SITEMAP_URL, 20_000);
+    if (xml == null) return [];
     const seen = new Set<string>();
     for (const m of xml.matchAll(/<loc>(https:\/\/www\.pfalz\.de\/de\/veranstaltung\/[^<"]+)<\/loc>/g)) {
       const url = m[1].trim();
@@ -212,19 +224,19 @@ async function fetchAllDetailPages(
   fetchImpl: typeof fetch,
   urls: string[],
   concurrency: number,
+  budget: AbortSignal,
 ): Promise<DetailPage[]> {
   // Tiny worker-pool to keep concurrent fetches bounded — we don't want to
   // hammer the upstream Drupal cluster on a daily cron.
   const out: DetailPage[] = [];
   let cursor = 0;
   async function worker() {
-    while (cursor < urls.length) {
+    while (cursor < urls.length && !budget.aborted) {
       const i = cursor++;
       const url = urls[i];
       try {
-        const res = await fetchWithTimeout(fetchImpl, url, 12_000);
-        if (!res.ok) continue;
-        const html = await res.text();
+        const html = await fetchTextWithTimeout(fetchImpl, url, 8_000);
+        if (html == null) continue;
         const page = parseDetail(url, html);
         if (page) out.push(page);
       } catch (err) {
@@ -350,17 +362,23 @@ function decode(s: string | undefined): string | undefined {
   return s ? decodeEntities(s).trim() : undefined;
 }
 
-/** Wrap fetch with an AbortController so a hung pfalz.de socket can't
- *  stall the whole scrape pipeline. The default fetch in Bun has no
- *  per-request timeout. */
-async function fetchWithTimeout(fetchImpl: typeof fetch, url: string, timeoutMs: number): Promise<Response> {
+/** Fetch + read body under a single AbortController so a hung pfalz.de
+ *  socket can't stall the whole scrape pipeline. The default fetch in
+ *  Bun has no per-request timeout, and clearing the timer before
+ *  awaiting `res.text()` would re-expose the body-stream to indefinite
+ *  hangs — which actually happened on a slow-day CI run that ran past
+ *  30 minutes. Returns `null` for non-2xx, aborted, or errored fetches
+ *  (caller logs nothing extra). */
+async function fetchTextWithTimeout(fetchImpl: typeof fetch, url: string, timeoutMs: number): Promise<string | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    return await fetchImpl(url, {
+    const res = await fetchImpl(url, {
       headers: { "User-Agent": "landau-today/1.0" },
       signal: ctrl.signal,
     });
+    if (!res.ok) return null;
+    return await res.text();
   } finally {
     clearTimeout(timer);
   }
