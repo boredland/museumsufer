@@ -25,6 +25,8 @@ interface ParsedSubscription {
   p256dh: string;
   auth: string;
   schedules: PushSchedule[];
+  /** Opaque per-app filter blob — null means "no filter, notify on all events". */
+  filters: Record<string, unknown> | null;
 }
 
 function parseSubscriptionBody(body: unknown): ParsedSubscription | string {
@@ -46,7 +48,16 @@ function parseSubscriptionBody(body: unknown): ParsedSubscription | string {
     if (!isSchedule(s)) return `invalid schedule: ${String(s)}`;
     if (!schedules.includes(s)) schedules.push(s);
   }
-  return { endpoint: b.endpoint, p256dh: keys.p256dh, auth: keys.auth, schedules };
+
+  let filters: Record<string, unknown> | null = null;
+  if (b.filters != null) {
+    if (typeof b.filters !== "object" || Array.isArray(b.filters)) return "filters must be an object";
+    const blob = JSON.stringify(b.filters);
+    if (blob.length > 4096) return "filters too large";
+    filters = b.filters as Record<string, unknown>;
+  }
+
+  return { endpoint: b.endpoint, p256dh: keys.p256dh, auth: keys.auth, schedules, filters };
 }
 
 /** GET /api/push/key — returns the app's VAPID public key. */
@@ -65,16 +76,18 @@ export async function handlePushSubscribeRequest(request: Request, env: PushEnv)
   if (typeof parsed === "string") return Response.json({ error: parsed }, { status: 400 });
 
   const ua = request.headers.get("user-agent");
+  const filtersJson = parsed.filters ? JSON.stringify(parsed.filters) : null;
   const stmts = parsed.schedules.map((schedule) =>
     env.DB.prepare(
-      `INSERT INTO push_subscriptions (endpoint, p256dh, auth, schedule, user_agent)
-       VALUES (?1, ?2, ?3, ?4, ?5)
+      `INSERT INTO push_subscriptions (endpoint, p256dh, auth, schedule, user_agent, filters_json)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6)
        ON CONFLICT (endpoint, schedule) DO UPDATE SET
          p256dh = excluded.p256dh,
          auth = excluded.auth,
          user_agent = excluded.user_agent,
+         filters_json = excluded.filters_json,
          failed_at = NULL`,
-    ).bind(parsed.endpoint, parsed.p256dh, parsed.auth, schedule, ua),
+    ).bind(parsed.endpoint, parsed.p256dh, parsed.auth, schedule, ua, filtersJson),
   );
 
   const keepList = parsed.schedules.map((s) => `'${s}'`).join(",");
@@ -98,12 +111,32 @@ export async function handlePushUnsubscribeRequest(request: Request, env: PushEn
   return Response.json({ ok: true });
 }
 
-/** GET /api/push/me?endpoint=… — reports which schedules an endpoint is on. */
+/**
+ * GET /api/push/me?endpoint=… — reports which schedules an endpoint is on and
+ * the (shared) filters the user chose. All rows for one endpoint share the same
+ * filters_json since the subscribe handler writes the same blob to each row.
+ */
 export async function handlePushMeRequest(request: Request, env: PushEnv): Promise<Response> {
   const endpoint = new URL(request.url).searchParams.get("endpoint");
-  if (!endpoint) return Response.json({ schedules: [] });
-  const rows = await env.DB.prepare(`SELECT schedule FROM push_subscriptions WHERE endpoint = ?1 AND failed_at IS NULL`)
+  if (!endpoint) return Response.json({ schedules: [], filters: null });
+  const rows = await env.DB.prepare(
+    `SELECT schedule, filters_json FROM push_subscriptions WHERE endpoint = ?1 AND failed_at IS NULL`,
+  )
     .bind(endpoint)
-    .all<{ schedule: PushSchedule }>();
-  return Response.json({ schedules: (rows.results ?? []).map((r) => r.schedule) });
+    .all<{ schedule: PushSchedule; filters_json: string | null }>();
+  const results = rows.results ?? [];
+  const filters = results.find((r) => r.filters_json)?.filters_json ?? null;
+  return Response.json({
+    schedules: results.map((r) => r.schedule),
+    filters: filters ? safeParseJson(filters) : null,
+  });
+}
+
+function safeParseJson(s: string): Record<string, unknown> | null {
+  try {
+    const v = JSON.parse(s);
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
 }

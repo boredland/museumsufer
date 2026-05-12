@@ -356,6 +356,21 @@ export function renderDigestDialog(): string {
         <span class="digest-option__sub">Wochenüberblick</span>
       </label>
     </fieldset>
+    <details class="digest-filter">
+      <summary class="digest-filter__summary">
+        <span class="digest-filter__label">Genres einschränken</span>
+        <span class="digest-filter__hint">leer = alle</span>
+      </summary>
+      <fieldset class="digest-filter__chips" aria-label="Genres">
+        ${GENRE_ORDER.map(
+          (g) => `<label class="digest-chip">
+          <input type="checkbox" name="filter-genre" value="${g}" />
+          <span class="digest-chip__dot" style="background:${GENRE_COLOR_VAR[g]}"></span>
+          <span class="digest-chip__label">${GENRE_LABELS[g]}</span>
+        </label>`,
+        ).join("")}
+      </fieldset>
+    </details>
     <p id="digest-ios-hint" class="contact-form__regarding" hidden>
       <span class="contact-form__regarding-label">iPhone</span>
       <span>Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.</span>
@@ -605,6 +620,7 @@ if ('serviceWorker' in navigator) {
     var iosHint = document.getElementById('digest-ios-hint');
     var unsupported = document.getElementById('digest-unsupported');
     var boxes = form.querySelectorAll('input[name="schedule"]');
+    var genreBoxes = form.querySelectorAll('input[name="filter-genre"]');
 
     function checked(){
       var out = [];
@@ -613,6 +629,14 @@ if ('serviceWorker' in navigator) {
     }
     function setChecked(values){
       boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
+    }
+    function checkedGenres(){
+      var out = [];
+      genreBoxes.forEach(function(b){ if (b.checked) out.push(b.value); });
+      return out;
+    }
+    function setGenres(values){
+      genreBoxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
     }
     function setStatus(msg, kind){
       if (!msg){ status.hidden = true; status.textContent = ''; status.className = 'contact-form__status'; return; }
@@ -645,7 +669,7 @@ if ('serviceWorker' in navigator) {
       setStatus('');
       submit.disabled = false; submit.textContent = 'Abonnieren';
       unsubBtn.hidden = true;
-      setChecked([]);
+      setChecked([]); setGenres([]);
       iosHint.hidden = true; unsupported.hidden = true;
       if (!supports()){
         if (iosNonStandalone()) iosHint.hidden = false; else unsupported.hidden = false;
@@ -660,6 +684,7 @@ if ('serviceWorker' in navigator) {
             .then(function(me){
               if (me && me.schedules && me.schedules.length){
                 setChecked(me.schedules);
+                if (me.filters && Array.isArray(me.filters.genres)) setGenres(me.filters.genres);
                 submit.textContent = 'Speichern';
                 unsubBtn.hidden = false;
               }
@@ -689,9 +714,11 @@ if ('serviceWorker' in navigator) {
         }
         function withSub(sub){
           var json = sub.toJSON();
+          var genres = checkedGenres();
+          var filters = genres.length > 0 ? { genres: genres } : null;
           return fetch('/api/push/subscribe', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+            body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
           }).then(function(r){ if (!r.ok) throw new Error('save-failed'); return 'saved'; });
         }
         if (existing) return withSub(existing);
