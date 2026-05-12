@@ -127,7 +127,7 @@ export function renderMasthead(): string {
     <p class="tagline">Was heute in Frankfurt und Umgebung erklingt.</p>
   </a>
   <hr class="masthead__rule" />
-  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbthema wechseln" title="Farbthema wechseln" onclick="document.documentElement.classList.toggle('dark');document.documentElement.classList.remove('light');localStorage.setItem('theme',document.documentElement.classList.contains('dark')?'dark':'light')">
+  <button type="button" class="theme-toggle" data-theme-toggle aria-label="Farbthema wechseln" title="Farbthema wechseln">
     <svg class="tt-moon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     <svg class="tt-sun" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4"/></svg>
   </button>
@@ -309,6 +309,103 @@ function formatPriceRange(min?: number | null, max?: number | null): string | nu
 
 export const escapeHtml = coreEscapeHtml;
 
+export function renderClientBehaviors(): string {
+  return `<script>
+(function(){
+  var btn = document.querySelector('[data-theme-toggle]');
+  if (btn) btn.addEventListener('click', function(){
+    var html = document.documentElement;
+    var isDark = html.classList.contains('dark');
+    html.classList.toggle('dark', !isDark);
+    html.classList.toggle('light', isDark);
+    try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
+  });
+
+  // After HTMX swaps in a new programme, re-sync date strip + genre pills to
+  // match the URL the swap pushed. Without this, the user clicks a date and
+  // sees the highlighted tile stay on yesterday — looks broken even though
+  // the content updated.
+  function currentDate(){
+    var m = location.pathname.match(/^\\/tag\\/(\\d{4}-\\d{2}-\\d{2})/);
+    return m ? m[1] : null;
+  }
+  function currentGenre(){ return new URLSearchParams(location.search).get('genre'); }
+
+  function setAttrIfPresent(el, name, value){ if (el.hasAttribute(name)) el.setAttribute(name, value); }
+
+  function syncDateStrip(){
+    var date = currentDate(); if (!date) return;
+    var genre = currentGenre();
+    var qs = genre ? ('?genre=' + encodeURIComponent(genre)) : '';
+    var hxQs = genre ? ('&genre=' + encodeURIComponent(genre)) : '';
+    document.querySelectorAll('.datetile').forEach(function(t){
+      var tileDate = (t.getAttribute('href') || '').match(/\\/tag\\/(\\d{4}-\\d{2}-\\d{2})/);
+      if (!tileDate) return;
+      var d = tileDate[1];
+      var active = d === date;
+      t.classList.toggle('datetile--active', active);
+      t.setAttribute('aria-current', active ? 'true' : 'false');
+      // Rewrite tile href + hx-* so date navigation preserves genre filter
+      t.setAttribute('href', '/tag/' + d + qs);
+      setAttrIfPresent(t, 'hx-get', '/partial/programme?date=' + d + hxQs);
+      setAttrIfPresent(t, 'hx-push-url', '/tag/' + d + qs);
+    });
+    var active = document.querySelector('.datetile--active');
+    if (active && active.scrollIntoView) active.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }
+
+  function syncGenreFilter(){
+    var date = currentDate(); if (!date) return;
+    var genre = currentGenre();
+    document.querySelectorAll('.genre-pill').forEach(function(p){
+      var href = p.getAttribute('href') || '';
+      var pillGenre = (href.match(/[?&]genre=([^&]+)/) || [])[1] || null;
+      var active = (genre || null) === (pillGenre ? decodeURIComponent(pillGenre) : null);
+      p.classList.toggle('genre-pill--active', active);
+      // Rewrite pill URLs so the date stays in sync with the strip
+      var base = '/tag/' + date;
+      var partial = '/partial/programme?date=' + date;
+      if (pillGenre){
+        p.setAttribute('href', base + '?genre=' + pillGenre);
+        setAttrIfPresent(p, 'hx-get', partial + '&genre=' + pillGenre);
+        setAttrIfPresent(p, 'hx-push-url', base + '?genre=' + pillGenre);
+      } else {
+        p.setAttribute('href', base);
+        setAttrIfPresent(p, 'hx-get', partial);
+        setAttrIfPresent(p, 'hx-push-url', base);
+      }
+    });
+  }
+
+  // Optimistic active-state flip on click so the UI feels instant
+  document.addEventListener('click', function(e){
+    var tile = e.target.closest('.datetile');
+    if (tile){
+      document.querySelectorAll('.datetile--active').forEach(function(el){ el.classList.remove('datetile--active'); el.setAttribute('aria-current', 'false'); });
+      tile.classList.add('datetile--active'); tile.setAttribute('aria-current', 'true');
+      return;
+    }
+    var pill = e.target.closest('.genre-pill');
+    if (pill){
+      document.querySelectorAll('.genre-pill--active').forEach(function(el){ el.classList.remove('genre-pill--active'); });
+      pill.classList.add('genre-pill--active');
+    }
+  });
+
+  document.body.addEventListener('htmx:afterSwap', function(e){
+    if (!e.detail || !e.detail.target || e.detail.target.id !== 'programme-content') return;
+    syncDateStrip(); syncGenreFilter();
+  });
+  // Also re-sync on history navigation (back/forward) when HTMX restores the cache
+  window.addEventListener('popstate', function(){ syncDateStrip(); syncGenreFilter(); });
+
+  function onReady(){ syncDateStrip(); syncGenreFilter(); }
+  if (document.readyState !== 'loading') onReady();
+  else document.addEventListener('DOMContentLoaded', onReady);
+})();
+</script>`;
+}
+
 export function renderFooter(): string {
   return `<footer class="footer">
   <span class="footer__rule"></span>
@@ -373,6 +470,7 @@ ${renderDateStrip(dateStrip, date, today)}
 </main>
 
 ${renderFooter()}
+${renderClientBehaviors()}
 </body>
 </html>`;
 }
