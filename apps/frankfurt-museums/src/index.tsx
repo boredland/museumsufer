@@ -1,6 +1,6 @@
 import { EmailMessage } from "cloudflare:email";
 import { zValidator } from "@hono/zod-validator";
-import { buildFeedbackMime, securityHeaders } from "@museumsufer/core";
+import { buildFeedbackMime, securityHeaders, verifyTurnstileToken } from "@museumsufer/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
@@ -75,8 +75,9 @@ app.use(
       "img-src 'self' data: https:",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline'",
-      "connect-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
+      "connect-src 'self' https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -223,10 +224,31 @@ const FEEDBACK_TO = "info@jonas-strassel.de";
 
 app.post("/api/contact", async (c) => {
   const body = (await c.req
-    .json<{ category?: string; email?: string; message?: string; context?: string }>()
-    .catch(() => null)) as { category?: string; email?: string; message?: string; context?: string } | null;
+    .json<{
+      category?: string;
+      email?: string;
+      message?: string;
+      context?: string;
+      "cf-turnstile-response"?: string;
+    }>()
+    .catch(() => null)) as {
+    category?: string;
+    email?: string;
+    message?: string;
+    context?: string;
+    "cf-turnstile-response"?: string;
+  } | null;
   if (!body?.message || body.message.length < 3) return c.json({ error: "message required" }, 400);
   if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
+
+  if (c.env.TURNSTILE_SECRET) {
+    const verdict = await verifyTurnstileToken(
+      body["cf-turnstile-response"],
+      c.env.TURNSTILE_SECRET,
+      c.req.header("cf-connecting-ip") ?? null,
+    );
+    if (!verdict.success) return c.json({ error: "turnstile failed", codes: verdict.errorCodes }, 400);
+  }
 
   const raw = buildFeedbackMime({
     from: FEEDBACK_FROM,
@@ -487,14 +509,25 @@ app.get(
     const horizon = berlinNow().add(90, "day").format("YYYY-MM-DD");
     const dateCounts = getEventCountsByDate(today, horizon);
 
-    return c.html(renderPage(locale, initialData, museums, sort === "near" ? "near" : undefined, range, dateCounts), {
-      headers: {
-        "Content-Language": locale,
-        Vary: "Accept, Accept-Language",
-        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
-        Link: linkHeader,
+    return c.html(
+      renderPage(
+        locale,
+        initialData,
+        museums,
+        sort === "near" ? "near" : undefined,
+        range,
+        dateCounts,
+        c.env.TURNSTILE_SITE_KEY,
+      ),
+      {
+        headers: {
+          "Content-Language": locale,
+          Vary: "Accept, Accept-Language",
+          "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+          Link: linkHeader,
+        },
       },
-    });
+    );
   },
 );
 

@@ -14,6 +14,9 @@
       "destination_address": "info@jonas-strassel.de"
     }
   ],
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAADNxRIr9duIRP8ag"
+  },
   "assets": {
     "directory": "./public",
     "html_handling": "none",

@@ -75,7 +75,7 @@ app.get("/", async (c) => {
       },
     });
   }
-  return c.html(renderPage({ date, today, performances, dateStrip }), {
+  return c.html(renderPage({ date, today, performances, dateStrip, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }), {
     headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
   });
 });

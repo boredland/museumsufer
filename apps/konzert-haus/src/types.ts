@@ -1,5 +1,7 @@
 export interface Env {
   FEEDBACK_EMAIL: SendEmail;
+  TURNSTILE_SECRET?: string;
+  TURNSTILE_SITE_KEY?: string;
 }
 
 export type Genre = "classical" | "jazz" | "sacred" | "world" | "experimental" | "chamber";

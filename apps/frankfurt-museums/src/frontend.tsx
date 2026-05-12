@@ -39,6 +39,7 @@ interface HtmlHeadOptions {
   ogImage?: string;
   jsonSchemas?: Array<{ name: string; json: string }>;
   twitterCard?: "summary_large_image" | "summary";
+  turnstileSiteKey?: string;
 }
 
 /** Renders the HTML head with meta tags, fonts, stylesheets, and structured data */
@@ -51,6 +52,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
     ogImage = "https://museumsufer.app/og-image.png",
     jsonSchemas = [],
     twitterCard = "summary_large_image",
+    turnstileSiteKey,
   } = options;
 
   const hreflangs = [
@@ -106,6 +108,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       {jsonSchemas.map((schema) => (
         <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
       ))}
+      {turnstileSiteKey ? <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer /> : null}
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
     </>
   );
@@ -527,7 +530,7 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
 }
 
 /** Contact dialog for submitting feedback, missing events, or museum corrections */
-export function ContactDialog({ tr }: { tr: Record<string, string> }) {
+export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, string>; turnstileSiteKey?: string }) {
   const inputClass =
     "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
   const labelClass = "font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary block mb-1.5";
@@ -596,6 +599,10 @@ export function ContactDialog({ tr }: { tr: Record<string, string> }) {
         </label>
 
         <input type="hidden" id="contact-context" name="context" />
+
+        {turnstileSiteKey ? (
+          <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
+        ) : null}
 
         <div class="flex items-center justify-between gap-4 mt-1">
           <p
@@ -679,6 +686,7 @@ export function renderPage(
   _sort?: string,
   range?: number,
   dateCounts: Array<{ date: string; count: number }> = [],
+  turnstileSiteKey?: string,
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
   const berlinOffset = getBerlinUtcOffset();
@@ -758,6 +766,7 @@ export function renderPage(
             description: tr.metaLong,
             canonicalUrl,
             jsonSchemas,
+            turnstileSiteKey,
           })}
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
@@ -898,7 +907,7 @@ export function renderPage(
             </footer>
           </div>
 
-          <ContactDialog tr={tr} />
+          <ContactDialog tr={tr} turnstileSiteKey={turnstileSiteKey} />
           <DigestDialog tr={tr} />
 
           <script
