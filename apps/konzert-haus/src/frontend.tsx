@@ -6,6 +6,8 @@ import {
   CalendarPopover,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
+  formatGermanDateLong,
+  formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   langSwitchItems,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
@@ -88,11 +90,6 @@ function dateParts(iso: string) {
     month: d.getUTCMonth(),
     year: d.getUTCFullYear(),
   };
-}
-
-function fullGerman(iso: string): string {
-  const p = dateParts(iso);
-  return `${WEEKDAYS_LONG[p.weekday]}, ${p.day}. ${MONTHS_LONG[p.month]} ${p.year}`;
 }
 
 export interface HeadOptions {
@@ -1177,14 +1174,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
 }
 
 function niceDateFor(date: string, locale: Locale): string {
-  if (locale === "de") return fullGerman(date);
-  const d = new Date(`${date}T12:00:00Z`);
-  const fmt = locale === "fr" ? "fr-FR" : "en-GB";
-  return d.toLocaleDateString(fmt, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
+  return formatLocalisedDateLong(date, locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "de-DE");
 }
+
+// Keep dateParts/WEEKDAYS_LONG/MONTHS_LONG imports above used elsewhere.

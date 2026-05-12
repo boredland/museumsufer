@@ -55,3 +55,77 @@ export const GERMAN_MONTHS_LONG = [
   "November",
   "Dezember",
 ];
+
+export const GERMAN_MONTHS_SHORT_DISPLAY = [
+  "Jan",
+  "Feb",
+  "Mär",
+  "Apr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Dez",
+];
+
+interface DateParts {
+  weekday: number;
+  day: number;
+  month: number;
+  year: number;
+}
+
+function parseIsoUtc(iso: string): Date {
+  return new Date(`${iso}T12:00:00Z`);
+}
+
+function dateParts(iso: string): DateParts {
+  const d = parseIsoUtc(iso);
+  return {
+    weekday: d.getUTCDay(),
+    day: d.getUTCDate(),
+    month: d.getUTCMonth(),
+    year: d.getUTCFullYear(),
+  };
+}
+
+/** "Donnerstag, 12. Mai 2026" — long German typesetter form. */
+export function formatGermanDateLong(iso: string): string {
+  const p = dateParts(iso);
+  return `${GERMAN_WEEKDAYS[p.weekday]}, ${p.day}. ${GERMAN_MONTHS_LONG[p.month]} ${p.year}`;
+}
+
+/** "12. Mai" — short German date without year or weekday. */
+export function formatGermanDateShort(iso: string): string {
+  const p = dateParts(iso);
+  return `${p.day}. ${GERMAN_MONTHS_SHORT_DISPLAY[p.month]}`;
+}
+
+/** "Mo" — German short weekday. */
+export function germanWeekdayShort(iso: string): string {
+  return GERMAN_WEEKDAYS_SHORT[parseIsoUtc(iso).getUTCDay()];
+}
+
+/** "Jan" — German short month name. */
+export function germanMonthShort(iso: string): string {
+  return GERMAN_MONTHS_SHORT_DISPLAY[parseIsoUtc(iso).getUTCMonth()];
+}
+
+/**
+ * Locale-aware long date. Uses Intl for en/fr; the German path matches
+ * the hand-tuned `formatGermanDateLong()` output exactly. Pass an
+ * Intl-compatible locale tag (e.g. "fr-FR").
+ */
+export function formatLocalisedDateLong(iso: string, localeTag: string): string {
+  if (localeTag.startsWith("de")) return formatGermanDateLong(iso);
+  return parseIsoUtc(iso).toLocaleDateString(localeTag, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
