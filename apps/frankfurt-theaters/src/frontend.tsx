@@ -4,7 +4,6 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
-  CalendarPopover,
   escapeHtml as coreEscapeHtml,
   dateOffset,
   type FaqItem,
@@ -12,7 +11,6 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
-  POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
@@ -20,6 +18,7 @@ import {
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
   type WebMcpToolDef,
 } from "@museumsufer/core";
+import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayPerformance } from "./db";

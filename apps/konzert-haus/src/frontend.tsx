@@ -4,20 +4,19 @@ import {
   buildLangParam,
   buildUtm,
   type CalendarEvent,
-  CalendarPopover,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   langSwitchItems,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
-  POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
 } from "@museumsufer/core";
+import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayEvent } from "./db";
