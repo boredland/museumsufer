@@ -1,4 +1,4 @@
-import { buildWebMcpScript, type WebMcpToolDef } from "@museumsufer/core";
+import { buildWebMcpScript, HTMX_LIFECYCLE_SCRIPT, type WebMcpToolDef } from "@museumsufer/core";
 
 const WEBMCP_TOOLS: WebMcpToolDef[] = [
   {
@@ -92,14 +92,7 @@ export const CLIENT_SCRIPT = `
       if (!htmxReady) { htmxReady = true; htmx.config.globalViewTransitions = true; }
     });
 
-    // Top-of-viewport progress bar — shows during the htmx fetch so date
-    // swaps don't feel inert while the network is in flight.
-    document.body.addEventListener('htmx:beforeRequest', function(){
-      document.body.dataset.loading = 'true';
-    });
-    document.body.addEventListener('htmx:afterRequest', function(){
-      delete document.body.dataset.loading;
-    });
+    ${HTMX_LIFECYCLE_SCRIPT}
 
     var cachedPos = sessionStorage.getItem('userPos');
     let userPos = cachedPos ? JSON.parse(cachedPos) : null;

@@ -10,6 +10,7 @@ export * from "./feedback-email";
 export * from "./german";
 export * from "./hash";
 export * from "./html";
+export * from "./htmx-lifecycle";
 export * from "./llm-services";
 export * from "./manifest";
 export * from "./push";

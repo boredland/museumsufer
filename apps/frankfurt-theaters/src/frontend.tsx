@@ -8,8 +8,10 @@ import {
   escapeHtml as coreEscapeHtml,
   dateOffset,
   type FaqItem,
+  HTMX_LIFECYCLE_SCRIPT,
   LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
+  POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
@@ -1047,6 +1049,8 @@ function buildClientScript(): string {
   return `
   window.THEATER_LOC = ${locJson};
 
+  ${HTMX_LIFECYCLE_SCRIPT}
+  ${POPOVER_POSITIONING_SCRIPT}
   ${WEBMCP_SCRIPT}
 
   // Anfahrt — popover with RMV / Google Maps / Apple Maps deep-links
@@ -1080,24 +1084,6 @@ function buildClientScript(): string {
     function rebindAll(){
       document.querySelectorAll('.nav-popover').forEach(populatePopover);
     }
-    function positionPopover(btn){
-      var pop = document.getElementById(btn.getAttribute('data-popover-target') || btn.getAttribute('popovertarget'));
-      if (!pop) return;
-      var r = btn.getBoundingClientRect();
-      var w = pop.offsetWidth || 224;
-      var h = pop.offsetHeight || 280;
-      var maxLeft = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8));
-      var spaceBelow = window.innerHeight - r.bottom;
-      var top = (spaceBelow >= h + 12) ? (r.bottom + 4) : Math.max(8, r.top - h - 4);
-      pop.style.top = top + 'px';
-      pop.style.left = maxLeft + 'px';
-      pop.style.right = 'auto';
-    }
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest('[data-popover-target]');
-      if (!btn) return;
-      requestAnimationFrame(function(){ positionPopover(btn); });
-    });
     rebindAll();
     window.__rebindTransit = rebindAll;
   })();
@@ -1305,8 +1291,6 @@ function buildClientScript(): string {
   });
   window.addEventListener('popstate', function(){ syncDateStrip(true); });
 
-  document.body.addEventListener('htmx:beforeRequest', function(){ document.body.dataset.loading = 'true'; });
-  document.body.addEventListener('htmx:afterRequest', function(){ delete document.body.dataset.loading; });
   document.body.addEventListener('htmx:afterSwap', function(e){
     if (!e.detail || !e.detail.target) return;
     if (e.detail.target.id !== 'programme-content') return;
