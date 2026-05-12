@@ -894,24 +894,6 @@ body.htmx-request .htmx-progress::before {
   ::view-transition-new(content-body) { animation: none; }
 }
 
-/** Highlight-on-arrival pulse — rotwein outline that fades over 2.5 s
- *  when the URL has ?highlight=<id> on load (or after htmx:afterSwap).
- *  The outline animates rather than the row itself so the page text
- *  doesn't shift, and the scrollMargin keeps the row away from the
- *  sticky-ish chip strip if we ever add one. */
-@keyframes highlight-pulse {
-  0%   { box-shadow: 0 0 0 0 var(--color-rotwein), 0 0 0 0 transparent; background-color: color-mix(in oklab, var(--color-rotwein) 12%, transparent); }
-  60%  { box-shadow: 0 0 0 4px color-mix(in oklab, var(--color-rotwein) 35%, transparent), 0 0 0 0 transparent; background-color: color-mix(in oklab, var(--color-rotwein) 6%, transparent); }
-  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent; background-color: transparent; }
-}
-.highlight-pulse {
-  animation: highlight-pulse 2.5s ease-out;
-  scroll-margin-top: 1.5rem;
-}
-@media (prefers-reduced-motion: reduce) {
-  .highlight-pulse { animation: none; outline: 2px solid var(--color-rotwein); outline-offset: 4px; }
-}
-
 /** Toast for per-row "Link kopiert" feedback (clipboard fallback path).
  *  Same vocabulary as the event-detail share toast. */
 .share-toast-row {
@@ -1267,3 +1249,41 @@ body.htmx-request .htmx-progress::before {
   border-color: var(--color-rotwein);
 }
 .digest-chip:has(input:checked) .digest-chip__glyph { color: var(--color-paper); }
+
+/* CalendarPopover (shared markup with theaters/konzert via @museumsufer/core/calendar-popover) */
+.nav-wrap { display: inline-block; position: relative; }
+.nav-popover {
+  inset: unset;
+  position: fixed;
+  margin: 0;
+  padding: 0.55rem 0;
+  border: 1px solid var(--color-rule);
+  border-radius: 0.55rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  min-width: 14rem;
+  box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.35), 0 4px 8px -4px rgba(0, 0, 0, 0.2);
+}
+.nav-popover::backdrop { background: rgba(0, 0, 0, 0.18); }
+.dark .nav-popover::backdrop { background: rgba(0, 0, 0, 0.5); }
+.nav-popover__link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  text-decoration: none;
+  transition: background 0.16s, color 0.16s;
+}
+.nav-popover__link:hover,
+.nav-popover__link:focus-visible {
+  background: var(--color-rotwein);
+  color: var(--color-paper);
+  outline: none;
+}

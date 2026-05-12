@@ -11,10 +11,10 @@
  * Public surface (used by HTMX_AFTER_SWAP):
  *   window.__landauApplySearch()    — re-runs the search filter
  *   window.__landauPaintVisited()   — re-applies visited row marks
- *   window.__landauHighlight()      — replays a ?highlight=<id> pulse
  */
 
 import { buildWebMcpScript, type WebMcpToolDef } from "@museumsufer/core";
+import { POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { CATEGORIES } from "./categories";
 
 const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug);
@@ -74,6 +74,7 @@ const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
 
 export const CLIENT_SCRIPT = `
 ${WEBMCP_SCRIPT}
+${POPOVER_POSITIONING_SCRIPT}
 
 // ─── service worker registration ───────────────────────────────────
 if ('serviceWorker' in navigator) {
@@ -201,9 +202,8 @@ document.addEventListener('click', function(e){
     var rowBtn = e.target.closest && e.target.closest('.js-share-row');
     if (rowBtn) {
       e.preventDefault(); e.stopPropagation();
-      var u = new URL(location.href);
-      u.searchParams.set('highlight', rowBtn.dataset.id);
-      shareOrCopy({ title: rowBtn.dataset.title || 'Veranstaltung', url: u.toString() }, 'share-toast-row', 'Link kopiert');
+      var url = location.origin + '/event/' + rowBtn.dataset.id;
+      shareOrCopy({ title: rowBtn.dataset.title || 'Veranstaltung', url: url }, 'share-toast-row', 'Link kopiert');
       return;
     }
     var btn = e.target.closest && e.target.closest('.js-share');
@@ -212,26 +212,6 @@ document.addEventListener('click', function(e){
       shareOrCopy({ title: btn.dataset.title, url: btn.dataset.url }, 'share-toast', 'Link kopiert');
     }
   });
-})();
-
-// ─── highlight-on-arrival pulse ────────────────────────────────────
-(function(){
-  function highlightFromUrl(){
-    var params = new URLSearchParams(location.search);
-    var id = params.get('highlight');
-    if (!id) return;
-    var node = document.querySelector('[data-id="' + CSS.escape(id) + '"]');
-    if (!node) return;
-    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    node.classList.add('highlight-pulse');
-    setTimeout(function(){ node.classList.remove('highlight-pulse'); }, 2500);
-    params.delete('highlight');
-    var clean = location.pathname + (params.toString() ? '?' + params.toString() : '');
-    history.replaceState(null, '', clean);
-  }
-  window.__landauHighlight = highlightFromUrl;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', highlightFromUrl);
-  else highlightFromUrl();
 })();
 
 // ─── "In der Nähe" haversine sort ──────────────────────────────────
@@ -315,7 +295,6 @@ document.addEventListener('click', function(e){
 document.body.addEventListener('htmx:afterSwap', function(){
   if (window.__landauApplySearch) window.__landauApplySearch();
   if (window.__landauPaintVisited) window.__landauPaintVisited();
-  if (window.__landauHighlight) window.__landauHighlight();
 });
 
 // ─── digest dialog ─────────────────────────────────────────────────
