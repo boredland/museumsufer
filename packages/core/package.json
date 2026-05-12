@@ -21,6 +21,7 @@
     "./i18n": "./src/i18n.ts",
     "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
+    "./markdown": "./src/markdown.ts",
     "./og-svg": "./src/og-svg.ts",
     "./push": "./src/push.ts",
     "./robots": "./src/robots.ts",

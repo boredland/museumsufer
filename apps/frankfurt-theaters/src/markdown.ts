@@ -1,89 +1,60 @@
-import { buildUtm } from "@museumsufer/core";
+import {
+  renderDayMarkdown as coreRenderDay,
+  renderVenueMarkdown as coreRenderVenue,
+  type MarkdownEvent,
+  wantsMarkdown,
+} from "@museumsufer/core";
 import type { DayPerformance } from "./db";
 import type { TheaterConfig } from "./theater-config";
 
-const utm = buildUtm("frankfurt.ins.theater");
+export { wantsMarkdown };
 
-/** Human + LLM-friendly markdown view of a day or theater page. */
+const UTM_SOURCE = "frankfurt.ins.theater";
+const LOCALE_TAG = "de-DE";
+
+function toMarkdownEvent(p: DayPerformance): MarkdownEvent {
+  const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
+  const subtitle = p.show.subtitle?.replace(/<br\s*\/?>/gi, " · ");
+  const cancelled = p.status === "cancelled" || p.status === "sold_out";
+  return {
+    date: p.date,
+    time: p.time ?? null,
+    title: p.show.title,
+    subtitle: subtitle ?? null,
+    venueLabel: p.theater.name,
+    venueRoom: sameVenue ? null : (p.venue_room ?? null),
+    // Cancelled / sold-out shows still surface the title + suffix; drop the price.
+    priceMin: cancelled ? null : (p.price_min ?? null),
+    priceMax: cancelled ? null : (p.price_max ?? null),
+    ticketUrl: p.ticket_url ?? null,
+    detailUrl: p.show.detail_url ?? null,
+    statusSuffix: p.status === "sold_out" ? " **(Ausverkauft)**" : p.status === "cancelled" ? " **(Entfällt)**" : null,
+  };
+}
 
 export function renderDayMarkdown(date: string, performances: DayPerformance[]): string {
-  const niceDate = new Date(`${date}T12:00:00Z`).toLocaleDateString("de-DE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
+  return coreRenderDay({
+    date,
+    events: performances.map(toMarkdownEvent),
+    brand: "Frankfurt Theater",
+    localeTag: LOCALE_TAG,
+    emptyCopy: "Heute kein Programm.",
+    nounSingular: "Vorstellung",
+    nounPlural: "Vorstellungen",
+    apiUrl: `https://${UTM_SOURCE}/api/day?date=${date}`,
+    utmSource: UTM_SOURCE,
   });
-  const lines = [`# Frankfurt Theater — ${niceDate}`, ""];
-  if (!performances.length) {
-    lines.push("_Heute kein Programm._");
-    return lines.join("\n");
-  }
-  lines.push(`${performances.length} Vorstellung${performances.length === 1 ? "" : "en"}.`);
-  lines.push("");
-  for (const p of performances) {
-    lines.push(perfBullet(p, { showTheater: true }));
-  }
-  lines.push("");
-  lines.push("---");
-  lines.push(`Daten unter https://frankfurt.ins.theater/api/day?date=${date}`);
-  return lines.join("\n");
 }
 
 export function renderTheaterMarkdown(config: TheaterConfig, performances: DayPerformance[]): string {
-  const lines = [`# ${config.name}`, ""];
-  if (config.address) lines.push(`_${config.address}_`);
-  if (config.website_url) lines.push(`Website: ${utm(config.website_url, "markdown")}`);
-  lines.push("");
-  if (!performances.length) {
-    lines.push("_Noch kein angekündigtes Programm._");
-    return lines.join("\n");
-  }
-
-  const byDate = new Map<string, DayPerformance[]>();
-  for (const p of performances) {
-    const arr = byDate.get(p.date);
-    if (arr) arr.push(p);
-    else byDate.set(p.date, [p]);
-  }
-  for (const [date, perfs] of byDate) {
-    const heading = new Date(`${date}T12:00:00Z`).toLocaleDateString("de-DE", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "UTC",
-    });
-    lines.push(`## ${heading}`);
-    lines.push("");
-    for (const p of perfs) lines.push(perfBullet(p, { showTheater: false }));
-    lines.push("");
-  }
-  lines.push("---");
-  lines.push(`Daten unter https://frankfurt.ins.theater/api/theater/${config.slug}`);
-  return lines.join("\n");
-}
-
-function perfBullet(p: DayPerformance, opts: { showTheater: boolean }): string {
-  const time = p.time ?? "—";
-  const status = p.status === "sold_out" ? " **(Ausverkauft)**" : p.status === "cancelled" ? " **(Entfällt)**" : "";
-  const subtitle = p.show.subtitle ? ` — ${p.show.subtitle.replace(/<br\s*\/?>/gi, " · ")}` : "";
-  const price =
-    p.status === "sold_out" || p.status === "cancelled" || p.price_min == null
-      ? ""
-      : p.price_max && p.price_max !== p.price_min
-        ? ` · ${p.price_min}–${p.price_max} €`
-        : ` · ${p.price_min} €`;
-  const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
-  const room = p.venue_room && !sameVenue ? p.venue_room : null;
-  const venue = opts.showTheater ? ` _(${p.theater.name}${room ? `, ${room}` : ""})_` : room ? ` _(${room})_` : "";
-  const urlSource = p.ticket_url ?? p.show.detail_url ?? "";
-  const url = urlSource ? utm(urlSource, "markdown") : "";
-  const title = url ? `[${p.show.title}](${url})` : p.show.title;
-  return `- **${time}** ${title}${subtitle}${venue}${price}${status}`;
-}
-
-export function wantsMarkdown(req: Request): boolean {
-  const accept = req.headers.get("accept") || "";
-  return accept.includes("text/markdown") || accept.includes("text/x-markdown");
+  return coreRenderVenue({
+    events: performances.map(toMarkdownEvent),
+    venueName: config.name,
+    venueAddress: config.address ?? null,
+    venueWebsite: config.website_url ?? null,
+    localeTag: LOCALE_TAG,
+    emptyCopy: "Noch kein angekündigtes Programm.",
+    apiUrl: `https://${UTM_SOURCE}/api/theater/${config.slug}`,
+    utmSource: UTM_SOURCE,
+  });
 }
