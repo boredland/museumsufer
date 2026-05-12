@@ -22,6 +22,7 @@ import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/c
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayPerformance } from "./db";
+import { imageProxyUrl } from "./image-proxy";
 import { INLINE_CSS } from "./styles-inline";
 import { THEATERS } from "./theater-config";
 
@@ -36,6 +37,13 @@ interface PageProps {
 }
 
 const APP_URL = "https://frankfurt.ins.theater";
+
+/** Absolute proxied image URL for JSON-LD / OG tags (callers need a full URL). */
+function absImageUrl(src: string | null | undefined): string | undefined {
+  const proxied = imageProxyUrl(src ?? undefined);
+  if (!proxied) return undefined;
+  return proxied.startsWith("/") ? `${APP_URL}${proxied}` : proxied;
+}
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const utm = buildUtm("frankfurt.ins.theater");
@@ -1647,7 +1655,7 @@ export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknow
       name: p.theater.name,
       url: p.theater.website_url ?? undefined,
     },
-    image: p.show.image_url ?? undefined,
+    image: absImageUrl(p.show.image_url),
     url: `${APP_URL}/api/performance/${p.id}`,
     offers: offer,
   };

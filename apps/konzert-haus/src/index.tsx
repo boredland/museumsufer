@@ -4,6 +4,7 @@ import { getDatesWithEvents, getEventsForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
 import { detectLocale, getTranslations } from "./i18n";
+import { handleImageProxy } from "./image-proxy";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
@@ -58,6 +59,8 @@ app.use("*", async (c, next) => {
 });
 
 app.get("/healthz", (c) => c.json({ ok: true }));
+
+app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
 function renderHome(c: Context<AppEnv>, date: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);

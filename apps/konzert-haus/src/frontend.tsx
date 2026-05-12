@@ -27,6 +27,7 @@ import type { HtmlEscapedString } from "hono/utils/html";
 import { VENUES } from "./concert-config";
 import type { DateWithCount, DayEvent } from "./db";
 import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
+import { imageProxyUrl } from "./image-proxy";
 import { INLINE_CSS } from "./styles-inline";
 import { GENRES, type Genre } from "./types";
 
@@ -374,7 +375,10 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
     if (e.price_min != null) offer.price = String(e.price_min);
     jsonLd.offers = offer;
   }
-  if (e.image_url) jsonLd.image = e.image_url;
+  if (e.image_url) {
+    const proxied = imageProxyUrl(e.image_url);
+    jsonLd.image = proxied?.startsWith("/") ? `${APP_URL}${proxied}` : (proxied ?? e.image_url);
+  }
   return jsonLd;
 }
 

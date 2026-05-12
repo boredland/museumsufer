@@ -3,11 +3,15 @@
   "name": "konzert-haus",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
+  // Apex → frankfurt.konzert.haus 301 is handled in src/index.tsx. The city
+  // is parsed from the subdomain (`<city>.konzert.haus` falls back to
+  // "frankfurt"), so each new city needs an additional CF custom_domain.
+  "routes": [
+    { "pattern": "frankfurt.konzert.haus", "custom_domain": true },
+    { "pattern": "konzert.haus", "custom_domain": true }
+  ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action
   // regenerates src/scrape-data.ts and pushes; CF redeploys on push.
-  // Host routes are added separately once DNS is wired:
-  //   frankfurt.konzert.haus/*
-  //   konzert.haus/* (apex → 301 to frankfurt.konzert.haus, handled in worker)
   "d1_databases": [
     {
       "binding": "DB",
