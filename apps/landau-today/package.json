@@ -19,7 +19,8 @@
     "@museumsufer/core": "*",
     "@scalar/hono-api-reference": "^0.10.14",
     "dayjs": "^1.11.20",
-    "hono": "^4.12.18"
+    "hono": "^4.12.18",
+    "p-queue": "^9.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260509.1",

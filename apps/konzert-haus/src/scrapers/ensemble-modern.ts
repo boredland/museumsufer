@@ -9,14 +9,15 @@ import {
   todayIso,
   truncate,
 } from "@museumsufer/core";
+import PQueue from "p-queue";
 import { classify } from "../genre-heuristics";
 import type { ScrapedEvent, ScrapeResult } from "../types";
 
 const BASE = "https://www.ensemble-modern.com";
 const UA = "konzert.haus crawler / contact: jonas@bgdlabs.com";
-const THROTTLE_MS = 200;
 const MAX_DETAIL_FETCHES = 20;
 const HORIZON_DAYS = 180;
+const FETCH_CONCURRENCY = 4;
 
 /**
  * Ensemble Modern tours extensively; we only keep concerts in the
@@ -59,31 +60,41 @@ export async function scrapeEnsembleModern(): Promise<ScrapeResult> {
 
   const events: ScrapedEvent[] = [];
   const seen = new Set<string>();
-  let detailFetches = 0;
-
+  const enrichable: CalendarCard[] = [];
   for (const card of ffm) {
-    const slug = `em-${card.eventId}`;
-    const dedup = `${slug}|${card.date}|${card.time ?? ""}`;
+    const dedup = `em-${card.eventId}|${card.date}|${card.time ?? ""}`;
     if (seen.has(dedup)) continue;
     seen.add(dedup);
+    enrichable.push(card);
+  }
 
-    let description: string | null = null;
-    let endTime: string | null = null;
-    if (detailFetches < MAX_DETAIL_FETCHES) {
-      await sleep(THROTTLE_MS);
+  // Parallel enrichment under MAX_DETAIL_FETCHES budget; the rest get
+  // emitted with no description/end_time fallback.
+  const enrichment = new Map<string, { description: string | null; endTime: string | null }>();
+  const slice = enrichable.slice(0, MAX_DETAIL_FETCHES);
+  const queue = new PQueue({ concurrency: FETCH_CONCURRENCY });
+  for (const card of slice) {
+    queue.add(async () => {
       try {
         const ical = await fetchIcal(card.eventId);
-        description = ical.description;
-        endTime = ical.endTime && ical.endTime !== card.time ? ical.endTime : null;
+        enrichment.set(card.eventId, {
+          description: ical.description,
+          endTime: ical.endTime && ical.endTime !== card.time ? ical.endTime : null,
+        });
       } catch (err) {
         console.warn(`ensemble-modern ics fetch failed for ${card.eventId}:`, err);
       }
-      detailFetches++;
-    }
+    });
+  }
+  await queue.onIdle();
 
+  for (const card of enrichable) {
+    const detail = enrichment.get(card.eventId);
+    const description = detail?.description ?? null;
+    const endTime = detail?.endTime ?? null;
     const subtitle = card.subtitle ?? card.festival ?? card.works ?? null;
     events.push({
-      slug,
+      slug: `em-${card.eventId}`,
       title: card.title,
       subtitle,
       description,
@@ -108,18 +119,18 @@ async function fetchCalendarCards(): Promise<CalendarCard[]> {
   const today = todayIso();
   const horizon = dateOffset(HORIZON_DAYS);
   const cards: CalendarCard[] = [];
-  let first = true;
-
+  const queue = new PQueue({ concurrency: FETCH_CONCURRENCY });
   for (const month of monthsInRange(horizon)) {
-    if (!first) await sleep(THROTTLE_MS);
-    first = false;
-    const html = await fetchMonthHtml(month);
-    if (html === null) continue;
-    for (const card of parseCalendarHtml(html)) {
-      if (card.date < today || card.date > horizon) continue;
-      cards.push(card);
-    }
+    queue.add(async () => {
+      const html = await fetchMonthHtml(month);
+      if (html === null) return;
+      for (const card of parseCalendarHtml(html)) {
+        if (card.date < today || card.date > horizon) continue;
+        cards.push(card);
+      }
+    });
   }
+  await queue.onIdle();
   return cards;
 }
 
@@ -270,8 +281,4 @@ function textOf(body: string, re: RegExp): string | null {
   if (!m) return null;
   const text = stripHtml(m[1]);
   return text || null;
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((r) => setTimeout(r, ms));
 }
