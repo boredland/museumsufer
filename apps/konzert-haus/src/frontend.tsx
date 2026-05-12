@@ -3,6 +3,7 @@ import {
   type CalendarEvent,
   CalendarPopover,
   escapeHtml as coreEscapeHtml,
+  HTMX_LIFECYCLE_SCRIPT,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
@@ -948,7 +949,13 @@ if ('serviceWorker' in navigator) {
 `;
 
 function ClientBehaviors() {
-  return <script dangerouslySetInnerHTML={{ __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}` }} />;
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}`,
+      }}
+    />
+  );
 }
 
 export function Footer() {

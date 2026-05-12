@@ -17,6 +17,7 @@
     "./german": "./src/german.ts",
     "./hash": "./src/hash.ts",
     "./html": "./src/html.ts",
+    "./htmx-lifecycle": "./src/htmx-lifecycle.ts",
     "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
     "./push": "./src/push.ts",
