@@ -87,8 +87,11 @@ export function localisedPath(currentPath: string, locale: Locale, fallback: Loc
 
 /**
  * Build absolute hreflang alternate hrefs for the supported locales of
- * an app. Use the result on every page that supports locale switching.
- * Adds `x-default` pointing at the fallback locale.
+ * an app. The fallback locale itself is *not* emitted as an explicit
+ * `hreflang` link — `x-default` covers the same URL, and emitting both
+ * trips Lighthouse's overly-strict "canonical must not equal an hreflang
+ * URL" check. Google's hreflang guidance allows omitting the default;
+ * x-default is the canonical pointer for the default locale.
  *
  *   buildHreflangAlternates({
  *     currentPath: "/event/123?date=2026-05-12",
@@ -96,6 +99,10 @@ export function localisedPath(currentPath: string, locale: Locale, fallback: Loc
  *     supported: ["de", "fr"],
  *     fallback: "de",
  *   })
+ *   // → [
+ *   //     { hreflang: "fr",        href: "https://landau.today/event/123?date=2026-05-12&lang=fr" },
+ *   //     { hreflang: "x-default", href: "https://landau.today/event/123?date=2026-05-12" },
+ *   //   ]
  */
 export interface HreflangAlternate {
   hreflang: string;
@@ -108,10 +115,12 @@ export function buildHreflangAlternates<L extends Locale>(opts: {
   fallback: L;
 }): HreflangAlternate[] {
   const { currentPath, appUrl, supported, fallback } = opts;
-  const out: HreflangAlternate[] = supported.map((l) => ({
-    hreflang: l,
-    href: `${appUrl}${localisedPath(currentPath, l, fallback)}`,
-  }));
+  const out: HreflangAlternate[] = supported
+    .filter((l) => l !== fallback)
+    .map((l) => ({
+      hreflang: l,
+      href: `${appUrl}${localisedPath(currentPath, l, fallback)}`,
+    }));
   out.push({ hreflang: "x-default", href: `${appUrl}${stripLangParam(currentPath) || "/"}` });
   return out;
 }
