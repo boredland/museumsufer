@@ -6,6 +6,7 @@ import { berlinNow, todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
+import { getAllMuseums } from "./queries";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { INLINE_CSS } from "./styles-inline";
@@ -410,6 +411,9 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
 export function DigestDialog({ tr }: { tr: Record<string, string> }) {
   const optionClass =
     "grid grid-cols-[1.1rem_1fr] gap-x-3 gap-y-0.5 items-baseline px-3.5 py-3 rounded-lg border border-border bg-surface cursor-pointer transition-colors hover:border-river has-[input:checked]:border-river has-[input:checked]:bg-river/10";
+  const museumOptions = getAllMuseums()
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, "de"));
   return (
     <dialog
       id="digest-dialog"
@@ -485,6 +489,37 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
             </span>
           </label>
         </fieldset>
+
+        <details class="mt-1 group">
+          <summary class="flex items-baseline justify-between gap-2 cursor-pointer py-1.5 list-none font-mono text-[0.625rem] uppercase tracking-[0.18em] text-text-tertiary hover:text-text-primary transition-colors marker:hidden">
+            <span class="inline-flex items-baseline gap-2">
+              <span class="text-river transition-transform group-open:rotate-90 inline-block">▸</span>
+              <span class="font-medium">{tr.digestFilterLabel}</span>
+            </span>
+            <span class="font-display italic text-[0.8125rem] text-text-tertiary normal-case tracking-normal">
+              {tr.digestFilterHint}
+            </span>
+          </summary>
+          <fieldset
+            class="flex flex-wrap gap-1.5 mt-2 border-0 p-0 max-h-56 overflow-y-auto"
+            aria-label={tr.digestFilterLabel}
+          >
+            {museumOptions.map((m) => (
+              <label
+                key={m.slug}
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface cursor-pointer font-mono text-[0.6875rem] tracking-tight text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary has-[input:checked]:bg-river has-[input:checked]:text-bg has-[input:checked]:border-river"
+              >
+                <input
+                  type="checkbox"
+                  name="filter-museum"
+                  value={m.slug}
+                  class="sr-only absolute opacity-0 pointer-events-none"
+                />
+                <span>{m.name}</span>
+              </label>
+            ))}
+          </fieldset>
+        </details>
 
         <div
           id="digest-ios-hint"

@@ -569,6 +569,21 @@ ${
       </label>
     </div>
 
+    <details class="digest-filter">
+      <summary class="digest-filter__summary">
+        <span class="digest-filter__label">Bühnen einschränken</span>
+        <span class="digest-filter__hint">leer = alle</span>
+      </summary>
+      <fieldset class="digest-filter__chips" aria-label="Bühnen">
+        ${THEATERS.map(
+          (t) => `<label class="digest-chip">
+          <input type="checkbox" name="filter-theater" value="${t.slug}" />
+          <span class="digest-chip__label">${escapeHtml(t.name)}</span>
+        </label>`,
+        ).join("")}
+      </fieldset>
+    </details>
+
     <div id="digest-ios-hint" class="digest-hint" hidden>
       <strong>Auf iPhone/iPad:</strong> Tippe unten auf »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das neue App-Icon — erst dann sind Push-Nachrichten möglich.
     </div>
@@ -1176,6 +1191,7 @@ export function renderClientScript(): string {
     var iosHint = document.getElementById('digest-ios-hint');
     var unsupported = document.getElementById('digest-unsupported');
     var boxes = form.querySelectorAll('input[name="schedule"]');
+    var theaterBoxes = form.querySelectorAll('input[name="filter-theater"]');
 
     function checked(){
       var out = [];
@@ -1184,6 +1200,14 @@ export function renderClientScript(): string {
     }
     function setChecked(values){
       boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
+    }
+    function checkedTheaters(){
+      var out = [];
+      theaterBoxes.forEach(function(b){ if (b.checked) out.push(b.value); });
+      return out;
+    }
+    function setTheaters(values){
+      theaterBoxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
     }
     function setStatus(msg, kind){
       if (!msg) { status.hidden = true; status.textContent = ''; status.className = 'contact-form__status'; return; }
@@ -1231,6 +1255,7 @@ export function renderClientScript(): string {
       submit.textContent = 'Abonnieren';
       unsubBtn.hidden = true;
       setChecked([]);
+      setTheaters([]);
       iosHint.hidden = true;
       unsupported.hidden = true;
 
@@ -1250,6 +1275,7 @@ export function renderClientScript(): string {
               var data = await me.json();
               if (data.schedules && data.schedules.length) {
                 setChecked(data.schedules);
+                if (data.filters && Array.isArray(data.filters.theaters)) setTheaters(data.filters.theaters);
                 submit.textContent = 'Speichern';
                 unsubBtn.hidden = false;
               }
@@ -1307,10 +1333,12 @@ export function renderClientScript(): string {
         }
 
         var json = existing.toJSON();
+        var theaters = checkedTheaters();
+        var filters = theaters.length > 0 ? { theaters: theaters } : null;
         var res = await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
         });
         if (!res.ok) throw new Error('save-failed');
         setStatus('Gespeichert. Bis bald!', 'ok');

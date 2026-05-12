@@ -973,6 +973,7 @@ export const CLIENT_SCRIPT = `
       var digestIos = document.getElementById('digest-ios-hint');
       var digestUnsupported = document.getElementById('digest-unsupported');
       var digestBoxes = digestForm.querySelectorAll('input[name="schedule"]');
+      var digestMuseumBoxes = digestForm.querySelectorAll('input[name="filter-museum"]');
 
       function digestChecked() {
         var out = [];
@@ -981,6 +982,14 @@ export const CLIENT_SCRIPT = `
       }
       function digestSetChecked(values) {
         digestBoxes.forEach(function(b) { b.checked = values.indexOf(b.value) !== -1; });
+      }
+      function digestCheckedMuseums() {
+        var out = [];
+        digestMuseumBoxes.forEach(function(b) { if (b.checked) out.push(b.value); });
+        return out;
+      }
+      function digestSetMuseums(values) {
+        digestMuseumBoxes.forEach(function(b) { b.checked = values.indexOf(b.value) !== -1; });
       }
       function digestSetStatus(msg, kind) {
         if (!msg) { digestStatus.hidden = true; digestStatus.textContent = ''; digestStatus.className = 'text-[0.75rem] leading-snug min-w-0 text-text-secondary'; return; }
@@ -1016,6 +1025,7 @@ export const CLIENT_SCRIPT = `
         digestSubmit.textContent = T.digestSubscribe;
         digestUnsubAll.hidden = true;
         digestSetChecked([]);
+        digestSetMuseums([]);
         digestIos.hidden = true;
         digestUnsupported.hidden = true;
 
@@ -1034,6 +1044,7 @@ export const CLIENT_SCRIPT = `
               .then(function(me) {
                 if (me && me.schedules && me.schedules.length) {
                   digestSetChecked(me.schedules);
+                  if (me.filters && Array.isArray(me.filters.museums)) digestSetMuseums(me.filters.museums);
                   digestSubmit.textContent = T.digestSave;
                   digestUnsubAll.hidden = false;
                 }
@@ -1067,10 +1078,12 @@ export const CLIENT_SCRIPT = `
 
           function continueWithSub(sub) {
             var json = sub.toJSON();
+            var museums = digestCheckedMuseums();
+            var filters = museums.length > 0 ? { museums: museums } : null;
             return fetch('/api/push/subscribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+              body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
             }).then(function(r) {
               if (!r.ok) throw new Error('save-failed');
               return 'saved';
