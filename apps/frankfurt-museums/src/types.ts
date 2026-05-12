@@ -1,5 +1,6 @@
 export interface Env {
   DB: D1Database;
+  FEEDBACK_EMAIL: SendEmail;
   // FETCH_PROXY_* are read by the scrape script (scripts/scrape.ts) via
   // process.env, not by the worker. They live here only so the scraper
   // modules — which are still imported by the script — typecheck against
