@@ -1,4 +1,5 @@
 import {
+  berlinHourMinute,
   buildHreflangAlternates,
   buildLangParam,
   buildUtm,
@@ -1115,8 +1116,22 @@ function SiblingStrap({ tr }: { tr: Translations }) {
   );
 }
 
+function filterPastForToday(date: string, events: DayEvent[]): DayEvent[] {
+  if (date !== todayIso()) return events;
+  const { hour, minute } = berlinHourMinute();
+  const nowMin = hour * 60 + minute - 30;
+  return events.filter((e) => {
+    if (!e.time) return true;
+    const [hh, mm] = e.time.split(":");
+    const startMin = parseInt(hh, 10) * 60 + parseInt(mm, 10);
+    return startMin >= nowMin;
+  });
+}
+
 export function ProgrammePartial({ date, events, tr }: { date: string; events: DayEvent[]; tr: Translations }) {
   const dp = dateParts(date);
+  const visible = filterPastForToday(date, events);
+  const hidden = events.length - visible.length;
   return (
     <>
       <header class="programme__header">
@@ -1128,17 +1143,20 @@ export function ProgrammePartial({ date, events, tr }: { date: string; events: D
           <span class="programme__year">{dp.year}</span>
         </h2>
       </header>
-      {events.length === 0 ? (
+      {visible.length === 0 ? (
         <div class="empty">
           <p class="empty__mark">∅</p>
-          <p>{tr.emptyTitle}</p>
+          <p>{hidden > 0 ? tr.emptyTodayAfterPast : tr.emptyTitle}</p>
         </div>
       ) : (
-        <ol class="concerts" id="concerts">
-          {events.map((e, i) => (
-            <Event key={e.id} e={e} opts={{ index: i }} tr={tr} />
-          ))}
-        </ol>
+        <>
+          <ol class="concerts" id="concerts">
+            {visible.map((e, i) => (
+              <Event key={e.id} e={e} opts={{ index: i }} tr={tr} />
+            ))}
+          </ol>
+          {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
+        </>
       )}
       <SiblingStrap tr={tr} />
     </>
