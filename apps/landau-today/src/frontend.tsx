@@ -73,13 +73,21 @@ ${buildHreflangs(currentPath)}
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link
+  rel="preload"
+  as="style"
   href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
-  rel="stylesheet"
+  onload="this.onload=null;this.rel='stylesheet'"
 />
+<noscript>
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
+  />
+</noscript>
 <link rel="stylesheet" href="/styles.css" />
 <script>${THEME_FOUC_SCRIPT}</script>
 <script src="/htmx.min.js" defer></script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT in client-script.ts. -->
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${faqLd}</script>
 </head>
@@ -234,7 +242,7 @@ function render(node: unknown, _cls: string, delayMs?: number): string {
 }
 
 function renderDigestCue(delayMs: number, tr: Translations, locale: Locale): string {
-  return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms" aria-label="${escapeHtml(tr.digestDialogTitle)}">
+  return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms">
   <span class="digest-cue__mark" aria-hidden="true">※</span>
   <span class="digest-cue__kicker">${escapeHtml(tr.digestKicker)}</span>
   <span class="digest-cue__rule" aria-hidden="true"></span>

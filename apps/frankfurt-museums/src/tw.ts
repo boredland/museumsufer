@@ -12,8 +12,11 @@ export const iconBtnGhost =
 export const quietCountClass =
   "inline-flex items-center gap-1 text-[0.6875rem] font-mono font-medium text-text-tertiary tabular-nums opacity-70";
 
+// `block` + `min-h-6 py-0.5` give the title link a 24px hit area so it clears
+// WCAG 2.5.5 (target-size). The visible text position is unchanged because
+// `py-0.5` cancels out at the card-body level via existing line-height.
 export const titleLinkClass =
-  "text-inherit no-underline block hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm";
+  "text-inherit no-underline block min-h-6 py-0.5 hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm";
 
 export const emptyStateClass = "empty-state";
 

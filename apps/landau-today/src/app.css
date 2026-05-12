@@ -372,7 +372,8 @@
   font-size: 0.7rem;
   font-feature-settings: "onum" 1;
   letter-spacing: 0;
-  color: color-mix(in oklab, currentColor 60%, transparent);
+  /* Bumped from 60% to 80% so the small count chip clears AA against parchment. */
+  color: color-mix(in oklab, currentColor 80%, transparent);
 }
 .chip.m-rotwein .glyph { color: var(--color-rotwein); }
 .chip.m-ocker .glyph   { color: var(--color-ocker); }

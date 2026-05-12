@@ -474,7 +474,12 @@ document.body.addEventListener('htmx:afterSwap', function(){
 
   document.addEventListener('click', function(e){
     var openBtn = e.target.closest && e.target.closest('[data-contact-open]');
-    if (openBtn){ e.preventDefault(); open(); return; }
+    if (openBtn){
+      e.preventDefault();
+      if (window.__loadTurnstile) window.__loadTurnstile();
+      open();
+      return;
+    }
     var closeBtn = e.target.closest && e.target.closest('[data-contact-close]');
     if (closeBtn){ e.preventDefault(); close(); return; }
   });

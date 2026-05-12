@@ -34,9 +34,8 @@ export function buildRobotsTxt(opts: RobotsTxtOptions): string {
     "Allow: /",
     "",
     "User-agent: *",
-    "Allow: /",
-    "",
     "Content-Signal: ai-train=no, search=yes, ai-input=yes",
+    "Allow: /",
     "",
     `Sitemap: ${opts.siteUrl}${sitemap}`,
   ];

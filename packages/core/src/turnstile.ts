@@ -13,6 +13,34 @@
 
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
+/**
+ * Inline JS snippet that lazy-injects the Turnstile widget script only
+ * when the user actually opens a form gated by Turnstile. Loading the
+ * script eagerly costs ~6 audits in Lighthouse (deprecations,
+ * legacy-javascript, dom-size, bf-cache, errors-in-console,
+ * uses-long-cache-ttl) — all caused by Turnstile's bundle, none by our
+ * code. Lazy loading clears every one.
+ *
+ * Usage: drop this snippet into your inline client-script blob; call
+ * `window.__loadTurnstile()` right before showing the gated dialog.
+ * Turnstile auto-scans for `.cf-turnstile` elements once the script
+ * resolves, so the widget materialises inside the dialog without
+ * further wiring.
+ */
+export const TURNSTILE_LAZY_LOAD_SCRIPT = `
+window.__loadTurnstile = (function(){
+  var loading = false;
+  return function(){
+    if (loading || window.turnstile) return;
+    loading = true;
+    var s = document.createElement("script");
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    s.async = true; s.defer = true;
+    document.head.appendChild(s);
+  };
+})();
+`.trim();
+
 export interface TurnstileVerifyResult {
   success: boolean;
   errorCodes?: string[];
