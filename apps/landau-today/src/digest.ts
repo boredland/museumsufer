@@ -1,4 +1,5 @@
 import { sendPush, type VapidKeys } from "@museumsufer/core";
+import { isCategorySlug } from "./categories";
 import { todayIso } from "./date";
 import { getEventsForDate, getEventsForRange } from "./queries";
 import type { Env } from "./types";
@@ -13,6 +14,26 @@ interface SubRow {
   p256dh: string;
   auth: string;
   schedule: Schedule;
+  filters_json: string | null;
+}
+
+interface LandauFilters {
+  categories?: string[];
+}
+
+function parseFilters(json: string | null): LandauFilters | null {
+  if (!json) return null;
+  try {
+    const v = JSON.parse(json);
+    if (!v || typeof v !== "object") return null;
+    if (!Array.isArray((v as { categories?: unknown }).categories)) return null;
+    const cats = ((v as { categories: unknown[] }).categories as unknown[]).filter(
+      (c): c is string => typeof c === "string" && isCategorySlug(c),
+    );
+    return cats.length === 0 ? null : { categories: cats };
+  } catch {
+    return null;
+  }
 }
 
 function berlinHour(d: Date): number {
@@ -56,9 +77,22 @@ function formatTime(t: string | undefined): string {
   return t ? t.slice(0, 5) : "";
 }
 
-function buildMorningPayload(): NotificationPayload | null {
+interface EventLike {
+  date: string;
+  time?: string;
+  title: string;
+  category: string;
+}
+
+function eventsMatchingFilters(events: EventLike[], filters: LandauFilters | null): EventLike[] {
+  if (!filters?.categories || filters.categories.length === 0) return events;
+  const allowed = new Set(filters.categories);
+  return events.filter((e) => allowed.has(e.category));
+}
+
+function buildMorningPayload(filters: LandauFilters | null): NotificationPayload | null {
   const date = todayIso();
-  const events = getEventsForDate(date);
+  const events = eventsMatchingFilters(getEventsForDate(date) as EventLike[], filters);
   if (events.length === 0) return null;
   const sample = events.slice(0, 3).map((e) => {
     const time = formatTime(e.time);
@@ -73,9 +107,9 @@ function buildMorningPayload(): NotificationPayload | null {
   };
 }
 
-function buildAfternoonPayload(): NotificationPayload | null {
+function buildAfternoonPayload(filters: LandauFilters | null): NotificationPayload | null {
   const date = todayIso();
-  const all = getEventsForDate(date);
+  const all = eventsMatchingFilters(getEventsForDate(date) as EventLike[], filters);
   const evening = all.filter((e) => e.time && e.time >= "17:00");
   if (evening.length === 0) return null;
   const sample = evening.slice(0, 3).map((e) => `${formatTime(e.time)} ${e.title}`);
@@ -88,12 +122,12 @@ function buildAfternoonPayload(): NotificationPayload | null {
   };
 }
 
-function buildWeeklyPayload(): NotificationPayload | null {
+function buildWeeklyPayload(filters: LandauFilters | null): NotificationPayload | null {
   const from = todayIso();
   const toDate = new Date(`${from}T12:00:00Z`);
   toDate.setUTCDate(toDate.getUTCDate() + 6);
   const to = toDate.toISOString().slice(0, 10);
-  const events = getEventsForRange(from, to);
+  const events = eventsMatchingFilters(getEventsForRange(from, to) as EventLike[], filters);
   if (events.length === 0) return null;
   const byDate = new Map<string, number>();
   for (const e of events) byDate.set(e.date, (byDate.get(e.date) ?? 0) + 1);
@@ -106,10 +140,10 @@ function buildWeeklyPayload(): NotificationPayload | null {
   };
 }
 
-function buildPayload(schedule: Schedule): NotificationPayload | null {
-  if (schedule === "morning") return buildMorningPayload();
-  if (schedule === "afternoon") return buildAfternoonPayload();
-  return buildWeeklyPayload();
+function buildPayload(schedule: Schedule, filters: LandauFilters | null): NotificationPayload | null {
+  if (schedule === "morning") return buildMorningPayload(filters);
+  if (schedule === "afternoon") return buildAfternoonPayload(filters);
+  return buildWeeklyPayload(filters);
 }
 
 function vapidFromEnv(env: Env): VapidKeys | null {
@@ -127,14 +161,9 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
     console.warn("VAPID keys missing — skipping dispatch");
     return;
   }
-  const payload = buildPayload(schedule);
-  if (!payload) {
-    console.log(`No content for ${schedule} digest — skipping`);
-    return;
-  }
 
   const rows = await env.DB.prepare(
-    `SELECT id, endpoint, p256dh, auth, schedule FROM push_subscriptions
+    `SELECT id, endpoint, p256dh, auth, schedule, filters_json FROM push_subscriptions
      WHERE schedule = ?1 AND failed_at IS NULL`,
   )
     .bind(schedule)
@@ -148,9 +177,16 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
 
   const goneIds: number[] = [];
   const sentIds: number[] = [];
+  let skipped = 0;
 
   await Promise.all(
     subs.map(async (sub) => {
+      const filters = parseFilters(sub.filters_json);
+      const payload = buildPayload(schedule, filters);
+      if (!payload) {
+        skipped++;
+        return;
+      }
       try {
         const res = await sendPush(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -180,5 +216,5 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
       .bind(...sentIds)
       .run();
   }
-  console.log(`${schedule}: sent ${sentIds.length}, pruned ${goneIds.length}`);
+  console.log(`${schedule}: sent ${sentIds.length}, skipped ${skipped} (no matching events), pruned ${goneIds.length}`);
 }

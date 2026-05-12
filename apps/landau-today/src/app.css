@@ -1162,3 +1162,77 @@ body.htmx-request .htmx-progress::before {
   .digest-cue__text { grid-column: 1 / -1; font-size: 0.95rem; }
   .digest-cue__schedules { grid-row: 1; grid-column: 3; justify-self: end; }
 }
+
+/* Digest filter — collapsible category multi-select inside digest dialog */
+.digest-filter { margin-top: 0.25rem; }
+.digest-filter__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.1rem;
+  cursor: pointer;
+  list-style: none;
+  font-family: "Bodoni Moda SC", var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  transition: color 0.18s;
+}
+.digest-filter__summary::-webkit-details-marker { display: none; }
+.digest-filter__summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.45rem;
+  color: var(--color-rotwein);
+  transition: transform 0.2s;
+}
+.digest-filter[open] .digest-filter__summary::before { transform: rotate(90deg); }
+.digest-filter[open] .digest-filter__summary { color: var(--color-ink); }
+.digest-filter__summary:hover { color: var(--color-ink); }
+.digest-filter__hint {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgb(from var(--color-ink) r g b / 0.55);
+}
+.digest-filter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border: 0;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+.digest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+  background: var(--color-paper-2);
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+.digest-chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.digest-chip__glyph {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--color-rotwein);
+}
+.digest-chip:hover { color: var(--color-ink); border-color: var(--color-ink-soft); }
+.digest-chip:has(input:checked) {
+  color: var(--color-paper);
+  background: var(--color-rotwein);
+  border-color: var(--color-rotwein);
+}
+.digest-chip:has(input:checked) .digest-chip__glyph { color: var(--color-paper); }

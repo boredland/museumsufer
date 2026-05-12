@@ -1,5 +1,5 @@
 import { buildFaqPageSchema, type FaqItem, THEME_FOUC_SCRIPT } from "@museumsufer/core";
-import { CATEGORY_BY_SLUG } from "./categories";
+import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
 import { APP_URL, formatDateLong } from "./shared";
@@ -157,6 +157,22 @@ ${renderFaq(FAQ)}
         <span class="digest-option__sub">Wochenüberblick</span>
       </label>
     </fieldset>
+
+    <details class="digest-filter">
+      <summary class="digest-filter__summary">
+        <span class="digest-filter__label">Kategorien einschränken</span>
+        <span class="digest-filter__hint">leer = alle</span>
+      </summary>
+      <fieldset class="digest-filter__chips" aria-label="Kategorien">
+        ${CATEGORIES.map(
+          (c) => `<label class="digest-chip">
+          <input type="checkbox" name="filter-category" value="${c.slug}" />
+          <span class="digest-chip__glyph">${c.glyph}</span>
+          <span class="digest-chip__label">${c.short}</span>
+        </label>`,
+        ).join("")}
+      </fieldset>
+    </details>
 
     <div id="digest-ios-hint" hidden style="padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:rgb(from var(--color-ink) r g b / 0.8)">
       <strong style="font-weight:600">Auf iPhone/iPad:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das App-Icon — erst dann sind Push-Nachrichten möglich.

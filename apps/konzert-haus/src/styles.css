@@ -1090,3 +1090,80 @@ a:focus-visible {
   .digest-cue__text { grid-column: 1 / -1; font-size: 0.95rem; }
   .digest-cue__schedules { grid-row: 1; grid-column: 3; justify-self: end; }
 }
+
+/* Digest filter — collapsible section inside the digest dialog */
+.digest-filter {
+  margin-top: 0.25rem;
+}
+.digest-filter[open] .digest-filter__summary { color: var(--felt); }
+.digest-filter__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.1rem;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--felt-quiet);
+  transition: color 0.18s;
+}
+.digest-filter__summary::-webkit-details-marker { display: none; }
+.digest-filter__summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.45rem;
+  color: var(--brass);
+  transition: transform 0.2s;
+}
+.digest-filter[open] .digest-filter__summary::before { transform: rotate(90deg); }
+.digest-filter__summary:hover { color: var(--felt); }
+.digest-filter__label { font-weight: 500; }
+.digest-filter__hint {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--felt-quiet);
+}
+.digest-filter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border: 0;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+.digest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--felt-soft);
+  background: var(--walnut-deep);
+  transition: border-color 0.18s, color 0.18s, background 0.18s;
+}
+.digest-chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.digest-chip__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.digest-chip:hover { color: var(--felt); border-color: var(--felt-quiet); }
+.digest-chip:has(input:checked) {
+  color: var(--walnut);
+  background: var(--felt);
+  border-color: var(--felt);
+}

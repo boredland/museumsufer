@@ -269,6 +269,7 @@ document.body.addEventListener('htmx:afterSwap', function(){
   var iosHint = document.getElementById('digest-ios-hint');
   var unsupported = document.getElementById('digest-unsupported');
   var boxes = form.querySelectorAll('input[name="schedule"]');
+  var catBoxes = form.querySelectorAll('input[name="filter-category"]');
 
   function checked(){
     var out = [];
@@ -277,6 +278,14 @@ document.body.addEventListener('htmx:afterSwap', function(){
   }
   function setChecked(values){
     boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
+  }
+  function checkedCategories(){
+    var out = [];
+    catBoxes.forEach(function(b){ if (b.checked) out.push(b.value); });
+    return out;
+  }
+  function setCategories(values){
+    catBoxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
   }
   function setStatus(msg, kind){
     if (!msg){ status.hidden = true; status.textContent = ''; status.style.color = ''; return; }
@@ -312,6 +321,7 @@ document.body.addEventListener('htmx:afterSwap', function(){
     submit.textContent = 'Abonnieren';
     unsubBtn.hidden = true;
     setChecked([]);
+    setCategories([]);
     iosHint.hidden = true;
     unsupported.hidden = true;
 
@@ -330,6 +340,7 @@ document.body.addEventListener('htmx:afterSwap', function(){
           .then(function(me){
             if (me && me.schedules && me.schedules.length){
               setChecked(me.schedules);
+              if (me.filters && Array.isArray(me.filters.categories)) setCategories(me.filters.categories);
               submit.textContent = 'Speichern';
               unsubBtn.hidden = false;
             }
@@ -363,10 +374,12 @@ document.body.addEventListener('htmx:afterSwap', function(){
 
       function withSub(sub){
         var json = sub.toJSON();
+        var cats = checkedCategories();
+        var filters = cats.length > 0 ? { categories: cats } : null;
         return fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched })
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
         }).then(function(r){
           if (!r.ok) throw new Error('save-failed');
           return 'saved';
