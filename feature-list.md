@@ -11,7 +11,7 @@ Aggregated programme for Frankfurt's Museumsufer district (museums + exhibitions
 ### User-facing routes
 - `GET /` — day view with date strip; `?date=YYYY-MM-DD&range=2-14&lang=de|en|fr`
 - `GET /museum/:slug` — single museum: hours, exhibitions, events, JSON-LD `Museum` schema
-- `GET /impressum` — imprint
+- `GET /impressum` (+ `/imprint` → 301, preserves `?lang`) — imprint
 - `GET /api/docs` — Scalar OpenAPI reference UI
 - `GET /partial/content` — HTMX fragment for date/range swaps (returns `X-Date-Label`)
 
@@ -123,7 +123,7 @@ Concert programme aggregator (classical, jazz, sacred, world, experimental, cham
 - `GET /tag/:date` — dated programme (hreflang alternates de/en/fr)
 - `GET /spielort/:slug` — single venue (60-day schedule, `MusicVenue` JSON-LD)
 - `GET /genre/:slug` — genre listing (60-day window)
-- `GET /impressum`
+- `GET /impressum` (+ `/imprint` → 301)
 - `GET /api/docs` — Scalar UI
 
 ### APIs / feeds
@@ -178,7 +178,7 @@ Aggregated cultural events for Landau in der Pfalz and the Südliche Weinstraße
 - `GET /event/:id` — event detail (schema.org, calendar deep-links, VRN transit)
 - `GET /event/:id.ics` — single-event iCal
 - `GET /impressum` (+ `/imprint` → 301)
-- `GET /api/docs`
+- `GET /api/docs` — Scalar UI
 
 ### APIs / feeds
 - `GET /api/day?date&category` — `{date, count, events[]}`
