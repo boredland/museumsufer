@@ -7,6 +7,8 @@ import {
   LLM_SERVICES,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
+import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq } from "@museumsufer/core/faq-ui";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
@@ -355,150 +357,68 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name, "de"));
   return (
-    <dialog id="digest-dialog" class="dialog">
-      <form id="digest-form" class="dialog__form">
-        <div class="dialog__head">
-          <h2 class="dialog__title">{tr.digestTitle}</h2>
-          <button type="button" data-digest-close aria-label={tr.contactClose} class="dialog__close">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
-              <path d={ICON.close} />
-            </svg>
-          </button>
-        </div>
-
-        <p class="dialog__intro">{tr.digestIntro}</p>
-
-        <fieldset class="digest-options" aria-label={tr.digestTitle}>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="morning" class="digest-option__radio" />
-            <span class="digest-option__label">
-              <span class="digest-option__name">{tr.digestSchedMorning}</span>
-              <span class="digest-option__time">{tr.digestSchedMorningTime}</span>
-            </span>
-            <span class="digest-option__desc">{tr.digestSchedMorningDesc}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="afternoon" class="digest-option__radio" />
-            <span class="digest-option__label">
-              <span class="digest-option__name">{tr.digestSchedAfternoon}</span>
-              <span class="digest-option__time">{tr.digestSchedAfternoonTime}</span>
-            </span>
-            <span class="digest-option__desc">{tr.digestSchedAfternoonDesc}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="weekly" class="digest-option__radio" />
-            <span class="digest-option__label">
-              <span class="digest-option__name">{tr.digestSchedWeekly}</span>
-              <span class="digest-option__time">{tr.digestSchedWeeklyTime}</span>
-            </span>
-            <span class="digest-option__desc">{tr.digestSchedWeeklyDesc}</span>
-          </label>
-        </fieldset>
-
-        <details class="digest-filter">
-          <summary class="digest-filter__summary">
-            <span class="digest-filter__label">
-              <span class="digest-filter__caret">▸</span>
-              {tr.digestFilterLabel}
-            </span>
-            <span class="digest-filter__hint">{tr.digestFilterHint}</span>
-          </summary>
-          <fieldset class="digest-filter__list" aria-label={tr.digestFilterLabel}>
-            {museumOptions.map((m) => (
-              <label key={m.slug} class="digest-filter__chip">
-                <input type="checkbox" name="filter-museum" value={m.slug} class="digest-filter__chip-input" />
-                <span>{m.name}</span>
-              </label>
-            ))}
-          </fieldset>
-        </details>
-
-        <div id="digest-ios-hint" hidden class="dialog__hint" dangerouslySetInnerHTML={{ __html: tr.digestIosHint }} />
-
-        <div id="digest-unsupported" hidden class="dialog__error">
-          {tr.digestUnsupported}
-        </div>
-
-        <div class="dialog__footer">
-          <p id="digest-status" hidden class="dialog__status" aria-live="polite" />
-          <button type="button" id="digest-unsubscribe-all" hidden class="btn-link">
-            {tr.digestUnsubAll}
-          </button>
-          <button type="submit" id="digest-submit" class="btn-primary">
-            {tr.digestSubscribe}
-          </button>
-        </div>
-      </form>
-    </dialog>
+    <SharedDigestDialog
+      schedules={[
+        {
+          value: "morning",
+          label: tr.digestSchedMorning,
+          time: tr.digestSchedMorningTime,
+          desc: tr.digestSchedMorningDesc,
+        },
+        {
+          value: "afternoon",
+          label: tr.digestSchedAfternoon,
+          time: tr.digestSchedAfternoonTime,
+          desc: tr.digestSchedAfternoonDesc,
+        },
+        {
+          value: "weekly",
+          label: tr.digestSchedWeekly,
+          time: tr.digestSchedWeeklyTime,
+          desc: tr.digestSchedWeeklyDesc,
+        },
+      ]}
+      filterChips={museumOptions.map((m) => ({ value: m.slug, label: m.name }))}
+      filterName="filter-museum"
+      tr={{
+        title: tr.digestTitle,
+        close: tr.contactClose,
+        intro: tr.digestIntro,
+        filterLabel: tr.digestFilterLabel,
+        filterHint: tr.digestFilterHint,
+        iosHint: tr.digestIosHint,
+        unsupported: tr.digestUnsupported,
+        submit: tr.digestSubscribe,
+        unsubAll: tr.digestUnsubAll,
+      }}
+    />
   );
 }
 
 /** Contact dialog for submitting feedback, missing events, or museum corrections */
 export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, string>; turnstileSiteKey?: string }) {
   return (
-    <dialog id="contact-dialog" class="dialog dialog--wide">
-      <form id="contact-form" class="dialog__form">
-        <div class="dialog__head">
-          <h2 class="dialog__title">{tr.contactTitle}</h2>
-          <button type="button" data-contact-close aria-label={tr.contactClose} class="dialog__close">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
-              <path d={ICON.close} />
-            </svg>
-          </button>
-        </div>
-
-        <div id="contact-regarding" hidden class="dialog__regarding">
-          <span class="dialog__regarding-kicker">{tr.contactRegarding}</span>
-          <span id="contact-regarding-text" class="dialog__regarding-text" />
-        </div>
-
-        <label class="field">
-          <span class="field__label">{tr.contactCategoryLabel}</span>
-          <select id="contact-category" name="category" required class="field__select">
-            <option value={tr.contactCategoryEvent}>{tr.contactCategoryEvent}</option>
-            <option value={tr.contactCategoryInstitution}>{tr.contactCategoryInstitution}</option>
-            <option value={tr.contactCategoryFeedback}>{tr.contactCategoryFeedback}</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span class="field__label">{tr.contactEmailLabel}</span>
-          <input
-            type="email"
-            id="contact-email"
-            name="email"
-            required
-            placeholder={tr.contactEmailPlaceholder}
-            class="field__input"
-          />
-        </label>
-
-        <label class="field">
-          <span class="field__label">{tr.contactMessageLabel}</span>
-          <textarea
-            id="contact-message"
-            name="message"
-            required
-            rows={4}
-            placeholder={tr.contactMessagePlaceholder}
-            class="field__textarea"
-          />
-        </label>
-
-        <input type="hidden" id="contact-context" name="context" />
-
-        {turnstileSiteKey ? (
-          <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
-        ) : null}
-
-        <div class="dialog__footer">
-          <p id="contact-status" hidden class="dialog__status" aria-live="polite" />
-          <button type="submit" id="contact-submit" class="btn-primary">
-            {tr.contactSubmit}
-          </button>
-        </div>
-      </form>
-    </dialog>
+    <SharedContactDialog
+      wide
+      emailRequired
+      turnstileSiteKey={turnstileSiteKey}
+      categories={[
+        { value: tr.contactCategoryEvent, label: tr.contactCategoryEvent },
+        { value: tr.contactCategoryInstitution, label: tr.contactCategoryInstitution },
+        { value: tr.contactCategoryFeedback, label: tr.contactCategoryFeedback },
+      ]}
+      tr={{
+        title: tr.contactTitle,
+        close: tr.contactClose,
+        regarding: tr.contactRegarding,
+        categoryLabel: tr.contactCategoryLabel,
+        emailLabel: tr.contactEmailLabel,
+        emailPlaceholder: tr.contactEmailPlaceholder,
+        messageLabel: tr.contactMessageLabel,
+        messagePlaceholder: tr.contactMessagePlaceholder,
+        submit: tr.contactSubmit,
+      }}
+    />
   );
 }
 

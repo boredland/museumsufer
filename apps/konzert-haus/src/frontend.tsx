@@ -22,6 +22,8 @@ import {
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
+import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
@@ -555,156 +557,57 @@ function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
 
 function DigestDialog({ tr }: { tr: Translations }) {
   return (
-    <dialog id="digest-dialog" class="contact-dialog">
-      <form id="digest-form" class="contact-form" novalidate>
-        <header class="contact-form__head">
-          <h2 class="contact-form__title">{tr.digestTitle}</h2>
-          <button type="button" class="contact-form__close" data-digest-close aria-label={tr.digestClose}>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" />
-            </svg>
-          </button>
-        </header>
-        <p class="contact-form__intro">
-          Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.
-        </p>
-        <fieldset class="digest-options" aria-label={tr.digestSchedules}>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="morning" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestMorning}</span>
-              <span class="digest-option__time">07:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestMorningSub}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="afternoon" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestAfternoon}</span>
-              <span class="digest-option__time">17:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestAfternoonSub}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="weekly" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestSunday}</span>
-              <span class="digest-option__time">So 09:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestSundaySub}</span>
-          </label>
-        </fieldset>
-        <details class="digest-filter">
-          <summary class="digest-filter__summary">
-            <span class="digest-filter__label">{tr.digestFilterLabel}</span>
-            <span class="digest-filter__hint">{tr.digestFilterHint}</span>
-          </summary>
-          <fieldset class="digest-filter__chips" aria-label={tr.genre}>
-            {GENRE_ORDER.map((g) => (
-              <label key={g} class="digest-chip">
-                <input type="checkbox" name="filter-genre" value={g} />
-                <span class="digest-chip__dot" style={`background:${GENRE_COLOR_VAR[g]}`} />
-                <span class="digest-chip__label">{genreLabel(g, tr)}</span>
-              </label>
-            ))}
-          </fieldset>
-        </details>
-        <p id="digest-ios-hint" class="contact-form__regarding" hidden>
-          <span class="contact-form__regarding-label">iPhone</span>
-          <span>
-            Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind
-            Push-Nachrichten möglich.
-          </span>
-        </p>
-        <p id="digest-unsupported" class="contact-form__regarding" hidden>
-          <span class="contact-form__regarding-label">Browser</span>
-          <span>
-            Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.
-          </span>
-        </p>
-        <footer class="contact-form__foot">
-          <p id="digest-status" class="contact-form__status" hidden aria-live="polite" />
-          <button
-            type="button"
-            id="digest-unsubscribe-all"
-            hidden
-            class="contact-form__submit"
-            style="background:transparent;color:var(--felt-soft);border-color:var(--rule)"
-          >
-            Alle abbestellen
-          </button>
-          <button type="submit" id="digest-submit" class="contact-form__submit">
-            Abonnieren
-          </button>
-        </footer>
-      </form>
-    </dialog>
+    <SharedDigestDialog
+      schedules={[
+        { value: "morning", label: tr.digestMorning, time: "07:00", desc: tr.digestMorningSub },
+        { value: "afternoon", label: tr.digestAfternoon, time: "17:00", desc: tr.digestAfternoonSub },
+        { value: "weekly", label: tr.digestSunday, time: "So 09:00", desc: tr.digestSundaySub },
+      ]}
+      filterChips={GENRE_ORDER.map((g) => ({
+        value: g,
+        label: genreLabel(g, tr),
+        dotColor: GENRE_COLOR_VAR[g],
+      }))}
+      filterName="filter-genre"
+      tr={{
+        title: tr.digestTitle,
+        close: tr.digestClose,
+        intro: "Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.",
+        filterLabel: tr.digestFilterLabel,
+        filterHint: tr.digestFilterHint,
+        iosHint:
+          "<strong>iPhone:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.",
+        unsupported:
+          "Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.",
+        submit: "Abonnieren",
+        unsubAll: "Alle abbestellen",
+      }}
+    />
   );
 }
 
 function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey?: string; tr: Translations }) {
   return (
-    <dialog id="contact-dialog" class="contact-dialog">
-      <form id="contact-form" class="contact-form" novalidate>
-        <header class="contact-form__head">
-          <h2 class="contact-form__title">{tr.contactTitle}</h2>
-          <button type="button" class="contact-form__close" data-contact-close aria-label={tr.digestClose}>
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" />
-            </svg>
-          </button>
-        </header>
-        <p class="contact-form__intro">
-          Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.
-        </p>
-        <div class="contact-form__regarding" id="contact-regarding" hidden>
-          <span class="contact-form__regarding-label">{tr.contactRegarding}</span>
-          <span id="contact-regarding-text" />
-        </div>
-        <label class="contact-form__field">
-          <span class="contact-form__label">Kategorie</span>
-          <select id="contact-category" name="category" required>
-            <option value="Konzert">{tr.contactCategoryConcert}</option>
-            <option value="Spielort">{tr.contactCategoryVenue}</option>
-            <option value="Allgemein">{tr.contactCategoryGeneral}</option>
-          </select>
-        </label>
-        <label class="contact-form__field">
-          <span class="contact-form__label">{tr.contactEmail}</span>
-          <input type="email" id="contact-email" name="email" placeholder="dein@email.de" />
-        </label>
-        <label class="contact-form__field">
-          <span class="contact-form__label">{tr.contactMessage}</span>
-          <textarea id="contact-message" name="message" required rows={4} placeholder={tr.contactIntro} />
-        </label>
-        <input type="hidden" id="contact-context" name="context" />
-        {turnstileSiteKey ? (
-          <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
-        ) : null}
-        <footer class="contact-form__foot">
-          <p id="contact-status" class="contact-form__status" hidden aria-live="polite" />
-          <button type="submit" id="contact-submit" class="contact-form__submit">
-            {tr.contactSend}
-          </button>
-        </footer>
-      </form>
-    </dialog>
+    <SharedContactDialog
+      turnstileSiteKey={turnstileSiteKey}
+      categories={[
+        { value: "Konzert", label: tr.contactCategoryConcert },
+        { value: "Spielort", label: tr.contactCategoryVenue },
+        { value: "Allgemein", label: tr.contactCategoryGeneral },
+      ]}
+      tr={{
+        title: tr.contactTitle,
+        close: tr.digestClose,
+        intro: "Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.",
+        regarding: tr.contactRegarding,
+        categoryLabel: "Kategorie",
+        emailLabel: tr.contactEmail,
+        emailPlaceholder: "dein@email.de",
+        messageLabel: tr.contactMessage,
+        messagePlaceholder: tr.contactIntro,
+        submit: tr.contactSend,
+      }}
+    />
   );
 }
 

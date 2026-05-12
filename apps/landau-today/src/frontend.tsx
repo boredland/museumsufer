@@ -6,6 +6,8 @@ import {
   langSwitchItems,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
+import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { raw } from "hono/html";
@@ -94,164 +96,59 @@ function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
   );
 }
 
-const DIALOG_STYLE =
-  "margin:auto;padding:0;border:1px solid var(--color-rule);border-radius:0.5rem;background:var(--color-paper);color:var(--color-ink);width:min(28rem,calc(100vw - 2rem));box-shadow:0 16px 48px -16px rgb(from var(--color-ink) r g b / 0.35);";
-const DIALOG_FORM_STYLE = "padding:1.5rem;display:flex;flex-direction:column;gap:1rem;font-family:var(--font-body)";
-const DIALOG_HEAD_STYLE = "display:flex;align-items:flex-start;justify-content:space-between;gap:1rem";
-const DIALOG_TITLE_STYLE =
-  "font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15";
-const DIALOG_CLOSE_STYLE =
-  "background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1";
-const DIALOG_INTRO_STYLE =
-  "margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)";
-const DIALOG_FIELD_LABEL_STYLE = "display:flex;flex-direction:column;gap:0.35rem";
-const DIALOG_FIELD_LABEL_TEXT_STYLE =
-  "font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)";
-const DIALOG_FIELD_INPUT_STYLE =
-  "padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit";
-const DIALOG_NOTICE_STYLE =
-  "padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:rgb(from var(--color-ink) r g b / 0.8)";
-const DIALOG_NOTICE_ERR_STYLE =
-  "padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:var(--color-rotwein)";
-const DIALOG_FOOT_STYLE = "display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-top:0.25rem";
-const DIALOG_STATUS_STYLE =
-  "margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0";
-const DIALOG_BTN_PRIMARY_STYLE =
-  "margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)";
-const DIALOG_BTN_SECONDARY_STYLE =
-  "background:transparent;border:0;padding:0.5rem 0;font-size:0.6875rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55);cursor:pointer;font-family:var(--font-body)";
 const FOOTER_LINK_STYLE =
   "background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px";
 
 function DigestDialog({ tr }: { tr: Translations }) {
   return (
-    <dialog id="digest-dialog" style={DIALOG_STYLE}>
-      <form id="digest-form" style={DIALOG_FORM_STYLE}>
-        <div style={DIALOG_HEAD_STYLE}>
-          <h2 style={DIALOG_TITLE_STYLE}>{tr.digestDialogTitle}</h2>
-          <button type="button" data-digest-close aria-label={tr.close} style={DIALOG_CLOSE_STYLE}>
-            ×
-          </button>
-        </div>
-        <p style={DIALOG_INTRO_STYLE}>{tr.digestDialogIntro}</p>
-        <fieldset
-          aria-label={tr.digestSchedulesLabel}
-          style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem"
-        >
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="morning" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestMorning}</span>
-              <span class="digest-option__time">07:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestMorningSub}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="afternoon" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestAfternoon}</span>
-              <span class="digest-option__time">17:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestAfternoonSub}</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="weekly" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">{tr.digestWeekly}</span>
-              <span class="digest-option__time">So 09:00</span>
-            </span>
-            <span class="digest-option__sub">{tr.digestWeeklySub}</span>
-          </label>
-        </fieldset>
-        <details class="digest-filter">
-          <summary class="digest-filter__summary">
-            <span class="digest-filter__label">{tr.digestRestrictCategories}</span>
-            <span class="digest-filter__hint">{tr.digestRestrictHint}</span>
-          </summary>
-          <fieldset class="digest-filter__chips" aria-label={tr.ariaCategory}>
-            {CATEGORIES.map((c) => {
-              const localized = tr.categories[c.slug]?.short ?? c.short;
-              return (
-                <label key={c.slug} class="digest-chip">
-                  <input type="checkbox" name="filter-category" value={c.slug} />
-                  <span class="digest-chip__glyph">{c.glyph}</span>
-                  <span class="digest-chip__label">{localized}</span>
-                </label>
-              );
-            })}
-          </fieldset>
-        </details>
-        <div id="digest-ios-hint" hidden style={DIALOG_NOTICE_STYLE}>
-          {tr.digestIosHint}
-        </div>
-        <div id="digest-unsupported" hidden style={DIALOG_NOTICE_ERR_STYLE}>
-          {tr.digestBrowserUnsupported}
-        </div>
-        <div style={DIALOG_FOOT_STYLE}>
-          <p id="digest-status" hidden style={DIALOG_STATUS_STYLE} aria-live="polite" />
-          <button type="button" id="digest-unsubscribe-all" hidden style={DIALOG_BTN_SECONDARY_STYLE}>
-            {tr.digestUnsubscribeAll}
-          </button>
-          <button type="submit" id="digest-submit" style={DIALOG_BTN_PRIMARY_STYLE}>
-            {tr.digestSubscribeBtn}
-          </button>
-        </div>
-      </form>
-    </dialog>
+    <SharedDigestDialog
+      schedules={[
+        { value: "morning", label: tr.digestMorning, time: "07:00", desc: tr.digestMorningSub },
+        { value: "afternoon", label: tr.digestAfternoon, time: "17:00", desc: tr.digestAfternoonSub },
+        { value: "weekly", label: tr.digestWeekly, time: "So 09:00", desc: tr.digestWeeklySub },
+      ]}
+      filterChips={CATEGORIES.map((c) => ({
+        value: c.slug,
+        label: `${c.glyph} ${tr.categories[c.slug]?.short ?? c.short}`,
+      }))}
+      filterName="filter-category"
+      tr={{
+        title: tr.digestDialogTitle,
+        close: tr.close,
+        intro: tr.digestDialogIntro,
+        filterLabel: tr.digestRestrictCategories,
+        filterHint: tr.digestRestrictHint,
+        iosHint: tr.digestIosHint,
+        unsupported: tr.digestBrowserUnsupported,
+        submit: tr.digestSubscribeBtn,
+        unsubAll: tr.digestUnsubscribeAll,
+      }}
+    />
   );
 }
 
 function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey: string; tr: Translations }) {
-  const textareaStyle = `${DIALOG_FIELD_INPUT_STYLE};resize:vertical;min-height:5rem`;
   return (
-    <dialog id="contact-dialog" style={DIALOG_STYLE}>
-      <form id="contact-form" style={DIALOG_FORM_STYLE} novalidate>
-        <div style={DIALOG_HEAD_STYLE}>
-          <h2 style={DIALOG_TITLE_STYLE}>{tr.contactTitle}</h2>
-          <button type="button" data-contact-close aria-label={tr.close} style={DIALOG_CLOSE_STYLE}>
-            ×
-          </button>
-        </div>
-        <p style={DIALOG_INTRO_STYLE}>{tr.contactIntro}</p>
-        <label style={DIALOG_FIELD_LABEL_STYLE}>
-          <span style={DIALOG_FIELD_LABEL_TEXT_STYLE}>{tr.ariaCategory}</span>
-          <select id="contact-category" name="category" required style={DIALOG_FIELD_INPUT_STYLE}>
-            <option value="Veranstaltung">{tr.contactCategoryEvent}</option>
-            <option value="Quelle">{tr.contactCategorySource}</option>
-            <option value="Allgemein">{tr.contactCategoryGeneral}</option>
-          </select>
-        </label>
-        <label style={DIALOG_FIELD_LABEL_STYLE}>
-          <span style={DIALOG_FIELD_LABEL_TEXT_STYLE}>{tr.contactEmailLabel}</span>
-          <input
-            type="email"
-            id="contact-email"
-            name="email"
-            placeholder="dein@email.de"
-            style={DIALOG_FIELD_INPUT_STYLE}
-          />
-        </label>
-        <label style={DIALOG_FIELD_LABEL_STYLE}>
-          <span style={DIALOG_FIELD_LABEL_TEXT_STYLE}>{tr.contactMessageLabel}</span>
-          <textarea
-            id="contact-message"
-            name="message"
-            required
-            rows={4}
-            placeholder={tr.contactIntro}
-            style={textareaStyle}
-          />
-        </label>
-        <input type="hidden" id="contact-context" name="context" />
-        <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
-        <div style={DIALOG_FOOT_STYLE}>
-          <p id="contact-status" hidden style={DIALOG_STATUS_STYLE} aria-live="polite" />
-          <button type="submit" id="contact-submit" style={DIALOG_BTN_PRIMARY_STYLE}>
-            {tr.contactSendBtn}
-          </button>
-        </div>
-      </form>
-    </dialog>
+    <SharedContactDialog
+      turnstileSiteKey={turnstileSiteKey}
+      categories={[
+        { value: "Veranstaltung", label: tr.contactCategoryEvent },
+        { value: "Quelle", label: tr.contactCategorySource },
+        { value: "Allgemein", label: tr.contactCategoryGeneral },
+      ]}
+      tr={{
+        title: tr.contactTitle,
+        close: tr.close,
+        intro: tr.contactIntro,
+        regarding: tr.ariaCategory,
+        categoryLabel: tr.ariaCategory,
+        emailLabel: tr.contactEmailLabel,
+        emailPlaceholder: "dein@email.de",
+        messageLabel: tr.contactMessageLabel,
+        messagePlaceholder: tr.contactIntro,
+        submit: tr.contactSendBtn,
+      }}
+    />
   );
 }
 

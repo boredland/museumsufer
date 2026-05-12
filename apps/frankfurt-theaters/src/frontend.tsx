@@ -19,6 +19,8 @@ import {
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
+import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
@@ -598,143 +600,54 @@ export function DigestCue() {
 
 function ContactDialog({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
   return (
-    <dialog id="contact-dialog" class="contact-dialog">
-      <form id="contact-form" class="contact-form" novalidate>
-        <header class="contact-form__head">
-          <h2 class="contact-form__title">Feedback &amp; Korrekturen</h2>
-          <button type="button" class="contact-form__close" data-contact-close aria-label="Schließen">
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" />
-            </svg>
-          </button>
-        </header>
-        <p class="contact-form__intro">
-          Falsche Zeit, fehlende Vorstellung, Tippfehler? Wir freuen uns über jeden Hinweis.
-        </p>
-        <div class="contact-form__regarding" id="contact-regarding" hidden>
-          <span class="contact-form__regarding-label">Betrifft</span>
-          <span id="contact-regarding-text" />
-        </div>
-        <label class="contact-form__field">
-          <span class="contact-form__label">Kategorie</span>
-          <select id="contact-category" name="category" required>
-            <option value="Vorstellung">Vorstellung — falsche Daten</option>
-            <option value="Bühne">Bühne — fehlt oder Korrektur</option>
-            <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
-          </select>
-        </label>
-        <label class="contact-form__field">
-          <span class="contact-form__label">E-Mail (optional, für Rückfragen)</span>
-          <input type="email" id="contact-email" name="email" placeholder="dein@email.de" />
-        </label>
-        <label class="contact-form__field">
-          <span class="contact-form__label">Nachricht</span>
-          <textarea id="contact-message" name="message" required rows={4} placeholder="Was stimmt nicht?" />
-        </label>
-        <input type="hidden" id="contact-context" name="context" />
-        {turnstileSiteKey ? (
-          <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
-        ) : null}
-        <footer class="contact-form__foot">
-          <p id="contact-status" class="contact-form__status" hidden aria-live="polite" />
-          <button type="submit" id="contact-submit" class="contact-form__submit">
-            Senden
-          </button>
-        </footer>
-      </form>
-    </dialog>
+    <SharedContactDialog
+      turnstileSiteKey={turnstileSiteKey}
+      categories={[
+        { value: "Vorstellung", label: "Vorstellung — falsche Daten" },
+        { value: "Bühne", label: "Bühne — fehlt oder Korrektur" },
+        { value: "Allgemein", label: "Allgemein — Feedback / Funktionen" },
+      ]}
+      tr={{
+        title: "Feedback & Korrekturen",
+        close: "Schließen",
+        intro: "Falsche Zeit, fehlende Vorstellung, Tippfehler? Wir freuen uns über jeden Hinweis.",
+        regarding: "Betrifft",
+        categoryLabel: "Kategorie",
+        emailLabel: "E-Mail (optional, für Rückfragen)",
+        emailPlaceholder: "dein@email.de",
+        messageLabel: "Nachricht",
+        messagePlaceholder: "Was stimmt nicht?",
+        submit: "Senden",
+      }}
+    />
   );
 }
 
 function DigestDialog() {
   return (
-    <dialog id="digest-dialog" class="contact-dialog">
-      <form id="digest-form" class="contact-form" novalidate>
-        <header class="contact-form__head">
-          <h2 class="contact-form__title">Vorstellungen abonnieren</h2>
-          <button type="button" class="contact-form__close" data-digest-close aria-label="Schließen">
-            <svg
-              viewBox="0 0 16 16"
-              width="14"
-              height="14"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <path d="M3 3l10 10M13 3L3 13" stroke-linecap="round" />
-            </svg>
-          </button>
-        </header>
-        <p class="contact-form__intro">
-          Bekomme Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Du kannst jederzeit wieder abbestellen.
-        </p>
-        <fieldset class="digest-options" aria-label="Digest-Zeitpunkte">
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="morning" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">Jeden Morgen</span>
-              <span class="digest-option__time">07:00</span>
-            </span>
-            <span class="digest-option__sub">Heutige Vorstellungen</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="afternoon" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">Jeden Nachmittag</span>
-              <span class="digest-option__time">17:00</span>
-            </span>
-            <span class="digest-option__sub">Was läuft heute Abend?</span>
-          </label>
-          <label class="digest-option">
-            <input type="checkbox" name="schedule" value="weekly" />
-            <span class="digest-option__main">
-              <span class="digest-option__title">Sonntag-Digest</span>
-              <span class="digest-option__time">So 09:00</span>
-            </span>
-            <span class="digest-option__sub">Wochenüberblick</span>
-          </label>
-        </fieldset>
-        <details class="digest-filter">
-          <summary class="digest-filter__summary">
-            <span class="digest-filter__label">Bühnen einschränken</span>
-            <span class="digest-filter__hint">leer = alle</span>
-          </summary>
-          <fieldset class="digest-filter__chips" aria-label="Bühnen">
-            {THEATERS.map((t) => (
-              <label key={t.slug} class="digest-chip">
-                <input type="checkbox" name="filter-theater" value={t.slug} />
-                <span class="digest-chip__label">{t.name}</span>
-              </label>
-            ))}
-          </fieldset>
-        </details>
-        <div id="digest-ios-hint" class="digest-hint" hidden>
-          <strong>Auf iPhone/iPad:</strong> Tippe unten auf »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die
-          Seite anschließend über das neue App-Icon — erst dann sind Push-Nachrichten möglich.
-        </div>
-        <div id="digest-unsupported" class="digest-hint digest-hint--err" hidden>
-          Dein Browser unterstützt Push-Nachrichten nicht. Probier es in Safari (macOS), Chrome, Firefox oder Edge.
-        </div>
-        <footer class="contact-form__foot">
-          <p id="digest-status" class="contact-form__status" hidden aria-live="polite" />
-          <button type="button" id="digest-unsubscribe-all" class="digest-form__unsub" hidden>
-            Alle abbestellen
-          </button>
-          <button type="submit" id="digest-submit" class="contact-form__submit">
-            Abonnieren
-          </button>
-        </footer>
-      </form>
-    </dialog>
+    <SharedDigestDialog
+      schedules={[
+        { value: "morning", label: "Jeden Morgen", time: "07:00", desc: "Heutige Vorstellungen" },
+        { value: "afternoon", label: "Jeden Nachmittag", time: "17:00", desc: "Was läuft heute Abend?" },
+        { value: "weekly", label: "Sonntag-Digest", time: "So 09:00", desc: "Wochenüberblick" },
+      ]}
+      filterChips={THEATERS.map((t) => ({ value: t.slug, label: t.name }))}
+      filterName="filter-theater"
+      tr={{
+        title: "Vorstellungen abonnieren",
+        close: "Schließen",
+        intro:
+          "Bekomme Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Du kannst jederzeit wieder abbestellen.",
+        filterLabel: "Bühnen einschränken",
+        filterHint: "leer = alle",
+        iosHint:
+          "<strong>Auf iPhone/iPad:</strong> Tippe unten auf »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das neue App-Icon — erst dann sind Push-Nachrichten möglich.",
+        unsupported:
+          "Dein Browser unterstützt Push-Nachrichten nicht. Probier es in Safari (macOS), Chrome, Firefox oder Edge.",
+        submit: "Abonnieren",
+        unsubAll: "Alle abbestellen",
+      }}
+    />
   );
 }
 
