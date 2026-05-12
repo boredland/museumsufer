@@ -131,7 +131,7 @@ Concert programme aggregator (classical, jazz, sacred, world, experimental, cham
 - Calendars: `/feed.ics`, `/spielort/:slug/feed.ics`, `/genre/:slug/feed.ics`, `/event/:id/feed.ics`
 - `/feed.rss` (+ `/feed.xml` → redirect)
 - `GET /og/:id/image.svg` — dynamic OG image
-- `POST /api/contact`, push endpoints
+- `POST /api/contact`, `GET|POST /api/push/{key,subscribe,unsubscribe,me}`
 
 ### Discovery / agent-readiness
 - `/robots.txt`, `/sitemap.xml`, `/llms.txt` (+ `.well-known`), `/.well-known/api-catalog`, `/api/docs/openapi.json`, `/manifest.json`
