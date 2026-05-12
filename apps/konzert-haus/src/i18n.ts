@@ -181,7 +181,7 @@ const de: Translations = {
   faqItems: [
     {
       q: "Welche Spielorte sind hier vertreten?",
-      a: "Aktuell rund zwanzig Häuser in Frankfurt und Umgebung — von Alte Oper, Oper Frankfurt und HR-Sinfonieorchester bis zu Ensemble Modern, der Brotfabrik und kammermusikalischen Reihen wie dem Holzhausenschlösschen oder St. Katharinen. Im Sommer kommen das Rheingau Musik Festival und die Kronberg Academy dazu.",
+      a: "Aktuell 19 Häuser und Reihen in Frankfurt und Umgebung: Alte Oper Frankfurt, Oper Frankfurt, Dr. Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Musik Festival, Bad Homburger Schlosskonzerte und Bad Sodener Kammerkonzerte.",
     },
     {
       q: "Wie aktuell ist das Programm?",
@@ -202,6 +202,10 @@ const de: Translations = {
     {
       q: "Warum diese Seite?",
       a: "Frankfurt hat eine außergewöhnliche Dichte an klassischen und improvisierten Konzerten, aber kein gemeinsames Programmheft. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Konzertkalender für die ganze Stadt.",
+    },
+    {
+      q: "Wie funktionieren die Push-Mitteilungen?",
+      a: "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Genres einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
     },
   ],
 };
@@ -291,7 +295,7 @@ const en: Translations = {
   faqItems: [
     {
       q: "Which venues are covered?",
-      a: "Around twenty houses in Frankfurt and the surrounding region — from Alte Oper, Oper Frankfurt and the HR Sinfonieorchester to Ensemble Modern, Brotfabrik, and chamber-music series like Holzhausenschlösschen or St. Katharinen. In summer the Rheingau Musik Festival and Kronberg Academy join in.",
+      a: "Currently 19 venues and series in Frankfurt and the surrounding area: Alte Oper Frankfurt, Oper Frankfurt, Dr Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Music Festival, Bad Homburg Castle Concerts and Bad Soden Chamber Concerts.",
     },
     {
       q: "How current is the programme?",
@@ -312,6 +316,10 @@ const en: Translations = {
     {
       q: "Why this site?",
       a: "Frankfurt has an unusually dense classical and improvised concert scene, but no shared programme. This site lays every house onto one searchable day view — a concert calendar for the whole city.",
+    },
+    {
+      q: "How do push notifications work?",
+      a: 'Subscribe via the "Push Digest" button or the footer link. Three time slots are available: morning (07:00), afternoon (17:00) and a weekly Sunday overview (09:00). Notifications can optionally be restricted to specific genres. Sign-up is anonymous — no account, no email — and can be cancelled at any time. On iOS, the site must first be added to the home screen as a web app.',
     },
   ],
 };
@@ -401,7 +409,7 @@ const fr: Translations = {
   faqItems: [
     {
       q: "Quelles salles sont couvertes ?",
-      a: "Une vingtaine de lieux à Francfort et dans la région — de l'Alte Oper, de l'Opéra de Francfort et de l'Orchestre symphonique HR à l'Ensemble Modern, à la Brotfabrik et à des séries de musique de chambre comme le Holzhausenschlösschen ou St. Katharinen. L'été s'y ajoutent le Rheingau Musik Festival et la Kronberg Academy.",
+      a: "Actuellement 19 salles et séries à Francfort et ses environs : Alte Oper Frankfurt, Oper Frankfurt, Dr. Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Musik Festival, Bad Homburger Schlosskonzerte et Bad Sodener Kammerkonzerte.",
     },
     {
       q: "À quel point le programme est-il à jour ?",
@@ -422,6 +430,10 @@ const fr: Translations = {
     {
       q: "Pourquoi ce site ?",
       a: "Francfort possède une scène classique et improvisée d'une densité rare, mais aucun programme commun. Ce site rassemble toutes les salles dans une vue quotidienne consultable — un calendrier de concerts pour toute la ville.",
+    },
+    {
+      q: "Comment fonctionnent les notifications push ?",
+      a: "Il est possible de s'abonner aux notifications push via le bouton « Push-Digest » ou le lien dans le pied de page. Trois plages horaires sont disponibles : le matin (07h00), l'après-midi (17h00) et un aperçu hebdomadaire le dimanche (09h00). En option, il est possible de limiter les notifications à certains genres. L'inscription est anonyme — pas de compte, pas d'e-mail — et résiliable à tout moment. Sur iOS, le site doit d'abord être ajouté à l'écran d'accueil en tant qu'application web.",
     },
   ],
 };

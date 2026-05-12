@@ -167,6 +167,10 @@ const de: Translations = {
       q: "Werden meine Daten getrackt?",
       a: "Nein. Keine Analytics, keine Cookies, kein Login. Der Service Worker speichert lediglich Seiteninhalt für Offline-Nutzung im Browser-Cache.",
     },
+    {
+      q: "Wie funktionieren die Push-Mitteilungen?",
+      a: "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Kategorien einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
+    },
   ],
   digestCueText: "Erfahre morgens, was heute in der Pfalz läuft.",
   digestKicker: "Push-Digest",
@@ -298,6 +302,10 @@ const fr: Translations = {
     {
       q: "Mes données sont-elles suivies ?",
       a: "Non. Pas d'analytics, pas de cookies, pas de compte. Le service worker stocke uniquement le contenu des pages dans le cache du navigateur pour une utilisation hors-ligne.",
+    },
+    {
+      q: "Comment fonctionnent les notifications push ?",
+      a: "Il est possible de s'abonner aux notifications push via le bouton « Push-Digest » ou le lien dans le pied de page. Trois plages horaires sont disponibles : le matin (07h00), l'après-midi (17h00) et un aperçu hebdomadaire le dimanche (09h00). En option, il est possible de limiter les notifications à certaines catégories. L'inscription est anonyme — pas de compte, pas d'e-mail — et résiliable à tout moment. Sur iOS, le site doit d'abord être ajouté à l'écran d'accueil en tant qu'application web.",
     },
   ],
   digestCueText: "Découvre chaque matin ce qui se passe aujourd'hui dans le Palatinat.",

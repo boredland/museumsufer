@@ -112,7 +112,7 @@ function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, categor
   const props = buildProps(c, category);
   if (!props) {
     const tr = getTranslations(detectLocale(c.req.raw));
-    return c.html(`<p>${tr.errInvalidRequest}</p>`, 400);
+    return c.html(<p>{tr.errInvalidRequest}</p>, 400);
   }
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderDayMarkdown(props.date, props.events), {
@@ -137,7 +137,7 @@ app.get("/partial/content", (c) => {
   const props = buildProps(c, cat);
   if (!props) {
     const tr = getTranslations(detectLocale(c.req.raw));
-    return c.html(`<p>${tr.errInvalidRequest}</p>`, 400);
+    return c.html(<p>{tr.errInvalidRequest}</p>, 400);
   }
   return c.html(renderPartial(props), 200, {
     "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",

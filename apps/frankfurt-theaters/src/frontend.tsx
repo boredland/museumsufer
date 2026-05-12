@@ -570,7 +570,7 @@ export function AskAi() {
 const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Welche Bühnen sind hier vertreten?",
-    a: "Die Seite bündelt rund zwei Dutzend Frankfurter Häuser — von Schauspiel Frankfurt, Oper Frankfurt und English Theatre über die Komödie und Die Käs bis zu freien Bühnen wie dem Gallus Theater, dem Mousonturm oder der Brotfabrik. Auch Tanz und Musical sind dabei.",
+    a: "Aktuell 23 Frankfurter Häuser: Schauspiel Frankfurt, Oper Frankfurt, The English Theatre Frankfurt, Die Komödie Frankfurt, Künstlerhaus Mousonturm, Neues Theater Höchst, Volksbühne im Großen Hirschgraben, Stalburg Theater, Tigerpalast Varieté, Die Schmiere, Dresden Frankfurt Dance Company, Die Dramatische Bühne, Theater Willy Praml, Kellertheater Frankfurt, Gallus Theater, Theaterhaus Frankfurt, Internationales Theater Frankfurt, Papageno Musiktheater, Galli Theater Frankfurt, Theater Alte Brücke, Die Käs, Theater Lempenfieber und Landungsbrücken Frankfurt. Tanz und Musical sind dabei.",
   },
   {
     q: "Wie aktuell ist der Spielplan?",
@@ -595,6 +595,10 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Warum diese Seite?",
     a: "Frankfurt hat eine ungewöhnlich dichte Theaterlandschaft, aber keinen gemeinsamen Spielplan. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Programmheft für die ganze Stadt.",
+  },
+  {
+    q: "Wie funktionieren die Push-Mitteilungen?",
+    a: "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Bühnen einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
   },
 ];
 

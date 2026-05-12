@@ -46,68 +46,53 @@ function ImprintPage({ locale }: { locale: Locale }) {
           <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
-          <div class="max-w-[640px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
-            <p class="mb-8">
-              <a
-                href={locale === "de" ? "/" : `/?lang=${locale}`}
-                class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary hover:text-river no-underline"
-              >
+          <div class="page page--narrow">
+            <p class="imprint__back">
+              <a href={locale === "de" ? "/" : `/?lang=${locale}`} class="imprint__back-link">
                 ← {tr.back}
               </a>
             </p>
-            <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2rem,6vw,3rem)] mb-8">
-              {tr.imprintHeading}
-            </h1>
+            <h1 class="imprint__title">{tr.imprintHeading}</h1>
 
-            <section class="mb-8">
-              <h2 class="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary mb-2">
-                {tr.imprintTmgHeading}
-              </h2>
-              <p class="leading-relaxed">
+            <section class="imprint__section">
+              <h2 class="imprint__section-title">{tr.imprintTmgHeading}</h2>
+              <p class="imprint__body">
                 {OPERATOR.name}
                 <br />
                 Frankfurt am Main, Germany
               </p>
             </section>
 
-            <section class="mb-8">
-              <h2 class="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary mb-2">
-                {tr.imprintContactHeading}
-              </h2>
-              <p class="leading-relaxed">
-                <a class="text-river hover:underline" href={`mailto:${OPERATOR.email}`}>
+            <section class="imprint__section">
+              <h2 class="imprint__section-title">{tr.imprintContactHeading}</h2>
+              <p class="imprint__body">
+                <a class="imprint__link" href={`mailto:${OPERATOR.email}`}>
                   {OPERATOR.email}
                 </a>
               </p>
             </section>
 
-            <section class="mb-8">
-              <h2 class="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary mb-2">
-                {tr.imprintResponsibleHeading}
-              </h2>
-              <p class="leading-relaxed">{OPERATOR.name}</p>
+            <section class="imprint__section">
+              <h2 class="imprint__section-title">{tr.imprintResponsibleHeading}</h2>
+              <p class="imprint__body">{OPERATOR.name}</p>
             </section>
 
-            <section class="mb-8">
-              <h2 class="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary mb-2">
-                {tr.imprintDataSourceHeading}
-              </h2>
-              <p class="leading-relaxed">{tr.imprintDataSourceText}</p>
+            <section class="imprint__section">
+              <h2 class="imprint__section-title">{tr.imprintDataSourceHeading}</h2>
+              <p class="imprint__body">{tr.imprintDataSourceText}</p>
             </section>
 
-            <section class="mb-8">
-              <h2 class="font-mono text-[0.75rem] uppercase tracking-[0.16em] text-text-tertiary mb-2">
-                {tr.imprintDisclaimerHeading}
-              </h2>
-              <p class="leading-relaxed">{tr.imprintDisclaimerText}</p>
+            <section class="imprint__section">
+              <h2 class="imprint__section-title">{tr.imprintDisclaimerHeading}</h2>
+              <p class="imprint__body">{tr.imprintDisclaimerText}</p>
             </section>
 
-            <p class="mt-12 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
+            <p class="imprint__source">
               <a
                 href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
                 target="_blank"
                 rel="noopener"
-                class="hover:text-river no-underline"
+                class="imprint__source-link"
               >
                 Source · GitHub
               </a>

@@ -141,7 +141,7 @@ const de: Translations = {
   faqTitle: "Häufige Fragen",
   faq1Q: "Welche Museen werden erfasst?",
   faq1A:
-    "Die App erfasst die rund 40 Museen des offiziellen Museumsufers sowie weitere Frankfurter Museen und Ausstellungsorte darüber hinaus – darunter das Städel Museum, das Senckenberg Naturmuseum, die Schirn Kunsthalle und viele mehr.",
+    "Aktuell rund 45 Häuser in Frankfurt und Offenbach: Archäologisches Museum Frankfurt, Atelierfrankfurt, Bibelhaus ErlebnisMuseum, Caricatura Museum, DAM (Deutsches Architekturmuseum), DFF (Deutsches Filminstitut & Filmmuseum), Deutsches Ledermuseum Offenbach, Dialogmuseum, Dommuseum Frankfurt, Eintracht Frankfurt Museum, EXPERIMINTA ScienceCenter, Fotografie Forum Frankfurt, Frankfurter Bürgerstiftung im Holzhausenschlösschen, Frankfurter Feldbahnmuseum, Frankfurter Goethe-Haus, Frankfurter Kunstverein, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte Offenbach, Hindemith Kabinett, Historisches Museum Frankfurt, Ikonenmuseum, Institut für Stadtgeschichte, Jüdisches Museum Frankfurt (mit Museum Judengasse), Junges Museum Frankfurt, Klingspor Museum Offenbach, Kunststiftung DZ BANK, Liebieghaus Skulpturensammlung, MMK – Museum für Moderne Kunst (Hauptbau, Tower, Zollamt), MOMEM, Museum Angewandte Kunst, Museum für Kommunikation Frankfurt, Museum Giersch der Goethe-Universität, Museum Sinclair-Haus Bad Homburg, Portikus, Porzellan Museum Frankfurt, Romantik-Museum / Freies Deutsches Hochstift, SCHIRN Kunsthalle Frankfurt, Senckenberg Naturmuseum, Städel Museum, Stoltze-Museum, Struwwelpeter Museum, Verkehrsmuseum Frankfurt, Weltkulturen Museum und das Wollheim Memorial.",
   faq2Q: "Was ist die Museumsufercard?",
   faq2A:
     "Die Museumsufercard ist ein Jahrespass, der freien Eintritt in alle teilnehmenden Museen bietet. Daneben gibt es das Museumsuferticket für zwei aufeinanderfolgende Tage. Beide sind über museumsufer.de erhältlich.",
@@ -160,6 +160,9 @@ const de: Translations = {
   faq7Q: "Wie geht die App mit meinen Daten um?",
   faq7A:
     "Likes werden anonym mit einem täglichen Hash deiner IP-Adresse gespeichert. Wenn du die Entfernungssortierung aktivierst, wird dein Standort auf ein Raster (~200 m) gerundet und an die RMV-API gesendet, um Fahrzeiten zu schätzen — deine genaue Position wird niemals gespeichert oder weitergegeben. Es werden keine personenbezogenen Daten erhoben.",
+  faq8Q: "Wie funktionieren die Push-Mitteilungen?",
+  faq8A:
+    "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Museen einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
   categoryFilm: "Film",
   categoryFuehrung: "Führung",
   categoryWorkshop: "Workshop",
@@ -328,7 +331,7 @@ const en: Translations = {
   faqTitle: "FAQ",
   faq1Q: "Which museums are covered?",
   faq1A:
-    "The app covers the roughly 40 museums of the official Museumsufer as well as additional Frankfurt museums and exhibition venues beyond that — including the Städel Museum, Senckenberg Nature Museum, Schirn Kunsthalle and many more.",
+    "Currently around 45 museums in Frankfurt and Offenbach: Archäologisches Museum Frankfurt, Atelierfrankfurt, Bibelhaus ErlebnisMuseum, Caricatura Museum, DAM (Deutsches Architekturmuseum), DFF (Deutsches Filminstitut & Filmmuseum), Deutsches Ledermuseum Offenbach, Dialogmuseum, Dommuseum Frankfurt, Eintracht Frankfurt Museum, EXPERIMINTA ScienceCenter, Fotografie Forum Frankfurt, Frankfurter Bürgerstiftung im Holzhausenschlösschen, Frankfurter Feldbahnmuseum, Frankfurter Goethe-Haus, Frankfurter Kunstverein, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte Offenbach, Hindemith Kabinett, Historisches Museum Frankfurt, Ikonenmuseum, Institut für Stadtgeschichte, Jewish Museum Frankfurt (with Museum Judengasse), Junges Museum Frankfurt, Klingspor Museum Offenbach, Kunststiftung DZ BANK, Liebieghaus Skulpturensammlung, MMK – Museum für Moderne Kunst (Hauptbau, Tower, Zollamt), MOMEM, Museum Angewandte Kunst, Museum für Kommunikation Frankfurt, Museum Giersch der Goethe-Universität, Museum Sinclair-Haus Bad Homburg, Portikus, Porzellan Museum Frankfurt, Romantik-Museum / Freies Deutsches Hochstift, SCHIRN Kunsthalle Frankfurt, Senckenberg Naturmuseum, Städel Museum, Stoltze-Museum, Struwwelpeter Museum, Verkehrsmuseum Frankfurt, Weltkulturen Museum and the Wollheim Memorial.",
   faq2Q: "What is the Museumsufercard?",
   faq2A:
     "The Museumsufercard is an annual pass that grants free admission to all participating museums. There is also a Museumsuferticket for two consecutive days. Both are available via museumsufer.de.",
@@ -347,6 +350,9 @@ const en: Translations = {
   faq7Q: "How does the app handle my data?",
   faq7A:
     "Likes are stored anonymously using a daily hash of your IP address. When you enable distance sorting, your location is rounded to a grid (~200 m) and sent to the RMV API to estimate travel times — your exact position is never stored or shared. No personal data is collected.",
+  faq8Q: "How do push notifications work?",
+  faq8A:
+    'Subscribe via the "Push Digest" button or the footer link. Three time slots are available: morning (07:00), afternoon (17:00) and a weekly Sunday overview (09:00). Notifications can optionally be restricted to specific museums. Sign-up is anonymous — no account, no email — and can be cancelled at any time. On iOS, the site must first be added to the home screen as a web app.',
   categoryFilm: "Film",
   categoryFuehrung: "Guided tour",
   categoryWorkshop: "Workshop",
@@ -514,7 +520,7 @@ const fr: Translations = {
   faqTitle: "Questions fréquentes",
   faq1Q: "Quels musées sont couverts ?",
   faq1A:
-    "L'application couvre les quelque 40 musées du Museumsufer officiel ainsi que d'autres musées et lieux d'exposition de Francfort — dont le Städel Museum, le Senckenberg Naturmuseum, la Schirn Kunsthalle et bien d'autres.",
+    "Actuellement environ 45 musées à Francfort et Offenbach : Musée archéologique de Francfort, Atelierfrankfurt, Bibelhaus ErlebnisMuseum, Caricatura Museum, DAM (Deutsches Architekturmuseum), DFF (Deutsches Filminstitut & Filmmuseum), Deutsches Ledermuseum Offenbach, Dialogmuseum, Dommuseum Frankfurt, Eintracht Frankfurt Museum, EXPERIMINTA ScienceCenter, Fotografie Forum Frankfurt, Frankfurter Bürgerstiftung im Holzhausenschlösschen, Frankfurter Feldbahnmuseum, Frankfurter Goethe-Haus, Frankfurter Kunstverein, Geldmuseum der Deutschen Bundesbank, Haus der Stadtgeschichte Offenbach, Hindemith Kabinett, Historisches Museum Frankfurt, Ikonenmuseum, Institut für Stadtgeschichte, Musée juif de Francfort (avec Museum Judengasse), Junges Museum Frankfurt, Klingspor Museum Offenbach, Kunststiftung DZ BANK, Liebieghaus Skulpturensammlung, MMK – Museum für Moderne Kunst (bâtiment principal, Tower, Zollamt), MOMEM, Museum Angewandte Kunst, Museum für Kommunikation Frankfurt, Museum Giersch de l'université Goethe, Museum Sinclair-Haus Bad Homburg, Portikus, Porzellan Museum Frankfurt, Romantik-Museum / Freies Deutsches Hochstift, SCHIRN Kunsthalle Frankfurt, Senckenberg Naturmuseum, Städel Museum, Stoltze-Museum, Struwwelpeter Museum, Verkehrsmuseum Frankfurt, Weltkulturen Museum et le Wollheim Memorial.",
   faq2Q: "Qu'est-ce que la Museumsufercard ?",
   faq2A:
     "La Museumsufercard est un pass annuel offrant l'entrée gratuite dans tous les musées participants. Il existe également un Museumsuferticket pour deux jours consécutifs. Les deux sont disponibles sur museumsufer.de.",
@@ -533,6 +539,9 @@ const fr: Translations = {
   faq7Q: "Comment l'application gère-t-elle mes données ?",
   faq7A:
     "Les likes sont stockés de manière anonyme en utilisant un hachage quotidien de votre adresse IP. Lorsque vous activez le tri par distance, votre position est arrondie à une grille (~200 m) et envoyée à l'API RMV pour estimer les temps de trajet — votre position exacte n'est jamais stockée ou partagée. Aucune donnée personnelle n'est collectée.",
+  faq8Q: "Comment fonctionnent les notifications push ?",
+  faq8A:
+    "Il est possible de s'abonner aux notifications push via le bouton « Push-Digest » ou le lien dans le pied de page. Trois plages horaires sont disponibles : le matin (07h00), l'après-midi (17h00) et un aperçu hebdomadaire le dimanche (09h00). En option, il est possible de limiter les notifications à certains musées. L'inscription est anonyme — pas de compte, pas d'e-mail — et résiliable à tout moment. Sur iOS, le site doit d'abord être ajouté à l'écran d'accueil en tant qu'application web.",
   categoryFilm: "Film",
   categoryFuehrung: "Visite guidée",
   categoryWorkshop: "Atelier",
