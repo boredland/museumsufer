@@ -8,6 +8,7 @@ import {
   escapeHtml as coreEscapeHtml,
   dateOffset,
   type FaqItem,
+  formatGermanDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   LLM_SERVICES,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
@@ -49,10 +50,7 @@ function dateParts(iso: string) {
   };
 }
 
-function fullGerman(iso: string): string {
-  const p = dateParts(iso);
-  return `${WEEKDAYS_LONG[p.weekday]}, ${p.day}. ${MONTHS_LONG[p.month]} ${p.year}`;
-}
+const fullGerman = formatGermanDateLong;
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
