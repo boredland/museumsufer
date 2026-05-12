@@ -13,3 +13,6 @@ scrape_secret.txt
 .lighthouseci/
 screenshots/
 scripts/capture_askai.py
+
+# Claude Code harness
+.claude/
