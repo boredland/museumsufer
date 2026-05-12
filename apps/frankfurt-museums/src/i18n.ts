@@ -1,38 +1,23 @@
-export type Locale = "de" | "en" | "fr";
+import { type Locale as CoreLocale, detectLocale as coreDetect, dateLocale } from "@museumsufer/core";
 
+export type Locale = Extract<CoreLocale, "de" | "en" | "fr">;
 export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
-
-const LOCALE_DATE_FORMATS: Record<Locale, string> = {
-  de: "de-DE",
-  en: "en-GB",
-  fr: "fr-FR",
-};
-
-export function dateLocale(locale: Locale): string {
-  return LOCALE_DATE_FORMATS[locale];
-}
+export const DEFAULT_LOCALE: Locale = "de";
 
 export function detectLocale(request: Request): Locale {
-  const url = new URL(request.url);
-  const param = url.searchParams.get("lang");
-  if (param && isLocale(param)) return param;
-
-  const accept = request.headers.get("Accept-Language") || "";
-  for (const part of accept.split(",")) {
-    const tag = part.split(";")[0].trim().slice(0, 2).toLowerCase();
-    if (isLocale(tag)) return tag;
-  }
-
-  return "de";
+  return coreDetect(request, SUPPORTED_LOCALES, DEFAULT_LOCALE);
 }
 
-function isLocale(v: string): v is Locale {
-  return SUPPORTED_LOCALES.includes(v as Locale);
-}
+export { dateLocale };
 
 type Translations = Record<string, string>;
 
 const de: Translations = {
+  langSwitchAria: "Sprache",
+  clearSearch: "Suche leeren",
+  digestKicker: "Push-Digest",
+  digestCueAria: "Push-Nachrichten zu Veranstaltungen abonnieren",
+  digestCueText: "Erfahre morgens, was heute am Ufer los ist.",
   subtitle: "was heute am Museumsufer los ist",
   today: "Heute",
   tomorrow: "Morgen",
@@ -213,6 +198,11 @@ const de: Translations = {
 };
 
 const en: Translations = {
+  langSwitchAria: "Language",
+  clearSearch: "Clear search",
+  digestKicker: "Push digest",
+  digestCueAria: "Subscribe to event push notifications",
+  digestCueText: "Wake up to what's on at the river today.",
   subtitle: "what's on at the Museumsufer today",
   today: "Today",
   tomorrow: "Tomorrow",
@@ -392,6 +382,11 @@ const en: Translations = {
 };
 
 const fr: Translations = {
+  langSwitchAria: "Langue",
+  clearSearch: "Effacer la recherche",
+  digestKicker: "Digest push",
+  digestCueAria: "S'abonner aux notifications push des événements",
+  digestCueText: "Découvre chaque matin ce qui se passe au quai aujourd'hui.",
   subtitle: "ce qui se passe au Museumsufer aujourd'hui",
   today: "Auj.",
   tomorrow: "Demain",

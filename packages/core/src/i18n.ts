@@ -44,3 +44,17 @@ export function detectLocale<L extends Locale>(request: Request, supported: read
 export function buildLangParam(locale: Locale, fallback: Locale, separator: "?" | "&" = "?"): string {
   return locale === fallback ? "" : `${separator}lang=${locale}`;
 }
+
+/**
+ * Render the "07 · 17 · So 09" digest schedule strip with the correct
+ * abbreviated weekday for the target locale. The morning + afternoon
+ * digests fire at 07:00 and 17:00 every day; the weekly digest fires
+ * Sunday at 09:00. The literal numerals stay the same across locales.
+ */
+export function digestScheduleLabel(locale: Locale): string {
+  const sundayShort = new Intl.DateTimeFormat(LOCALE_DATE_FORMATS[locale], {
+    weekday: "short",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2024, 0, 7)));
+  return `07 · 17 · ${sundayShort} 09`;
+}
