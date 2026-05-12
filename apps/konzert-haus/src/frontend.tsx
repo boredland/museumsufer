@@ -1,5 +1,6 @@
 import {
   berlinHourMinute,
+  buildFaqPageSchema,
   buildHreflangAlternates,
   buildLangParam,
   buildUtm,
@@ -7,8 +8,10 @@ import {
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
+  type FaqItem,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
+  LLM_SERVICES,
   langSwitchItems,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
@@ -1253,6 +1256,64 @@ export function ProgrammePartial({ date, events, tr }: { date: string; events: D
 
 const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
 
+function Faq({ tr }: { tr: Translations }) {
+  const items = tr.faqItems;
+  const total = String(items.length).padStart(2, "0");
+  return (
+    <section class="faq" aria-labelledby="faq-title">
+      <header class="faq__head">
+        <span class="faq__kicker" id="faq-title">
+          {tr.faqKicker}
+        </span>
+        <span class="faq__rule" aria-hidden="true" />
+        <span class="faq__count">01 — {total}</span>
+      </header>
+      <div class="faq__list">
+        {items.map((item, i) => (
+          <details key={`faq-${i}`} class="faq__item" open={i === 0 ? true : undefined}>
+            <summary class="faq__row">
+              <span class="faq__num" aria-hidden="true">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 class="faq__q">{item.q}</h3>
+              <span class="faq__toggle" aria-hidden="true" />
+            </summary>
+            <p class="faq__a">{item.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
+  const niceDate = formatLocalisedDateLong(date, locale);
+  const prompt = tr.askAiPrompt(niceDate);
+  return (
+    <section class="askai" aria-label={tr.askAiAria}>
+      <span class="askai__label">{tr.askAiLabel}</span>
+      <div class="askai__row">
+        {LLM_SERVICES.map((s) => (
+          <a
+            key={s.name}
+            class="askai__svc"
+            href={s.buildUrl(prompt)}
+            target="_blank"
+            rel="noopener"
+            aria-label={s.name}
+            title={s.name}
+            style={`color:${s.color}`}
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor">
+              <path d={s.svgPath} />
+            </svg>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function renderProgrammePartial(
   date: string,
   events: DayEvent[],
@@ -1289,6 +1350,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
+            jsonLd={buildFaqPageSchema(tr.faqItems as FaqItem[])}
           />
         </head>
         <body>
@@ -1297,11 +1359,13 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <GenreFilter date={date} active={genre} tr={tr} locale={locale} />
           <DateStrip strip={dateStrip} active={date} today={today} tr={tr} />
           <DigestCue tr={tr} locale={locale} />
+          <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
               <ProgrammePartial date={date} events={events} tr={tr} />
             </div>
           </main>
+          <Faq tr={tr} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />
