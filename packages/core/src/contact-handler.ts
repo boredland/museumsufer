@@ -1,4 +1,3 @@
-import { EmailMessage } from "cloudflare:email";
 import { buildFeedbackMime } from "./feedback-email";
 import { verifyTurnstileToken } from "./turnstile";
 
@@ -75,6 +74,7 @@ export async function handleContactRequest(opts: ContactHandlerOptions): Promise
       pageUrl: request.headers.get("referer") ?? null,
     },
   });
+  const { EmailMessage } = await import("cloudflare:email");
   await env.FEEDBACK_EMAIL.send(new EmailMessage(from, to, raw));
 
   return Response.json({ ok: true });

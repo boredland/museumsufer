@@ -10,7 +10,9 @@
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
+import { bundleSection } from "@museumsufer/core/bundle-writer";
+import { todayIso } from "@museumsufer/core/date";
+import { fnv1aInt } from "@museumsufer/core/hash";
 import PQueue from "p-queue";
 import { VENUES, type VenueConfig } from "../src/concert-config";
 import { dedupEvents } from "../src/dedup";
