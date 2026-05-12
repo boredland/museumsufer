@@ -58,3 +58,136 @@ export function digestScheduleLabel(locale: Locale): string {
   }).format(new Date(Date.UTC(2024, 0, 7)));
   return `07 · 17 · ${sundayShort} 09`;
 }
+
+/**
+ * Strip an existing `lang=` query param from `currentPath` so we can
+ * cleanly re-stamp it. Preserves every other query param.
+ */
+export function stripLangParam(currentPath: string): string {
+  const i = currentPath.indexOf("?");
+  if (i < 0) return currentPath;
+  const path = currentPath.slice(0, i);
+  const params = new URLSearchParams(currentPath.slice(i + 1));
+  params.delete("lang");
+  const q = params.toString();
+  return q ? `${path}?${q}` : path;
+}
+
+/**
+ * Build the `lang=`-swapped path for a single locale. The default locale
+ * emits the bare path (no `?lang=`); other locales append `?lang=xx` or
+ * `&lang=xx` depending on existing query.
+ */
+export function localisedPath(currentPath: string, locale: Locale, fallback: Locale): string {
+  const stripped = stripLangParam(currentPath);
+  if (locale === fallback) return stripped || "/";
+  const sep = stripped.includes("?") ? "&" : "?";
+  return `${stripped}${sep}lang=${locale}`;
+}
+
+/**
+ * Build absolute hreflang alternate hrefs for the supported locales of
+ * an app. Use the result on every page that supports locale switching.
+ * Adds `x-default` pointing at the fallback locale.
+ *
+ *   buildHreflangAlternates({
+ *     currentPath: "/event/123?date=2026-05-12",
+ *     appUrl: "https://landau.today",
+ *     supported: ["de", "fr"],
+ *     fallback: "de",
+ *   })
+ */
+export interface HreflangAlternate {
+  hreflang: string;
+  href: string;
+}
+export function buildHreflangAlternates<L extends Locale>(opts: {
+  currentPath: string;
+  appUrl: string;
+  supported: readonly L[];
+  fallback: L;
+}): HreflangAlternate[] {
+  const { currentPath, appUrl, supported, fallback } = opts;
+  const out: HreflangAlternate[] = supported.map((l) => ({
+    hreflang: l,
+    href: `${appUrl}${localisedPath(currentPath, l, fallback)}`,
+  }));
+  out.push({ hreflang: "x-default", href: `${appUrl}${stripLangParam(currentPath) || "/"}` });
+  return out;
+}
+
+/**
+ * Inert HTML string of <link rel="alternate" hreflang="..." href="..." />
+ * lines. Useful for apps still using string-template head rendering.
+ * Each href is HTML-attr-escaped.
+ */
+export function renderHreflangLinks<L extends Locale>(opts: {
+  currentPath: string;
+  appUrl: string;
+  supported: readonly L[];
+  fallback: L;
+}): string {
+  return buildHreflangAlternates(opts)
+    .map(({ hreflang, href }) => `<link rel="alternate" hreflang="${hreflang}" href="${attrEsc(href)}" />`)
+    .join("\n");
+}
+
+function attrEsc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+/**
+ * Inert HTML for a lang-switch nav. The wrapping <nav> is left to the
+ * caller (CSS varies per app). This returns just the <a> chips.
+ * Each `lang` link is `?lang=…` for non-fallback locales.
+ *
+ * For JSX-rendered apps, see `langSwitchItems()` which returns plain
+ * data instead of HTML.
+ */
+export function renderLangSwitchLinks<L extends Locale>(opts: {
+  locale: L;
+  currentPath: string;
+  supported: readonly L[];
+  fallback: L;
+  className?: string;
+  activeClassName?: string;
+}): string {
+  const {
+    locale,
+    currentPath,
+    supported,
+    fallback,
+    className = "langswitch__a",
+    activeClassName = "langswitch__a--active",
+  } = opts;
+  return langSwitchItems({ locale, currentPath, supported, fallback })
+    .map(
+      ({ locale: l, href, active }) =>
+        `<a href="${attrEsc(href)}" class="${active ? `${className} ${activeClassName}` : className}" hreflang="${l}"${active ? ' aria-current="page"' : ""}>${l.toUpperCase()}</a>`,
+    )
+    .join("");
+}
+
+/**
+ * Pure data for a lang switcher: one entry per supported locale, with
+ * the href to swap to and an `active` flag. JSX renderers iterate this;
+ * string renderers use `renderLangSwitchLinks` instead.
+ */
+export interface LangSwitchItem<L extends Locale = Locale> {
+  locale: L;
+  href: string;
+  active: boolean;
+}
+export function langSwitchItems<L extends Locale>(opts: {
+  locale: L;
+  currentPath: string;
+  supported: readonly L[];
+  fallback: L;
+}): LangSwitchItem<L>[] {
+  const { locale, currentPath, supported, fallback } = opts;
+  return supported.map((l) => ({
+    locale: l,
+    href: localisedPath(currentPath, l, fallback),
+    active: l === locale,
+  }));
+}

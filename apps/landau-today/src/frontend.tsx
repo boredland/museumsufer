@@ -1,4 +1,11 @@
-import { buildFaqPageSchema, digestScheduleLabel, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import {
+  buildFaqPageSchema,
+  buildLangParam,
+  digestScheduleLabel,
+  renderHreflangLinks,
+  renderLangSwitchLinks,
+  THEME_FOUC_SCRIPT,
+} from "@museumsufer/core";
 import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
@@ -6,28 +13,13 @@ import { DEFAULT_LOCALE, type FaqEntry, type Locale, SUPPORTED_LOCALES, type Tra
 import { APP_URL, formatDateLong, jsonLdSafe } from "./shared";
 import type { Event } from "./types";
 
-function langSuffix(locale: Locale, sep: "?" | "&" = "?"): string {
-  return locale === DEFAULT_LOCALE ? "" : `${sep}lang=${locale}`;
-}
+const langSuffix = (locale: Locale, sep: "?" | "&" = "?") => buildLangParam(locale, DEFAULT_LOCALE, sep);
 
-export function buildHreflangs(currentPath: string): string {
-  return SUPPORTED_LOCALES.map((l) => {
-    const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
-    const sep = stripped.includes("?") ? "&" : "?";
-    const href = `${APP_URL}${l === DEFAULT_LOCALE ? stripped : `${stripped}${sep}lang=${l}`}`;
-    return `<link rel="alternate" hreflang="${l}" href="${href}" />`;
-  }).join("\n");
-}
+export const buildHreflangs = (currentPath: string): string =>
+  renderHreflangLinks({ currentPath, appUrl: APP_URL, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
 
-export function buildLangSwitchHtml(locale: Locale, currentPath: string): string {
-  const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
-  const sep = stripped.includes("?") ? "&" : "?";
-  return SUPPORTED_LOCALES.map((l) => {
-    const href = l === DEFAULT_LOCALE ? stripped || "/" : `${stripped || "/"}${sep}lang=${l}`;
-    const cls = l === locale ? "langswitch__a langswitch__a--active" : "langswitch__a";
-    return `<a href="${href}" class="${cls}" hreflang="${l}"${l === locale ? ' aria-current="page"' : ""}>${l.toUpperCase()}</a>`;
-  }).join("");
-}
+export const buildLangSwitchHtml = (locale: Locale, currentPath: string): string =>
+  renderLangSwitchLinks({ locale, currentPath, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
 
 interface PageProps {
   date: string;
