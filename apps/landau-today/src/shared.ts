@@ -3,74 +3,83 @@
  * primitives (date math, hash, html stripping) live in @museumsufer/core.
  */
 import { escapeHtml } from "@museumsufer/core";
+import type { Locale } from "./i18n";
 
 export const APP_URL = "https://landau.today";
 export const USER_AGENT = "landau.today/1.0 (+https://landau.today)";
 
 export const escHtml = escapeHtml;
 
-const WEEKDAYS_DE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-const WEEKDAYS_DE_SHORT = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
-const MONTHS_DE = [
-  "Januar",
-  "Februar",
-  "März",
-  "April",
-  "Mai",
-  "Juni",
-  "Juli",
-  "August",
-  "September",
-  "Oktober",
-  "November",
-  "Dezember",
-];
-const MONTHS_DE_SHORT = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+/** JSON-encode + escape `<` so an embedded `</script>` in user data can't break out. */
+export function jsonLdSafe(obj: unknown): string {
+  return JSON.stringify(obj).replace(/</g, "\\u003c");
+}
+
+const LOCALE_TAGS: Record<Locale, string> = { de: "de-DE", fr: "fr-FR" };
 
 function parseIso(iso: string): Date {
   return new Date(`${iso}T12:00:00Z`);
 }
 
-export function formatDateLong(iso: string): string {
-  const d = parseIso(iso);
-  return `${WEEKDAYS_DE[d.getUTCDay()]}, ${d.getUTCDate()}. ${MONTHS_DE[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+function tagFor(locale: Locale): string {
+  return LOCALE_TAGS[locale];
 }
 
-export function formatDateShort(iso: string): string {
-  const d = parseIso(iso);
-  return `${d.getUTCDate()}. ${MONTHS_DE_SHORT[d.getUTCMonth()]}`;
+export function formatDateLong(iso: string, locale: Locale = "de"): string {
+  return parseIso(iso).toLocaleDateString(tagFor(locale), {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
-export function weekdayShort(iso: string): string {
-  return WEEKDAYS_DE_SHORT[parseIso(iso).getUTCDay()];
+export function formatDateShort(iso: string, locale: Locale = "de"): string {
+  return parseIso(iso).toLocaleDateString(tagFor(locale), {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
+export function weekdayShort(iso: string, locale: Locale = "de"): string {
+  return parseIso(iso).toLocaleDateString(tagFor(locale), { weekday: "short", timeZone: "UTC" });
 }
 
 export function dayOfMonth(iso: string): string {
   return String(parseIso(iso).getUTCDate());
 }
 
-export function monthShort(iso: string): string {
-  return MONTHS_DE_SHORT[parseIso(iso).getUTCMonth()];
+export function monthShort(iso: string, locale: Locale = "de"): string {
+  return parseIso(iso).toLocaleDateString(tagFor(locale), { month: "short", timeZone: "UTC" });
 }
 
-/** German time format: 19.45 instead of 19:45 — typesetter's convention. */
-export function formatTime(time?: string): string | null {
+/** German typesetter convention: 19.45. FR uses a colon. */
+export function formatTime(time: string | undefined, locale: Locale = "de"): string | null {
   if (!time) return null;
-  return time.replace(":", ".");
+  return locale === "de" ? time.replace(":", ".") : time;
 }
 
-export function formatDateRange(start: string, end?: string): string {
-  if (!end || end === start) return formatDateLong(start);
-  return `${formatDateShort(start)} – ${formatDateShort(end)} ${parseIso(end).getUTCFullYear()}`;
+export function formatDateRange(start: string, end: string | undefined, locale: Locale = "de"): string {
+  if (!end || end === start) return formatDateLong(start, locale);
+  const endYear = parseIso(end).toLocaleDateString(tagFor(locale), { year: "numeric", timeZone: "UTC" });
+  return `${formatDateShort(start, locale)} – ${formatDateShort(end, locale)} ${endYear}`;
 }
 
-export function relativeDayLabel(iso: string, today: string): string | null {
-  if (iso === today) return "Heute";
+const RELATIVE_DAY_LABELS: Record<Locale, [string, string, string]> = {
+  de: ["Heute", "Morgen", "Übermorgen"],
+  fr: ["aujourd'hui", "demain", "après-demain"],
+};
+
+export function relativeDayLabel(iso: string, today: string, locale: Locale = "de"): string | null {
+  const labels = RELATIVE_DAY_LABELS[locale];
+  if (iso === today) return labels[0];
   const d1 = parseIso(today);
   const d2 = parseIso(iso);
   const diffDays = Math.round((d2.getTime() - d1.getTime()) / 86400000);
-  if (diffDays === 1) return "Morgen";
-  if (diffDays === 2) return "Übermorgen";
+  if (diffDays === 1) return labels[1];
+  if (diffDays === 2) return labels[2];
   return null;
 }
 

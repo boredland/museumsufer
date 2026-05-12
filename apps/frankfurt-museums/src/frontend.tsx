@@ -43,6 +43,24 @@ interface HtmlHeadOptions {
   turnstileSiteKey?: string;
 }
 
+/**
+ * Build hreflang alternates that preserve every non-`lang` query param,
+ * dedupe `?lang=` (so dated pages stay dated and we never double-stamp).
+ */
+function buildHreflangsForCanonical(canonicalUrl: string): Array<{ hreflang: string; href: string }> {
+  const u = new URL(canonicalUrl);
+  u.searchParams.delete("lang");
+  const baseQuery = u.searchParams.toString();
+  const baseHref = `${u.origin}${u.pathname}${baseQuery ? `?${baseQuery}` : ""}`;
+  const withLang = (l: string) => `${u.origin}${u.pathname}?${baseQuery ? `${baseQuery}&` : ""}lang=${l}`;
+  return [
+    { hreflang: "de", href: baseHref },
+    { hreflang: "en", href: withLang("en") },
+    { hreflang: "fr", href: withLang("fr") },
+    { hreflang: "x-default", href: baseHref },
+  ];
+}
+
 /** Renders the HTML head with meta tags, fonts, stylesheets, and structured data */
 export function renderHtmlHead(options: HtmlHeadOptions) {
   const {
@@ -56,12 +74,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
     turnstileSiteKey,
   } = options;
 
-  const hreflangs = [
-    { hreflang: "de", href: canonicalUrl.replace(/\?lang=[^&]*/, "").split("?")[0] || "https://museumsufer.app/" },
-    { hreflang: "en", href: `${canonicalUrl.split("?")[0]}${canonicalUrl.includes("?") ? "&" : "?"}lang=en` },
-    { hreflang: "fr", href: `${canonicalUrl.split("?")[0]}${canonicalUrl.includes("?") ? "&" : "?"}lang=fr` },
-    { hreflang: "x-default", href: canonicalUrl.split("?")[0] || "https://museumsufer.app/" },
-  ];
+  const hreflangs = buildHreflangsForCanonical(canonicalUrl);
 
   return (
     <>
@@ -77,7 +90,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       <meta property="og:description" content={description} />
       <meta property="og:type" content="website" />
       <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:locale" content={locale} />
+      <meta property="og:locale" content={locale === "en" ? "en_GB" : locale === "fr" ? "fr_FR" : "de_DE"} />
       <meta property="og:site_name" content="Museumsufer Frankfurt" />
       <meta property="og:image" content={ogImage} />
       <meta property="og:image:width" content="1200" />

@@ -3,10 +3,12 @@ import {
   buildIcsCalendar,
   buildOutlookCalendarUrl,
   buildYahooCalendarUrl,
+  THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORY_BY_SLUG } from "../categories";
 import { todayIso } from "../date";
+import { buildHreflangs, buildLangSwitchHtml } from "../frontend";
 import { categoryLabel, detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
 import { imageProxyUrl } from "../image-proxy";
 import { getEventById } from "../queries";
@@ -17,6 +19,7 @@ import {
   formatDateLong,
   formatDateRange,
   formatTime,
+  jsonLdSafe,
   weekdayShort,
 } from "../shared";
 import type { Env, Event } from "../types";
@@ -54,11 +57,12 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
   const localCat = categoryLabel(cat.slug, tr);
   const today = todayIso();
   const isPast = (ev.end_date ?? ev.date) < today;
-  const time = formatTime(ev.time);
-  const endTime = formatTime(ev.end_time);
+  const time = formatTime(ev.time, locale);
+  const endTime = formatTime(ev.end_time, locale);
+  const sameTime = time !== null && endTime !== null && time === endTime;
   const when = ev.end_date
-    ? formatDateRange(ev.date, ev.end_date)
-    : `${weekdayShort(ev.date)}, ${formatDateLong(ev.date)}`;
+    ? formatDateRange(ev.date, ev.end_date, locale)
+    : `${weekdayShort(ev.date, locale)}, ${formatDateLong(ev.date, locale)}`;
   const calEv = {
     date: ev.date,
     time: ev.time ?? null,
@@ -73,7 +77,7 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
   const vrnUrl = buildVrnUrl(ev.venue, ev.city);
   const mapsUrl = buildGoogleMapsUrl(ev.venue, ev.city);
   const shareUrl = `${APP_URL}/event/${ev.id}`;
-  const ldJson = JSON.stringify({
+  const ldJson = jsonLdSafe({
     "@context": "https://schema.org",
     "@type": "Event",
     name: ev.title,
@@ -101,7 +105,7 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
     eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
   });
-  const breadcrumbLd = JSON.stringify({
+  const breadcrumbLd = jsonLdSafe({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
@@ -115,7 +119,7 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
   // don't end on a half-word.
   const metaDescription = trimToWords(ev.description ?? `${ev.title} — ${when} in ${ev.city ?? "Landau"}.`, 155);
   return `<!doctype html>
-<html lang="de">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -140,6 +144,9 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
   rel="stylesheet"
 />
 <link rel="stylesheet" href="/styles.css" />
+${buildHreflangs(`/event/${ev.id}`)}
+<script>${THEME_FOUC_SCRIPT}</script>
+<script src="/client.js" defer></script>
 <script type="application/ld+json">${ldJson}</script>
 <script type="application/ld+json">${breadcrumbLd}</script>
 </head>
@@ -147,6 +154,11 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
 <header class="masthead">
   <h1><a href="/${locale === "fr" ? "?lang=fr" : ""}">Landau<span class="ampersand">&amp;</span>heute</a></h1>
   <p class="subtitle">${esc(tr.subtitle)}</p>
+  <nav class="langswitch" aria-label="${esc(tr.langSwitchAria)}">${buildLangSwitchHtml(locale, `/event/${ev.id}`)}</nav>
+  <button type="button" class="theme-toggle js-theme" aria-label="${esc(tr.themeToggle)}" title="${esc(tr.themeToggle)}">
+    <span class="icon-sun" aria-hidden="true">☀</span>
+    <span class="icon-moon" aria-hidden="true">☾</span>
+  </button>
 </header>
 <main id="content" class="event-detail" style="padding:0 1rem">
   <p class="eyebrow">
@@ -154,7 +166,7 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
     ${isPast ? ` · ${esc(tr.evPast)}` : ""}
   </p>
   <h1>${esc(ev.title)}</h1>
-  <p class="when">${esc(when)}${time ? ` · ${time}${endTime ? `–${endTime}` : ""} Uhr` : ""}</p>
+  <p class="when">${esc(when)}${time ? ` · ${time}${endTime && !sameTime ? `–${endTime}` : ""}${tr.timeSuffix ? ` ${esc(tr.timeSuffix)}` : ""}` : ""}</p>
   ${ev.venue ? `<p class="where">${esc(ev.venue)}${ev.organizer && ev.organizer !== ev.venue ? ` · ${esc(ev.organizer)}` : ""}</p>` : ""}
   ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" loading="lazy" decoding="async" />` : ""}
   ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}

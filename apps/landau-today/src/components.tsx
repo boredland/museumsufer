@@ -109,9 +109,9 @@ export function DateStrip({ current, category, counts, daysAhead = 21, tr, local
               {...hxAttrs}
               aria-current={iso === current ? "date" : undefined}
             >
-              <span class="day-name">{weekdayShort(iso)}</span>
+              <span class="day-name">{weekdayShort(iso, locale)}</span>
               <span class="day-num">{dayOfMonth(iso)}</span>
-              <span class="day-month">{monthShort(iso)}</span>
+              <span class="day-month">{monthShort(iso, locale)}</span>
             </a>
           );
         })}
@@ -120,12 +120,22 @@ export function DateStrip({ current, category, counts, daysAhead = 21, tr, local
   );
 }
 
-export function DayHeadline({ date, total, tr }: { date: string; total: number; tr: Translations }) {
+export function DayHeadline({
+  date,
+  total,
+  tr,
+  locale,
+}: {
+  date: string;
+  total: number;
+  tr: Translations;
+  locale: Locale;
+}) {
   const today = todayIso();
-  const rel = relativeDayLabelLocalized(date, today, tr);
+  const rel = relativeDayLabel(date, today, locale);
   return (
     <div class="day-headline">
-      <h2>{rel ?? formatDateLong(date)}</h2>
+      <h2>{rel ?? formatDateLong(date, locale)}</h2>
       <div class="day-headline-meta">
         <button type="button" class="near-toggle js-near" aria-pressed="false" title={tr.nearbyHint}>
           <span class="glyph" aria-hidden="true">
@@ -139,13 +149,6 @@ export function DayHeadline({ date, total, tr }: { date: string; total: number; 
       </div>
     </div>
   );
-}
-
-function relativeDayLabelLocalized(date: string, today: string, tr: Translations): string | null {
-  const original = relativeDayLabel(date, today);
-  if (!original) return null;
-  if (original.toLowerCase() === "heute") return tr.today;
-  return original;
 }
 
 function categoryFor(slug: string): CategoryDef {
@@ -165,15 +168,16 @@ function venueIncludesCity(venue: string | undefined, city: string): boolean {
 interface LedgerProps {
   ev: Event;
   tr: Translations;
+  locale: Locale;
 }
 
 /** The ledger row — the page's primary card vocabulary. Looks like a
  *  classified-listing entry: tabular time on the left, hairline rule,
  *  title + venue + price in the body, mood-colored category glyph at
  *  the right. */
-export function Ledger({ ev, tr }: LedgerProps) {
+export function Ledger({ ev, tr, locale }: LedgerProps) {
   const cat = categoryFor(ev.category);
-  const time = formatTime(ev.time);
+  const time = formatTime(ev.time, locale);
   const isOpen = !!ev.end_date && !time;
   // Order: venue, city (only if it's not already echoed inside the venue
   // string), organizer (only if distinct from venue), price.
@@ -205,7 +209,7 @@ export function Ledger({ ev, tr }: LedgerProps) {
       <div class={`time${time ? "" : " allday"}`}>
         {time ?? (isOpen ? "ganztags" : "ganztags")}
         {ev.end_time && ev.end_time !== ev.time ? (
-          <div style="font-size:0.7em;opacity:0.6">– {formatTime(ev.end_time)}</div>
+          <div style="font-size:0.7em;opacity:0.6">– {formatTime(ev.end_time, locale)}</div>
         ) : null}
       </div>
       <div class="body">
@@ -261,15 +265,16 @@ export function Ledger({ ev, tr }: LedgerProps) {
 interface BroadsideProps {
   ev: Event;
   tr: Translations;
+  locale: Locale;
 }
 
 /** Full-width image card. Used as visual punctuation every ~6 ledger
  *  rows to break the rhythm; only emitted for events that carry a real
  *  image URL. */
-export function Broadside({ ev, tr }: BroadsideProps) {
+export function Broadside({ ev, tr, locale }: BroadsideProps) {
   const cat = categoryFor(ev.category);
   const img = imageProxyUrl(ev.image_url);
-  const time = formatTime(ev.time);
+  const time = formatTime(ev.time, locale);
   const geoAttrs =
     typeof ev.lat === "number" && typeof ev.lng === "number"
       ? { "data-lat": String(ev.lat), "data-lng": String(ev.lng) }
@@ -291,7 +296,7 @@ export function Broadside({ ev, tr }: BroadsideProps) {
       <div class="copy">
         <div class="eyebrow">
           <span style={`color:var(--color-${cat.mood})`}>{cat.glyph}</span> {categoryLabel(cat.slug, tr).label} ·{" "}
-          {ev.end_date ? formatDateRange(ev.date, ev.end_date) : formatDateLong(ev.date)}
+          {ev.end_date ? formatDateRange(ev.date, ev.end_date, locale) : formatDateLong(ev.date, locale)}
           {time ? ` · ${time}` : ""}
         </div>
         <h3 class="t-title">{ev.title}</h3>
@@ -310,13 +315,14 @@ interface EventListProps {
   events: Event[];
   date: string;
   tr: Translations;
+  locale: Locale;
 }
 
 /** Renders a day's events with periodic broadside breakouts. The cadence
  *  is "every 7 ledger rows, lift one event with an image into a
  *  broadside" — but only if at least 8 rows remain, so the page doesn't
  *  end on a broadside that visually orphan-quotes its category. */
-export function EventList({ events, tr }: EventListProps) {
+export function EventList({ events, tr, locale }: EventListProps) {
   if (events.length === 0) {
     return <div class="empty">{tr.emptyDay}</div>;
   }
@@ -327,10 +333,10 @@ export function EventList({ events, tr }: EventListProps) {
     const remaining = events.length - idx;
     const eligible = !!ev.image_url && sinceBroadside >= ROWS_BETWEEN_BROADSIDES && remaining >= 4;
     if (eligible) {
-      out.push(<Broadside ev={ev} tr={tr} />);
+      out.push(<Broadside ev={ev} tr={tr} locale={locale} />);
       sinceBroadside = 0;
     } else {
-      out.push(<Ledger ev={ev} tr={tr} />);
+      out.push(<Ledger ev={ev} tr={tr} locale={locale} />);
       sinceBroadside++;
     }
   });

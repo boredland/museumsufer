@@ -3,14 +3,14 @@ import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
 import { DEFAULT_LOCALE, type FaqEntry, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
-import { APP_URL, formatDateLong } from "./shared";
+import { APP_URL, formatDateLong, jsonLdSafe } from "./shared";
 import type { Event } from "./types";
 
 function langSuffix(locale: Locale, sep: "?" | "&" = "?"): string {
   return locale === DEFAULT_LOCALE ? "" : `${sep}lang=${locale}`;
 }
 
-function buildHreflangs(currentPath: string): string {
+export function buildHreflangs(currentPath: string): string {
   return SUPPORTED_LOCALES.map((l) => {
     const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
     const sep = stripped.includes("?") ? "&" : "?";
@@ -19,7 +19,7 @@ function buildHreflangs(currentPath: string): string {
   }).join("\n");
 }
 
-function buildLangSwitchHtml(locale: Locale, currentPath: string): string {
+export function buildLangSwitchHtml(locale: Locale, currentPath: string): string {
   const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
   const sep = stripped.includes("?") ? "&" : "?";
   return SUPPORTED_LOCALES.map((l) => {
@@ -55,7 +55,7 @@ export function renderPage(props: PageProps): string {
   const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}${langAmp}` : `${APP_URL}/?date=${date}${langAmp}`;
   const currentPath = cat ? `/c/${cat.slug}?date=${date}` : `/?date=${date}`;
   const jsonLd = buildJsonLd(events.slice(0, 50));
-  const faqLd = JSON.stringify(buildFaqPageSchema(tr.faq));
+  const faqLd = jsonLdSafe(buildFaqPageSchema(tr.faq));
 
   return `<!doctype html>
 <html lang="${locale}">
@@ -106,7 +106,7 @@ ${buildHreflangs(currentPath)}
   </h1>
   <p class="subtitle">${escapeHtml(tr.subtitle)}</p>
   <p class="colophon">${escapeHtml(formatDateLong(todayIso()))}</p>
-  <nav class="langswitch" aria-label="Language">${buildLangSwitchHtml(locale, currentPath)}</nav>
+  <nav class="langswitch" aria-label="${escapeHtml(tr.langSwitchAria)}">${buildLangSwitchHtml(locale, currentPath)}</nav>
   <button type="button" class="theme-toggle js-theme" aria-label="${escapeHtml(tr.themeToggle)}" title="${escapeHtml(tr.themeToggle)}">
     <span class="icon-sun" aria-hidden="true">☀</span>
     <span class="icon-moon" aria-hidden="true">☾</span>
@@ -267,8 +267,8 @@ export function renderPartial(props: PageProps): string {
     render(<ChipRow active={category} date={date} counts={categoryCounts} tr={tr} locale={locale} />, "ink-up", 60),
     render(<DateStrip current={date} category={category} counts={dateCounts} tr={tr} locale={locale} />, "ink-up", 120),
     renderDigestCue(180, tr),
-    render(<DayHeadline date={date} total={events.length} tr={tr} />, "ink-up", 200),
-    `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} tr={tr} />, "")}</section>`,
+    render(<DayHeadline date={date} total={events.length} tr={tr} locale={locale} />, "ink-up", 200),
+    `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} tr={tr} locale={locale} />, "")}</section>`,
   ].join("\n");
 }
 
@@ -312,5 +312,5 @@ function buildJsonLd(events: Event[]): string {
     url: `${APP_URL}/event/${ev.id}`,
     offers: ev.price ? { "@type": "Offer", price: ev.price } : undefined,
   }));
-  return JSON.stringify({ "@context": "https://schema.org", "@graph": items });
+  return jsonLdSafe({ "@context": "https://schema.org", "@graph": items });
 }
