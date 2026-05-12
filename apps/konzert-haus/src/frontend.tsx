@@ -1088,6 +1088,32 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
   );
 }
 
+/**
+ * Quiet editorial cross-link to the two sibling Frankfurt apps. Sits
+ * after the concert list — a soft suggestion for visitors who didn't
+ * find anything in today's programme.
+ */
+function SiblingStrap({ tr }: { tr: Translations }) {
+  const [before, midRaw] = tr.siblingTemplate.split("{first}");
+  const [mid, after] = (midRaw ?? "").split("{second}");
+  return (
+    <section class="programme__siblings">
+      <hr class="programme__siblings-rule" />
+      <p class="programme__siblings-prompt">
+        {before}
+        <a href="https://frankfurt.ins.theater" target="_blank" rel="noopener">
+          {tr.siblingTheaterLabel}
+        </a>
+        {mid}
+        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+          {tr.siblingMuseumLabel}
+        </a>
+        {after}
+      </p>
+    </section>
+  );
+}
+
 export function ProgrammePartial({ date, events, tr }: { date: string; events: DayEvent[]; tr: Translations }) {
   const dp = dateParts(date);
   return (
@@ -1113,6 +1139,7 @@ export function ProgrammePartial({ date, events, tr }: { date: string; events: D
           ))}
         </ol>
       )}
+      <SiblingStrap tr={tr} />
     </>
   );
 }

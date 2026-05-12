@@ -838,10 +838,6 @@ export function Footer({ turnstileSiteKey }: { turnstileSiteKey?: string } = {})
             </button>
           </p>
           <p class="footer__links">
-            <a href="https://museumsufer.app" target="_blank" rel="noopener">
-              Museumsufer
-            </a>
-            <span class="footer__sep">·</span>
             <a href="/api/docs">API</a>
             <span class="footer__sep">·</span>
             <a href="/feed.ics">iCal</a>
@@ -892,6 +888,30 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
     const startMin = parseInt(hh, 10) * 60 + parseInt(mm, 10);
     return startMin >= nowMin;
   });
+}
+
+/**
+ * Quiet editorial cross-link to the two sibling Frankfurt apps. Sits
+ * after the performances list — a soft suggestion for visitors who
+ * didn't find anything in today's theatre line-up.
+ */
+function SiblingStrap() {
+  return (
+    <section class="programme__siblings">
+      <hr class="programme__siblings-rule" />
+      <p class="programme__siblings-prompt">
+        Nichts dabei? Wie wäre es stattdessen mit einem{" "}
+        <a href="https://frankfurt.konzert.haus" target="_blank" rel="noopener">
+          Konzert
+        </a>{" "}
+        oder einem{" "}
+        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+          Museumsbesuch
+        </a>
+        ?
+      </p>
+    </section>
+  );
 }
 
 export function ProgrammePartial({ date, performances }: { date: string; performances: DayPerformance[] }) {
@@ -950,6 +970,7 @@ export function ProgrammePartial({ date, performances }: { date: string; perform
           ) : null}
         </>
       )}
+      <SiblingStrap />
     </>
   );
 }

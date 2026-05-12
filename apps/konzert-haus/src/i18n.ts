@@ -79,6 +79,10 @@ export interface Translations {
   genreDescription: (genre: string, count: number) => string;
   // a11y
   langSwitchAria: string;
+  // Cross-app suggestion strap (theater + museum)
+  siblingTemplate: string;
+  siblingTheaterLabel: string;
+  siblingMuseumLabel: string;
 }
 
 const de: Translations = {
@@ -151,6 +155,9 @@ const de: Translations = {
   genreDescription: (genre, count) =>
     `${genre}-Konzerte in Frankfurt und Umgebung. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
   langSwitchAria: "Sprache",
+  siblingTemplate: "Nichts dabei? Wie wäre es stattdessen mit einem {first} oder {second}?",
+  siblingTheaterLabel: "Theaterstück",
+  siblingMuseumLabel: "Museumsbesuch",
 };
 
 const en: Translations = {
@@ -223,6 +230,9 @@ const en: Translations = {
   genreDescription: (genre, count) =>
     `${genre} concerts in Frankfurt and around. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
   langSwitchAria: "Language",
+  siblingTemplate: "Nothing for you? How about {first} or {second} instead?",
+  siblingTheaterLabel: "a play",
+  siblingMuseumLabel: "a museum visit",
 };
 
 const fr: Translations = {
@@ -294,6 +304,9 @@ const fr: Translations = {
   genreDescription: (genre, count) =>
     `Concerts de ${genre.toLowerCase()} à Francfort et alentour. ${count} rendez-vous dans les 60 prochains jours.`,
   langSwitchAria: "Langue",
+  siblingTemplate: "Rien pour toi ? Pourquoi pas {first} ou {second} à la place ?",
+  siblingTheaterLabel: "une pièce",
+  siblingMuseumLabel: "une visite au musée",
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr };
