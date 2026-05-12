@@ -1,16 +1,8 @@
 import { buildUtm, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
+import { raw } from "hono/html";
 import { type DayPerformance, getPerformancesInRange } from "../db";
-import {
-  buildPerformanceJsonLd,
-  escapeHtml,
-  renderClientScript,
-  renderFooter,
-  renderGrain,
-  renderHead,
-  renderMasthead,
-  renderPerformance,
-} from "../frontend";
+import { buildPerformanceJsonLd, ClientScript, Footer, Grain, Head, Masthead, Performance } from "../frontend";
 import { renderTheaterMarkdown, wantsMarkdown } from "../markdown";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
@@ -19,6 +11,60 @@ import { APP_URL } from "./static";
 const utm = buildUtm("frankfurt.ins.theater");
 
 const app = new Hono<{ Bindings: Env }>();
+
+const MONTH_NAMES_DE = [
+  "Januar",
+  "Februar",
+  "März",
+  "April",
+  "Mai",
+  "Juni",
+  "Juli",
+  "August",
+  "September",
+  "Oktober",
+  "November",
+  "Dezember",
+];
+const WEEKDAYS_DE = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+
+function GroupedPerformances({ performances }: { performances: DayPerformance[] }) {
+  const byDate = new Map<string, DayPerformance[]>();
+  for (const p of performances) {
+    const arr = byDate.get(p.date);
+    if (arr) arr.push(p);
+    else byDate.set(p.date, [p]);
+  }
+  let i = 0;
+  return (
+    <>
+      {[...byDate.entries()].map(([date, perfs]) => {
+        if (!perfs.length) return null;
+        const dp = new Date(`${date}T12:00:00Z`);
+        const wk = WEEKDAYS_DE[dp.getUTCDay()];
+        const month = MONTH_NAMES_DE[dp.getUTCMonth()];
+        const day = dp.getUTCDate();
+        return (
+          <section key={date} class="theater-day">
+            <header class="theater-day__head">
+              <p class="theater-day__weekday">{wk}</p>
+              <h3 class="theater-day__date">
+                {day}. {month}
+              </h3>
+            </header>
+            <ol class="performances">
+              {perfs.map((p) => {
+                const row = <Performance key={p.id} p={p} opts={{ index: i, hideTheater: true }} />;
+                i++;
+                return row;
+              })}
+            </ol>
+          </section>
+        );
+      })}
+    </>
+  );
+}
 
 app.get("/theater/:slug", async (c) => {
   const slug = c.req.param("slug");
@@ -88,103 +134,71 @@ app.get("/theater/:slug", async (c) => {
   ];
 
   const turnstileSiteKey = c.env.TURNSTILE_SITE_KEY;
-  const head = renderHead({
-    title: `${config.name} — Spielplan · Frankfurt Theater`,
-    description: `Aktueller Spielplan und Karten für ${config.name} in Frankfurt am Main. ${performances.length} kommende Vorstellung${
-      performances.length === 1 ? "" : "en"
-    }.`,
-    canonical: `${APP_URL}/theater/${slug}`,
-    ogImage: `${APP_URL}/theater/${slug}/og.svg`,
-    jsonLd,
-    turnstileSiteKey,
-    extraLinks: [
-      { rel: "alternate", type: "text/calendar", href: `/theater/${slug}/feed.ics`, title: `${config.name} – iCal` },
-      { rel: "alternate", type: "application/json", href: `/api/theater/${slug}`, title: `${config.name} – JSON` },
-    ],
-  });
 
-  return c.html(`<!doctype html>
-<html lang="de">
-<head>
-${head}
-</head>
-<body>
-${renderGrain()}
-${renderMasthead({ sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
-
-<main class="programme programme--theater">
-  <header class="theater-hero">
-    <p class="theater-hero__line"></p>
-    <p class="theater-hero__kicker">Spielplan</p>
-    <h2 class="theater-hero__name">${escapeHtml(config.name)}</h2>
-    ${config.address ? `<p class="theater-hero__address">${escapeHtml(config.address)}</p>` : ""}
-    <p class="theater-hero__meta">
-      ${config.website_url ? `<a href="${escapeHtml(utm(config.website_url, "theater_website"))}" target="_blank" rel="noopener">Website ↗</a>` : ""}
-      <a href="/theater/${slug}/feed.ics">iCal abonnieren</a>
-      <a href="/api/theater/${slug}">JSON</a>
-    </p>
-  </header>
-
-  ${
-    performances.length === 0
-      ? `<div class="empty">
-           <p class="empty__mark">∅</p>
-           <p>Noch kein angekündigtes Programm.</p>
-         </div>`
-      : renderGrouped(performances)
-  }
-</main>
-
-${renderFooter({ turnstileSiteKey })}
-
-${renderClientScript()}
-</body>
-</html>`);
+  return c.html(
+    <>
+      {raw("<!DOCTYPE html>")}
+      <html lang="de">
+        <head>
+          <Head
+            title={`${config.name} — Spielplan · Frankfurt Theater`}
+            description={`Aktueller Spielplan und Karten für ${config.name} in Frankfurt am Main. ${performances.length} kommende Vorstellung${
+              performances.length === 1 ? "" : "en"
+            }.`}
+            canonical={`${APP_URL}/theater/${slug}`}
+            ogImage={`${APP_URL}/theater/${slug}/og.svg`}
+            jsonLd={jsonLd}
+            turnstileSiteKey={turnstileSiteKey}
+            extraLinks={[
+              {
+                rel: "alternate",
+                type: "text/calendar",
+                href: `/theater/${slug}/feed.ics`,
+                title: `${config.name} – iCal`,
+              },
+              {
+                rel: "alternate",
+                type: "application/json",
+                href: `/api/theater/${slug}`,
+                title: `${config.name} – JSON`,
+              },
+            ]}
+          />
+        </head>
+        <body>
+          <Grain />
+          <Masthead sublabel="Frankfurter Bühnen, kuratiert nach Tag." />
+          <main class="programme programme--theater">
+            <header class="theater-hero">
+              <p class="theater-hero__line" />
+              <p class="theater-hero__kicker">Spielplan</p>
+              <h2 class="theater-hero__name">{config.name}</h2>
+              {config.address ? <p class="theater-hero__address">{config.address}</p> : null}
+              <p class="theater-hero__meta">
+                {config.website_url ? (
+                  <a href={utm(config.website_url, "theater_website")} target="_blank" rel="noopener">
+                    Website ↗
+                  </a>
+                ) : null}
+                <a href={`/theater/${slug}/feed.ics`}>iCal abonnieren</a>
+                <a href={`/api/theater/${slug}`}>JSON</a>
+              </p>
+            </header>
+            {performances.length === 0 ? (
+              <div class="empty">
+                <p class="empty__mark">∅</p>
+                <p>Noch kein angekündigtes Programm.</p>
+              </div>
+            ) : (
+              <GroupedPerformances performances={performances} />
+            )}
+          </main>
+          <Footer turnstileSiteKey={turnstileSiteKey} />
+          <ClientScript />
+        </body>
+      </html>
+    </>,
+  );
 });
-
-function renderGrouped(performances: DayPerformance[]): string {
-  // Group by date — only render dates that actually have a performance.
-  // (Audit found we were rendering 60 dates with ~23 empty stretches.)
-  const byDate = new Map<string, DayPerformance[]>();
-  for (const p of performances) {
-    const arr = byDate.get(p.date);
-    if (arr) arr.push(p);
-    else byDate.set(p.date, [p]);
-  }
-  const groups: string[] = [];
-  let i = 0;
-  const monthNames = [
-    "Januar",
-    "Februar",
-    "März",
-    "April",
-    "Mai",
-    "Juni",
-    "Juli",
-    "August",
-    "September",
-    "Oktober",
-    "November",
-    "Dezember",
-  ];
-  const weekdays = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
-  for (const [date, perfs] of byDate) {
-    if (!perfs.length) continue;
-    const dp = new Date(`${date}T12:00:00Z`);
-    const wk = weekdays[dp.getUTCDay()];
-    const month = monthNames[dp.getUTCMonth()];
-    const day = dp.getUTCDate();
-    groups.push(`<section class="theater-day">
-      <header class="theater-day__head">
-        <p class="theater-day__weekday">${wk}</p>
-        <h3 class="theater-day__date">${day}. ${month}</h3>
-      </header>
-      <ol class="performances" role="list">
-        ${perfs.map((p) => renderPerformance(p, { index: i++, hideTheater: true })).join("")}
-      </ol>
-    </section>`);
-  }
-  return groups.join("\n");
-}
 
 export default app;
