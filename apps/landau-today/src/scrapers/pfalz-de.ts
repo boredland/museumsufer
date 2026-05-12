@@ -17,6 +17,7 @@
  * occurrences beyond the horizon are dropped to keep the bundle small.
  */
 import { decodeEntities, stripHtml, truncate } from "@museumsufer/core";
+import PQueue from "p-queue";
 import { classifyEventByText } from "../categories";
 import { todayIso } from "../date";
 import type { Event, EventSource } from "../types";
@@ -226,26 +227,25 @@ async function fetchAllDetailPages(
   concurrency: number,
   budget: AbortSignal,
 ): Promise<DetailPage[]> {
-  // Tiny worker-pool to keep concurrent fetches bounded — we don't want to
-  // hammer the upstream Drupal cluster on a daily cron.
+  // p-queue throttles concurrent fetches so we don't hammer the
+  // upstream Drupal cluster. Same dispatcher pattern the konzert-haus
+  // + theaters scrape scripts use one layer up.
+  const queue = new PQueue({ concurrency });
   const out: DetailPage[] = [];
-  let cursor = 0;
-  async function worker() {
-    while (cursor < urls.length && !budget.aborted) {
-      const i = cursor++;
-      const url = urls[i];
+  for (const url of urls) {
+    queue.add(async () => {
+      if (budget.aborted) return;
       try {
         const html = await fetchTextWithTimeout(fetchImpl, url, 8_000);
-        if (html == null) continue;
+        if (html == null) return;
         const page = parseDetail(url, html);
         if (page) out.push(page);
       } catch (err) {
         console.warn(`pfalz-de fetch ${url}: ${(err as Error).message}`);
       }
-    }
+    });
   }
-  const workers = Array.from({ length: Math.min(concurrency, urls.length) }, () => worker());
-  await Promise.all(workers);
+  await queue.onIdle();
   return out;
 }
 

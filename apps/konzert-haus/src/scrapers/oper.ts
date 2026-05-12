@@ -7,6 +7,7 @@ import {
   todayIso,
   truncate,
 } from "@museumsufer/core";
+import PQueue from "p-queue";
 import { classify } from "../genre-heuristics";
 import type { Genre, ScrapedEvent, ScrapeResult } from "../types";
 
@@ -16,6 +17,7 @@ const LIEDERABENDE_URL = `${BASE}/de/liederabende/`;
 const UA = "konzert.haus crawler / contact: jonas@bgdlabs.com";
 const REQUEST_DELAY_MS = 200;
 const DETAIL_FETCH_BUDGET = 40;
+const DETAIL_CONCURRENCY = 4;
 
 interface RawEvent {
   slug: string;
@@ -52,24 +54,26 @@ export async function scrapeOper(): Promise<ScrapeResult> {
   }
 
   // One enrichment fetch per unique show — description/image/price are
-  // production-level, not performance-level.
+  // production-level, not performance-level. p-queue limits parallel
+  // requests so we stay polite without serialising the whole batch.
   const enrichment = new Map<string, OperDetail>();
-  let fetchesUsed = 0;
-  for (const [slug, group] of dedupedBySlug) {
-    if (fetchesUsed >= DETAIL_FETCH_BUDGET) break;
+  const slice = [...dedupedBySlug].slice(0, DETAIL_FETCH_BUDGET);
+  const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
+  for (const [slug, group] of slice) {
     const sample = group.find((g) => g.providerEventId) ?? group[0];
     const enrichmentUrl = sample.providerEventId
       ? `${sample.detailUrl}?id_datum=${sample.providerEventId}`
       : sample.detailUrl;
-    try {
-      await sleep(REQUEST_DELAY_MS);
-      const html = await fetchHtml(enrichmentUrl);
-      enrichment.set(slug, parseOperDetail(html));
-    } catch (err) {
-      console.warn(`oper-frankfurt detail enrichment failed for ${slug}:`, err);
-    }
-    fetchesUsed++;
+    queue.add(async () => {
+      try {
+        const html = await fetchHtml(enrichmentUrl);
+        enrichment.set(slug, parseOperDetail(html));
+      } catch (err) {
+        console.warn(`oper-frankfurt detail enrichment failed for ${slug}:`, err);
+      }
+    });
   }
+  await queue.onIdle();
 
   const events: ScrapedEvent[] = [];
   for (const group of dedupedBySlug.values()) {
