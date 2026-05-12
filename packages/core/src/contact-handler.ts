@@ -8,8 +8,8 @@ import { verifyTurnstileToken } from "./turnstile";
  */
 export interface FeedbackEnv {
   FEEDBACK_EMAIL: SendEmail;
-  TURNSTILE_SECRET?: string;
-  TURNSTILE_SITE_KEY?: string;
+  TURNSTILE_SECRET: string;
+  TURNSTILE_SITE_KEY: string;
 }
 
 export interface ContactHandlerOptions {
@@ -56,12 +56,10 @@ export async function handleContactRequest(opts: ContactHandlerOptions): Promise
     return Response.json({ error: "message too long" }, { status: 400 });
   }
 
-  if (env.TURNSTILE_SECRET) {
-    const remoteIp = opts.remoteIp ?? request.headers.get("cf-connecting-ip");
-    const verdict = await verifyTurnstileToken(body["cf-turnstile-response"], env.TURNSTILE_SECRET, remoteIp);
-    if (!verdict.success) {
-      return Response.json({ error: "turnstile failed", codes: verdict.errorCodes }, { status: 400 });
-    }
+  const remoteIp = opts.remoteIp ?? request.headers.get("cf-connecting-ip");
+  const verdict = await verifyTurnstileToken(body["cf-turnstile-response"], env.TURNSTILE_SECRET, remoteIp);
+  if (!verdict.success) {
+    return Response.json({ error: "turnstile failed", codes: verdict.errorCodes }, { status: 400 });
   }
 
   const raw = buildFeedbackMime({
