@@ -58,5 +58,8 @@ jobs:
         with:
           urls: ${{ matrix.site.url }}
           configPath: ./.github/lighthouse/lighthouserc.json
+          # Per-site artifact name — without this every matrix job races
+          # to upload `lighthouse-results` and three of four 409 on conflict.
+          artifactName: lighthouse-${{ matrix.site.name }}
           uploadArtifacts: true
           temporaryPublicStorage: true
