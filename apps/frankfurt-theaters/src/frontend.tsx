@@ -436,6 +436,17 @@ export function renderFaq(): string {
   </section>`;
 }
 
+export function renderDigestCue(): string {
+  return `<button type="button" class="digest-cue" data-digest-open aria-label="Push-Nachrichten zu Vorstellungen abonnieren">
+  <span class="digest-cue__mark" aria-hidden="true">※</span>
+  <span class="digest-cue__kicker">Push-Digest</span>
+  <span class="digest-cue__rule" aria-hidden="true"></span>
+  <span class="digest-cue__text">Erfahre morgens, was heute Abend gespielt wird.</span>
+  <span class="digest-cue__schedules" aria-hidden="true">07 · 17 · So 09</span>
+  <span class="digest-cue__chevron" aria-hidden="true">→</span>
+</button>`;
+}
+
 export function renderFooter(opts: { turnstileSiteKey?: string } = {}): string {
   return `<footer class="footer">
   <div>
@@ -661,6 +672,7 @@ ${head}
 ${renderGrain()}
 ${renderMasthead()}
 ${renderDateStrip(dateStrip, date, today)}
+${renderDigestCue()}
 ${renderAskAi()}
 
 <main class="programme" id="programme">

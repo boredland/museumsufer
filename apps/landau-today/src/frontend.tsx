@@ -221,6 +221,17 @@ function render(node: unknown, _cls: string, delayMs?: number): string {
   return `<div class="ink-up" style="animation-delay:${delayMs}ms">${inner}</div>`;
 }
 
+function renderDigestCue(delayMs: number): string {
+  return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms" aria-label="Push-Nachrichten zu Veranstaltungen abonnieren">
+  <span class="digest-cue__mark" aria-hidden="true">※</span>
+  <span class="digest-cue__kicker">Push-Digest</span>
+  <span class="digest-cue__rule" aria-hidden="true"></span>
+  <span class="digest-cue__text">Erfahre morgens, was heute in der Pfalz läuft.</span>
+  <span class="digest-cue__schedules" aria-hidden="true">07 · 17 · So 09</span>
+  <span class="digest-cue__chevron" aria-hidden="true">→</span>
+</button>`;
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -235,7 +246,8 @@ export function renderPartial(props: PageProps): string {
   return [
     render(<ChipRow active={category} date={date} counts={categoryCounts} />, "ink-up", 60),
     render(<DateStrip current={date} category={category} counts={dateCounts} />, "ink-up", 120),
-    render(<DayHeadline date={date} total={events.length} />, "ink-up", 180),
+    renderDigestCue(180),
+    render(<DayHeadline date={date} total={events.length} />, "ink-up", 200),
     `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} />, "")}</section>`,
   ].join("\n");
 }
