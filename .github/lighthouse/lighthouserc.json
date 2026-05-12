@@ -10,10 +10,7 @@
           "throughputKbps": 10240,
           "cpuSlowdownMultiplier": 1
         },
-        "skipAudits": [
-          "uses-http2",
-          "canonical"
-        ]
+        "skipAudits": ["uses-http2"]
       }
     },
     "assert": {
