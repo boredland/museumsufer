@@ -24,7 +24,9 @@ export interface Translations {
   todayProgrammeTitle: string;
   emptyTitle: string;
   emptyTodayAfterPast: string;
+  emptyHint: string;
   pastNote: (n: number) => string;
+  castLabel: string;
   empty: string;
   ticketsAction: string;
   freeEntry: string;
@@ -101,7 +103,9 @@ const de: Translations = {
   todayProgrammeTitle: "Heutige Konzerte",
   emptyTitle: "Heute keine Konzerte gemeldet.",
   emptyTodayAfterPast: "Heute keine kommenden Konzerte mehr.",
+  emptyHint: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   pastNote: (n) => `${n} Konzert${n === 1 ? "" : "e"} heute bereits begonnen — verborgen.`,
+  castLabel: "Mit",
   empty: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   ticketsAction: "Karten",
   freeEntry: "Eintritt frei",
@@ -178,7 +182,9 @@ const en: Translations = {
   todayProgrammeTitle: "Tonight's concerts",
   emptyTitle: "No concerts announced today.",
   emptyTodayAfterPast: "No more upcoming concerts today.",
+  emptyHint: "Check back tomorrow or change the date above.",
   pastNote: (n) => `${n} concert${n === 1 ? "" : "s"} already started today — hidden.`,
+  castLabel: "With",
   empty: "Check back tomorrow or change the date above.",
   ticketsAction: "Tickets",
   freeEntry: "Free entry",
@@ -255,8 +261,10 @@ const fr: Translations = {
   todayProgrammeTitle: "Concerts de ce soir",
   emptyTitle: "Aucun concert annoncé aujourd'hui.",
   emptyTodayAfterPast: "Plus de concerts à venir aujourd'hui.",
+  emptyHint: "Repasse demain ou choisis une autre date ci-dessus.",
   pastNote: (n) =>
     `${n} concert${n === 1 ? "" : "s"} déjà commencé${n === 1 ? "" : "s"} aujourd'hui — masqué${n === 1 ? "" : "s"}.`,
+  castLabel: "Avec",
   empty: "Repasse demain ou choisis une autre date ci-dessus.",
   ticketsAction: "Billets",
   freeEntry: "Entrée libre",
