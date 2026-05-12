@@ -499,7 +499,7 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
   const googleUrl = buildCalendarUrl(calEv);
   const outlookUrl = buildOutlookUrl(calEv);
   const yahooUrl = buildYahooUrl(calEv);
-  const icsUrl = `/api/event/${ev.id}.ics`;
+  const icsUrl = `/event/${ev.id}/feed.ics`;
 
   const popId = `cal-${ev.id}`;
   return (

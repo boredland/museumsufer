@@ -81,7 +81,7 @@ export async function getPerformancesInRange(
 }
 
 /** A single performance by its synthetic ID — used by `/api/performance/{id}`,
- *  `/performance/{id}/feed.ics`, deep-link share URLs, and JSON-LD output. */
+ *  `/event/{id}/feed.ics`, deep-link share URLs, and JSON-LD output. */
 export async function getPerformanceById(id: number): Promise<DayPerformance | null> {
   const p = PERFORMANCES_BY_ID.get(id);
   return p ? joinPerformance(p) : null;

@@ -2,6 +2,7 @@ import {
   buildGoogleCalendarUrl,
   buildIcsCalendar,
   buildOutlookCalendarUrl,
+  buildUtm,
   buildYahooCalendarUrl,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
@@ -24,23 +25,22 @@ import {
 } from "../shared";
 import type { Env, Event } from "../types";
 
+const utm = buildUtm("landau.today");
+
 const app = new Hono<{ Bindings: Env }>();
 
-// Single handler so the literal `.ics` suffix doesn't fight Hono's
-// param matcher — `:id` would otherwise eat the dot.
-app.get("/event/:slug", (c) => {
-  const raw = c.req.param("slug");
-  const isIcs = raw.endsWith(".ics");
-  const idStr = isIcs ? raw.slice(0, -4) : raw;
-  if (!/^\d+$/.test(idStr)) return c.notFound();
-  const ev = getEventById(parseInt(idStr, 10));
+app.get("/event/:id{[0-9]+}/feed.ics", (c) => {
+  const ev = getEventById(parseInt(c.req.param("id"), 10));
   if (!ev) return c.notFound();
-  if (isIcs) {
-    return c.text(buildIcsForOne(ev), 200, {
-      "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
-    });
-  }
+  return c.text(buildIcsForOne(ev), 200, {
+    "Content-Type": "text/calendar; charset=utf-8",
+    "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
+  });
+});
+
+app.get("/event/:id{[0-9]+}", (c) => {
+  const ev = getEventById(parseInt(c.req.param("id"), 10));
+  if (!ev) return c.notFound();
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   return c.html(renderEventPage(ev, locale, tr), 200, {
@@ -178,14 +178,14 @@ ${buildHreflangs(`/event/${ev.id}`)}
   </div>
   <div class="actions actions--group">
     <span class="actions__label">${esc(tr.evCalendar)}</span>
-    <a href="/event/${ev.id}.ics">.ics</a>
+    <a href="/event/${ev.id}/feed.ics">.ics</a>
     <a href="${esc(buildGoogleCalendarUrl(calEv))}" rel="external">Google</a>
     <a href="${esc(buildOutlookCalendarUrl(calEv))}" rel="external">Outlook</a>
     <a href="${esc(buildYahooCalendarUrl(calEv))}" rel="external">Yahoo</a>
   </div>
   <div class="actions actions--group">
     <span class="actions__label">${esc(tr.evMore)}</span>
-    <a href="${esc(ev.detail_url)}" rel="external">${esc(tr.evViewSource)}</a>
+    <a href="${esc(utm(ev.detail_url, "event"))}" rel="external">${esc(tr.evViewSource)}</a>
     <button type="button" class="action-btn js-share" data-url="${esc(shareUrl)}" data-title="${esc(ev.title)}">${esc(tr.evShare)}</button>
   </div>
   <div class="share-toast" hidden>${esc(tr.evLinkCopied)}</div>

@@ -309,7 +309,7 @@ app.get("/api/day", async (c) => {
   );
 });
 
-app.get("/api/event/:id.ics", async (c) => {
+app.get("/event/:id/feed.ics", async (c) => {
   const idStr = c.req.param("id");
   if (!idStr) return c.json({ error: "invalid id" }, { status: 400 });
   const id = parseInt(idStr, 10);

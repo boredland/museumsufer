@@ -86,7 +86,7 @@ app.get("/sw.js", (c) =>
   }),
 );
 
-app.get("/partial/programme", async (c) => {
+app.get("/partial/content", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const performances = await getPerformancesForDate(date);

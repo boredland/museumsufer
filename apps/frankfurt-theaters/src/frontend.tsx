@@ -213,7 +213,7 @@ export function DateStrip({
               class={cls}
               href={href}
               aria-current={isActive ? "true" : "false"}
-              hx-get={isHome ? `/partial/programme?date=${d.date}` : undefined}
+              hx-get={isHome ? `/partial/content?date=${d.date}` : undefined}
               hx-target={isHome ? "#programme-content" : undefined}
               hx-swap={isHome ? "innerHTML swap:80ms settle:20ms" : undefined}
               hx-push-url={isHome ? href : undefined}
@@ -867,7 +867,7 @@ function TomorrowLink() {
     <a
       class="empty__next"
       href={`/?date=${tomorrow}`}
-      hx-get={`/partial/programme?date=${tomorrow}`}
+      hx-get={`/partial/content?date=${tomorrow}`}
       hx-target="#programme-content"
       hx-swap="innerHTML swap:80ms settle:20ms"
       hx-push-url={`/?date=${tomorrow}`}

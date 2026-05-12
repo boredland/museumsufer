@@ -101,7 +101,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
 app.get("/", (c) => renderHome(c, c.req.query("date") || todayIso()));
 app.get("/tag/:date", (c) => renderHome(c, c.req.param("date")));
 
-app.get("/partial/programme", (c) => {
+app.get("/partial/content", (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const genre = parseGenre(c.req.query("genre"));

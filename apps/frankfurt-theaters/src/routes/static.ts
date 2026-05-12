@@ -64,7 +64,7 @@ Single performance + its show + its theater.
 
 GET /feed.ics — next 14 days, all theaters
 GET /theater/{slug}/feed.ics — single theater
-GET /performance/{id}/feed.ics — single performance
+GET /event/{id}/feed.ics — single performance
 
 ## Optional
 

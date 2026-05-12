@@ -47,7 +47,7 @@ const spec = {
         },
       },
     },
-    "/event/{id}.ics": {
+    "/event/{id}/feed.ics": {
       get: {
         summary: "Event as ICS",
         description: "Single event as a downloadable iCalendar (RFC 5545) file.",
