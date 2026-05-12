@@ -39,6 +39,8 @@ Aggregated programme for Frankfurt's Museumsufer district (museums + exhibitions
 - Share menus building Google / Outlook / Yahoo calendar deep-links (UTM-tagged)
 - Push digest signup dialog with per-museum filters and 3 schedules
 - Client-side search (NFD + diacritic-strip)
+- "Ask your AI" deep-links — pre-filled day-context prompt routed to Gemini AI Mode, ChatGPT, Claude, Perplexity, Grok (shared via `packages/core/src/llm-services.ts`)
+- FAQ section (6 collapsible Q&A) with `FAQPage` JSON-LD emitted via `packages/core/src/faq.ts`
 
 ### Scheduled jobs
 - Crons `0 5,6 * * *`, `0 15,16 * * *`, `0 7,8 * * SUN` (Berlin-aware morning 07:00, afternoon 17:00, weekly Sunday 09:00); only the matching local hour dispatches the push digest
@@ -92,7 +94,8 @@ Aggregated theatre programme for Frankfurt. Apex `ins.theater` 301-redirects to 
 - Status badges: "Ausverkauft", "Entfällt", "Restkarten"
 - Push digest dialog (3 schedules + per-theatre filter)
 - Contact dialog (Turnstile-gated)
-- "Ask AI" buttons (ChatGPT / Claude / Perplexity deep-links, pre-filled date query)
+- "Ask your AI" deep-links — pre-filled date-context prompt routed to Gemini AI Mode, ChatGPT, Claude, Perplexity, Grok (shared via `packages/core/src/llm-services.ts`)
+- FAQ section (6 collapsible Q&A) with `FAQPage` JSON-LD emitted via `packages/core/src/faq.ts`
 - Service worker at `/sw.js` (cache v5)
 
 ### Scheduled jobs
@@ -197,6 +200,7 @@ Aggregated cultural events for Landau in der Pfalz and the Südliche Weinstraße
 - Per-row share with `?highlight=<id>`; native share API + clipboard fallback + toast
 - `?highlight=` arrival animation (pulse + scrollIntoView)
 - Service worker (offline cache)
+- FAQ section (translated `de` / `fr`) with `FAQPage` JSON-LD via `packages/core/src/faq.ts`
 - Push digest dialog (3 schedules + 16 category filters, iOS PWA hint, capability detection)
 - Contact dialog (Turnstile lazy-load on open)
 
@@ -251,4 +255,6 @@ Used by every public app. Keeps the four sites byte-for-byte consistent on the a
 - **`HTMX_LIFECYCLE_SCRIPT`, `TURNSTILE_LAZY_LOAD_SCRIPT`, `THEME_FOUC_SCRIPT`** — small inline JS snippets re-used across apps.
 - **`buildHreflangAlternates`, `langSwitchItems`, `buildLangParam`** — i18n routing helpers.
 - **`buildUtm`** — UTM tagger for outbound ticket / detail URLs.
+- **`LLM_SERVICES`** (`llm-services.ts`) — "Ask your AI" target list (Gemini AI Mode, ChatGPT, Claude, Perplexity, Grok) with brand colours, SVG glyphs, and `buildUrl(prompt)` deep-links.
+- **`buildFaqPageSchema`** (`faq.ts`) — JSON-LD `FAQPage` builder used by the museums / theaters / landau FAQ sections.
 - **Date helpers:** `todayIso`, `dateOffset`, `berlinHourMinute`, `formatLocalisedDateLong`, German month/weekday tables, `compareNullsLast`, `escapeHtml`.
