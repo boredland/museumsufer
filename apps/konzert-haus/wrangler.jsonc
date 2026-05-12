@@ -8,6 +8,12 @@
   // Host routes are added separately once DNS is wired:
   //   frankfurt.konzert.haus/*
   //   konzert.haus/* (apex → 301 to frankfurt.konzert.haus, handled in worker)
+  "send_email": [
+    {
+      "name": "FEEDBACK_EMAIL",
+      "destination_address": "info@jonas-strassel.de"
+    }
+  ],
   "assets": {
     "directory": "./public",
     "html_handling": "none",

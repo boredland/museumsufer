@@ -1,8 +1,12 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { EmailMessage } from "cloudflare:email";
+import { buildFeedbackMime, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getPerformanceById, getPerformancesForDate, getPerformancesInRange } from "../db";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
+
+const FEEDBACK_FROM = "noreply@frankfurt.ins.theater";
+const FEEDBACK_TO = "info@jonas-strassel.de";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -81,13 +85,20 @@ app.post("/api/contact", async (c) => {
   }
   if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
 
-  const ua = c.req.header("user-agent") ?? null;
-  const pageUrl = c.req.header("referer") ?? null;
-  await c.env.DB.prepare(
-    `INSERT INTO feedback (category, email, message, context, user_agent, page_url) VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
-  )
-    .bind(body.category ?? null, body.email ?? null, body.message, body.context ?? null, ua, pageUrl)
-    .run();
+  const raw = buildFeedbackMime({
+    from: FEEDBACK_FROM,
+    to: FEEDBACK_TO,
+    input: {
+      app: "frankfurt-theaters",
+      category: body.category ?? null,
+      email: body.email ?? null,
+      message: body.message,
+      context: body.context ?? null,
+      userAgent: c.req.header("user-agent") ?? null,
+      pageUrl: c.req.header("referer") ?? null,
+    },
+  });
+  await c.env.FEEDBACK_EMAIL.send(new EmailMessage(FEEDBACK_FROM, FEEDBACK_TO, raw));
 
   return c.json({ ok: true });
 });

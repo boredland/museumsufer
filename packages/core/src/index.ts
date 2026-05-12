@@ -4,6 +4,7 @@ export * from "./calendar";
 export * from "./date";
 export * from "./escape";
 export * from "./faq";
+export * from "./feedback-email";
 export * from "./german";
 export * from "./hash";
 export * from "./html";

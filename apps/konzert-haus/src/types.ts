@@ -1,5 +1,5 @@
 export interface Env {
-  DB?: D1Database;
+  FEEDBACK_EMAIL: SendEmail;
 }
 
 export type Genre = "classical" | "jazz" | "sacred" | "world" | "experimental" | "chamber";
