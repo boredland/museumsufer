@@ -108,11 +108,19 @@ export function buildYahooCalendarUrl(ev: CalendarEvent): string {
 
 // ─── ICS / RFC 5545 ──────────────────────────────────────────────────
 
+export type IcsStatus = "CONFIRMED" | "CANCELLED" | "TENTATIVE";
+
 export interface IcsEventInput extends CalendarEvent {
   /** Stable cross-run UID — typically `${id}@${host}`. */
   uid: string;
   /** Optional URL field on the VEVENT. Falls back to `detail_url`. */
   url?: string;
+  /** VEVENT STATUS line. Default "CONFIRMED" when explicitly set; omitted otherwise. */
+  status?: IcsStatus;
+  /** When the event has a start time but no end_time, synthesise an end
+   *  this many hours later. Defaults to 2 (matches the convention used
+   *  by konzert-haus / theaters). Set 0 to emit no DTEND. */
+  defaultDurationHours?: number;
 }
 
 /** Emit a single VEVENT block (no surrounding VCALENDAR). All-day events
@@ -135,7 +143,14 @@ export function buildIcsVevent(ev: IcsEventInput): string {
         ? `DTEND;TZID=Europe/Berlin:${dt(ev.end_date ?? ev.date, ev.end_time)}`
         : `DTEND;VALUE=DATE:${dt(ev.end_date ?? ev.date)}`,
     );
+  } else if (ev.time && (ev.defaultDurationHours ?? 0) > 0) {
+    const dur = ev.defaultDurationHours ?? 2;
+    const [h, m] = ev.time.split(":").map(Number);
+    const endH = (h + dur) % 24;
+    const endTime = `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    lines.push(`DTEND;TZID=Europe/Berlin:${dt(ev.date, endTime)}`);
   }
+  if (ev.status) lines.push(`STATUS:${ev.status}`);
   lines.push(`SUMMARY:${icsEsc(ev.title)}`);
   if (ev.location) lines.push(`LOCATION:${icsEsc(ev.location)}`);
   if (ev.description) lines.push(`DESCRIPTION:${icsEsc(ev.description)}`);
