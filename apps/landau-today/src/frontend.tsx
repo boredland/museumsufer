@@ -1,4 +1,4 @@
-import { buildFaqPageSchema, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { buildFaqPageSchema, digestScheduleLabel, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
@@ -241,13 +241,13 @@ function render(node: unknown, _cls: string, delayMs?: number): string {
   return `<div class="ink-up" style="animation-delay:${delayMs}ms">${inner}</div>`;
 }
 
-function renderDigestCue(delayMs: number, tr: Translations): string {
+function renderDigestCue(delayMs: number, tr: Translations, locale: Locale): string {
   return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms" aria-label="${escapeHtml(tr.digestDialogTitle)}">
   <span class="digest-cue__mark" aria-hidden="true">※</span>
   <span class="digest-cue__kicker">${escapeHtml(tr.digestKicker)}</span>
   <span class="digest-cue__rule" aria-hidden="true"></span>
   <span class="digest-cue__text">${escapeHtml(tr.digestCueText)}</span>
-  <span class="digest-cue__schedules" aria-hidden="true">07 · 17 · So 09</span>
+  <span class="digest-cue__schedules" aria-hidden="true">${escapeHtml(digestScheduleLabel(locale))}</span>
   <span class="digest-cue__chevron" aria-hidden="true">→</span>
 </button>`;
 }
@@ -266,7 +266,7 @@ export function renderPartial(props: PageProps): string {
   return [
     render(<ChipRow active={category} date={date} counts={categoryCounts} tr={tr} locale={locale} />, "ink-up", 60),
     render(<DateStrip current={date} category={category} counts={dateCounts} tr={tr} locale={locale} />, "ink-up", 120),
-    renderDigestCue(180, tr),
+    renderDigestCue(180, tr, locale),
     render(<DayHeadline date={date} total={events.length} tr={tr} locale={locale} />, "ink-up", 200),
     `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} tr={tr} locale={locale} />, "")}</section>`,
   ].join("\n");

@@ -1,4 +1,10 @@
-import { buildFaqPageSchema, type FaqItem, LLM_SERVICES, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import {
+  buildFaqPageSchema,
+  digestScheduleLabel,
+  type FaqItem,
+  LLM_SERVICES,
+  THEME_FOUC_SCRIPT,
+} from "@museumsufer/core";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -166,11 +172,11 @@ export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, st
         </div>
         <div class="flex items-center gap-4 shrink-0">
           <ThemeToggle tr={tr} />
-          <LangSwitch locale={locale} />
+          <LangSwitch locale={locale} tr={tr} />
         </div>
       </div>
       <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.3rem,8vw,3.5rem)]">
-        Museumsufer Frankfurt
+        Museumsufer
       </h1>
       <div class="flex items-center gap-3 mt-4">
         <div class="river-band flex-1" aria-hidden="true" />
@@ -217,9 +223,9 @@ function ThemeToggle({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-function LangSwitch({ locale }: { locale: Locale }) {
+function LangSwitch({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
-    <nav class="flex gap-3 font-mono text-[0.6875rem] uppercase tracking-[0.14em]" aria-label="Language">
+    <nav class="flex gap-3 font-mono text-[0.6875rem] uppercase tracking-[0.14em]" aria-label={tr.langSwitchAria}>
       {SUPPORTED_LOCALES.map((l) => (
         <a
           href={`?lang=${l}`}
@@ -258,7 +264,7 @@ function SearchBar({ tr }: { tr: Record<string, string> }) {
         type="button"
         id="search-clear"
         class="text-text-tertiary hover:text-river hidden cursor-pointer transition-colors"
-        aria-label="Clear search"
+        aria-label={tr.clearSearch}
       >
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
           <path d={ICON.close} />
@@ -845,20 +851,15 @@ export function renderPage(
               dateCounts={dateCounts}
             />
 
-            <button
-              type="button"
-              class="digest-cue"
-              data-digest-open
-              aria-label="Push-Nachrichten zu Museen abonnieren"
-            >
+            <button type="button" class="digest-cue" data-digest-open aria-label={tr.digestCueAria}>
               <span class="digest-cue__mark" aria-hidden="true">
                 ※
               </span>
-              <span class="digest-cue__kicker">Push-Digest</span>
+              <span class="digest-cue__kicker">{tr.digestKicker}</span>
               <span class="digest-cue__rule" aria-hidden="true" />
-              <span class="digest-cue__text">Erfahre morgens, was heute am Museumsufer offen ist.</span>
+              <span class="digest-cue__text">{tr.digestCueText}</span>
               <span class="digest-cue__schedules" aria-hidden="true">
-                07 · 17 · So 09
+                {digestScheduleLabel(locale)}
               </span>
               <span class="digest-cue__chevron" aria-hidden="true">
                 →

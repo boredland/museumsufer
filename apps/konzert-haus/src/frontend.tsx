@@ -3,6 +3,7 @@ import {
   type CalendarEvent,
   CalendarPopover,
   escapeHtml as coreEscapeHtml,
+  digestScheduleLabel,
   HTMX_LIFECYCLE_SCRIPT,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   POPOVER_POSITIONING_SCRIPT,
@@ -521,7 +522,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
   );
 }
 
-function DigestCue({ tr }: { tr: Translations }) {
+function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
   return (
     <button type="button" class="digest-cue" data-digest-open aria-label={tr.digestTitle}>
       <span class="digest-cue__mark" aria-hidden="true">
@@ -531,7 +532,7 @@ function DigestCue({ tr }: { tr: Translations }) {
       <span class="digest-cue__rule" aria-hidden="true" />
       <span class="digest-cue__text">{tr.digestCueText}</span>
       <span class="digest-cue__schedules" aria-hidden="true">
-        07 · 17 · So 09
+        {digestScheduleLabel(locale)}
       </span>
       <span class="digest-cue__chevron" aria-hidden="true">
         →
@@ -1163,7 +1164,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <GenreFilter date={date} active={genre} tr={tr} locale={locale} />
           <DateStrip strip={dateStrip} active={date} today={today} tr={tr} />
-          <DigestCue tr={tr} />
+          <DigestCue tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
               <ProgrammePartial date={date} events={events} tr={tr} />

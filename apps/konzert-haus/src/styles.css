@@ -235,6 +235,15 @@ body::before {
   border-bottom-color: var(--brass);
 }
 
+/* Below 480px the wordmark expands enough that the lang switch
+   collides with it. Tuck the switch under the theme toggle, right-aligned. */
+@media (max-width: 480px) {
+  .langswitch {
+    top: calc(clamp(1.25rem, 2.5vw, 2rem) + 2.6rem);
+    right: var(--gut);
+  }
+}
+
 .genre-filter {
   position: relative;
   z-index: 3;
