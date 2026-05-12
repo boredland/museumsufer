@@ -6,6 +6,7 @@ import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderPartial } from "./frontend";
 import { detectLocale, getTranslations } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
+import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import { getCategoryCountsForDate, getEventCountsByDate, getEventsForDate } from "./queries";
 import apiRoute from "./routes/api";
 import docsRoute from "./routes/docs";
@@ -18,6 +19,24 @@ import staticRoute from "./routes/static";
 import type { Env } from "./types";
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use("*", async (c, next) => {
+  await next();
+  const path = new URL(c.req.url).pathname;
+  if (path.startsWith("/api/") && !path.startsWith("/api/docs")) {
+    c.header("X-Robots-Tag", "noindex");
+  }
+  c.header(
+    "Link",
+    [
+      '</.well-known/api-catalog>; rel=api-catalog; type="application/linkset+json"',
+      '</api/docs/openapi.json>; rel=service-desc; type="application/openapi+json"',
+      '</api/docs>; rel=service-doc; type="text/html"',
+      '</llms.txt>; rel=describedby; type="text/plain"; title="LLM Instructions"',
+    ].join(", "),
+    { append: true },
+  );
+});
 
 app.use(
   "*",
@@ -94,6 +113,14 @@ function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, categor
   if (!props) {
     const tr = getTranslations(detectLocale(c.req.raw));
     return c.html(`<p>${tr.errInvalidRequest}</p>`, 400);
+  }
+  if (wantsMarkdown(c.req.raw)) {
+    return c.body(renderDayMarkdown(props.date, props.events), {
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Cache-Control": "public, max-age=600, s-maxage=1800",
+      },
+    });
   }
   return c.html(renderPage(props), 200, {
     "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
