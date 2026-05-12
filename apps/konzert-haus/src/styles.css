@@ -1458,3 +1458,158 @@ a:focus-visible {
   background: var(--felt);
   border-color: var(--felt);
 }
+
+/* ── Ask AI service strip ─────────────────────────────────────────
+   Shared <SharedAskAi/> from @museumsufer/core/ask-ai emits .askai /
+   .askai__label / .askai__row / .askai__svc — define them here so the
+   row reads as a brass-rimmed shelf, matching the rest of the page. */
+.askai {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 1.75rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--rule);
+  background: var(--walnut-deep);
+  border-radius: 4px;
+}
+@media (max-width: 480px) {
+  .askai { gap: 0.5rem; padding: 0.625rem 0.75rem; }
+}
+.askai__label {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--felt-soft);
+  flex-shrink: 0;
+}
+.askai__row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+.askai__svc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.askai__svc:hover { border-color: currentColor; background: var(--brass-soft); }
+.askai__svc:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+/* ── FAQ section ───────────────────────────────────────────────────
+   <Faq/> in frontend.tsx emits .faq / .faq__head / .faq__kicker /
+   .faq__rule / .faq__count / .faq__list / .faq__item / .faq__row /
+   .faq__num / .faq__q / .faq__toggle / .faq__a. Vocabulary mirrors
+   the theaters paradigm with konzert-haus tokens. */
+.faq {
+  margin-top: 3rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+}
+.faq__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.faq__kicker {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--felt-soft);
+  flex-shrink: 0;
+}
+.faq__rule {
+  height: 1px;
+  flex: 1;
+  background: var(--brass);
+  opacity: 0.5;
+}
+.faq__count {
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  color: var(--felt-soft);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.faq__list {
+  border-bottom: 1px solid var(--rule);
+}
+.faq__item {
+  border-top: 1px solid var(--rule);
+}
+.faq__item > summary { list-style: none; }
+.faq__item > summary::-webkit-details-marker { display: none; }
+.faq__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+.faq__num {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  color: var(--felt-soft);
+  font-variant-numeric: tabular-nums;
+  padding-top: 3px;
+  width: 1.75rem;
+  flex-shrink: 0;
+}
+.faq__q {
+  flex: 1;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--felt);
+  transition: color 0.15s ease;
+}
+.faq__item:hover .faq__q { color: var(--brass); }
+.faq__toggle {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin-top: 6px;
+  color: var(--felt-soft);
+  transition: color 0.15s ease;
+}
+.faq__item:hover .faq__toggle { color: var(--brass); }
+.faq__toggle::before,
+.faq__toggle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  height: 1.5px;
+  background: currentColor;
+  transform: translateY(-50%);
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.faq__toggle::after { transform: translateY(-50%) rotate(90deg); }
+.faq__item[open] > summary .faq__toggle::after {
+  transform: translateY(-50%) rotate(0);
+  opacity: 0;
+}
+.faq__a {
+  padding: 0 0 1.25rem 2.75rem;
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--felt-soft);
+  margin: 0;
+}

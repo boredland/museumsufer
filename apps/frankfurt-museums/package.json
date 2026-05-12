@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "css": "tailwindcss -i src/app.css -o public/styles.css --minify && bun scripts/inline-css.mjs",
-    "css:watch": "tailwindcss -i src/app.css -o public/styles.css --watch",
+    "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/app.css && bun scripts/inline-css.mjs",
+    "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/app.css && bun scripts/inline-css.mjs",
     "dev": "bun css && wrangler dev",
     "build": "bun css",
     "deploy": "bun css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
@@ -29,8 +29,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260509.1",
     "@museumsufer/tsconfig": "*",
-    "@tailwindcss/cli": "^4.3.0",
-    "tailwindcss": "^4.3.0",
+    "lightningcss-cli": "^1.32.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.90.0"
   }

@@ -2,16 +2,6 @@ import { buildUtm } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
-import {
-  cardClass,
-  cardListClass,
-  descriptionClass,
-  emptyStateClass,
-  iconBtnClass,
-  iconBtnGhost,
-  quietCountClass,
-  titleLinkClass,
-} from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 function Icon({ id, class: cls }: { id: string; class: string }) {
@@ -36,11 +26,8 @@ function searchHaystack(...parts: (string | null | undefined)[]): string {
 const utm = buildUtm("museumsufer.app");
 
 function ImagePlaceholder({ hero }: { hero?: boolean }) {
-  const cls = hero
-    ? "w-[112px] h-[112px] max-[480px]:w-20 max-[480px]:h-20 rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border"
-    : "w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] rounded-lg shrink-0 bg-border-light flex items-center justify-center text-border";
   return (
-    <div class={cls} aria-hidden="true">
+    <div class={`thumb thumb-placeholder${hero ? " thumb--hero" : ""}`} aria-hidden="true">
       <svg aria-hidden="true" width={hero ? 32 : 24} height={hero ? 32 : 24} viewBox="0 0 24 24" fill="none">
         <path
           d="M4 16l4-4 4 4m2-2l2-2 4 4M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
@@ -52,9 +39,6 @@ function ImagePlaceholder({ hero }: { hero?: boolean }) {
     </div>
   );
 }
-
-const imgWrapClass =
-  "w-[72px] h-[54px] max-[480px]:w-14 max-[480px]:h-[42px] rounded-lg shrink-0 bg-border-light overflow-hidden";
 
 function CardImage({
   src,
@@ -73,15 +57,13 @@ function CardImage({
   hero?: boolean;
   priority?: boolean;
 }) {
-  const wrapClass = hero
-    ? "w-[112px] h-[112px] max-[480px]:w-20 max-[480px]:h-20 rounded-lg shrink-0 bg-border-light overflow-hidden"
-    : imgWrapClass;
+  const wrapClass = `thumb${hero ? " thumb--hero" : ""}`;
   const w = hero ? 112 : 72;
   const h = hero ? 112 : 54;
   const inner = src ? (
     <div class={wrapClass}>
       <img
-        class="w-full h-full object-cover"
+        class="thumb__img"
         src={`${src}?w=${w * 2}`}
         srcset={`${src}?w=${w} ${w}w, ${src}?w=${w * 2} ${w * 2}w`}
         sizes={hero ? "(max-width: 480px) 80px, 112px" : "(max-width: 480px) 56px, 72px"}
@@ -98,7 +80,7 @@ function CardImage({
 
   if (detailUrl) {
     return (
-      <a href={utm(detailUrl, utmContent)} target="_blank" rel="noopener" tabindex={-1} class="shrink-0">
+      <a href={utm(detailUrl, utmContent)} target="_blank" rel="noopener" tabindex={-1} class="thumb-link">
         {inner}
       </a>
     );
@@ -109,8 +91,8 @@ function CardImage({
 function TranslatedBadge({ translated }: { translated?: boolean }) {
   if (!translated) return null;
   return (
-    <span class="text-[0.5625rem] text-text-tertiary inline-flex items-center gap-0.5" title="Translated by DeepL">
-      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" class="w-2.5 h-2.5">
+    <span class="translated-badge" title="Translated by DeepL">
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" class="translated-badge__icon">
         <path
           d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"
           fill="currentColor"
@@ -124,8 +106,8 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
 function LikeBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span class={`card-likes ${quietCountClass}`} title={`${count} likes`}>
-      <Icon id="i-heart" class="w-3 h-3 shrink-0 fill-current" />
+    <span class="like-badge quiet-count" title={`${count} likes`}>
+      <Icon id="i-heart" class="like-badge__icon" />
       {count}
     </span>
   );
@@ -141,9 +123,6 @@ function navUrls(name: string, lat: number, lng: number) {
   };
 }
 
-const navLinkClass =
-  "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
-
 const positionPopover = `var p=document.getElementById(this.getAttribute('popovertarget'));var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.right-180,innerWidth-188))+'px'`;
 
 /** Navigation button for museums — opens popover menu with RMV, Google Maps, and Apple Maps links */
@@ -153,32 +132,27 @@ export function NavButton({ slug, name, tr }: { slug: string | undefined; name: 
   const urls = navUrls(name, m.lat, m.lng);
   const popId = `nav-${slug}`;
   return (
-    <span class="relative inline-block">
+    <span class="popover-wrap">
       <button
         type="button"
-        class={iconBtnClass}
+        class="icon-btn"
         aria-label={tr.navigate}
         title={tr.navigate}
         aria-haspopup="menu"
         popovertarget={popId}
         onclick={positionPopover}
       >
-        <Icon id="i-navigate" class="w-3 h-3 shrink-0 fill-current" />
+        <Icon id="i-navigate" class="icon-btn__icon" />
       </button>
-      <div
-        id={popId}
-        popover="auto"
-        role="menu"
-        class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
-      >
+      <div id={popId} popover="auto" role="menu" class="nav-popover">
         <a
           href={urls.rmvApp}
           target="_blank"
           rel="noopener"
           role="menuitem"
-          class={`${navLinkClass} hidden max-[1024px]:flex`}
+          class="nav-popover__link nav-popover__link--rmv-app"
         >
-          <Icon id="i-rmv" class="w-3.5 h-3.5 shrink-0 fill-current" />
+          <Icon id="i-rmv" class="nav-popover__icon" />
           RMV
         </a>
         <a
@@ -186,17 +160,17 @@ export function NavButton({ slug, name, tr }: { slug: string | undefined; name: 
           target="_blank"
           rel="noopener"
           role="menuitem"
-          class={`${navLinkClass} max-[1024px]:hidden`}
+          class="nav-popover__link nav-popover__link--rmv-web"
         >
-          <Icon id="i-rmv" class="w-3.5 h-3.5 shrink-0 fill-current" />
+          <Icon id="i-rmv" class="nav-popover__icon" />
           RMV
         </a>
-        <a href={urls.google} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
-          <Icon id="i-gmaps" class="w-3.5 h-3.5 shrink-0" />
+        <a href={urls.google} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          <Icon id="i-gmaps" class="nav-popover__icon" />
           Google Maps
         </a>
-        <a href={urls.apple} target="_blank" rel="noopener" role="menuitem" class={navLinkClass}>
-          <Icon id="i-apple" class="w-3.5 h-3.5 shrink-0" />
+        <a href={urls.apple} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          <Icon id="i-apple" class="nav-popover__icon" />
           Apple Maps
         </a>
       </div>
@@ -205,7 +179,7 @@ export function NavButton({ slug, name, tr }: { slug: string | undefined; name: 
 }
 
 function ExternalLinkIcon() {
-  return <Icon id="i-open" class="w-[11px] h-[11px] align-[-1px] fill-current" />;
+  return <Icon id="i-open" class="icon-open" />;
 }
 
 /** Report button for submitting feedback about events, exhibitions, or museums */
@@ -231,9 +205,9 @@ export function ReportButton({
       data-report-url={url || ""}
       aria-label={tr.reportLabel}
       title={tr.reportLabel}
-      class={iconBtnGhost}
+      class="icon-btn-ghost"
     >
-      <Icon id="i-report" class="w-3 h-3 shrink-0 fill-current" />
+      <Icon id="i-report" class="icon-btn-ghost__icon" />
     </button>
   );
 }
@@ -264,69 +238,32 @@ export function ShareButton({
       data-share-date={date || ""}
       aria-label={tr.shareLabel}
       title={tr.shareLabel}
-      class={iconBtnGhost}
+      class="icon-btn-ghost"
     >
-      <Icon id="i-share" class="w-3 h-3 shrink-0 fill-current" />
+      <Icon id="i-share" class="icon-btn-ghost__icon" />
     </button>
   );
 }
 
-const CATEGORY_STYLES: Record<string, { icon: string; color: string; bg: string; trKey: string }> = {
-  Film: {
-    icon: "i-film",
-    color: "text-blue-700 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    trKey: "categoryFilm",
-  },
-  Führung: {
-    icon: "i-navigate",
-    color: "text-green-700 dark:text-green-400",
-    bg: "bg-green-50 dark:bg-green-900/20",
-    trKey: "categoryFuehrung",
-  },
-  Workshop: {
-    icon: "i-edit",
-    color: "text-orange-700 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-900/20",
-    trKey: "categoryWorkshop",
-  },
-  Vortrag: {
-    icon: "i-chat",
-    color: "text-purple-700 dark:text-purple-400",
-    bg: "bg-purple-50 dark:bg-purple-900/20",
-    trKey: "categoryVortrag",
-  },
-  Familie: {
-    icon: "i-user",
-    color: "text-pink-700 dark:text-pink-400",
-    bg: "bg-pink-50 dark:bg-pink-900/20",
-    trKey: "categoryFamilie",
-  },
-  Vernissage: {
-    icon: "i-star",
-    color: "text-yellow-700 dark:text-yellow-400",
-    bg: "bg-yellow-50 dark:bg-yellow-900/20",
-    trKey: "categoryVernissage",
-  },
-  Konzert: {
-    icon: "i-music",
-    color: "text-red-700 dark:text-red-400",
-    bg: "bg-red-50 dark:bg-red-900/20",
-    trKey: "categoryKonzert",
-  },
+const CATEGORY_STYLES: Record<string, { icon: string; mod: string; trKey: string }> = {
+  Film: { icon: "i-film", mod: "film", trKey: "categoryFilm" },
+  Führung: { icon: "i-navigate", mod: "guide", trKey: "categoryFuehrung" },
+  Workshop: { icon: "i-edit", mod: "workshop", trKey: "categoryWorkshop" },
+  Vortrag: { icon: "i-chat", mod: "talk", trKey: "categoryVortrag" },
+  Familie: { icon: "i-user", mod: "family", trKey: "categoryFamilie" },
+  Vernissage: { icon: "i-star", mod: "vernissage", trKey: "categoryVernissage" },
+  Konzert: { icon: "i-music", mod: "concert", trKey: "categoryKonzert" },
 };
 
 function EventTag({ category, tr }: { category: string | null; tr: Record<string, string> }) {
   if (!category) return null;
   const config = CATEGORY_STYLES[category];
   const label = config ? tr[config.trKey] || category : category;
-  const style = config || { icon: "i-tag", color: "text-text-tertiary", bg: "bg-border-light/50" };
-
+  const cls = config ? `event-tag event-tag--${config.mod}` : "event-tag";
+  const icon = config?.icon ?? "i-tag";
   return (
-    <span
-      class={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[0.625rem] font-medium uppercase tracking-wider ${style.bg} ${style.color}`}
-    >
-      <Icon id={style.icon} class="w-2.5 h-2.5 fill-current" />
+    <span class={cls}>
+      <Icon id={icon} class="event-tag__icon" />
       {label}
     </span>
   );
@@ -350,14 +287,8 @@ function EndingBadge({
   const label = daysLeft <= 3 ? tr.lastDays : tr.endingSoon;
   const urgent = daysLeft <= 3;
   return (
-    <span
-      class={`ending-badge inline-flex items-center gap-1.5 font-mono text-[0.625rem] uppercase tracking-[0.14em] ${urgent ? "text-red-700 dark:text-red-500" : "text-text-tertiary"}`}
-      title={`${daysLeft} ${daysUnit}`}
-    >
-      <span
-        aria-hidden="true"
-        class={`inline-block w-1.5 h-1.5 rounded-full ${urgent ? "bg-red-700 dark:bg-red-500" : "bg-text-tertiary"}`}
-      />
+    <span class={`ending-badge${urgent ? " ending-badge--urgent" : ""}`} title={`${daysLeft} ${daysUnit}`}>
+      <span aria-hidden="true" class="ending-badge__dot" />
       {label}
     </span>
   );
@@ -384,7 +315,7 @@ function ExhibitionCard({
     .filter(Boolean)
     .join(" – ");
   const titleContent = ex.detail_url ? (
-    <a href={utm(ex.detail_url, "exhibition_title")} target="_blank" rel="noopener" class={titleLinkClass}>
+    <a href={utm(ex.detail_url, "exhibition_title")} target="_blank" rel="noopener" class="title-link">
       {ex.title}
     </a>
   ) : (
@@ -395,14 +326,12 @@ function ExhibitionCard({
   return (
     <li data-search={searchHaystack(ex.title, ex.museum_name, ex.description)}>
       <article
-        class={`${cardClass}${hero ? " is-hero" : ""}`}
+        class={`card${hero ? " is-hero" : ""}`}
         data-item-id={ex.id}
         data-share-key={`exhibition-${ex.id}`}
         data-museum-slug={ex.museum_slug}
       >
-        <div
-          class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
-        >
+        <div class={`card-thumb-col${hero ? " card-thumb-col--hero" : ""}`}>
           <CardImage
             src={ex.image_url ?? null}
             alt={ex.title}
@@ -412,42 +341,35 @@ function ExhibitionCard({
             hero={hero}
             priority={idx === 0}
           />
-          {dates && (
-            <span class="text-[0.5625rem] font-mono font-medium text-text-tertiary px-1 py-0.5 text-center leading-tight tracking-tight">
-              {dates}
-            </span>
-          )}
+          {dates && <span class="card-date-pill">{dates}</span>}
         </div>
-        <div class="card-body min-w-0 flex flex-col">
-          <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
+        <div class="card-body">
+          <p class={hero ? "card-title card-title-line--hero" : "card-title-line card-title-line--sm"}>
             {titleContent} <TranslatedBadge translated={ex.translated} />
           </p>
-          <p class="text-xs text-text-secondary">
+          <p class="card-venue">
             {ex.museum_slug ? (
-              <a
-                href={`/museum/${ex.museum_slug}`}
-                class="no-underline hover:text-river inline-flex items-center min-h-6"
-              >
+              <a href={`/museum/${ex.museum_slug}`} class="museum-link">
                 {ex.museum_name || ""}
               </a>
             ) : (
               ex.museum_name || ""
             )}
           </p>
-          <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
+          <div class="card-badges">
             <EndingBadge endDate={ex.end_date ?? null} todayIso={todayIso} tr={tr} />
             <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
-              class={`card-visited-btn ${iconBtnGhost}`}
+              class="card-visited-btn icon-btn-ghost"
               aria-pressed="false"
               aria-label={tr.markVisited}
               title={tr.markVisited}
               data-item-type="exhibition"
               onclick={`onToggleVisited(${ex.id},this.dataset.itemType)`}
             >
-              <Icon id="i-visibility" class="w-3 h-3 shrink-0 fill-current" />
+              <Icon id="i-visibility" class="icon-btn-ghost__icon" />
             </button>
             <ReportButton
               type="exhibition"
@@ -466,12 +388,12 @@ function ExhibitionCard({
             />
           </div>
           {ex.description && (
-            <details class="mt-1" open={hero}>
-              <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
+            <details class="card-disclosure" open={hero}>
+              <summary class="card-disclosure__summary">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class={descriptionClass}>{ex.description}</div>
+              <div class="card-description">{ex.description}</div>
             </details>
           )}
         </div>
@@ -479,9 +401,6 @@ function ExhibitionCard({
     </li>
   );
 }
-
-const calLinkClass =
-  "flex items-center gap-2 px-3 py-1.5 text-[0.6875rem] text-text-secondary no-underline hover:bg-border-light rounded transition-colors";
 
 function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, string> }) {
   // CalendarEvent (in @museumsufer/core) uses `string | null` semantics.
@@ -503,39 +422,34 @@ function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, s
 
   const popId = `cal-${ev.id}`;
   return (
-    <span class="relative inline-block">
+    <span class="popover-wrap">
       <button
         type="button"
-        class={iconBtnClass}
+        class="icon-btn"
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         aria-haspopup="menu"
         popovertarget={popId}
         onclick={positionPopover}
       >
-        <Icon id="i-event" class="w-3 h-3 shrink-0 fill-current" />
+        <Icon id="i-event" class="icon-btn__icon" />
       </button>
-      <div
-        id={popId}
-        popover="auto"
-        role="menu"
-        class="fixed m-0 p-0 bg-surface rounded-lg shadow-search border border-border py-1 min-w-[180px]"
-      >
-        <a href={googleUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <Icon id="i-cal-google" class="w-3.5 h-3.5 shrink-0" />
+      <div id={popId} popover="auto" role="menu" class="nav-popover">
+        <a href={googleUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          <Icon id="i-cal-google" class="nav-popover__icon" />
           Google
         </a>
-        <a href={outlookUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <Icon id="i-cal-outlook" class="w-3.5 h-3.5 shrink-0" />
+        <a href={outlookUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          <Icon id="i-cal-outlook" class="nav-popover__icon" />
           Outlook
         </a>
-        <a href={yahooUrl} target="_blank" rel="noopener" role="menuitem" class={calLinkClass}>
-          <Icon id="i-cal-yahoo" class="w-3.5 h-3.5 shrink-0" />
+        <a href={yahooUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          <Icon id="i-cal-yahoo" class="nav-popover__icon" />
           Yahoo
         </a>
-        <hr class="my-1 border-border-light" />
-        <a href={icsUrl} download="event.ics" role="menuitem" class={calLinkClass}>
-          <Icon id="i-cal-ics" class="w-3.5 h-3.5 shrink-0" />
+        <hr class="nav-popover__divider" />
+        <a href={icsUrl} download="event.ics" role="menuitem" class="nav-popover__link">
+          <Icon id="i-cal-ics" class="nav-popover__icon" />
           .ics (Apple, Proton, ...)
         </a>
       </div>
@@ -558,7 +472,7 @@ function EventCard({
   const linkUrl = ev.detail_url || ev.url || null;
   const hero = heroProp !== undefined ? heroProp : idx === 0;
   const titleContent = linkUrl ? (
-    <a href={utm(linkUrl, "event_title")} target="_blank" rel="noopener" class={titleLinkClass}>
+    <a href={utm(linkUrl, "event_title")} target="_blank" rel="noopener" class="title-link">
       {ev.title}
     </a>
   ) : (
@@ -567,16 +481,14 @@ function EventCard({
   return (
     <li data-search={searchHaystack(ev.title, ev.museum_name, ev.description)}>
       <article
-        class={`${cardClass}${hero ? " is-hero" : ""}`}
+        class={`card${hero ? " is-hero" : ""}`}
         data-item-id={ev.id}
         data-share-key={`event-${ev.id}`}
         data-museum-slug={ev.museum_slug}
         data-event-time={ev.time || undefined}
         data-event-date={ev.date}
       >
-        <div
-          class={`shrink-0 ${hero ? "w-[112px] max-[480px]:w-20" : "w-[72px] max-[480px]:w-14"} flex flex-col items-center gap-1.5`}
-        >
+        <div class={`card-thumb-col${hero ? " card-thumb-col--hero" : ""}`}>
           <CardImage
             src={ev.image_url ?? null}
             alt={ev.title}
@@ -586,36 +498,27 @@ function EventCard({
             hero={hero}
             priority={idx === 0}
           />
-          {timeStr && (
-            <span class="card-time text-[0.625rem] font-mono font-medium text-river bg-river-light px-1 py-0.5 rounded text-center leading-tight tabular-nums tracking-tight">
-              {timeStr}
-            </span>
-          )}
+          {timeStr && <span class="card-time">{timeStr}</span>}
         </div>
-        <div class="card-body min-w-0 flex flex-col">
-          <p class={hero ? "card-title mb-1.5" : "text-sm font-medium leading-tight mb-0.5"}>
+        <div class="card-body">
+          <p class={hero ? "card-title card-title-line--hero" : "card-title-line card-title-line--sm"}>
             {titleContent} <TranslatedBadge translated={ev.translated} />
           </p>
-          <p class="text-xs text-text-secondary">
+          <p class="card-venue">
             {ev.museum_slug ? (
-              <a
-                href={`/museum/${ev.museum_slug}`}
-                class="no-underline hover:text-river inline-flex items-center min-h-6"
-              >
+              <a href={`/museum/${ev.museum_slug}`} class="museum-link">
                 {ev.museum_name || ""}
               </a>
             ) : (
               ev.museum_name || ""
             )}
           </p>
-          <div class="flex items-center gap-1.5 mt-1 flex-wrap max-[480px]:gap-1">
+          <div class="card-badges">
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
             <LikeBadge count={ev.like_count} />
             <EventTag category={ev.category ?? null} tr={tr} />
-            {ev.price && (
-              <span class="text-[0.625rem] font-mono font-medium text-text-secondary tracking-tight">{ev.price}</span>
-            )}
+            {ev.price && <span class="card-price">{ev.price}</span>}
             <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
             <ShareButton
               type="event"
@@ -627,12 +530,12 @@ function EventCard({
             />
           </div>
           {ev.description && (
-            <details class="mt-1" open={hero}>
-              <summary class="card-disclosure text-[0.75rem] text-text-tertiary cursor-pointer hover:text-river inline-flex items-center">
+            <details class="card-disclosure" open={hero}>
+              <summary class="card-disclosure__summary">
                 <span aria-hidden="true" class="disclosure-icon" />
                 {tr.details}
               </summary>
-              <div class={descriptionClass}>{ev.description}</div>
+              <div class="card-description">{ev.description}</div>
             </details>
           )}
         </div>
@@ -659,20 +562,16 @@ function Section({
   defaultOpen?: boolean;
 }) {
   return (
-    <details class="section mb-12" data-section={sectionKey} open={defaultOpen}>
-      <summary class="section-header mb-5 cursor-pointer select-none group">
-        <div class="flex items-baseline gap-3">
-          <h2 class="section-display flex-1 group-hover:text-river transition-colors">{title}</h2>
-          <span
-            class="section-count font-mono text-[0.6875rem] font-medium text-text-tertiary tabular-nums shrink-0"
-            title={`${count} ${title}`}
-            data-total={count}
-          >
+    <details class="section" data-section={sectionKey} open={defaultOpen}>
+      <summary class="section__summary">
+        <div class="section__title-row">
+          <h2 class="section-display section__title">{title}</h2>
+          <span class="section-count section__count" title={`${count} ${title}`} data-total={count}>
             {String(count).padStart(2, "0")}
           </span>
           <svg
             aria-hidden="true"
-            class="section-chevron text-text-tertiary transition-transform shrink-0 [[open]>summary_&]:rotate-180"
+            class="section-chevron section__chevron"
             viewBox="0 0 16 16"
             fill="none"
             width="14"
@@ -687,9 +586,7 @@ function Section({
             />
           </svg>
         </div>
-        {description && (
-          <p class="mt-1 text-[0.75rem] text-text-tertiary leading-snug font-display italic">{description}</p>
-        )}
+        {description && <p class="section__description">{description}</p>}
       </summary>
       {children}
     </details>
@@ -699,15 +596,11 @@ function Section({
 function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
   return (
     <li class="museum-cell" data-search={searchHaystack(museum.name, slug)}>
-      <div
-        class="group relative flex flex-col h-full bg-surface rounded-lg border border-border-light overflow-hidden transition-colors hover:border-river"
-        data-museum-slug={slug}
-        data-share-key={`museum-${slug}`}
-      >
-        <div class="aspect-[4/3] bg-border-light overflow-hidden">
+      <div class="museum-tile" data-museum-slug={slug} data-share-key={`museum-${slug}`}>
+        <div class="museum-tile__media">
           {museum.image_url ? (
             <img
-              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              class="museum-tile__media-img"
               src={`/img/${encodeURIComponent(museum.image_url)}?w=320`}
               srcset={`/img/${encodeURIComponent(museum.image_url)}?w=200 200w, /img/${encodeURIComponent(museum.image_url)}?w=320 320w`}
               sizes="(max-width: 480px) 45vw, (max-width: 720px) 30vw, 220px"
@@ -717,7 +610,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
               loading="lazy"
             />
           ) : (
-            <div class="w-full h-full flex items-center justify-center text-border">
+            <div class="museum-tile__media-placeholder">
               <svg aria-hidden="true" width="32" height="32" viewBox="0 0 24 24" fill="none">
                 <path
                   d="M12 2L2 6v2h20V6L12 2zM4 11v6h2v-6H4zm4 0v6h2v-6H8zm4 0v6h2v-6h-2zm4 0v6h2v-6h-2zM2 19v2h20v-2H2z"
@@ -727,32 +620,22 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
             </div>
           )}
         </div>
-        <div class="flex-1 flex flex-col gap-2 p-3">
-          <p class="font-display italic text-[0.9375rem] leading-tight line-clamp-2 max-[480px]:text-[0.8125rem]">
-            <a
-              href={`/museum/${slug}`}
-              class="text-inherit no-underline inline-flex items-center min-h-6 hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
-            >
+        <div class="museum-tile__body">
+          <p class="museum-tile__title">
+            <a href={`/museum/${slug}`} class="museum-tile__title-link">
               {museum.name}
             </a>
           </p>
-          {MUSEUMS[slug]?.abbreviation && (
-            <p class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary -mt-1">
-              {MUSEUMS[slug]?.abbreviation}
-            </p>
-          )}
+          {MUSEUMS[slug]?.abbreviation && <p class="museum-tile__abbrev">{MUSEUMS[slug]?.abbreviation}</p>}
           {museum.museumsufer === false && (
-            <span
-              class="font-mono text-[0.625rem] uppercase tracking-[0.12em] text-text-tertiary opacity-70 -mt-1"
-              title={tr.notMuseumsufer}
-            >
+            <span class="museum-tile__excl" title={tr.notMuseumsufer}>
               Card excl.
             </span>
           )}
-          <div class="flex items-center gap-1 mt-auto">
+          <div class="museum-tile__actions">
             {museum.website && (
               <a
-                class="inline-flex items-center justify-center w-7 h-7 text-text-tertiary border border-border rounded transition-colors no-underline hover:border-river hover:text-river"
+                class="museum-tile__website"
                 href={utm(museum.website, "museum_link")}
                 target="_blank"
                 rel="noopener"
@@ -775,24 +658,22 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
 /**
  * Quiet editorial cross-link to the two sibling Frankfurt apps. Sits
  * after the events + exhibitions block — a soft suggestion for visitors
- * who didn't find anything in today's museum line-up. Renders the
- * `siblingTemplate` translation with `{first}` / `{second}` replaced by
- * the two anchor links.
+ * who didn't find anything in today's museum line-up.
  */
 function SiblingStrap({ tr }: { tr: Record<string, string> }) {
   const template = tr.siblingTemplate;
   const [before, midRaw] = template.split("{first}");
   const [mid, after] = (midRaw ?? "").split("{second}");
   return (
-    <section class="my-12 max-w-prose mx-auto text-center">
-      <hr class="mx-auto w-12 border-t border-border opacity-50 mb-6" />
-      <p class="font-display italic text-text-secondary text-base leading-relaxed">
+    <section class="sibling-strap">
+      <hr class="sibling-strap__rule" />
+      <p class="sibling-strap__text">
         {before}
-        <a href="https://frankfurt.ins.theater" class="text-river hover:underline">
+        <a href="https://frankfurt.ins.theater" class="sibling-strap__link">
           {tr.siblingTheaterLabel}
         </a>
         {mid}
-        <a href="https://frankfurt.konzert.haus" class="text-river hover:underline">
+        <a href="https://frankfurt.konzert.haus" class="sibling-strap__link">
           {tr.siblingKonzertLabel}
         </a>
         {after}
@@ -834,11 +715,11 @@ export function ContentBody({
         iconPath="M6 2v2M14 2v2M3 8h14M5 4h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
       >
         {sortedEvents.length === 0 ? (
-          <div class={emptyStateClass}>{tr.noEvents}</div>
+          <div class="empty-state">{tr.noEvents}</div>
         ) : groupByDate ? (
           <GroupedEventList events={sortedEvents} locale={locale} tr={tr} />
         ) : (
-          <ul class={cardListClass}>
+          <ul class="card-list">
             {sortedEvents.map((ev, i) => (
               <EventCard ev={ev} idx={i} tr={tr} />
             ))}
@@ -854,20 +735,20 @@ export function ContentBody({
         iconPath="M4 16V4h12v12H4zM7 4v12M13 4v12M4 10h12"
       >
         {sortedExhibitions.length === 0 ? (
-          <div class={emptyStateClass}>{tr.noExhibitions}</div>
+          <div class="empty-state">{tr.noExhibitions}</div>
         ) : (
-          <ul class={cardListClass}>
+          <ul class="card-list">
             <ExhibitionList exhibitions={sortedExhibitions} todayIso={todayIso} locale={locale} tr={tr} />
             <li>
-              <details class="visited-section mt-4 py-2.5 px-4" id="visited-section" hidden>
-                <summary class="font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary cursor-pointer flex items-center gap-2 hover:text-river">
+              <details class="visited-section" id="visited-section" hidden>
+                <summary class="visited-section__summary">
                   <span aria-hidden="true" class="disclosure-icon" />
                   {tr.alreadyVisited}
-                  <span id="visited-count" class="font-mono text-[0.625rem] tabular-nums opacity-70">
+                  <span id="visited-count" class="visited-section__count">
                     0
                   </span>
                 </summary>
-                <ul class={`${cardListClass} mt-3`} id="visited-list" />
+                <ul class="card-list visited-section__list" id="visited-list" />
               </details>
             </li>
           </ul>
@@ -890,7 +771,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
       iconPath="M10 2L2 6v1.5h16V6L10 2zM4 9.5v5h1.5v-5H4zm3.5 0v5H9v-5H7.5zm3.5 0v5h1.5v-5H11zm3.5 0v5H16v-5h-1.5zM2 16v1.5h16V16H2z"
       defaultOpen={false}
     >
-      <ul class="museum-grid grid grid-cols-2 sm:grid-cols-3 gap-3 list-none p-0">
+      <ul class="museum-grid">
         {Object.entries(museums)
           .sort(([, a], [, b]) => a.name.localeCompare(b.name))
           .map(([slug, m]) => (
@@ -938,22 +819,20 @@ function GroupedEventList({
   const dates = Object.keys(groups).sort();
   let cardIdx = 0;
   return (
-    <div class="flex flex-col gap-8 lg:gap-10">
+    <div class="event-groups">
       {dates.map((date) => {
         const dayDate = new Date(`${date}T00:00:00`);
         const weekday = dayDate.toLocaleDateString(dl, { weekday: "long" });
         const dayMonth = dayDate.toLocaleDateString(dl, { day: "numeric", month: "long" });
         return (
-          <section class="lg:grid lg:grid-cols-[6.5rem_1fr] lg:gap-6 lg:items-start">
-            <header class="day-spine flex items-baseline gap-3 mb-3 px-1 lg:flex-col lg:items-end lg:gap-1 lg:mb-0 lg:px-0 lg:text-right lg:sticky lg:top-4 lg:self-start">
-              <span class="font-display italic text-2xl text-river leading-none tabular-nums lg:text-[2.75rem] lg:tracking-tight">
-                {dayDate.getDate()}
-              </span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">{weekday}</span>
-              <span class="font-mono text-[0.6875rem] text-text-tertiary opacity-60 lg:hidden">·</span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary">{dayMonth}</span>
+          <section class="event-group">
+            <header class="event-group__spine day-spine">
+              <span class="event-group__day">{dayDate.getDate()}</span>
+              <span class="event-group__weekday">{weekday}</span>
+              <span class="event-group__sep">·</span>
+              <span class="event-group__month">{dayMonth}</span>
             </header>
-            <ul class={cardListClass}>
+            <ul class="card-list">
               {groups[date].map((ev, i) => {
                 const globalIdx = cardIdx++;
                 return <EventCard ev={ev} idx={globalIdx} hero={i === 0} tr={tr} />;

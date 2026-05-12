@@ -18,7 +18,6 @@ import { getAllMuseums } from "./queries";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { INLINE_CSS } from "./styles-inline";
-import { kbdClass, passLinkClass } from "./tw";
 import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
 
 /** Theme initialization script to prevent flash of unstyled content */
@@ -164,26 +163,22 @@ function Mark({ class: cls }: { class?: string }) {
 /** Masthead with logo, location, theme toggle, and language switcher */
 export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
-    <header class="mb-12 max-[480px]:mb-9">
-      <div class="flex items-center justify-between gap-4 mb-4">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <Mark class="text-river w-7 h-[1.45rem] shrink-0" />
-          <p class="section-eyebrow truncate">Frankfurt am Main · 50.10°N 8.68°E</p>
+    <header class="masthead">
+      <div class="masthead__head">
+        <div class="masthead__brand">
+          <Mark class="masthead__mark" />
+          <p class="section-eyebrow masthead__location">Frankfurt am Main · 50.10°N 8.68°E</p>
         </div>
-        <div class="flex items-center gap-4 shrink-0">
+        <div class="masthead__actions">
           <ThemeToggle tr={tr} />
           <LangSwitch locale={locale} tr={tr} />
         </div>
       </div>
-      <h1 class="font-display italic font-normal leading-[0.95] tracking-[-0.02em] text-text-primary text-[clamp(2.3rem,8vw,3.5rem)]">
-        Museumsufer
-      </h1>
-      <div class="flex items-center gap-3 mt-4">
-        <div class="river-band flex-1" aria-hidden="true" />
-        <span class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary shrink-0">
-          {tr.subtitle}
-        </span>
-        <div class="river-band flex-1" aria-hidden="true" />
+      <h1 class="masthead__title">Museumsufer</h1>
+      <div class="masthead__band-row">
+        <div class="river-band" aria-hidden="true" />
+        <span class="masthead__band-label">{tr.subtitle}</span>
+        <div class="river-band" aria-hidden="true" />
       </div>
     </header>
   );
@@ -191,30 +186,24 @@ export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, st
 
 function ThemeToggle({ tr }: { tr: Record<string, string> }) {
   return (
-    <button
-      type="button"
-      id="theme-toggle"
-      class="inline-flex items-center justify-center text-text-tertiary hover:text-river transition-colors cursor-pointer p-1 -m-1"
-      title={tr.switchTheme}
-      aria-label={tr.switchTheme}
-    >
+    <button type="button" id="theme-toggle" class="theme-toggle" title={tr.switchTheme} aria-label={tr.switchTheme}>
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         stroke-width="2"
-        class="w-3.5 h-3.5"
+        class="theme-toggle__icon"
         aria-hidden="true"
       >
         <path
-          class="dark:hidden"
+          class="theme-toggle__moon"
           d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
           fill="currentColor"
           stroke="none"
         />
-        <circle class="hidden dark:block" cx="12" cy="12" r="5" fill="currentColor" stroke="none" />
+        <circle class="theme-toggle__sun" cx="12" cy="12" r="5" fill="currentColor" stroke="none" />
         <path
-          class="hidden dark:block"
+          class="theme-toggle__sun"
           d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
           stroke="currentColor"
         />
@@ -225,12 +214,12 @@ function ThemeToggle({ tr }: { tr: Record<string, string> }) {
 
 function LangSwitch({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
   return (
-    <nav class="flex gap-3 font-mono text-[0.6875rem] uppercase tracking-[0.14em]" aria-label={tr.langSwitchAria}>
+    <nav class="langswitch" aria-label={tr.langSwitchAria}>
       {SUPPORTED_LOCALES.map((l) => (
         <a
           href={`?lang=${l}`}
           data-lang={l}
-          class={`no-underline transition-colors focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 ${l === locale ? "text-text-primary" : "text-text-tertiary hover:text-river"}`}
+          class={`langswitch__link${l === locale ? " langswitch__link--active" : ""}`}
           aria-current={l === locale ? "page" : undefined}
         >
           {l.toUpperCase()}
@@ -242,15 +231,8 @@ function LangSwitch({ locale, tr }: { locale: Locale; tr: Record<string, string>
 
 function SearchBar({ tr }: { tr: Record<string, string> }) {
   return (
-    <div class="search-bar mb-6">
-      <svg
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        width="14"
-        height="14"
-        aria-hidden="true"
-        class="text-text-tertiary shrink-0"
-      >
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true" class="search-bar__icon">
         <path d={ICON.search} />
       </svg>
       <input
@@ -260,17 +242,12 @@ function SearchBar({ tr }: { tr: Record<string, string> }) {
         placeholder={tr.searchPlaceholder}
         aria-label={tr.search}
       />
-      <button
-        type="button"
-        id="search-clear"
-        class="text-text-tertiary hover:text-river hidden cursor-pointer transition-colors"
-        aria-label={tr.clearSearch}
-      >
+      <button type="button" id="search-clear" class="search-clear" aria-label={tr.clearSearch}>
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
           <path d={ICON.close} />
         </svg>
       </button>
-      <kbd class={`${kbdClass} max-[1024px]:hidden`}>⌘K</kbd>
+      <kbd class="kbd kbd--desktop">⌘K</kbd>
     </div>
   );
 }
@@ -279,25 +256,18 @@ function PassPromo({ locale, tr }: { locale: Locale; tr: Record<string, string> 
   const urls = PASS_URLS[locale];
   const utm = "?utm_source=museumsufer.app&utm_medium=referral&utm_campaign=pass_promo&utm_content=";
   return (
-    <aside class="my-12 px-2 py-8 border-y border-border-light text-center">
-      <p class="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-text-tertiary mb-3">Card · Ticket</p>
-      <p class="font-display italic text-[1.5rem] leading-tight text-text-primary mb-1 max-w-[28ch] mx-auto">
-        {tr.passPromo}
-      </p>
-      <div class="flex justify-center gap-3 mt-5 flex-wrap">
-        <a
-          href={`https://www.museumsufer.de/${urls.card}${utm}card`}
-          target="_blank"
-          rel="noopener"
-          class={passLinkClass}
-        >
+    <aside class="pass-promo">
+      <p class="pass-promo__kicker">Card · Ticket</p>
+      <p class="pass-promo__line">{tr.passPromo}</p>
+      <div class="pass-promo__actions">
+        <a href={`https://www.museumsufer.de/${urls.card}${utm}card`} target="_blank" rel="noopener" class="pass-link">
           {tr.passCard}
         </a>
         <a
           href={`https://www.museumsufer.de/${urls.ticket}${utm}ticket`}
           target="_blank"
           rel="noopener"
-          class={passLinkClass}
+          class="pass-link"
         >
           {tr.passTicket}
         </a>
@@ -349,7 +319,7 @@ function RiverNav({
   });
 
   return (
-    <nav class="mb-7" aria-label={tr.dateNav}>
+    <nav class="rivernav" aria-label={tr.dateNav}>
       <div id="river-strip" class="river-strip">
         <div class="river-strip__inner">
           <div class="river-strip__rail">
@@ -368,7 +338,7 @@ function RiverNav({
           </div>
         </div>
       </div>
-      <div class="flex items-center gap-2 mt-5 flex-wrap">
+      <div class="range-row">
         <button
           type="button"
           id="btn-upcoming"
@@ -389,7 +359,7 @@ function RiverNav({
           <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13" aria-hidden="true">
             <path d={ICON.gps} />
           </svg>
-          <span class="max-[480px]:sr-only">{tr.nearMe}</span>
+          <span class="near-label">{tr.nearMe}</span>
         </button>
       </div>
     </nav>
@@ -398,14 +368,9 @@ function RiverNav({
 
 function AskAI({ tr }: { tr: Record<string, string> }) {
   return (
-    <section
-      class="my-7 py-3 px-4 bg-surface rounded-xl border border-border-light flex items-center gap-3 flex-wrap max-[480px]:gap-2 max-[480px]:py-2.5 max-[480px]:px-3"
-      aria-label={tr.llmTip}
-    >
-      <span class="font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary shrink-0">
-        {tr.llmTip}
-      </span>
-      <div class="flex items-center gap-1 ml-auto">
+    <section class="ask-ai" aria-label={tr.llmTip}>
+      <span class="ask-ai__label">{tr.llmTip}</span>
+      <div class="ask-ai__list">
         {LLM_SERVICES.map((s) => (
           <a
             href={s.buildUrl(tr.llmPrompt)}
@@ -413,10 +378,10 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
             rel="noopener"
             aria-label={s.name}
             title={s.name}
-            class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-border transition-colors hover:border-current focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2"
+            class="ask-ai__link"
             style={`color:${s.color}`}
           >
-            <svg aria-hidden="true" class="w-3 h-3 fill-current">
+            <svg aria-hidden="true" class="ask-ai__icon">
               <use href={`#i-${s.id}`} />
             </svg>
           </a>
@@ -428,153 +393,80 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
 
 /** Digest subscription dialog — Web Push opt-in with schedule picker */
 export function DigestDialog({ tr }: { tr: Record<string, string> }) {
-  const optionClass =
-    "grid grid-cols-[1.1rem_1fr] gap-x-3 gap-y-0.5 items-baseline px-3.5 py-3 rounded-lg border border-border bg-surface cursor-pointer transition-colors hover:border-river has-[input:checked]:border-river has-[input:checked]:bg-river/10";
   const museumOptions = getAllMuseums()
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name, "de"));
   return (
-    <dialog
-      id="digest-dialog"
-      class="m-auto p-0 bg-bg text-text-primary rounded-xl shadow-search border border-border max-w-[440px] w-[calc(100%-2rem)] backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <form id="digest-form" class="flex flex-col p-6 gap-4 max-[480px]:p-5 max-[480px]:gap-3.5">
-        <div class="flex items-start justify-between gap-4">
-          <h2 class="font-display italic text-[1.4rem] leading-tight text-text-primary">{tr.digestTitle}</h2>
-          <button
-            type="button"
-            data-digest-close
-            aria-label={tr.contactClose}
-            class="text-text-tertiary hover:text-river bg-transparent border-0 p-1 -m-1 cursor-pointer transition-colors shrink-0"
-          >
+    <dialog id="digest-dialog" class="dialog">
+      <form id="digest-form" class="dialog__form">
+        <div class="dialog__head">
+          <h2 class="dialog__title">{tr.digestTitle}</h2>
+          <button type="button" data-digest-close aria-label={tr.contactClose} class="dialog__close">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
               <path d={ICON.close} />
             </svg>
           </button>
         </div>
 
-        <p class="text-[0.875rem] leading-snug text-text-secondary">{tr.digestIntro}</p>
+        <p class="dialog__intro">{tr.digestIntro}</p>
 
-        <fieldset class="flex flex-col gap-2 border-0 p-0 m-0" aria-label={tr.digestTitle}>
-          <label class={optionClass}>
-            <input
-              type="checkbox"
-              name="schedule"
-              value="morning"
-              class="row-span-2 self-center accent-river cursor-pointer m-0"
-            />
-            <span class="flex items-baseline justify-between gap-3">
-              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedMorning}</span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
-                {tr.digestSchedMorningTime}
-              </span>
+        <fieldset class="digest-options" aria-label={tr.digestTitle}>
+          <label class="digest-option">
+            <input type="checkbox" name="schedule" value="morning" class="digest-option__radio" />
+            <span class="digest-option__label">
+              <span class="digest-option__name">{tr.digestSchedMorning}</span>
+              <span class="digest-option__time">{tr.digestSchedMorningTime}</span>
             </span>
-            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
-              {tr.digestSchedMorningDesc}
-            </span>
+            <span class="digest-option__desc">{tr.digestSchedMorningDesc}</span>
           </label>
-          <label class={optionClass}>
-            <input
-              type="checkbox"
-              name="schedule"
-              value="afternoon"
-              class="row-span-2 self-center accent-river cursor-pointer m-0"
-            />
-            <span class="flex items-baseline justify-between gap-3">
-              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedAfternoon}</span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
-                {tr.digestSchedAfternoonTime}
-              </span>
+          <label class="digest-option">
+            <input type="checkbox" name="schedule" value="afternoon" class="digest-option__radio" />
+            <span class="digest-option__label">
+              <span class="digest-option__name">{tr.digestSchedAfternoon}</span>
+              <span class="digest-option__time">{tr.digestSchedAfternoonTime}</span>
             </span>
-            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
-              {tr.digestSchedAfternoonDesc}
-            </span>
+            <span class="digest-option__desc">{tr.digestSchedAfternoonDesc}</span>
           </label>
-          <label class={optionClass}>
-            <input
-              type="checkbox"
-              name="schedule"
-              value="weekly"
-              class="row-span-2 self-center accent-river cursor-pointer m-0"
-            />
-            <span class="flex items-baseline justify-between gap-3">
-              <span class="font-display text-[0.95rem] text-text-primary">{tr.digestSchedWeekly}</span>
-              <span class="font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
-                {tr.digestSchedWeeklyTime}
-              </span>
+          <label class="digest-option">
+            <input type="checkbox" name="schedule" value="weekly" class="digest-option__radio" />
+            <span class="digest-option__label">
+              <span class="digest-option__name">{tr.digestSchedWeekly}</span>
+              <span class="digest-option__time">{tr.digestSchedWeeklyTime}</span>
             </span>
-            <span class="col-start-2 text-[0.8125rem] text-text-secondary leading-snug">
-              {tr.digestSchedWeeklyDesc}
-            </span>
+            <span class="digest-option__desc">{tr.digestSchedWeeklyDesc}</span>
           </label>
         </fieldset>
 
-        <details class="mt-1 group">
-          <summary class="flex items-baseline justify-between gap-2 cursor-pointer py-1.5 list-none font-mono text-[0.625rem] uppercase tracking-[0.18em] text-text-tertiary hover:text-text-primary transition-colors marker:hidden">
-            <span class="inline-flex items-baseline gap-2">
-              <span class="text-river transition-transform group-open:rotate-90 inline-block">▸</span>
-              <span class="font-medium">{tr.digestFilterLabel}</span>
+        <details class="digest-filter">
+          <summary class="digest-filter__summary">
+            <span class="digest-filter__label">
+              <span class="digest-filter__caret">▸</span>
+              {tr.digestFilterLabel}
             </span>
-            <span class="font-display italic text-[0.8125rem] text-text-tertiary normal-case tracking-normal">
-              {tr.digestFilterHint}
-            </span>
+            <span class="digest-filter__hint">{tr.digestFilterHint}</span>
           </summary>
-          <fieldset
-            class="flex flex-wrap gap-1.5 mt-2 border-0 p-0 max-h-56 overflow-y-auto"
-            aria-label={tr.digestFilterLabel}
-          >
+          <fieldset class="digest-filter__list" aria-label={tr.digestFilterLabel}>
             {museumOptions.map((m) => (
-              <label
-                key={m.slug}
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-border bg-surface cursor-pointer font-mono text-[0.6875rem] tracking-tight text-text-secondary transition-colors hover:border-text-tertiary hover:text-text-primary has-[input:checked]:bg-river has-[input:checked]:text-bg has-[input:checked]:border-river"
-              >
-                <input
-                  type="checkbox"
-                  name="filter-museum"
-                  value={m.slug}
-                  class="sr-only absolute opacity-0 pointer-events-none"
-                />
+              <label key={m.slug} class="digest-filter__chip">
+                <input type="checkbox" name="filter-museum" value={m.slug} class="digest-filter__chip-input" />
                 <span>{m.name}</span>
               </label>
             ))}
           </fieldset>
         </details>
 
-        <div
-          id="digest-ios-hint"
-          hidden
-          class="px-3.5 py-2.5 text-[0.8125rem] leading-snug text-text-secondary bg-surface border border-border-light rounded-lg"
-          dangerouslySetInnerHTML={{ __html: tr.digestIosHint }}
-        />
+        <div id="digest-ios-hint" hidden class="dialog__hint" dangerouslySetInnerHTML={{ __html: tr.digestIosHint }} />
 
-        <div
-          id="digest-unsupported"
-          hidden
-          class="px-3.5 py-2.5 text-[0.8125rem] leading-snug text-error bg-surface border border-border-light rounded-lg"
-        >
+        <div id="digest-unsupported" hidden class="dialog__error">
           {tr.digestUnsupported}
         </div>
 
-        <div class="flex items-center justify-between gap-4 mt-1">
-          <p
-            id="digest-status"
-            hidden
-            class="text-[0.75rem] text-text-secondary leading-snug min-w-0"
-            aria-live="polite"
-          />
-          <button
-            type="button"
-            id="digest-unsubscribe-all"
-            hidden
-            class="bg-transparent border-0 p-2 cursor-pointer font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-text-tertiary hover:text-error transition-colors"
-          >
+        <div class="dialog__footer">
+          <p id="digest-status" hidden class="dialog__status" aria-live="polite" />
+          <button type="button" id="digest-unsubscribe-all" hidden class="btn-link">
             {tr.digestUnsubAll}
           </button>
-          <button
-            type="submit"
-            id="digest-submit"
-            class="ml-auto shrink-0 text-sm font-medium py-2 px-5 rounded-full no-underline whitespace-nowrap border border-river text-river bg-transparent transition-colors cursor-pointer hover:bg-river hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+          <button type="submit" id="digest-submit" class="btn-primary">
             {tr.digestSubscribe}
           </button>
         </div>
@@ -585,70 +477,53 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
 
 /** Contact dialog for submitting feedback, missing events, or museum corrections */
 export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, string>; turnstileSiteKey?: string }) {
-  const inputClass =
-    "w-full px-3 py-2 bg-surface border border-border rounded-lg text-[0.875rem] text-text-primary placeholder:text-text-tertiary focus:outline-2 focus:outline-river focus:outline-offset-1 focus:border-river transition-colors";
-  const labelClass = "font-mono text-[0.625rem] uppercase tracking-[0.16em] text-text-tertiary block mb-1.5";
   return (
-    <dialog
-      id="contact-dialog"
-      class="m-auto p-0 bg-bg text-text-primary rounded-xl shadow-search border border-border max-w-[480px] w-[calc(100%-2rem)] backdrop:bg-black/60 backdrop:backdrop-blur-sm"
-    >
-      <form id="contact-form" class="flex flex-col p-6 gap-4 max-[480px]:p-5 max-[480px]:gap-3.5">
-        <div class="flex items-start justify-between gap-4">
-          <h2 class="font-display italic text-[1.5rem] leading-tight text-text-primary">{tr.contactTitle}</h2>
-          <button
-            type="button"
-            data-contact-close
-            aria-label={tr.contactClose}
-            class="text-text-tertiary hover:text-river bg-transparent border-0 p-1 -m-1 cursor-pointer transition-colors shrink-0"
-          >
+    <dialog id="contact-dialog" class="dialog dialog--wide">
+      <form id="contact-form" class="dialog__form">
+        <div class="dialog__head">
+          <h2 class="dialog__title">{tr.contactTitle}</h2>
+          <button type="button" data-contact-close aria-label={tr.contactClose} class="dialog__close">
             <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
               <path d={ICON.close} />
             </svg>
           </button>
         </div>
 
-        <div
-          id="contact-regarding"
-          hidden
-          class="flex items-baseline gap-2 px-3 py-2 rounded-lg bg-surface border border-border-light text-[0.75rem]"
-        >
-          <span class="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-text-tertiary shrink-0">
-            {tr.contactRegarding}
-          </span>
-          <span id="contact-regarding-text" class="text-text-secondary leading-snug min-w-0 break-words" />
+        <div id="contact-regarding" hidden class="dialog__regarding">
+          <span class="dialog__regarding-kicker">{tr.contactRegarding}</span>
+          <span id="contact-regarding-text" class="dialog__regarding-text" />
         </div>
 
-        <label class="block">
-          <span class={labelClass}>{tr.contactCategoryLabel}</span>
-          <select id="contact-category" name="category" required class={inputClass}>
+        <label class="field">
+          <span class="field__label">{tr.contactCategoryLabel}</span>
+          <select id="contact-category" name="category" required class="field__select">
             <option value={tr.contactCategoryEvent}>{tr.contactCategoryEvent}</option>
             <option value={tr.contactCategoryInstitution}>{tr.contactCategoryInstitution}</option>
             <option value={tr.contactCategoryFeedback}>{tr.contactCategoryFeedback}</option>
           </select>
         </label>
 
-        <label class="block">
-          <span class={labelClass}>{tr.contactEmailLabel}</span>
+        <label class="field">
+          <span class="field__label">{tr.contactEmailLabel}</span>
           <input
             type="email"
             id="contact-email"
             name="email"
             required
             placeholder={tr.contactEmailPlaceholder}
-            class={inputClass}
+            class="field__input"
           />
         </label>
 
-        <label class="block">
-          <span class={labelClass}>{tr.contactMessageLabel}</span>
+        <label class="field">
+          <span class="field__label">{tr.contactMessageLabel}</span>
           <textarea
             id="contact-message"
             name="message"
             required
             rows={4}
             placeholder={tr.contactMessagePlaceholder}
-            class={`${inputClass} resize-none font-sans`}
+            class="field__textarea"
           />
         </label>
 
@@ -658,18 +533,9 @@ export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, str
           <div class="cf-turnstile" data-sitekey={turnstileSiteKey} data-size="flexible" data-theme="auto" />
         ) : null}
 
-        <div class="flex items-center justify-between gap-4 mt-1">
-          <p
-            id="contact-status"
-            hidden
-            class="text-[0.75rem] text-text-secondary leading-snug min-w-0"
-            aria-live="polite"
-          />
-          <button
-            type="submit"
-            id="contact-submit"
-            class="ml-auto shrink-0 text-sm font-medium py-2 px-5 rounded-full no-underline whitespace-nowrap border border-river text-river bg-transparent transition-colors cursor-pointer hover:bg-river hover:text-bg disabled:opacity-50 disabled:cursor-not-allowed"
-          >
+        <div class="dialog__footer">
+          <p id="contact-status" hidden class="dialog__status" aria-live="polite" />
+          <button type="submit" id="contact-submit" class="btn-primary">
             {tr.contactSubmit}
           </button>
         </div>
@@ -680,9 +546,9 @@ export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, str
 
 function AboutSection({ tr }: { tr: Record<string, string> }) {
   return (
-    <section class="mt-12">
-      <h2 class="font-display italic text-[1.25rem] leading-tight text-text-primary mb-3">{tr.aboutHeading}</h2>
-      <p class="text-[0.8125rem] text-text-secondary leading-relaxed">{tr.introText}</p>
+    <section class="about">
+      <h2 class="about__title">{tr.aboutHeading}</h2>
+      <p class="about__body">{tr.introText}</p>
     </section>
   );
 }
@@ -696,35 +562,28 @@ function faqItems(tr: Record<string, string>): FaqItem[] {
     { q: tr.faq5Q, a: tr.faq5A },
     { q: tr.faq6Q, a: tr.faq6A },
     { q: tr.faq7Q, a: tr.faq7A },
+    { q: tr.faq8Q, a: tr.faq8A },
   ];
 }
 
 function FaqSection({ tr }: { tr: Record<string, string> }) {
   const items = faqItems(tr);
   return (
-    <section class="mt-12">
-      <header class="mb-5 flex items-baseline gap-3">
-        <span class="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-text-tertiary shrink-0">
-          {tr.faqTitle}
-        </span>
-        <span class="h-px flex-1 bg-river" aria-hidden="true" />
-        <span class="font-mono text-[0.625rem] tabular-nums text-text-tertiary shrink-0">
-          01 — {String(items.length).padStart(2, "0")}
-        </span>
+    <section class="faq">
+      <header class="faq__head">
+        <span class="faq__kicker">{tr.faqTitle}</span>
+        <span class="faq__rule" aria-hidden="true" />
+        <span class="faq__count">01 — {String(items.length).padStart(2, "0")}</span>
       </header>
-      <div class="border-b border-border-light">
+      <div class="faq__list">
         {items.map((item, i) => (
-          <details class="border-t border-border-light group" open={i === 0}>
-            <summary class="flex items-start gap-4 py-4 cursor-pointer select-none list-none">
-              <span class="font-mono text-[0.6875rem] tracking-[0.16em] text-text-tertiary tabular-nums pt-[3px] w-7 shrink-0">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 class="flex-1 text-[0.9375rem] font-medium text-text-primary leading-snug group-hover:text-river transition-colors">
-                {item.q}
-              </h3>
-              <span class="faq-toggle shrink-0 mt-[6px] text-text-tertiary group-hover:text-river" aria-hidden="true" />
+          <details class="faq__item" open={i === 0}>
+            <summary class="faq__row">
+              <span class="faq__num">{String(i + 1).padStart(2, "0")}</span>
+              <h3 class="faq__q">{item.q}</h3>
+              <span class="faq-toggle" aria-hidden="true" />
             </summary>
-            <p class="pl-[2.75rem] pr-8 pb-5 text-[0.8125rem] text-text-secondary leading-relaxed">{item.a}</p>
+            <p class="faq__a">{item.a}</p>
           </details>
         ))}
       </div>
@@ -824,21 +683,20 @@ export function renderPage(
           })}
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
-          {eventSchemaJson ? raw(eventSchemaJson) : null}
+          {eventSchemaJson ? (
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: eventSchemaJson }} />
+          ) : null}
           <script src="/uFuzzy.iife.min.js" defer />
           <script src="/htmx.min.js" defer />
         </head>
         <body>
           <IconSprite />
           <div class="progress-bar" aria-hidden="true" />
-          <a
-            href="#content"
-            class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-[200] focus:bg-river focus:text-bg focus:py-2 focus:px-4 focus:rounded-br-xl focus:text-sm"
-          >
+          <a href="#content" class="skip-link">
             {tr.skipLink}
           </a>
 
-          <div class="max-w-[720px] mx-auto pt-10 pb-16 px-5 max-[480px]:pt-8 max-[480px]:pb-12">
+          <div class="page">
             <Masthead locale={locale} tr={tr} />
 
             <AskAI tr={tr} />
@@ -866,7 +724,7 @@ export function renderPage(
               </span>
             </button>
 
-            <div class="anchor-headline mb-7 mt-8" id="date-label" aria-live="polite">
+            <div class="anchor-headline" id="date-label" aria-live="polite">
               {range
                 ? tr.upcomingDays.replace("{n}", String(range))
                 : initialData
@@ -876,7 +734,7 @@ export function renderPage(
 
             <SearchBar tr={tr} />
 
-            <div id="search-no-results" class="hidden py-16 px-4 text-center fade-in">
+            <div id="search-no-results" class="search-no-results fade-in">
               <div class="empty-state">
                 <p>{tr.noResults}</p>
               </div>
@@ -898,9 +756,9 @@ export function renderPage(
                   groupByDate={!!range}
                 />
               ) : (
-                <div class="py-16 px-4 text-center">
-                  <div class="river-band mx-auto mb-6 max-w-[200px] opacity-60" aria-hidden="true" />
-                  <p class="font-display italic text-xl text-text-tertiary">{tr.loading}…</p>
+                <div class="loading-state">
+                  <div class="river-band loading-state__rule" aria-hidden="true" />
+                  <p class="loading-state__label">{tr.loading}…</p>
                 </div>
               )}
             </main>
@@ -912,56 +770,45 @@ export function renderPage(
             <AboutSection tr={tr} />
             <FaqSection tr={tr} />
 
-            <footer class="mt-12 pt-6 border-t border-border-light flex flex-col gap-3 max-[480px]:items-stretch">
-              <div class="flex flex-wrap gap-x-5 gap-y-2 text-[0.8125rem]">
+            <footer class="footer">
+              <div class="footer__primary">
                 <a
                   href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
                   target="_blank"
                   rel="noopener"
-                  class="text-text-secondary no-underline hover:text-river"
+                  class="footer__primary-link"
                 >
                   {tr.subscribeCal}
                 </a>
-                <a href="/feed.xml" class="text-text-secondary no-underline hover:text-river">
+                <a href="/feed.xml" class="footer__primary-link">
                   {tr.rssFeed}
                 </a>
-                <button
-                  type="button"
-                  data-digest-open
-                  class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
-                >
+                <button type="button" data-digest-open class="footer__primary-link">
                   {tr.digestOpen}
                 </button>
-                <button
-                  type="button"
-                  data-contact-open
-                  class="text-text-secondary no-underline hover:text-river bg-transparent border-0 p-0 cursor-pointer text-[0.8125rem] font-sans text-left"
-                >
+                <button type="button" data-contact-open class="footer__primary-link">
                   {tr.contact}
                 </button>
               </div>
-              <div class="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-text-tertiary">
-                <a href="/api/docs" class="no-underline hover:text-river">
+              <div class="footer__secondary">
+                <a href="/api/docs" class="footer__secondary-link">
                   API
                 </a>
                 <a
                   href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
                   target="_blank"
                   rel="noopener"
-                  class="no-underline hover:text-river"
+                  class="footer__secondary-link"
                 >
                   Source
                 </a>
-                <a
-                  href={locale === "de" ? "/impressum" : `/impressum?lang=${locale}`}
-                  class="no-underline hover:text-river"
-                >
+                <a href={locale === "de" ? "/impressum" : `/impressum?lang=${locale}`} class="footer__secondary-link">
                   {tr.imprint}
                 </a>
               </div>
-              <p class="text-[0.75rem] text-text-tertiary">
+              <p class="footer__byline">
                 {tr.byline} ·{" "}
-                <a href="mailto:feedback@ins.museum" class="no-underline hover:text-river text-text-secondary">
+                <a href="mailto:feedback@ins.museum" class="footer__byline-link">
                   feedback@ins.museum
                 </a>
               </p>
@@ -1112,5 +959,5 @@ function buildEventSchema(data: InitialData, tz: string): string {
 
   if (schemas.length === 0) return "";
   const wrapper = { "@context": "https://schema.org", "@graph": schemas };
-  return `<script type="application/ld+json">${JSON.stringify(wrapper)}</script>`;
+  return JSON.stringify(wrapper);
 }
