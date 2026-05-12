@@ -433,4 +433,64 @@ document.body.addEventListener('htmx:afterSwap', function(){
     else submit.textContent = unsubBtn.hidden ? 'Abonnieren' : 'Speichern';
   });
 })();
+
+// Contact dialog — Problem melden form. Submits to /api/contact which
+// verifies Turnstile and forwards to email.
+(function(){
+  var dlg = document.getElementById('contact-dialog');
+  if (!dlg) return;
+  var form = document.getElementById('contact-form');
+  var category = document.getElementById('contact-category');
+  var message = document.getElementById('contact-message');
+  var context = document.getElementById('contact-context');
+  var status = document.getElementById('contact-status');
+  var submit = document.getElementById('contact-submit');
+
+  function open(){
+    status.hidden = true; status.textContent = ''; status.style.color = '';
+    submit.disabled = false; submit.textContent = 'Senden';
+    context.value = location.href;
+    if (typeof dlg.showModal === 'function') dlg.showModal();
+    else dlg.setAttribute('open', '');
+    setTimeout(function(){ message.focus(); }, 50);
+  }
+  function close(){
+    if (typeof dlg.close === 'function') dlg.close();
+    else dlg.removeAttribute('open');
+  }
+
+  document.addEventListener('click', function(e){
+    var openBtn = e.target.closest && e.target.closest('[data-contact-open]');
+    if (openBtn){ e.preventDefault(); open(); return; }
+    var closeBtn = e.target.closest && e.target.closest('[data-contact-close]');
+    if (closeBtn){ e.preventDefault(); close(); return; }
+  });
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) close(); });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    submit.disabled = true; submit.textContent = 'Wird gesendet…';
+    status.hidden = true;
+    var data = new FormData(form);
+    var payload = {};
+    data.forEach(function(v, k){ payload[k] = v; });
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r){
+      if (!r.ok) throw new Error('submit failed');
+      status.textContent = 'Danke — Hinweis ist angekommen.';
+      status.style.color = '';
+      status.hidden = false;
+      form.reset();
+      setTimeout(close, 1800);
+    }).catch(function(){
+      status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an info@jonas-strassel.de.';
+      status.style.color = 'var(--color-rotwein)';
+      status.hidden = false;
+      submit.disabled = false; submit.textContent = 'Senden';
+    });
+  });
+})();
 `;

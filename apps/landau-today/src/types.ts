@@ -1,4 +1,6 @@
-export interface Env {
+import type { FeedbackEnv } from "@museumsufer/core";
+
+export interface Env extends FeedbackEnv {
   DB: D1Database;
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
