@@ -3,6 +3,7 @@ import {
   buildHreflangAlternates,
   buildLangParam,
   buildUtm,
+  buildWebMcpScript,
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
@@ -15,14 +16,16 @@ import {
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
+  type WebMcpToolDef,
 } from "@museumsufer/core";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
+import { VENUES } from "./concert-config";
 import type { DateWithCount, DayEvent } from "./db";
 import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { INLINE_CSS } from "./styles-inline";
-import type { Genre } from "./types";
+import { GENRES, type Genre } from "./types";
 
 export type { DayEvent } from "./db";
 
@@ -1054,11 +1057,78 @@ if ('serviceWorker' in navigator) {
 })();
 `;
 
+const WEBMCP_TOOLS: WebMcpToolDef[] = [
+  {
+    name: "get_events",
+    description:
+      "Get concerts on a specific date in Frankfurt (and neighbouring venues). Returns titles, times, venues, genres, prices, and ticket links.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
+        genre: { type: "string", enum: [...GENRES], description: "Optional genre filter." },
+        venue: { type: "string", description: "Optional venue slug filter." },
+      },
+    },
+    executeBody: `var params = new URLSearchParams();
+      if (input.date) params.set('date', input.date);
+      if (input.genre) params.set('genre', input.genre);
+      if (input.venue) params.set('venue', input.venue);
+      return fetch('/api/events?' + params).then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "get_venues",
+    description: "Get all configured concert venues with slug, name, address, and website.",
+    inputSchema: { type: "object", properties: {} },
+    executeBody: `return fetch('/api/venues').then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "list_venue_slugs",
+    description: "List the slug + display name of every venue configured on konzert.haus (no network call).",
+    inputSchema: { type: "object", properties: {} },
+    executeBody: `return Promise.resolve(${JSON.stringify(VENUES.map((v) => ({ slug: v.slug, name: v.name })))});`,
+  },
+  {
+    name: "list_genres",
+    description: "List the genre slugs available for filtering on konzert.haus.",
+    inputSchema: { type: "object", properties: {} },
+    executeBody: `return Promise.resolve(${JSON.stringify([...GENRES])});`,
+  },
+  {
+    name: "search_programme",
+    description: "Search visible concert rows on the page by keyword (title, performer, venue).",
+    inputSchema: {
+      type: "object",
+      properties: { query: { type: "string", description: "Search term" } },
+      required: ["query"],
+    },
+    executeBody: `var rows = document.querySelectorAll('[data-event-card], .programme-row, article.event');
+      var q = (input.query || '').toLowerCase();
+      var results = [];
+      rows.forEach(function(el) {
+        var text = (el.textContent || '').toLowerCase();
+        if (!q || text.indexOf(q) !== -1) {
+          var title = el.querySelector('.event-title, .programme-row__title, h2, h3');
+          var venue = el.querySelector('.event-venue, .programme-row__venue');
+          var time = el.querySelector('.event-time, .programme-row__time');
+          results.push({
+            title: title ? title.textContent.trim() : '',
+            venue: venue ? venue.textContent.trim() : '',
+            time: time ? time.textContent.trim() : ''
+          });
+        }
+      });
+      return Promise.resolve({ query: input.query, count: results.length, results: results.slice(0, 20) });`,
+  },
+];
+
+const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
+
 function ClientBehaviors() {
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}`,
+        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${WEBMCP_SCRIPT}`,
       }}
     />
   );

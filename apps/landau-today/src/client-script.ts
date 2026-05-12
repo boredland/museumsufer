@@ -14,7 +14,67 @@
  *   window.__landauHighlight()      — replays a ?highlight=<id> pulse
  */
 
+import { buildWebMcpScript, type WebMcpToolDef } from "@museumsufer/core";
+import { CATEGORIES } from "./categories";
+
+const CATEGORY_SLUGS = CATEGORIES.map((c) => c.slug);
+
+const WEBMCP_TOOLS: WebMcpToolDef[] = [
+  {
+    name: "get_events",
+    description:
+      "Get events for a specific date in Landau and the Südliche Weinstraße. Returns titles, times, venues, prices, and detail links.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
+        category: { type: "string", enum: CATEGORY_SLUGS, description: "Optional category slug to filter by." },
+      },
+    },
+    executeBody: `var params = new URLSearchParams();
+      if (input.date) params.set('date', input.date);
+      if (input.category) params.set('category', input.category);
+      return fetch('/api/day?' + params).then(function(r) { return r.json(); });`,
+  },
+  {
+    name: "list_categories",
+    description: "List the unified event categories used on landau.today (with slug and human label).",
+    inputSchema: { type: "object", properties: {} },
+    executeBody: `return Promise.resolve(${JSON.stringify(CATEGORIES.map((c) => ({ slug: c.slug, label: c.label })))});`,
+  },
+  {
+    name: "search_events",
+    description: "Search visible events on the page by keyword (title, venue, organizer). Returns matches.",
+    inputSchema: {
+      type: "object",
+      properties: { query: { type: "string", description: "Search term" } },
+      required: ["query"],
+    },
+    executeBody: `var input2 = document.querySelector('.js-search');
+      if (input2) {
+        input2.value = input.query;
+        input2.dispatchEvent(new Event('input'));
+      }
+      var rows = document.querySelectorAll('[data-search]:not([data-search-hidden])');
+      var results = [];
+      rows.forEach(function(el) {
+        var title = el.querySelector('.evt-title, .event-title, h3, h2');
+        var meta = el.querySelector('.evt-meta, .event-meta, .meta');
+        results.push({
+          id: el.dataset.id || '',
+          title: title ? title.textContent.trim() : '',
+          meta: meta ? meta.textContent.trim() : ''
+        });
+      });
+      return Promise.resolve({ query: input.query, count: results.length, results: results.slice(0, 20) });`,
+  },
+];
+
+const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
+
 export const CLIENT_SCRIPT = `
+${WEBMCP_SCRIPT}
+
 // ─── service worker registration ───────────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){

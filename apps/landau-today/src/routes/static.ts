@@ -1,4 +1,10 @@
-import { buildManifest, buildRobotsTxt, HTMX_LIFECYCLE_SCRIPT, TURNSTILE_LAZY_LOAD_SCRIPT } from "@museumsufer/core";
+import {
+  buildApiCatalog,
+  buildManifest,
+  buildRobotsTxt,
+  HTMX_LIFECYCLE_SCRIPT,
+  TURNSTILE_LAZY_LOAD_SCRIPT,
+} from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORIES } from "../categories";
 import { CLIENT_SCRIPT } from "../client-script";
@@ -20,6 +26,7 @@ const MANIFEST = buildManifest({
 });
 
 const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
 
 /** OG card — masthead set in Bodoni-style geometry, hand-drawn so we don't
  *  have to ship a font file or rasterise. Keeps with the wine-label idiom. */
@@ -140,6 +147,12 @@ ${urls
 </urlset>`;
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
 });
+
+app.get("/.well-known/api-catalog", (c) =>
+  c.body(API_CATALOG, {
+    headers: { "Content-Type": "application/linkset+json", "Cache-Control": "public, max-age=86400" },
+  }),
+);
 
 app.get("/.well-known/*", (c) => c.json({ error: "Not Found" }, 404));
 
