@@ -60,22 +60,32 @@ const ICON_DOWNLOAD = (
   </svg>
 );
 
+export interface CalendarPopoverLabels {
+  /** Trigger button aria-label + title. Default "Zum Kalender hinzufügen". */
+  addToCalendar?: string;
+  /** Trailing label for the ICS download row. Default ".ics (Apple, Proton, …)". */
+  icsDownload?: string;
+}
+
 export interface CalendarPopoverProps {
   event: CalendarEvent;
   popoverId: string;
   icsHref: string;
   buttonClass?: string;
+  labels?: CalendarPopoverLabels;
 }
 
-export function CalendarPopover({ event, popoverId, icsHref, buttonClass = "ics-btn" }: CalendarPopoverProps) {
+export function CalendarPopover({ event, popoverId, icsHref, buttonClass = "ics-btn", labels }: CalendarPopoverProps) {
+  const add = labels?.addToCalendar ?? "Zum Kalender hinzufügen";
+  const ics = labels?.icsDownload ?? ".ics (Apple, Proton, …)";
   return (
     <span class="nav-wrap">
       <button
         type="button"
         class={buttonClass}
         data-popover-target={popoverId}
-        aria-label="Zum Kalender hinzufügen"
-        title="Zum Kalender hinzufügen"
+        aria-label={add}
+        title={add}
         popovertarget={popoverId}
         aria-haspopup="menu"
       >
@@ -116,7 +126,7 @@ export function CalendarPopover({ event, popoverId, icsHref, buttonClass = "ics-
           <span class="nav-popover__icon" aria-hidden="true">
             {ICON_DOWNLOAD}
           </span>{" "}
-          .ics (Apple, Proton, …)
+          {ics}
         </a>
       </div>
     </span>

@@ -66,6 +66,19 @@ export interface Translations {
   contactErr: string;
   homeTitle: string;
   homeDescription: string;
+  // Venue + genre pages
+  endTimePrefix: string;
+  venueKicker: string;
+  genreKicker: string;
+  emptyGenre: (genre: string) => string;
+  emptyVenue: string;
+  icalSubscribe: string;
+  jsonLink: string;
+  websiteLink: string;
+  venueDescription: (venue: string, count: number) => string;
+  genreDescription: (genre: string, count: number) => string;
+  // a11y
+  langSwitchAria: string;
 }
 
 const de: Translations = {
@@ -125,6 +138,19 @@ const de: Translations = {
   homeTitle: "konzert.haus — Konzerte heute in Frankfurt",
   homeDescription:
     "Klassik, Jazz, Kammermusik, Kirchenmusik und Neue Musik — täglich aktualisiertes Programm aus Frankfurt und der Rhein-Main-Region.",
+  endTimePrefix: "bis",
+  venueKicker: "Spielort",
+  genreKicker: "Genre",
+  emptyGenre: (genre) => `Aktuell keine angekündigten ${genre}-Konzerte.`,
+  emptyVenue: "Noch kein angekündigtes Programm.",
+  icalSubscribe: "iCal abonnieren",
+  jsonLink: "JSON",
+  websiteLink: "Website",
+  venueDescription: (venue, count) =>
+    `Konzerte bei ${venue}. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
+  genreDescription: (genre, count) =>
+    `${genre}-Konzerte in Frankfurt und Umgebung. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
+  langSwitchAria: "Sprache",
 };
 
 const en: Translations = {
@@ -184,6 +210,19 @@ const en: Translations = {
   homeTitle: "konzert.haus — concerts today in Frankfurt",
   homeDescription:
     "Classical, jazz, chamber, sacred and new music — daily programme from Frankfurt and the Rhine-Main region.",
+  endTimePrefix: "until",
+  venueKicker: "Venue",
+  genreKicker: "Genre",
+  emptyGenre: (genre) => `No ${genre.toLowerCase()} concerts currently announced.`,
+  emptyVenue: "No programme announced yet.",
+  icalSubscribe: "Subscribe via iCal",
+  jsonLink: "JSON",
+  websiteLink: "Website",
+  venueDescription: (venue, count) =>
+    `Concerts at ${venue}. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
+  genreDescription: (genre, count) =>
+    `${genre} concerts in Frankfurt and around. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
+  langSwitchAria: "Language",
 };
 
 const fr: Translations = {
@@ -243,6 +282,18 @@ const fr: Translations = {
   homeTitle: "konzert.haus — concerts à Francfort aujourd'hui",
   homeDescription:
     "Classique, jazz, musique de chambre, musique sacrée et contemporaine — programme actualisé quotidiennement de Francfort et de la région Rhin-Main.",
+  endTimePrefix: "jusqu'à",
+  venueKicker: "Salle",
+  genreKicker: "Genre",
+  emptyGenre: (genre) => `Aucun concert de ${genre.toLowerCase()} annoncé pour l'instant.`,
+  emptyVenue: "Aucun programme annoncé pour l'instant.",
+  icalSubscribe: "S'abonner à iCal",
+  jsonLink: "JSON",
+  websiteLink: "Site",
+  venueDescription: (venue, count) => `Concerts à ${venue}. ${count} rendez-vous dans les 60 prochains jours.`,
+  genreDescription: (genre, count) =>
+    `Concerts de ${genre.toLowerCase()} à Francfort et alentour. ${count} rendez-vous dans les 60 prochains jours.`,
+  langSwitchAria: "Langue",
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr };

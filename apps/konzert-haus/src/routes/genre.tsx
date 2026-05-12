@@ -2,7 +2,7 @@ import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange } from "../db";
-import { Event, Footer, GENRE_LABELS, Grain, Head, Masthead } from "../frontend";
+import { Event, Footer, Grain, genreLabel, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import { type Env, parseGenre } from "../types";
 import { APP_URL } from "./static";
@@ -16,7 +16,7 @@ app.get("/genre/:slug", (c) => {
   const events = getEventsInRange(todayIso(), dateOffset(60), { genre });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
-  const label = GENRE_LABELS[genre];
+  const label = genreLabel(genre, tr);
   const currentPath = `/genre/${slug}`;
 
   return c.html(
@@ -26,7 +26,7 @@ app.get("/genre/:slug", (c) => {
         <head>
           <Head
             title={`${label} — konzert.haus`}
-            description={`${label}-Konzerte in Frankfurt und Umgebung. ${events.length} Termin${events.length === 1 ? "" : "e"} in den nächsten 60 Tagen.`}
+            description={tr.genreDescription(label, events.length)}
             canonical={`${APP_URL}/genre/${slug}`}
             locale={locale}
             currentPath={currentPath}
@@ -40,17 +40,17 @@ app.get("/genre/:slug", (c) => {
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
             <section class="venue-hero">
-              <p class="venue-hero__kicker">{tr.genre}</p>
+              <p class="venue-hero__kicker">{tr.genreKicker}</p>
               <h2 class="venue-hero__name">{label}</h2>
               <p class="venue-hero__meta">
-                <a href={`/genre/${slug}/feed.ics`}>iCal abonnieren</a>
+                <a href={`/genre/${slug}/feed.ics`}>{tr.icalSubscribe}</a>
               </p>
             </section>
 
             {events.length === 0 ? (
               <div class="empty">
                 <p class="empty__mark">∅</p>
-                <p>Aktuell keine angekündigten {label}-Konzerte.</p>
+                <p>{tr.emptyGenre(label)}</p>
               </div>
             ) : (
               <ol class="concerts">
@@ -64,6 +64,13 @@ app.get("/genre/:slug", (c) => {
         </body>
       </html>
     </>,
+    {
+      headers: {
+        "Content-Language": locale,
+        "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
+        Vary: "Accept-Language",
+      },
+    },
   );
 });
 

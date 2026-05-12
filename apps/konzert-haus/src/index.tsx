@@ -107,9 +107,14 @@ app.get("/partial/programme", (c) => {
   const genre = parseGenre(c.req.query("genre"));
   const city = c.get("city") ?? "frankfurt";
   const events = getEventsForDate(date, { city, genre });
-  const tr = getTranslations(detectLocale(c.req.raw));
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
   return c.html(renderProgrammePartial(date, events, tr), {
-    headers: { "Cache-Control": "public, max-age=300, s-maxage=900" },
+    headers: {
+      "Cache-Control": "public, max-age=300, s-maxage=900",
+      "Content-Language": locale,
+      Vary: "Accept-Language",
+    },
   });
 });
 

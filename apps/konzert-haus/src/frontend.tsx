@@ -34,7 +34,7 @@ export const GENRE_LABELS: Record<Genre, string> = {
   chamber: "Kammermusik",
 };
 
-function genreLabel(g: Genre, tr: Translations): string {
+export function genreLabel(g: Genre, tr: Translations): string {
   switch (g) {
     case "classical":
       return tr.genreClassical;
@@ -171,11 +171,11 @@ export function Grain() {
   return <div class="grain" aria-hidden="true" />;
 }
 
-function LangSwitch({ locale, currentPath }: { locale: Locale; currentPath: string }) {
+function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: string; tr: Translations }) {
   const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
   const sep = stripped.includes("?") ? "&" : "?";
   return (
-    <nav class="langswitch" aria-label="Language">
+    <nav class="langswitch" aria-label={tr.langSwitchAria}>
       {SUPPORTED_LOCALES.map((l) => {
         const href = l === DEFAULT_LOCALE ? stripped || "/" : `${stripped || "/"}${sep}lang=${l}`;
         return (
@@ -206,7 +206,7 @@ export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale
         <p class="tagline">{tr.tagline}</p>
       </a>
       <hr class="masthead__rule" />
-      <LangSwitch locale={locale} currentPath={currentPath} />
+      <LangSwitch locale={locale} currentPath={currentPath} tr={tr} />
       <button type="button" class="theme-toggle" data-theme-toggle aria-label={tr.themeToggle} title={tr.themeToggle}>
         <svg class="tt-moon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -407,7 +407,7 @@ function PriceRange({ min, max }: { min?: number | null; max?: number | null }) 
 
 export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr: Translations }) {
   const time = e.time ?? "—";
-  const endTime = e.end_time ? `bis ${e.end_time}` : "";
+  const endTime = e.end_time ? `${tr.endTimePrefix} ${e.end_time}` : "";
   const venueRoom = e.venue_room ?? null;
   const titleSource = e.detail_url ?? e.ticket_url ?? null;
   const titleHref = titleSource ? utm(titleSource, "event_title") : null;
@@ -485,6 +485,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
           popoverId={`cal-${e.id}`}
           icsHref={`/event/${e.id}/feed.ics`}
           buttonClass="icon-btn"
+          labels={{ addToCalendar: tr.toCalendar }}
         />
         <button
           type="button"

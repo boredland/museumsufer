@@ -97,6 +97,11 @@ export interface Translations {
   evShare: string;
   evLinkCopied: string;
   evBackToProgramme: string;
+  /** German "Uhr" suffix; empty in FR. */
+  timeSuffix: string;
+  // a11y
+  langSwitchAria: string;
+  imprintMetaDescription: string;
   // Error pages
   errInvalidRequest: string;
   err404Title: string;
@@ -211,6 +216,9 @@ const de: Translations = {
   evShare: "Teilen",
   evLinkCopied: "Link kopiert",
   evBackToProgramme: "Zurück zum Programm",
+  timeSuffix: "Uhr",
+  langSwitchAria: "Sprache",
+  imprintMetaDescription: "Kontakt, Verantwortlichkeit und rechtliche Hinweise zu landau.today.",
   errInvalidRequest: "Ungültige Anfrage.",
   err404Title: "Nicht gefunden",
   err404Body: "Diese Seite existiert nicht.",
@@ -341,6 +349,9 @@ const fr: Translations = {
   evShare: "Partager",
   evLinkCopied: "Lien copié",
   evBackToProgramme: "Retour au programme",
+  timeSuffix: "",
+  langSwitchAria: "Langue",
+  imprintMetaDescription: "Contact, responsabilité et mentions légales de landau.today.",
   errInvalidRequest: "Requête invalide.",
   err404Title: "Page introuvable",
   err404Body: "Cette page n'existe pas.",

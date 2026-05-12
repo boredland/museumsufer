@@ -53,7 +53,7 @@ app.get("/spielort/:slug", (c) => {
         <head>
           <Head
             title={`${venue.name} — konzert.haus`}
-            description={`Kommende Konzerte bei ${venue.name}. ${events.length} Termin${events.length === 1 ? "" : "e"} in den nächsten 60 Tagen.`}
+            description={tr.venueDescription(venue.name, events.length)}
             canonical={`${APP_URL}/spielort/${slug}`}
             locale={locale}
             currentPath={currentPath}
@@ -79,22 +79,22 @@ app.get("/spielort/:slug", (c) => {
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
             <section class="venue-hero">
-              <p class="venue-hero__kicker">Spielort</p>
+              <p class="venue-hero__kicker">{tr.venueKicker}</p>
               <h2 class="venue-hero__name">{venue.name}</h2>
               <p class="venue-hero__address">{venue.address}</p>
               <p class="venue-hero__meta">
                 <a href={venue.website_url} target="_blank" rel="noopener">
-                  Website ↗
+                  {tr.websiteLink} ↗
                 </a>
-                <a href={`/spielort/${venue.slug}/feed.ics`}>iCal abonnieren</a>
-                <a href={`/api/venues/${venue.slug}`}>JSON</a>
+                <a href={`/spielort/${venue.slug}/feed.ics`}>{tr.icalSubscribe}</a>
+                <a href={`/api/venues/${venue.slug}`}>{tr.jsonLink}</a>
               </p>
             </section>
 
             {events.length === 0 ? (
               <div class="empty">
                 <p class="empty__mark">∅</p>
-                <p>Noch kein angekündigtes Programm.</p>
+                <p>{tr.emptyVenue}</p>
               </div>
             ) : (
               <ol class="concerts">
@@ -108,6 +108,13 @@ app.get("/spielort/:slug", (c) => {
         </body>
       </html>
     </>,
+    {
+      headers: {
+        "Content-Language": locale,
+        "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
+        Vary: "Accept-Language",
+      },
+    },
   );
 });
 
