@@ -1,7 +1,10 @@
 import {
   buildUtm,
+  type CalendarEvent,
+  CalendarPopover,
   escapeHtml as coreEscapeHtml,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
+  POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
@@ -337,6 +340,19 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
   const genreLabel = GENRE_LABELS[e.genre];
   const reportRegarding = `${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
   const reportContext = `${APP_URL}/api/events/${e.id}`;
+  const calendarEvent: CalendarEvent = {
+    date: e.date,
+    time: e.time ?? null,
+    end_time: e.end_time ?? null,
+    end_date: null,
+    title: e.title,
+    location: [e.venue.name, venueRoom && venueRoom !== e.venue.name ? venueRoom : null].filter(Boolean).join(", "),
+    description: e.subtitle ?? null,
+    detail_url: (() => {
+      const src = e.detail_url ?? e.ticket_url ?? null;
+      return src ? utm(src, "calendar") : null;
+    })(),
+  };
 
   const venueLine = opts.hideVenue ? (
     venueRoom ? (
@@ -388,21 +404,12 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
         ) : (
           <p class="concert__price concert__price--free">Eintritt frei</p>
         )}
-        <a class="icon-btn" href={`/event/${e.id}/feed.ics`} aria-label="Zum Kalender" title="Zum Kalender">
-          <svg
-            viewBox="0 0 16 16"
-            width="13"
-            height="13"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.3"
-            stroke-linecap="round"
-          >
-            <rect x="2" y="3" width="12" height="11" rx="1.5" />
-            <path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" />
-          </svg>
-        </a>
+        <CalendarPopover
+          event={calendarEvent}
+          popoverId={`cal-${e.id}`}
+          icsHref={`/event/${e.id}/feed.ics`}
+          buttonClass="icon-btn"
+        />
         <button
           type="button"
           class="icon-btn"
@@ -941,7 +948,7 @@ if ('serviceWorker' in navigator) {
 `;
 
 function ClientBehaviors() {
-  return <script dangerouslySetInnerHTML={{ __html: CLIENT_SCRIPT }} />;
+  return <script dangerouslySetInnerHTML={{ __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}` }} />;
 }
 
 export function Footer() {

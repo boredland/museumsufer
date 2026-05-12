@@ -7,6 +7,7 @@
       "apps/**/src/**/*.tsx",
       "apps/**/scripts/**/*.ts",
       "packages/**/src/**/*.ts",
+      "packages/**/src/**/*.tsx",
       "!apps/frankfurt-theaters/src/scrape-data.ts",
       "!apps/frankfurt-museums/src/scrape-data.ts",
       "!apps/konzert-haus/src/scrape-data.ts"

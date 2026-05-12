@@ -1,8 +1,5 @@
 {
-  "extends": "@museumsufer/tsconfig/base.json",
-  "compilerOptions": {
-    "types": ["@cloudflare/workers-types"]
-  },
-  "include": ["src/**/*.ts"],
+  "extends": "@museumsufer/tsconfig/worker.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
