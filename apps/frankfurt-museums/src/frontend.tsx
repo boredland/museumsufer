@@ -128,7 +128,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       {jsonSchemas.map((schema) => (
         <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
       ))}
-      {turnstileSiteKey ? <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer /> : null}
+      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT in client-script.ts. */}
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
     </>
   );
@@ -851,7 +851,7 @@ export function renderPage(
               dateCounts={dateCounts}
             />
 
-            <button type="button" class="digest-cue" data-digest-open aria-label={tr.digestCueAria}>
+            <button type="button" class="digest-cue" data-digest-open>
               <span class="digest-cue__mark" aria-hidden="true">
                 ※
               </span>

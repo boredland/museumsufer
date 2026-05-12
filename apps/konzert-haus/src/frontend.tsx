@@ -13,6 +13,7 @@ import {
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
+  TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
@@ -155,9 +156,7 @@ export function Head(opts: HeadOptions) {
       </noscript>
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
       <script src="/htmx.min.js" defer></script>
-      {opts.turnstileSiteKey ? (
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      ) : null}
+      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */}
       {jsonLdArr.map((j, i) => (
         <script key={`jsonld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(j) }} />
       ))}
@@ -517,7 +516,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
 
 function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
   return (
-    <button type="button" class="digest-cue" data-digest-open aria-label={tr.digestTitle}>
+    <button type="button" class="digest-cue" data-digest-open>
       <span class="digest-cue__mark" aria-hidden="true">
         ※
       </span>
@@ -819,12 +818,18 @@ if ('serviceWorker' in navigator) {
 
     document.addEventListener('click', function(e){
       var openBtn = e.target.closest('[data-contact-open]');
-      if (openBtn) { e.preventDefault(); open(null); return; }
+      if (openBtn) {
+        e.preventDefault();
+        if (window.__loadTurnstile) window.__loadTurnstile();
+        open(null);
+        return;
+      }
       var closeBtn = e.target.closest('[data-contact-close]');
       if (closeBtn) { e.preventDefault(); close(); return; }
       var reportBtn = e.target.closest('[data-report-regarding]');
       if (reportBtn) {
         e.preventDefault();
+        if (window.__loadTurnstile) window.__loadTurnstile();
         open({
           category: 'Konzert',
           regarding: reportBtn.getAttribute('data-report-regarding') || '',
@@ -1022,7 +1027,7 @@ function ClientBehaviors() {
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}`,
+        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}`,
       }}
     />
   );

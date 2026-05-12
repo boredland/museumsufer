@@ -1682,7 +1682,8 @@ textarea:focus-visible,
   font-size: 0.6875rem;
   letter-spacing: 0.16em;
   font-feature-settings: "tnum";
-  color: var(--ink-quiet);
+  /* --ink-quiet is 32% opacity — fails AA against paper. Lift to --ink-soft (62%). */
+  color: var(--ink-soft);
 }
 .faq__q {
   flex: 1;

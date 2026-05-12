@@ -14,6 +14,7 @@ import {
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
+  TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
@@ -112,9 +113,11 @@ export function Head(opts: HeadOptions) {
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
       <script src="/htmx.min.js" defer></script>
       <script src="/uFuzzy.iife.min.js" defer></script>
-      {opts.turnstileSiteKey ? (
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer />
-      ) : null}
+      {opts.turnstileSiteKey
+        ? {
+            /* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */
+          }
+        : null}
       {jsonLdArr.map((j, i) => (
         <script key={`jsonld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(j) }} />
       ))}
@@ -636,7 +639,7 @@ export function Faq() {
 
 export function DigestCue() {
   return (
-    <button type="button" class="digest-cue" data-digest-open aria-label="Push-Nachrichten zu Vorstellungen abonnieren">
+    <button type="button" class="digest-cue" data-digest-open>
       <span class="digest-cue__mark" aria-hidden="true">
         ※
       </span>
@@ -1049,6 +1052,7 @@ function buildClientScript(): string {
 
   ${HTMX_LIFECYCLE_SCRIPT}
   ${POPOVER_POSITIONING_SCRIPT}
+  ${TURNSTILE_LAZY_LOAD_SCRIPT}
   ${WEBMCP_SCRIPT}
 
   // Anfahrt — popover with RMV / Google Maps / Apple Maps deep-links
@@ -1151,12 +1155,13 @@ function buildClientScript(): string {
     }
     document.addEventListener('click', function(e){
       var openBtn = e.target.closest('[data-contact-open]');
-      if (openBtn) { e.preventDefault(); open(null); return; }
+      if (openBtn) { e.preventDefault(); if (window.__loadTurnstile) window.__loadTurnstile(); open(null); return; }
       var closeBtn = e.target.closest('[data-contact-close]');
       if (closeBtn) { e.preventDefault(); close(); return; }
       var reportBtn = e.target.closest('[data-report-type]');
       if (reportBtn) {
         e.preventDefault();
+        if (window.__loadTurnstile) window.__loadTurnstile();
         var type = reportBtn.dataset.reportType;
         var cat = type === 'theater' ? 'Bühne' : type === 'performance' ? 'Vorstellung' : 'Allgemein';
         open({ category: cat, regarding: reportBtn.dataset.reportRegarding || '', context: reportBtn.dataset.reportContext || '' });

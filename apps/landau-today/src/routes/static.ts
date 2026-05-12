@@ -1,4 +1,4 @@
-import { buildManifest, buildRobotsTxt, HTMX_LIFECYCLE_SCRIPT } from "@museumsufer/core";
+import { buildManifest, buildRobotsTxt, HTMX_LIFECYCLE_SCRIPT, TURNSTILE_LAZY_LOAD_SCRIPT } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CATEGORIES } from "../categories";
 import { CLIENT_SCRIPT } from "../client-script";
@@ -87,10 +87,13 @@ app.get("/sw.js", (c) =>
 );
 
 app.get("/client.js", (c) =>
-  c.body(`${HTMX_LIFECYCLE_SCRIPT}\n${CLIENT_SCRIPT}`, {
+  c.body(`${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${CLIENT_SCRIPT}`, {
     headers: {
       "Content-Type": "application/javascript",
-      "Cache-Control": "public, max-age=300, s-maxage=3600",
+      // 1 day client-side, 1 week at the edge. Asset isn't content-hashed,
+      // so we can't go "immutable"; this still clears Lighthouse's TTL audit
+      // and keeps clients on fresh-ish JS between deploys.
+      "Cache-Control": "public, max-age=86400, s-maxage=604800",
     },
   }),
 );

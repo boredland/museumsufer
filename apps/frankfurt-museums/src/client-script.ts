@@ -1,4 +1,9 @@
-import { buildWebMcpScript, HTMX_LIFECYCLE_SCRIPT, type WebMcpToolDef } from "@museumsufer/core";
+import {
+  buildWebMcpScript,
+  HTMX_LIFECYCLE_SCRIPT,
+  TURNSTILE_LAZY_LOAD_SCRIPT,
+  type WebMcpToolDef,
+} from "@museumsufer/core";
 
 const WEBMCP_TOOLS: WebMcpToolDef[] = [
   {
@@ -93,6 +98,7 @@ export const CLIENT_SCRIPT = `
     });
 
     ${HTMX_LIFECYCLE_SCRIPT}
+    ${TURNSTILE_LAZY_LOAD_SCRIPT}
 
     var cachedPos = sessionStorage.getItem('userPos');
     let userPos = cachedPos ? JSON.parse(cachedPos) : null;
@@ -903,12 +909,18 @@ export const CLIENT_SCRIPT = `
 
       document.addEventListener('click', function(e) {
         var openBtn = e.target.closest('[data-contact-open]');
-        if (openBtn) { e.preventDefault(); openContactDialog(null); return; }
+        if (openBtn) {
+          e.preventDefault();
+          if (window.__loadTurnstile) window.__loadTurnstile();
+          openContactDialog(null);
+          return;
+        }
         var closeBtn = e.target.closest('[data-contact-close]');
         if (closeBtn) { e.preventDefault(); closeContactDialog(); return; }
         var reportBtn = e.target.closest('[data-report-type]');
         if (reportBtn) {
           e.preventDefault();
+          if (window.__loadTurnstile) window.__loadTurnstile();
           var type = reportBtn.dataset.reportType;
           var title = reportBtn.dataset.reportTitle || '';
           var museum = reportBtn.dataset.reportMuseum || '';

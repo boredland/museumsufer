@@ -424,7 +424,10 @@ function ExhibitionCard({
           </p>
           <p class="text-xs text-text-secondary">
             {ex.museum_slug ? (
-              <a href={`/museum/${ex.museum_slug}`} class="no-underline hover:text-river">
+              <a
+                href={`/museum/${ex.museum_slug}`}
+                class="no-underline hover:text-river inline-flex items-center min-h-6 py-1 -my-1"
+              >
                 {ex.museum_name || ""}
               </a>
             ) : (

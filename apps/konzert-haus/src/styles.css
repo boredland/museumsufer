@@ -225,7 +225,14 @@ body::before {
 }
 .langswitch__a {
   color: inherit;
-  padding: 0.15rem 0.1rem;
+  /* 24×24 minimum tap target (WCAG 2.5.5). The visible underline is unchanged;
+     the padding adds invisible hit area. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  padding: 0.25rem 0.4rem;
   border-bottom: 1px solid transparent;
   transition: color 0.2s, border-color 0.2s;
 }
@@ -482,7 +489,8 @@ body::before {
   font-family: var(--mono);
   font-size: 0.65rem;
   font-weight: 400;
-  color: var(--felt-quiet);
+  /* --felt-quiet (32%) fails AA against walnut. --felt-soft (58%) clears it. */
+  color: var(--felt-soft);
   letter-spacing: 0.06em;
 }
 
