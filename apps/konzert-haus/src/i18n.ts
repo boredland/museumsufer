@@ -87,6 +87,13 @@ export interface Translations {
   siblingTemplate: string;
   siblingTheaterLabel: string;
   siblingMuseumLabel: string;
+  // Ask AI
+  askAiLabel: string;
+  askAiPrompt: (date: string) => string;
+  askAiAria: string;
+  // FAQ
+  faqKicker: string;
+  faqItems: { q: string; a: string }[];
 }
 
 const de: Translations = {
@@ -166,6 +173,37 @@ const de: Translations = {
   siblingTemplate: "Nichts dabei? Wie wäre es stattdessen mit einem {first} oder {second}?",
   siblingTheaterLabel: "Theaterstück",
   siblingMuseumLabel: "Museumsbesuch",
+  askAiLabel: "Frag eine KI",
+  askAiPrompt: (date) =>
+    `Was wird am ${date} in Frankfurt und Umgebung gespielt? Quelle: https://frankfurt.konzert.haus`,
+  askAiAria: "Frag eine KI nach dem heutigen Konzertprogramm",
+  faqKicker: "Häufige Fragen",
+  faqItems: [
+    {
+      q: "Welche Spielorte sind hier vertreten?",
+      a: "Aktuell rund zwanzig Häuser in Frankfurt und Umgebung — von Alte Oper, Oper Frankfurt und HR-Sinfonieorchester bis zu Ensemble Modern, der Brotfabrik und kammermusikalischen Reihen wie dem Holzhausenschlösschen oder St. Katharinen. Im Sommer kommen das Rheingau Musik Festival und die Kronberg Academy dazu.",
+    },
+    {
+      q: "Wie aktuell ist das Programm?",
+      a: "Die Daten werden stündlich zwischen 09 und 21 Uhr direkt von den Webseiten der Häuser abgerufen. Absagen, Ausverkauft-Hinweise oder Programmänderungen erscheinen in der Regel innerhalb einer Stunde.",
+    },
+    {
+      q: "Kann ich hier Karten kaufen?",
+      a: "Nein — die Tickets-Schaltfläche an jedem Konzert führt direkt auf die Buchungsseite des jeweiligen Hauses oder Vorverkäufers. Diese Seite verkauft selbst keine Karten und nimmt keine Provision.",
+    },
+    {
+      q: "Welche Genres werden abgedeckt?",
+      a: "Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik. Pop, Rock und Schlager bewusst nicht — dafür gibt es bessere Plattformen.",
+    },
+    {
+      q: "Was passiert mit Konzerten, die schon angefangen haben?",
+      a: "Auf der heutigen Ansicht werden Konzerte 30 Minuten nach Beginn ausgeblendet, damit nur noch erreichbare Termine sichtbar sind. Eine kleine Notiz unter der Liste zeigt, wie viele bereits gestartet sind.",
+    },
+    {
+      q: "Warum diese Seite?",
+      a: "Frankfurt hat eine außergewöhnliche Dichte an klassischen und improvisierten Konzerten, aber kein gemeinsames Programmheft. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Konzertkalender für die ganze Stadt.",
+    },
+  ],
 };
 
 const en: Translations = {
@@ -245,6 +283,37 @@ const en: Translations = {
   siblingTemplate: "Nothing for you? How about {first} or {second} instead?",
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",
+  askAiLabel: "Ask an AI",
+  askAiPrompt: (date) =>
+    `What's on in Frankfurt and the wider region on ${date}? Source: https://frankfurt.konzert.haus`,
+  askAiAria: "Ask an AI about today's concert programme",
+  faqKicker: "Frequently asked",
+  faqItems: [
+    {
+      q: "Which venues are covered?",
+      a: "Around twenty houses in Frankfurt and the surrounding region — from Alte Oper, Oper Frankfurt and the HR Sinfonieorchester to Ensemble Modern, Brotfabrik, and chamber-music series like Holzhausenschlösschen or St. Katharinen. In summer the Rheingau Musik Festival and Kronberg Academy join in.",
+    },
+    {
+      q: "How current is the programme?",
+      a: "Data is scraped hourly between 09:00 and 21:00 Berlin time directly from venue websites. Cancellations, sold-out flags, and programme changes usually surface within an hour.",
+    },
+    {
+      q: "Can I buy tickets here?",
+      a: "No — the Tickets button on each concert links directly to the venue's or pre-sale's own booking page. This site doesn't sell tickets and takes no commission.",
+    },
+    {
+      q: "Which genres are covered?",
+      a: "Classical, jazz, chamber music, sacred music, world music and new/experimental music. Pop, rock and Schlager are deliberately out of scope — other platforms cover those better.",
+    },
+    {
+      q: "What happens to concerts that have already started?",
+      a: "On today's view, concerts are hidden 30 minutes after their start time, so only reachable performances remain visible. A small note at the bottom shows how many have already begun.",
+    },
+    {
+      q: "Why this site?",
+      a: "Frankfurt has an unusually dense classical and improvised concert scene, but no shared programme. This site lays every house onto one searchable day view — a concert calendar for the whole city.",
+    },
+  ],
 };
 
 const fr: Translations = {
@@ -324,6 +393,37 @@ const fr: Translations = {
   siblingTemplate: "Rien pour toi ? Pourquoi pas {first} ou {second} à la place ?",
   siblingTheaterLabel: "une pièce",
   siblingMuseumLabel: "une visite au musée",
+  askAiLabel: "Demande à une IA",
+  askAiPrompt: (date) =>
+    `Que joue-t-on à Francfort et dans la région le ${date} ? Source : https://frankfurt.konzert.haus`,
+  askAiAria: "Demande à une IA le programme de concerts du jour",
+  faqKicker: "Questions fréquentes",
+  faqItems: [
+    {
+      q: "Quelles salles sont couvertes ?",
+      a: "Une vingtaine de lieux à Francfort et dans la région — de l'Alte Oper, de l'Opéra de Francfort et de l'Orchestre symphonique HR à l'Ensemble Modern, à la Brotfabrik et à des séries de musique de chambre comme le Holzhausenschlösschen ou St. Katharinen. L'été s'y ajoutent le Rheingau Musik Festival et la Kronberg Academy.",
+    },
+    {
+      q: "À quel point le programme est-il à jour ?",
+      a: "Les données sont collectées toutes les heures entre 09h et 21h depuis les sites des salles. Les annulations, les complets et les modifications de programme apparaissent généralement en moins d'une heure.",
+    },
+    {
+      q: "Puis-je acheter des billets ici ?",
+      a: "Non — le bouton Billets de chaque concert renvoie directement à la page de réservation de la salle ou du prévendeur. Ce site ne vend pas de billets et ne perçoit aucune commission.",
+    },
+    {
+      q: "Quels genres sont couverts ?",
+      a: "Classique, jazz, musique de chambre, musique sacrée, musiques du monde et musique contemporaine. Pop, rock et Schlager sont volontairement exclus — d'autres plateformes les couvrent mieux.",
+    },
+    {
+      q: "Et les concerts déjà commencés ?",
+      a: "Sur la vue du jour, les concerts sont masqués 30 minutes après leur heure de début, pour ne montrer que ceux encore accessibles. Une petite note en bas indique combien ont déjà commencé.",
+    },
+    {
+      q: "Pourquoi ce site ?",
+      a: "Francfort possède une scène classique et improvisée d'une densité rare, mais aucun programme commun. Ce site rassemble toutes les salles dans une vue quotidienne consultable — un calendrier de concerts pour toute la ville.",
+    },
+  ],
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr };
