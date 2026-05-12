@@ -1,0 +1,21 @@
+# Supply-chain hardening: refuse to install npm versions younger than 3 days.
+# Blunts the standard malware pattern of attackers publishing a new release
+# and immediately trying to get downstream installs. Only affects new
+# resolutions — existing entries in bun.lock are unchanged.
+#
+# Workspace packages are listed explicitly in case the cooldown is ever
+# evaluated against them; they're resolved from disk so this is mostly a
+# belt-and-suspenders safeguard.
+#
+# Docs: https://bun.com/docs/cli/install#minimum-release-age
+[install]
+minimumReleaseAge = 259200  # 3 days, in seconds
+minimumReleaseAgeExcludes = [
+  "@museumsufer/core",
+  "@museumsufer/tsconfig",
+  "@museumsufer/fetch-proxy",
+  "@museumsufer/frankfurt-museums",
+  "@museumsufer/frankfurt-theaters",
+  "@museumsufer/konzert-haus",
+  "@museumsufer/landau-today",
+]
