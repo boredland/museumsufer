@@ -1,8 +1,12 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { EmailMessage } from "cloudflare:email";
+import { buildFeedbackMime, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { VENUES } from "../concert-config";
 import { getEventById, getEventsForDate, getEventsInRange, getVenueBySlug } from "../db";
 import { type Env, parseGenre } from "../types";
+
+const FEEDBACK_FROM = "noreply@konzert.haus";
+const FEEDBACK_TO = "info@jonas-strassel.de";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -70,6 +74,30 @@ app.get("/api/venues/:slug{[^.]+}", (c) => {
   if (!venue) return c.json({ error: "not found" }, 404);
   const events = getEventsInRange(todayIso(), dateOffset(60), { venue: slug });
   return c.json({ venue, events }, { headers: DAY_HEADERS });
+});
+
+app.post("/api/contact", async (c) => {
+  const body = (await c.req
+    .json<{ category?: string; email?: string; message?: string; context?: string }>()
+    .catch(() => null)) as { category?: string; email?: string; message?: string; context?: string } | null;
+  if (!body?.message || body.message.length < 3) return c.json({ error: "message required" }, 400);
+  if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
+
+  const raw = buildFeedbackMime({
+    from: FEEDBACK_FROM,
+    to: FEEDBACK_TO,
+    input: {
+      app: "konzert-haus",
+      category: body.category ?? null,
+      email: body.email ?? null,
+      message: body.message,
+      context: body.context ?? null,
+      userAgent: c.req.header("user-agent") ?? null,
+      pageUrl: c.req.header("referer") ?? null,
+    },
+  });
+  await c.env.FEEDBACK_EMAIL.send(new EmailMessage(FEEDBACK_FROM, FEEDBACK_TO, raw));
+  return c.json({ ok: true });
 });
 
 export default app;

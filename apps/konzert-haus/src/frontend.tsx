@@ -288,6 +288,12 @@ export function renderEvent(e: DayEvent, opts: EventRowOptions): string {
       <a class="icon-btn" href="/event/${e.id}/feed.ics" aria-label="Zum Kalender" title="Zum Kalender">
         <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3"/></svg>
       </a>
+      <button type="button" class="icon-btn"
+        data-report-regarding="${escapeHtml(`${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`)}"
+        data-report-context="${escapeHtml(`${APP_URL}/api/events/${e.id}`)}"
+        aria-label="Fehler bei diesem Konzert melden" title="Fehler bei diesem Konzert melden">
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
+      </button>
       ${
         e.ticket_url
           ? `<a class="action" href="${escapeHtml(utm(e.ticket_url, "karten"))}" target="_blank" rel="noopener">
@@ -308,6 +314,45 @@ function formatPriceRange(min?: number | null, max?: number | null): string | nu
 }
 
 export const escapeHtml = coreEscapeHtml;
+
+export function renderContactDialog(): string {
+  return `<dialog id="contact-dialog" class="contact-dialog">
+  <form id="contact-form" class="contact-form" novalidate>
+    <header class="contact-form__head">
+      <h2 class="contact-form__title">Feedback &amp; Korrekturen</h2>
+      <button type="button" class="contact-form__close" data-contact-close aria-label="Schließen">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 3l10 10M13 3L3 13" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <p class="contact-form__intro">Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.</p>
+    <div class="contact-form__regarding" id="contact-regarding" hidden>
+      <span class="contact-form__regarding-label">Betrifft</span>
+      <span id="contact-regarding-text"></span>
+    </div>
+    <label class="contact-form__field">
+      <span class="contact-form__label">Kategorie</span>
+      <select id="contact-category" name="category" required>
+        <option value="Konzert">Konzert — falsche Daten</option>
+        <option value="Spielort">Spielort — fehlt oder Korrektur</option>
+        <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
+      </select>
+    </label>
+    <label class="contact-form__field">
+      <span class="contact-form__label">E-Mail (optional, für Rückfragen)</span>
+      <input type="email" id="contact-email" name="email" placeholder="dein@email.de" />
+    </label>
+    <label class="contact-form__field">
+      <span class="contact-form__label">Nachricht</span>
+      <textarea id="contact-message" name="message" required rows="4" placeholder="Was stimmt nicht?"></textarea>
+    </label>
+    <input type="hidden" id="contact-context" name="context" />
+    <footer class="contact-form__foot">
+      <p id="contact-status" class="contact-form__status" hidden aria-live="polite"></p>
+      <button type="submit" id="contact-submit" class="contact-form__submit">Senden</button>
+    </footer>
+  </form>
+</dialog>`;
+}
 
 export function renderClientBehaviors(): string {
   return `<script>
@@ -402,6 +447,86 @@ export function renderClientBehaviors(): string {
   function onReady(){ syncDateStrip(); syncGenreFilter(); }
   if (document.readyState !== 'loading') onReady();
   else document.addEventListener('DOMContentLoaded', onReady);
+
+  // Contact dialog — opens for footer button + per-event report buttons,
+  // submits to /api/contact which forwards to email.
+  (function(){
+    var dlg = document.getElementById('contact-dialog');
+    if (!dlg) return;
+    var form = document.getElementById('contact-form');
+    var category = document.getElementById('contact-category');
+    var message = document.getElementById('contact-message');
+    var context = document.getElementById('contact-context');
+    var regarding = document.getElementById('contact-regarding');
+    var regardingText = document.getElementById('contact-regarding-text');
+    var status = document.getElementById('contact-status');
+    var submit = document.getElementById('contact-submit');
+
+    function open(prefill){
+      status.hidden = true; status.textContent = ''; status.className = 'contact-form__status';
+      submit.disabled = false; submit.textContent = 'Senden';
+      if (prefill && prefill.category) category.value = prefill.category;
+      if (prefill && prefill.regarding) {
+        regardingText.textContent = prefill.regarding;
+        context.value = prefill.context || prefill.regarding;
+        regarding.hidden = false;
+      } else {
+        regarding.hidden = true; regardingText.textContent = '';
+        context.value = location.href;
+      }
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+      setTimeout(function(){ message.focus(); }, 50);
+    }
+    function close(){
+      if (typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+    }
+
+    document.addEventListener('click', function(e){
+      var openBtn = e.target.closest('[data-contact-open]');
+      if (openBtn) { e.preventDefault(); open(null); return; }
+      var closeBtn = e.target.closest('[data-contact-close]');
+      if (closeBtn) { e.preventDefault(); close(); return; }
+      var reportBtn = e.target.closest('[data-report-regarding]');
+      if (reportBtn) {
+        e.preventDefault();
+        open({
+          category: 'Konzert',
+          regarding: reportBtn.getAttribute('data-report-regarding') || '',
+          context: reportBtn.getAttribute('data-report-context') || ''
+        });
+      }
+    });
+
+    dlg.addEventListener('click', function(e){ if (e.target === dlg) close(); });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      submit.disabled = true; submit.textContent = 'Wird gesendet…';
+      status.hidden = true;
+      var data = new FormData(form);
+      var payload = {};
+      data.forEach(function(v, k){ payload[k] = v; });
+      fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function(r){
+        if (!r.ok) throw new Error('submit failed');
+        status.textContent = 'Danke — Hinweis ist angekommen.';
+        status.className = 'contact-form__status contact-form__status--ok';
+        status.hidden = false;
+        form.reset();
+        setTimeout(close, 1800);
+      }).catch(function(){
+        status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an info@jonas-strassel.de.';
+        status.className = 'contact-form__status contact-form__status--err';
+        status.hidden = false;
+        submit.disabled = false; submit.textContent = 'Senden';
+      });
+    });
+  })();
 })();
 </script>`;
 }
@@ -410,6 +535,12 @@ export function renderFooter(): string {
   return `<footer class="footer">
   <span class="footer__rule"></span>
   <p>konzert.haus — Konzerte in Frankfurt und Umgebung.<br>Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik.</p>
+  <div class="footer__actions">
+    <button type="button" class="footer__action" data-contact-open aria-label="Problem melden">
+      <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.5v4M8 11h.01" stroke-linecap="round"/></svg>
+      <span>Problem melden</span>
+    </button>
+  </div>
   <div class="footer__links">
     <a href="/feed.ics">iCal</a>
     <span class="footer__sep">·</span>
@@ -470,6 +601,7 @@ ${renderDateStrip(dateStrip, date, today)}
 </main>
 
 ${renderFooter()}
+${renderContactDialog()}
 ${renderClientBehaviors()}
 </body>
 </html>`;

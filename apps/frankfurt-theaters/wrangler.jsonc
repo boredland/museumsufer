@@ -18,6 +18,12 @@
       "database_id": "c610b75f-a189-4692-a50a-13cf7e1a63f4"
     }
   ],
+  "send_email": [
+    {
+      "name": "FEEDBACK_EMAIL",
+      "destination_address": "info@jonas-strassel.de"
+    }
+  ],
   "assets": {
     "directory": "./public",
     "html_handling": "none",
