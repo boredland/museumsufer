@@ -940,7 +940,7 @@ export const CLIENT_SCRIPT = `
         var data = new FormData(contactForm);
         var payload = {};
         data.forEach(function(v, k) { payload[k] = v; });
-        fetch('https://formspree.io/f/feedback@ins.museum', {
+        fetch('/api/contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify(payload)

@@ -1,5 +1,6 @@
+import { EmailMessage } from "cloudflare:email";
 import { zValidator } from "@hono/zod-validator";
-import { securityHeaders } from "@museumsufer/core";
+import { buildFeedbackMime, securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
@@ -50,9 +51,21 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
+// Apex → frankfurt subdomain. Anyone landing on ins.museum gets a permanent
+// redirect to the canonical host (museumsufer.app remains primary canonical
+// for SEO; this redirect just collapses the apex shortcut).
+app.use("*", async (c, next) => {
+  const host = (c.req.header("host") ?? "").toLowerCase();
+  if (host === "ins.museum") {
+    const url = new URL(c.req.url);
+    return c.redirect(`https://frankfurt.ins.museum${url.pathname}${url.search}`, 301);
+  }
+  await next();
+});
+
 // Security headers — applied to every response. CSP keeps the inline-script
-// allowance for the FOUC bootstrap and Formspree form post; Permissions-Policy
-// keeps geolocation enabled for the transit-distance API on /api/transit.
+// allowance for the FOUC bootstrap; Permissions-Policy keeps geolocation
+// enabled for the transit-distance API on /api/transit.
 app.use(
   "*",
   securityHeaders({
@@ -63,10 +76,10 @@ app.use(
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "script-src 'self' 'unsafe-inline'",
-      "connect-src 'self' https://formspree.io",
+      "connect-src 'self'",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://formspree.io",
+      "form-action 'self'",
     ].join("; "),
   }),
 );
@@ -203,6 +216,33 @@ app.post("/api/transit", async (c) => {
 // API routes (migrated from handleApi)
 app.post("/api/like", async (c) => {
   return handleLike(c.req.raw, c.env);
+});
+
+const FEEDBACK_FROM = "no-reply@ins.museum";
+const FEEDBACK_TO = "info@jonas-strassel.de";
+
+app.post("/api/contact", async (c) => {
+  const body = (await c.req
+    .json<{ category?: string; email?: string; message?: string; context?: string }>()
+    .catch(() => null)) as { category?: string; email?: string; message?: string; context?: string } | null;
+  if (!body?.message || body.message.length < 3) return c.json({ error: "message required" }, 400);
+  if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
+
+  const raw = buildFeedbackMime({
+    from: FEEDBACK_FROM,
+    to: FEEDBACK_TO,
+    input: {
+      app: "frankfurt-museums",
+      category: body.category ?? null,
+      email: body.email ?? null,
+      message: body.message,
+      context: body.context ?? null,
+      userAgent: c.req.header("user-agent") ?? null,
+      pageUrl: c.req.header("referer") ?? null,
+    },
+  });
+  await c.env.FEEDBACK_EMAIL.send(new EmailMessage(FEEDBACK_FROM, FEEDBACK_TO, raw));
+  return c.json({ ok: true });
 });
 
 app.get("/api/events", async (c) => {
