@@ -178,10 +178,7 @@ ${buildHreflangs(`/event/${ev.id}`)}
   </div>
   <div class="actions actions--group">
     <span class="actions__label">${esc(tr.evCalendar)}</span>
-    <a href="/event/${ev.id}/feed.ics">.ics</a>
-    <a href="${esc(buildGoogleCalendarUrl(calEv))}" rel="external">Google</a>
-    <a href="${esc(buildOutlookCalendarUrl(calEv))}" rel="external">Outlook</a>
-    <a href="${esc(buildYahooCalendarUrl(calEv))}" rel="external">Yahoo</a>
+    ${renderCalendarPopoverHtml({ id: `cal-${ev.id}`, event: calEv, icsHref: `/event/${ev.id}/feed.ics`, label: tr.evCalendar })}
   </div>
   <div class="actions actions--group">
     <span class="actions__label">${esc(tr.evMore)}</span>
@@ -254,6 +251,30 @@ function buildIcsForOne(ev: Event): string {
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** HTML mirror of @museumsufer/core/calendar-popover CalendarPopover. Same
+ *  class hooks (`nav-wrap`, `nav-popover`, `nav-popover__link`) so the shared
+ *  POPOVER_POSITIONING_SCRIPT positions the dropdown the same way as in
+ *  theaters and konzert. */
+function renderCalendarPopoverHtml(opts: {
+  id: string;
+  event: Parameters<typeof buildGoogleCalendarUrl>[0];
+  icsHref: string;
+  label: string;
+}): string {
+  const g = esc(buildGoogleCalendarUrl(opts.event));
+  const o = esc(buildOutlookCalendarUrl(opts.event));
+  const y = esc(buildYahooCalendarUrl(opts.event));
+  return `<span class="nav-wrap">
+    <button type="button" class="action-btn" data-popover-target="${esc(opts.id)}" popovertarget="${esc(opts.id)}" aria-haspopup="menu" aria-label="${esc(opts.label)}" title="${esc(opts.label)}">📅</button>
+    <div id="${esc(opts.id)}" popover="auto" role="menu" class="nav-popover">
+      <a class="nav-popover__link" href="${g}" target="_blank" rel="noopener" role="menuitem">Google Calendar</a>
+      <a class="nav-popover__link" href="${o}" target="_blank" rel="noopener" role="menuitem">Outlook</a>
+      <a class="nav-popover__link" href="${y}" target="_blank" rel="noopener" role="menuitem">Yahoo</a>
+      <a class="nav-popover__link" href="${esc(opts.icsHref)}" download role="menuitem">.ics (Apple, Proton, …)</a>
+    </div>
+  </span>`;
 }
 
 /** Trim a string to ≤ maxLen characters at the nearest word boundary
