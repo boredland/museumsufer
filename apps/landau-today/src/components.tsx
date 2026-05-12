@@ -1,6 +1,7 @@
 import { Fragment } from "hono/jsx";
 import { CATEGORIES, CATEGORY_BY_SLUG, type CategoryDef } from "./categories";
 import { todayIso } from "./date";
+import { categoryLabel, DEFAULT_LOCALE, type Locale, type Translations } from "./i18n";
 import { imageProxyUrl } from "./image-proxy";
 import {
   dayOfMonth,
@@ -13,45 +14,53 @@ import {
 } from "./shared";
 import type { Event } from "./types";
 
+function langSuffix(locale: Locale, sep: "?" | "&" = "?"): string {
+  return locale === DEFAULT_LOCALE ? "" : `${sep}lang=${locale}`;
+}
+
 interface ChipRowProps {
   active?: string;
   date: string;
   counts: Map<string, number>;
+  tr: Translations;
+  locale: Locale;
 }
 
-export function ChipRow({ active, date, counts }: ChipRowProps) {
+export function ChipRow({ active, date, counts, tr, locale }: ChipRowProps) {
   const total = [...counts.values()].reduce((a, b) => a + b, 0);
   // Anchors are htmx-boosted to swap #content-body in place — see
   // src/index.tsx /partial/content. Falls back to a normal full-nav
   // if htmx isn't loaded (or for shift/cmd-clicks, which htmx
   // forwards to the browser).
   const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
+  const lang = langSuffix(locale, "&");
   return (
-    <nav class="strip" aria-label="Kategorie">
+    <nav class="strip" aria-label={tr.ariaCategory}>
       <div class="strip-rail">
         <a
           class={`chip ${active ? "" : "active"}`}
-          href={`/?date=${date}`}
+          href={`/?date=${date}${lang}`}
           hx-get={`/partial/content?date=${date}`}
           {...hxAttrs}
         >
-          <span class="t-label">Alle</span>
+          <span class="t-label">{tr.chipAll}</span>
           {total > 0 ? <span class="count">{total}</span> : null}
         </a>
         {CATEGORIES.map((cat) => {
           const n = counts.get(cat.slug) ?? 0;
           if (n === 0 && active !== cat.slug) return null;
+          const { short } = categoryLabel(cat.slug, tr);
           return (
             <a
               class={`chip m-${cat.mood} ${active === cat.slug ? "active" : ""}`}
-              href={`/c/${cat.slug}?date=${date}`}
+              href={`/c/${cat.slug}?date=${date}${lang}`}
               hx-get={`/partial/content?category=${cat.slug}&date=${date}`}
               {...hxAttrs}
             >
               <span class="glyph" aria-hidden="true">
                 {cat.glyph}
               </span>
-              <span class="t-label">{cat.short}</span>
+              <span class="t-label">{short}</span>
               {n > 0 ? <span class="count">{n}</span> : null}
             </a>
           );
@@ -66,9 +75,11 @@ interface DateStripProps {
   category?: string;
   counts: Map<string, number>;
   daysAhead?: number;
+  tr: Translations;
+  locale: Locale;
 }
 
-export function DateStrip({ current, category, counts, daysAhead = 21 }: DateStripProps) {
+export function DateStrip({ current, category, counts, daysAhead = 21, tr, locale }: DateStripProps) {
   const today = todayIso();
   const days: string[] = [];
   const start = new Date(`${today}T12:00:00Z`);
@@ -78,12 +89,13 @@ export function DateStrip({ current, category, counts, daysAhead = 21 }: DateStr
     days.push(d.toISOString().slice(0, 10));
   }
   const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
+  const lang = langSuffix(locale, "&");
   return (
-    <nav class="dates" aria-label="Datum">
+    <nav class="dates" aria-label={tr.ariaDate}>
       <div class="dates-rail">
         {days.map((iso) => {
           const n = counts.get(iso) ?? 0;
-          const href = category ? `/c/${category}?date=${iso}` : `/?date=${iso}`;
+          const href = (category ? `/c/${category}?date=${iso}` : `/?date=${iso}`) + lang;
           const partial = category
             ? `/partial/content?category=${category}&date=${iso}`
             : `/partial/content?date=${iso}`;
@@ -108,34 +120,32 @@ export function DateStrip({ current, category, counts, daysAhead = 21 }: DateStr
   );
 }
 
-export function DayHeadline({ date, total }: { date: string; total: number }) {
+export function DayHeadline({ date, total, tr }: { date: string; total: number; tr: Translations }) {
   const today = todayIso();
-  const rel = relativeDayLabel(date, today);
+  const rel = relativeDayLabelLocalized(date, today, tr);
   return (
     <div class="day-headline">
       <h2>{rel ?? formatDateLong(date)}</h2>
       <div class="day-headline-meta">
-        {/* "Near me" is a sort tool, not a category filter, so it lives
-            with the day metadata rather than in the chip strip — pairs
-            visually with the event count and stays out of the way while
-            the user picks categories. */}
-        <button
-          type="button"
-          class="near-toggle js-near"
-          aria-pressed="false"
-          title="Sortiert nach Entfernung zu deinem Standort"
-        >
+        <button type="button" class="near-toggle js-near" aria-pressed="false" title={tr.nearbyHint}>
           <span class="glyph" aria-hidden="true">
             ⌖
           </span>
-          <span>In der Nähe</span>
+          <span>{tr.nearby}</span>
         </button>
         <span class="meta">
-          {total} {total === 1 ? "Veranstaltung" : "Veranstaltungen"}
+          {total} {total === 1 ? tr.eventSingular : tr.eventPlural}
         </span>
       </div>
     </div>
   );
+}
+
+function relativeDayLabelLocalized(date: string, today: string, tr: Translations): string | null {
+  const original = relativeDayLabel(date, today);
+  if (!original) return null;
+  if (original.toLowerCase() === "heute") return tr.today;
+  return original;
 }
 
 function categoryFor(slug: string): CategoryDef {
@@ -154,13 +164,14 @@ function venueIncludesCity(venue: string | undefined, city: string): boolean {
 
 interface LedgerProps {
   ev: Event;
+  tr: Translations;
 }
 
 /** The ledger row — the page's primary card vocabulary. Looks like a
  *  classified-listing entry: tabular time on the left, hairline rule,
  *  title + venue + price in the body, mood-colored category glyph at
  *  the right. */
-export function Ledger({ ev }: LedgerProps) {
+export function Ledger({ ev, tr }: LedgerProps) {
   const cat = categoryFor(ev.category);
   const time = formatTime(ev.time);
   const isOpen = !!ev.end_date && !time;
@@ -210,8 +221,8 @@ export function Ledger({ ev }: LedgerProps) {
           <button
             type="button"
             class="row-action js-share-row"
-            aria-label="Direktlink kopieren"
-            title="Direktlink kopieren"
+            aria-label={tr.copyDirectLink}
+            title={tr.copyDirectLink}
             data-id={String(ev.id)}
             data-title={ev.title}
           >
@@ -220,8 +231,8 @@ export function Ledger({ ev }: LedgerProps) {
           <button
             type="button"
             class="row-action js-visited"
-            aria-label="Als besucht markieren"
-            title="Als besucht markieren"
+            aria-label={tr.markVisited}
+            title={tr.markVisited}
             data-id={String(ev.id)}
           >
             ✓
@@ -235,7 +246,12 @@ export function Ledger({ ev }: LedgerProps) {
           </div>
         ) : null}
       </div>
-      <span class="cat-glyph" title={cat.label} role="img" aria-label={cat.label}>
+      <span
+        class="cat-glyph"
+        title={categoryLabel(cat.slug, tr).label}
+        role="img"
+        aria-label={categoryLabel(cat.slug, tr).label}
+      >
         {cat.glyph}
       </span>
     </div>
@@ -244,12 +260,13 @@ export function Ledger({ ev }: LedgerProps) {
 
 interface BroadsideProps {
   ev: Event;
+  tr: Translations;
 }
 
 /** Full-width image card. Used as visual punctuation every ~6 ledger
  *  rows to break the rhythm; only emitted for events that carry a real
  *  image URL. */
-export function Broadside({ ev }: BroadsideProps) {
+export function Broadside({ ev, tr }: BroadsideProps) {
   const cat = categoryFor(ev.category);
   const img = imageProxyUrl(ev.image_url);
   const time = formatTime(ev.time);
@@ -273,7 +290,7 @@ export function Broadside({ ev }: BroadsideProps) {
       )}
       <div class="copy">
         <div class="eyebrow">
-          <span style={`color:var(--color-${cat.mood})`}>{cat.glyph}</span> {cat.label} ·{" "}
+          <span style={`color:var(--color-${cat.mood})`}>{cat.glyph}</span> {categoryLabel(cat.slug, tr).label} ·{" "}
           {ev.end_date ? formatDateRange(ev.date, ev.end_date) : formatDateLong(ev.date)}
           {time ? ` · ${time}` : ""}
         </div>
@@ -292,15 +309,16 @@ export function Broadside({ ev }: BroadsideProps) {
 interface EventListProps {
   events: Event[];
   date: string;
+  tr: Translations;
 }
 
 /** Renders a day's events with periodic broadside breakouts. The cadence
  *  is "every 7 ledger rows, lift one event with an image into a
  *  broadside" — but only if at least 8 rows remain, so the page doesn't
  *  end on a broadside that visually orphan-quotes its category. */
-export function EventList({ events }: EventListProps) {
+export function EventList({ events, tr }: EventListProps) {
   if (events.length === 0) {
-    return <div class="empty">Heute kein Programm gefunden.</div>;
+    return <div class="empty">{tr.emptyDay}</div>;
   }
   const ROWS_BETWEEN_BROADSIDES = 7;
   const out: ReturnType<typeof Ledger>[] = [];
@@ -309,10 +327,10 @@ export function EventList({ events }: EventListProps) {
     const remaining = events.length - idx;
     const eligible = !!ev.image_url && sinceBroadside >= ROWS_BETWEEN_BROADSIDES && remaining >= 4;
     if (eligible) {
-      out.push(<Broadside ev={ev} />);
+      out.push(<Broadside ev={ev} tr={tr} />);
       sinceBroadside = 0;
     } else {
-      out.push(<Ledger ev={ev} />);
+      out.push(<Ledger ev={ev} tr={tr} />);
       sinceBroadside++;
     }
   });

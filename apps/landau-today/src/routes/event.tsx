@@ -7,6 +7,7 @@ import {
 import { Hono } from "hono";
 import { CATEGORY_BY_SLUG } from "../categories";
 import { todayIso } from "../date";
+import { categoryLabel, detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
 import { imageProxyUrl } from "../image-proxy";
 import { getEventById } from "../queries";
 import {
@@ -37,15 +38,20 @@ app.get("/event/:slug", (c) => {
       "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
     });
   }
-  return c.html(renderEventPage(ev), 200, {
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  return c.html(renderEventPage(ev, locale, tr), 200, {
     "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
+    "Content-Language": locale,
+    Vary: "Accept-Language",
   });
 });
 
 export default app;
 
-function renderEventPage(ev: Event): string {
+function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
   const cat = CATEGORY_BY_SLUG.get(ev.category) ?? CATEGORY_BY_SLUG.get("sonstiges")!;
+  const localCat = categoryLabel(cat.slug, tr);
   const today = todayIso();
   const isPast = (ev.end_date ?? ev.date) < today;
   const time = formatTime(ev.time);
@@ -139,13 +145,13 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
 </head>
 <body>
 <header class="masthead">
-  <h1><a href="/">Landau<span class="ampersand">&amp;</span>heute</a></h1>
-  <p class="subtitle">Veranstaltungsblatt für die Südliche Weinstraße</p>
+  <h1><a href="/${locale === "fr" ? "?lang=fr" : ""}">Landau<span class="ampersand">&amp;</span>heute</a></h1>
+  <p class="subtitle">${esc(tr.subtitle)}</p>
 </header>
 <main id="content" class="event-detail" style="padding:0 1rem">
   <p class="eyebrow">
-    <span style="color:var(--color-${cat.mood})">${cat.glyph}</span> ${esc(cat.label)}
-    ${isPast ? " · vorbei" : ""}
+    <span style="color:var(--color-${cat.mood})">${cat.glyph}</span> ${esc(localCat.label)}
+    ${isPast ? ` · ${esc(tr.evPast)}` : ""}
   </p>
   <h1>${esc(ev.title)}</h1>
   <p class="when">${esc(when)}${time ? ` · ${time}${endTime ? `–${endTime}` : ""} Uhr` : ""}</p>
@@ -154,23 +160,23 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
   ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}
   ${ev.price ? `<p class="when" style="margin-top:1rem"><em>${esc(ev.price)}</em></p>` : ""}
   <div class="actions actions--group">
-    <span class="actions__label">Anfahrt</span>
+    <span class="actions__label">${esc(tr.evDirections)}</span>
     ${vrnUrl ? `<a href="${esc(vrnUrl)}" rel="external">VRN ÖPNV</a>` : ""}
     ${mapsUrl ? `<a href="${esc(mapsUrl)}" rel="external">Google Maps</a>` : ""}
   </div>
   <div class="actions actions--group">
-    <span class="actions__label">Kalender</span>
+    <span class="actions__label">${esc(tr.evCalendar)}</span>
     <a href="/event/${ev.id}.ics">.ics</a>
     <a href="${esc(buildGoogleCalendarUrl(calEv))}" rel="external">Google</a>
     <a href="${esc(buildOutlookCalendarUrl(calEv))}" rel="external">Outlook</a>
     <a href="${esc(buildYahooCalendarUrl(calEv))}" rel="external">Yahoo</a>
   </div>
   <div class="actions actions--group">
-    <span class="actions__label">Mehr</span>
-    <a href="${esc(ev.detail_url)}" rel="external">Quelle ansehen</a>
-    <button type="button" class="action-btn js-share" data-url="${esc(shareUrl)}" data-title="${esc(ev.title)}">Teilen</button>
+    <span class="actions__label">${esc(tr.evMore)}</span>
+    <a href="${esc(ev.detail_url)}" rel="external">${esc(tr.evViewSource)}</a>
+    <button type="button" class="action-btn js-share" data-url="${esc(shareUrl)}" data-title="${esc(ev.title)}">${esc(tr.evShare)}</button>
   </div>
-  <div class="share-toast" hidden>Link kopiert</div>
+  <div class="share-toast" hidden>${esc(tr.evLinkCopied)}</div>
 </main>
 <script>
 (function(){
@@ -208,8 +214,8 @@ ${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_u
 })();
 </script>
 <footer class="colophon-foot" style="max-width:38rem;margin:0 auto;padding:0 1rem 2rem">
-  <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
-  <span><a href="/">Zurück zum Programm</a></span>
+  <span>${esc(tr.footerLine)}</span>
+  <span><a href="/${locale === "fr" ? "?lang=fr" : ""}">${esc(tr.evBackToProgramme)}</a></span>
 </footer>
 </body>
 </html>`;
