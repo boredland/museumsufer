@@ -21,6 +21,26 @@ const spec = {
     { name: "Calendar", description: "Subscribable .ics feeds" },
   ],
   paths: {
+    "/api/day": {
+      get: {
+        tags: ["Events"],
+        summary: "Events for a date",
+        description: "Returns `{date, count, events}` for the given day. Optional filters: venue, genre, city.",
+        operationId: "getDay",
+        parameters: [
+          {
+            name: "date",
+            in: "query",
+            schema: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
+            description: "ISO date (defaults to today in Europe/Berlin)",
+          },
+          { name: "venue", in: "query", schema: { type: "string" }, description: "Venue slug" },
+          { name: "genre", in: "query", schema: { type: "string" }, description: "Genre key" },
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key" },
+        ],
+        responses: { "200": { description: "Day events" } },
+      },
+    },
     "/api/events": {
       get: {
         tags: ["Events"],

@@ -63,7 +63,7 @@ Returns: { date, count, events: [{ id, title, date, time, end_date, end_time, ca
 
 - RSS: ${APP_URL}/feed.xml (next 7 days)
 - ICS: ${APP_URL}/feed.ics (next 14 days)
-- Per-event ICS: ${APP_URL}/event/<id>.ics
+- Per-event ICS: ${APP_URL}/event/<id>/feed.ics
 
 ## Categories
 

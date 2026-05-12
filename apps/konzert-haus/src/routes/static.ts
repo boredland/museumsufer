@@ -39,6 +39,9 @@ Base URL: ${APP_URL}
 
 ### Events
 
+GET /api/day?date=YYYY-MM-DD&venue={slug}&genre={genre}&city={city}
+Returns { date, count, events } for one day. Date defaults to today (Europe/Berlin).
+
 GET /api/events?date=YYYY-MM-DD&from=YYYY-MM-DD&to=YYYY-MM-DD&venue={slug}&genre={genre}&city={city}
 Returns events with title, subtitle, performers, date, time, venue, venue_room, genre, price, ticket_url.
 

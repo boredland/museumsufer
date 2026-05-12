@@ -13,6 +13,16 @@ const DAY_HEADERS = {
   "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
 };
 
+app.get("/api/day", (c) => {
+  const date = c.req.query("date") ?? todayIso();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
+  const venue = c.req.query("venue") ?? null;
+  const city = c.req.query("city") ?? null;
+  const genre = parseGenre(c.req.query("genre"));
+  const events = getEventsForDate(date, { venue, city, genre });
+  return c.json({ date, count: events.length, events }, { headers: DAY_HEADERS });
+});
+
 app.get("/api/events", (c) => {
   const today = todayIso();
   const date = c.req.query("date");

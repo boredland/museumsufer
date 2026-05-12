@@ -244,7 +244,7 @@ function GenreFilter({
       <a
         class={`genre-pill ${!active ? "genre-pill--active" : ""}`}
         href={`/tag/${date}${lang}`}
-        hx-get={`/partial/programme?date=${date}`}
+        hx-get={`/partial/content?date=${date}`}
         hx-target="#programme-content"
         hx-push-url={`/tag/${date}${lang}`}
       >
@@ -257,7 +257,7 @@ function GenreFilter({
             key={g}
             class={`genre-pill ${active === g ? "genre-pill--active" : ""}`}
             href={href}
-            hx-get={`/partial/programme?date=${date}&genre=${g}`}
+            hx-get={`/partial/content?date=${date}&genre=${g}`}
             hx-target="#programme-content"
             hx-push-url={href}
           >
@@ -298,7 +298,7 @@ function DateStrip({
               class={cls}
               href={`/tag/${d.date}`}
               aria-current={isActive ? "true" : "false"}
-              hx-get={`/partial/programme?date=${d.date}`}
+              hx-get={`/partial/content?date=${d.date}`}
               hx-target="#programme-content"
               hx-push-url={`/tag/${d.date}`}
             >
@@ -762,7 +762,7 @@ if ('serviceWorker' in navigator) {
       t.setAttribute('aria-current', active ? 'true' : 'false');
       // Rewrite tile href + hx-* so date navigation preserves genre filter
       t.setAttribute('href', '/tag/' + d + qs);
-      setAttrIfPresent(t, 'hx-get', '/partial/programme?date=' + d + hxQs);
+      setAttrIfPresent(t, 'hx-get', '/partial/content?date=' + d + hxQs);
       setAttrIfPresent(t, 'hx-push-url', '/tag/' + d + qs);
     });
     var active = document.querySelector('.datetile--active');
@@ -778,7 +778,7 @@ if ('serviceWorker' in navigator) {
       var active = (genre || null) === (pillGenre ? decodeURIComponent(pillGenre) : null);
       p.classList.toggle('genre-pill--active', active);
       var base = '/tag/' + date;
-      var partial = '/partial/programme?date=' + date;
+      var partial = '/partial/content?date=' + date;
       if (pillGenre){
         p.setAttribute('href', base + '?genre=' + pillGenre);
         setAttrIfPresent(p, 'hx-get', partial + '&genre=' + pillGenre);
@@ -1074,7 +1074,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
       if (input.date) params.set('date', input.date);
       if (input.genre) params.set('genre', input.genre);
       if (input.venue) params.set('venue', input.venue);
-      return fetch('/api/events?' + params).then(function(r) { return r.json(); });`,
+      return fetch('/api/day?' + params).then(function(r) { return r.json(); });`,
   },
   {
     name: "get_venues",

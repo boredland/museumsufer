@@ -167,7 +167,7 @@ const spec = {
         responses: { "200": { description: "iCalendar (text/calendar)" } },
       },
     },
-    "/performance/{id}/feed.ics": {
+    "/event/{id}/feed.ics": {
       get: {
         tags: ["Calendar"],
         summary: "Single performance .ics",

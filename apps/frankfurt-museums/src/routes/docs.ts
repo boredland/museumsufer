@@ -115,7 +115,7 @@ const spec = {
         },
       },
     },
-    "/api/event/{id}.ics": {
+    "/event/{id}/feed.ics": {
       get: {
         summary: "Event as ICS",
         description: "Downloads a single event as an ICS calendar file.",

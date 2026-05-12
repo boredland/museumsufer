@@ -16,8 +16,8 @@ import { APP_URL } from "./static";
 /**
  * RFC 5545 calendar feeds. Three flavours:
  *   - /feed.ics                       (next 14 days, all theaters)
- *   - /api/theater/{slug}.ics         (next 60 days, single theater)
- *   - /api/performance/{id}.ics       (single performance)
+ *   - /theater/{slug}/feed.ics        (next 60 days, single theater)
+ *   - /event/{id}/feed.ics            (single performance)
  *
  * Cancelled performances ship STATUS:CANCELLED so subscribers see a
  * strikethrough rather than a plain event. Timed events default to a
@@ -57,7 +57,7 @@ app.get("/theater/:slug/feed.ics", async (c) => {
   return c.body(buildIcs(performances, theater.name), { headers: ICS_HEADERS });
 });
 
-app.get("/performance/:id/feed.ics", async (c) => {
+app.get("/event/:id/feed.ics", async (c) => {
   const idParam = c.req.param("id");
   if (!idParam) return c.notFound();
   const id = parseInt(idParam, 10);
