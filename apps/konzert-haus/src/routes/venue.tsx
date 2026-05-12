@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange, getVenueBySlug } from "../db";
 import { Event, Footer, Grain, Head, Masthead } from "../frontend";
+import { detectLocale, getTranslations } from "../i18n";
 import { renderVenueMarkdown, wantsMarkdown } from "../markdown";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
@@ -25,6 +26,9 @@ app.get("/spielort/:slug", (c) => {
     });
   }
 
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  const currentPath = `/spielort/${slug}`;
   const addressLocality = venue.city.length ? venue.city[0].toUpperCase() + venue.city.slice(1) : venue.city;
   const jsonLd = {
     "@context": "https://schema.org",
@@ -45,12 +49,14 @@ app.get("/spielort/:slug", (c) => {
   return c.html(
     <>
       {raw("<!DOCTYPE html>")}
-      <html lang="de">
+      <html lang={locale}>
         <head>
           <Head
             title={`${venue.name} — konzert.haus`}
             description={`Kommende Konzerte bei ${venue.name}. ${events.length} Termin${events.length === 1 ? "" : "e"} in den nächsten 60 Tagen.`}
             canonical={`${APP_URL}/spielort/${slug}`}
+            locale={locale}
+            currentPath={currentPath}
             jsonLd={jsonLd}
             extraLinks={[
               {
@@ -70,7 +76,7 @@ app.get("/spielort/:slug", (c) => {
         </head>
         <body>
           <Grain />
-          <Masthead />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
             <section class="venue-hero">
               <p class="venue-hero__kicker">Spielort</p>
@@ -93,12 +99,12 @@ app.get("/spielort/:slug", (c) => {
             ) : (
               <ol class="concerts">
                 {events.map((e, i) => (
-                  <Event key={e.id} e={e} opts={{ index: i, hideVenue: true }} />
+                  <Event key={e.id} e={e} opts={{ index: i, hideVenue: true }} tr={tr} />
                 ))}
               </ol>
             )}
           </main>
-          <Footer />
+          <Footer tr={tr} locale={locale} />
         </body>
       </html>
     </>,

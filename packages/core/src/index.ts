@@ -11,6 +11,7 @@ export * from "./german";
 export * from "./hash";
 export * from "./html";
 export * from "./htmx-lifecycle";
+export * from "./i18n";
 export * from "./llm-services";
 export * from "./manifest";
 export * from "./push";

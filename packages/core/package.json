@@ -18,6 +18,7 @@
     "./hash": "./src/hash.ts",
     "./html": "./src/html.ts",
     "./htmx-lifecycle": "./src/htmx-lifecycle.ts",
+    "./i18n": "./src/i18n.ts",
     "./llm-services": "./src/llm-services.ts",
     "./manifest": "./src/manifest.ts",
     "./push": "./src/push.ts",

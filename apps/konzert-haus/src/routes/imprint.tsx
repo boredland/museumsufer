@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { Footer, Grain, Head } from "../frontend";
+import { DEFAULT_LOCALE, getTranslations } from "../i18n";
 import type { Env } from "../types";
 import { APP_URL, REPO_URL } from "./static";
 
@@ -77,7 +78,7 @@ app.get("/impressum", (c) =>
               </a>
             </p>
           </main>
-          <Footer />
+          <Footer tr={getTranslations(DEFAULT_LOCALE)} locale={DEFAULT_LOCALE} />
         </body>
       </html>
     </>,

@@ -3,6 +3,7 @@ import { type Context, Hono } from "hono";
 import { getDatesWithEvents, getEventsForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
+import { detectLocale, getTranslations } from "./i18n";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
 import docsRoutes from "./routes/docs";
@@ -73,10 +74,26 @@ function renderHome(c: Context<AppEnv>, date: string) {
       },
     });
   }
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
   return c.html(
-    renderPage({ date, today, events, dateStrip, city, genre, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }),
+    renderPage({
+      date,
+      today,
+      events,
+      dateStrip,
+      city,
+      genre,
+      locale,
+      tr,
+      turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
+    }),
     {
-      headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
+      headers: {
+        "Content-Language": locale,
+        "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
+        Vary: "Accept-Language",
+      },
     },
   );
 }
@@ -90,7 +107,8 @@ app.get("/partial/programme", (c) => {
   const genre = parseGenre(c.req.query("genre"));
   const city = c.get("city") ?? "frankfurt";
   const events = getEventsForDate(date, { city, genre });
-  return c.html(renderProgrammePartial(date, events), {
+  const tr = getTranslations(detectLocale(c.req.raw));
+  return c.html(renderProgrammePartial(date, events, tr), {
     headers: { "Cache-Control": "public, max-age=300, s-maxage=900" },
   });
 });
