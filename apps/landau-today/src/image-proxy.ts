@@ -8,7 +8,18 @@
  */
 import { USER_AGENT } from "./shared";
 
-const ALLOWED_HOSTS = new Set(["www.landau.de", "kulturnetz-landau.de"]);
+/**
+ * Upstream image hosts we proxy. Anything outside this set is served direct
+ * (the renderer returns the original URL). Add hosts as scrapers find them —
+ * see `bun -e` host frequency check in the README for current counts.
+ */
+const ALLOWED_HOSTS = new Set([
+  "www.landau.de",
+  "kulturnetz-landau.de",
+  "www.suedlicheweinstrasse.de",
+  "www.pfalz.de",
+  "hambacher-schloss.de",
+]);
 
 export async function handleImageProxy(req: Request): Promise<Response | null> {
   const url = new URL(req.url);

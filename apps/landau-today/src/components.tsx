@@ -288,7 +288,10 @@ export function Broadside({ ev, tr, locale }: BroadsideProps) {
         // pipeline. Saves bandwidth on the events users never scroll
         // far enough to see.
         <div class="image" aria-hidden="true">
-          <img class="broadside-img" src={img} alt="" loading="lazy" decoding="async" />
+          {/* width/height tell the layout engine the aspect ratio up-front so
+              the broadside-img cell doesn't shift in (CLS). object-fit: cover
+              in the CSS still crops to the .image container's actual size. */}
+          <img class="broadside-img" src={img} alt="" width="400" height="200" loading="lazy" decoding="async" />
         </div>
       ) : (
         <div class="image" style="background:var(--color-paper-2)" aria-hidden="true" />
