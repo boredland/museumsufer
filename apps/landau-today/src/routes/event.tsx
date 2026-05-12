@@ -1,15 +1,18 @@
 import {
-  buildGoogleCalendarUrl,
+  type buildGoogleCalendarUrl,
   buildIcsCalendar,
   buildOutlookCalendarUrl,
   buildUtm,
   buildYahooCalendarUrl,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { CalendarPopover } from "@museumsufer/core/calendar-popover";
 import { Hono } from "hono";
-import { CATEGORY_BY_SLUG } from "../categories";
+import { raw } from "hono/html";
+import type { HtmlEscapedString } from "hono/utils/html";
+import { CATEGORY_BY_SLUG, type CategoryDef } from "../categories";
 import { todayIso } from "../date";
-import { buildHreflangs, buildLangSwitchHtml } from "../frontend";
+import { renderHreflangs, renderLangSwitch } from "../frontend";
 import { categoryLabel, detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
 import { imageProxyUrl } from "../image-proxy";
 import { getEventById } from "../queries";
@@ -52,7 +55,223 @@ app.get("/event/:id{[0-9]+}", (c) => {
 
 export default app;
 
-function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
+const FONT_HREF =
+  "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:opsz,wght@6..96,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap";
+
+const SHARE_SCRIPT = `
+(function(){
+  function showToast(){
+    var t = document.querySelector('.share-toast');
+    if (!t) return;
+    t.hidden = false;
+    setTimeout(function(){ t.hidden = true; }, 2000);
+  }
+  function onShare(btn){
+    var payload = { title: btn.dataset.title, url: btn.dataset.url };
+    if (navigator.share) { navigator.share(payload).catch(function(){}); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(payload.url).then(showToast).catch(function(){});
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = payload.url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast(); } catch(e){}
+    document.body.removeChild(ta);
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('.js-share');
+    if (btn) { e.preventDefault(); onShare(btn); }
+  });
+})();
+`;
+
+interface EventPageProps {
+  ev: Event;
+  locale: Locale;
+  tr: Translations;
+  cat: CategoryDef;
+  localCatLabel: string;
+  isPast: boolean;
+  when: string;
+  time: string | null;
+  endTime: string | null;
+  sameTime: boolean;
+  img: string | undefined;
+  vrnUrl: string | null;
+  mapsUrl: string | null;
+  shareUrl: string;
+  calEv: Parameters<typeof buildGoogleCalendarUrl>[0];
+  ldJson: string;
+  breadcrumbLd: string;
+  metaDescription: string;
+  title: string;
+}
+
+function EventDetail(props: EventPageProps) {
+  const {
+    ev,
+    locale,
+    tr,
+    cat,
+    localCatLabel,
+    isPast,
+    when,
+    time,
+    endTime,
+    sameTime,
+    img,
+    vrnUrl,
+    mapsUrl,
+    shareUrl,
+    calEv,
+    ldJson,
+    breadcrumbLd,
+    metaDescription,
+    title,
+  } = props;
+  const langHome = locale === "fr" ? "/?lang=fr" : "/";
+  return (
+    <>
+      {raw("<!doctype html>")}
+      <html lang={locale}>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+          <title>{title}</title>
+          <meta name="description" content={metaDescription} />
+          <meta name="theme-color" content="#f2ead3" />
+          <meta property="og:title" content={title} />
+          <meta property="og:description" content={metaDescription} />
+          <meta property="og:type" content="event" />
+          <meta property="og:image" content={`${APP_URL}/og/${ev.id}/image.svg`} />
+          <meta property="og:image:type" content="image/svg+xml" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="630" />
+          <meta name="twitter:card" content="summary_large_image" />
+          {ev.image_url ? <meta property="og:image:secure_url" content={ev.image_url} /> : null}
+          <link rel="canonical" href={`${APP_URL}/event/${ev.id}`} />
+          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+          <link href={FONT_HREF} rel="stylesheet" />
+          <link rel="stylesheet" href="/styles.css" />
+          {renderHreflangs(`/event/${ev.id}`)}
+          <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
+          <script src="/client.js" defer />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbLd }} />
+        </head>
+        <body>
+          <header class="masthead">
+            <h1>
+              <a href={langHome}>
+                Landau<span class="ampersand">&amp;</span>heute
+              </a>
+            </h1>
+            <p class="subtitle">{tr.subtitle}</p>
+            {renderLangSwitch(locale, `/event/${ev.id}`, tr)}
+            <button type="button" class="theme-toggle js-theme" aria-label={tr.themeToggle} title={tr.themeToggle}>
+              <span class="icon-sun" aria-hidden="true">
+                ☀
+              </span>
+              <span class="icon-moon" aria-hidden="true">
+                ☾
+              </span>
+            </button>
+          </header>
+          <main id="content" class="event-detail" style="padding:0 1rem">
+            <p class="eyebrow">
+              <span style={`color:var(--color-${cat.mood})`}>{cat.glyph}</span> {localCatLabel}
+              {isPast ? ` · ${tr.evPast}` : ""}
+            </p>
+            <h1>{ev.title}</h1>
+            <p class="when">
+              {when}
+              {time
+                ? ` · ${time}${endTime && !sameTime ? `–${endTime}` : ""}${tr.timeSuffix ? ` ${tr.timeSuffix}` : ""}`
+                : ""}
+            </p>
+            {ev.venue ? (
+              <p class="where">
+                {ev.venue}
+                {ev.organizer && ev.organizer !== ev.venue ? ` · ${ev.organizer}` : ""}
+              </p>
+            ) : null}
+            {img ? (
+              <img
+                src={img}
+                alt={ev.title}
+                width="800"
+                height="450"
+                loading="lazy"
+                decoding="async"
+                style="width:100%;height:auto;aspect-ratio:16/9;object-fit:cover"
+              />
+            ) : null}
+            {ev.description ? (
+              <div class="body-copy">
+                <p>{ev.description}</p>
+              </div>
+            ) : null}
+            {ev.price ? (
+              <p class="when" style="margin-top:1rem">
+                <em>{ev.price}</em>
+              </p>
+            ) : null}
+            <div class="actions actions--group">
+              <span class="actions__label">{tr.evDirections}</span>
+              {vrnUrl ? (
+                <a href={vrnUrl} rel="external">
+                  VRN ÖPNV
+                </a>
+              ) : null}
+              {mapsUrl ? (
+                <a href={mapsUrl} rel="external">
+                  Google Maps
+                </a>
+              ) : null}
+            </div>
+            <div class="actions actions--group">
+              <span class="actions__label">{tr.evCalendar}</span>
+              <CalendarPopover
+                event={calEv}
+                popoverId={`cal-${ev.id}`}
+                icsHref={`/event/${ev.id}/feed.ics`}
+                buttonClass="action-btn"
+                labels={{ addToCalendar: tr.evCalendar }}
+              />
+            </div>
+            <div class="actions actions--group">
+              <span class="actions__label">{tr.evMore}</span>
+              <a href={utm(ev.detail_url, "event")} rel="external">
+                {tr.evViewSource}
+              </a>
+              <button type="button" class="action-btn js-share" data-url={shareUrl} data-title={ev.title}>
+                {tr.evShare}
+              </button>
+            </div>
+            <div class="share-toast" hidden>
+              {tr.evLinkCopied}
+            </div>
+          </main>
+          <script dangerouslySetInnerHTML={{ __html: SHARE_SCRIPT }} />
+          <footer class="colophon-foot" style="max-width:38rem;margin:0 auto;padding:0 1rem 2rem">
+            <span>{tr.footerLine}</span>
+            <span>
+              <a href={langHome}>{tr.evBackToProgramme}</a>
+            </span>
+          </footer>
+        </body>
+      </html>
+    </>
+  );
+}
+
+function renderEventPage(ev: Event, locale: Locale, tr: Translations): HtmlEscapedString {
   const cat = CATEGORY_BY_SLUG.get(ev.category) ?? CATEGORY_BY_SLUG.get("sonstiges")!;
   const localCat = categoryLabel(cat.slug, tr);
   const today = todayIso();
@@ -115,119 +334,30 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): string {
     ],
   });
   const title = `${ev.title} — landau.today`;
-  // SERP descriptions truncate around ~155 chars; trim defensively so we
-  // don't end on a half-word.
   const metaDescription = trimToWords(ev.description ?? `${ev.title} — ${when} in ${ev.city ?? "Landau"}.`, 155);
-  return `<!doctype html>
-<html lang="${locale}">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>${esc(title)}</title>
-<meta name="description" content="${esc(metaDescription)}" />
-<meta name="theme-color" content="#f2ead3" />
-<meta property="og:title" content="${esc(title)}" />
-<meta property="og:description" content="${esc(metaDescription)}" />
-<meta property="og:type" content="event" />
-<meta property="og:image" content="${APP_URL}/og/${ev.id}/image.svg" />
-<meta property="og:image:type" content="image/svg+xml" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
-${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_url)}" />` : ""}
-<link rel="canonical" href="${APP_URL}/event/${ev.id}" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:opsz,wght@6..96,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
-  rel="stylesheet"
-/>
-<link rel="stylesheet" href="/styles.css" />
-${buildHreflangs(`/event/${ev.id}`)}
-<script>${THEME_FOUC_SCRIPT}</script>
-<script src="/client.js" defer></script>
-<script type="application/ld+json">${ldJson}</script>
-<script type="application/ld+json">${breadcrumbLd}</script>
-</head>
-<body>
-<header class="masthead">
-  <h1><a href="/${locale === "fr" ? "?lang=fr" : ""}">Landau<span class="ampersand">&amp;</span>heute</a></h1>
-  <p class="subtitle">${esc(tr.subtitle)}</p>
-  <nav class="langswitch" aria-label="${esc(tr.langSwitchAria)}">${buildLangSwitchHtml(locale, `/event/${ev.id}`)}</nav>
-  <button type="button" class="theme-toggle js-theme" aria-label="${esc(tr.themeToggle)}" title="${esc(tr.themeToggle)}">
-    <span class="icon-sun" aria-hidden="true">☀</span>
-    <span class="icon-moon" aria-hidden="true">☾</span>
-  </button>
-</header>
-<main id="content" class="event-detail" style="padding:0 1rem">
-  <p class="eyebrow">
-    <span style="color:var(--color-${cat.mood})">${cat.glyph}</span> ${esc(localCat.label)}
-    ${isPast ? ` · ${esc(tr.evPast)}` : ""}
-  </p>
-  <h1>${esc(ev.title)}</h1>
-  <p class="when">${esc(when)}${time ? ` · ${time}${endTime && !sameTime ? `–${endTime}` : ""}${tr.timeSuffix ? ` ${esc(tr.timeSuffix)}` : ""}` : ""}</p>
-  ${ev.venue ? `<p class="where">${esc(ev.venue)}${ev.organizer && ev.organizer !== ev.venue ? ` · ${esc(ev.organizer)}` : ""}</p>` : ""}
-  ${img ? `<img src="${esc(img)}" alt="${esc(ev.title)}" width="800" height="450" loading="lazy" decoding="async" style="width:100%;height:auto;aspect-ratio:16/9;object-fit:cover" />` : ""}
-  ${ev.description ? `<div class="body-copy"><p>${esc(ev.description)}</p></div>` : ""}
-  ${ev.price ? `<p class="when" style="margin-top:1rem"><em>${esc(ev.price)}</em></p>` : ""}
-  <div class="actions actions--group">
-    <span class="actions__label">${esc(tr.evDirections)}</span>
-    ${vrnUrl ? `<a href="${esc(vrnUrl)}" rel="external">VRN ÖPNV</a>` : ""}
-    ${mapsUrl ? `<a href="${esc(mapsUrl)}" rel="external">Google Maps</a>` : ""}
-  </div>
-  <div class="actions actions--group">
-    <span class="actions__label">${esc(tr.evCalendar)}</span>
-    ${renderCalendarPopoverHtml({ id: `cal-${ev.id}`, event: calEv, icsHref: `/event/${ev.id}/feed.ics`, label: tr.evCalendar })}
-  </div>
-  <div class="actions actions--group">
-    <span class="actions__label">${esc(tr.evMore)}</span>
-    <a href="${esc(utm(ev.detail_url, "event"))}" rel="external">${esc(tr.evViewSource)}</a>
-    <button type="button" class="action-btn js-share" data-url="${esc(shareUrl)}" data-title="${esc(ev.title)}">${esc(tr.evShare)}</button>
-  </div>
-  <div class="share-toast" hidden>${esc(tr.evLinkCopied)}</div>
-</main>
-<script>
-(function(){
-  // Share via the Web Share API where available; otherwise copy the URL
-  // to the clipboard and surface a small toast. Same idiom as theaters.
-  function showToast(){
-    var t = document.querySelector('.share-toast');
-    if (!t) return;
-    t.hidden = false;
-    setTimeout(function(){ t.hidden = true; }, 2000);
-  }
-  function onShare(btn){
-    var payload = { title: btn.dataset.title, url: btn.dataset.url };
-    if (navigator.share) {
-      navigator.share(payload).catch(function(){});
-      return;
-    }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(payload.url).then(showToast).catch(function(){});
-      return;
-    }
-    var ta = document.createElement('textarea');
-    ta.value = payload.url;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); showToast(); } catch(e){}
-    document.body.removeChild(ta);
-  }
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest && e.target.closest('.js-share');
-    if (btn) { e.preventDefault(); onShare(btn); }
-  });
-})();
-</script>
-<footer class="colophon-foot" style="max-width:38rem;margin:0 auto;padding:0 1rem 2rem">
-  <span>${esc(tr.footerLine)}</span>
-  <span><a href="/${locale === "fr" ? "?lang=fr" : ""}">${esc(tr.evBackToProgramme)}</a></span>
-</footer>
-</body>
-</html>`;
+  return (
+    <EventDetail
+      ev={ev}
+      locale={locale}
+      tr={tr}
+      cat={cat}
+      localCatLabel={localCat.label}
+      isPast={isPast}
+      when={when}
+      time={time}
+      endTime={endTime}
+      sameTime={sameTime}
+      img={img}
+      vrnUrl={vrnUrl}
+      mapsUrl={mapsUrl}
+      shareUrl={shareUrl}
+      calEv={calEv}
+      ldJson={ldJson}
+      breadcrumbLd={breadcrumbLd}
+      metaDescription={metaDescription}
+      title={title}
+    />
+  ) as unknown as HtmlEscapedString;
 }
 
 function buildIcsForOne(ev: Event): string {
@@ -247,34 +377,6 @@ function buildIcsForOne(ev: Event): string {
       },
     ],
   });
-}
-
-function esc(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-}
-
-/** HTML mirror of @museumsufer/core/calendar-popover CalendarPopover. Same
- *  class hooks (`nav-wrap`, `nav-popover`, `nav-popover__link`) so the shared
- *  POPOVER_POSITIONING_SCRIPT positions the dropdown the same way as in
- *  theaters and konzert. */
-function renderCalendarPopoverHtml(opts: {
-  id: string;
-  event: Parameters<typeof buildGoogleCalendarUrl>[0];
-  icsHref: string;
-  label: string;
-}): string {
-  const g = esc(buildGoogleCalendarUrl(opts.event));
-  const o = esc(buildOutlookCalendarUrl(opts.event));
-  const y = esc(buildYahooCalendarUrl(opts.event));
-  return `<span class="nav-wrap">
-    <button type="button" class="action-btn" data-popover-target="${esc(opts.id)}" popovertarget="${esc(opts.id)}" aria-haspopup="menu" aria-label="${esc(opts.label)}" title="${esc(opts.label)}">📅</button>
-    <div id="${esc(opts.id)}" popover="auto" role="menu" class="nav-popover">
-      <a class="nav-popover__link" href="${g}" target="_blank" rel="noopener" role="menuitem">Google Calendar</a>
-      <a class="nav-popover__link" href="${o}" target="_blank" rel="noopener" role="menuitem">Outlook</a>
-      <a class="nav-popover__link" href="${y}" target="_blank" rel="noopener" role="menuitem">Yahoo</a>
-      <a class="nav-popover__link" href="${esc(opts.icsHref)}" download role="menuitem">.ics (Apple, Proton, …)</a>
-    </div>
-  </span>`;
 }
 
 /** Trim a string to ≤ maxLen characters at the nearest word boundary
