@@ -14,6 +14,7 @@ import {
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayEvent } from "./db";
+import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { INLINE_CSS } from "./styles-inline";
 import type { Genre } from "./types";
 
@@ -33,6 +34,27 @@ export const GENRE_LABELS: Record<Genre, string> = {
   chamber: "Kammermusik",
 };
 
+function genreLabel(g: Genre, tr: Translations): string {
+  switch (g) {
+    case "classical":
+      return tr.genreClassical;
+    case "jazz":
+      return tr.genreJazz;
+    case "sacred":
+      return tr.genreSacred;
+    case "world":
+      return tr.genreWorld;
+    case "experimental":
+      return tr.genreExperimental;
+    case "chamber":
+      return tr.genreChamber;
+  }
+}
+
+function langSuffix(locale: Locale, separator: "?" | "&" = "?"): string {
+  return locale === DEFAULT_LOCALE ? "" : `${separator}lang=${locale}`;
+}
+
 const GENRE_ORDER: Genre[] = ["classical", "jazz", "chamber", "sacred", "world", "experimental"];
 
 const GENRE_COLOR_VAR: Record<Genre, string> = {
@@ -51,6 +73,8 @@ interface PageProps {
   dateStrip: DateWithCount[];
   city: string;
   genre?: Genre | null;
+  locale: Locale;
+  tr: Translations;
   turnstileSiteKey?: string;
 }
 
@@ -77,6 +101,8 @@ export interface HeadOptions {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   extraLinks?: Array<{ rel: string; href: string; type?: string; title?: string }>;
   turnstileSiteKey?: string;
+  locale?: Locale;
+  currentPath?: string;
 }
 
 export const escapeHtml = coreEscapeHtml;
@@ -103,7 +129,16 @@ export function Head(opts: HeadOptions) {
       <meta property="og:type" content="website" />
       <meta property="og:url" content={opts.canonical} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:locale" content="de_DE" />
+      <meta property="og:locale" content={opts.locale === "en" ? "en_GB" : opts.locale === "fr" ? "fr_FR" : "de_DE"} />
+      {opts.currentPath
+        ? SUPPORTED_LOCALES.map((l) => {
+            const path = opts.currentPath as string;
+            const stripped = path.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
+            const sep = stripped.includes("?") ? "&" : "?";
+            const href = `${APP_URL}${l === DEFAULT_LOCALE ? stripped : `${stripped}${sep}lang=${l}`}`;
+            return <link key={`hreflang-${l}`} rel="alternate" hreflang={l} href={href} />;
+          })
+        : null}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="theme-color" content="#F7F0E7" />
       <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -136,25 +171,43 @@ export function Grain() {
   return <div class="grain" aria-hidden="true" />;
 }
 
-export function Masthead() {
+function LangSwitch({ locale, currentPath }: { locale: Locale; currentPath: string }) {
+  const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
+  const sep = stripped.includes("?") ? "&" : "?";
+  return (
+    <nav class="langswitch" aria-label="Language">
+      {SUPPORTED_LOCALES.map((l) => {
+        const href = l === DEFAULT_LOCALE ? stripped || "/" : `${stripped || "/"}${sep}lang=${l}`;
+        return (
+          <a
+            key={l}
+            href={href}
+            class={`langswitch__a${l === locale ? " langswitch__a--active" : ""}`}
+            aria-current={l === locale ? "page" : undefined}
+            hreflang={l}
+          >
+            {l.toUpperCase()}
+          </a>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale: Locale; currentPath: string }) {
   return (
     <header class="masthead">
-      <a class="masthead__brand" href="/">
+      <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
         <h1 class="wordmark">
           <span class="wordmark__konzert">konzert</span>
           <span class="wordmark__dot">.</span>
           <span class="wordmark__haus">haus</span>
         </h1>
-        <p class="tagline">Was heute in Frankfurt und Umgebung erklingt.</p>
+        <p class="tagline">{tr.tagline}</p>
       </a>
       <hr class="masthead__rule" />
-      <button
-        type="button"
-        class="theme-toggle"
-        data-theme-toggle
-        aria-label="Farbthema wechseln"
-        title="Farbthema wechseln"
-      >
+      <LangSwitch locale={locale} currentPath={currentPath} />
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label={tr.themeToggle} title={tr.themeToggle}>
         <svg class="tt-moon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
@@ -177,21 +230,33 @@ export function Masthead() {
   );
 }
 
-function GenreFilter({ date, active }: { date: string; active?: Genre | null }) {
+function GenreFilter({
+  date,
+  active,
+  tr,
+  locale,
+}: {
+  date: string;
+  active?: Genre | null;
+  tr: Translations;
+  locale: Locale;
+}) {
+  const lang = langSuffix(locale);
+  const langAmp = langSuffix(locale, "&");
   return (
     <div class="genre-filter">
-      <span class="genre-filter__label">Genre</span>
+      <span class="genre-filter__label">{tr.genre}</span>
       <a
         class={`genre-pill ${!active ? "genre-pill--active" : ""}`}
-        href={`/tag/${date}`}
+        href={`/tag/${date}${lang}`}
         hx-get={`/partial/programme?date=${date}`}
         hx-target="#programme-content"
-        hx-push-url={`/tag/${date}`}
+        hx-push-url={`/tag/${date}${lang}`}
       >
-        Alle
+        {tr.genreAll}
       </a>
       {GENRE_ORDER.map((g) => {
-        const href = `/tag/${date}?genre=${g}`;
+        const href = `/tag/${date}?genre=${g}${langAmp}`;
         return (
           <a
             key={g}
@@ -202,7 +267,7 @@ function GenreFilter({ date, active }: { date: string; active?: Genre | null }) 
             hx-push-url={href}
           >
             <span class="genre-pill__dot" style={`background:${GENRE_COLOR_VAR[g]}`} />
-            {GENRE_LABELS[g]}
+            {genreLabel(g, tr)}
           </a>
         );
       })}
@@ -210,10 +275,20 @@ function GenreFilter({ date, active }: { date: string; active?: Genre | null }) 
   );
 }
 
-function DateStrip({ strip, active, today }: { strip: DateWithCount[]; active: string; today: string }) {
+function DateStrip({
+  strip,
+  active,
+  today,
+  tr,
+}: {
+  strip: DateWithCount[];
+  active: string;
+  today: string;
+  tr: Translations;
+}) {
   if (!strip.length) return null;
   return (
-    <nav class="datestrip" aria-label="Konzerttage">
+    <nav class="datestrip" aria-label={tr.dateStripLabel}>
       <div class="datestrip__inner" id="datestrip">
         {strip.map((d) => {
           const p = dateParts(d.date);
@@ -330,7 +405,7 @@ function PriceRange({ min, max }: { min?: number | null; max?: number | null }) 
   );
 }
 
-export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
+export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr: Translations }) {
   const time = e.time ?? "—";
   const endTime = e.end_time ? `bis ${e.end_time}` : "";
   const venueRoom = e.venue_room ?? null;
@@ -338,7 +413,7 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
   const titleHref = titleSource ? utm(titleSource, "event_title") : null;
   const priceNode = <PriceRange min={e.price_min} max={e.price_max} />;
   const hasPrice = e.price_min != null || e.price_max != null;
-  const genreLabel = GENRE_LABELS[e.genre];
+  const label = genreLabel(e.genre, tr);
   const reportRegarding = `${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
   const reportContext = `${APP_URL}/api/events/${e.id}`;
   const calendarEvent: CalendarEvent = {
@@ -385,7 +460,7 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
         {endTime ? <span class="concert__time-end">{endTime}</span> : null}
       </div>
       <div class="concert__body">
-        <span class={`concert__genre concert__genre--${e.genre}`}>{genreLabel}</span>
+        <span class={`concert__genre concert__genre--${e.genre}`}>{label}</span>
         <h3 class="concert__title">
           {titleHref ? (
             <a href={titleHref} target="_blank" rel="noopener">
@@ -403,7 +478,7 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
         {hasPrice ? (
           <p class="concert__price">{priceNode}</p>
         ) : (
-          <p class="concert__price concert__price--free">Eintritt frei</p>
+          <p class="concert__price concert__price--free">{tr.freeEntry}</p>
         )}
         <CalendarPopover
           event={calendarEvent}
@@ -416,8 +491,8 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
           class="icon-btn"
           data-report-regarding={reportRegarding}
           data-report-context={reportContext}
-          aria-label="Fehler bei diesem Konzert melden"
-          title="Fehler bei diesem Konzert melden"
+          aria-label={tr.reportConcert}
+          title={tr.reportConcert}
         >
           <svg
             viewBox="0 0 16 16"
@@ -434,7 +509,7 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
         </button>
         {e.ticket_url ? (
           <a class="action" href={utm(e.ticket_url, "karten")} target="_blank" rel="noopener">
-            <span>Karten</span>
+            <span>{tr.ticketsAction}</span>
             <span class="action__arrow" aria-hidden="true">
               →
             </span>
@@ -445,15 +520,15 @@ export function Event({ e, opts }: { e: DayEvent; opts: EventRowOptions }) {
   );
 }
 
-function DigestCue() {
+function DigestCue({ tr }: { tr: Translations }) {
   return (
-    <button type="button" class="digest-cue" data-digest-open aria-label="Push-Nachrichten zu Konzerten abonnieren">
+    <button type="button" class="digest-cue" data-digest-open aria-label={tr.digestTitle}>
       <span class="digest-cue__mark" aria-hidden="true">
         ※
       </span>
-      <span class="digest-cue__kicker">Push-Digest</span>
+      <span class="digest-cue__kicker">{tr.digestKicker}</span>
       <span class="digest-cue__rule" aria-hidden="true" />
-      <span class="digest-cue__text">Erfahre morgens, was heute klingt.</span>
+      <span class="digest-cue__text">{tr.digestCueText}</span>
       <span class="digest-cue__schedules" aria-hidden="true">
         07 · 17 · So 09
       </span>
@@ -464,13 +539,13 @@ function DigestCue() {
   );
 }
 
-function DigestDialog() {
+function DigestDialog({ tr }: { tr: Translations }) {
   return (
     <dialog id="digest-dialog" class="contact-dialog">
       <form id="digest-form" class="contact-form" novalidate>
         <header class="contact-form__head">
-          <h2 class="contact-form__title">Konzerte abonnieren</h2>
-          <button type="button" class="contact-form__close" data-digest-close aria-label="Schließen">
+          <h2 class="contact-form__title">{tr.digestTitle}</h2>
+          <button type="button" class="contact-form__close" data-digest-close aria-label={tr.digestClose}>
             <svg
               viewBox="0 0 16 16"
               width="14"
@@ -487,43 +562,43 @@ function DigestDialog() {
         <p class="contact-form__intro">
           Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.
         </p>
-        <fieldset class="digest-options" aria-label="Digest-Zeitpunkte">
+        <fieldset class="digest-options" aria-label={tr.digestSchedules}>
           <label class="digest-option">
             <input type="checkbox" name="schedule" value="morning" />
             <span class="digest-option__main">
-              <span class="digest-option__title">Jeden Morgen</span>
+              <span class="digest-option__title">{tr.digestMorning}</span>
               <span class="digest-option__time">07:00</span>
             </span>
-            <span class="digest-option__sub">Heutige Konzerte</span>
+            <span class="digest-option__sub">{tr.digestMorningSub}</span>
           </label>
           <label class="digest-option">
             <input type="checkbox" name="schedule" value="afternoon" />
             <span class="digest-option__main">
-              <span class="digest-option__title">Jeden Nachmittag</span>
+              <span class="digest-option__title">{tr.digestAfternoon}</span>
               <span class="digest-option__time">17:00</span>
             </span>
-            <span class="digest-option__sub">Was läuft heute Abend?</span>
+            <span class="digest-option__sub">{tr.digestAfternoonSub}</span>
           </label>
           <label class="digest-option">
             <input type="checkbox" name="schedule" value="weekly" />
             <span class="digest-option__main">
-              <span class="digest-option__title">Sonntag-Digest</span>
+              <span class="digest-option__title">{tr.digestSunday}</span>
               <span class="digest-option__time">So 09:00</span>
             </span>
-            <span class="digest-option__sub">Wochenüberblick</span>
+            <span class="digest-option__sub">{tr.digestSundaySub}</span>
           </label>
         </fieldset>
         <details class="digest-filter">
           <summary class="digest-filter__summary">
-            <span class="digest-filter__label">Genres einschränken</span>
-            <span class="digest-filter__hint">leer = alle</span>
+            <span class="digest-filter__label">{tr.digestFilterLabel}</span>
+            <span class="digest-filter__hint">{tr.digestFilterHint}</span>
           </summary>
-          <fieldset class="digest-filter__chips" aria-label="Genres">
+          <fieldset class="digest-filter__chips" aria-label={tr.genre}>
             {GENRE_ORDER.map((g) => (
               <label key={g} class="digest-chip">
                 <input type="checkbox" name="filter-genre" value={g} />
                 <span class="digest-chip__dot" style={`background:${GENRE_COLOR_VAR[g]}`} />
-                <span class="digest-chip__label">{GENRE_LABELS[g]}</span>
+                <span class="digest-chip__label">{genreLabel(g, tr)}</span>
               </label>
             ))}
           </fieldset>
@@ -561,13 +636,13 @@ function DigestDialog() {
   );
 }
 
-function ContactDialog({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
+function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey?: string; tr: Translations }) {
   return (
     <dialog id="contact-dialog" class="contact-dialog">
       <form id="contact-form" class="contact-form" novalidate>
         <header class="contact-form__head">
-          <h2 class="contact-form__title">Feedback &amp; Korrekturen</h2>
-          <button type="button" class="contact-form__close" data-contact-close aria-label="Schließen">
+          <h2 class="contact-form__title">{tr.contactTitle}</h2>
+          <button type="button" class="contact-form__close" data-contact-close aria-label={tr.digestClose}>
             <svg
               viewBox="0 0 16 16"
               width="14"
@@ -585,24 +660,24 @@ function ContactDialog({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
           Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.
         </p>
         <div class="contact-form__regarding" id="contact-regarding" hidden>
-          <span class="contact-form__regarding-label">Betrifft</span>
+          <span class="contact-form__regarding-label">{tr.contactRegarding}</span>
           <span id="contact-regarding-text" />
         </div>
         <label class="contact-form__field">
           <span class="contact-form__label">Kategorie</span>
           <select id="contact-category" name="category" required>
-            <option value="Konzert">Konzert — falsche Daten</option>
-            <option value="Spielort">Spielort — fehlt oder Korrektur</option>
-            <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
+            <option value="Konzert">{tr.contactCategoryConcert}</option>
+            <option value="Spielort">{tr.contactCategoryVenue}</option>
+            <option value="Allgemein">{tr.contactCategoryGeneral}</option>
           </select>
         </label>
         <label class="contact-form__field">
-          <span class="contact-form__label">E-Mail (optional, für Rückfragen)</span>
+          <span class="contact-form__label">{tr.contactEmail}</span>
           <input type="email" id="contact-email" name="email" placeholder="dein@email.de" />
         </label>
         <label class="contact-form__field">
-          <span class="contact-form__label">Nachricht</span>
-          <textarea id="contact-message" name="message" required rows={4} placeholder="Was stimmt nicht?" />
+          <span class="contact-form__label">{tr.contactMessage}</span>
+          <textarea id="contact-message" name="message" required rows={4} placeholder={tr.contactIntro} />
         </label>
         <input type="hidden" id="contact-context" name="context" />
         {turnstileSiteKey ? (
@@ -611,7 +686,7 @@ function ContactDialog({ turnstileSiteKey }: { turnstileSiteKey?: string }) {
         <footer class="contact-form__foot">
           <p id="contact-status" class="contact-form__status" hidden aria-live="polite" />
           <button type="submit" id="contact-submit" class="contact-form__submit">
-            Senden
+            {tr.contactSend}
           </button>
         </footer>
       </form>
@@ -958,17 +1033,14 @@ function ClientBehaviors() {
   );
 }
 
-export function Footer() {
+export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
+  const lang = langSuffix(locale);
   return (
     <footer class="footer">
       <span class="footer__rule" />
-      <p>
-        konzert.haus — Konzerte in Frankfurt und Umgebung.
-        <br />
-        Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik.
-      </p>
+      <p>{tr.homeDescription}</p>
       <div class="footer__actions">
-        <button type="button" class="footer__action" data-digest-open aria-label="Push-Nachrichten abonnieren">
+        <button type="button" class="footer__action" data-digest-open aria-label={tr.digestSubscribe}>
           <svg
             viewBox="0 0 16 16"
             width="13"
@@ -981,9 +1053,9 @@ export function Footer() {
             <path d="M8 1.5a4 4 0 0 0-4 4v3l-1.5 2.5h11L12 8.5v-3a4 4 0 0 0-4-4z" stroke-linejoin="round" />
             <path d="M6 13a2 2 0 0 0 4 0" stroke-linecap="round" />
           </svg>
-          <span>Push abonnieren</span>
+          <span>{tr.digestSubscribe}</span>
         </button>
-        <button type="button" class="footer__action" data-contact-open aria-label="Problem melden">
+        <button type="button" class="footer__action" data-contact-open aria-label={tr.reportProblem}>
           <svg
             viewBox="0 0 16 16"
             width="13"
@@ -996,7 +1068,7 @@ export function Footer() {
             <circle cx="8" cy="8" r="6.5" />
             <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
           </svg>
-          <span>Problem melden</span>
+          <span>{tr.reportProblem}</span>
         </button>
       </div>
       <div class="footer__links">
@@ -1006,7 +1078,7 @@ export function Footer() {
         <span class="footer__sep">·</span>
         <a href="/api/docs">API</a>
         <span class="footer__sep">·</span>
-        <a href="/impressum">Impressum</a>
+        <a href={`/impressum${lang}`}>{tr.imprint}</a>
         <span class="footer__sep">·</span>
         <a href={REPO_URL} target="_blank" rel="noopener">
           GitHub
@@ -1016,7 +1088,7 @@ export function Footer() {
   );
 }
 
-export function ProgrammePartial({ date, events }: { date: string; events: DayEvent[] }) {
+export function ProgrammePartial({ date, events, tr }: { date: string; events: DayEvent[]; tr: Translations }) {
   const dp = dateParts(date);
   return (
     <>
@@ -1032,12 +1104,12 @@ export function ProgrammePartial({ date, events }: { date: string; events: DayEv
       {events.length === 0 ? (
         <div class="empty">
           <p class="empty__mark">∅</p>
-          <p>Heute keine Konzerte gemeldet.</p>
+          <p>{tr.emptyTitle}</p>
         </div>
       ) : (
         <ol class="concerts" id="concerts">
           {events.map((e, i) => (
-            <Event key={e.id} e={e} opts={{ index: i }} />
+            <Event key={e.id} e={e} opts={{ index: i }} tr={tr} />
           ))}
         </ol>
       )}
@@ -1045,54 +1117,76 @@ export function ProgrammePartial({ date, events }: { date: string; events: DayEv
   );
 }
 
-export function renderProgrammePartial(date: string, events: DayEvent[]): HtmlEscapedString {
-  return (<ProgrammePartial date={date} events={events} />) as unknown as HtmlEscapedString;
+const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
+
+export function renderProgrammePartial(
+  date: string,
+  events: DayEvent[],
+  tr: Translations = DEFAULT_TR,
+): HtmlEscapedString {
+  return (<ProgrammePartial date={date} events={events} tr={tr} />) as unknown as HtmlEscapedString;
 }
 
 export function renderHead(opts: HeadOptions): HtmlEscapedString {
   return (<Head {...opts} />) as unknown as HtmlEscapedString;
 }
 
-export function renderFooter(): HtmlEscapedString {
-  return (<Footer />) as unknown as HtmlEscapedString;
+export function renderFooter(tr: Translations = DEFAULT_TR, locale: Locale = DEFAULT_LOCALE): HtmlEscapedString {
+  return (<Footer tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
 }
 
-export function renderEvent(e: DayEvent, opts: EventRowOptions): HtmlEscapedString {
-  return (<Event e={e} opts={opts} />) as unknown as HtmlEscapedString;
+export function renderEvent(e: DayEvent, opts: EventRowOptions, tr: Translations = DEFAULT_TR): HtmlEscapedString {
+  return (<Event e={e} opts={opts} tr={tr} />) as unknown as HtmlEscapedString;
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, events, dateStrip, genre, turnstileSiteKey } = props;
-  const niceDate = fullGerman(date);
+  const { date, today, events, dateStrip, genre, locale, tr, turnstileSiteKey } = props;
+  const niceDate = niceDateFor(date, locale);
+  const currentPath = genre ? `/tag/${date}?genre=${genre}` : `/tag/${date}`;
   return (
     <>
       {raw("<!DOCTYPE html>")}
-      <html lang="de">
+      <html lang={locale}>
         <head>
           <Head
             title={`konzert.haus · ${niceDate}`}
-            description={`Konzerte in Frankfurt und Umgebung am ${niceDate}. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik, Neue Musik.`}
-            canonical={`${APP_URL}/tag/${date}`}
+            description={tr.homeDescription}
+            canonical={`${APP_URL}/tag/${date}${langSuffix(locale)}`}
+            locale={locale}
+            currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
           />
         </head>
         <body>
           <Grain />
-          <Masthead />
-          <GenreFilter date={date} active={genre} />
-          <DateStrip strip={dateStrip} active={date} today={today} />
-          <DigestCue />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <GenreFilter date={date} active={genre} tr={tr} locale={locale} />
+          <DateStrip strip={dateStrip} active={date} today={today} tr={tr} />
+          <DigestCue tr={tr} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} events={events} />
+              <ProgrammePartial date={date} events={events} tr={tr} />
             </div>
           </main>
-          <Footer />
-          <ContactDialog turnstileSiteKey={turnstileSiteKey} />
-          <DigestDialog />
+          <Footer tr={tr} locale={locale} />
+          <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
+          <DigestDialog tr={tr} />
           <ClientBehaviors />
         </body>
       </html>
     </>
   ) as unknown as HtmlEscapedString;
+}
+
+function niceDateFor(date: string, locale: Locale): string {
+  if (locale === "de") return fullGerman(date);
+  const d = new Date(`${date}T12:00:00Z`);
+  const fmt = locale === "fr" ? "fr-FR" : "en-GB";
+  return d.toLocaleDateString(fmt, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }

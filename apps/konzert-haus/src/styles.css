@@ -211,6 +211,30 @@ body::before {
 :root.dark .theme-toggle .tt-sun { display: block; }
 :root.dark .theme-toggle .tt-moon { display: none; }
 
+.langswitch {
+  position: absolute;
+  top: clamp(1.25rem, 2.5vw, 2rem);
+  right: calc(var(--gut) + 3rem);
+  display: inline-flex;
+  gap: 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  color: var(--felt-quiet);
+  z-index: 50;
+}
+.langswitch__a {
+  color: inherit;
+  padding: 0.15rem 0.1rem;
+  border-bottom: 1px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+.langswitch__a:hover { color: var(--brass); }
+.langswitch__a--active {
+  color: var(--felt);
+  border-bottom-color: var(--brass);
+}
+
 .genre-filter {
   position: relative;
   z-index: 3;
