@@ -38,10 +38,11 @@ interface PageProps {
   events: Event[];
   categoryCounts: Map<string, number>;
   dateCounts: Map<string, number>;
+  turnstileSiteKey: string;
 }
 
 export function renderPage(props: PageProps): string {
-  const { date, category, events } = props;
+  const { date, category, events, turnstileSiteKey } = props;
   const cat = category ? CATEGORY_BY_SLUG.get(category) : undefined;
   const isHome = !category && date === todayIso();
   const title = cat
@@ -84,6 +85,7 @@ export function renderPage(props: PageProps): string {
 <link rel="stylesheet" href="/styles.css" />
 <script>${THEME_FOUC_SCRIPT}</script>
 <script src="/htmx.min.js" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script type="application/ld+json">${jsonLd}</script>
 <script type="application/ld+json">${faqLd}</script>
 </head>
@@ -116,7 +118,7 @@ ${renderFaq(FAQ)}
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
   <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
   <span>
-    <button type="button" data-digest-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Push abonnieren</button> · <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
+    <button type="button" data-digest-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Push abonnieren</button> · <button type="button" data-contact-open style="background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px">Problem melden</button> · <a href="/feed.ics">Kalender abonnieren</a> · <a href="/feed.xml">RSS</a> · <a href="/llms.txt">llms.txt</a> · <a href="/impressum">Impressum</a>
   </span>
 </footer>
 
@@ -168,6 +170,38 @@ ${renderFaq(FAQ)}
       <p id="digest-status" hidden style="margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0" aria-live="polite"></p>
       <button type="button" id="digest-unsubscribe-all" hidden style="background:transparent;border:0;padding:0.5rem 0;font-size:0.6875rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55);cursor:pointer;font-family:var(--font-body)">Alle abbestellen</button>
       <button type="submit" id="digest-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">Abonnieren</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="contact-dialog" style="margin:auto;padding:0;border:1px solid var(--color-rule);border-radius:0.5rem;background:var(--color-paper);color:var(--color-ink);width:min(28rem,calc(100vw - 2rem));box-shadow:0 16px 48px -16px rgb(from var(--color-ink) r g b / 0.35);">
+  <form id="contact-form" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;font-family:var(--font-body)" novalidate>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
+      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">Feedback &amp; Korrekturen</h2>
+      <button type="button" data-contact-close aria-label="Schließen" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
+    </div>
+    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">Fehlende Veranstaltung, falsche Zeit, Tippfehler? Wir freuen uns über jeden Hinweis.</p>
+    <label style="display:flex;flex-direction:column;gap:0.35rem">
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">Kategorie</span>
+      <select id="contact-category" name="category" required style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit">
+        <option value="Veranstaltung">Veranstaltung — fehlt oder falsch</option>
+        <option value="Quelle">Quelle — neue Seite vorschlagen</option>
+        <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
+      </select>
+    </label>
+    <label style="display:flex;flex-direction:column;gap:0.35rem">
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">E-Mail (optional, für Rückfragen)</span>
+      <input type="email" id="contact-email" name="email" placeholder="dein@email.de" style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit" />
+    </label>
+    <label style="display:flex;flex-direction:column;gap:0.35rem">
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">Nachricht</span>
+      <textarea id="contact-message" name="message" required rows="4" placeholder="Was stimmt nicht?" style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit;resize:vertical;min-height:5rem"></textarea>
+    </label>
+    <input type="hidden" id="contact-context" name="context" />
+    <div class="cf-turnstile" data-sitekey="${escapeHtml(turnstileSiteKey)}" data-size="flexible" data-theme="auto"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-top:0.25rem">
+      <p id="contact-status" hidden style="margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0" aria-live="polite"></p>
+      <button type="submit" id="contact-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">Senden</button>
     </div>
   </form>
 </dialog>

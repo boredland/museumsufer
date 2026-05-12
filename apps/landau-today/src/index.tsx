@@ -1,4 +1,4 @@
-import { securityHeaders } from "@museumsufer/core";
+import { handleContactRequest, securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { isCategorySlug } from "./categories";
 import { todayIso } from "./date";
@@ -24,8 +24,9 @@ app.use(
       "img-src 'self' data: https:",
       "font-src 'self' https://fonts.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "script-src 'self' 'unsafe-inline'",
-      "connect-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
+      "connect-src 'self' https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -41,13 +42,23 @@ app.route("/api/docs", docsRoute);
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
+app.post("/api/contact", (c) =>
+  handleContactRequest({
+    request: c.req.raw,
+    env: c.env,
+    app: "landau-today",
+    from: "no-reply@landau.today",
+    to: "info@jonas-strassel.de",
+  }),
+);
+
 // Home + category routes share a single renderer. /partial/content
 // always returns just the swappable inner body so htmx can graft it
 // into #content-body without flickering the masthead, search bar, or
 // footer. The full-page routes serve renderPage() unconditionally —
 // even when called by htmx — because the page entry shouldn't depend
 // on a header that proxies/CDN caches might strip.
-function buildProps(c: import("hono").Context, category?: string) {
+function buildProps(c: import("hono").Context<{ Bindings: Env }>, category?: string) {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   if (category && !isCategorySlug(category)) return null;
@@ -56,7 +67,7 @@ function buildProps(c: import("hono").Context, category?: string) {
   const horizon = new Date(`${todayIso()}T12:00:00Z`);
   horizon.setUTCDate(horizon.getUTCDate() + 21);
   const dateCounts = getEventCountsByDate(todayIso(), horizon.toISOString().slice(0, 10));
-  return { date, category, events, categoryCounts, dateCounts };
+  return { date, category, events, categoryCounts, dateCounts, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY };
 }
 
 const PAGE_HEADERS = {
@@ -64,7 +75,7 @@ const PAGE_HEADERS = {
   "Content-Language": "de",
 };
 
-function renderForCategory(c: import("hono").Context, category?: string) {
+function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, category?: string) {
   const props = buildProps(c, category);
   if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
   return c.html(renderPage(props), 200, PAGE_HEADERS);
