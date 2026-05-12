@@ -26,6 +26,7 @@ import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import imprintRoute from "./routes/imprint";
 import museumRoute from "./routes/museum";
+import ogRoute from "./routes/og";
 import pushRoute from "./routes/push";
 import staticRoute from "./routes/static";
 import { formatDateFull } from "./shared";
@@ -99,6 +100,7 @@ app.route("/", pushRoute);
 app.route("/", feedsRoute);
 app.route("/", imprintRoute);
 app.route("/", museumRoute);
+app.route("/", ogRoute);
 app.route("/api/docs", docsRoute);
 
 app.get("/img/*", async (c) => {

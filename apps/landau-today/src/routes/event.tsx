@@ -119,7 +119,12 @@ function renderEventPage(ev: Event): string {
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(metaDescription)}" />
 <meta property="og:type" content="event" />
-${ev.image_url ? `<meta property="og:image" content="${esc(ev.image_url)}" />` : ""}
+<meta property="og:image" content="${APP_URL}/og/${ev.id}/image.svg" />
+<meta property="og:image:type" content="image/svg+xml" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+${ev.image_url ? `<meta property="og:image:secure_url" content="${esc(ev.image_url)}" />` : ""}
 <link rel="canonical" href="${APP_URL}/event/${ev.id}" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
