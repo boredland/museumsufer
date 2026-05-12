@@ -33,7 +33,7 @@ function isLocale(v: string): v is Locale {
 type Translations = Record<string, string>;
 
 const de: Translations = {
-  subtitle: "Ausstellungen & Veranstaltungen",
+  subtitle: "was heute am Museumsufer los ist",
   today: "Heute",
   tomorrow: "Morgen",
   saturday: "Samstag",
@@ -213,7 +213,7 @@ const de: Translations = {
 };
 
 const en: Translations = {
-  subtitle: "Exhibitions & Events",
+  subtitle: "what's on at the Museumsufer today",
   today: "Today",
   tomorrow: "Tomorrow",
   saturday: "Saturday",
@@ -392,7 +392,7 @@ const en: Translations = {
 };
 
 const fr: Translations = {
-  subtitle: "Expositions & Événements",
+  subtitle: "ce qui se passe au Museumsufer aujourd'hui",
   today: "Auj.",
   tomorrow: "Demain",
   saturday: "Samedi",
