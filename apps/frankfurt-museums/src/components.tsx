@@ -598,7 +598,10 @@ function EventCard({
           </p>
           <p class="text-xs text-text-secondary">
             {ev.museum_slug ? (
-              <a href={`/museum/${ev.museum_slug}`} class="no-underline hover:text-river">
+              <a
+                href={`/museum/${ev.museum_slug}`}
+                class="no-underline hover:text-river inline-flex items-center min-h-6 py-1 -my-1"
+              >
                 {ev.museum_name || ""}
               </a>
             ) : (
@@ -728,7 +731,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
           <p class="font-display italic text-[0.9375rem] leading-tight line-clamp-2 max-[480px]:text-[0.8125rem]">
             <a
               href={`/museum/${slug}`}
-              class="text-inherit no-underline hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
+              class="text-inherit no-underline inline-flex items-center min-h-6 py-1 -my-1 hover:text-river focus-visible:outline-2 focus-visible:outline-river focus-visible:outline-offset-2 focus-visible:rounded-sm"
             >
               {museum.name}
             </a>

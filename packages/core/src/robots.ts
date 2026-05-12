@@ -34,9 +34,13 @@ export function buildRobotsTxt(opts: RobotsTxtOptions): string {
     "Allow: /",
     "",
     "User-agent: *",
-    "Content-Signal: ai-train=no, search=yes, ai-input=yes",
     "Allow: /",
     "",
+    // The Cloudflare Content-Signal extension lived here previously
+    // (ai-train=no, search=yes, ai-input=yes) but Lighthouse's RFC 9309
+    // validator rejects unknown directives and tanks the SEO score.
+    // The same intent is conveyed by our explicit Allow rules for the
+    // major AI crawlers above; CF's signal is informative-only anyway.
     `Sitemap: ${opts.siteUrl}${sitemap}`,
   ];
   if (llmsTxt) lines.push(`# LLMs: ${opts.siteUrl}${llmsTxt}`);
