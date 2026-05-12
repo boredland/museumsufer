@@ -1932,3 +1932,6 @@ dialog::backdrop {
 }
 .imprint__source-link:hover { color: var(--color-river); }
 
+
+/* Honor the HTML `hidden` attribute over any later display rule. */
+[hidden] { display: none !important; }

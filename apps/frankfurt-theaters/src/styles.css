@@ -1281,7 +1281,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 /* ────────────────  Contact dialog (native <dialog>)  ──────────────── */
 
-.contact-dialog {
+.dialog {
   margin: auto;
   padding: 0;
   border: 1px solid var(--rule);
@@ -1292,33 +1292,33 @@ button, a { -webkit-tap-highlight-color: transparent; }
   box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
-.contact-dialog::backdrop {
+.dialog::backdrop {
   background: rgba(15, 10, 5, 0.42);
   backdrop-filter: blur(2px);
 }
-:root.dark .contact-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+:root.dark .dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 
-.contact-form {
+.dialog__form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.4rem;
 }
-.contact-form__head {
+.dialog__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin: 0;
 }
-.contact-form__title {
+.dialog__title {
   font-family: var(--serif);
   font-variation-settings: 'opsz' 36, 'wght' 600, 'SOFT' 100;
   font-size: 1.35rem;
   letter-spacing: -0.005em;
   margin: 0;
 }
-.contact-form__close {
+.dialog__close {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -1328,16 +1328,16 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: 999px;
   transition: color 180ms ease, background 180ms ease;
 }
-.contact-form__close:hover { color: var(--accent); background: var(--accent-soft); }
+.dialog__close:hover { color: var(--accent); background: var(--accent-soft); }
 
-.contact-form__intro {
+.dialog__intro {
   margin: -0.25rem 0 0;
   color: var(--ink-soft);
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
-.contact-form__regarding {
+.dialog__regarding {
   display: flex;
   align-items: baseline;
   gap: 0.65rem;
@@ -1347,8 +1347,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-size: 0.8125rem;
   line-height: 1.4;
 }
-.contact-form__regarding[hidden] { display: none; }
-.contact-form__regarding-label {
+.dialog__regarding[hidden] { display: none; }
+.dialog__regarding-kicker {
   font-family: var(--mono);
   font-size: 0.625rem;
   letter-spacing: 0.16em;
@@ -1358,21 +1358,21 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 #contact-regarding-text { color: var(--ink-soft); }
 
-.contact-form__field {
+.field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
-.contact-form__label {
+.field__label {
   font-family: var(--mono);
   font-size: 0.625rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-quiet);
 }
-.contact-form__field select,
-.contact-form__field input,
-.contact-form__field textarea {
+.field select,
+.field input,
+.field textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
   border-radius: 0.4rem;
@@ -1384,33 +1384,33 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-family: inherit;
   transition: border-color 180ms ease, background 180ms ease;
 }
-.contact-form__field select:focus,
-.contact-form__field input:focus,
-.contact-form__field textarea:focus {
+.field select:focus,
+.field input:focus,
+.field textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
   border-color: var(--accent);
 }
-.contact-form__field textarea { resize: vertical; min-height: 5rem; }
+.field textarea { resize: vertical; min-height: 5rem; }
 
-.contact-form__foot {
+.dialog__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
   margin: 0.4rem 0 0;
 }
-.contact-form__status {
+.dialog__status {
   font-size: 0.8125rem;
   color: var(--ink-soft);
   margin: 0;
   flex: 1;
   min-width: 0;
 }
-.contact-form__status--ok { color: var(--accent); }
-.contact-form__status--err { color: var(--accent-deep); }
+.dialog__status--ok { color: var(--accent); }
+.dialog__status--err { color: var(--accent-deep); }
 
-.contact-form__submit {
+.btn-primary {
   margin-left: auto;
   padding: 0.5rem 1.25rem;
   font-family: var(--mono);
@@ -1424,11 +1424,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
   transition: background 200ms ease, color 200ms ease;
 }
-.contact-form__submit:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background: var(--accent-deep);
   border-color: var(--accent-deep);
 }
-.contact-form__submit:disabled { opacity: 0.55; cursor: progress; }
+.btn-primary:disabled { opacity: 0.55; cursor: progress; }
 
 /* ────────────────  Digest dialog (extends contact-dialog)  ──────────────── */
 
@@ -1462,13 +1462,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   accent-color: var(--accent);
   cursor: pointer;
 }
-.digest-option__main {
+.digest-option__label {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.7rem;
 }
-.digest-option__title {
+.digest-option__name {
   font-family: var(--serif);
   font-variation-settings: 'opsz' 14, 'wght' 500, 'SOFT' 0;
   font-size: 0.95rem;
@@ -1481,14 +1481,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   color: var(--ink-quiet);
   text-transform: uppercase;
 }
-.digest-option__sub {
+.digest-option__desc {
   grid-column: 2;
   font-size: 0.8125rem;
   color: var(--ink-soft);
   line-height: 1.35;
 }
 
-.digest-hint {
+.dialog__hint {
   padding: 0.75rem 0.9rem;
   font-size: 0.8125rem;
   line-height: 1.5;
@@ -1496,11 +1496,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   background: var(--accent-soft);
   border-radius: 0.5rem;
 }
-.digest-hint--err { color: var(--accent-deep); }
-.digest-hint[hidden] { display: none; }
-.digest-hint strong { color: var(--ink); font-weight: 600; }
+.dialog__error { color: var(--accent-deep); }
+.dialog__hint[hidden] { display: none; }
+.dialog__hint strong { color: var(--ink); font-weight: 600; }
 
-.digest-form__unsub {
+.btn-link {
   background: transparent;
   border: 0;
   padding: 0.5rem 0;
@@ -1512,8 +1512,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
   cursor: pointer;
   transition: color 180ms ease;
 }
-.digest-form__unsub:hover { color: var(--accent-deep); }
-.digest-form__unsub[hidden] { display: none; }
+.btn-link:hover { color: var(--accent-deep); }
+.btn-link[hidden] { display: none; }
 
 /* ────────────────  Search input in programme header  ──────────────── */
 
@@ -1573,7 +1573,7 @@ textarea:focus-visible,
 .transit-btn:focus-visible,
 .ics-btn:focus-visible,
 .footer__action:focus-visible,
-.contact-form__close:focus-visible,
+.dialog__close:focus-visible,
 .empty__reset:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -1963,7 +1963,7 @@ textarea:focus-visible,
   text-transform: none;
   color: var(--ink-quiet);
 }
-.digest-filter__chips {
+.digest-filter__list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
@@ -1973,7 +1973,7 @@ textarea:focus-visible,
   max-height: 14rem;
   overflow-y: auto;
 }
-.digest-chip {
+.digest-filter__chip {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -1988,9 +1988,9 @@ textarea:focus-visible,
   background: var(--paper-deep);
   transition: border-color 0.18s, color 0.18s, background 0.18s;
 }
-.digest-chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
-.digest-chip:hover { color: var(--ink); border-color: var(--ink-quiet); }
-.digest-chip:has(input:checked) {
+.digest-filter__chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.digest-filter__chip:hover { color: var(--ink); border-color: var(--ink-quiet); }
+.digest-filter__chip:has(input:checked) {
   color: var(--paper);
   background: var(--accent);
   border-color: var(--accent);

@@ -1036,7 +1036,7 @@ a:focus-visible {
 }
 
 /* Contact dialog (native <dialog>) */
-.contact-dialog {
+.dialog {
   margin: auto;
   padding: 0;
   border: 1px solid var(--rule);
@@ -1047,33 +1047,33 @@ a:focus-visible {
   box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.4), 0 8px 24px -8px rgba(0, 0, 0, 0.25);
   overflow: hidden;
 }
-.contact-dialog::backdrop {
+.dialog::backdrop {
   background: rgba(15, 10, 5, 0.42);
   backdrop-filter: blur(2px);
 }
-:root.dark .contact-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+:root.dark .dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
 
-.contact-form {
+.dialog__form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.4rem;
 }
-.contact-form__head {
+.dialog__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   margin: 0;
 }
-.contact-form__title {
+.dialog__title {
   font-family: var(--serif);
   font-size: 1.35rem;
   letter-spacing: -0.005em;
   font-weight: 500;
   margin: 0;
 }
-.contact-form__close {
+.dialog__close {
   background: transparent;
   border: 0;
   cursor: pointer;
@@ -1083,16 +1083,16 @@ a:focus-visible {
   border-radius: 999px;
   transition: color 0.18s, background 0.18s;
 }
-.contact-form__close:hover { color: var(--brass); background: var(--brass-soft); }
+.dialog__close:hover { color: var(--brass); background: var(--brass-soft); }
 
-.contact-form__intro {
+.dialog__intro {
   margin: -0.25rem 0 0;
   color: var(--felt-soft);
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
-.contact-form__regarding {
+.dialog__regarding {
   display: flex;
   align-items: baseline;
   gap: 0.65rem;
@@ -1102,8 +1102,8 @@ a:focus-visible {
   font-size: 0.8125rem;
   line-height: 1.4;
 }
-.contact-form__regarding[hidden] { display: none; }
-.contact-form__regarding-label {
+.dialog__regarding[hidden] { display: none; }
+.dialog__regarding-kicker {
   font-family: var(--mono);
   font-size: 0.625rem;
   letter-spacing: 0.16em;
@@ -1113,21 +1113,21 @@ a:focus-visible {
 }
 #contact-regarding-text { color: var(--felt-soft); }
 
-.contact-form__field {
+.field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
 }
-.contact-form__label {
+.field__label {
   font-family: var(--mono);
   font-size: 0.625rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--felt-quiet);
 }
-.contact-form__field select,
-.contact-form__field input,
-.contact-form__field textarea {
+.field select,
+.field input,
+.field textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
   border-radius: 0.4rem;
@@ -1139,33 +1139,33 @@ a:focus-visible {
   font-family: inherit;
   transition: border-color 0.18s, background 0.18s;
 }
-.contact-form__field select:focus,
-.contact-form__field input:focus,
-.contact-form__field textarea:focus {
+.field select:focus,
+.field input:focus,
+.field textarea:focus {
   outline: 2px solid var(--brass);
   outline-offset: 1px;
   border-color: var(--brass);
 }
-.contact-form__field textarea { resize: vertical; min-height: 5rem; }
+.field textarea { resize: vertical; min-height: 5rem; }
 
-.contact-form__foot {
+.dialog__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
   margin: 0.4rem 0 0;
 }
-.contact-form__status {
+.dialog__status {
   font-size: 0.8125rem;
   color: var(--felt-soft);
   margin: 0;
   flex: 1;
   min-width: 0;
 }
-.contact-form__status--ok { color: var(--brass); }
-.contact-form__status--err { color: var(--velvet); }
+.dialog__status--ok { color: var(--brass); }
+.dialog__status--err { color: var(--velvet); }
 
-.contact-form__submit {
+.btn-primary {
   margin-left: auto;
   padding: 0.5rem 1.25rem;
   font-family: var(--mono);
@@ -1179,14 +1179,14 @@ a:focus-visible {
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
-.contact-form__submit:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled) {
   background: var(--brass);
   border-color: var(--brass);
   color: var(--walnut);
 }
-.contact-form__submit:disabled { opacity: 0.55; cursor: progress; }
+.btn-primary:disabled { opacity: 0.55; cursor: progress; }
 
-/* Digest dialog options (Web Push subscription) — reuses the .contact-dialog shell */
+/* Digest dialog options (Web Push subscription) — reuses the .dialog shell */
 .digest-options {
   border: 0;
   padding: 0;
@@ -1220,13 +1220,13 @@ a:focus-visible {
   accent-color: var(--brass);
   cursor: pointer;
 }
-.digest-option__main {
+.digest-option__label {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 0.7rem;
 }
-.digest-option__title {
+.digest-option__name {
   font-family: var(--serif);
   font-size: 0.95rem;
   font-weight: 500;
@@ -1239,7 +1239,7 @@ a:focus-visible {
   text-transform: uppercase;
   color: var(--felt-quiet);
 }
-.digest-option__sub {
+.digest-option__desc {
   font-size: 0.8125rem;
   color: var(--felt-soft);
 }
@@ -1403,14 +1403,14 @@ a:focus-visible {
   transition: color 0.18s;
 }
 .digest-filter__summary::-webkit-details-marker { display: none; }
-.digest-filter__summary::before {
-  content: "▸";
+.digest-filter__summary { list-style: none; }
+.digest-filter__caret {
   display: inline-block;
   margin-right: 0.45rem;
   color: var(--brass);
   transition: transform 0.2s;
 }
-.digest-filter[open] .digest-filter__summary::before { transform: rotate(90deg); }
+.digest-filter[open] .digest-filter__caret { transform: rotate(90deg); }
 .digest-filter__summary:hover { color: var(--felt); }
 .digest-filter__label { font-weight: 500; }
 .digest-filter__hint {
@@ -1421,7 +1421,7 @@ a:focus-visible {
   text-transform: none;
   color: var(--felt-quiet);
 }
-.digest-filter__chips {
+.digest-filter__list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -1429,7 +1429,7 @@ a:focus-visible {
   margin: 0.5rem 0 0;
   padding: 0;
 }
-.digest-chip {
+.digest-filter__chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -1445,15 +1445,15 @@ a:focus-visible {
   background: var(--walnut-deep);
   transition: border-color 0.18s, color 0.18s, background 0.18s;
 }
-.digest-chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.digest-filter__chip input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
 .digest-chip__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.digest-chip:hover { color: var(--felt); border-color: var(--felt-quiet); }
-.digest-chip:has(input:checked) {
+.digest-filter__chip:hover { color: var(--felt); border-color: var(--felt-quiet); }
+.digest-filter__chip:has(input:checked) {
   color: var(--walnut);
   background: var(--felt);
   border-color: var(--felt);
