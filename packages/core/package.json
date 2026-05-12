@@ -27,6 +27,7 @@
     "./push": "./src/push.ts",
     "./robots": "./src/robots.ts",
     "./scrape-log": "./src/scrape-log.ts",
+    "./screenshots": "./src/screenshots.ts",
     "./security-headers": "./src/security-headers.ts",
     "./service-worker": "./src/service-worker.ts",
     "./sort": "./src/sort.ts",
@@ -44,6 +45,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260509.1",
     "@museumsufer/tsconfig": "*",
+    "playwright": "^1.59.1",
     "typescript": "^5.9.3"
   }
 }

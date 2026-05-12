@@ -13,6 +13,10 @@ const MANIFEST = buildManifest({
   description: "Veranstaltungen in Landau in der Pfalz.",
   themeColor: "#f2ead3",
   backgroundColor: "#f2ead3",
+  screenshots: [
+    { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "landau.today" },
+    { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "landau.today" },
+  ],
 });
 
 const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
