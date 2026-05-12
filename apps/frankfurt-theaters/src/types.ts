@@ -1,8 +1,7 @@
-export interface Env {
+import type { FeedbackEnv } from "@museumsufer/core";
+
+export interface Env extends FeedbackEnv {
   DB: D1Database;
-  FEEDBACK_EMAIL: SendEmail;
-  TURNSTILE_SECRET?: string;
-  TURNSTILE_SITE_KEY?: string;
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
   VAPID_SUBJECT?: string;

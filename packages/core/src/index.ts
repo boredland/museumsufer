@@ -1,6 +1,7 @@
 export * from "./api-catalog";
 export * from "./bundle-writer";
 export * from "./calendar";
+export * from "./contact-handler";
 export * from "./date";
 export * from "./escape";
 export * from "./faq";

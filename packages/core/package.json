@@ -35,6 +35,7 @@
     "dayjs": "^1.11.20"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250410.0",
     "@museumsufer/tsconfig": "*",
     "typescript": "^5.8.3"
   }

@@ -1,8 +1,6 @@
-export interface Env {
-  FEEDBACK_EMAIL: SendEmail;
-  TURNSTILE_SECRET?: string;
-  TURNSTILE_SITE_KEY?: string;
-}
+import type { FeedbackEnv } from "@museumsufer/core";
+
+export type Env = FeedbackEnv;
 
 export type Genre = "classical" | "jazz" | "sacred" | "world" | "experimental" | "chamber";
 
