@@ -24,6 +24,19 @@ app.onError((err, c) => {
 
 app.use("*", securityHeaders());
 
+// Apex → frankfurt subdomain. Anyone landing on ins.theater gets a permanent
+// redirect to the canonical host. Other apex paths in the same zone (e.g.,
+// /llms.txt, /robots.txt) follow the same rule so external referrers stay
+// consistent.
+app.use("*", async (c, next) => {
+  const host = (c.req.header("host") ?? "").toLowerCase();
+  if (host === "ins.theater") {
+    const url = new URL(c.req.url);
+    return c.redirect(`https://frankfurt.ins.theater${url.pathname}${url.search}`, 301);
+  }
+  await next();
+});
+
 // Theater-specific response headers: X-Robots-Tag on data API, Link header
 // pointing at the API discovery surfaces.
 app.use("*", async (c, next) => {

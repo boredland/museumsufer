@@ -5,7 +5,7 @@ import { getPerformanceById, getPerformancesForDate, getPerformancesInRange } fr
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 
-const FEEDBACK_FROM = "noreply@frankfurt.ins.theater";
+const FEEDBACK_FROM = "no-reply@ins.theater";
 const FEEDBACK_TO = "info@jonas-strassel.de";
 
 const app = new Hono<{ Bindings: Env }>();
