@@ -1,0 +1,81 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "schedule:weekly",
+    ":semanticCommits",
+    ":automergeMinor",
+    ":automergePatch",
+    ":dependencyDashboard",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "timezone": "Europe/Berlin",
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  },
+  "minimumReleaseAge": "3 days",
+  "internalChecksFilter": "strict",
+  "packageRules": [
+    {
+      "description": "Group all non-major dep bumps into one PR per week to cut noise.",
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchPackageNames": ["*"],
+      "groupName": "all non-major deps",
+      "groupSlug": "all-minor-patch"
+    },
+    {
+      "description": "Group all GitHub Actions bumps into a single PR; auto-merge.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions",
+      "automerge": true
+    },
+    {
+      "description": "Group Cloudflare tooling — workers-types ships almost daily and would otherwise dominate the dashboard.",
+      "matchPackageNames": ["wrangler", "@cloudflare/workers-types", "@cloudflare/workerd-linux-64"],
+      "groupName": "cloudflare",
+      "schedule": ["before 6am on monday"]
+    },
+    {
+      "description": "Group all Hono packages — they release together and a partial bump breaks the type graph.",
+      "matchPackageNames": ["hono", "/^@hono//"],
+      "groupName": "hono"
+    },
+    {
+      "description": "Group Tailwind + plugin together for the same reason.",
+      "matchPackageNames": ["tailwindcss", "/^@tailwindcss//"],
+      "groupName": "tailwind"
+    },
+    {
+      "description": "Pin major bumps — never auto-merge across a major. TS / Hono / Tailwind major changes break things.",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+      "labels": ["dependencies", "major"]
+    },
+    {
+      "description": "Auto-merge dev-only patches that pass CI — biome, turbo, typescript-eslint, etc. — to keep the dashboard tidy.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "automerge": true,
+    "minimumReleaseAge": null
+  },
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 8,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/scrape-data.ts",
+    "apps/*/public/**"
+  ],
+  "ignoreDeps": [
+    "@museumsufer/core",
+    "@museumsufer/tsconfig"
+  ]
+}
