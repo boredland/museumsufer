@@ -372,8 +372,14 @@
   font-size: 0.7rem;
   font-feature-settings: "onum" 1;
   letter-spacing: 0;
-  /* Bumped from 60% to 80% so the small count chip clears AA against parchment. */
+  /* 80% currentColor for inactive chips (parchment background) clears AA.
+     The active chip's rotwein background still needs full-opacity ink — see
+     the `.chip.active .count` override below. */
   color: color-mix(in oklab, currentColor 80%, transparent);
+}
+.chip.active .count {
+  /* Solid ink at 11.2px on rotwein clears 4.5:1; the 80% mix didn't. */
+  color: currentColor;
 }
 .chip.m-rotwein .glyph { color: var(--color-rotwein); }
 .chip.m-ocker .glyph   { color: var(--color-ocker); }
