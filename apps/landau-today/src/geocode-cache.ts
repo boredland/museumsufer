@@ -204,6 +204,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "westwallmuseum bad bergzabern|bad bergzabern": [49.107642, 8.005972],
   "wild- und wanderpark silz|silz": [49.13863, 7.930459],
   "wollmesheimer höhe|landau in der pfalz": [49.192773, 8.094036],
+  "zoo landau, hindenburgstraße 12|": [49.198283, 8.112344],
   "zoo landau|landau in der pfalz": [49.190433, 8.13046],
   "ökumenische sozialstation in der otto-hahn-straße 6 in landau|landau in der pfalz": [49.190998, 8.139604],
   "ökumenische sozialstation|landau in der pfalz": [49.190998, 8.139604],
