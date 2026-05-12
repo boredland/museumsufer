@@ -1,10 +1,12 @@
 import { dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
-import { getPerformancesForDate, getPerformancesInRange } from "./db";
+import { type DayPerformance, getPerformancesForDate, getPerformancesInRange } from "./db";
+import { THEATERS } from "./theater-config";
 import type { Env } from "./types";
 
 export type Schedule = "morning" | "afternoon" | "weekly";
 
 const APP_URL = "https://frankfurt.ins.theater";
+const THEATER_SLUGS = new Set(THEATERS.map((t) => t.slug));
 
 interface SubRow {
   id: number;
@@ -12,6 +14,32 @@ interface SubRow {
   p256dh: string;
   auth: string;
   schedule: Schedule;
+  filters_json: string | null;
+}
+
+interface TheatersFilters {
+  theaters?: string[];
+}
+
+function parseFilters(json: string | null): TheatersFilters | null {
+  if (!json) return null;
+  try {
+    const v = JSON.parse(json);
+    if (!v || typeof v !== "object") return null;
+    if (!Array.isArray((v as { theaters?: unknown }).theaters)) return null;
+    const slugs = ((v as { theaters: unknown[] }).theaters as unknown[]).filter(
+      (t): t is string => typeof t === "string" && THEATER_SLUGS.has(t),
+    );
+    return slugs.length === 0 ? null : { theaters: slugs };
+  } catch {
+    return null;
+  }
+}
+
+function perfsMatching(perfs: DayPerformance[], filters: TheatersFilters | null): DayPerformance[] {
+  if (!filters?.theaters || filters.theaters.length === 0) return perfs;
+  const allowed = new Set(filters.theaters);
+  return perfs.filter((p) => allowed.has(p.theater.slug));
 }
 
 function berlinHour(d: Date): number {
@@ -60,9 +88,9 @@ interface NotificationPayload {
   tag: string;
 }
 
-async function buildMorningPayload(): Promise<NotificationPayload | null> {
+async function buildMorningPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
   const date = todayIso();
-  const perfs = await getPerformancesForDate(date);
+  const perfs = perfsMatching(await getPerformancesForDate(date), filters);
   if (perfs.length === 0) return null;
   const sample = perfs.slice(0, 3).map((p) => {
     const time = formatTime(p.time);
@@ -77,9 +105,9 @@ async function buildMorningPayload(): Promise<NotificationPayload | null> {
   };
 }
 
-async function buildAfternoonPayload(): Promise<NotificationPayload | null> {
+async function buildAfternoonPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
   const date = todayIso();
-  const all = await getPerformancesForDate(date);
+  const all = perfsMatching(await getPerformancesForDate(date), filters);
   const evening = all.filter((p) => p.time && p.time >= "17:00" && p.status !== "cancelled");
   if (evening.length === 0) return null;
   const sample = evening.slice(0, 3).map((p) => `${formatTime(p.time)} ${p.show.title}`);
@@ -92,10 +120,10 @@ async function buildAfternoonPayload(): Promise<NotificationPayload | null> {
   };
 }
 
-async function buildWeeklyPayload(): Promise<NotificationPayload | null> {
+async function buildWeeklyPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
   const from = todayIso();
   const to = dateOffset(6);
-  const perfs = await getPerformancesInRange(from, to);
+  const perfs = perfsMatching(await getPerformancesInRange(from, to), filters);
   if (perfs.length === 0) return null;
   const byDate = new Map<string, number>();
   for (const p of perfs) byDate.set(p.date, (byDate.get(p.date) ?? 0) + 1);
@@ -108,10 +136,10 @@ async function buildWeeklyPayload(): Promise<NotificationPayload | null> {
   };
 }
 
-async function buildPayload(schedule: Schedule): Promise<NotificationPayload | null> {
-  if (schedule === "morning") return buildMorningPayload();
-  if (schedule === "afternoon") return buildAfternoonPayload();
-  return buildWeeklyPayload();
+async function buildPayload(schedule: Schedule, filters: TheatersFilters | null): Promise<NotificationPayload | null> {
+  if (schedule === "morning") return buildMorningPayload(filters);
+  if (schedule === "afternoon") return buildAfternoonPayload(filters);
+  return buildWeeklyPayload(filters);
 }
 
 function vapidFromEnv(env: Env): VapidKeys | null {
@@ -129,14 +157,9 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
     console.warn("VAPID keys missing — skipping dispatch");
     return;
   }
-  const payload = await buildPayload(schedule);
-  if (!payload) {
-    console.log(`No content for ${schedule} digest — skipping`);
-    return;
-  }
 
   const rows = await env.DB.prepare(
-    `SELECT id, endpoint, p256dh, auth, schedule FROM push_subscriptions
+    `SELECT id, endpoint, p256dh, auth, schedule, filters_json FROM push_subscriptions
      WHERE schedule = ?1 AND failed_at IS NULL`,
   )
     .bind(schedule)
@@ -150,9 +173,16 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
 
   const goneIds: number[] = [];
   const sentIds: number[] = [];
+  let skipped = 0;
 
   await Promise.all(
     subs.map(async (sub) => {
+      const filters = parseFilters(sub.filters_json);
+      const payload = await buildPayload(schedule, filters);
+      if (!payload) {
+        skipped++;
+        return;
+      }
       try {
         const res = await sendPush(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
@@ -182,5 +212,5 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
       .bind(...sentIds)
       .run();
   }
-  console.log(`${schedule}: sent ${sentIds.length}, pruned ${goneIds.length}`);
+  console.log(`${schedule}: sent ${sentIds.length}, skipped ${skipped} (no matching events), pruned ${goneIds.length}`);
 }
