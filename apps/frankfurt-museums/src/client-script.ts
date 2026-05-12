@@ -663,21 +663,6 @@ export const CLIENT_SCRIPT = `
     }
     scheduleNextDayRefresh();
 
-    setTimeout(function() {
-      var btns = document.querySelectorAll('[data-date]');
-      for (var i = 0; i < Math.min(btns.length, 3); i++) {
-        var d = btns[i].dataset.date;
-        if (d && d !== currentDate) {
-          var link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.as = 'fetch';
-          link.href = '/partial/content?date=' + d + '&lang=' + CURRENT_LANG;
-          document.head.appendChild(link);
-          break;
-        }
-      }
-    }, 2000);
-
     // Inline search filter
     var searchInput = document.getElementById('search-input');
     var searchClear = document.getElementById('search-clear');
