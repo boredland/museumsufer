@@ -1,12 +1,10 @@
 import {
   berlinHourMinute,
   buildFaqPageSchema,
-  buildGoogleCalendarUrl,
-  buildOutlookCalendarUrl,
   buildUtm,
   buildWebMcpScript,
-  buildYahooCalendarUrl,
   type CalendarEvent,
+  CalendarPopover,
   escapeHtml as coreEscapeHtml,
   dateOffset,
   type FaqItem,
@@ -232,61 +230,6 @@ export function DateStrip({
 
 // ─── Performance row ───────────────────────────────────────────────────
 
-const ICON_CAL = (
-  <svg
-    viewBox="0 0 16 16"
-    width="13"
-    height="13"
-    aria-hidden="true"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.4"
-  >
-    <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" />
-    <path d="M2.5 6h11M5.5 2v3M10.5 2v3M5 9h2M9 9h2M5 11h2" stroke-linecap="round" />
-  </svg>
-);
-const ICON_GCAL = (
-  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
-    <path d="M19.5 4.5h-3V3a1 1 0 1 0-2 0v1.5h-5V3a1 1 0 1 0-2 0v1.5h-3A1.5 1.5 0 0 0 3 6v13.5A1.5 1.5 0 0 0 4.5 21h15a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5zM19 19H5V10h14v9zM5 8.5V6.5h14v2H5z" />
-  </svg>
-);
-const ICON_OUTLOOK = (
-  <svg
-    viewBox="0 0 24 24"
-    width="14"
-    height="14"
-    aria-hidden="true"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.6"
-  >
-    <rect x="3" y="6" width="13" height="12" rx="1.5" />
-    <path d="M9.5 9.5a2.5 3 0 1 1 0 5 2.5 3 0 1 1 0-5z" />
-    <path d="M16 10l4-1.5v7L16 14" stroke-linejoin="round" />
-  </svg>
-);
-const ICON_YAHOO = (
-  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
-    <path d="M3 5h4l3 5 3-5h4l-5 8v6h-4v-6L3 5z" />
-  </svg>
-);
-const ICON_DOWNLOAD = (
-  <svg
-    viewBox="0 0 16 16"
-    width="13"
-    height="13"
-    aria-hidden="true"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.5"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M8 2v9M4.5 7.5L8 11l3.5-3.5" />
-    <path d="M3 13h10" />
-  </svg>
-);
 const ICON_NAVIGATE = (
   <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true" fill="currentColor">
     <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
@@ -361,9 +304,8 @@ function StatusStamp({ status, terminus }: { status: string; terminus?: boolean 
   }
 }
 
-function CalendarPopover({ p }: { p: DayPerformance }) {
+function PerformanceCalendarPopover({ p }: { p: DayPerformance }) {
   if (p.status === "cancelled") return null;
-  const popId = `cal-${p.id}`;
   const ev: CalendarEvent = {
     date: p.date,
     time: p.time ?? null,
@@ -379,47 +321,7 @@ function CalendarPopover({ p }: { p: DayPerformance }) {
       return src ? utm(src, "calendar") : null;
     })(),
   };
-  return (
-    <span class="nav-wrap">
-      <button
-        type="button"
-        class="ics-btn"
-        data-popover-target={popId}
-        aria-label="Zum Kalender hinzufügen"
-        title="Zum Kalender hinzufügen"
-        popovertarget={popId}
-        aria-haspopup="menu"
-      >
-        {ICON_CAL}
-      </button>
-      <div id={popId} popover="auto" role="menu" class="nav-popover">
-        <a role="menuitem" class="nav-popover__link" href={buildGoogleCalendarUrl(ev)} target="_blank" rel="noopener">
-          <span class="nav-popover__icon" aria-hidden="true">
-            {ICON_GCAL}
-          </span>{" "}
-          Google Calendar
-        </a>
-        <a role="menuitem" class="nav-popover__link" href={buildOutlookCalendarUrl(ev)} target="_blank" rel="noopener">
-          <span class="nav-popover__icon" aria-hidden="true">
-            {ICON_OUTLOOK}
-          </span>{" "}
-          Outlook
-        </a>
-        <a role="menuitem" class="nav-popover__link" href={buildYahooCalendarUrl(ev)} target="_blank" rel="noopener">
-          <span class="nav-popover__icon" aria-hidden="true">
-            {ICON_YAHOO}
-          </span>{" "}
-          Yahoo
-        </a>
-        <a role="menuitem" class="nav-popover__link" href={`/performance/${p.id}/feed.ics`} download>
-          <span class="nav-popover__icon" aria-hidden="true">
-            {ICON_DOWNLOAD}
-          </span>{" "}
-          .ics (Apple, Proton, …)
-        </a>
-      </div>
-    </span>
-  );
+  return <CalendarPopover event={ev} popoverId={`cal-${p.id}`} icsHref={`/performance/${p.id}/feed.ics`} />;
 }
 
 function TransitPopover({ p }: { p: DayPerformance }) {
@@ -634,7 +536,7 @@ export function Performance({ p, opts }: { p: DayPerformance; opts: PerformanceR
         ) : null}
         {!isTerminalStatus ? <StatusStamp status={p.status} /> : null}
         <TransitPopover p={p} />
-        <CalendarPopover p={p} />
+        <PerformanceCalendarPopover p={p} />
         <ShareButton p={p} />
         <ReportButton p={p} />
         <Terminus p={p} />

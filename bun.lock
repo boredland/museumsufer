@@ -106,6 +106,7 @@
       "version": "0.0.0",
       "dependencies": {
         "dayjs": "^1.11.20",
+        "hono": "^4.12.15",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20250410.0",

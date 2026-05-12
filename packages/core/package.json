@@ -10,6 +10,7 @@
     "./api-catalog": "./src/api-catalog.ts",
     "./bundle-writer": "./src/bundle-writer.ts",
     "./calendar": "./src/calendar.ts",
+    "./calendar-popover": "./src/calendar-popover.tsx",
     "./date": "./src/date.ts",
     "./escape": "./src/escape.ts",
     "./faq": "./src/faq.ts",
@@ -32,7 +33,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "dayjs": "^1.11.20"
+    "dayjs": "^1.11.20",
+    "hono": "^4.12.15"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250410.0",
