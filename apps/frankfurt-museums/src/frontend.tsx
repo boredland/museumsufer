@@ -7,6 +7,9 @@ import {
   LLM_SERVICES,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { Faq } from "@museumsufer/core/faq-ui";
+import { LangSwitch } from "@museumsufer/core/langswitch";
+import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -170,8 +173,8 @@ export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, st
           <p class="section-eyebrow masthead__location">Frankfurt am Main · 50.10°N 8.68°E</p>
         </div>
         <div class="masthead__actions">
-          <ThemeToggle tr={tr} />
-          <LangSwitch locale={locale} tr={tr} />
+          <ThemeToggle label={tr.switchTheme} />
+          <LangSwitch locale={locale} supported={SUPPORTED_LOCALES} ariaLabel={tr.langSwitchAria} />
         </div>
       </div>
       <h1 class="masthead__title">Museumsufer</h1>
@@ -181,51 +184,6 @@ export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, st
         <div class="river-band" aria-hidden="true" />
       </div>
     </header>
-  );
-}
-
-function ThemeToggle({ tr }: { tr: Record<string, string> }) {
-  return (
-    <button type="button" id="theme-toggle" class="theme-toggle" title={tr.switchTheme} aria-label={tr.switchTheme}>
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        class="theme-toggle__icon"
-        aria-hidden="true"
-      >
-        <path
-          class="theme-toggle__moon"
-          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
-          fill="currentColor"
-          stroke="none"
-        />
-        <circle class="theme-toggle__sun" cx="12" cy="12" r="5" fill="currentColor" stroke="none" />
-        <path
-          class="theme-toggle__sun"
-          d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-          stroke="currentColor"
-        />
-      </svg>
-    </button>
-  );
-}
-
-function LangSwitch({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
-  return (
-    <nav class="langswitch" aria-label={tr.langSwitchAria}>
-      {SUPPORTED_LOCALES.map((l) => (
-        <a
-          href={`?lang=${l}`}
-          data-lang={l}
-          class={`langswitch__link${l === locale ? " langswitch__link--active" : ""}`}
-          aria-current={l === locale ? "page" : undefined}
-        >
-          {l.toUpperCase()}
-        </a>
-      ))}
-    </nav>
   );
 }
 
@@ -567,28 +525,7 @@ function faqItems(tr: Record<string, string>): FaqItem[] {
 }
 
 function FaqSection({ tr }: { tr: Record<string, string> }) {
-  const items = faqItems(tr);
-  return (
-    <section class="faq">
-      <header class="faq__head">
-        <span class="faq__kicker">{tr.faqTitle}</span>
-        <span class="faq__rule" aria-hidden="true" />
-        <span class="faq__count">01 — {String(items.length).padStart(2, "0")}</span>
-      </header>
-      <div class="faq__list">
-        {items.map((item, i) => (
-          <details class="faq__item" open={i === 0}>
-            <summary class="faq__row">
-              <span class="faq__num">{String(i + 1).padStart(2, "0")}</span>
-              <h3 class="faq__q">{item.q}</h3>
-              <span class="faq-toggle" aria-hidden="true" />
-            </summary>
-            <p class="faq__a">{item.a}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
+  return <Faq kicker={tr.faqTitle} items={faqItems(tr)} />;
 }
 
 /** Renders the complete landing page with all sections, schemas, and interactivity */

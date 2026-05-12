@@ -19,6 +19,8 @@ import {
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
+import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayPerformance } from "./db";
@@ -154,38 +156,7 @@ export function Masthead({ sublabel }: { sublabel?: string } = {}) {
         </h1>
         <p class="tagline">{sublabel ?? "Was heute auf den Frankfurter Bühnen läuft."}</p>
       </a>
-      <button
-        type="button"
-        class="theme-toggle"
-        data-theme-toggle
-        aria-label="Farbthema wechseln"
-        title="Farbthema wechseln"
-      >
-        <svg
-          class="theme-toggle__moon"
-          viewBox="0 0 24 24"
-          width="14"
-          height="14"
-          aria-hidden="true"
-          fill="currentColor"
-        >
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
-        <svg
-          class="theme-toggle__sun"
-          viewBox="0 0 16 16"
-          width="14"
-          height="14"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.4"
-          stroke-linecap="round"
-        >
-          <circle cx="8" cy="8" r="3" />
-          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.4 1.4M11.55 11.55l1.4 1.4M3.05 12.95l1.4-1.4M11.55 4.45l1.4-1.4" />
-        </svg>
-      </button>
+      <ThemeToggle label="Farbthema wechseln" />
     </header>
   );
 }
@@ -603,32 +574,7 @@ const FAQ_ITEMS: FaqItem[] = [
 ];
 
 export function Faq() {
-  const total = String(FAQ_ITEMS.length).padStart(2, "0");
-  return (
-    <section class="faq" aria-labelledby="faq-title">
-      <header class="faq__head">
-        <span class="faq__kicker" id="faq-title">
-          Häufige Fragen
-        </span>
-        <span class="faq__rule" aria-hidden="true" />
-        <span class="faq__count">01 — {total}</span>
-      </header>
-      <div class="faq__list">
-        {FAQ_ITEMS.map((item, i) => (
-          <details class="faq__item" open={i === 0 ? true : undefined}>
-            <summary class="faq__row">
-              <span class="faq__num" aria-hidden="true">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <h3 class="faq__q">{item.q}</h3>
-              <span class="faq__toggle" aria-hidden="true" />
-            </summary>
-            <p class="faq__a">{item.a}</p>
-          </details>
-        ))}
-      </div>
-    </section>
-  );
+  return <SharedFaq kicker="Häufige Fragen" items={FAQ_ITEMS} />;
 }
 
 export function DigestCue() {

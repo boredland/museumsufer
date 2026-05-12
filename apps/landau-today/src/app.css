@@ -303,15 +303,15 @@ a.t-shift:hover .t-title { font-style: italic; }
   letter-spacing: 0.14em;
   color: var(--color-ink-soft);
 }
-.langswitch__a {
+.langswitch__link {
   color: inherit;
   text-decoration: none;
   padding: 0.1rem 0.05rem;
   border-bottom: 1px solid transparent;
   transition: color 0.15s, border-color 0.15s;
 }
-.langswitch__a:hover { color: var(--color-rotwein); }
-.langswitch__a--active {
+.langswitch__link:hover { color: var(--color-rotwein); }
+.langswitch__link--active {
   color: var(--color-ink);
   border-bottom-color: var(--color-rotwein);
 }
@@ -435,46 +435,93 @@ a.t-shift:hover .t-title { font-style: italic; }
 /** FAQ — native <details>/<summary> with the same hairline-rule
     vocabulary as the ledger rows. The toggle is the cross/dash glyph
     used elsewhere on the site (museums + theaters carry the same idiom). */
+/** FAQ — shared <Faq/> from @museumsufer/core/faq-ui. Vocabulary:
+    .faq, .faq__head, .faq__kicker, .faq__rule, .faq__count, .faq__list,
+    .faq__item, .faq__row, .faq__num, .faq__q, .faq__toggle, .faq__a.
+    Typography is landau's editorial Heimatzeitung serif. */
 .faq {
   margin-top: 3rem;
   border-top: 1px solid var(--color-ink);
   padding-top: 1.5rem;
 }
-.faq-title {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  letter-spacing: -0.005em;
-  margin: 0 0 1rem;
+.faq__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
 }
-.faq-item {
+.faq__kicker {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--color-ink-soft);
+  flex-shrink: 0;
+}
+.faq__rule {
+  height: 1px;
+  flex: 1;
+  background: var(--color-rotwein);
+  opacity: 0.5;
+}
+.faq__count {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  color: var(--color-ink-soft);
+  flex-shrink: 0;
+}
+.faq__list {
   border-bottom: 1px solid var(--color-rule);
 }
-.faq-item > summary {
-  list-style: none;
-  cursor: pointer;
+.faq__item {
+  border-top: 1px solid var(--color-rule);
+}
+.faq__item > summary { list-style: none; }
+.faq__item > summary::-webkit-details-marker { display: none; }
+.faq__row {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 1rem;
   padding: 0.85rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+.faq__num {
+  font-family: var(--font-display);
+  font-feature-settings: "smcp" 1, "c2sc" 1, "lnum" 1, "tnum" 1;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  color: var(--color-ink-soft);
+  padding-top: 3px;
+  width: 1.75rem;
+  flex-shrink: 0;
+}
+.faq__q {
+  flex: 1;
+  margin: 0;
   font-family: var(--font-body);
   font-feature-settings: "onum" 1;
   font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.35;
   color: var(--color-ink);
+  transition: color 0.15s ease;
 }
-.faq-item > summary::-webkit-details-marker { display: none; }
-.faq-item > summary:hover { color: var(--color-rotwein); }
-.faq-toggle {
+.faq__item:hover .faq__q { color: var(--color-rotwein); }
+.faq__toggle {
   position: relative;
   width: 14px;
   height: 14px;
   flex: 0 0 14px;
+  margin-top: 6px;
   color: var(--color-ink-soft);
+  transition: color 0.15s ease;
 }
-.faq-toggle::before,
-.faq-toggle::after {
+.faq__item:hover .faq__toggle { color: var(--color-rotwein); }
+.faq__toggle::before,
+.faq__toggle::after {
   content: '';
   position: absolute;
   left: 0;
@@ -485,16 +532,18 @@ a.t-shift:hover .t-title { font-style: italic; }
   transform: translateY(-50%);
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
-.faq-toggle::after { transform: translateY(-50%) rotate(90deg); }
-.faq-item[open] > summary .faq-toggle::after {
+.faq__toggle::after { transform: translateY(-50%) rotate(90deg); }
+.faq__item[open] > summary .faq__toggle::after {
   transform: translateY(-50%) rotate(0);
   opacity: 0;
 }
-.faq-a {
-  padding: 0 0 1rem;
+.faq__a {
+  padding: 0 0 1rem 2.75rem;
+  font-family: var(--font-body);
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--color-ink-soft);
+  margin: 0;
 }
 
 /** Distance badge injected client-side after a near-me sort. Sits to the

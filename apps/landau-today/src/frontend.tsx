@@ -6,6 +6,8 @@ import {
   langSwitchItems,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
+import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
@@ -49,14 +51,14 @@ function HreflangLinks({ currentPath }: { currentPath: string }) {
 
 function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: string; tr: Translations }) {
   const items = langSwitchItems({ locale, currentPath, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
+  const hrefByLocale = new Map(items.map((i) => [i.locale, i.href] as const));
   return (
-    <nav class="langswitch" aria-label={tr.langSwitchAria}>
-      {items.map(({ locale: l, href, active }) => (
-        <a key={l} href={href} class={active ? "langswitch__a langswitch__a--active" : "langswitch__a"} hreflang={l}>
-          {l.toUpperCase()}
-        </a>
-      ))}
-    </nav>
+    <SharedLangSwitch
+      locale={locale}
+      supported={SUPPORTED_LOCALES}
+      ariaLabel={tr.langSwitchAria}
+      buildHref={(l) => hrefByLocale.get(l) ?? `?lang=${l}`}
+    />
   );
 }
 
@@ -70,20 +72,7 @@ export function renderLangSwitch(locale: Locale, currentPath: string, tr: Transl
 }
 
 function Faq({ items, tr }: { items: FaqEntry[]; tr: Translations }) {
-  return (
-    <section class="faq ink-up" style="animation-delay:300ms">
-      <h2 class="faq-title">{tr.faqTitle}</h2>
-      {items.map((it, i) => (
-        <details key={`faq-${i}`} class="faq-item">
-          <summary>
-            <span class="faq-q">{it.q}</span>
-            <span class="faq-toggle" aria-hidden="true" />
-          </summary>
-          <div class="faq-a">{it.a}</div>
-        </details>
-      ))}
-    </section>
-  );
+  return <SharedFaq kicker={tr.faqTitle} items={items} />;
 }
 
 function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
