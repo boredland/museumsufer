@@ -8,6 +8,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./api-catalog": "./src/api-catalog.ts",
+    "./ask-ai": "./src/ask-ai.tsx",
     "./bundle-writer": "./src/bundle-writer.ts",
     "./calendar": "./src/calendar.ts",
     "./calendar-popover": "./src/calendar-popover.tsx",
