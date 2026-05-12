@@ -1,8 +1,8 @@
-import { buildFaqPageSchema, type FaqItem, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { buildFaqPageSchema, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
-import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
+import { DEFAULT_LOCALE, type FaqEntry, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { APP_URL, formatDateLong } from "./shared";
 import type { Event } from "./types";
 
@@ -28,33 +28,6 @@ function buildLangSwitchHtml(locale: Locale, currentPath: string): string {
     return `<a href="${href}" class="${cls}" hreflang="${l}"${l === locale ? ' aria-current="page"' : ""}>${l.toUpperCase()}</a>`;
   }).join("");
 }
-
-const FAQ: FaqItem[] = [
-  {
-    q: "Wo kommen die Veranstaltungen her?",
-    a: "Täglich aggregiert aus sechs öffentlichen Quellen: Kulturnetz Landau (kulturnetz-landau.de), Stadt Landau (landau.de), Stiftung Hambacher Schloss, RPTU Kaiserslautern-Landau (gefiltert auf Landau), Pfalz.de und Südliche Weinstraße Tourismus. Die Originale verlinken wir bei jeder Veranstaltung.",
-  },
-  {
-    q: "Warum sind manche Veranstaltungen nicht aus Landau, sondern aus den umliegenden Dörfern?",
-    a: "landau.today versteht sich als Veranstaltungsblatt für Landau und die Südliche Weinstraße. Konzerte, Weinfeste und Stadtführungen aus Bornheim, Edenkoben, Annweiler und den Landauer Stadtteilen gehören für viele Landauer:innen zum Alltag — und diese Region ist das thematische Zuhause der Seite.",
-  },
-  {
-    q: "Wie kann ich eine Veranstaltung melden, die hier fehlt?",
-    a: "Schreibt direkt an die ursprüngliche Quelle: Stadt Landau betreibt einen offenen Eintrag unter landau.de/Tourismus-Kultur/Veranstaltungen, Kulturnetz Landau hat ein Mitmach-Formular auf kulturnetz-landau.de/mitmachen. Was dort eingetragen ist, erscheint am nächsten Tag automatisch hier.",
-  },
-  {
-    q: 'Was bedeutet die Karte mit dem Kompass-Symbol „In der Nähe"?',
-    a: "Das ist ein optionaler Filter: Wenn ihr ihn aktiviert und der Browser nach eurem Standort fragt, sortieren wir die Veranstaltungen nach Luftlinie zu eurem aktuellen Ort. Standortdaten verlassen den Browser nicht — wir machen die Berechnung lokal.",
-  },
-  {
-    q: "Kann ich den Kalender abonnieren?",
-    a: "Ja. /feed.ics ist ein iCalendar-Abo der nächsten 14 Tage; einfach in Apple Kalender, Google Kalender oder Outlook hinzufügen. Für RSS-Reader gibt es /feed.xml mit den nächsten 7 Tagen.",
-  },
-  {
-    q: "Werden meine Daten getrackt?",
-    a: "Nein. Keine Analytics, keine Cookies, kein Login. Der Service Worker speichert lediglich Seiteninhalt für Offline-Nutzung im Browser-Cache.",
-  },
-];
 
 interface PageProps {
   date: string;
@@ -82,7 +55,7 @@ export function renderPage(props: PageProps): string {
   const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}${langAmp}` : `${APP_URL}/?date=${date}${langAmp}`;
   const currentPath = cat ? `/c/${cat.slug}?date=${date}` : `/?date=${date}`;
   const jsonLd = buildJsonLd(events.slice(0, 50));
-  const faqLd = JSON.stringify(buildFaqPageSchema(FAQ));
+  const faqLd = JSON.stringify(buildFaqPageSchema(tr.faq));
 
   return `<!doctype html>
 <html lang="${locale}">
@@ -143,7 +116,7 @@ ${buildHreflangs(currentPath)}
 <div id="content-body">
 ${renderPartial(props)}
 </div>
-${renderFaq(FAQ)}
+${renderFaq(tr.faq, tr)}
 </main>
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
   <span>${escapeHtml(tr.footerLine)}</span>
@@ -155,67 +128,68 @@ ${renderFaq(FAQ)}
 <dialog id="digest-dialog" style="margin:auto;padding:0;border:1px solid var(--color-rule);border-radius:0.5rem;background:var(--color-paper);color:var(--color-ink);width:min(28rem,calc(100vw - 2rem));box-shadow:0 16px 48px -16px rgb(from var(--color-ink) r g b / 0.35);">
   <form id="digest-form" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;font-family:var(--font-body)">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
-      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">Veranstaltungen abonnieren</h2>
-      <button type="button" data-digest-close aria-label="Schließen" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
+      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">${escapeHtml(tr.digestDialogTitle)}</h2>
+      <button type="button" data-digest-close aria-label="${escapeHtml(tr.close)}" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
     </div>
 
-    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.</p>
+    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">${escapeHtml(tr.digestDialogIntro)}</p>
 
-    <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem" aria-label="Digest-Zeitpunkte">
+    <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem" aria-label="${escapeHtml(tr.digestSchedulesLabel)}">
       <label class="digest-option">
         <input type="checkbox" name="schedule" value="morning" />
         <span class="digest-option__main">
-          <span class="digest-option__title">Jeden Morgen</span>
+          <span class="digest-option__title">${escapeHtml(tr.digestMorning)}</span>
           <span class="digest-option__time">07:00</span>
         </span>
-        <span class="digest-option__sub">Heutige Termine</span>
+        <span class="digest-option__sub">${escapeHtml(tr.digestMorningSub)}</span>
       </label>
       <label class="digest-option">
         <input type="checkbox" name="schedule" value="afternoon" />
         <span class="digest-option__main">
-          <span class="digest-option__title">Jeden Nachmittag</span>
+          <span class="digest-option__title">${escapeHtml(tr.digestAfternoon)}</span>
           <span class="digest-option__time">17:00</span>
         </span>
-        <span class="digest-option__sub">Was läuft heute Abend?</span>
+        <span class="digest-option__sub">${escapeHtml(tr.digestAfternoonSub)}</span>
       </label>
       <label class="digest-option">
         <input type="checkbox" name="schedule" value="weekly" />
         <span class="digest-option__main">
-          <span class="digest-option__title">Sonntag-Digest</span>
+          <span class="digest-option__title">${escapeHtml(tr.digestWeekly)}</span>
           <span class="digest-option__time">So 09:00</span>
         </span>
-        <span class="digest-option__sub">Wochenüberblick</span>
+        <span class="digest-option__sub">${escapeHtml(tr.digestWeeklySub)}</span>
       </label>
     </fieldset>
 
     <details class="digest-filter">
       <summary class="digest-filter__summary">
-        <span class="digest-filter__label">Kategorien einschränken</span>
-        <span class="digest-filter__hint">leer = alle</span>
+        <span class="digest-filter__label">${escapeHtml(tr.digestRestrictCategories)}</span>
+        <span class="digest-filter__hint">${escapeHtml(tr.digestRestrictHint)}</span>
       </summary>
-      <fieldset class="digest-filter__chips" aria-label="Kategorien">
-        ${CATEGORIES.map(
-          (c) => `<label class="digest-chip">
+      <fieldset class="digest-filter__chips" aria-label="${escapeHtml(tr.ariaCategory)}">
+        ${CATEGORIES.map((c) => {
+          const localized = tr.categories[c.slug]?.short ?? c.short;
+          return `<label class="digest-chip">
           <input type="checkbox" name="filter-category" value="${c.slug}" />
           <span class="digest-chip__glyph">${c.glyph}</span>
-          <span class="digest-chip__label">${c.short}</span>
-        </label>`,
-        ).join("")}
+          <span class="digest-chip__label">${escapeHtml(localized)}</span>
+        </label>`;
+        }).join("")}
       </fieldset>
     </details>
 
     <div id="digest-ios-hint" hidden style="padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:rgb(from var(--color-ink) r g b / 0.8)">
-      <strong style="font-weight:600">Auf iPhone/iPad:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das App-Icon — erst dann sind Push-Nachrichten möglich.
+      ${escapeHtml(tr.digestIosHint)}
     </div>
 
     <div id="digest-unsupported" hidden style="padding:0.75rem 0.9rem;font-size:0.8125rem;line-height:1.5;background:var(--color-paper-2);border-radius:0.4rem;color:var(--color-rotwein)">
-      Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.
+      ${escapeHtml(tr.digestBrowserUnsupported)}
     </div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-top:0.25rem">
       <p id="digest-status" hidden style="margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0" aria-live="polite"></p>
-      <button type="button" id="digest-unsubscribe-all" hidden style="background:transparent;border:0;padding:0.5rem 0;font-size:0.6875rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55);cursor:pointer;font-family:var(--font-body)">Alle abbestellen</button>
-      <button type="submit" id="digest-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">Abonnieren</button>
+      <button type="button" id="digest-unsubscribe-all" hidden style="background:transparent;border:0;padding:0.5rem 0;font-size:0.6875rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55);cursor:pointer;font-family:var(--font-body)">${escapeHtml(tr.digestUnsubscribeAll)}</button>
+      <button type="submit" id="digest-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">${escapeHtml(tr.digestSubscribeBtn)}</button>
     </div>
   </form>
 </dialog>
@@ -223,31 +197,31 @@ ${renderFaq(FAQ)}
 <dialog id="contact-dialog" style="margin:auto;padding:0;border:1px solid var(--color-rule);border-radius:0.5rem;background:var(--color-paper);color:var(--color-ink);width:min(28rem,calc(100vw - 2rem));box-shadow:0 16px 48px -16px rgb(from var(--color-ink) r g b / 0.35);">
   <form id="contact-form" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem;font-family:var(--font-body)" novalidate>
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem">
-      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">Feedback &amp; Korrekturen</h2>
-      <button type="button" data-contact-close aria-label="Schließen" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
+      <h2 style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:500;margin:0;line-height:1.15">${escapeHtml(tr.contactTitle)}</h2>
+      <button type="button" data-contact-close aria-label="${escapeHtml(tr.close)}" style="background:transparent;border:0;cursor:pointer;color:rgb(from var(--color-ink) r g b / 0.55);padding:0.25rem;margin:-0.25rem;font-size:1.25rem;line-height:1">×</button>
     </div>
-    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">Fehlende Veranstaltung, falsche Zeit, Tippfehler? Wir freuen uns über jeden Hinweis.</p>
+    <p style="margin:-0.25rem 0 0;font-size:0.875rem;line-height:1.5;color:rgb(from var(--color-ink) r g b / 0.75)">${escapeHtml(tr.contactIntro)}</p>
     <label style="display:flex;flex-direction:column;gap:0.35rem">
-      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">Kategorie</span>
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">${escapeHtml(tr.ariaCategory)}</span>
       <select id="contact-category" name="category" required style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit">
-        <option value="Veranstaltung">Veranstaltung — fehlt oder falsch</option>
-        <option value="Quelle">Quelle — neue Seite vorschlagen</option>
-        <option value="Allgemein">Allgemein — Feedback / Funktionen</option>
+        <option value="Veranstaltung">${escapeHtml(tr.contactCategoryEvent)}</option>
+        <option value="Quelle">${escapeHtml(tr.contactCategorySource)}</option>
+        <option value="Allgemein">${escapeHtml(tr.contactCategoryGeneral)}</option>
       </select>
     </label>
     <label style="display:flex;flex-direction:column;gap:0.35rem">
-      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">E-Mail (optional, für Rückfragen)</span>
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">${escapeHtml(tr.contactEmailLabel)}</span>
       <input type="email" id="contact-email" name="email" placeholder="dein@email.de" style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit" />
     </label>
     <label style="display:flex;flex-direction:column;gap:0.35rem">
-      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">Nachricht</span>
-      <textarea id="contact-message" name="message" required rows="4" placeholder="Was stimmt nicht?" style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit;resize:vertical;min-height:5rem"></textarea>
+      <span style="font-size:0.625rem;letter-spacing:0.16em;text-transform:uppercase;color:rgb(from var(--color-ink) r g b / 0.55)">${escapeHtml(tr.contactMessageLabel)}</span>
+      <textarea id="contact-message" name="message" required rows="4" placeholder="${escapeHtml(tr.contactIntro)}" style="padding:0.55rem 0.7rem;border-radius:0.4rem;border:1px solid var(--color-rule);background:var(--color-paper-2);color:var(--color-ink);font:inherit;resize:vertical;min-height:5rem"></textarea>
     </label>
     <input type="hidden" id="contact-context" name="context" />
     <div class="cf-turnstile" data-sitekey="${escapeHtml(turnstileSiteKey)}" data-size="flexible" data-theme="auto"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.8rem;margin-top:0.25rem">
       <p id="contact-status" hidden style="margin:0;font-size:0.8125rem;color:rgb(from var(--color-ink) r g b / 0.7);flex:1;min-width:0" aria-live="polite"></p>
-      <button type="submit" id="contact-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">Senden</button>
+      <button type="submit" id="contact-submit" style="margin-left:auto;padding:0.5rem 1.25rem;font-size:0.6875rem;letter-spacing:0.18em;text-transform:uppercase;background:var(--color-rotwein);color:var(--color-paper);border:1px solid var(--color-rotwein);border-radius:999px;cursor:pointer;font-family:var(--font-body)">${escapeHtml(tr.contactSendBtn)}</button>
     </div>
   </form>
 </dialog>
@@ -267,12 +241,12 @@ function render(node: unknown, _cls: string, delayMs?: number): string {
   return `<div class="ink-up" style="animation-delay:${delayMs}ms">${inner}</div>`;
 }
 
-function renderDigestCue(delayMs: number): string {
-  return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms" aria-label="Push-Nachrichten zu Veranstaltungen abonnieren">
+function renderDigestCue(delayMs: number, tr: Translations): string {
+  return `<button type="button" class="digest-cue ink-up" data-digest-open style="animation-delay:${delayMs}ms" aria-label="${escapeHtml(tr.digestDialogTitle)}">
   <span class="digest-cue__mark" aria-hidden="true">※</span>
-  <span class="digest-cue__kicker">Push-Digest</span>
+  <span class="digest-cue__kicker">${escapeHtml(tr.digestKicker)}</span>
   <span class="digest-cue__rule" aria-hidden="true"></span>
-  <span class="digest-cue__text">Erfahre morgens, was heute in der Pfalz läuft.</span>
+  <span class="digest-cue__text">${escapeHtml(tr.digestCueText)}</span>
   <span class="digest-cue__schedules" aria-hidden="true">07 · 17 · So 09</span>
   <span class="digest-cue__chevron" aria-hidden="true">→</span>
 </button>`;
@@ -288,22 +262,22 @@ function escapeHtml(s: string): string {
  *  `<div id="content-body">` so the markup is identical between full
  *  and partial responses. */
 export function renderPartial(props: PageProps): string {
-  const { date, category, events, categoryCounts, dateCounts } = props;
+  const { date, category, events, categoryCounts, dateCounts, tr, locale } = props;
   return [
-    render(<ChipRow active={category} date={date} counts={categoryCounts} />, "ink-up", 60),
-    render(<DateStrip current={date} category={category} counts={dateCounts} />, "ink-up", 120),
-    renderDigestCue(180),
-    render(<DayHeadline date={date} total={events.length} />, "ink-up", 200),
-    `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} />, "")}</section>`,
+    render(<ChipRow active={category} date={date} counts={categoryCounts} tr={tr} locale={locale} />, "ink-up", 60),
+    render(<DateStrip current={date} category={category} counts={dateCounts} tr={tr} locale={locale} />, "ink-up", 120),
+    renderDigestCue(180, tr),
+    render(<DayHeadline date={date} total={events.length} tr={tr} />, "ink-up", 200),
+    `<section class="ink-up" style="animation-delay:240ms">${render(<EventList events={events} date={date} tr={tr} />, "")}</section>`,
   ].join("\n");
 }
 
 /** FAQ accordion — native <details>/<summary> so it works without JS;
  *  the visual treatment comes from .faq-* rules in app.css. Section
  *  also emits FAQPage JSON-LD into <head> for SEO. */
-function renderFaq(items: FaqItem[]): string {
+function renderFaq(items: FaqEntry[], tr: Translations): string {
   return `<section class="faq ink-up" style="animation-delay:300ms">
-  <h2 class="faq-title">Fragen &amp; Antworten</h2>
+  <h2 class="faq-title">${escapeHtml(tr.faqTitle)}</h2>
   ${items
     .map(
       (it) => `<details class="faq-item">

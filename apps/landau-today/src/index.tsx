@@ -90,7 +90,10 @@ function buildProps(c: import("hono").Context<{ Bindings: Env }>, category?: str
 
 function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, category?: string) {
   const props = buildProps(c, category);
-  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
+  if (!props) {
+    const tr = getTranslations(detectLocale(c.req.raw));
+    return c.html(`<p>${tr.errInvalidRequest}</p>`, 400);
+  }
   return c.html(renderPage(props), 200, {
     "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
     "Content-Language": props.locale,
@@ -98,19 +101,21 @@ function renderForCategory(c: import("hono").Context<{ Bindings: Env }>, categor
   });
 }
 
-const PAGE_HEADERS = {
-  "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
-  "Content-Language": "de",
-};
-
 app.get("/", (c) => renderForCategory(c));
 app.get("/c/:cat", (c) => renderForCategory(c, c.req.param("cat")));
 
 app.get("/partial/content", (c) => {
   const cat = c.req.query("category");
   const props = buildProps(c, cat);
-  if (!props) return c.html(`<p>Ungültige Anfrage.</p>`, 400);
-  return c.html(renderPartial(props), 200, PAGE_HEADERS);
+  if (!props) {
+    const tr = getTranslations(detectLocale(c.req.raw));
+    return c.html(`<p>${tr.errInvalidRequest}</p>`, 400);
+  }
+  return c.html(renderPartial(props), 200, {
+    "Cache-Control": "public, max-age=900, s-maxage=3600, stale-while-revalidate=3600",
+    "Content-Language": props.locale,
+    Vary: "Accept-Language",
+  });
 });
 
 // JSON for clients / agents.
@@ -123,15 +128,21 @@ app.get("/api/day", (c) => {
 
 app.onError((err, c) => {
   console.error("Unhandled:", err);
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  const homeHref = locale === "fr" ? "/?lang=fr" : "/";
   return c.html(
-    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Fehler</title><link rel="stylesheet" href="/styles.css" /></head><body><main style="max-width:32rem;margin:6rem auto;padding:0 1rem"><h1 style="font-family:'Bodoni Moda',serif;font-style:italic">Etwas ist schief gegangen.</h1><p><a href="/">Zur Startseite</a></p></main></body></html>`,
+    `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${tr.err500Title}</title><link rel="stylesheet" href="/styles.css" /></head><body><main style="max-width:32rem;margin:6rem auto;padding:0 1rem"><h1 style="font-family:'Bodoni Moda',serif;font-style:italic">${tr.err500Body}</h1><p><a href="${homeHref}">${tr.err500Back}</a></p></main></body></html>`,
     500,
   );
 });
 
 app.notFound((c) => {
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  const homeHref = locale === "fr" ? "/?lang=fr" : "/";
   return c.html(
-    `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Nicht gefunden</title><link rel="stylesheet" href="/styles.css" /></head><body><header class="masthead"><h1><a href="/">Landau<span class="ampersand">&amp;</span>heute</a></h1></header><main style="max-width:32rem;margin:4rem auto;padding:0 1rem;text-align:center"><p style="font-family:'Bodoni Moda',serif;font-style:italic;font-size:1.25rem">Diese Seite existiert nicht.</p><p style="margin-top:2rem"><a href="/" style="border-bottom:1px solid currentColor">Zurück zum Programm</a></p></main></body></html>`,
+    `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${tr.err404Title}</title><link rel="stylesheet" href="/styles.css" /></head><body><header class="masthead"><h1><a href="${homeHref}">Landau<span class="ampersand">&amp;</span>heute</a></h1></header><main style="max-width:32rem;margin:4rem auto;padding:0 1rem;text-align:center"><p style="font-family:'Bodoni Moda',serif;font-style:italic;font-size:1.25rem">${tr.err404Body}</p><p style="margin-top:2rem"><a href="${homeHref}" style="border-bottom:1px solid currentColor">${tr.err404Back}</a></p></main></body></html>`,
     404,
   );
 });

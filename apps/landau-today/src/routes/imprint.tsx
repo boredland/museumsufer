@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
 import { APP_URL } from "../shared";
 import type { Env } from "../types";
 
@@ -12,23 +13,31 @@ const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/impressum", (c) =>
-  c.html(renderImprint(), 200, {
-    "Content-Language": "de",
+app.get("/impressum", (c) => {
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  return c.html(renderImprint(locale, tr), 200, {
+    "Content-Language": locale,
     "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-  }),
-);
+    Vary: "Accept-Language",
+  });
+});
 
 app.get("/imprint", (c) => c.redirect("/impressum", 301));
 
-function renderImprint(): string {
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function renderImprint(locale: Locale, tr: Translations): string {
+  const homeHref = locale === "fr" ? "/?lang=fr" : "/";
   return `<!doctype html>
-<html lang="de">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Impressum · landau.today</title>
-<meta name="description" content="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu landau.today." />
+<title>${esc(tr.imprintTitle)} · landau.today</title>
+<meta name="description" content="${esc(tr.imprintTitle)}" />
 <meta name="theme-color" content="#f2ead3" />
 <meta name="robots" content="index,follow" />
 <link rel="canonical" href="${APP_URL}/impressum" />
@@ -43,40 +52,29 @@ function renderImprint(): string {
 </head>
 <body>
 <header class="masthead">
-  <h1><a href="/">Landau<span class="ampersand">&amp;</span>heute</a></h1>
-  <p class="subtitle">Impressum &amp; Verantwortliche</p>
+  <h1><a href="${homeHref}">Landau<span class="ampersand">&amp;</span>heute</a></h1>
+  <p class="subtitle">${esc(tr.imprintTitle)}</p>
 </header>
 <main id="content" style="max-width:48rem;margin:0 auto;padding:0 1rem 4rem">
-  <p style="margin:1rem 0"><a href="/">← Zurück zum Veranstaltungsblatt</a></p>
-  <h2>Impressum</h2>
+  <p style="margin:1rem 0"><a href="${homeHref}">← ${esc(tr.imprintBack)}</a></p>
+  <h2>${esc(tr.imprintTitle)}</h2>
 
-  <h3>Anbieter (TMG §5)</h3>
+  <h3>${esc(tr.imprintProvider)}</h3>
   <p>${OPERATOR.name}<br />${OPERATOR.city}</p>
 
-  <h3>Kontakt</h3>
+  <h3>${esc(tr.imprintContact)}</h3>
   <p><a href="mailto:${OPERATOR.email}">${OPERATOR.email}</a></p>
 
-  <h3>Inhaltlich Verantwortlicher gemäß §18 Abs. 2 MStV</h3>
+  <h3>${esc(tr.imprintResponsible)}</h3>
   <p>${OPERATOR.name}, ${OPERATOR.city}</p>
 
-  <h3>Datenherkunft</h3>
-  <p>
-    Veranstaltungstermine werden automatisiert aus öffentlichen Quellen aggregiert:
-    Kulturnetz Landau, Stadt Landau, Stiftung Hambacher Schloss, RPTU Kaiserslautern-Landau,
-    Pfalz.de und Südliche Weinstraße Tourismus. Die Rechte an den Inhalten verbleiben
-    bei den jeweiligen Veranstaltern. Diese Seite hat keinerlei kommerzielle Beziehung zu
-    den gelisteten Veranstaltern und übernimmt keine Verantwortung für die Richtigkeit
-    der angezeigten Daten — bitte prüfen Sie alle Angaben vor Ihrem Besuch beim Veranstalter.
-  </p>
+  <h3>${esc(tr.imprintDataSource)}</h3>
+  <p>${esc(tr.imprintDataSourceBody)}</p>
 
-  <h3>Haftungsausschluss</h3>
-  <p>
-    Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die
-    Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich
-    deren Betreiber verantwortlich.
-  </p>
+  <h3>${esc(tr.imprintDisclaimer)}</h3>
+  <p>${esc(tr.imprintDisclaimerBody)}</p>
 
-  <h3>Quellcode</h3>
+  <h3>${esc(tr.imprintSource)}</h3>
   <p>
     <a href="${REPO_URL}/tree/main/apps/landau-today" target="_blank" rel="noopener">
       ${REPO_URL.replace("https://", "")}
@@ -84,7 +82,7 @@ function renderImprint(): string {
   </p>
 </main>
 <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
-  <span>Landau heute · Heimatzeitung für Veranstaltungen</span>
+  <span>${esc(tr.footerLine)}</span>
 </footer>
 </body>
 </html>`;
