@@ -1,11 +1,10 @@
-import { EmailMessage } from "cloudflare:email";
-import { buildFeedbackMime, dateOffset, todayIso, verifyTurnstileToken } from "@museumsufer/core";
+import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { VENUES } from "../concert-config";
 import { getEventById, getEventsForDate, getEventsInRange, getVenueBySlug } from "../db";
 import { type Env, parseGenre } from "../types";
 
-const FEEDBACK_FROM = "noreply@konzert.haus";
+const FEEDBACK_FROM = "no-reply@konzert.haus";
 const FEEDBACK_TO = "info@jonas-strassel.de";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -76,49 +75,14 @@ app.get("/api/venues/:slug{[^.]+}", (c) => {
   return c.json({ venue, events }, { headers: DAY_HEADERS });
 });
 
-app.post("/api/contact", async (c) => {
-  const body = (await c.req
-    .json<{
-      category?: string;
-      email?: string;
-      message?: string;
-      context?: string;
-      "cf-turnstile-response"?: string;
-    }>()
-    .catch(() => null)) as {
-    category?: string;
-    email?: string;
-    message?: string;
-    context?: string;
-    "cf-turnstile-response"?: string;
-  } | null;
-  if (!body?.message || body.message.length < 3) return c.json({ error: "message required" }, 400);
-  if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
-
-  if (c.env.TURNSTILE_SECRET) {
-    const verdict = await verifyTurnstileToken(
-      body["cf-turnstile-response"],
-      c.env.TURNSTILE_SECRET,
-      c.req.header("cf-connecting-ip") ?? null,
-    );
-    if (!verdict.success) return c.json({ error: "turnstile failed", codes: verdict.errorCodes }, 400);
-  }
-
-  const raw = buildFeedbackMime({
+app.post("/api/contact", (c) =>
+  handleContactRequest({
+    request: c.req.raw,
+    env: c.env,
+    app: "konzert-haus",
     from: FEEDBACK_FROM,
     to: FEEDBACK_TO,
-    input: {
-      app: "konzert-haus",
-      category: body.category ?? null,
-      email: body.email ?? null,
-      message: body.message,
-      context: body.context ?? null,
-      userAgent: c.req.header("user-agent") ?? null,
-      pageUrl: c.req.header("referer") ?? null,
-    },
-  });
-  await c.env.FEEDBACK_EMAIL.send(new EmailMessage(FEEDBACK_FROM, FEEDBACK_TO, raw));
-  return c.json({ ok: true });
-});
+  }),
+);
 
 export default app;

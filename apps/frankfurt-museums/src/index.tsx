@@ -1,6 +1,5 @@
-import { EmailMessage } from "cloudflare:email";
 import { zValidator } from "@hono/zod-validator";
-import { buildFeedbackMime, securityHeaders, verifyTurnstileToken } from "@museumsufer/core";
+import { handleContactRequest, securityHeaders } from "@museumsufer/core";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
@@ -222,50 +221,15 @@ app.post("/api/like", async (c) => {
 const FEEDBACK_FROM = "no-reply@ins.museum";
 const FEEDBACK_TO = "info@jonas-strassel.de";
 
-app.post("/api/contact", async (c) => {
-  const body = (await c.req
-    .json<{
-      category?: string;
-      email?: string;
-      message?: string;
-      context?: string;
-      "cf-turnstile-response"?: string;
-    }>()
-    .catch(() => null)) as {
-    category?: string;
-    email?: string;
-    message?: string;
-    context?: string;
-    "cf-turnstile-response"?: string;
-  } | null;
-  if (!body?.message || body.message.length < 3) return c.json({ error: "message required" }, 400);
-  if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
-
-  if (c.env.TURNSTILE_SECRET) {
-    const verdict = await verifyTurnstileToken(
-      body["cf-turnstile-response"],
-      c.env.TURNSTILE_SECRET,
-      c.req.header("cf-connecting-ip") ?? null,
-    );
-    if (!verdict.success) return c.json({ error: "turnstile failed", codes: verdict.errorCodes }, 400);
-  }
-
-  const raw = buildFeedbackMime({
+app.post("/api/contact", (c) =>
+  handleContactRequest({
+    request: c.req.raw,
+    env: c.env,
+    app: "frankfurt-museums",
     from: FEEDBACK_FROM,
     to: FEEDBACK_TO,
-    input: {
-      app: "frankfurt-museums",
-      category: body.category ?? null,
-      email: body.email ?? null,
-      message: body.message,
-      context: body.context ?? null,
-      userAgent: c.req.header("user-agent") ?? null,
-      pageUrl: c.req.header("referer") ?? null,
-    },
-  });
-  await c.env.FEEDBACK_EMAIL.send(new EmailMessage(FEEDBACK_FROM, FEEDBACK_TO, raw));
-  return c.json({ ok: true });
-});
+  }),
+);
 
 app.get("/api/events", async (c) => {
   const date = c.req.query("date") || todayIso();
