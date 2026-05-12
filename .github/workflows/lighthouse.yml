@@ -47,7 +47,7 @@ jobs:
           - { name: konzert-haus, url: "https://frankfurt.konzert.haus/" }
           - { name: landau, url: "https://landau.today/" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Wait 60s for Cloudflare deploy
         if: github.event_name == 'push'
