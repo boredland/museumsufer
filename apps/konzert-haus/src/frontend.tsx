@@ -405,7 +405,8 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
   const titleHref = titleSource ? utm(titleSource, "event_title") : null;
   const priceNode = <PriceRange min={e.price_min} max={e.price_max} />;
   const hasPrice = e.price_min != null || e.price_max != null;
-  const label = genreLabel(e.genre, tr);
+  const composerLine = e.subtitle ?? null;
+  const showCast = e.performers && e.performers !== e.subtitle;
   const reportRegarding = `${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
   const reportContext = `${APP_URL}/api/events/${e.id}`;
   const calendarEvent: CalendarEvent = {
@@ -422,92 +423,106 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
     })(),
   };
 
-  const venueLine = opts.hideVenue ? (
-    venueRoom ? (
-      <p class="concert__venue">
-        <span>{venueRoom}</span>
-      </p>
-    ) : null
-  ) : (
-    <p class="concert__venue">
-      <a href={`/spielort/${e.venue.slug}`}>{e.venue.short_name ?? e.venue.name}</a>
-      {venueRoom ? (
-        <>
-          <span class="concert__venue-sep">/</span>
-          <span>{venueRoom}</span>
-        </>
-      ) : null}
-    </p>
-  );
-
   return (
-    <li class="concert" id={`event-${e.id}`} style={`--i:${opts.index}`}>
+    <li
+      class={`prog-entry prog-entry--${e.genre}`}
+      id={`event-${e.id}`}
+      style={`--i:${opts.index}; --genre-color:${GENRE_COLOR_VAR[e.genre]}`}
+    >
       <script
         type="application/ld+json"
         data-id={String(e.id)}
         dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildEventJsonLd(e)) }}
       />
-      <div class="concert__when">
-        <span class="concert__time">{time}</span>
-        {endTime ? <span class="concert__time-end">{endTime}</span> : null}
-      </div>
-      <div class="concert__body">
-        <span class={`concert__genre concert__genre--${e.genre}`}>{label}</span>
-        <h3 class="concert__title">
-          {titleHref ? (
-            <a href={titleHref} target="_blank" rel="noopener">
-              {e.title}
-            </a>
-          ) : (
-            e.title
-          )}
-        </h3>
-        {e.subtitle ? <p class="concert__subtitle">{e.subtitle}</p> : null}
-        {e.performers && e.performers !== e.subtitle ? <p class="concert__subtitle">{e.performers}</p> : null}
-        {venueLine}
-      </div>
-      <div class="concert__rail">
-        {hasPrice ? (
-          <p class="concert__price">{priceNode}</p>
-        ) : (
-          <p class="concert__price concert__price--free">{tr.freeEntry}</p>
-        )}
-        <CalendarPopover
-          event={calendarEvent}
-          popoverId={`cal-${e.id}`}
-          icsHref={`/event/${e.id}/feed.ics`}
-          buttonClass="icon-btn"
-          labels={{ addToCalendar: tr.toCalendar }}
-        />
-        <button
-          type="button"
-          class="icon-btn"
-          data-report-regarding={reportRegarding}
-          data-report-context={reportContext}
-          aria-label={tr.reportConcert}
-          title={tr.reportConcert}
-        >
-          <svg
-            viewBox="0 0 16 16"
-            width="13"
-            height="13"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.4"
-          >
-            <circle cx="8" cy="8" r="6.5" />
-            <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
-          </svg>
-        </button>
-        {e.ticket_url ? (
-          <a class="action" href={utm(e.ticket_url, "karten")} target="_blank" rel="noopener">
-            <span>{tr.ticketsAction}</span>
-            <span class="action__arrow" aria-hidden="true">
-              →
-            </span>
-          </a>
+      <span class="prog-entry__numeral" aria-hidden="true" />
+      <header class="prog-entry__head">
+        {!opts.hideVenue ? (
+          <p class="prog-entry__house">
+            <a href={`/spielort/${e.venue.slug}`}>{e.venue.short_name ?? e.venue.name}</a>
+            {venueRoom ? (
+              <>
+                <span class="prog-entry__house-sep" aria-hidden="true">
+                  ·
+                </span>
+                <span>{venueRoom}</span>
+              </>
+            ) : null}
+          </p>
+        ) : venueRoom ? (
+          <p class="prog-entry__house">
+            <span>{venueRoom}</span>
+          </p>
         ) : null}
+        <h3 class="prog-entry__work">
+          {composerLine ? <span class="prog-entry__composer">{composerLine}</span> : null}
+          <span class="prog-entry__title">
+            {titleHref ? (
+              <a href={titleHref} target="_blank" rel="noopener">
+                {e.title}
+              </a>
+            ) : (
+              e.title
+            )}
+          </span>
+        </h3>
+      </header>
+      {showCast ? (
+        <p class="prog-entry__cast">
+          <span class="prog-entry__cast-label">{tr.castLabel}</span>
+          <span class="prog-entry__cast-text">{e.performers}</span>
+        </p>
+      ) : null}
+      <div class="prog-entry__meta">
+        <span class="prog-entry__time">
+          <time>{time}</time>
+          {endTime ? <span class="prog-entry__time-end">{endTime}</span> : null}
+        </span>
+        <span class="prog-entry__bar" aria-hidden="true">
+          ∣
+        </span>
+        {hasPrice ? (
+          <span class="prog-entry__price">{priceNode}</span>
+        ) : (
+          <span class="prog-entry__price prog-entry__price--free">{tr.freeEntry}</span>
+        )}
+        <span class="prog-entry__actions">
+          <CalendarPopover
+            event={calendarEvent}
+            popoverId={`cal-${e.id}`}
+            icsHref={`/event/${e.id}/feed.ics`}
+            buttonClass="icon-btn"
+            labels={{ addToCalendar: tr.toCalendar }}
+          />
+          <button
+            type="button"
+            class="icon-btn"
+            data-report-regarding={reportRegarding}
+            data-report-context={reportContext}
+            aria-label={tr.reportConcert}
+            title={tr.reportConcert}
+          >
+            <svg
+              viewBox="0 0 16 16"
+              width="13"
+              height="13"
+              aria-hidden="true"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+            >
+              <circle cx="8" cy="8" r="6.5" />
+              <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
+            </svg>
+          </button>
+          {e.ticket_url ? (
+            <a class="action" href={utm(e.ticket_url, "karten")} target="_blank" rel="noopener">
+              <span>{tr.ticketsAction}</span>
+              <span class="action__arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          ) : null}
+        </span>
       </div>
     </li>
   );
@@ -1143,9 +1158,13 @@ export function ProgrammePartial({ date, events, tr }: { date: string; events: D
         </h2>
       </header>
       {visible.length === 0 ? (
-        <div class="empty">
-          <p class="empty__mark">∅</p>
-          <p>{hidden > 0 ? tr.emptyTodayAfterPast : tr.emptyTitle}</p>
+        <div class="empty empty--generalpause">
+          <p class="empty__mark" aria-hidden="true">
+            ‖
+          </p>
+          <p class="empty__direction">Generalpause</p>
+          <p class="empty__line">{hidden > 0 ? tr.emptyTodayAfterPast : tr.emptyTitle}</p>
+          <p class="empty__hint">{tr.emptyHint}</p>
         </div>
       ) : (
         <>
