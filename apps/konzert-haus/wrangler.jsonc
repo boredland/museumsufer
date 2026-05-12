@@ -8,6 +8,16 @@
   // Host routes are added separately once DNS is wired:
   //   frankfurt.konzert.haus/*
   //   konzert.haus/* (apex → 301 to frankfurt.konzert.haus, handled in worker)
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "konzert-haus-db",
+      "database_id": "6c36c9b8-d1a2-4d9c-9db4-83d31be9ffca"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 5,6 * * *", "0 15,16 * * *", "0 7,8 * * SUN"]
+  },
   "send_email": [
     {
       "name": "FEEDBACK_EMAIL",
