@@ -1125,101 +1125,142 @@ a:focus-visible {
   color: var(--felt-soft);
 }
 
-/* Digest CTA strip — between date strip and programme */
-.digest-cue {
+/* Digest CTA strip — lobby-card between date strip and programme */
+.digest-strip {
   position: relative;
   z-index: 3;
   display: grid;
-  grid-template-columns: auto auto minmax(1rem, 1fr) auto auto auto;
-  align-items: baseline;
-  gap: 0.85rem;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(0.75rem, 2.2vw, 1.4rem);
   width: 100%;
   max-width: var(--maxw);
-  margin: 0 auto;
-  padding: 0.95rem var(--gut);
-  background: transparent;
-  border: 0;
+  margin: 0.75rem auto 0;
+  padding: 0.95rem clamp(0.9rem, 2.4vw, 1.25rem) 0.95rem clamp(1.05rem, 2.6vw, 1.5rem);
+  background:
+    linear-gradient(90deg, var(--brass-glow) 0%, transparent 55%),
+    linear-gradient(180deg, color-mix(in oklab, var(--walnut) 60%, transparent) 0%, transparent 100%);
   border-top: 0.5px solid var(--rule);
   border-bottom: 0.5px solid var(--rule);
-  font-family: inherit;
-  color: var(--felt);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.4s ease, color 0.4s ease;
+  box-shadow: inset 3px 0 0 0 var(--brass);
   animation: fade 0.7s 0.28s both;
 }
-.digest-cue::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(ellipse 70% 100% at 30% 50%, var(--brass-glow) 0%, transparent 75%);
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-.digest-cue:hover,
-.digest-cue:focus-visible { border-color: var(--brass); outline: none; }
-.digest-cue:hover::before,
-.digest-cue:focus-visible::before { opacity: 1; }
-.digest-cue__mark {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  line-height: 1;
+
+.digest-strip__seal {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
   color: var(--brass);
-  transform: translateY(0.02em);
+  background: color-mix(in oklab, var(--brass-glow) 50%, transparent);
+  border: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
 }
-.digest-cue__kicker {
+.digest-strip__pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 0.5px solid var(--brass);
+  opacity: 0;
+  animation: digestPulse 3.6s ease-out 0.6s infinite;
+}
+@keyframes digestPulse {
+  0%   { transform: scale(0.85); opacity: 0; }
+  18%  { opacity: 0.55; }
+  100% { transform: scale(1.6);  opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .digest-strip__pulse { animation: none; opacity: 0; }
+}
+
+.digest-strip__copy {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 0.7rem;
+  row-gap: 0.05rem;
+  min-width: 0;
+}
+.digest-strip__kicker {
   font-family: var(--mono);
   font-size: 0.625rem;
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--brass);
+  grid-column: 1;
 }
-.digest-cue__rule {
-  height: 1px;
-  background: linear-gradient(90deg, var(--brass) 0%, transparent 90%);
-  align-self: center;
-  opacity: 0.55;
-  transition: opacity 0.4s ease;
-}
-.digest-cue:hover .digest-cue__rule { opacity: 1; }
-.digest-cue__text {
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1rem;
-  color: var(--felt);
-  text-wrap: balance;
-}
-.digest-cue__schedules {
+.digest-strip__schedules {
   font-family: var(--mono);
   font-size: 0.625rem;
   letter-spacing: 0.18em;
   color: var(--felt-quiet);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  grid-column: 2;
+  justify-self: start;
 }
-.digest-cue__chevron {
+.digest-strip__title {
+  grid-column: 1 / -1;
+  margin: 0.1rem 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 2.3vw, 1.2rem);
+  line-height: 1.25;
+  color: var(--felt);
+  text-wrap: balance;
+}
+
+.digest-strip__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.95rem;
   font-family: var(--mono);
-  font-size: 1rem;
-  line-height: 1;
-  color: var(--brass);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--walnut-deep);
+  background: var(--brass);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.digest-strip__cta:hover,
+.digest-strip__cta:focus-visible { background: var(--brass-bright); outline: none; }
+.digest-strip__cta:hover .digest-strip__arrow,
+.digest-strip__cta:focus-visible .digest-strip__arrow { transform: translateX(0.3rem); }
+.digest-strip__arrow {
+  font-size: 0.9rem;
   transition: transform 0.3s cubic-bezier(0.2, 0.6, 0.2, 1);
 }
-.digest-cue:hover .digest-cue__chevron,
-.digest-cue:focus-visible .digest-cue__chevron { transform: translateX(0.35rem); }
-@media (max-width: 720px) {
-  .digest-cue {
-    grid-template-columns: auto auto 1fr auto;
-    grid-template-rows: auto auto;
-    column-gap: 0.6rem;
-    row-gap: 0.15rem;
-    padding: 0.85rem var(--gut);
+
+@media (prefers-color-scheme: dark) {
+  .digest-strip {
+    background:
+      linear-gradient(90deg, color-mix(in oklab, var(--brass-glow) 70%, transparent) 0%, transparent 55%),
+      linear-gradient(180deg, color-mix(in oklab, var(--walnut-deep) 75%, transparent) 0%, transparent 100%);
   }
-  .digest-cue__rule { display: none; }
-  .digest-cue__text { grid-column: 1 / -1; font-size: 0.95rem; }
-  .digest-cue__schedules { grid-row: 1; grid-column: 3; justify-self: end; }
+}
+
+@media (max-width: 640px) {
+  .digest-strip {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 0.5rem;
+    padding: 0.85rem 1rem 0.9rem 1.15rem;
+  }
+  .digest-strip__cta {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: center;
+  }
+  .digest-strip__title { font-size: 1.02rem; }
 }
 
 /* Digest filter — collapsible section inside the digest dialog */
