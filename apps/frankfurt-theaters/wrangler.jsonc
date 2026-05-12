@@ -21,7 +21,7 @@
   "send_email": [
     {
       "name": "FEEDBACK_EMAIL",
-      "destination_address": "info@jonas-strassel.de"
+      "destination_address": "feedback@ins.theater"
     }
   ],
   // Turnstile site key is a public value — safe to commit. The secret is set

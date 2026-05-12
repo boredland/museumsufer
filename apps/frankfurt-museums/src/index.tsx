@@ -219,7 +219,7 @@ app.post("/api/like", async (c) => {
 });
 
 const FEEDBACK_FROM = "no-reply@ins.museum";
-const FEEDBACK_TO = "info@jonas-strassel.de";
+const FEEDBACK_TO = "feedback@ins.museum";
 
 app.post("/api/contact", (c) =>
   handleContactRequest({

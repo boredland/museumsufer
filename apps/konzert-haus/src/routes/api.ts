@@ -5,7 +5,7 @@ import { getEventById, getEventsForDate, getEventsInRange, getVenueBySlug } from
 import { type Env, parseGenre } from "../types";
 
 const FEEDBACK_FROM = "no-reply@konzert.haus";
-const FEEDBACK_TO = "info@jonas-strassel.de";
+const FEEDBACK_TO = "feedback@konzert.haus";
 
 const app = new Hono<{ Bindings: Env }>();
 
