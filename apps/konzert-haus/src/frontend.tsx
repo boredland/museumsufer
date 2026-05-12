@@ -1,10 +1,13 @@
 import {
+  buildHreflangAlternates,
+  buildLangParam,
   buildUtm,
   type CalendarEvent,
   CalendarPopover,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
   HTMX_LIFECYCLE_SCRIPT,
+  langSwitchItems,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   POPOVER_POSITIONING_SCRIPT,
   THEME_FOUC_SCRIPT,
@@ -52,9 +55,7 @@ export function genreLabel(g: Genre, tr: Translations): string {
   }
 }
 
-function langSuffix(locale: Locale, separator: "?" | "&" = "?"): string {
-  return locale === DEFAULT_LOCALE ? "" : `${separator}lang=${locale}`;
-}
+const langSuffix = (locale: Locale, separator: "?" | "&" = "?") => buildLangParam(locale, DEFAULT_LOCALE, separator);
 
 const GENRE_ORDER: Genre[] = ["classical", "jazz", "chamber", "sacred", "world", "experimental"];
 
@@ -132,13 +133,12 @@ export function Head(opts: HeadOptions) {
       <meta property="og:image" content={ogImage} />
       <meta property="og:locale" content={opts.locale === "en" ? "en_GB" : opts.locale === "fr" ? "fr_FR" : "de_DE"} />
       {opts.currentPath
-        ? SUPPORTED_LOCALES.map((l) => {
-            const path = opts.currentPath as string;
-            const stripped = path.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
-            const sep = stripped.includes("?") ? "&" : "?";
-            const href = `${APP_URL}${l === DEFAULT_LOCALE ? stripped : `${stripped}${sep}lang=${l}`}`;
-            return <link key={`hreflang-${l}`} rel="alternate" hreflang={l} href={href} />;
-          })
+        ? buildHreflangAlternates({
+            currentPath: opts.currentPath,
+            appUrl: APP_URL,
+            supported: SUPPORTED_LOCALES,
+            fallback: DEFAULT_LOCALE,
+          }).map((h) => <link key={`hreflang-${h.hreflang}`} rel="alternate" hreflang={h.hreflang} href={h.href} />)
         : null}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="theme-color" content="#F7F0E7" />
@@ -173,24 +173,20 @@ export function Grain() {
 }
 
 function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: string; tr: Translations }) {
-  const stripped = currentPath.replace(/[?&]lang=[a-z]{2}/, "").replace(/[?&]$/, "");
-  const sep = stripped.includes("?") ? "&" : "?";
+  const items = langSwitchItems({ locale, currentPath, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
   return (
     <nav class="langswitch" aria-label={tr.langSwitchAria}>
-      {SUPPORTED_LOCALES.map((l) => {
-        const href = l === DEFAULT_LOCALE ? stripped || "/" : `${stripped || "/"}${sep}lang=${l}`;
-        return (
-          <a
-            key={l}
-            href={href}
-            class={`langswitch__a${l === locale ? " langswitch__a--active" : ""}`}
-            aria-current={l === locale ? "page" : undefined}
-            hreflang={l}
-          >
-            {l.toUpperCase()}
-          </a>
-        );
-      })}
+      {items.map(({ locale: l, href, active }) => (
+        <a
+          key={l}
+          href={href}
+          class={`langswitch__a${active ? " langswitch__a--active" : ""}`}
+          aria-current={active ? "page" : undefined}
+          hreflang={l}
+        >
+          {l.toUpperCase()}
+        </a>
+      ))}
     </nav>
   );
 }

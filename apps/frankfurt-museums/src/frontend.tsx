@@ -1,5 +1,7 @@
 import {
   buildFaqPageSchema,
+  buildHreflangAlternates,
+  buildLangParam as coreBuildLangParam,
   digestScheduleLabel,
   type FaqItem,
   LLM_SERVICES,
@@ -24,7 +26,7 @@ export const THEME_SCRIPT = THEME_FOUC_SCRIPT;
 
 /** Generates language parameter string for URLs */
 export function buildLangParam(locale: Locale): string {
-  return locale === "de" ? "" : `?lang=${locale}`;
+  return coreBuildLangParam(locale, "de");
 }
 
 export type { MuseumInfo };
@@ -50,21 +52,19 @@ interface HtmlHeadOptions {
 }
 
 /**
- * Build hreflang alternates that preserve every non-`lang` query param,
- * dedupe `?lang=` (so dated pages stay dated and we never double-stamp).
+ * Build hreflang alternates from a canonical URL by extracting the path
+ * and delegating to the shared core builder. Preserves every non-`lang`
+ * query param and dedupes `?lang=`.
  */
 function buildHreflangsForCanonical(canonicalUrl: string): Array<{ hreflang: string; href: string }> {
   const u = new URL(canonicalUrl);
-  u.searchParams.delete("lang");
-  const baseQuery = u.searchParams.toString();
-  const baseHref = `${u.origin}${u.pathname}${baseQuery ? `?${baseQuery}` : ""}`;
-  const withLang = (l: string) => `${u.origin}${u.pathname}?${baseQuery ? `${baseQuery}&` : ""}lang=${l}`;
-  return [
-    { hreflang: "de", href: baseHref },
-    { hreflang: "en", href: withLang("en") },
-    { hreflang: "fr", href: withLang("fr") },
-    { hreflang: "x-default", href: baseHref },
-  ];
+  const currentPath = u.pathname + (u.search || "");
+  return buildHreflangAlternates({
+    currentPath,
+    appUrl: u.origin,
+    supported: SUPPORTED_LOCALES,
+    fallback: "de",
+  });
 }
 
 /** Renders the HTML head with meta tags, fonts, stylesheets, and structured data */
