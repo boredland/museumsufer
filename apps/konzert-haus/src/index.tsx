@@ -71,9 +71,12 @@ function renderHome(c: Context<AppEnv>, date: string) {
       },
     });
   }
-  return c.html(renderPage({ date, today, events, dateStrip, city, genre }), {
-    headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
-  });
+  return c.html(
+    renderPage({ date, today, events, dateStrip, city, genre, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }),
+    {
+      headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
+    },
+  );
 }
 
 app.get("/", (c) => renderHome(c, c.req.query("date") || todayIso()));

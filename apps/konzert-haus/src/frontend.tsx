@@ -45,6 +45,7 @@ interface PageProps {
   dateStrip: DateWithCount[];
   city: string;
   genre?: Genre | null;
+  turnstileSiteKey?: string;
 }
 
 function dateParts(iso: string) {
@@ -69,6 +70,7 @@ export interface HeadOptions {
   ogImage?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   extraLinks?: Array<{ rel: string; href: string; type?: string; title?: string }>;
+  turnstileSiteKey?: string;
 }
 
 export function renderHead(opts: HeadOptions): string {
@@ -111,6 +113,7 @@ ${
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" /></noscript>
 <style>${INLINE_CSS}</style>
 <script src="/htmx.min.js" defer></script>
+${opts.turnstileSiteKey ? `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` : ""}
 ${jsonLdScripts}`;
 }
 
@@ -315,7 +318,7 @@ function formatPriceRange(min?: number | null, max?: number | null): string | nu
 
 export const escapeHtml = coreEscapeHtml;
 
-export function renderContactDialog(): string {
+export function renderContactDialog(opts: { turnstileSiteKey?: string } = {}): string {
   return `<dialog id="contact-dialog" class="contact-dialog">
   <form id="contact-form" class="contact-form" novalidate>
     <header class="contact-form__head">
@@ -346,6 +349,11 @@ export function renderContactDialog(): string {
       <textarea id="contact-message" name="message" required rows="4" placeholder="Was stimmt nicht?"></textarea>
     </label>
     <input type="hidden" id="contact-context" name="context" />
+${
+  opts.turnstileSiteKey
+    ? `    <div class="cf-turnstile" data-sitekey="${escapeHtml(opts.turnstileSiteKey)}" data-size="flexible" data-theme="auto"></div>`
+    : ""
+}
     <footer class="contact-form__foot">
       <p id="contact-status" class="contact-form__status" hidden aria-live="polite"></p>
       <button type="submit" id="contact-submit" class="contact-form__submit">Senden</button>
@@ -574,13 +582,14 @@ export function renderProgrammePartial(date: string, events: DayEvent[]): string
 }
 
 export function renderPage(props: PageProps): string {
-  const { date, today, events, dateStrip, genre } = props;
+  const { date, today, events, dateStrip, genre, turnstileSiteKey } = props;
   const niceDate = fullGerman(date);
 
   const head = renderHead({
     title: `konzert.haus · ${niceDate}`,
     description: `Konzerte in Frankfurt und Umgebung am ${niceDate}. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik, Neue Musik.`,
     canonical: `${APP_URL}/tag/${date}`,
+    turnstileSiteKey,
   });
 
   return `<!doctype html>
@@ -601,7 +610,7 @@ ${renderDateStrip(dateStrip, date, today)}
 </main>
 
 ${renderFooter()}
-${renderContactDialog()}
+${renderContactDialog({ turnstileSiteKey })}
 ${renderClientBehaviors()}
 </body>
 </html>`;

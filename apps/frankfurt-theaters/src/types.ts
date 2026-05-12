@@ -1,6 +1,8 @@
 export interface Env {
   DB: D1Database;
   FEEDBACK_EMAIL: SendEmail;
+  TURNSTILE_SECRET?: string;
+  TURNSTILE_SITE_KEY?: string;
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
   VAPID_SUBJECT?: string;

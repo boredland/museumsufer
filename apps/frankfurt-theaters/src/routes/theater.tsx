@@ -87,6 +87,7 @@ app.get("/theater/:slug", async (c) => {
     },
   ];
 
+  const turnstileSiteKey = c.env.TURNSTILE_SITE_KEY;
   const head = renderHead({
     title: `${config.name} — Spielplan · Frankfurt Theater`,
     description: `Aktueller Spielplan und Karten für ${config.name} in Frankfurt am Main. ${performances.length} kommende Vorstellung${
@@ -95,6 +96,7 @@ app.get("/theater/:slug", async (c) => {
     canonical: `${APP_URL}/theater/${slug}`,
     ogImage: `${APP_URL}/theater/${slug}/og.svg`,
     jsonLd,
+    turnstileSiteKey,
     extraLinks: [
       { rel: "alternate", type: "text/calendar", href: `/theater/${slug}/feed.ics`, title: `${config.name} – iCal` },
       { rel: "alternate", type: "application/json", href: `/api/theater/${slug}`, title: `${config.name} – JSON` },
@@ -133,7 +135,7 @@ ${renderMasthead({ sublabel: "Frankfurter Bühnen, kuratiert nach Tag." })}
   }
 </main>
 
-${renderFooter()}
+${renderFooter({ turnstileSiteKey })}
 
 ${renderClientScript()}
 </body>

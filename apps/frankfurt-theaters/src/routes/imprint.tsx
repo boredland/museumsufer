@@ -12,10 +12,12 @@ const OPERATOR = {
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/impressum", (c) => {
+  const turnstileSiteKey = c.env.TURNSTILE_SITE_KEY;
   const head = renderHead({
     title: "Impressum · Frankfurt Theater",
     description: "Kontakt, Verantwortlichkeit und rechtliche Hinweise zu frankfurt.ins.theater.",
     canonical: `${APP_URL}/impressum`,
+    turnstileSiteKey,
   });
 
   return c.html(
@@ -80,7 +82,7 @@ ${renderGrain()}
   </section>
 </main>
 
-${renderFooter()}
+${renderFooter({ turnstileSiteKey })}
 
 ${renderClientScript()}
 </body>

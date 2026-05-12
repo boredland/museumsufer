@@ -29,6 +29,7 @@ interface PageProps {
   today: string;
   performances: DayPerformance[];
   dateStrip: DateWithCount[];
+  turnstileSiteKey?: string;
 }
 
 const APP_URL = "https://frankfurt.ins.theater";
@@ -63,6 +64,8 @@ export interface HeadOptions {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** Extra <link> tags rendered after the standard head links (e.g. per-theater iCal). */
   extraLinks?: Array<{ rel: string; href: string; type?: string; title?: string }>;
+  /** When set, includes the Cloudflare Turnstile script for the contact form. */
+  turnstileSiteKey?: string;
 }
 
 export function renderHead(opts: HeadOptions): string {
@@ -106,6 +109,7 @@ ${
 <style>${INLINE_CSS}</style>
 <script src="/htmx.min.js" defer></script>
 <script src="/uFuzzy.iife.min.js" defer></script>
+${opts.turnstileSiteKey ? `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` : ""}
 ${jsonLdScripts}`;
 }
 
@@ -432,7 +436,7 @@ export function renderFaq(): string {
   </section>`;
 }
 
-export function renderFooter(): string {
+export function renderFooter(opts: { turnstileSiteKey?: string } = {}): string {
   return `<footer class="footer">
   <div>
     <p class="footer__rule"></p>
@@ -503,7 +507,12 @@ export function renderFooter(): string {
     </label>
 
     <input type="hidden" id="contact-context" name="context" />
-
+${
+  opts.turnstileSiteKey
+    ? `
+    <div class="cf-turnstile" data-sitekey="${escapeHtml(opts.turnstileSiteKey)}" data-size="flexible" data-theme="auto"></div>`
+    : ""
+}
     <footer class="contact-form__foot">
       <p id="contact-status" class="contact-form__status" hidden aria-live="polite"></p>
       <button type="submit" id="contact-submit" class="contact-form__submit">Senden</button>
@@ -632,7 +641,7 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
 }
 
 export function renderPage(props: PageProps): string {
-  const { date, today, performances, dateStrip } = props;
+  const { date, today, performances, dateStrip, turnstileSiteKey } = props;
   const niceDate = fullGerman(date);
 
   const head = renderHead({
@@ -640,6 +649,7 @@ export function renderPage(props: PageProps): string {
     description: `Vorstellungen und Karten der Frankfurter Bühnen am ${niceDate} — kuratiert nach Tag.`,
     canonical: `${APP_URL}/`,
     jsonLd: buildHomeJsonLd(date, performances),
+    turnstileSiteKey,
   });
 
   return `<!doctype html>
@@ -661,7 +671,7 @@ ${renderAskAi()}
 
 ${renderFaq()}
 
-${renderFooter()}
+${renderFooter({ turnstileSiteKey })}
 
 ${renderClientScript()}
 </body>

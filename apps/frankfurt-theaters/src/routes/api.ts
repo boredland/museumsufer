@@ -1,5 +1,5 @@
 import { EmailMessage } from "cloudflare:email";
-import { buildFeedbackMime, dateOffset, todayIso } from "@museumsufer/core";
+import { buildFeedbackMime, dateOffset, todayIso, verifyTurnstileToken } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getPerformanceById, getPerformancesForDate, getPerformancesInRange } from "../db";
 import { THEATERS } from "../theater-config";
@@ -78,12 +78,28 @@ app.post("/api/contact", async (c) => {
       email?: string;
       message?: string;
       context?: string;
+      "cf-turnstile-response"?: string;
     }>()
-    .catch(() => null)) as { category?: string; email?: string; message?: string; context?: string } | null;
+    .catch(() => null)) as {
+    category?: string;
+    email?: string;
+    message?: string;
+    context?: string;
+    "cf-turnstile-response"?: string;
+  } | null;
   if (!body?.message || body.message.length < 3) {
     return c.json({ error: "message required" }, 400);
   }
   if (body.message.length > 4000) return c.json({ error: "message too long" }, 400);
+
+  if (c.env.TURNSTILE_SECRET) {
+    const verdict = await verifyTurnstileToken(
+      body["cf-turnstile-response"],
+      c.env.TURNSTILE_SECRET,
+      c.req.header("cf-connecting-ip") ?? null,
+    );
+    if (!verdict.success) return c.json({ error: "turnstile failed", codes: verdict.errorCodes }, 400);
+  }
 
   const raw = buildFeedbackMime({
     from: FEEDBACK_FROM,
