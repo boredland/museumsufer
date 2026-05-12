@@ -6,7 +6,6 @@ import {
   CalendarPopover,
   escapeHtml as coreEscapeHtml,
   digestScheduleLabel,
-  formatGermanDateLong,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   langSwitchItems,
@@ -516,20 +515,37 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
 
 function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
   return (
-    <button type="button" class="digest-cue" data-digest-open>
-      <span class="digest-cue__mark" aria-hidden="true">
-        ※
+    <aside class="digest-strip" aria-labelledby="digest-strip-title">
+      <span class="digest-strip__seal" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+          role="presentation"
+        >
+          <title>Push-Glocke</title>
+          <path d="M12 3.5a5 5 0 0 0-5 5v3.6L5 15h14l-2-2.9V8.5a5 5 0 0 0-5-5z" stroke-linejoin="round" />
+          <path d="M9.5 17.5a2.5 2.5 0 0 0 5 0" stroke-linecap="round" />
+        </svg>
+        <span class="digest-strip__pulse" aria-hidden="true" />
       </span>
-      <span class="digest-cue__kicker">{tr.digestKicker}</span>
-      <span class="digest-cue__rule" aria-hidden="true" />
-      <span class="digest-cue__text">{tr.digestCueText}</span>
-      <span class="digest-cue__schedules" aria-hidden="true">
-        {digestScheduleLabel(locale)}
-      </span>
-      <span class="digest-cue__chevron" aria-hidden="true">
-        →
-      </span>
-    </button>
+      <div class="digest-strip__copy">
+        <span class="digest-strip__kicker">{tr.digestKicker}</span>
+        <span class="digest-strip__schedules">{digestScheduleLabel(locale)}</span>
+        <h2 id="digest-strip-title" class="digest-strip__title">
+          {tr.digestCueText}
+        </h2>
+      </div>
+      <button type="button" class="digest-strip__cta" data-digest-open>
+        <span>{tr.digestSubscribe}</span>
+        <span class="digest-strip__arrow" aria-hidden="true">
+          →
+        </span>
+      </button>
+    </aside>
   );
 }
 
@@ -1040,21 +1056,6 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
       <span class="footer__rule" />
       <p>{tr.homeDescription}</p>
       <div class="footer__actions">
-        <button type="button" class="footer__action" data-digest-open aria-label={tr.digestSubscribe}>
-          <svg
-            viewBox="0 0 16 16"
-            width="13"
-            height="13"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <path d="M8 1.5a4 4 0 0 0-4 4v3l-1.5 2.5h11L12 8.5v-3a4 4 0 0 0-4-4z" stroke-linejoin="round" />
-            <path d="M6 13a2 2 0 0 0 4 0" stroke-linecap="round" />
-          </svg>
-          <span>{tr.digestSubscribe}</span>
-        </button>
         <button type="button" class="footer__action" data-contact-open aria-label={tr.reportProblem}>
           <svg
             viewBox="0 0 16 16"
