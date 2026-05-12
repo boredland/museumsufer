@@ -528,7 +528,7 @@ export function renderClientBehaviors(): string {
         form.reset();
         setTimeout(close, 1800);
       }).catch(function(){
-        status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an info@jonas-strassel.de.';
+        status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@konzert.haus.';
         status.className = 'contact-form__status contact-form__status--err';
         status.hidden = false;
         submit.disabled = false; submit.textContent = 'Senden';

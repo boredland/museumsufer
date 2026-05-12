@@ -48,7 +48,7 @@ app.post("/api/contact", (c) =>
     env: c.env,
     app: "landau-today",
     from: "no-reply@landau.today",
-    to: "info@jonas-strassel.de",
+    to: "feedback@landau.today",
   }),
 );
 

@@ -486,7 +486,7 @@ document.body.addEventListener('htmx:afterSwap', function(){
       form.reset();
       setTimeout(close, 1800);
     }).catch(function(){
-      status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an info@jonas-strassel.de.';
+      status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@landau.today.';
       status.style.color = 'var(--color-rotwein)';
       status.hidden = false;
       submit.disabled = false; submit.textContent = 'Senden';

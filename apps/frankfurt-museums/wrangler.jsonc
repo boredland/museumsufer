@@ -24,7 +24,7 @@
   "send_email": [
     {
       "name": "FEEDBACK_EMAIL",
-      "destination_address": "info@jonas-strassel.de"
+      "destination_address": "feedback@ins.museum"
     }
   ],
   "vars": {
