@@ -1,8 +1,6 @@
-/** stderr line logger shared by both apps' scrape scripts. The worker
- *  occasionally imports modules that import this (e.g. translate.ts via
- *  the museums request-time `translateFields()` path), but `process`
- *  doesn't exist in the Workers runtime — the typeof guard makes this
- *  a no-op there. */
+/** stderr line logger for the scrape scripts. `process` doesn't exist
+ *  in the Workers runtime, so the typeof guard makes this a no-op when
+ *  imported transitively at request time. */
 declare const process: { stderr: { write(s: string): void } } | undefined;
 
 const PAD = 36;

@@ -23,6 +23,7 @@
     "./german": "./src/german.ts",
     "./hash": "./src/hash.ts",
     "./html": "./src/html.ts",
+    "./html-head": "./src/html-head.tsx",
     "./htmx-lifecycle": "./src/htmx-lifecycle.ts",
     "./i18n": "./src/i18n.ts",
     "./imprint": "./src/imprint.ts",

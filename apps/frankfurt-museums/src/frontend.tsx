@@ -13,6 +13,7 @@ import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq } from "@museumsufer/core/faq-ui";
 import { Footer } from "@museumsufer/core/footer";
+import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
@@ -73,7 +74,8 @@ function buildHreflangsForCanonical(canonicalUrl: string): Array<{ hreflang: str
   });
 }
 
-/** Renders the HTML head with meta tags, fonts, stylesheets, and structured data */
+const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR" };
+
 export function renderHtmlHead(options: HtmlHeadOptions) {
   const {
     locale,
@@ -85,44 +87,30 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
     twitterCard = "summary_large_image",
   } = options;
 
-  const hreflangs = buildHreflangsForCanonical(canonicalUrl);
-
   return (
-    <>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={canonicalUrl} />
-      {hreflangs.map((h) => (
-        <link key={h.hreflang} rel="alternate" hreflang={h.hreflang} href={h.href} />
-      ))}
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content={canonicalUrl} />
-      <meta property="og:locale" content={locale === "en" ? "en_GB" : locale === "fr" ? "fr_FR" : "de_DE"} />
-      <meta property="og:site_name" content="Museumsufer Frankfurt" />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta name="twitter:card" content={twitterCard} />
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={ogImage} />
-      <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-      <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
-      <link rel="apple-touch-icon" href="/icon-192.png" />
-      <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
-      <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
-      <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      <link rel="stylesheet" href="/fonts.css" />
-      {jsonSchemas.map((schema) => (
-        <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
-      ))}
-      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT in client-script.ts. */}
-      <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
-    </>
+    <HtmlHead
+      title={title}
+      description={description}
+      canonical={canonicalUrl}
+      ogImage={ogImage}
+      ogLocale={OG_LOCALE[locale]}
+      ogSiteName="Museumsufer Frankfurt"
+      ogImageSize={{ width: 1200, height: 630 }}
+      twitterCard={twitterCard}
+      twitter={{ title, description, image: ogImage }}
+      hreflangs={buildHreflangsForCanonical(canonicalUrl)}
+      themeColor={[
+        { content: "#efe7d8", media: "(prefers-color-scheme: light)" },
+        { content: "#14110e", media: "(prefers-color-scheme: dark)" },
+      ]}
+      icons={{ svg: "/favicon.svg", png192: "/icon-192.png", appleTouch: "/icon-192.png" }}
+      alternates={[
+        { rel: "alternate", type: "application/rss+xml", title: "Museumsufer Frankfurt", href: "/feed.xml" },
+      ]}
+      inlineCss={INLINE_CSS}
+      deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js"]}
+      jsonLd={jsonSchemas.map((s) => s.json)}
+    />
   );
 }
 
@@ -543,13 +531,9 @@ export function renderPage(
             canonicalUrl,
             jsonSchemas,
           })}
-          <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
-          <link rel="manifest" href="/manifest.json" />
           {eventSchemaJson ? (
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: eventSchemaJson }} />
           ) : null}
-          <script src="/uFuzzy.iife.min.js" defer />
-          <script src="/htmx.min.js" defer />
         </head>
         <body>
           <IconSprite />

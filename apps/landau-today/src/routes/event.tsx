@@ -1,11 +1,4 @@
-import {
-  type buildGoogleCalendarUrl,
-  buildIcsCalendar,
-  buildOutlookCalendarUrl,
-  buildUtm,
-  buildYahooCalendarUrl,
-  THEME_FOUC_SCRIPT,
-} from "@museumsufer/core";
+import { type buildGoogleCalendarUrl, buildIcsCalendar, buildUtm, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { CalendarPopover } from "@museumsufer/core/calendar-popover";
 import { Hono } from "hono";
 import { raw } from "hono/html";

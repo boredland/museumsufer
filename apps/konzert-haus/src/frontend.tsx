@@ -15,7 +15,6 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   jsonLdSafe,
   langSwitchItems,
-  THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   type WebMcpToolDef,
@@ -27,6 +26,7 @@ import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dia
 import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
+import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
@@ -99,49 +99,38 @@ export interface HeadOptions {
   currentPath?: string;
 }
 
+const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR" };
+
 export function Head(opts: HeadOptions) {
   const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
+  const hreflangs = opts.currentPath
+    ? buildHreflangAlternates({
+        currentPath: opts.currentPath,
+        appUrl: APP_URL,
+        supported: SUPPORTED_LOCALES,
+        fallback: DEFAULT_LOCALE,
+      })
+    : undefined;
   return (
-    <>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
-      <title>{opts.title}</title>
-      <meta name="description" content={opts.description} />
-      <link rel="canonical" href={opts.canonical} />
-      <meta property="og:title" content={opts.title} />
-      <meta property="og:description" content={opts.description} />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content={opts.canonical} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:locale" content={opts.locale === "en" ? "en_GB" : opts.locale === "fr" ? "fr_FR" : "de_DE"} />
-      {opts.currentPath
-        ? buildHreflangAlternates({
-            currentPath: opts.currentPath,
-            appUrl: APP_URL,
-            supported: SUPPORTED_LOCALES,
-            fallback: DEFAULT_LOCALE,
-          }).map((h) => <link key={`hreflang-${h.hreflang}`} rel="alternate" hreflang={h.hreflang} href={h.href} />)
-        : null}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="theme-color" content="#F7F0E7" />
-      <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-      <link rel="apple-touch-icon" href="/icon-192.png" />
-      <link rel="manifest" href="/manifest.json" />
-      <link rel="alternate" type="application/json" title="konzert.haus API" href="/api/events" />
-      <link rel="alternate" type="text/calendar" title="Programm iCal" href="/feed.ics" />
-      {opts.extraLinks?.map((l) => (
-        <link key={`${l.rel}-${l.href}`} rel={l.rel} href={l.href} type={l.type} title={l.title} />
-      ))}
-      <link rel="stylesheet" href="/fonts.css" />
-      <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
-      <script src="/htmx.min.js" defer></script>
-      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */}
-      {jsonLdArr.map((j, i) => (
-        <script key={`jsonld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(j) }} />
-      ))}
-    </>
+    <HtmlHead
+      title={opts.title}
+      description={opts.description}
+      canonical={opts.canonical}
+      ogImage={ogImage}
+      ogLocale={OG_LOCALE[opts.locale ?? DEFAULT_LOCALE]}
+      hreflangs={hreflangs}
+      themeColor="#F7F0E7"
+      icons={{ svg: "/favicon.svg", appleTouch: "/icon-192.png" }}
+      alternates={[
+        { rel: "alternate", type: "application/json", title: "konzert.haus API", href: "/api/events" },
+        { rel: "alternate", type: "text/calendar", title: "Programm iCal", href: "/feed.ics" },
+        ...(opts.extraLinks ?? []),
+      ]}
+      inlineCss={INLINE_CSS}
+      deferScripts={["/htmx.min.js"]}
+      jsonLd={jsonLdArr}
+    />
   );
 }
 

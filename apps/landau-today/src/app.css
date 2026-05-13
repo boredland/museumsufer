@@ -1001,11 +1001,6 @@ body.htmx-request .htmx-progress::before {
   animation: ink-up 0.25s ease-out both;
 }
 
-/* .share-row + .ledger-wrap absolute-positioned chrome was replaced by
-   .row-action inline buttons inside .title-line — see the card-link
-   block above. The legacy rules used to fade the buttons in on hover
-   only; users couldn't find them on touch. */
-
 /* ── event detail ───────────────────────────────────────────────── */
 .event-detail {
   max-width: 38rem;

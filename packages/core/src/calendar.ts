@@ -1,11 +1,6 @@
 /**
  * Cross-vendor "Add to calendar" URL builders + RFC-5545 ICS emitters.
- * Originally split across each app's own helpers; lifted to core so all
- * three apps share one implementation.
- *
- * `location` is the human-readable venue label (museum name, theater
- * name + room, etc.). The original museums shape called it
- * `museum_name`; renamed here to keep the helper neutral.
+ * `location` is the human-readable venue label (museum / theater / hall).
  */
 import { icsEsc, utcStamp, xmlEsc } from "./escape";
 

@@ -1,12 +1,7 @@
 /**
- * Standard security headers shared by museums and theaters. Both apps' index.tsx
- * had near-identical middlewares; this collapses them to one factory.
- *
- * The CSP and Permissions-Policy are opt-in because museums currently ships
- * them but theaters does not (and a strict CSP would silently break theaters'
- * inline scripts and Formspree fallback). Keep the API surface minimal:
- * default = the four always-on headers; pass `csp` / `permissionsPolicy` to
- * add them.
+ * Standard security headers shared across apps. CSP and Permissions-Policy
+ * are opt-in via `opts`; the four always-on headers (HSTS, X-Frame-Options,
+ * X-Content-Type-Options, Referrer-Policy) ship by default.
  *
  * Returned as a Hono-compatible middleware. We avoid importing Hono's
  * MiddlewareHandler type so this module stays peer-dep-light — the function

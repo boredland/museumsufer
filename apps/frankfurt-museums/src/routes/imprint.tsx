@@ -1,4 +1,5 @@
-import { langSwitchItems, THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { langSwitchItems } from "@museumsufer/core";
+import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -17,21 +18,20 @@ function ImprintPage({ locale }: { locale: Locale }) {
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>{tr.imprintTitle}</title>
-          <meta name="description" content={tr.imprintTitle} />
-          <link rel="canonical" href="https://museumsufer.app/impressum" />
+          <HtmlHead
+            title={tr.imprintTitle}
+            description={tr.imprintTitle}
+            canonical="https://museumsufer.app/impressum"
+            ogImage="https://museumsufer.app/og-image.png"
+            ogSiteName="Museumsufer Frankfurt"
+            themeColor={[
+              { content: "#efe7d8", media: "(prefers-color-scheme: light)" },
+              { content: "#14110e", media: "(prefers-color-scheme: dark)" },
+            ]}
+            icons={{ svg: "/favicon.svg", png192: "/icon-192.png", appleTouch: "/icon-192.png" }}
+            stylesheetHref="/styles.css"
+          />
           <meta name="robots" content="index,follow" />
-          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-          <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
-          <link rel="apple-touch-icon" href="/icon-192.png" />
-          <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
-          <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
-          <link rel="stylesheet" href="/fonts.css" />
-          <link rel="preload" as="style" href="/styles.css" />
-          <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>
           <div class="page page--narrow">

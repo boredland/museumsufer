@@ -1,7 +1,5 @@
 /**
- * Build a small offline-first service worker as a string. Each app
- * (museums, theaters, landau) had a hand-rolled near-identical SW —
- * now they all call this factory.
+ * Build a small offline-first service worker as a string.
  *
  * Cache vocabulary:
  *   - SHELL_URLS get pre-cached on install (shell + manifest + styles).

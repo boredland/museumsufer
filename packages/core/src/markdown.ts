@@ -1,12 +1,8 @@
 /**
- * LLM-friendly markdown views of "a day's events" and "a venue's events".
- * Used by every app's content-negotiated `Accept: text/markdown` handler.
- *
- * Each app supplies its events in the `MarkdownEvent` shape + a few
- * branding strings (title prefix, plural nouns, API URLs) and gets back
- * a string. The actual formatting — bullet shape, date heading, empty
- * fallback — is locked down here so the four apps stay byte-for-byte
- * consistent in how they expose data to AI assistants.
+ * LLM-friendly markdown views of "a day's events" and "a venue's events"
+ * served by each app's `Accept: text/markdown` handler. Callers pass
+ * events in the `MarkdownEvent` shape + a few branding strings and get a
+ * string back.
  */
 import { buildUtm } from "./utm";
 
