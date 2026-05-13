@@ -5,21 +5,29 @@
   --walnut-deep:  #EDE4D6;
   --walnut-edge:  #DDD1BE;
   --felt:         #1A1210;
-  --felt-soft:    rgba(26, 18, 16, 0.58);
+  /* felt-soft alpha bumped 0.58 → 0.72 so the composite on walnut clears
+     AA 4.5:1 (was 4.35, composited to #776f6a). Now ~#5e5550 ≈ 6.4:1. */
+  --felt-soft:    rgba(26, 18, 16, 0.72);
   --felt-quiet:   rgba(26, 18, 16, 0.32);
   --felt-faint:   rgba(26, 18, 16, 0.12);
   --rule:         rgba(26, 18, 16, 0.14);
   --hairline:     rgba(26, 18, 16, 0.07);
 
-  --brass:        #9E7A38;
+  /* brass darkened from #9E7A38 → 5.21:1 on walnut (was 3.51, AA fail).
+     Brass is used both as text colour (.prog-entry__cast-label,
+     .programme__month, .action__note bright variant, glyphs) and as
+     button-fill (.digest-strip__cta) where walnut-deep text on it
+     was at 3.15 — symmetric improvement on both surfaces. */
+  --brass:        #825E1A;
   --brass-bright: #C4993D;
-  --brass-soft:   rgba(158, 122, 56, 0.12);
+  --brass-soft:   rgba(130, 94, 26, 0.12);
   --brass-glow:   rgba(196, 153, 61, 0.06);
 
   --velvet:       #7B2D3B;
   --velvet-soft:  rgba(123, 45, 59, 0.10);
-  --amber:        #8B6914;
-  --amber-soft:   rgba(139, 105, 20, 0.10);
+  /* amber tuned for AA on walnut (was #8B6914 = 4.50:1 at threshold). */
+  --amber:        #7A5715;
+  --amber-soft:   rgba(122, 87, 21, 0.10);
   --stained:      #2B4A6E;
   --stained-soft: rgba(43, 74, 110, 0.10);
   --terra:        #8B5E3C;
