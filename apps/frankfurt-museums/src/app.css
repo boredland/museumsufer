@@ -5,7 +5,8 @@
   --color-surface: #fbf6ec;
   --color-text-primary: #1c1410;
   --color-text-secondary: #5b524a;
-  --color-text-tertiary: #847a6f;
+  /* Darkened from #847a6f → 4.92:1 on --color-surface (was 3.9, AA fail). */
+  --color-text-tertiary: #736a60;
   --color-accent: #b45309;
   --color-accent-light: #f5e1bf;
   --color-river: #1f3a52;
@@ -74,7 +75,7 @@
   --color-surface: #fbf6ec;
   --color-text-primary: #1c1410;
   --color-text-secondary: #5b524a;
-  --color-text-tertiary: #847a6f;
+  --color-text-tertiary: #736a60;
   --color-accent: #b45309;
   --color-accent-light: #f5e1bf;
   --color-river: #1f3a52;
