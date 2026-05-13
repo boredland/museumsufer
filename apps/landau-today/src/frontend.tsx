@@ -9,6 +9,7 @@ import {
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
+import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
@@ -95,9 +96,6 @@ function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
     </button>
   );
 }
-
-const FOOTER_LINK_STYLE =
-  "background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;text-decoration:underline;text-decoration-color:rgb(from var(--color-ink) r g b / 0.3);text-underline-offset:3px";
 
 function DigestDialog({ tr }: { tr: Translations }) {
   return (
@@ -249,20 +247,28 @@ function Page(props: PageProps) {
             </div>
             <Faq items={tr.faq} tr={tr} />
           </main>
-          <footer class="colophon-foot" style="max-width:48rem;margin:0 auto;padding:0 1rem 2rem">
-            <span>{tr.footerLine}</span>
-            <span>
-              <button type="button" data-digest-open style={FOOTER_LINK_STYLE}>
-                {tr.digestSubscribe}
-              </button>{" "}
-              ·{" "}
-              <button type="button" data-contact-open style={FOOTER_LINK_STYLE}>
-                {tr.reportProblem}
-              </button>{" "}
-              · <a href="/feed.ics">{tr.subscribeCalendar}</a> · <a href="/feed.xml">RSS</a> ·{" "}
-              <a href="/llms.txt">llms.txt</a> · <a href={`/impressum${lang}`}>{tr.imprint}</a>
-            </span>
-          </footer>
+          <SharedFooter
+            description={tr.footerLine}
+            actions={[
+              {
+                label: tr.digestSubscribe,
+                openAttr: "data-digest-open",
+                icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
+              },
+              {
+                label: tr.reportProblem,
+                openAttr: "data-contact-open",
+                icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
+              },
+            ]}
+            links={[
+              { href: "/feed.ics", label: tr.subscribeCalendar },
+              { href: "/feed.xml", label: "RSS" },
+              { href: "/llms.txt", label: "llms.txt" },
+              { href: `/impressum${lang}`, label: tr.imprint },
+            ]}
+            toast={false}
+          />
           <DigestDialog tr={tr} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <script src="/client.js" defer />

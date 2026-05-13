@@ -10,6 +10,7 @@ import {
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq } from "@museumsufer/core/faq-ui";
+import { Footer } from "@museumsufer/core/footer";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
@@ -627,49 +628,41 @@ export function renderPage(
             <AboutSection tr={tr} />
             <FaqSection tr={tr} />
 
-            <footer class="footer">
-              <div class="footer__primary">
-                <a
-                  href="https://calendar.google.com/calendar/r?cid=webcal://museumsufer.app/feed.ics"
-                  target="_blank"
-                  rel="noopener"
-                  class="footer__primary-link"
-                >
-                  {tr.subscribeCal}
-                </a>
-                <a href="/feed.xml" class="footer__primary-link">
-                  {tr.rssFeed}
-                </a>
-                <button type="button" data-digest-open class="footer__primary-link">
-                  {tr.digestOpen}
-                </button>
-                <button type="button" data-contact-open class="footer__primary-link">
-                  {tr.contact}
-                </button>
-              </div>
-              <div class="footer__secondary">
-                <a href="/api/docs" class="footer__secondary-link">
-                  API
-                </a>
-                <a
-                  href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
-                  target="_blank"
-                  rel="noopener"
-                  class="footer__secondary-link"
-                >
-                  Source
-                </a>
-                <a href={locale === "de" ? "/impressum" : `/impressum?lang=${locale}`} class="footer__secondary-link">
-                  {tr.imprint}
-                </a>
-              </div>
-              <p class="footer__byline">
-                {tr.byline} ·{" "}
-                <a href="mailto:feedback@ins.museum" class="footer__byline-link">
-                  feedback@ins.museum
-                </a>
-              </p>
-            </footer>
+            <Footer
+              description={tr.metaShort ?? tr.subtitle}
+              actions={[
+                {
+                  label: tr.digestOpen,
+                  openAttr: "data-digest-open",
+                  icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
+                },
+                {
+                  label: tr.contact,
+                  openAttr: "data-contact-open",
+                  icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
+                },
+              ]}
+              links={[
+                { href: "/feed.ics", label: "iCal" },
+                { href: "/feed.xml", label: tr.rssFeed },
+                { href: "/api/docs", label: "API" },
+                {
+                  href: locale === "de" ? "/impressum" : `/impressum?lang=${locale}`,
+                  label: tr.imprint,
+                },
+                {
+                  href: "https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums",
+                  label: "GitHub",
+                  external: true,
+                  ariaLabel: "GitHub",
+                  icon: (
+                    <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
+                      <path d="M8 .2a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.3-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4A8 8 0 0 0 8 .2Z" />
+                    </svg>
+                  ),
+                },
+              ]}
+            />
           </div>
 
           <ContactDialog tr={tr} turnstileSiteKey={turnstileSiteKey} />

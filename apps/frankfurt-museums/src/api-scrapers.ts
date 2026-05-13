@@ -166,23 +166,31 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
   const data = (await res.json()) as { events?: TribeEvent[] };
   if (!data.events) return [];
 
-  return data.events
-    .map((ev): ApiEvent => {
-      const endDate = ev.end_date?.slice(0, 10) || null;
-      const startDate = ev.start_date?.slice(0, 10) || "";
-      return {
-        title: stripHtml(ev.title || ""),
-        date: startDate,
-        time: nullIfMidnight(ev.start_date?.slice(11, 16) || null),
-        end_time: nullIfMidnight(ev.end_date?.slice(11, 16) || null),
-        end_date: endDate !== startDate ? endDate : null,
-        description: truncateHtml(ev.excerpt || ev.description || ""),
-        detail_url: ev.url || null,
-        image_url: ev.image?.url || null,
-        price: ev.cost || null,
-      };
-    })
-    .filter((ev) => ev.title && ev.date);
+  return (
+    data.events
+      .map((ev): ApiEvent => {
+        const endDate = ev.end_date?.slice(0, 10) || null;
+        const startDate = ev.start_date?.slice(0, 10) || "";
+        return {
+          title: stripHtml(ev.title || ""),
+          date: startDate,
+          time: nullIfMidnight(ev.start_date?.slice(11, 16) || null),
+          end_time: nullIfMidnight(ev.end_date?.slice(11, 16) || null),
+          end_date: endDate !== startDate ? endDate : null,
+          description: truncateHtml(ev.excerpt || ev.description || ""),
+          detail_url: ev.url || null,
+          image_url: ev.image?.url || null,
+          price: ev.cost || null,
+        };
+      })
+      .filter((ev) => ev.title && ev.date)
+      // DAM publishes its "on tour" exhibitions through the same Tribe Events
+      // endpoint. Those are hosted at other venues (Hamburg, Wien, Bad Aibling…),
+      // not at DAM Frankfurt, so they don't belong on the Museumsufer site.
+      // Matching by title prefix is safe because the string is namespaced — no
+      // other museum's events look like "DAM on Tour in …".
+      .filter((ev) => !DAM_ON_TOUR_RE.test(ev.title))
+  );
 }
 
 interface TribeEvent {
@@ -3571,6 +3579,14 @@ async function fetchArchaeologischesExhibitions(endpoint: string): Promise<ApiEx
   return out;
 }
 
+/**
+ * Matches "DAM on Tour …" / "DAM On Tour …" — shows the museum is hosting an
+ * exhibition at another venue, not at DAM Frankfurt. Filtered out of the
+ * Museumsufer bundle since visitors browsing this site are looking for things
+ * they can actually see in town.
+ */
+const DAM_ON_TOUR_RE = /^DAM\s+on\s+tour\b/i;
+
 async function fetchDamTribeExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
@@ -3599,6 +3615,7 @@ async function fetchDamTribeExhibitions(endpoint: string): Promise<ApiExhibition
 
     const name = stripHtml(ev.name ?? "").trim();
     if (!name) continue;
+    if (DAM_ON_TOUR_RE.test(name)) continue;
     const image = Array.isArray(ev.image)
       ? ev.image[0]
       : typeof ev.image === "object" && ev.image
