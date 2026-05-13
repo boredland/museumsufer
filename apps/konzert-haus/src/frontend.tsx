@@ -365,7 +365,13 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
   const titleSource = e.detail_url ?? e.ticket_url ?? null;
   const titleHref = titleSource ? utm(titleSource, "event_title") : null;
   const priceNode = <PriceRange min={e.price_min} max={e.price_max} />;
-  const hasPrice = e.price_min != null || e.price_max != null;
+  const hasPrice = (e.price_min != null && e.price_min > 0) || (e.price_max != null && e.price_max > 0);
+  // Treat an explicit 0 (with no positive ceiling) as "Eintritt frei". Missing
+  // price data isn't a free claim — many venues just don't expose tariffs in
+  // their feed (or hide them once an event is sold out), so we render nothing
+  // instead of misleading the visitor.
+  const isFree =
+    (e.price_min === 0 && (e.price_max == null || e.price_max === 0)) || (e.price_min == null && e.price_max === 0);
   const composerLine = e.subtitle ?? null;
   const showCast = e.performers && e.performers !== e.subtitle;
   const reportRegarding = `${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
@@ -443,9 +449,9 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
         </span>
         {hasPrice ? (
           <span class="prog-entry__price">{priceNode}</span>
-        ) : (
+        ) : isFree ? (
           <span class="prog-entry__price prog-entry__price--free">{tr.freeEntry}</span>
-        )}
+        ) : null}
         <span class="prog-entry__actions">
           <CalendarPopover
             event={calendarEvent}
@@ -475,7 +481,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
               <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
             </svg>
           </button>
-          {e.ticket_url ? (
+          {e.ticket_url && !isFree ? (
             <a class="action" href={utm(e.ticket_url, "karten")} target="_blank" rel="noopener">
               <span class="action__note" aria-hidden="true">
                 ♪
