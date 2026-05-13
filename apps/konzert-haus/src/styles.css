@@ -1282,8 +1282,7 @@ a:focus-visible {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: clamp(0.75rem, 2.2vw, 1.4rem);
-  width: 100%;
-  max-width: var(--maxw);
+  width: min(100% - 2 * var(--gut), var(--maxw) - 2 * var(--gut));
   margin: 0.75rem auto 0;
   padding: 0.95rem clamp(0.9rem, 2.4vw, 1.25rem) 0.95rem clamp(1.05rem, 2.6vw, 1.5rem);
   background:
@@ -1500,7 +1499,7 @@ a:focus-visible {
   flex-wrap: wrap;
   position: relative;
   z-index: 3;
-  max-width: calc(var(--maxw) - 2 * var(--gut));
+  width: min(100% - 2 * var(--gut), var(--maxw) - 2 * var(--gut));
   margin: 1.75rem auto;
   padding: 0.75rem 1rem;
   border: 1px solid var(--rule);
