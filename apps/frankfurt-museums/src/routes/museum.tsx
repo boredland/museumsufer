@@ -6,20 +6,12 @@ import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../fron
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS } from "../museum-config";
+import { getEventsForMuseum, getExhibitionsForMuseum, getMuseumBySlug } from "../queries";
 import { generateScriptInit } from "../script-init";
 import { translateFields } from "../translate";
-import type { Env, Event, Exhibition } from "../types";
+import type { Env, Event, Exhibition, Museum } from "../types";
 
-interface MuseumRow {
-  id: number;
-  name: string;
-  slug: string;
-  opening_hours: string | null;
-  website_url: string | null;
-  description: string | null;
-  image_url: string | null;
-}
-
+type MuseumRow = Museum;
 type ExhibitionRow = Exhibition;
 type EventRow = Event;
 
@@ -43,7 +35,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
   const primaryMuseum = museums[0];
   const museumName = primaryMuseum.name;
   const abbreviation = config?.abbreviation;
-  const description = primaryMuseum.description;
+  const description = primaryMuseum.description ?? null;
   const metaDescription = truncate(description);
   const canonicalUrl = `https://museumsufer.app/museum/${slug}`;
   const langParam = buildLangParam(locale);
@@ -312,55 +304,36 @@ app.get("/museum/:slug", async (c) => {
     }
   }
 
-  // Fetch museums
+  // Pull museum(s), exhibitions, events straight from the bundled
+  // SCRAPE_DATA. Group slugs (mmk / jmf) fan out to multiple museums;
+  // exhibitions + events are concatenated then sorted at the end.
   const slugsToFetch = groupSlugs || [slug];
   let museums: MuseumRow[] = [];
   for (const s of slugsToFetch) {
-    const museum = await c.env.DB.prepare(
-      "SELECT id, name, slug, opening_hours, website_url, description, image_url FROM museums WHERE slug = ?",
-    )
-      .bind(s)
-      .first<MuseumRow>();
-    if (museum) museums.push(museum);
+    const m = getMuseumBySlug(s);
+    if (m) museums.push(m);
   }
-
   if (museums.length === 0) {
     return c.notFound();
   }
 
-  // Translate museum descriptions if not German
   if (locale !== "de") {
     museums = await translateFields(c.env, museums, ["description"] as (keyof MuseumRow)[], locale);
   }
 
-  // Fetch exhibitions and events for all museums in parallel
-  const museumIds = museums.map((m) => m.id);
-  const [rawExhibitions, rawEvents] = await Promise.all([
-    (async () => {
-      const placeholders = museumIds.map(() => "?").join(",");
-      const result = await c.env.DB.prepare(
-        `SELECT id, title, start_date, end_date, description, image_url, detail_url
-         FROM exhibitions WHERE museum_id IN (${placeholders}) AND (end_date IS NULL OR end_date >= ?)
-         ORDER BY end_date ASC, start_date ASC LIMIT 20`,
-      )
-        .bind(...museumIds, today)
-        .all<ExhibitionRow>();
-      return result.results || [];
-    })(),
-    (async () => {
-      const placeholders = museumIds.map(() => "?").join(",");
-      const result = await c.env.DB.prepare(
-        `SELECT id, title, date, time, end_time, end_date, description, url, detail_url, image_url, price
-         FROM events WHERE museum_id IN (${placeholders}) AND date >= ? AND date <= ?
-         ORDER BY date ASC, time ASC LIMIT 50`,
-      )
-        .bind(...museumIds, today, end30)
-        .all<EventRow>();
-      return result.results || [];
-    })(),
-  ]);
+  const rawExhibitions: ExhibitionRow[] = museums
+    .flatMap((m) => getExhibitionsForMuseum(m.id, today))
+    .sort(
+      (a, b) =>
+        (a.end_date ?? "9999-99-99").localeCompare(b.end_date ?? "9999-99-99") ||
+        (a.start_date ?? "9999-99-99").localeCompare(b.start_date ?? "9999-99-99"),
+    )
+    .slice(0, 20);
+  const rawEvents: EventRow[] = museums
+    .flatMap((m) => getEventsForMuseum(m.id, today, end30))
+    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? ""))
+    .slice(0, 50);
 
-  // Translate exhibition and event content if not German
   const exhibitions =
     locale === "de"
       ? rawExhibitions

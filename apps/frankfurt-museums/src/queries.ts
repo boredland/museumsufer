@@ -18,6 +18,7 @@ import { SCRAPE_DATA } from "./scrape-data";
 import type { Event, Exhibition, Museum, Translation } from "./types";
 
 const MUSEUMS_BY_ID = new Map<number, Museum>(SCRAPE_DATA.museums.map((m) => [m.id, m]));
+const MUSEUMS_BY_SLUG = new Map<string, Museum>(SCRAPE_DATA.museums.map((m) => [m.slug, m]));
 const EVENTS_BY_ID = new Map<number, Event>(SCRAPE_DATA.events.map((e) => [e.id, e]));
 const EXHIBITIONS_BY_ID = new Map<number, Exhibition>(SCRAPE_DATA.exhibitions.map((e) => [e.id, e]));
 
@@ -39,6 +40,47 @@ export function getAllMuseums(): Museum[] {
 
 export function getMuseumById(id: number): Museum | null {
   return MUSEUMS_BY_ID.get(id) ?? null;
+}
+
+export function getMuseumBySlug(slug: string): Museum | null {
+  return MUSEUMS_BY_SLUG.get(slug) ?? null;
+}
+
+/**
+ * All current + future exhibitions for one museum. Drops anything whose
+ * end_date is before `today`. Sorted by end_date ascending (closest-to-
+ * close first) so the museum-detail page surfaces what's ending soonest.
+ */
+export function getExhibitionsForMuseum(museumId: number, today: string, limit = 20): Exhibition[] {
+  const out: Exhibition[] = [];
+  for (const ex of SCRAPE_DATA.exhibitions) {
+    if (ex.museum_id !== museumId) continue;
+    if (ex.end_date && ex.end_date < today) continue;
+    out.push(ex);
+  }
+  out.sort(
+    (a, b) =>
+      compareNullsLast(a.end_date ?? null, b.end_date ?? null) ||
+      compareNullsLast(a.start_date ?? null, b.start_date ?? null),
+  );
+  return out.slice(0, limit);
+}
+
+/**
+ * Upcoming events for one museum within [today, endDate]. Sorted by
+ * date then time. No past-time filtering: the museum-detail view shows
+ * the next 30 days, so a started-already concert today still warrants
+ * a row (the visitor may want the venue / ticket link).
+ */
+export function getEventsForMuseum(museumId: number, today: string, endDate: string, limit = 50): Event[] {
+  const out: Event[] = [];
+  for (const ev of SCRAPE_DATA.events) {
+    if (ev.museum_id !== museumId) continue;
+    if (ev.date < today || ev.date > endDate) continue;
+    out.push(ev);
+  }
+  out.sort((a, b) => a.date.localeCompare(b.date) || compareNullsLast(a.time, b.time));
+  return out.slice(0, limit);
 }
 
 type Joined<T> = T & {
