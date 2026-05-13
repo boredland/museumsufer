@@ -1,8 +1,8 @@
 import { buildImprintSections } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
-import { Footer, Grain, Head } from "../frontend";
-import { DEFAULT_LOCALE, getTranslations } from "../i18n";
+import { Footer, Grain, Head, Masthead } from "../frontend";
+import { detectLocale, getTranslations } from "../i18n";
 import type { Env } from "../types";
 import { APP_URL, REPO_URL } from "./static";
 
@@ -24,32 +24,27 @@ const SECTIONS = buildImprintSections({
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/impressum", (c) =>
-  c.html(
+app.get("/impressum", (c) => {
+  const locale = detectLocale(c.req.raw);
+  const tr = getTranslations(locale);
+  const currentPath = "/impressum";
+  return c.html(
     <>
       {raw("<!DOCTYPE html>")}
-      <html lang="de">
+      <html lang={locale}>
         <head>
           <Head
             title="Impressum · konzert.haus"
             description="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu konzert.haus."
             canonical={`${APP_URL}/impressum`}
+            locale={locale}
+            currentPath={currentPath}
           />
           <meta name="robots" content="index,follow" />
         </head>
         <body>
           <Grain />
-          <header class="masthead">
-            <a class="masthead__brand" href="/">
-              <h1 class="wordmark">
-                <span class="wordmark__konzert">konzert</span>
-                <span class="wordmark__dot">.</span>
-                <span class="wordmark__haus">haus</span>
-              </h1>
-              <p class="tagline">Impressum &amp; Verantwortliche</p>
-            </a>
-            <hr class="masthead__rule" />
-          </header>
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
             <p>
               <a href="/">← Zum Programm</a>
@@ -82,18 +77,19 @@ app.get("/impressum", (c) =>
               </section>
             ))}
           </main>
-          <Footer tr={getTranslations(DEFAULT_LOCALE)} locale={DEFAULT_LOCALE} />
+          <Footer tr={tr} locale={locale} />
         </body>
       </html>
     </>,
     {
       headers: {
-        "Content-Language": "de",
+        "Content-Language": locale,
+        Vary: "Accept-Language",
         "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
       },
     },
-  ),
-);
+  );
+});
 
 app.get("/imprint", (c) => c.redirect("/impressum", 301));
 

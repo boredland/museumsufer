@@ -1,7 +1,8 @@
 import { THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { LangSwitch } from "@museumsufer/core/langswitch";
 import { Hono } from "hono";
 import { raw } from "hono/html";
-import { detectLocale, getTranslations, type Locale } from "../i18n";
+import { detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
 import type { Env } from "../types";
 
 const OPERATOR = {
@@ -47,11 +48,14 @@ function ImprintPage({ locale }: { locale: Locale }) {
         </head>
         <body>
           <div class="page page--narrow">
-            <p class="imprint__back">
-              <a href={locale === "de" ? "/" : `/?lang=${locale}`} class="imprint__back-link">
-                ← {tr.back}
-              </a>
-            </p>
+            <div class="imprint__head">
+              <p class="imprint__back">
+                <a href={locale === "de" ? "/" : `/?lang=${locale}`} class="imprint__back-link">
+                  ← {tr.back}
+                </a>
+              </p>
+              <LangSwitch locale={locale} supported={SUPPORTED_LOCALES} ariaLabel={tr.langSwitchAria} />
+            </div>
             <h1 class="imprint__title">{tr.imprintHeading}</h1>
 
             <section class="imprint__section">

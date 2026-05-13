@@ -7,17 +7,15 @@ import {
   buildWebMcpScript,
   type CalendarEvent,
   escapeHtml as coreEscapeHtml,
+  dateLocale,
   digestScheduleLabel,
   type FaqItem,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   langSwitchItems,
-  GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
-  GERMAN_WEEKDAYS as WEEKDAYS_LONG,
-  GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
   type WebMcpToolDef,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
@@ -261,36 +259,47 @@ function DateStrip({
   active,
   today,
   tr,
+  locale,
 }: {
   strip: DateWithCount[];
   active: string;
   today: string;
   tr: Translations;
+  locale: Locale;
 }) {
   if (!strip.length) return null;
+  // Localised weekday + month labels via Intl. Keeping the dateParts shape
+  // for the day-of-month + isToday math, but the labels are now formatted
+  // per the active locale instead of hardcoded German.
+  const dl = dateLocale(locale);
+  const weekdayFmt = new Intl.DateTimeFormat(dl, { weekday: "short", timeZone: "UTC" });
+  const monthFmt = new Intl.DateTimeFormat(dl, { month: "short", timeZone: "UTC" });
+  const lang = langSuffix(locale, "?");
   return (
     <nav class="datestrip" aria-label={tr.dateStripLabel}>
       <div class="datestrip__inner" id="datestrip">
         {strip.map((d) => {
           const p = dateParts(d.date);
+          const dateObj = new Date(`${d.date}T12:00:00Z`);
           const isActive = d.date === active;
           const isToday = d.date === today;
           const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
             .filter(Boolean)
             .join(" ");
+          const href = `/tag/${d.date}${lang}`;
           return (
             <a
               key={d.date}
               class={cls}
-              href={`/tag/${d.date}`}
+              href={href}
               aria-current={isActive ? "true" : "false"}
               hx-get={`/partial/content?date=${d.date}`}
               hx-target="#programme-content"
-              hx-push-url={`/tag/${d.date}`}
+              hx-push-url={href}
             >
-              <span class="datetile__weekday">{WEEKDAYS_SHORT[p.weekday]}</span>
+              <span class="datetile__weekday">{weekdayFmt.format(dateObj)}</span>
               <span class="datetile__day">{p.day}</span>
-              <span class="datetile__month">{MONTHS_LONG[p.month].slice(0, 3)}</span>
+              <span class="datetile__month">{monthFmt.format(dateObj)}</span>
               <span class="datetile__count">{d.n}</span>
             </a>
           );
@@ -573,15 +582,13 @@ function DigestDialog({ tr }: { tr: Translations }) {
       tr={{
         title: tr.digestTitle,
         close: tr.digestClose,
-        intro: "Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.",
+        intro: tr.digestIntro,
         filterLabel: tr.digestFilterLabel,
         filterHint: tr.digestFilterHint,
-        iosHint:
-          "<strong>iPhone:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.",
-        unsupported:
-          "Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.",
-        submit: "Abonnieren",
-        unsubAll: "Alle abbestellen",
+        iosHint: tr.digestIosHint,
+        unsupported: tr.digestUnsupported,
+        submit: tr.digestSubscribe,
+        unsubAll: tr.digestUnsubAll,
       }}
     />
   );
@@ -599,11 +606,11 @@ function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey?: string; tr
       tr={{
         title: tr.contactTitle,
         close: tr.digestClose,
-        intro: "Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.",
+        intro: tr.contactBody,
         regarding: tr.contactRegarding,
-        categoryLabel: "Kategorie",
+        categoryLabel: tr.contactCategoryLabel,
         emailLabel: tr.contactEmail,
-        emailPlaceholder: "dein@email.de",
+        emailPlaceholder: tr.contactEmailPlaceholder,
         messageLabel: tr.contactMessage,
         messagePlaceholder: tr.contactIntro,
         submit: tr.contactSend,
@@ -612,7 +619,24 @@ function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey?: string; tr
   );
 }
 
-const CLIENT_SCRIPT = `
+interface ClientScriptLabels {
+  subscribe: string;
+  save: string;
+  unsubscribe: string;
+  saving: string;
+  unsubscribing: string;
+  saved: string;
+  unsubscribed: string;
+  saveFailed: string;
+  permissionDenied: string;
+}
+
+function buildClientScript(L: ClientScriptLabels): string {
+  // String labels are inlined as JSON literals so the runtime gets the locale
+  // copy without depending on a window-level i18n bag. Every state change in
+  // the digest dialog (subscribe ↔ save ↔ unsubscribe) reads from `L`.
+  const j = (s: string) => JSON.stringify(s);
+  return `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
 }
@@ -849,7 +873,7 @@ if ('serviceWorker' in navigator) {
     }
     function openDialog(){
       setStatus('');
-      submit.disabled = false; submit.textContent = 'Abonnieren';
+      submit.disabled = false; submit.textContent = ${j(L.subscribe)};
       unsubBtn.hidden = true;
       setChecked([]); setGenres([]);
       iosHint.hidden = true; unsupported.hidden = true;
@@ -867,7 +891,7 @@ if ('serviceWorker' in navigator) {
               if (me && me.schedules && me.schedules.length){
                 setChecked(me.schedules);
                 if (me.filters && Array.isArray(me.filters.genres)) setGenres(me.filters.genres);
-                submit.textContent = 'Speichern';
+                submit.textContent = ${j(L.save)};
                 unsubBtn.hidden = false;
               }
             });
@@ -883,7 +907,7 @@ if ('serviceWorker' in navigator) {
     function submitFlow(){
       var sched = checked();
       submit.disabled = true;
-      submit.textContent = sched.length === 0 ? 'Wird abbestellt…' : 'Wird gespeichert…';
+      submit.textContent = sched.length === 0 ? ${j(L.unsubscribing)} : ${j(L.saving)};
       setStatus('');
       currentSub().then(function(existing){
         if (sched.length === 0){
@@ -915,16 +939,16 @@ if ('serviceWorker' in navigator) {
           });
         }).then(withSub);
       }).then(function(outcome){
-        setStatus(outcome === 'unsubscribed' ? 'Abbestellt.' : 'Gespeichert.', 'ok');
-        if (outcome === 'saved'){ submit.textContent = 'Speichern'; unsubBtn.hidden = false; }
+        setStatus(outcome === 'unsubscribed' ? ${j(L.unsubscribed)} : ${j(L.saved)}, 'ok');
+        if (outcome === 'saved'){ submit.textContent = ${j(L.save)}; unsubBtn.hidden = false; }
         setTimeout(closeDialog, 1200);
       }).catch(function(err){
-        var msg = 'Speichern fehlgeschlagen.';
-        if (err && err.message === 'permission-denied') msg = 'Benachrichtigungen wurden blockiert. Erlaube sie in den Browser-Einstellungen.';
+        var msg = ${j(L.saveFailed)};
+        if (err && err.message === 'permission-denied') msg = ${j(L.permissionDenied)};
         setStatus(msg, 'err');
         submit.disabled = false;
         var resched = checked();
-        submit.textContent = resched.length === 0 ? 'Abbestellen' : (unsubBtn.hidden ? 'Abonnieren' : 'Speichern');
+        submit.textContent = resched.length === 0 ? ${j(L.unsubscribe)} : (unsubBtn.hidden ? ${j(L.subscribe)} : ${j(L.save)});
       });
     }
 
@@ -940,12 +964,13 @@ if ('serviceWorker' in navigator) {
     form.addEventListener('change', function(){
       if (submit.disabled) return;
       var sched = checked();
-      if (sched.length === 0 && !unsubBtn.hidden) submit.textContent = 'Abbestellen';
-      else submit.textContent = unsubBtn.hidden ? 'Abonnieren' : 'Speichern';
+      if (sched.length === 0 && !unsubBtn.hidden) submit.textContent = ${j(L.unsubscribe)};
+      else submit.textContent = unsubBtn.hidden ? ${j(L.subscribe)} : ${j(L.save)};
     });
   })();
 })();
 `;
+}
 
 const WEBMCP_TOOLS: WebMcpToolDef[] = [
   {
@@ -1014,11 +1039,22 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
 
 const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
 
-function ClientBehaviors() {
+function ClientBehaviors({ tr }: { tr: Translations }) {
+  const clientScript = buildClientScript({
+    subscribe: tr.digestSubscribe,
+    save: tr.digestSave,
+    unsubscribe: tr.digestUnsubscribeBtn,
+    saving: tr.digestSaving,
+    unsubscribing: tr.digestUnsubscribing,
+    saved: tr.digestSaved,
+    unsubscribed: tr.digestUnsubscribed,
+    saveFailed: tr.digestError,
+    permissionDenied: tr.digestPermissionDenied,
+  });
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: `${CLIENT_SCRIPT}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${WEBMCP_SCRIPT}`,
+        __html: `${clientScript}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${WEBMCP_SCRIPT}`,
       }}
     />
   );
@@ -1100,18 +1136,32 @@ function filterPastForToday(date: string, events: DayEvent[]): DayEvent[] {
   });
 }
 
-export function ProgrammePartial({ date, events, tr }: { date: string; events: DayEvent[]; tr: Translations }) {
+export function ProgrammePartial({
+  date,
+  events,
+  tr,
+  locale = DEFAULT_LOCALE,
+}: {
+  date: string;
+  events: DayEvent[];
+  tr: Translations;
+  locale?: Locale;
+}) {
   const dp = dateParts(date);
+  const dateObj = new Date(`${date}T12:00:00Z`);
+  const dl = dateLocale(locale);
+  const weekdayLong = new Intl.DateTimeFormat(dl, { weekday: "long", timeZone: "UTC" }).format(dateObj);
+  const monthLong = new Intl.DateTimeFormat(dl, { month: "long", timeZone: "UTC" }).format(dateObj);
   const visible = filterPastForToday(date, events);
   const hidden = events.length - visible.length;
   return (
     <>
       <header class="programme__header">
         <p class="programme__line" />
-        <p class="programme__weekday">{WEEKDAYS_LONG[dp.weekday]}</p>
+        <p class="programme__weekday">{weekdayLong}</p>
         <h2 class="programme__date">
           <span class="programme__day">{dp.day}.</span>
-          <span class="programme__month">{MONTHS_LONG[dp.month]}</span>
+          <span class="programme__month">{monthLong}</span>
           <span class="programme__year">{dp.year}</span>
         </h2>
       </header>
@@ -1154,8 +1204,9 @@ export function renderProgrammePartial(
   date: string,
   events: DayEvent[],
   tr: Translations = DEFAULT_TR,
+  locale: Locale = DEFAULT_LOCALE,
 ): HtmlEscapedString {
-  return (<ProgrammePartial date={date} events={events} tr={tr} />) as unknown as HtmlEscapedString;
+  return (<ProgrammePartial date={date} events={events} tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
 }
 
 export function renderHead(opts: HeadOptions): HtmlEscapedString {
@@ -1193,19 +1244,19 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <Grain />
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <GenreFilter date={date} active={genre} tr={tr} locale={locale} />
-          <DateStrip strip={dateStrip} active={date} today={today} tr={tr} />
+          <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} events={events} tr={tr} />
+              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} />
             </div>
           </main>
           <Faq tr={tr} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />
-          <ClientBehaviors />
+          <ClientBehaviors tr={tr} />
         </body>
       </html>
     </>
@@ -1215,5 +1266,3 @@ export function renderPage(props: PageProps): HtmlEscapedString {
 function niceDateFor(date: string, locale: Locale): string {
   return formatLocalisedDateLong(date, locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "de-DE");
 }
-
-// Keep dateParts/WEEKDAYS_LONG/MONTHS_LONG imports above used elsewhere.

@@ -1910,6 +1910,11 @@ dialog::backdrop {
 .museum-detail__source-link:hover { color: var(--color-river); }
 
 /* ── Imprint route ────────────────────────────────────────────── */
+.imprint__head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin: 0 0 2rem;
+}
+.imprint__head .imprint__back { margin: 0; }
 .imprint__back { margin: 0 0 2rem; }
 .imprint__back-link { /* same vocabulary as .museum-detail__back-link */
   font-family: var(--font-mono);

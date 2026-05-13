@@ -181,6 +181,12 @@ export function renderLangSwitchLinks<L extends Locale>(opts: {
  * Pure data for a lang switcher: one entry per supported locale, with
  * the href to swap to and an `active` flag. JSX renderers iterate this;
  * string renderers use `renderLangSwitchLinks` instead.
+ *
+ * Unlike `localisedPath` (which omits `?lang=` for the fallback locale
+ * because hreflang prefers the clean canonical URL), this builder
+ * ALWAYS pins `?lang=…` on the switcher hrefs. The user's browser may
+ * be sending `Accept-Language: en-*`, so a clean `/` URL would be
+ * detected as EN; the explicit `?lang=de` lets the user override.
  */
 export interface LangSwitchItem<L extends Locale = Locale> {
   locale: L;
@@ -193,10 +199,15 @@ export function langSwitchItems<L extends Locale>(opts: {
   supported: readonly L[];
   fallback: L;
 }): LangSwitchItem<L>[] {
-  const { locale, currentPath, supported, fallback } = opts;
-  return supported.map((l) => ({
-    locale: l,
-    href: localisedPath(currentPath, l, fallback),
-    active: l === locale,
-  }));
+  const { locale, currentPath, supported } = opts;
+  return supported.map((l) => {
+    const stripped = stripLangParam(currentPath);
+    const path = stripped || "/";
+    const sep = path.includes("?") ? "&" : "?";
+    return {
+      locale: l,
+      href: `${path}${sep}lang=${l}`,
+      active: l === locale,
+    };
+  });
 }

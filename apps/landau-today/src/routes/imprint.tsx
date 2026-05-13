@@ -1,7 +1,16 @@
+import { langSwitchItems } from "@museumsufer/core";
+import { LangSwitch } from "@museumsufer/core/langswitch";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
-import { detectLocale, getTranslations, type Locale, type Translations } from "../i18n";
+import {
+  DEFAULT_LOCALE,
+  detectLocale,
+  getTranslations,
+  type Locale,
+  SUPPORTED_LOCALES,
+  type Translations,
+} from "../i18n";
 import { APP_URL } from "../shared";
 import type { Env } from "../types";
 
@@ -58,6 +67,20 @@ function ImprintPage({ locale, tr }: { locale: Locale; tr: Translations }) {
               </a>
             </h1>
             <p class="subtitle">{tr.imprintTitle}</p>
+            <LangSwitch
+              locale={locale}
+              supported={SUPPORTED_LOCALES}
+              ariaLabel={tr.langSwitchAria}
+              buildHref={(l) => {
+                const items = langSwitchItems({
+                  locale,
+                  currentPath: "/impressum",
+                  supported: SUPPORTED_LOCALES,
+                  fallback: DEFAULT_LOCALE,
+                });
+                return items.find((i) => i.locale === l)?.href ?? `?lang=${l}`;
+              }}
+            />
           </header>
           <main id="content" style="max-width:48rem;margin:0 auto;padding:0 1rem 4rem">
             <p style="margin:1rem 0">
