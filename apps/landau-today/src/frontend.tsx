@@ -8,6 +8,7 @@ import {
 } from "@museumsufer/core";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
+import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
@@ -272,6 +273,25 @@ function Page(props: PageProps) {
           <DigestDialog tr={tr} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <script src="/client.js" defer />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: buildDigestDialogScript({
+                labels: {
+                  subscribe: tr.digestSubscribe,
+                  save: tr.digestSave,
+                  unsubscribe: tr.digestUnsubscribeBtn,
+                  saving: tr.digestSaving,
+                  unsubscribing: tr.digestUnsubscribing,
+                  saved: tr.digestSaved,
+                  unsubscribed: tr.digestUnsubscribed,
+                  saveFailed: tr.digestError,
+                  permissionDenied: tr.digestPermissionDenied,
+                },
+                filterField: "categories",
+                filterName: "filter-category",
+              }),
+            }}
+          />
         </body>
       </html>
     </>

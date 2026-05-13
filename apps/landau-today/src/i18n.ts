@@ -66,6 +66,22 @@ export interface Translations {
   digestSubscribeBtn: string;
   digestUnsubscribeAll: string;
   digestSchedulesLabel: string;
+  /** Button label after the user has an existing subscription — saving changes. */
+  digestSave: string;
+  /** Button label when no schedule is checked but the user is subscribed. */
+  digestUnsubscribeBtn: string;
+  /** In-flight saving placeholder for the submit button. */
+  digestSaving: string;
+  /** In-flight unsubscribing placeholder. */
+  digestUnsubscribing: string;
+  /** Success toast after save / subscribe. */
+  digestSaved: string;
+  /** Success toast after unsubscribe. */
+  digestUnsubscribed: string;
+  /** Error toast for save/subscribe failures. */
+  digestError: string;
+  /** Long error when the browser refused notification permission. */
+  digestPermissionDenied: string;
   // Contact dialog
   contactTitle: string;
   contactIntro: string;
@@ -191,6 +207,14 @@ const de: Translations = {
   digestSubscribeBtn: "Abonnieren",
   digestUnsubscribeAll: "Alle abbestellen",
   digestSchedulesLabel: "Digest-Zeitpunkte",
+  digestSave: "Speichern",
+  digestUnsubscribeBtn: "Abbestellen",
+  digestSaving: "Wird gespeichert…",
+  digestUnsubscribing: "Wird abbestellt…",
+  digestSaved: "Gespeichert.",
+  digestUnsubscribed: "Abbestellt.",
+  digestError: "Speichern fehlgeschlagen.",
+  digestPermissionDenied: "Benachrichtigungen wurden blockiert. Erlaube sie in den Browser-Einstellungen.",
   contactTitle: "Feedback & Korrekturen",
   contactIntro: "Fehlende Veranstaltung, falsche Zeit, Tippfehler? Wir freuen uns über jeden Hinweis.",
   contactCategoryEvent: "Veranstaltung — fehlt oder falsch",
@@ -328,6 +352,14 @@ const fr: Translations = {
   digestSubscribeBtn: "S'abonner",
   digestUnsubscribeAll: "Tout désabonner",
   digestSchedulesLabel: "Horaires du digest",
+  digestSave: "Enregistrer",
+  digestUnsubscribeBtn: "Se désabonner",
+  digestSaving: "Enregistrement…",
+  digestUnsubscribing: "Désabonnement…",
+  digestSaved: "Enregistré.",
+  digestUnsubscribed: "Désabonné.",
+  digestError: "Échec de l'enregistrement.",
+  digestPermissionDenied: "Les notifications ont été bloquées. Autorise-les dans les paramètres du navigateur.",
   contactTitle: "Retours & corrections",
   contactIntro: "Événement manquant, mauvaise heure, faute de frappe ? Toute remarque est bienvenue.",
   contactCategoryEvent: "Événement — manquant ou incorrect",

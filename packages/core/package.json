@@ -15,6 +15,7 @@
     "./contact-dialog": "./src/contact-dialog.tsx",
     "./date": "./src/date.ts",
     "./digest-dialog": "./src/digest-dialog.tsx",
+    "./digest-dialog-script": "./src/digest-dialog-script.ts",
     "./escape": "./src/escape.ts",
     "./faq": "./src/faq.ts",
     "./faq-ui": "./src/faq-ui.tsx",
