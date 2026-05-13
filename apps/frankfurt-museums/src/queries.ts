@@ -47,14 +47,17 @@ export function getMuseumBySlug(slug: string): Museum | null {
 }
 
 /**
- * All current + future exhibitions for one museum. Drops anything whose
- * end_date is before `today`. Sorted by end_date ascending (closest-to-
- * close first) so the museum-detail page surfaces what's ending soonest.
+ * All current + future exhibitions for one or more museums. Drops
+ * anything whose end_date is before `today`. Sorted by end_date
+ * ascending (closest-to-close first) so the museum-detail page surfaces
+ * what's ending soonest. Accepts a single id or an array (e.g. a group
+ * slug fans out to several museum ids) and scans SCRAPE_DATA once.
  */
-export function getExhibitionsForMuseum(museumId: number, today: string, limit = 20): Exhibition[] {
+export function getExhibitionsForMuseum(museumId: number | number[], today: string, limit = 20): Exhibition[] {
+  const ids = typeof museumId === "number" ? new Set([museumId]) : new Set(museumId);
   const out: Exhibition[] = [];
   for (const ex of SCRAPE_DATA.exhibitions) {
-    if (ex.museum_id !== museumId) continue;
+    if (!ids.has(ex.museum_id)) continue;
     if (ex.end_date && ex.end_date < today) continue;
     out.push(ex);
   }
@@ -67,15 +70,16 @@ export function getExhibitionsForMuseum(museumId: number, today: string, limit =
 }
 
 /**
- * Upcoming events for one museum within [today, endDate]. Sorted by
- * date then time. No past-time filtering: the museum-detail view shows
- * the next 30 days, so a started-already concert today still warrants
- * a row (the visitor may want the venue / ticket link).
+ * Upcoming events for one or more museums within [today, endDate].
+ * Sorted by date then time. No past-time filtering: the museum-detail
+ * view shows the next 30 days, so a started-already concert today still
+ * warrants a row (the visitor may want the venue / ticket link).
  */
-export function getEventsForMuseum(museumId: number, today: string, endDate: string, limit = 50): Event[] {
+export function getEventsForMuseum(museumId: number | number[], today: string, endDate: string, limit = 50): Event[] {
+  const ids = typeof museumId === "number" ? new Set([museumId]) : new Set(museumId);
   const out: Event[] = [];
   for (const ev of SCRAPE_DATA.events) {
-    if (ev.museum_id !== museumId) continue;
+    if (!ids.has(ev.museum_id)) continue;
     if (ev.date < today || ev.date > endDate) continue;
     out.push(ev);
   }

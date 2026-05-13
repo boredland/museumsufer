@@ -1,7 +1,6 @@
 /**
- * `/.well-known/api-catalog` linkset body. Both apps' static.ts shipped the
- * same shape — a single linkset entry pointing at the OpenAPI spec, the
- * Scalar-rendered docs, and the primary status endpoint.
+ * `/.well-known/api-catalog` linkset body — points at the OpenAPI spec,
+ * the Scalar-rendered docs, and the primary status endpoint.
  */
 export interface ApiCatalogOptions {
   apiBase: string;

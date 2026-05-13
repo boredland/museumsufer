@@ -216,7 +216,6 @@ app.post("/api/transit", async (c) => {
   return c.json(result, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
 });
 
-// API routes (migrated from handleApi)
 app.post("/api/like", async (c) => {
   return handleLike(c.req.raw, c.env);
 });

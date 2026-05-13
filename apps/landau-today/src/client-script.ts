@@ -313,9 +313,15 @@ document.body.addEventListener('htmx:afterSwap', function(){
   var status = document.getElementById('contact-status');
   var submit = document.getElementById('contact-submit');
 
+  var L = (window.__landauContactL || {});
+  var L_SUBMIT = L.submit || 'Senden';
+  var L_SENDING = L.sending || 'Wird gesendet…';
+  var L_SENT = L.sent || 'Danke — Hinweis ist angekommen.';
+  var L_ERR = L.err || 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@landau.today.';
+
   function open(){
     status.hidden = true; status.textContent = ''; status.style.color = '';
-    submit.disabled = false; submit.textContent = 'Senden';
+    submit.disabled = false; submit.textContent = L_SUBMIT;
     context.value = location.href;
     if (typeof dlg.showModal === 'function') dlg.showModal();
     else dlg.setAttribute('open', '');
@@ -341,7 +347,7 @@ document.body.addEventListener('htmx:afterSwap', function(){
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    submit.disabled = true; submit.textContent = 'Wird gesendet…';
+    submit.disabled = true; submit.textContent = L_SENDING;
     status.hidden = true;
     var data = new FormData(form);
     var payload = {};
@@ -352,16 +358,16 @@ document.body.addEventListener('htmx:afterSwap', function(){
       body: JSON.stringify(payload)
     }).then(function(r){
       if (!r.ok) throw new Error('submit failed');
-      status.textContent = 'Danke — Hinweis ist angekommen.';
+      status.textContent = L_SENT;
       status.style.color = '';
       status.hidden = false;
       form.reset();
       setTimeout(close, 1800);
     }).catch(function(){
-      status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@landau.today.';
+      status.textContent = L_ERR;
       status.style.color = 'var(--color-rotwein)';
       status.hidden = false;
-      submit.disabled = false; submit.textContent = 'Senden';
+      submit.disabled = false; submit.textContent = L_SUBMIT;
     });
   });
 })();

@@ -4,13 +4,13 @@ import {
   buildLangParam,
   digestScheduleLabel,
   langSwitchItems,
-  THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
+import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
@@ -170,30 +170,28 @@ function Page(props: PageProps) {
       {raw("<!doctype html>")}
       <html lang={locale}>
         <head>
-          <meta charset="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-          <title>{title}</title>
-          <meta name="description" content={description} />
-          <meta name="theme-color" content="#f2ead3" />
-          <meta property="og:title" content={title} />
-          <meta property="og:description" content={description} />
-          <meta property="og:type" content="website" />
-          <meta property="og:url" content={canonical} />
-          <meta property="og:image" content={`${APP_URL}/og.svg`} />
-          <meta property="og:locale" content={locale === "fr" ? "fr_FR" : "de_DE"} />
-          <meta name="twitter:card" content="summary_large_image" />
-          <link rel="canonical" href={canonical} />
-          <HreflangLinks currentPath={currentPath} />
-          <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-          <link rel="manifest" href="/manifest.json" />
-          <link rel="alternate" type="application/rss+xml" title="landau.today RSS" href="/feed.xml" />
-          <link rel="alternate" type="text/calendar" title="landau.today Kalender" href="/feed.ics" />
-          <link rel="stylesheet" href="/fonts.css" />
-          <link rel="stylesheet" href="/styles.css" />
-          <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
-          <script src="/htmx.min.js" defer />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqLd }} />
+          <HtmlHead
+            title={title}
+            description={description}
+            canonical={canonical}
+            ogImage={`${APP_URL}/og.svg`}
+            ogLocale={locale === "fr" ? "fr_FR" : "de_DE"}
+            themeColor="#f2ead3"
+            icons={{ svg: "/favicon.svg" }}
+            hreflangs={buildHreflangAlternates({
+              currentPath,
+              appUrl: APP_URL,
+              supported: SUPPORTED_LOCALES,
+              fallback: DEFAULT_LOCALE,
+            })}
+            alternates={[
+              { rel: "alternate", type: "application/rss+xml", title: "landau.today RSS", href: "/feed.xml" },
+              { rel: "alternate", type: "text/calendar", title: "landau.today Kalender", href: "/feed.ics" },
+            ]}
+            stylesheetHref="/styles.css"
+            deferScripts={["/htmx.min.js"]}
+            jsonLd={[jsonLd, faqLd]}
+          />
         </head>
         <body>
           <a class="sr-only" href="#content">
@@ -256,6 +254,16 @@ function Page(props: PageProps) {
           />
           <DigestDialog tr={tr} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.__landauContactL=${JSON.stringify({
+                submit: tr.contactSendBtn,
+                sending: tr.contactSending,
+                sent: tr.contactSent,
+                err: tr.contactErr,
+              })};`,
+            }}
+          />
           <script src="/client.js" defer />
           <script
             dangerouslySetInnerHTML={{

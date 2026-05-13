@@ -1,5 +1,5 @@
 /**
- * Escape helpers for the three contexts both apps emit:
+ * Escape helpers for the three contexts the apps emit:
  *  - HTML attribute / text node    (escapeHtml)
  *  - XML / RSS                     (xmlEsc — also escapes apostrophes)
  *  - RFC 5545 ICS field values     (icsEsc)

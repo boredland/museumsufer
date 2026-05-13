@@ -10,7 +10,6 @@ import {
   type FaqItem,
   formatGermanDateLong,
   HTMX_LIFECYCLE_SCRIPT,
-  jsonLdSafe,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
@@ -25,6 +24,7 @@ import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
+import { HtmlHead } from "@museumsufer/core/html-head";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
@@ -77,38 +77,22 @@ export function Head(opts: HeadOptions) {
   const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
   return (
-    <>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
-      <title>{opts.title}</title>
-      <meta name="description" content={opts.description} />
-      <link rel="canonical" href={opts.canonical} />
-      <meta property="og:title" content={opts.title} />
-      <meta property="og:description" content={opts.description} />
-      <meta property="og:type" content="website" />
-      <meta property="og:url" content={opts.canonical} />
-      <meta property="og:image" content={ogImage} />
-      <meta property="og:locale" content="de_DE" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="theme-color" content="#F4EFE2" />
-      <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-      <link rel="apple-touch-icon" href="/icon-192.png" />
-      <link rel="manifest" href="/manifest.json" />
-      <link rel="alternate" type="application/json" title="Frankfurt Theater API" href="/api/day" />
-      <link rel="alternate" type="text/calendar" title="Spielplan iCal" href="/feed.ics" />
-      {opts.extraLinks?.map((l) => (
-        <link key={`${l.rel}-${l.href}`} rel={l.rel} href={l.href} type={l.type} title={l.title} />
-      ))}
-      <link rel="stylesheet" href="/fonts.css" />
-      <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
-      <script src="/htmx.min.js" defer></script>
-      <script src="/uFuzzy.iife.min.js" defer></script>
-      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */}
-      {jsonLdArr.map((j, i) => (
-        <script key={`jsonld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(j) }} />
-      ))}
-    </>
+    <HtmlHead
+      title={opts.title}
+      description={opts.description}
+      canonical={opts.canonical}
+      ogImage={ogImage}
+      themeColor="#F4EFE2"
+      icons={{ svg: "/favicon.svg", appleTouch: "/icon-192.png" }}
+      alternates={[
+        { rel: "alternate", type: "application/json", title: "Frankfurt Theater API", href: "/api/day" },
+        { rel: "alternate", type: "text/calendar", title: "Spielplan iCal", href: "/feed.ics" },
+        ...(opts.extraLinks ?? []),
+      ]}
+      inlineCss={INLINE_CSS}
+      deferScripts={["/htmx.min.js", "/uFuzzy.iife.min.js"]}
+      jsonLd={jsonLdArr}
+    />
   );
 }
 

@@ -1498,7 +1498,10 @@ a:focus-visible {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin: 1.75rem 0;
+  position: relative;
+  z-index: 3;
+  max-width: calc(var(--maxw) - 2 * var(--gut));
+  margin: 1.75rem auto;
   padding: 0.75rem 1rem;
   border: 1px solid var(--rule);
   background: var(--walnut-deep);
@@ -1540,9 +1543,12 @@ a:focus-visible {
    .faq__num / .faq__q / .faq__toggle / .faq__a. Vocabulary mirrors
    the theaters paradigm with konzert-haus tokens. */
 .faq {
-  margin-top: 3rem;
+  position: relative;
+  z-index: 3;
+  max-width: var(--maxw);
+  margin: 3rem auto 0;
+  padding: 1.5rem var(--gut) 0;
   border-top: 1px solid var(--rule);
-  padding-top: 1.5rem;
 }
 .faq__head {
   display: flex;

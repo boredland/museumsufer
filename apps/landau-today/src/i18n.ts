@@ -91,6 +91,9 @@ export interface Translations {
   contactEmailLabel: string;
   contactMessageLabel: string;
   contactSendBtn: string;
+  contactSending: string;
+  contactSent: string;
+  contactErr: string;
   // Generic close
   close: string;
   // Imprint
@@ -223,6 +226,9 @@ const de: Translations = {
   contactEmailLabel: "E-Mail (optional, für Rückfragen)",
   contactMessageLabel: "Nachricht",
   contactSendBtn: "Senden",
+  contactSending: "Wird gesendet…",
+  contactSent: "Danke — Hinweis ist angekommen.",
+  contactErr: "Senden fehlgeschlagen. Bitte schreib direkt an feedback@landau.today.",
   close: "Schließen",
   imprintBack: "Zurück zum Veranstaltungsblatt",
   imprintTitle: "Impressum",
@@ -368,6 +374,9 @@ const fr: Translations = {
   contactEmailLabel: "E-mail (optionnel, pour suivi)",
   contactMessageLabel: "Message",
   contactSendBtn: "Envoyer",
+  contactSending: "En cours d'envoi…",
+  contactSent: "Merci — la remarque est arrivée.",
+  contactErr: "Échec de l'envoi. Veuillez écrire directement à feedback@landau.today.",
   close: "Fermer",
   imprintBack: "Retour au journal des événements",
   imprintTitle: "Mentions légales",

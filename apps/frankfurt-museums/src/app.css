@@ -760,10 +760,7 @@ dialog::backdrop {
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   Semantic class layer — every primitive used in JSX. The Tailwind
-   utility soup that used to live inline in components.tsx + frontend.tsx
-   was lifted here so the JSX matches the landau/theaters paradigm
-   (one semantic class per element, BEM-ish names).
+   Semantic class layer — one BEM-ish class per element used in JSX.
    ─────────────────────────────────────────────────────────────────── */
 
 /* Page shell — used by every route. */

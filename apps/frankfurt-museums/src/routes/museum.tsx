@@ -322,18 +322,9 @@ app.get("/museum/:slug", async (c) => {
     museums = await translateFields(c.env, museums, ["description"] as (keyof MuseumRow)[], locale);
   }
 
-  const rawExhibitions: ExhibitionRow[] = museums
-    .flatMap((m) => getExhibitionsForMuseum(m.id, today))
-    .sort(
-      (a, b) =>
-        (a.end_date ?? "9999-99-99").localeCompare(b.end_date ?? "9999-99-99") ||
-        (a.start_date ?? "9999-99-99").localeCompare(b.start_date ?? "9999-99-99"),
-    )
-    .slice(0, 20);
-  const rawEvents: EventRow[] = museums
-    .flatMap((m) => getEventsForMuseum(m.id, today, end30))
-    .sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? ""))
-    .slice(0, 50);
+  const museumIds = museums.map((m) => m.id);
+  const rawExhibitions: ExhibitionRow[] = getExhibitionsForMuseum(museumIds, today);
+  const rawEvents: EventRow[] = getEventsForMuseum(museumIds, today, end30);
 
   const exhibitions =
     locale === "de"

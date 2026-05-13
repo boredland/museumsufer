@@ -1,8 +1,8 @@
 /**
- * Shared "Ask your AI" deep-link row. Each app passes a localised label,
+ * Shared "Ask your AI" deep-link row. Caller passes a localised label,
  * aria text and a date-context prompt; the LLM_SERVICES list is rendered
- * uniformly across the four apps. Visual hooks (`askai`, `askai__label`,
- * `askai__row`, `askai__svc`) come from each app's inline-CSS.
+ * uniformly. Visual hooks: `askai`, `askai__label`, `askai__row`,
+ * `askai__svc`.
  */
 import { LLM_SERVICES } from "./llm-services";
 

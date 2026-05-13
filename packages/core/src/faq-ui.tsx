@@ -1,11 +1,10 @@
 /**
- * Shared FAQ section. Each app passes a localised kicker + count label and the
- * list of items; the markup vocabulary (`.faq`, `.faq__head`, `.faq__row` …)
- * is uniform so a single set of CSS hooks styles all four apps' FAQ blocks.
+ * Shared FAQ section. Caller passes a localised kicker + list of items; the
+ * markup vocabulary (`.faq`, `.faq__head`, `.faq__row` …) is uniform so a
+ * single set of CSS hooks styles every app's FAQ block.
  *
- * The first item opens by default (most common Q first); subsequent items are
- * collapsed. The toggle glyph is `.faq__toggle` and rotates via the
- * `.faq__item[open]` selector — styling lives in each app's stylesheet.
+ * The first item opens by default; the toggle glyph is `.faq__toggle` and
+ * rotates via the `.faq__item[open]` selector.
  */
 import type { FaqItem } from "./faq";
 

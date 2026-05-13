@@ -1,12 +1,10 @@
 /**
- * German legal-imprint boilerplate (TMG §5 + MStV §18) shared by all
- * four apps. Each app's `/impressum` route varies in wrapper markup
- * (Tailwind vs BEM vs string templates), so we lift only the section
- * *data* — every app iterates this and emits its own JSX/HTML.
+ * German legal-imprint boilerplate (TMG §5 + MStV §18). Only the section
+ * *data* lives here — each app's `/impressum` route iterates this and
+ * emits its own JSX/HTML.
  *
- * Translations are the responsibility of each app's i18n.ts. The labels
- * here are the German source-of-truth; downstream renderers can swap
- * them via the `labels` argument if they support EN/FR imprints.
+ * Translations are the caller's responsibility; the labels here are the
+ * German source-of-truth and can be swapped via the `labels` argument.
  */
 
 export interface ImprintOperator {

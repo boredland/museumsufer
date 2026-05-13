@@ -155,14 +155,24 @@ function categoryFor(slug: string): CategoryDef {
   return CATEGORY_BY_SLUG.get(slug) ?? CATEGORY_BY_SLUG.get("sonstiges")!;
 }
 
+const CITY_REGEX_CACHE = new Map<string, RegExp>();
+function cityRegex(city: string): RegExp {
+  let r = CITY_REGEX_CACHE.get(city);
+  if (!r) {
+    const bare = city.replace(/\s+in der Pfalz$/i, "").replace(/^Landau-/, "");
+    r = new RegExp(`\\b${bare}\\b`, "i");
+    CITY_REGEX_CACHE.set(city, r);
+  }
+  return r;
+}
+
 /** True when the venue label already contains the city name — avoids
  *  rendering "Stiftskirche Landau · Landau in der Pfalz" with the
  *  city echoed twice. Match on the bare town name, not the full
  *  "Landau in der Pfalz" form. */
 function venueIncludesCity(venue: string | undefined, city: string): boolean {
   if (!venue) return false;
-  const bare = city.replace(/\s+in der Pfalz$/i, "").replace(/^Landau-/, "");
-  return new RegExp(`\\b${bare}\\b`, "i").test(venue);
+  return cityRegex(city).test(venue);
 }
 
 interface LedgerProps {
