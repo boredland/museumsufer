@@ -22,6 +22,7 @@ import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
+import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
@@ -620,6 +621,7 @@ function ContactDialog({ turnstileSiteKey, tr }: { turnstileSiteKey?: string; tr
 }
 
 interface ClientScriptLabels {
+  // Digest dialog state machine (also handed to buildDigestDialogScript).
   subscribe: string;
   save: string;
   unsubscribe: string;
@@ -629,6 +631,11 @@ interface ClientScriptLabels {
   unsubscribed: string;
   saveFailed: string;
   permissionDenied: string;
+  // Contact dialog labels.
+  contactSubmit: string;
+  contactSending: string;
+  contactSent: string;
+  contactErr: string;
 }
 
 function buildClientScript(L: ClientScriptLabels): string {
@@ -636,6 +643,11 @@ function buildClientScript(L: ClientScriptLabels): string {
   // copy without depending on a window-level i18n bag. Every state change in
   // the digest dialog (subscribe ↔ save ↔ unsubscribe) reads from `L`.
   const j = (s: string) => JSON.stringify(s);
+  const digestScript = buildDigestDialogScript({
+    labels: L,
+    filterField: "genres",
+    filterName: "filter-genre",
+  });
   return `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
@@ -745,7 +757,7 @@ if ('serviceWorker' in navigator) {
 
     function open(prefill){
       status.hidden = true; status.textContent = ''; status.className = 'contact-form__status';
-      submit.disabled = false; submit.textContent = 'Senden';
+      submit.disabled = false; submit.textContent = ${j(L.contactSubmit)};
       if (prefill && prefill.category) category.value = prefill.category;
       if (prefill && prefill.regarding) {
         regardingText.textContent = prefill.regarding;
@@ -790,7 +802,7 @@ if ('serviceWorker' in navigator) {
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
-      submit.disabled = true; submit.textContent = 'Wird gesendet…';
+      submit.disabled = true; submit.textContent = ${j(L.contactSending)};
       status.hidden = true;
       var data = new FormData(form);
       var payload = {};
@@ -801,173 +813,23 @@ if ('serviceWorker' in navigator) {
         body: JSON.stringify(payload)
       }).then(function(r){
         if (!r.ok) throw new Error('submit failed');
-        status.textContent = 'Danke — Hinweis ist angekommen.';
+        status.textContent = ${j(L.contactSent)};
         status.className = 'contact-form__status contact-form__status--ok';
         status.hidden = false;
         form.reset();
         setTimeout(close, 1800);
       }).catch(function(){
-        status.textContent = 'Senden fehlgeschlagen. Bitte schreib direkt an feedback@konzert.haus.';
+        status.textContent = ${j(L.contactErr)};
         status.className = 'contact-form__status contact-form__status--err';
         status.hidden = false;
-        submit.disabled = false; submit.textContent = 'Senden';
+        submit.disabled = false; submit.textContent = ${j(L.contactSubmit)};
       });
     });
   })();
 
-  // Digest dialog — Web Push subscription management
-  (function(){
-    var dlg = document.getElementById('digest-dialog');
-    if (!dlg) return;
-    var form = document.getElementById('digest-form');
-    var status = document.getElementById('digest-status');
-    var submit = document.getElementById('digest-submit');
-    var unsubBtn = document.getElementById('digest-unsubscribe-all');
-    var iosHint = document.getElementById('digest-ios-hint');
-    var unsupported = document.getElementById('digest-unsupported');
-    var boxes = form.querySelectorAll('input[name="schedule"]');
-    var genreBoxes = form.querySelectorAll('input[name="filter-genre"]');
-
-    function checked(){
-      var out = [];
-      boxes.forEach(function(b){ if (b.checked) out.push(b.value); });
-      return out;
-    }
-    function setChecked(values){
-      boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
-    }
-    function checkedGenres(){
-      var out = [];
-      genreBoxes.forEach(function(b){ if (b.checked) out.push(b.value); });
-      return out;
-    }
-    function setGenres(values){
-      genreBoxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; });
-    }
-    function setStatus(msg, kind){
-      if (!msg){ status.hidden = true; status.textContent = ''; status.className = 'contact-form__status'; return; }
-      status.hidden = false;
-      status.textContent = msg;
-      status.className = 'contact-form__status' + (kind === 'ok' ? ' contact-form__status--ok' : kind === 'err' ? ' contact-form__status--err' : '');
-    }
-    function b64ToBytes(s){
-      var pad = '='.repeat((4 - s.length % 4) % 4);
-      var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
-      var bin = atob(b64);
-      var out = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-      return out;
-    }
-    function iosNonStandalone(){
-      var ua = navigator.userAgent || '';
-      var isIos = /iP(hone|od|ad)/.test(ua) || (ua.indexOf('Mac') >= 0 && 'ontouchend' in document);
-      if (!isIos) return false;
-      var standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
-      return !standalone;
-    }
-    function supports(){
-      return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-    }
-    function currentSub(){
-      return navigator.serviceWorker.ready.then(function(reg){ return reg.pushManager.getSubscription(); });
-    }
-    function openDialog(){
-      setStatus('');
-      submit.disabled = false; submit.textContent = ${j(L.subscribe)};
-      unsubBtn.hidden = true;
-      setChecked([]); setGenres([]);
-      iosHint.hidden = true; unsupported.hidden = true;
-      if (!supports()){
-        if (iosNonStandalone()) iosHint.hidden = false; else unsupported.hidden = false;
-        submit.disabled = true;
-      } else if (iosNonStandalone()){
-        iosHint.hidden = false; submit.disabled = true;
-      } else {
-        currentSub().then(function(existing){
-          if (!existing) return;
-          return fetch('/api/push/me?endpoint=' + encodeURIComponent(existing.endpoint))
-            .then(function(r){ return r.ok ? r.json() : null; })
-            .then(function(me){
-              if (me && me.schedules && me.schedules.length){
-                setChecked(me.schedules);
-                if (me.filters && Array.isArray(me.filters.genres)) setGenres(me.filters.genres);
-                submit.textContent = ${j(L.save)};
-                unsubBtn.hidden = false;
-              }
-            });
-        }).catch(function(){});
-      }
-      if (typeof dlg.showModal === 'function') dlg.showModal();
-      else dlg.setAttribute('open', '');
-    }
-    function closeDialog(){
-      if (typeof dlg.close === 'function') dlg.close();
-      else dlg.removeAttribute('open');
-    }
-    function submitFlow(){
-      var sched = checked();
-      submit.disabled = true;
-      submit.textContent = sched.length === 0 ? ${j(L.unsubscribing)} : ${j(L.saving)};
-      setStatus('');
-      currentSub().then(function(existing){
-        if (sched.length === 0){
-          if (!existing) return null;
-          return fetch('/api/push/unsubscribe', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint: existing.endpoint })
-          }).then(function(){ return existing.unsubscribe().catch(function(){}); })
-            .then(function(){ return 'unsubscribed'; });
-        }
-        function withSub(sub){
-          var json = sub.toJSON();
-          var genres = checkedGenres();
-          var filters = genres.length > 0 ? { genres: genres } : null;
-          return fetch('/api/push/subscribe', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
-          }).then(function(r){ if (!r.ok) throw new Error('save-failed'); return 'saved'; });
-        }
-        if (existing) return withSub(existing);
-        if (Notification.permission === 'denied') throw new Error('permission-denied');
-        var permP = Notification.permission === 'granted' ? Promise.resolve('granted') : Notification.requestPermission();
-        return permP.then(function(p){
-          if (p !== 'granted') throw new Error('permission-denied');
-          return fetch('/api/push/key').then(function(r){ if (!r.ok) throw new Error('key-failed'); return r.json(); });
-        }).then(function(data){
-          return navigator.serviceWorker.ready.then(function(reg){
-            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(data.publicKey) });
-          });
-        }).then(withSub);
-      }).then(function(outcome){
-        setStatus(outcome === 'unsubscribed' ? ${j(L.unsubscribed)} : ${j(L.saved)}, 'ok');
-        if (outcome === 'saved'){ submit.textContent = ${j(L.save)}; unsubBtn.hidden = false; }
-        setTimeout(closeDialog, 1200);
-      }).catch(function(err){
-        var msg = ${j(L.saveFailed)};
-        if (err && err.message === 'permission-denied') msg = ${j(L.permissionDenied)};
-        setStatus(msg, 'err');
-        submit.disabled = false;
-        var resched = checked();
-        submit.textContent = resched.length === 0 ? ${j(L.unsubscribe)} : (unsubBtn.hidden ? ${j(L.subscribe)} : ${j(L.save)});
-      });
-    }
-
-    document.addEventListener('click', function(e){
-      var openBtn = e.target.closest && e.target.closest('[data-digest-open]');
-      if (openBtn){ e.preventDefault(); openDialog(); return; }
-      var closeBtn = e.target.closest && e.target.closest('[data-digest-close]');
-      if (closeBtn){ e.preventDefault(); closeDialog(); return; }
-    });
-    dlg.addEventListener('click', function(e){ if (e.target === dlg) closeDialog(); });
-    form.addEventListener('submit', function(e){ e.preventDefault(); submitFlow(); });
-    unsubBtn.addEventListener('click', function(e){ e.preventDefault(); setChecked([]); submitFlow(); });
-    form.addEventListener('change', function(){
-      if (submit.disabled) return;
-      var sched = checked();
-      if (sched.length === 0 && !unsubBtn.hidden) submit.textContent = ${j(L.unsubscribe)};
-      else submit.textContent = unsubBtn.hidden ? ${j(L.subscribe)} : ${j(L.save)};
-    });
-  })();
+  // Digest dialog — Web Push subscription management. Implementation
+  // lives in @museumsufer/core/digest-dialog-script (shared with landau).
+  ${digestScript}
 })();
 `;
 }
@@ -1050,6 +912,10 @@ function ClientBehaviors({ tr }: { tr: Translations }) {
     unsubscribed: tr.digestUnsubscribed,
     saveFailed: tr.digestError,
     permissionDenied: tr.digestPermissionDenied,
+    contactSubmit: tr.contactSend,
+    contactSending: tr.contactSending,
+    contactSent: tr.contactSent,
+    contactErr: tr.contactErr,
   });
   return (
     <script
