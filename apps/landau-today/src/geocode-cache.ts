@@ -11,6 +11,7 @@
 export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "60+ smart ins internet das projekt der digital-botschafter landau|landau in der pfalz": [49.198283, 8.112344],
   "alm landau|landau": [49.198283, 8.112344],
+  "alsterweiler kapelle|maikammer": [49.308511, 8.122563],
   "alte elektro-werkstatt|bad bergzabern": [49.102808, 7.999127],
   "alter kaufhaus, foyer|landau in der pfalz": [0, 0],
   "altes kaufhaus (foyer)|landau in der pfalz": [49.198283, 8.112344],
@@ -47,6 +48,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "frank-loebsches-haus|landau in der pfalz": [49.199176, 8.112177],
   "freiwillige feuerwehr annweiler am trifels|annweiler am trifels": [49.203815, 7.967896],
   "galerie neumühle|edenkoben": [49.283253, 8.111971],
+  "gleichstellungssstelle der stadt landau|landau in der pfalz": [49.198283, 8.112344],
   "gloria kulturpalast|landau in der pfalz": [49.198828, 8.117435],
   "goethepark (konzertmuschel)|landau in der pfalz": [49.198283, 8.112344],
   "grundschule in ilbesheim|ilbesheim": [49.186938, 8.052131],
@@ -157,6 +159,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "städtische galerie villa streccius|landau in der pfalz": [49.198283, 8.112344],
   "suppe mag brot - suppenbar & café|landau in der pfalz": [49.198283, 8.112344],
   "toms näschtl|landau in der pfalz": [49.207634, 8.121735],
+  "tourist-info st. martin|st. martin": [49.00108, 11.262601],
   "tourist-information bad bergzaberner land|bad bergzabern": [49.102808, 7.999127],
   "tourist-information landau|landau": [49.198283, 8.112344],
   "touristinformation maikammer|maikammer": [49.305216, 8.131629],
