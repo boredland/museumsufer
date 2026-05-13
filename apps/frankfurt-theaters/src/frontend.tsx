@@ -367,6 +367,10 @@ function Terminus({ p }: { p: DayPerformance }) {
     return <StatusStamp status={p.status} terminus />;
   }
   if (!p.ticket_url) return null;
+  // Free performances (explicit 0) don't get a "Karten" link — there's nothing to buy.
+  const isFree =
+    (p.price_min === 0 && (p.price_max == null || p.price_max === 0)) || (p.price_min == null && p.price_max === 0);
+  if (isFree) return null;
   return (
     <a class="action" href={utm(p.ticket_url, "karten")} target="_blank" rel="noopener">
       <span>Karten</span>
