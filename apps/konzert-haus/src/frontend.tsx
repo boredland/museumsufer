@@ -25,6 +25,7 @@ import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/c
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
+import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { raw } from "hono/html";
@@ -507,10 +508,10 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
           </button>
           {e.ticket_url ? (
             <a class="action" href={utm(e.ticket_url, "karten")} target="_blank" rel="noopener">
-              <span>{tr.ticketsAction}</span>
-              <span class="action__arrow" aria-hidden="true">
-                →
+              <span class="action__note" aria-hidden="true">
+                ♪
               </span>
+              <span>{tr.ticketsAction}</span>
             </a>
           ) : null}
         </span>
@@ -1026,40 +1027,38 @@ function ClientBehaviors() {
 export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
   const lang = langSuffix(locale);
   return (
-    <footer class="footer">
-      <span class="footer__rule" />
-      <p>{tr.homeDescription}</p>
-      <div class="footer__actions">
-        <button type="button" class="footer__action" data-contact-open aria-label={tr.reportProblem}>
-          <svg
-            viewBox="0 0 16 16"
-            width="13"
-            height="13"
-            aria-hidden="true"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <circle cx="8" cy="8" r="6.5" />
-            <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
-          </svg>
-          <span>{tr.reportProblem}</span>
-        </button>
-      </div>
-      <div class="footer__links">
-        <a href="/feed.ics">iCal</a>
-        <span class="footer__sep">·</span>
-        <a href="/feed.rss">RSS</a>
-        <span class="footer__sep">·</span>
-        <a href="/api/docs">API</a>
-        <span class="footer__sep">·</span>
-        <a href={`/impressum${lang}`}>{tr.imprint}</a>
-        <span class="footer__sep">·</span>
-        <a href={REPO_URL} target="_blank" rel="noopener">
-          GitHub
-        </a>
-      </div>
-    </footer>
+    <SharedFooter
+      description={tr.homeDescription}
+      actions={[
+        {
+          label: tr.digestSubscribe,
+          openAttr: "data-digest-open",
+          icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
+        },
+        {
+          label: tr.reportProblem,
+          openAttr: "data-contact-open",
+          icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
+        },
+      ]}
+      links={[
+        { href: "/feed.ics", label: "iCal" },
+        { href: "/feed.rss", label: "RSS" },
+        { href: "/api/docs", label: "API" },
+        { href: `/impressum${lang}`, label: tr.imprint },
+        {
+          href: REPO_URL,
+          label: "GitHub",
+          external: true,
+          ariaLabel: "GitHub",
+          icon: (
+            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
+              <path d="M8 .2a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.3-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4A8 8 0 0 0 8 .2Z" />
+            </svg>
+          ),
+        },
+      ]}
+    />
   );
 }
 
