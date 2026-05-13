@@ -68,7 +68,7 @@ export async function scrapeAlteOper(): Promise<ScrapeResult> {
       const room = raw.room ? stripHtml(decodeEntities(raw.room)).trim() : null;
 
       const imageUrl = raw.thumbs?.large || raw.thumbs?.medium || raw.thumbs?.small || raw.image?.url || null;
-      const detailUrl = `${BASE}/de/programm/${raw.slug}/`;
+      const detailUrl = `${BASE}/de/programm/${raw.slug}/${raw.id}`;
 
       const priceMin = raw.lowest_price != null ? Number(raw.lowest_price) : null;
 
