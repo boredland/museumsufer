@@ -1562,7 +1562,7 @@ dialog::backdrop {
   width: calc(100% - 2rem);
   max-width: 27.5rem; /* 440px — digest default */
 }
-.dialog--wide { max-width: 30rem; } /* 480px — contact */
+#contact-dialog.dialog { max-width: 30rem; } /* 480px — contact */
 .dialog::backdrop {
   background: color-mix(in oklab, var(--color-river-deep) 50%, rgb(0 0 0 / 0.6));
   backdrop-filter: blur(2px);
@@ -1581,7 +1581,7 @@ dialog::backdrop {
   color: var(--color-text-primary);
   margin: 0;
 }
-.dialog--wide .dialog__title { font-size: 1.5rem; }
+#contact-dialog .dialog__title { font-size: 1.5rem; }
 .dialog__close {
   background: transparent; border: 0; padding: 0.25rem; margin: -0.25rem;
   cursor: pointer;

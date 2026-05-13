@@ -2,9 +2,11 @@ import {
   buildFaqPageSchema,
   buildHreflangAlternates,
   buildLangParam as coreBuildLangParam,
+  dateFormatter,
   digestScheduleLabel,
   type FaqItem,
   LLM_SERVICES,
+  langSwitchItems,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
@@ -17,7 +19,7 @@ import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
-import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
+import { DEFAULT_LOCALE, dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { getAllMuseums } from "./queries";
@@ -53,7 +55,6 @@ interface HtmlHeadOptions {
   ogImage?: string;
   jsonSchemas?: Array<{ name: string; json: string }>;
   twitterCard?: "summary_large_image" | "summary";
-  turnstileSiteKey?: string;
 }
 
 /**
@@ -82,7 +83,6 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
     ogImage = "https://museumsufer.app/og-image.png",
     jsonSchemas = [],
     twitterCard = "summary_large_image",
-    turnstileSiteKey,
   } = options;
 
   const hreflangs = buildHreflangsForCanonical(canonicalUrl);
@@ -116,20 +116,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
       <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
       <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-      <link
-        rel="preload"
-        as="style"
-        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-        onload="this.onload=null;this.rel='stylesheet'"
-      />
-      <noscript>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-        />
-      </noscript>
+      <link rel="stylesheet" href="/fonts.css" />
       {jsonSchemas.map((schema) => (
         <script key={schema.name} type="application/ld+json" dangerouslySetInnerHTML={{ __html: schema.json }} />
       ))}
@@ -167,7 +154,17 @@ function Mark({ class: cls }: { class?: string }) {
 }
 
 /** Masthead with logo, location, theme toggle, and language switcher */
-export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, string> }) {
+export function Masthead({
+  locale,
+  tr,
+  currentPath = "/",
+}: {
+  locale: Locale;
+  tr: Record<string, string>;
+  currentPath?: string;
+}) {
+  const langItems = langSwitchItems({ locale, currentPath, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
+  const hrefByLocale = new Map(langItems.map((i) => [i.locale, i.href] as const));
   return (
     <header class="masthead">
       <div class="masthead__head">
@@ -177,7 +174,12 @@ export function Masthead({ locale, tr }: { locale: Locale; tr: Record<string, st
         </div>
         <div class="masthead__actions">
           <ThemeToggle label={tr.switchTheme} />
-          <LangSwitch locale={locale} supported={SUPPORTED_LOCALES} ariaLabel={tr.langSwitchAria} />
+          <LangSwitch
+            locale={locale}
+            supported={SUPPORTED_LOCALES}
+            ariaLabel={tr.langSwitchAria}
+            buildHref={(l) => hrefByLocale.get(l) ?? `?lang=${l}`}
+          />
         </div>
       </div>
       <h1 class="masthead__title">Museumsufer</h1>
@@ -252,6 +254,8 @@ function RiverNav({
   dateCounts: Array<{ date: string; count: number }>;
 }) {
   const dl = dateLocale(locale);
+  const weekdayFmt = dateFormatter(dl, { weekday: "short" });
+  const monthFmt = dateFormatter(dl, { month: "short" });
   const todayIsoStr = berlinNow().format("YYYY-MM-DD");
   // The bundle is already capped at +90 days at scrape time; use whatever
   // the queries layer surfaces. Always include today even if no events,
@@ -269,11 +273,12 @@ function RiverNav({
       .month(m - 1)
       .date(dd);
     const isToday = s.date === todayIsoStr;
+    const dateObj = date.toDate();
     return {
       iso: s.date,
-      weekday: isToday ? tr.today : date.toDate().toLocaleDateString(dl, { weekday: "short" }),
+      weekday: isToday ? tr.today : weekdayFmt.format(dateObj),
       day: String(date.date()),
-      month: date.toDate().toLocaleDateString(dl, { month: "short" }),
+      month: monthFmt.format(dateObj),
       count: s.count,
       isToday,
     };
@@ -400,7 +405,6 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
 export function ContactDialog({ tr, turnstileSiteKey }: { tr: Record<string, string>; turnstileSiteKey?: string }) {
   return (
     <SharedContactDialog
-      wide
       emailRequired
       turnstileSiteKey={turnstileSiteKey}
       categories={[
@@ -458,6 +462,7 @@ export function renderPage(
   range?: number,
   dateCounts: Array<{ date: string; count: number }> = [],
   turnstileSiteKey?: string,
+  currentPath = "/",
 ): HtmlEscapedString {
   const tr = getTranslations(locale);
   const berlinOffset = getBerlinUtcOffset();
@@ -537,7 +542,6 @@ export function renderPage(
             description: tr.metaLong,
             canonicalUrl,
             jsonSchemas,
-            turnstileSiteKey,
           })}
           <link rel="alternate" type="application/rss+xml" title="Museumsufer Frankfurt" href="/feed.xml" />
           <link rel="manifest" href="/manifest.json" />
@@ -555,7 +559,7 @@ export function renderPage(
           </a>
 
           <div class="page">
-            <Masthead locale={locale} tr={tr} />
+            <Masthead locale={locale} tr={tr} currentPath={currentPath} />
 
             <AskAI tr={tr} />
 
@@ -631,16 +635,8 @@ export function renderPage(
             <Footer
               description={tr.metaShort ?? tr.subtitle}
               actions={[
-                {
-                  label: tr.digestOpen,
-                  openAttr: "data-digest-open",
-                  icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
-                },
-                {
-                  label: tr.contact,
-                  openAttr: "data-contact-open",
-                  icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
-                },
+                { label: tr.digestOpen, openAttr: "data-digest-open", kind: "digest" },
+                { label: tr.contact, openAttr: "data-contact-open", kind: "report" },
               ]}
               links={[
                 { href: "/feed.ics", label: "iCal" },

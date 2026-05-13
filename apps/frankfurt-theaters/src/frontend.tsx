@@ -4,11 +4,13 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
-  escapeHtml as coreEscapeHtml,
   dateOffset,
+  dateParts,
+  escapeHtml,
   type FaqItem,
   formatGermanDateLong,
   HTMX_LIFECYCLE_SCRIPT,
+  jsonLdSafe,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
@@ -53,26 +55,10 @@ const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const utm = buildUtm("frankfurt.ins.theater");
 
-function dateParts(iso: string) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  return {
-    weekday: d.getUTCDay(),
-    day: d.getUTCDate(),
-    month: d.getUTCMonth(),
-    year: d.getUTCFullYear(),
-  };
-}
-
 const fullGerman = formatGermanDateLong;
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
-}
-
-export const escapeHtml = coreEscapeHtml;
-
-function jsonLdSafe(obj: Record<string, unknown>): string {
-  return JSON.stringify(obj).replace(/</g, "\\u003c");
 }
 
 export interface HeadOptions {
@@ -90,8 +76,6 @@ export interface HeadOptions {
 export function Head(opts: HeadOptions) {
   const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
-  const fontHref =
-    "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=JetBrains+Mono:wght@400;500;700&display=swap";
   return (
     <>
       <meta charset="utf-8" />
@@ -116,20 +100,11 @@ export function Head(opts: HeadOptions) {
       {opts.extraLinks?.map((l) => (
         <link key={`${l.rel}-${l.href}`} rel={l.rel} href={l.href} type={l.type} title={l.title} />
       ))}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-      <link rel="stylesheet" href={fontHref} media="print" onload="this.media='all'" />
-      <noscript>
-        <link rel="stylesheet" href={fontHref} />
-      </noscript>
+      <link rel="stylesheet" href="/fonts.css" />
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
       <script src="/htmx.min.js" defer></script>
       <script src="/uFuzzy.iife.min.js" defer></script>
-      {opts.turnstileSiteKey
-        ? {
-            /* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */
-          }
-        : null}
+      {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */}
       {jsonLdArr.map((j, i) => (
         <script key={`jsonld-${i}`} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(j) }} />
       ))}
@@ -658,16 +633,8 @@ export function Footer({ turnstileSiteKey }: { turnstileSiteKey?: string } = {})
       <SharedFooter
         description="Eine Übersicht des Spielplans an Frankfurts Bühnen."
         actions={[
-          {
-            label: "Abonnieren",
-            openAttr: "data-digest-open",
-            icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
-          },
-          {
-            label: "Problem melden",
-            openAttr: "data-contact-open",
-            icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
-          },
+          { label: "Abonnieren", openAttr: "data-digest-open", kind: "digest" },
+          { label: "Problem melden", openAttr: "data-contact-open", kind: "report" },
         ]}
         links={[
           { href: "/api/docs", label: "API" },

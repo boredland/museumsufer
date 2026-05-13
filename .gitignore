@@ -4,6 +4,10 @@ dist/
 .turbo/
 claude-seo
 
+# Generated vendored assets (synced from node_modules by scripts/sync-assets.mjs)
+apps/*/public/fonts/
+apps/*/public/fonts.css
+
 # Secrets — manage via `wrangler secret put` instead
 scrape_secret.txt
 .env

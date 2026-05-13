@@ -40,13 +40,11 @@ export interface ContactDialogProps {
   turnstileSiteKey?: string;
   /** Whether the email field is required. Defaults to false. */
   emailRequired?: boolean;
-  /** Optional wide-variant flag — matches Museums' 30rem max-width style. */
-  wide?: boolean;
 }
 
-export function ContactDialog({ tr, categories, turnstileSiteKey, emailRequired, wide }: ContactDialogProps) {
+export function ContactDialog({ tr, categories, turnstileSiteKey, emailRequired }: ContactDialogProps) {
   return (
-    <dialog id="contact-dialog" class={`dialog${wide ? " dialog--wide" : ""}`}>
+    <dialog id="contact-dialog" class="dialog">
       <form id="contact-form" class="dialog__form" novalidate>
         <div class="dialog__head">
           <h2 class="dialog__title">{tr.title}</h2>

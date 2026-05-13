@@ -71,25 +71,10 @@ export const GERMAN_MONTHS_SHORT_DISPLAY = [
   "Dez",
 ];
 
-interface DateParts {
-  weekday: number;
-  day: number;
-  month: number;
-  year: number;
-}
+import { dateParts } from "./date";
 
 function parseIsoUtc(iso: string): Date {
   return new Date(`${iso}T12:00:00Z`);
-}
-
-function dateParts(iso: string): DateParts {
-  const d = parseIsoUtc(iso);
-  return {
-    weekday: d.getUTCDay(),
-    day: d.getUTCDate(),
-    month: d.getUTCMonth(),
-    year: d.getUTCFullYear(),
-  };
 }
 
 /** "Donnerstag, 12. Mai 2026" — long German typesetter form. */

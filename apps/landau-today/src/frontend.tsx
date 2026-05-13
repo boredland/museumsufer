@@ -34,9 +34,6 @@ interface PageProps {
   tr: Translations;
 }
 
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap";
-
 function HreflangLinks({ currentPath }: { currentPath: string }) {
   const items = buildHreflangAlternates({
     currentPath,
@@ -191,12 +188,7 @@ function Page(props: PageProps) {
           <link rel="manifest" href="/manifest.json" />
           <link rel="alternate" type="application/rss+xml" title="landau.today RSS" href="/feed.xml" />
           <link rel="alternate" type="text/calendar" title="landau.today Kalender" href="/feed.ics" />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link rel="preload" as="style" href={FONT_HREF} onload="this.onload=null;this.rel='stylesheet'" />
-          <noscript>
-            <link rel="stylesheet" href={FONT_HREF} />
-          </noscript>
+          <link rel="stylesheet" href="/fonts.css" />
           <link rel="stylesheet" href="/styles.css" />
           <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
           <script src="/htmx.min.js" defer />
@@ -251,16 +243,8 @@ function Page(props: PageProps) {
           <SharedFooter
             description={tr.footerLine}
             actions={[
-              {
-                label: tr.digestSubscribe,
-                openAttr: "data-digest-open",
-                icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
-              },
-              {
-                label: tr.reportProblem,
-                openAttr: "data-contact-open",
-                icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
-              },
+              { label: tr.digestSubscribe, openAttr: "data-digest-open", kind: "digest" },
+              { label: tr.reportProblem, openAttr: "data-contact-open", kind: "report" },
             ]}
             links={[
               { href: "/feed.ics", label: tr.subscribeCalendar },

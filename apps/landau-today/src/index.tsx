@@ -45,8 +45,8 @@ app.use(
     csp: [
       "default-src 'self'",
       "img-src 'self' data: https:",
-      "font-src 'self' https://fonts.gstatic.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
       "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "script-src-elem 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "frame-src https://challenges.cloudflare.com",
