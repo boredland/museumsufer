@@ -112,7 +112,7 @@ app.get("/partial/content", (c) => {
   const events = getEventsForDate(date, { city, genre });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, events, tr), {
+  return c.html(renderProgrammePartial(date, events, tr, locale), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

@@ -39,6 +39,16 @@ export interface Translations {
   digestKicker: string;
   digestCueText: string;
   digestTitle: string;
+  digestIntro: string;
+  digestIosHint: string;
+  digestUnsupported: string;
+  digestUnsubAll: string;
+  /** Button label after the user has an existing subscription — saving changes. */
+  digestSave: string;
+  /** Button label when no schedule is checked but the user is subscribed — confirm unsubscribe. */
+  digestUnsubscribeBtn: string;
+  /** Long error shown when the browser refused notification permission. */
+  digestPermissionDenied: string;
   digestSubscribe: string;
   digestSchedules: string;
   digestMorning: string;
@@ -56,6 +66,12 @@ export interface Translations {
   digestError: string;
   digestClose: string;
   contactTitle: string;
+  /** Body paragraph shown beneath the contact-dialog title. */
+  contactBody: string;
+  /** Localised category-select label (Kategorie / Category / Catégorie). */
+  contactCategoryLabel: string;
+  /** Placeholder shown in the e-mail input. */
+  contactEmailPlaceholder: string;
   contactIntro: string;
   contactCategoryGeneral: string;
   contactCategoryConcert: string;
@@ -125,6 +141,15 @@ const de: Translations = {
   digestKicker: "Push-Digest",
   digestCueText: "Erfahre morgens, was heute klingt.",
   digestTitle: "Konzerte abonnieren",
+  digestIntro: "Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.",
+  digestIosHint:
+    "<strong>iPhone:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.",
+  digestUnsupported:
+    "Dein Browser unterstützt keine Push-Nachrichten. Probier es in Safari (macOS), Chrome, Firefox oder Edge.",
+  digestUnsubAll: "Alle abbestellen",
+  digestSave: "Speichern",
+  digestUnsubscribeBtn: "Abbestellen",
+  digestPermissionDenied: "Benachrichtigungen wurden blockiert. Erlaube sie in den Browser-Einstellungen.",
   digestSubscribe: "Push abonnieren",
   digestSchedules: "Digest-Zeitpunkte",
   digestMorning: "Jeden Morgen",
@@ -142,6 +167,9 @@ const de: Translations = {
   digestError: "Speichern fehlgeschlagen.",
   digestClose: "Schließen",
   contactTitle: "Feedback & Korrekturen",
+  contactBody: "Falsche Zeit, fehlendes Konzert, Tippfehler? Wir freuen uns über jeden Hinweis.",
+  contactCategoryLabel: "Kategorie",
+  contactEmailPlaceholder: "dein@email.de",
   contactIntro: "Was stimmt nicht?",
   contactCategoryGeneral: "Allgemein — Feedback / Funktionen",
   contactCategoryConcert: "Konzert — falsche Daten",
@@ -239,6 +267,14 @@ const en: Translations = {
   digestKicker: "Push digest",
   digestCueText: "Wake up to what's on tonight.",
   digestTitle: "Subscribe to concerts",
+  digestIntro: "Push notifications straight to your device — no email, no account. Cancel any time.",
+  digestIosHint:
+    '<strong>iPhone:</strong> Tap "Share" and "Add to Home Screen". Then open from the app icon — only then can push notifications work.',
+  digestUnsupported: "Your browser doesn't support push notifications. Try Safari (macOS), Chrome, Firefox or Edge.",
+  digestUnsubAll: "Unsubscribe all",
+  digestSave: "Save",
+  digestUnsubscribeBtn: "Unsubscribe",
+  digestPermissionDenied: "Notifications were blocked. Allow them in your browser settings.",
   digestSubscribe: "Subscribe",
   digestSchedules: "Digest times",
   digestMorning: "Every morning",
@@ -256,6 +292,9 @@ const en: Translations = {
   digestError: "Saving failed.",
   digestClose: "Close",
   contactTitle: "Feedback & corrections",
+  contactBody: "Wrong time, missing concert, typo? Every hint is welcome.",
+  contactCategoryLabel: "Category",
+  contactEmailPlaceholder: "you@email.com",
   contactIntro: "What's wrong?",
   contactCategoryGeneral: "General — feedback / features",
   contactCategoryConcert: "Concert — wrong data",
@@ -354,6 +393,15 @@ const fr: Translations = {
   digestKicker: "Digest push",
   digestCueText: "Découvre chaque matin ce qui résonne aujourd'hui.",
   digestTitle: "S'abonner aux concerts",
+  digestIntro: "Messages push directement sur l'appareil — pas d'e-mail, pas de compte. Annulable à tout moment.",
+  digestIosHint:
+    "<strong>iPhone :</strong> Appuie sur « Partager » puis « Ajouter à l'écran d'accueil ». Ouvre ensuite depuis l'icône — c'est seulement à ce moment que les notifications push fonctionnent.",
+  digestUnsupported:
+    "Ton navigateur ne prend pas en charge les notifications push. Essaie Safari (macOS), Chrome, Firefox ou Edge.",
+  digestUnsubAll: "Tout désabonner",
+  digestSave: "Enregistrer",
+  digestUnsubscribeBtn: "Se désabonner",
+  digestPermissionDenied: "Les notifications ont été bloquées. Autorise-les dans les paramètres du navigateur.",
   digestSubscribe: "S'abonner",
   digestSchedules: "Horaires du digest",
   digestMorning: "Tous les matins",
@@ -371,6 +419,9 @@ const fr: Translations = {
   digestError: "Échec de l'enregistrement.",
   digestClose: "Fermer",
   contactTitle: "Retours & corrections",
+  contactBody: "Heure erronée, concert manquant, faute de frappe ? Toute remarque est la bienvenue.",
+  contactCategoryLabel: "Catégorie",
+  contactEmailPlaceholder: "toi@email.fr",
   contactIntro: "Qu'est-ce qui ne va pas ?",
   contactCategoryGeneral: "Général — retours / fonctionnalités",
   contactCategoryConcert: "Concert — données erronées",
