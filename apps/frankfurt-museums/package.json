@@ -3,11 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "assets": "bun ../../scripts/sync-assets.mjs",
     "css": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/app.css && bun scripts/inline-css.mjs",
     "css:watch": "lightningcss --minify --targets '>0.25%, last 2 versions, not dead' -o public/styles.css src/app.css && bun scripts/inline-css.mjs",
-    "dev": "bun css && wrangler dev",
-    "build": "bun css",
-    "deploy": "bun css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
+    "dev": "bun assets && bun css && wrangler dev",
+    "build": "bun assets && bun css",
+    "deploy": "bun assets && bun css && wrangler d1 migrations apply museumsufer-db --remote && wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply museumsufer-db --local",
     "db:migrate": "wrangler d1 migrations apply museumsufer-db --remote",
     "scrape": "bun scripts/scrape.ts",
@@ -16,6 +17,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource/dm-mono": "^5.2.7",
     "@hono/zod-validator": "^0.7.6",
     "@museumsufer/core": "*",
     "@scalar/hono-api-reference": "^0.10.14",

@@ -9,11 +9,7 @@ export const APP_URL = "https://landau.today";
 export const USER_AGENT = "landau.today/1.0 (+https://landau.today)";
 
 export const escHtml = escapeHtml;
-
-/** JSON-encode + escape `<` so an embedded `</script>` in user data can't break out. */
-export function jsonLdSafe(obj: unknown): string {
-  return JSON.stringify(obj).replace(/</g, "\\u003c");
-}
+export { jsonLdSafe } from "@museumsufer/core";
 
 const LOCALE_TAGS: Record<Locale, string> = { de: "de-DE", fr: "fr-FR" };
 

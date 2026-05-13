@@ -55,9 +55,6 @@ app.get("/event/:id{[0-9]+}", (c) => {
 
 export default app;
 
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,800;1,6..96,400;1,6..96,500;1,6..96,600&family=Bodoni+Moda+SC:opsz,wght@6..96,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap";
-
 const SHARE_SCRIPT = `
 (function(){
   function showToast(){
@@ -155,9 +152,7 @@ function EventDetail(props: EventPageProps) {
           {ev.image_url ? <meta property="og:image:secure_url" content={ev.image_url} /> : null}
           <link rel="canonical" href={`${APP_URL}/event/${ev.id}`} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link href={FONT_HREF} rel="stylesheet" />
+          <link rel="stylesheet" href="/fonts.css" />
           <link rel="stylesheet" href="/styles.css" />
           {renderHreflangs(`/event/${ev.id}`)}
           <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />

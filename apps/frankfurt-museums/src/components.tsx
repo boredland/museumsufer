@@ -1,4 +1,4 @@
-import { buildUtm } from "@museumsufer/core";
+import { buildUtm, dateFormatter } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
@@ -812,6 +812,8 @@ function GroupedEventList({
   tr: Record<string, string>;
 }) {
   const dl = dateLocale(locale);
+  const weekdayFmt = dateFormatter(dl, { weekday: "long" });
+  const dayMonthFmt = dateFormatter(dl, { day: "numeric", month: "long" });
   const groups: Record<string, EventWithLikes[]> = {};
   for (const ev of events) {
     (groups[ev.date] ||= []).push(ev);
@@ -822,8 +824,8 @@ function GroupedEventList({
     <div class="event-groups">
       {dates.map((date) => {
         const dayDate = new Date(`${date}T00:00:00`);
-        const weekday = dayDate.toLocaleDateString(dl, { weekday: "long" });
-        const dayMonth = dayDate.toLocaleDateString(dl, { day: "numeric", month: "long" });
+        const weekday = weekdayFmt.format(dayDate);
+        const dayMonth = dayMonthFmt.format(dayDate);
         return (
           <section class="event-group">
             <header class="event-group__spine day-spine">

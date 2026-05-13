@@ -1,8 +1,8 @@
-import { THEME_FOUC_SCRIPT } from "@museumsufer/core";
+import { langSwitchItems, THEME_FOUC_SCRIPT } from "@museumsufer/core";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { Hono } from "hono";
 import { raw } from "hono/html";
-import { detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
+import { DEFAULT_LOCALE, detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
 import type { Env } from "../types";
 
 const OPERATOR = {
@@ -29,20 +29,7 @@ function ImprintPage({ locale }: { locale: Locale }) {
           <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)" />
           <meta name="theme-color" content="#14110e" media="(prefers-color-scheme: dark)" />
           <script dangerouslySetInnerHTML={{ __html: THEME_FOUC_SCRIPT }} />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link
-            rel="preload"
-            as="style"
-            href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            onload="this.onload=null;this.rel='stylesheet'"
-          />
-          <noscript>
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..600&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
-            />
-          </noscript>
+          <link rel="stylesheet" href="/fonts.css" />
           <link rel="preload" as="style" href="/styles.css" />
           <link rel="stylesheet" href="/styles.css" />
         </head>
@@ -54,7 +41,20 @@ function ImprintPage({ locale }: { locale: Locale }) {
                   ← {tr.back}
                 </a>
               </p>
-              <LangSwitch locale={locale} supported={SUPPORTED_LOCALES} ariaLabel={tr.langSwitchAria} />
+              <LangSwitch
+                locale={locale}
+                supported={SUPPORTED_LOCALES}
+                ariaLabel={tr.langSwitchAria}
+                buildHref={(l) => {
+                  const items = langSwitchItems({
+                    locale,
+                    currentPath: "/impressum",
+                    supported: SUPPORTED_LOCALES,
+                    fallback: DEFAULT_LOCALE,
+                  });
+                  return items.find((i) => i.locale === l)?.href ?? `?lang=${l}`;
+                }}
+              />
             </div>
             <h1 class="imprint__title">{tr.imprintHeading}</h1>
 

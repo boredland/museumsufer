@@ -32,3 +32,8 @@ export function icsEsc(s: string): string {
 export function utcStamp(): string {
   return `${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "").slice(0, 15)}Z`;
 }
+
+/** JSON-encode + escape `<` so an embedded `</script>` in user data can't break out. */
+export function jsonLdSafe(obj: unknown): string {
+  return JSON.stringify(obj).replace(/</g, "\\u003c");
+}

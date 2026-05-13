@@ -1,4 +1,4 @@
-import { dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
+import { berlinHour, berlinWeekday, dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
 import { type DayPerformance, getPerformancesForDate, getPerformancesInRange } from "./db";
 import { THEATERS } from "./theater-config";
 import type { Env } from "./types";
@@ -40,27 +40,6 @@ function perfsMatching(perfs: DayPerformance[], filters: TheatersFilters | null)
   if (!filters?.theaters || filters.theaters.length === 0) return perfs;
   const allowed = new Set(filters.theaters);
   return perfs.filter((p) => allowed.has(p.theater.slug));
-}
-
-function berlinHour(d: Date): number {
-  const h = new Intl.DateTimeFormat("de-DE", {
-    timeZone: "Europe/Berlin",
-    hour: "numeric",
-    hour12: false,
-  })
-    .formatToParts(d)
-    .find((p) => p.type === "hour")?.value;
-  return h ? parseInt(h, 10) : -1;
-}
-
-function berlinWeekday(d: Date): number {
-  const w = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Europe/Berlin",
-    weekday: "short",
-  })
-    .formatToParts(d)
-    .find((p) => p.type === "weekday")?.value;
-  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(w ?? "");
 }
 
 /**

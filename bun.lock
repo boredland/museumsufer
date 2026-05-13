@@ -19,6 +19,9 @@
       "name": "@museumsufer/frankfurt-museums",
       "version": "0.0.1",
       "dependencies": {
+        "@fontsource-variable/dm-sans": "^5.2.8",
+        "@fontsource-variable/fraunces": "^5.2.9",
+        "@fontsource/dm-mono": "^5.2.7",
         "@hono/zod-validator": "^0.7.6",
         "@museumsufer/core": "*",
         "@scalar/hono-api-reference": "^0.10.14",
@@ -41,11 +44,14 @@
       "name": "@museumsufer/frankfurt-theaters",
       "version": "0.0.1",
       "dependencies": {
+        "@fontsource-variable/fraunces": "^5.2.9",
+        "@fontsource-variable/jetbrains-mono": "^5.2.8",
         "@hono/zod-validator": "^0.7.6",
         "@museumsufer/core": "*",
         "@scalar/hono-api-reference": "^0.10.14",
         "dayjs": "^1.11.20",
         "hono": "^4.12.18",
+        "htmx.org": "^2.0.10",
         "p-queue": "^9.2.0",
         "zod": "^4.4.3",
       },
@@ -61,11 +67,14 @@
       "name": "@museumsufer/konzert-haus",
       "version": "0.0.1",
       "dependencies": {
+        "@fontsource/cormorant-garamond": "^5.2.11",
+        "@fontsource/dm-mono": "^5.2.7",
         "@hono/zod-validator": "^0.7.6",
         "@museumsufer/core": "*",
         "@scalar/hono-api-reference": "^0.10.14",
         "dayjs": "^1.11.20",
         "hono": "^4.12.18",
+        "htmx.org": "^2.0.10",
         "p-queue": "^9.2.0",
         "zod": "^4.4.3",
       },
@@ -81,10 +90,14 @@
       "name": "@museumsufer/landau-today",
       "version": "0.0.1",
       "dependencies": {
+        "@fontsource-variable/bodoni-moda": "^5.2.7",
+        "@fontsource-variable/newsreader": "^5.2.10",
+        "@fontsource/bodoni-moda-sc": "^5.2.10",
         "@museumsufer/core": "*",
         "@scalar/hono-api-reference": "^0.10.14",
         "dayjs": "^1.11.20",
         "hono": "^4.12.18",
+        "htmx.org": "^2.0.10",
         "p-queue": "^9.2.0",
       },
       "devDependencies": {
@@ -204,6 +217,22 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.27.3", "", { "os": "win32", "cpu": "ia32" }, "sha512-QLKSFeXNS8+tHW7tZpMtjlNb7HKau0QDpwm49u0vUp9y1WOF+PEzkU84y9GqYaAVW8aH8f3GcBck26jh54cX4Q=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.27.3", "", { "os": "win32", "cpu": "x64" }, "sha512-4uJGhsxuptu3OcpVAzli+/gWusVGwZZHTlS63hh++ehExkVT8SgiEf7/uC/PclrPPkLhZqGgCTjd0VWLo6xMqA=="],
+
+    "@fontsource-variable/bodoni-moda": ["@fontsource-variable/bodoni-moda@5.2.7", "", {}, "sha512-GZo4yqbmS/72On15EcAcKHjYfPbWCPKh4AlkVp8OP2pcGMD+XGoXVuNPEPFgaAfMJpcsa2fsJj/BvQby0gH7Eg=="],
+
+    "@fontsource-variable/dm-sans": ["@fontsource-variable/dm-sans@5.2.8", "", {}, "sha512-AxkvMTvNWgfrmlyjiV05vlHYJa+nRQCf1EfvIrQAPBpFJW0O9VTz7oAFr9S3lvbWdmnFoBk7yFqQL86u64nl2g=="],
+
+    "@fontsource-variable/fraunces": ["@fontsource-variable/fraunces@5.2.9", "", {}, "sha512-Y6IjunlN9Ni723np+GIgAaKzCDBrPRrqNi01TZxHs5wtHYROWFM9W6yiT+/gGwSjWIRD18oX17kD/BRWekc/Lw=="],
+
+    "@fontsource-variable/jetbrains-mono": ["@fontsource-variable/jetbrains-mono@5.2.8", "", {}, "sha512-WBA9elru6Jdp5df2mES55wuOO0WIrn3kpXnI4+W2ek5u3ZgLS9XS4gmIlcQhiZOWEKl95meYdvK7xI+ETLCq/Q=="],
+
+    "@fontsource-variable/newsreader": ["@fontsource-variable/newsreader@5.2.10", "", {}, "sha512-MdI2iRwrqWpMOU/2aV2BgfZ4dJNlj/XlYaY8Zb7t87mWqHskYW0XiUANkt1cyOCiEfW2VQ0bQ5vZgGPp6B2B4w=="],
+
+    "@fontsource/bodoni-moda-sc": ["@fontsource/bodoni-moda-sc@5.2.10", "", {}, "sha512-Ltmawlu7lCXj57QUdNDqu1ihNSgC7MMJgaels62HaDolbQDp44YEWBr6aoxepvCwT0m1qFTDUBUfhg2A0q4MqQ=="],
+
+    "@fontsource/cormorant-garamond": ["@fontsource/cormorant-garamond@5.2.11", "", {}, "sha512-5JjpN023lhA5soijgVT0BdRGzmlijm402ppjccMd6h+vRE0mX2lJnE+41UPfnlidrkV9/rCo1mf58WZlHnB0CA=="],
+
+    "@fontsource/dm-mono": ["@fontsource/dm-mono@5.2.7", "", {}, "sha512-Ma1az2atTVgQWuOWwjuxx26p/6A6CU9HBNKq1CFV6YKpKhpswnf9ry9Ql4+T6bTZzkdtSfS6tjJvqZOljVzIFQ=="],
 
     "@hono/zod-validator": ["@hono/zod-validator@0.7.6", "", { "peerDependencies": { "hono": ">=3.9.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-Io1B6d011Gj1KknV4rXYz4le5+5EubcWEU/speUjuw9XMMIaP3n78yXLhjd2A3PXaXaUwEAluOiAyLqhBEJgsw=="],
 

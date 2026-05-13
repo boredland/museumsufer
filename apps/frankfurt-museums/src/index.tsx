@@ -73,8 +73,8 @@ app.use(
     csp: [
       "default-src 'self'",
       "img-src 'self' data: https:",
-      "font-src 'self' https://fonts.gstatic.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
       "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "script-src-elem 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "frame-src https://challenges.cloudflare.com",
@@ -476,6 +476,7 @@ app.get(
     const horizon = berlinNow().add(90, "day").format("YYYY-MM-DD");
     const dateCounts = getEventCountsByDate(today, horizon);
 
+    const reqUrl = new URL(c.req.url);
     return c.html(
       renderPage(
         locale,
@@ -485,6 +486,7 @@ app.get(
         range,
         dateCounts,
         c.env.TURNSTILE_SITE_KEY,
+        reqUrl.pathname + reqUrl.search,
       ),
       {
         headers: {

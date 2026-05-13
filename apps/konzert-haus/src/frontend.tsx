@@ -6,12 +6,14 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
-  escapeHtml as coreEscapeHtml,
+  dateFormatter,
   dateLocale,
+  dateParts,
   digestScheduleLabel,
   type FaqItem,
   formatLocalisedDateLong,
   HTMX_LIFECYCLE_SCRIPT,
+  jsonLdSafe,
   langSwitchItems,
   THEME_FOUC_SCRIPT,
   TURNSTILE_LAZY_LOAD_SCRIPT,
@@ -42,15 +44,6 @@ export const APP_URL = "https://frankfurt.konzert.haus";
 export const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const utm = buildUtm("frankfurt.konzert.haus");
-
-export const GENRE_LABELS: Record<Genre, string> = {
-  classical: "Klassik",
-  jazz: "Jazz",
-  sacred: "Kirchenmusik",
-  world: "Weltmusik",
-  experimental: "Neue Musik",
-  chamber: "Kammermusik",
-};
 
 export function genreLabel(g: Genre, tr: Translations): string {
   switch (g) {
@@ -94,16 +87,6 @@ interface PageProps {
   turnstileSiteKey?: string;
 }
 
-function dateParts(iso: string) {
-  const d = new Date(`${iso}T12:00:00Z`);
-  return {
-    weekday: d.getUTCDay(),
-    day: d.getUTCDate(),
-    month: d.getUTCMonth(),
-    year: d.getUTCFullYear(),
-  };
-}
-
 export interface HeadOptions {
   title: string;
   description: string;
@@ -116,17 +99,9 @@ export interface HeadOptions {
   currentPath?: string;
 }
 
-export const escapeHtml = coreEscapeHtml;
-
-function jsonLdSafe(obj: Record<string, unknown>): string {
-  return JSON.stringify(obj).replace(/</g, "\\u003c");
-}
-
 export function Head(opts: HeadOptions) {
   const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
-  const fontHref =
-    "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap";
   return (
     <>
       <meta charset="utf-8" />
@@ -159,12 +134,7 @@ export function Head(opts: HeadOptions) {
       {opts.extraLinks?.map((l) => (
         <link key={`${l.rel}-${l.href}`} rel={l.rel} href={l.href} type={l.type} title={l.title} />
       ))}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-      <link rel="stylesheet" href={fontHref} media="print" onload="this.media='all'" />
-      <noscript>
-        <link rel="stylesheet" href={fontHref} />
-      </noscript>
+      <link rel="stylesheet" href="/fonts.css" />
       <style dangerouslySetInnerHTML={{ __html: INLINE_CSS }} />
       <script src="/htmx.min.js" defer></script>
       {/* Turnstile is lazy-loaded via window.__loadTurnstile() on dialog open — see TURNSTILE_LAZY_LOAD_SCRIPT. */}
@@ -273,8 +243,8 @@ function DateStrip({
   // for the day-of-month + isToday math, but the labels are now formatted
   // per the active locale instead of hardcoded German.
   const dl = dateLocale(locale);
-  const weekdayFmt = new Intl.DateTimeFormat(dl, { weekday: "short", timeZone: "UTC" });
-  const monthFmt = new Intl.DateTimeFormat(dl, { month: "short", timeZone: "UTC" });
+  const weekdayFmt = dateFormatter(dl, { weekday: "short", timeZone: "UTC" });
+  const monthFmt = dateFormatter(dl, { month: "short", timeZone: "UTC" });
   const lang = langSuffix(locale, "?");
   return (
     <nav class="datestrip" aria-label={tr.dateStripLabel}>
@@ -932,16 +902,8 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
     <SharedFooter
       description={tr.homeDescription}
       actions={[
-        {
-          label: tr.digestSubscribe,
-          openAttr: "data-digest-open",
-          icon: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
-        },
-        {
-          label: tr.reportProblem,
-          openAttr: "data-contact-open",
-          icon: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
-        },
+        { label: tr.digestSubscribe, openAttr: "data-digest-open", kind: "digest" },
+        { label: tr.reportProblem, openAttr: "data-contact-open", kind: "report" },
       ]}
       links={[
         { href: "/feed.ics", label: "iCal" },
@@ -1016,8 +978,8 @@ export function ProgrammePartial({
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
   const dl = dateLocale(locale);
-  const weekdayLong = new Intl.DateTimeFormat(dl, { weekday: "long", timeZone: "UTC" }).format(dateObj);
-  const monthLong = new Intl.DateTimeFormat(dl, { month: "long", timeZone: "UTC" }).format(dateObj);
+  const weekdayLong = dateFormatter(dl, { weekday: "long", timeZone: "UTC" }).format(dateObj);
+  const monthLong = dateFormatter(dl, { month: "long", timeZone: "UTC" }).format(dateObj);
   const visible = filterPastForToday(date, events);
   const hidden = events.length - visible.length;
   return (
@@ -1073,18 +1035,6 @@ export function renderProgrammePartial(
   locale: Locale = DEFAULT_LOCALE,
 ): HtmlEscapedString {
   return (<ProgrammePartial date={date} events={events} tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
-}
-
-export function renderHead(opts: HeadOptions): HtmlEscapedString {
-  return (<Head {...opts} />) as unknown as HtmlEscapedString;
-}
-
-export function renderFooter(tr: Translations = DEFAULT_TR, locale: Locale = DEFAULT_LOCALE): HtmlEscapedString {
-  return (<Footer tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
-}
-
-export function renderEvent(e: DayEvent, opts: EventRowOptions, tr: Translations = DEFAULT_TR): HtmlEscapedString {
-  return (<Event e={e} opts={opts} tr={tr} />) as unknown as HtmlEscapedString;
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {

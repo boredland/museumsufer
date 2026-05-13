@@ -22,9 +22,6 @@ const OPERATOR = {
 
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
-const FONT_HREF =
-  "https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500&display=swap";
-
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/impressum", (c) => {
@@ -54,9 +51,7 @@ function ImprintPage({ locale, tr }: { locale: Locale; tr: Translations }) {
           <meta name="robots" content="index,follow" />
           <link rel="canonical" href={`${APP_URL}/impressum`} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-          <link href={FONT_HREF} rel="stylesheet" />
+          <link rel="stylesheet" href="/fonts.css" />
           <link rel="stylesheet" href="/styles.css" />
         </head>
         <body>

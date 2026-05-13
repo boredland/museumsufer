@@ -27,9 +27,10 @@ interface MuseumPageProps {
   exhibitions: ExhibitionRow[];
   events: EventRow[];
   slug: string;
+  currentPath: string;
 }
 
-function MuseumPage({ locale, museums, config, exhibitions, events, slug }: MuseumPageProps) {
+function MuseumPage({ locale, museums, config, exhibitions, events, slug, currentPath }: MuseumPageProps) {
   const tr = getTranslations(locale);
 
   const primaryMuseum = museums[0];
@@ -140,7 +141,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug }: Muse
         <body>
           <IconSprite />
           <div class="page">
-            <Masthead locale={locale} tr={tr} />
+            <Masthead locale={locale} tr={tr} currentPath={currentPath} />
 
             <p class="museum-detail__back">
               <a href={`/${langParam}`} class="museum-detail__back-link">
@@ -344,7 +345,9 @@ app.get("/museum/:slug", async (c) => {
       : await translateFields(c.env, rawEvents, ["title", "description"] as (keyof Event)[], locale);
 
   const config = MUSEUMS[slug];
-  return c.html(MuseumPage({ locale, museums, config, exhibitions, events, slug }), {
+  const reqUrl = new URL(c.req.url);
+  const currentPath = reqUrl.pathname + reqUrl.search;
+  return c.html(MuseumPage({ locale, museums, config, exhibitions, events, slug, currentPath }), {
     headers: {
       "Content-Language": locale,
       Vary: "Accept-Language",

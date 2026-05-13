@@ -1,46 +1,56 @@
 /**
- * Shared editorial footer. Used at the bottom of every public app:
- * hairline rule, short description, action buttons (Subscribe / Report
- * problem), inline links separated by middots (iCal / RSS / API /
- * Impressum / GitHub), and a status toast region.
+ * Shared editorial footer. Hairline rule, short description, action buttons
+ * (Subscribe / Report problem), inline middot-separated links (iCal / RSS /
+ * API / Impressum / GitHub), and a status toast region.
  *
- * Per-app stylesheet styles `.footer`, `.footer__rule`, `.footer__actions`,
- * `.footer__action`, `.footer__links`, `.footer__sep`, `.footer__toast`.
+ * Class hooks (per-app stylesheets define typography + colour):
+ *   .footer, .footer__rule, .footer__description, .footer__actions,
+ *   .footer__action, .footer__links, .footer__sep, .footer__toast
  */
+import { Fragment } from "hono/jsx";
 import type { JSX } from "hono/jsx/jsx-runtime";
 
+/**
+ * Standard action shapes — the two flavours every app uses. Picked via
+ * `kind` instead of duplicating the SVG path strings across four call
+ * sites. Apps that want a one-off icon can still pass `kind: "custom"`
+ * with their own path.
+ */
+export type FooterActionKind = "digest" | "report" | "custom";
+
+const ACTION_ICONS: Record<Exclude<FooterActionKind, "custom">, string> = {
+  // Bell — "Push abonnieren / Subscribe".
+  digest: "M3 6a5 5 0 0 1 10 0v3l1.2 1.6a.5.5 0 0 1-.4.8H2.2a.5.5 0 0 1-.4-.8L3 9V6ZM6.5 13a1.5 1.5 0 0 0 3 0",
+  // Circled-i — "Problem melden / Report problem".
+  report: "M14.5 8a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0ZM8 4.5v4M8 11h.01",
+};
+
 export interface FooterAction {
-  /** Localised label (also serves as aria-label). */
+  /** Localised label (also the aria-label). */
   label: string;
-  /** Attribute name that triggers the open behaviour, e.g. "data-contact-open". */
+  /** Attribute that wires the open behaviour, e.g. `data-contact-open`. */
   openAttr: string;
-  /** Inline SVG path data (rendered inside a 16×16 viewBox, stroke=currentColor). */
-  icon: string;
-  /** Optional stroke-fill flavour for the icon. */
-  variant?: "stroke" | "fill";
+  /** Picks one of the two standard SVGs, or `"custom"` + a `customIcon` path. */
+  kind?: FooterActionKind;
+  /** Inline SVG path data — required when `kind === "custom"`. */
+  customIcon?: string;
 }
 
 export interface FooterLink {
-  /** Anchor href. */
   href: string;
-  /** Visible label. */
   label: string;
-  /** If true, opens in a new tab with rel=noopener. */
+  /** Opens in a new tab + `rel="noopener"`. */
   external?: boolean;
-  /** Localised aria-label override (used by icon-only links). */
+  /** aria-label override for icon-only links. */
   ariaLabel?: string;
-  /** Optional inline SVG element to prepend (eg. GitHub mark). */
+  /** Optional inline SVG prepended to the label (e.g. the GitHub mark). */
   icon?: JSX.Element;
 }
 
 export interface FooterProps {
-  /** One-line tagline, e.g. "Eine Übersicht des Spielplans an Frankfurts Bühnen." */
   description: string;
-  /** Action buttons row (typically Subscribe + Report). */
   actions: FooterAction[];
-  /** Inline links separated by middots. */
   links: FooterLink[];
-  /** Whether to render the optional toast status region. */
   toast?: boolean;
 }
 
@@ -52,6 +62,7 @@ export function Footer({ description, actions, links, toast = true }: FooterProp
       {actions.length > 0 ? (
         <div class="footer__actions">
           {actions.map((a) => {
+            const path = a.kind === "custom" ? a.customIcon : ACTION_ICONS[a.kind ?? "digest"];
             const buttonProps: Record<string, unknown> = {
               type: "button",
               class: "footer__action",
@@ -65,11 +76,11 @@ export function Footer({ description, actions, links, toast = true }: FooterProp
                   width="13"
                   height="13"
                   aria-hidden="true"
-                  fill={a.variant === "fill" ? "currentColor" : "none"}
-                  stroke={a.variant === "fill" ? undefined : "currentColor"}
-                  stroke-width={a.variant === "fill" ? undefined : "1.5"}
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
                 >
-                  <path d={a.icon} stroke-linecap="round" />
+                  <path d={path} stroke-linecap="round" />
                 </svg>
                 <span>{a.label}</span>
               </button>
@@ -79,14 +90,13 @@ export function Footer({ description, actions, links, toast = true }: FooterProp
       ) : null}
       <div class="footer__links">
         {links.map((l, i) => (
-          <>
+          <Fragment key={l.href}>
             {i > 0 ? (
               <span class="footer__sep" aria-hidden="true">
                 ·
               </span>
             ) : null}
             <a
-              key={l.href}
               href={l.href}
               target={l.external ? "_blank" : undefined}
               rel={l.external ? "noopener" : undefined}
@@ -95,7 +105,7 @@ export function Footer({ description, actions, links, toast = true }: FooterProp
               {l.icon ?? null}
               {l.label}
             </a>
-          </>
+          </Fragment>
         ))}
       </div>
       {toast ? <span class="footer__toast" role="status" aria-live="polite" /> : null}

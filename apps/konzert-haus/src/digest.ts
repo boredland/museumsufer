@@ -1,4 +1,4 @@
-import { dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
+import { berlinHour, berlinWeekday, dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
 import { getEventsForDate, getEventsInRange } from "./db";
 import type { Env } from "./types";
 import { GENRES, type Genre } from "./types";
@@ -33,27 +33,6 @@ function parseFilters(json: string | null): KhFilters | null {
   } catch {
     return null;
   }
-}
-
-function berlinHour(d: Date): number {
-  const h = new Intl.DateTimeFormat("de-DE", {
-    timeZone: "Europe/Berlin",
-    hour: "numeric",
-    hour12: false,
-  })
-    .formatToParts(d)
-    .find((p) => p.type === "hour")?.value;
-  return h ? parseInt(h, 10) : -1;
-}
-
-function berlinWeekday(d: Date): number {
-  const w = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Europe/Berlin",
-    weekday: "short",
-  })
-    .formatToParts(d)
-    .find((p) => p.type === "weekday")?.value;
-  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(w ?? "");
 }
 
 /**
