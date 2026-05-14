@@ -19,6 +19,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 // Cross-app imports — used only at build time (never bundled into the Worker).
 import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
+import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
@@ -99,6 +100,7 @@ async function main(): Promise<void> {
     ["juedische-gemeinde-frankfurt", scrapeJuedischeGemeinde],
     ["fgz-streitclub", scrapeFgzStreitclub],
     ["literaturhaus-frankfurt", scrapeLiteraturhaus],
+    ["buergeruniversitaet", scrapeBuergeruniversitaet],
   ];
 
   for (const [slug, fn] of scrapers) {
