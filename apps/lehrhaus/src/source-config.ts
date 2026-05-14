@@ -41,6 +41,14 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1173,
     lon: 8.6814,
   },
+  {
+    slug: "buergeruniversitaet",
+    name: "Goethe-Uni Bürgeruniversität",
+    short_name: "Bürger-Uni",
+    url: "https://aktuelles.uni-frankfurt.de",
+    lat: 50.1284,
+    lon: 8.6679,
+  },
   // v2 sources (not yet scraped)
   // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
   // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut, depth psychology)
