@@ -1,5 +1,5 @@
 import { berlinHour, berlinWeekday, dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
-import { type DayPerformance, getPerformancesForDate, getPerformancesInRange } from "./db";
+import { getPerformancesForDate, getPerformancesInRange } from "./db";
 import type { Env } from "./types";
 
 export type Schedule = "morning" | "afternoon" | "weekly";
