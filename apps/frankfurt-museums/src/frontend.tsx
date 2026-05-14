@@ -345,11 +345,18 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
   );
 }
 
+const CATEGORY_CHIPS = [
+  { value: "Film", label: "Film" },
+  { value: "Führung", label: "Führung" },
+  { value: "Workshop", label: "Workshop" },
+  { value: "Vortrag", label: "Vortrag" },
+  { value: "Familie", label: "Familie" },
+  { value: "Konzert", label: "Konzert" },
+  { value: "Vernissage", label: "Vernissage" },
+];
+
 /** Digest subscription dialog — Web Push opt-in with schedule picker */
 export function DigestDialog({ tr }: { tr: Record<string, string> }) {
-  const museumOptions = getAllMuseums()
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name, "de"));
   return (
     <SharedDigestDialog
       schedules={[
@@ -372,8 +379,8 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
           desc: tr.digestSchedWeeklyDesc,
         },
       ]}
-      filterChips={museumOptions.map((m) => ({ value: m.slug, label: m.name }))}
-      filterName="filter-museum"
+      filterChips={CATEGORY_CHIPS}
+      filterName="filter-category"
       tr={{
         title: tr.digestTitle,
         close: tr.contactClose,

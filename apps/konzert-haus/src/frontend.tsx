@@ -536,7 +536,7 @@ function DigestDialog({ tr }: { tr: Translations }) {
     <SharedDigestDialog
       schedules={[
         { value: "morning", label: tr.digestMorning, time: "07:00", desc: tr.digestMorningSub },
-        { value: "afternoon", label: tr.digestAfternoon, time: "17:00", desc: tr.digestAfternoonSub },
+        { value: "afternoon", label: tr.digestAfternoon, time: "16:00", desc: tr.digestAfternoonSub },
         { value: "weekly", label: tr.digestSunday, time: "So 09:00", desc: tr.digestSundaySub },
       ]}
       filterChips={GENRE_ORDER.map((g) => ({

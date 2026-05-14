@@ -592,18 +592,16 @@ function DigestDialog() {
     <SharedDigestDialog
       schedules={[
         { value: "morning", label: "Jeden Morgen", time: "07:00", desc: "Heutige Vorstellungen" },
-        { value: "afternoon", label: "Jeden Nachmittag", time: "17:00", desc: "Was läuft heute Abend?" },
+        { value: "afternoon", label: "Jeden Nachmittag", time: "16:00", desc: "Was läuft heute Abend?" },
         { value: "weekly", label: "Sonntag-Digest", time: "So 09:00", desc: "Wochenüberblick" },
       ]}
-      filterChips={THEATERS.map((t) => ({ value: t.slug, label: t.name }))}
-      filterName="filter-theater"
       tr={{
         title: "Vorstellungen abonnieren",
         close: "Schließen",
         intro:
           "Bekomme Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Du kannst jederzeit wieder abbestellen.",
-        filterLabel: "Bühnen einschränken",
-        filterHint: "leer = alle",
+        filterLabel: "",
+        filterHint: "",
         iosHint:
           "<strong>Auf iPhone/iPad:</strong> Tippe unten auf »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne die Seite anschließend über das neue App-Icon — erst dann sind Push-Nachrichten möglich.",
         unsupported:
@@ -1135,11 +1133,8 @@ function buildClientScript(): string {
     var iosHint = document.getElementById('digest-ios-hint');
     var unsupported = document.getElementById('digest-unsupported');
     var boxes = form.querySelectorAll('input[name="schedule"]');
-    var theaterBoxes = form.querySelectorAll('input[name="filter-theater"]');
     function checked(){ var out = []; boxes.forEach(function(b){ if (b.checked) out.push(b.value); }); return out; }
     function setChecked(values){ boxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; }); }
-    function checkedTheaters(){ var out = []; theaterBoxes.forEach(function(b){ if (b.checked) out.push(b.value); }); return out; }
-    function setTheaters(values){ theaterBoxes.forEach(function(b){ b.checked = values.indexOf(b.value) !== -1; }); }
     function setStatus(msg, kind){
       if (!msg) { status.hidden = true; status.textContent = ''; status.className = 'contact-form__status'; return; }
       status.hidden = false; status.textContent = msg;
@@ -1171,7 +1166,7 @@ function buildClientScript(): string {
     }
     async function open(){
       setStatus(''); submit.disabled = false; submit.textContent = 'Abonnieren';
-      unsubBtn.hidden = true; setChecked([]); setTheaters([]);
+      unsubBtn.hidden = true; setChecked([]);
       iosHint.hidden = true; unsupported.hidden = true;
       if (!supportsPush()) {
         if (isIosNonStandalone()) iosHint.hidden = false; else unsupported.hidden = false;
@@ -1187,7 +1182,6 @@ function buildClientScript(): string {
               var data = await me.json();
               if (data.schedules && data.schedules.length) {
                 setChecked(data.schedules);
-                if (data.filters && Array.isArray(data.filters.theaters)) setTheaters(data.filters.theaters);
                 submit.textContent = 'Speichern'; unsubBtn.hidden = false;
               }
             }
@@ -1235,12 +1229,10 @@ function buildClientScript(): string {
           });
         }
         var json = existing.toJSON();
-        var theaters = checkedTheaters();
-        var filters = theaters.length > 0 ? { theaters: theaters } : null;
         var res = await fetch('/api/push/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: filters })
+          body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: sched, filters: null })
         });
         if (!res.ok) throw new Error('save-failed');
         setStatus('Gespeichert. Bis bald!', 'ok');
