@@ -26,7 +26,7 @@ import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { INLINE_CSS } from "./styles-inline";
-import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
+import type { MuseumInfo } from "./types";
 
 /** Theme initialization script to prevent flash of unstyled content */
 export const THEME_SCRIPT = THEME_FOUC_SCRIPT;
@@ -600,8 +600,8 @@ export function renderPage(
             <main id="content">
               {initialData ? (
                 <ContentBody
-                  events={initialData.events as EventWithLikes[]}
-                  exhibitions={initialData.exhibitions as ExhibitionWithLikes[]}
+                  events={initialData.events as import("./types").Event[]}
+                  exhibitions={initialData.exhibitions as import("./types").Exhibition[]}
                   tr={tr}
                   locale={locale}
                   todayIso={todayIso()}

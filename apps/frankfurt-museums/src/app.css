@@ -567,42 +567,6 @@ dialog::backdrop {
 }
 .search-bar input::placeholder { color: var(--color-text-tertiary); }
 
-/* Heart prompt */
-.heart-prompt {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--color-accent-light);
-  border-radius: 8px;
-  margin-top: 0.375rem;
-  animation: fadeIn 0.2s ease-out;
-}
-.heart-prompt-text {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  flex: 1;
-}
-.heart-prompt-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.625rem;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  border-radius: 999px;
-  cursor: pointer;
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  transition: all 0.15s ease;
-}
-.heart-prompt-btn:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.heart-prompt-btn.heart { color: #c2410c; border-color: var(--color-accent-light); }
-.heart-prompt-btn.heart:hover { background: var(--color-accent-light); border-color: var(--color-accent); }
-.heart-prompt-btn svg { width: 0.75rem; height: 0.75rem; }
-
 /* View transitions */
 #content {
   view-transition-name: content;
@@ -1120,19 +1084,6 @@ dialog::backdrop {
   color: var(--color-text-tertiary);
 }
 .translated-badge__icon { width: 0.625rem; height: 0.625rem; }
-
-/* Quiet count (used inside .like-badge etc.) */
-.quiet-count {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  font-family: var(--font-mono); font-weight: 500;
-  font-size: 0.6875rem;
-  color: var(--color-text-tertiary);
-  font-variant-numeric: tabular-nums; opacity: 0.7;
-}
-
-/* Like badge */
-.like-badge { /* uses .quiet-count */ }
-.like-badge__icon { width: 0.75rem; height: 0.75rem; flex-shrink: 0; fill: currentColor; }
 
 /* Ending-soon / urgent badge for exhibitions */
 .ending-badge {

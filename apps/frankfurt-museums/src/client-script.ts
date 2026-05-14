@@ -153,31 +153,7 @@ export const CLIENT_SCRIPT = `
       }
 
       toggleVisited(id);
-      if (getMyLikes()[id]) {
-        moveToVisited(card);
-      } else {
-        showHeartPrompt(id, itemType, card);
-      }
-    }
-
-    function showHeartPrompt(id, itemType, card) {
-      var existing = card.querySelector('.heart-prompt');
-      if (existing) return;
-      var prompt = document.createElement('div');
-      prompt.className = 'heart-prompt';
-      prompt.innerHTML = '<span class="heart-prompt-text">' + escHtml(T.heartPrompt) + '</span>'
-        + '<button type="button" class="heart-prompt-btn heart" data-action="like">'
-        + '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
-        + escHtml(T.heartYes) + '</button>'
-        + '<button type="button" class="heart-prompt-btn" data-action="dismiss">' + escHtml(T.heartDismiss) + '</button>';
-      prompt.addEventListener('click', function(e) {
-        var btn = e.target.closest('[data-action]');
-        if (!btn) return;
-        if (btn.dataset.action === 'like') submitLike(id, itemType);
-        prompt.remove();
-        moveToVisited(card);
-      });
-      card.querySelector('.card-body').appendChild(prompt);
+      moveToVisited(card);
     }
 
     function moveToVisited(card) {
@@ -201,26 +177,6 @@ export const CLIENT_SCRIPT = `
       if (visitedList && visitedCount) {
         visitedCount.textContent = visitedList.children.length;
       }
-    }
-
-    function getMyLikes() {
-      try { return JSON.parse(localStorage.getItem('my_likes') || '{}'); } catch { return {}; }
-    }
-
-    function submitLike(id, itemType) {
-      var likes = getMyLikes();
-      likes[id] = true;
-      try { localStorage.setItem('my_likes', JSON.stringify(likes)); } catch {}
-      var badge = document.querySelector('[data-item-id="' + id + '"] .card-likes');
-      if (badge) {
-        var count = parseInt(badge.textContent) || 0;
-        badge.lastChild.textContent = count + 1;
-      }
-      fetch('/api/like', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ item_type: itemType, item_id: id }),
-      }).catch(function() {});
     }
 
     function getVisited() {
@@ -333,7 +289,7 @@ export const CLIENT_SCRIPT = `
           clientToday = lastRenderData.date;
         }
       }
-      hydrateVisited(); hydrateMyLikes();
+      hydrateVisited();
       hydrateSectionStates();
       document.body.classList.add('hydrated');
       if (sortByDistance && userPos) { injectDistanceBadges(); injectReachability(); }
@@ -435,6 +391,15 @@ export const CLIENT_SCRIPT = `
       lists.forEach(function(list) {
         var items = Array.from(list.querySelectorAll(':scope > li'));
         items.sort(function(a, b) {
+          var cardA = a.querySelector('[data-event-date]');
+          var cardB = b.querySelector('[data-event-date]');
+          var dateA = cardA ? (cardA.dataset.eventDate || '') : '';
+          var dateB = cardB ? (cardB.dataset.eventDate || '') : '';
+          var timeA = cardA ? (cardA.dataset.eventTime || '') : '';
+          var timeB = cardB ? (cardB.dataset.eventTime || '') : '';
+          var dtA = dateA + 'T' + (timeA || '99:99');
+          var dtB = dateB + 'T' + (timeB || '99:99');
+          if (dtA !== dtB) return dtA < dtB ? -1 : 1;
           var elA = a.querySelector('[data-museum-slug]');
           var elB = b.querySelector('[data-museum-slug]');
           var da = elA ? (travelMin(elA.dataset.museumSlug) || 999) : 999;
@@ -452,10 +417,13 @@ export const CLIENT_SCRIPT = `
         items.sort(function(a, b) {
           var cardA = a.querySelector('[data-event-date]');
           var cardB = b.querySelector('[data-event-date]');
-          var dateA = cardA ? cardA.dataset.eventDate : '';
-          var dateB = cardB ? cardB.dataset.eventDate : '';
-          if (dateA === dateB) return 0;
-          return dateA < dateB ? -1 : 1;
+          var dateA = cardA ? (cardA.dataset.eventDate || '') : '';
+          var dateB = cardB ? (cardB.dataset.eventDate || '') : '';
+          var timeA = cardA ? (cardA.dataset.eventTime || '') : '';
+          var timeB = cardB ? (cardB.dataset.eventTime || '') : '';
+          var dtA = dateA + 'T' + (timeA || '99:99');
+          var dtB = dateB + 'T' + (timeB || '99:99');
+          return dtA < dtB ? -1 : dtA > dtB ? 1 : 0;
         });
         items.forEach(function(item) { list.appendChild(item); });
       });
@@ -594,18 +562,6 @@ export const CLIENT_SCRIPT = `
       }
     }
 
-    function hydrateMyLikes() {
-      var likes = getMyLikes();
-      document.querySelectorAll('.card-likes').forEach(function(badge) {
-        var card = badge.closest('article[data-item-id]');
-        if (!card) return;
-        var id = card.getAttribute('data-item-id');
-        if (likes[id]) {
-          badge.classList.add('!text-red-500', '!border-red-200');
-        }
-      });
-    }
-
     function hydrateSectionStates() {
       content.querySelectorAll('details.section').forEach(function(d) {
         var key = d.dataset.section;
@@ -634,7 +590,7 @@ export const CLIENT_SCRIPT = `
       if (currentDate !== clientToday) url.searchParams.set('date', currentDate);
       location.replace(url.toString());
     } else if (__INITIAL_DATE__) {
-      hydrateVisited(); hydrateMyLikes();
+      hydrateVisited();
       hydrateSectionStates();
       updateLangLinks();
       document.body.classList.add('hydrated');

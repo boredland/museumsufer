@@ -1,8 +1,8 @@
 import { buildUtm, dateFormatter } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
-import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort, sortByPopularity } from "./shared";
-import type { EventWithLikes, ExhibitionWithLikes, MuseumInfo } from "./types";
+import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort } from "./shared";
+import type { Event, Exhibition, MuseumInfo } from "./types";
 
 function Icon({ id, class: cls }: { id: string; class: string }) {
   return (
@@ -99,16 +99,6 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
         />
       </svg>
       DeepL
-    </span>
-  );
-}
-
-function LikeBadge({ count }: { count: number }) {
-  if (count <= 0) return null;
-  return (
-    <span class="like-badge quiet-count" title={`${count} likes`}>
-      <Icon id="i-heart" class="like-badge__icon" />
-      {count}
     </span>
   );
 }
@@ -301,7 +291,7 @@ function ExhibitionCard({
   locale,
   tr,
 }: {
-  ex: ExhibitionWithLikes;
+  ex: Exhibition;
   idx: number;
   todayIso: string;
   locale: Locale;
@@ -358,7 +348,6 @@ function ExhibitionCard({
           </p>
           <div class="card-badges">
             <EndingBadge endDate={ex.end_date ?? null} todayIso={todayIso} tr={tr} />
-            <LikeBadge count={ex.like_count} />
             <NavButton slug={ex.museum_slug} name={ex.museum_name || ""} tr={tr} />
             <button
               type="button"
@@ -402,7 +391,7 @@ function ExhibitionCard({
   );
 }
 
-function CalendarDropdown({ ev, tr }: { ev: EventWithLikes; tr: Record<string, string> }) {
+function CalendarDropdown({ ev, tr }: { ev: Event; tr: Record<string, string> }) {
   // CalendarEvent (in @museumsufer/core) uses `string | null` semantics.
   // Our optional Event fields land as `string | undefined` after stripping;
   // coerce here so the helper signatures stay narrow.
@@ -463,7 +452,7 @@ function EventCard({
   tr,
   hero: heroProp,
 }: {
-  ev: EventWithLikes;
+  ev: Event;
   idx: number;
   tr: Record<string, string>;
   hero?: boolean;
@@ -516,7 +505,6 @@ function EventCard({
           <div class="card-badges">
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
-            <LikeBadge count={ev.like_count} />
             <EventTag category={ev.category ?? null} tr={tr} />
             {ev.price && <span class="card-price">{ev.price}</span>}
             <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
@@ -691,19 +679,17 @@ export function ContentBody({
   todayIso,
   groupByDate,
 }: {
-  events: EventWithLikes[];
-  exhibitions: ExhibitionWithLikes[];
+  events: Event[];
+  exhibitions: Exhibition[];
   tr: Record<string, string>;
   locale: Locale;
   todayIso: string;
   groupByDate?: boolean;
 }) {
-  const sortedEvents = groupByDate
-    ? [...events].sort((a, b) =>
-        a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || ""),
-      )
-    : sortByPopularity(events);
-  const sortedExhibitions = sortByPopularity(exhibitions);
+  const sortedEvents = [...events].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || ""),
+  );
+  const sortedExhibitions = [...exhibitions].sort((a, b) => (a.museum_name || "").localeCompare(b.museum_name || ""));
 
   return (
     <>
@@ -788,7 +774,7 @@ function ExhibitionList({
   locale,
   tr,
 }: {
-  exhibitions: ExhibitionWithLikes[];
+  exhibitions: Exhibition[];
   todayIso: string;
   locale: Locale;
   tr: Record<string, string>;
@@ -802,19 +788,11 @@ function ExhibitionList({
   );
 }
 
-function GroupedEventList({
-  events,
-  locale,
-  tr,
-}: {
-  events: EventWithLikes[];
-  locale: Locale;
-  tr: Record<string, string>;
-}) {
+function GroupedEventList({ events, locale, tr }: { events: Event[]; locale: Locale; tr: Record<string, string> }) {
   const dl = dateLocale(locale);
   const weekdayFmt = dateFormatter(dl, { weekday: "long" });
   const dayMonthFmt = dateFormatter(dl, { day: "numeric", month: "long" });
-  const groups: Record<string, EventWithLikes[]> = {};
+  const groups: Record<string, Event[]> = {};
   for (const ev of events) {
     (groups[ev.date] ||= []).push(ev);
   }
