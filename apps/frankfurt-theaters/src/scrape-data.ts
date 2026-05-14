@@ -617,7 +617,7 @@ export const SCRAPE_DATA: ScrapeData = {
   ],
   performances: [
     {"date":"2026-05-14","id":244077536,"show_id":2640766088,"status":"available","ticket_url":"https://papageno-theater.de/produktionen/emil-und-die-detektive","time":"16:00"},
-    {"date":"2026-05-14","id":2036833045,"provider_event_id":"4548","show_id":3858198152,"status":"sold_out","ticket_url":"https://oper-frankfurt.de/de/spielplan/turandot/?id_datum=4548","time":"18:00","venue_room":"Opernhaus"},
+    {"date":"2026-05-14","id":2036833045,"provider_event_id":"4548","show_id":3858198152,"status":"available","ticket_url":"https://oper-frankfurt.de/de/spielplan/turandot/?id_datum=4548","time":"18:00","venue_room":"Opernhaus"},
     {"date":"2026-05-14","id":814744184,"provider_event_id":"3","show_id":3354305356,"status":"available","ticket_url":"https://www.gallustheater.de/prog/vob.php?i=3","time":"19:00","venue_room":"Gallus Theater"},
     {"date":"2026-05-14","end_time":"21:15","id":3547784664,"price_max":68,"price_min":14,"provider_event_id":"15983","show_id":2601518144,"status":"available","ticket_url":"https://schauspielfrankfurt.eventim-inhouse.de/webshop/webticket/shop?&event=15983&language=de","time":"19:30","venue_room":"Schauspielhaus"},
     {"date":"2026-05-14","id":1506027300,"price_max":43,"price_min":31,"provider_event_id":"76248","show_id":3033200516,"status":"available","ticket_url":"https://english-theatre.eventim-inhouse.de/webshop/webticket/shop?event=76248","time":"19:30"},
