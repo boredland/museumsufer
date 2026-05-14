@@ -4,7 +4,7 @@
  * src/scrape-data.ts. Sources:
  *   1. Cross-import from frankfurt-museums (events where category === "Vortrag")
  *   2. Cross-import from frankfurt-theaters (shows classified as talks)
- *   3. Dedicated scrapers: Polytechnische, Haus am Dom, Jüdische Gemeinde Frankfurt
+ *   3. Dedicated scrapers: Polytechnische, Haus am Dom, Jüdische Gemeinde Frankfurt, Literaturhaus
  *
  * Output is deterministic: stable FNV-1a IDs, sorted by date. Two consecutive
  * runs on identical upstream data produce byte-identical output.
@@ -21,6 +21,7 @@ import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-d
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
+import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { talkCategory } from "../src/scrapers/shared";
 import { SOURCES } from "../src/source-config";
@@ -95,6 +96,7 @@ async function main(): Promise<void> {
     ["polytechnische-gesellschaft", scrapePolytechnische],
     ["haus-am-dom", scrapeHausAmDom],
     ["juedische-gemeinde-frankfurt", scrapeJuedischeGemeinde],
+    ["literaturhaus-frankfurt", scrapeLiteraturhaus],
   ];
 
   for (const [slug, fn] of scrapers) {
