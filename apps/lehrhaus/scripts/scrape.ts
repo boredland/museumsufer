@@ -22,6 +22,7 @@ import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape
 import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
+import { scrapeInstitutFuerSozialforschung } from "../src/scrapers/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
@@ -101,6 +102,7 @@ async function main(): Promise<void> {
     ["fgz-streitclub", scrapeFgzStreitclub],
     ["literaturhaus-frankfurt", scrapeLiteraturhaus],
     ["buergeruniversitaet", scrapeBuergeruniversitaet],
+    ["institut-fuer-sozialforschung", scrapeInstitutFuerSozialforschung],
   ];
 
   for (const [slug, fn] of scrapers) {
