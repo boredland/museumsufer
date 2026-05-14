@@ -159,6 +159,18 @@ export const VENUES: VenueConfig[] = [
     scraper: "romanfabrik",
   },
   {
+    slug: "evangelische-akademie",
+    name: "Evangelische Akademie Frankfurt",
+    short_name: "Ev. Akademie",
+    address: "Römerberg 9, 60311 Frankfurt am Main",
+    lat: 50.1102,
+    lon: 8.6824,
+    city: "frankfurt",
+    website_url: "https://www.evangelische-akademie.de",
+    default_genre: "chamber",
+    scraper: "evangelische-akademie",
+  },
+  {
     slug: "andreas-koehs",
     name: "Kirchenmusik Andreas Köhs",
     short_name: "Andreas Köhs",

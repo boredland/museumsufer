@@ -35,7 +35,8 @@ export type ScraperName =
   | "kronberg-academy"
   | "rheingau-festival"
   | "bad-homburg-schloss"
-  | "bad-soden";
+  | "bad-soden"
+  | "evangelische-akademie";
 
 export interface Event {
   id: number;
