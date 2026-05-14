@@ -28,6 +28,7 @@ import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
 import { scrapeInstitutFuerSozialforschung } from "../src/scrapers/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
+import { scrapeOpenBooks } from "../src/scrapers/openbooks";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
 import { talkCategory } from "../src/scrapers/shared";
@@ -113,6 +114,7 @@ async function main(): Promise<void> {
     ["denkbar-frankfurt", scrapeDenkbar],
     ["sigmund-freud-institut", scrapeSigmundFreudInstitut],
     ["dig-frankfurt", scrapeDigFrankfurt],
+    ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 
   for (const [slug, fn] of scrapers) {

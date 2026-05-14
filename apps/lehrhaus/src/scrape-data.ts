@@ -15,6 +15,7 @@ export const SCRAPE_DATA: ScrapeData = {
     {"lat":50.1189,"lon":8.6601,"name":"Denkbar Frankfurt","short_name":"Denkbar","slug":"denkbar-frankfurt","url":"https://denkbar-ffm.de"},
     {"lat":50.117,"lon":8.6557,"name":"Sigmund-Freud-Institut Frankfurt","short_name":"Freud-Institut","slug":"sigmund-freud-institut","url":"https://sigmund-freud-institut.de"},
     {"lat":50.1109,"lon":8.6821,"name":"Deutsch-Israelische Gesellschaft Frankfurt","short_name":"DIG Frankfurt","slug":"dig-frankfurt","url":"https://frankfurt.deutsch-israelische-gesellschaft.de"},
+    {"lat":50.1109,"lon":8.6821,"name":"OPEN BOOKS Frankfurt","short_name":"Open Books","slug":"openbooks-frankfurt","url":"https://www.openbooks-frankfurt.de"},
     {"name":"Frankfurter Museen","short_name":"Museen","slug":"frankfurt-museums","url":"https://museumsufer.app"},
     {"name":"Frankfurter Theater","short_name":"Theater","slug":"frankfurt-theaters","url":"https://ins.theater"}
   ],
