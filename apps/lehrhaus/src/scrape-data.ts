@@ -59,6 +59,22 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "institut-fuer-sozialforschung",
       url: "https://www.ifs.uni-frankfurt.de",
     },
+    {
+      lat: 50.1102,
+      lon: 8.6824,
+      name: "Evangelische Akademie Frankfurt",
+      short_name: "Ev. Akademie",
+      slug: "evangelische-akademie-frankfurt",
+      url: "https://www.evangelische-akademie.de",
+    },
+    {
+      lat: 50.1183,
+      lon: 8.7078,
+      name: "Romanfabrik Frankfurt",
+      short_name: "Romanfabrik",
+      slug: "romanfabrik",
+      url: "https://www.romanfabrik.de",
+    },
     { name: "Frankfurter Museen", short_name: "Museen", slug: "frankfurt-museums", url: "https://museumsufer.app" },
     { name: "Frankfurter Theater", short_name: "Theater", slug: "frankfurt-theaters", url: "https://ins.theater" },
   ],
@@ -88,6 +104,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-05-17",
+      detail_url: "https://www.evangelische-akademie.de/kalender/sprechen-zuhoeren-nachdenken/64040/",
+      id: 4175700384,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Sprechen – Zuhören – Nachdenken",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-17",
       detail_url: "https://jg-ffm.de/veranstaltungskalender/reflective-citizens-sprechen-zuhoeren-nachdenken-2",
       id: 797014072,
       source_name: "Jüdische Gemeinde Frankfurt",
@@ -104,6 +129,16 @@ export const SCRAPE_DATA: ScrapeData = {
       source_name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
       source_slug: "haus-am-dom",
       title: "Ich designe meinen Tod",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-18",
+      detail_url:
+        "https://www.evangelische-akademie.de/kalender/maennlichkeit-autoritaere-strukturen-geschlechterbilder/64023/",
+      id: 4023761364,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Männlichkeit – Autoritäre Strukturen – Geschlechterbilder",
     },
     {
       category: "Vortrag",
@@ -152,6 +187,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "literaturhaus-frankfurt",
       time: "19:30",
       title: "Oliver Bottini: Die Summe aller Dinge",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-19",
+      detail_url: "https://www.evangelische-akademie.de/kalender/mehr-als-verteidigen/63967/",
+      id: 2919744788,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Mehr als verteidigen",
     },
     {
       category: "Vortrag",
@@ -276,6 +320,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "haus-am-dom",
       time: "20:30",
       title: "Wer glaubt was wie?",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-20",
+      detail_url: "https://www.evangelische-akademie.de/kalender/wie-sag-ichs/63805/",
+      id: 3783413480,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Wie sag ich’s?",
     },
     {
       category: "Vortrag",
@@ -485,6 +538,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-05-26",
+      detail_url: "https://www.evangelische-akademie.de/kalender/inside-cumex/64024/",
+      id: 3204355738,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Inside: CumEx",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-26",
       detail_url: "https://www.fffrankfurt.org/aktuell/",
       id: 894155712,
       source_name: "Frankfurter Museen",
@@ -664,6 +726,16 @@ export const SCRAPE_DATA: ScrapeData = {
       category: "Vortrag",
       date: "2026-05-28",
       detail_url:
+        "https://www.evangelische-akademie.de/kalender/stadtsalon-zum-guten-leben-in-frankfurt-und-offenbach/63629/",
+      id: 3654773936,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Stadtsalon – Zum guten Leben in Frankfurt und Offenbach",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-28",
+      detail_url:
         "https://literaturhaus-frankfurt.de/programm/termine/gedankenflieger-philosophieren-mit-kindern-ina-schmidt-2026-05-28/",
       id: 3329567776,
       source_name: "Literaturhaus Frankfurt",
@@ -788,6 +860,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-05-29",
+      detail_url: "https://www.evangelische-akademie.de/kalender/design-demokratie/63882/",
+      id: 2723039880,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Design Demokratie",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-05-29",
       detail_url:
         "https://literaturhaus-frankfurt.de/programm/termine/gedankenflieger-philosophieren-mit-kindern-ina-schmidt-2026-05-29/",
       id: 1417741400,
@@ -830,6 +911,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-06-01",
+      detail_url: "https://www.evangelische-akademie.de/kalender/militarisierung/63965/",
+      id: 3570578984,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Militarisierung?",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-01",
       description:
         "Organische Oberflächen in der Vormoderne Die Anschauungsform von Oberfläche und Hülle enthält immer ihr Gegenteil – das dahinter, darunter bzw. darin Liegende, das Unsichtbare, Teilsichtbare und das nicht Greifbare. Zwischen diesem und der Oberfläche der Hülle gibt es eine Distanz, die gleichzeitig einen zweiten Sinn transportiert. Hülle und Verhülltes treten in Wechselwirkung. Der Eigensinn der Hülle tritt dabei nie ganz in den Hintergrund. Hier setzt die Ringvorlesung zu organischen Oberflächen an. Die Vortragenden, die aus verschiedenen Disziplinen kommen, stellen organische Hüllen wie Klei",
       detail_url: "https://aktuelles.uni-frankfurt.de/event/huelle-materialitaet-medialitaet-wirkung/2026-06-01/",
@@ -860,6 +950,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "haus-am-dom",
       time: "21:00",
       title: "nomen ist omen",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-02",
+      detail_url: "https://www.evangelische-akademie.de/kalender/unsichtbar/64013/",
+      id: 3642316988,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Unsichtbar?!",
     },
     {
       category: "Vortrag",
@@ -916,6 +1015,16 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Interdisziplinäre Rechtsmedizin | Sommersemester 2026",
     },
     {
+      category: "Diskussion",
+      date: "2026-06-02",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/elisa-hoven",
+      id: 4127413588,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "Elisa Hoven im Gespräch mit Heike Borufka",
+    },
+    {
       category: "Vortrag",
       date: "2026-06-02",
       detail_url: "https://literaturhaus-frankfurt.de/programm/termine/lesezirkel-2026-06-02/",
@@ -947,6 +1056,15 @@ export const SCRAPE_DATA: ScrapeData = {
       ticket_url: "https://www.reservix.de/frankfurt-am-main/venue/haus-am-dom/v20608",
       time: "21:30",
       title: "Katrin Eigendorf: Erzählen, was ist",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-03",
+      detail_url: "https://www.evangelische-akademie.de/kalender/humor-ist/64004/",
+      id: 2476594672,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Humor ist …",
     },
     {
       category: "Vortrag",
@@ -1034,6 +1152,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "haus-am-dom",
       time: "11:00",
       title: "LiteraturLounge",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-08",
+      detail_url: "https://www.evangelische-akademie.de/kalender/ki-und-die-zukunft-der-medizin/64033/",
+      id: 4253147740,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "KI und die Zukunft der Medizin",
     },
     {
       category: "Vortrag",
@@ -1289,6 +1416,16 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://www.frankfurter-stadtevents.de/Themen/Bhnen-Shows/Die-Andere-Auf-den-Spuren-der-Frankfurter-Edelprostituierten-Helga-Matura-im-Theater-Alte-Brcke_20018597/",
       time: "19:30",
       title: "Cold Case „Helga Matura“ · Auf den Spuren der ermordeten Frankfurter Edelprostituierten",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-10",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/hendrik-bolz",
+      id: 3015424052,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "Hendrik Bolz",
     },
     {
       category: "Vortrag",
@@ -1681,6 +1818,16 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Madita Oeming: Aufgeklärt statt aufgeregt",
     },
     {
+      category: "Vortrag",
+      date: "2026-06-15",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/80-jahre-lucky-luke",
+      id: 2087913640,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "80 Jahre Lucky Luke",
+    },
+    {
       category: "Diskussion",
       date: "2026-06-15",
       detail_url: "https://fgz-risc.uni-frankfurt.de/streitclub-18-medienkrise-erlischt-das-lagerfeuer-der-nation/",
@@ -1701,6 +1848,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
       source_slug: "haus-am-dom",
       title: "Neue War Lords - trotzdem Frieden!?",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-16",
+      detail_url: "https://www.evangelische-akademie.de/kalender/neue-warlords-trotzdem-frieden/64025/",
+      id: 3181442140,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Neue Warlords – trotzdem Frieden?",
     },
     {
       category: "Vortrag",
@@ -1893,6 +2049,16 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "buergeruniversitaet",
       time: "18:15",
       title: "Interdisziplinäre Rechtsmedizin | Sommersemester 2026",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-16",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/ulli-lust",
+      id: 708470928,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "Ulli Lust",
     },
     {
       category: "Vortrag",
@@ -2312,6 +2478,15 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Antidemokratische Mobilisierung und die Macht der Gefühle. Diskussion anlässlich der Oper »Tancredi«",
     },
     {
+      category: "Vortrag",
+      date: "2026-06-20",
+      detail_url: "https://www.evangelische-akademie.de/kalender/wenn-der-brief-kommt/64032/",
+      id: 2318582436,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Wenn der Brief kommt",
+    },
+    {
       category: "Diskussion",
       date: "2026-06-20",
       description:
@@ -2466,6 +2641,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-06-24",
+      detail_url: "https://www.evangelische-akademie.de/kalender/design-demokratie/63884/",
+      id: 1309943948,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Design Demokratie",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-24",
       description: "Fritz Bauer Institut / A. Mergen",
       detail_url:
         "https://hausamdom-frankfurt.de/programm/fritz-bauer-und-die-literarische-und-filmische-bearbeitung-des-frankfurter-auschwitz-prozesses",
@@ -2538,6 +2722,16 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-06-24",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/dana-grigorcea-1",
+      id: 1977444040,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "Dana Grigorcea & Nadiia Zhurba",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-24",
       description:
         "Joshua Groß: Neben sich selbst hergehen. Denken in Avataren Der Titel der diesjährigen Poetikvorlesung verspricht ein Nachdenken über die Rolle von Autorschaft, Figurenkonstellationen und digitaler Gegenwart: Wer „neben sich selbst hergeht“ erlebt eine Verschiebung der Perspektive, tritt aus gewohnten Ordnungen heraus und erkundet ein (literarisches) Selbst. Das Motiv des Avatars erinnert an digitale Welten sowie Masken und Projektionen und fiktionalisierte Versionen von Subjekten, die in der literarischen Tradition schon vielfach zur Debatte standen. Joshua Groß‘ Texte erforschen und hinterfr",
       detail_url: "https://aktuelles.uni-frankfurt.de/event/frankfurter-poetikvorlesung-2026/2026-06-24/",
@@ -2582,6 +2776,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "institut-fuer-sozialforschung",
       time: "20:00",
       title: "»Die demokratische Frage« – Günter Frankenberg im Gespräch mit Samira Akbarian und Stephan Lessenich",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-25",
+      detail_url: "https://www.evangelische-akademie.de/kalender/gegenlicht/64009/",
+      id: 2079706376,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Gegenlicht",
     },
     {
       category: "Vortrag",
@@ -3111,6 +3314,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-08-20",
+      detail_url: "https://www.evangelische-akademie.de/kalender/stadtsalon/63630/",
+      id: 271008244,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Stadtsalon",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-08-20",
       description: "Max Beckmann - Selbstbildnis mit Fischerhut - 1949",
       detail_url: "https://hausamdom-frankfurt.de/programm/sinnbilder-20260820",
       id: 257631440,
@@ -3129,6 +3341,16 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "literaturhaus-frankfurt",
       time: "19:30",
       title: "Ruth-Maria Thomas: Die zweitgrößte Liebe",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-08-26",
+      detail_url:
+        "https://www.evangelische-akademie.de/kalender/maskulinistische-influencer-und-tradwife-ideale/63806/",
+      id: 1515839036,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Maskulinistische Influencer und Tradwife-Ideale",
     },
     {
       category: "Vortrag",
@@ -3207,6 +3429,25 @@ export const SCRAPE_DATA: ScrapeData = {
     },
     {
       category: "Vortrag",
+      date: "2026-10-22",
+      detail_url: "https://www.evangelische-akademie.de/kalender/stadtsalon/63631/",
+      id: 1278403068,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Stadtsalon",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-10-27",
+      detail_url: "https://www.romanfabrik.de/programm/detailansicht/termin/henni-nachtsheim-1",
+      id: 1181860672,
+      source_name: "Romanfabrik Frankfurt",
+      source_slug: "romanfabrik",
+      time: "19:30",
+      title: "Henni Nachtsheim",
+    },
+    {
+      category: "Vortrag",
       date: "2026-10-29",
       description: "Fußball- und Theatertalk",
       detail_url: "https://volksbuehne.net/programm/906-eintracht-buehne",
@@ -3216,6 +3457,16 @@ export const SCRAPE_DATA: ScrapeData = {
       ticket_url: "https://volksbuehne.reservix.de/p/reservix/event/2516564",
       time: "19:30",
       title: "90+6 / Eintracht & Bühne",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-02",
+      detail_url:
+        "https://www.evangelische-akademie.de/kalender/arbeit-zwischen-sinnstiftung-und-chancengerechtigkeit/64134/",
+      id: 2749783132,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Arbeit zwischen Sinnstiftung und Chancengerechtigkeit",
     },
     {
       category: "Vortrag",
@@ -3257,6 +3508,15 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-11-20",
+      detail_url: "https://www.evangelische-akademie.de/kalender/mission-ganymed/63825/",
+      id: 2865745052,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Mission Ganymed",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-20",
       detail_url: "https://www.ifs.uni-frankfurt.de/eventleser/adorno-vorlesungen-2026-3.html",
       end_time: "20:30",
       id: 3086670888,
@@ -3264,6 +3524,15 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "institut-fuer-sozialforschung",
       time: "18:30",
       title: "Adorno-Vorlesungen 2026",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-25",
+      detail_url: "https://www.evangelische-akademie.de/kalender/digitale-raeume-reale-wirkung/63807/",
+      id: 3477663984,
+      source_name: "Evangelische Akademie Frankfurt",
+      source_slug: "evangelische-akademie-frankfurt",
+      title: "Digitale Räume, reale Wirkung",
     },
     {
       category: "Vortrag",
