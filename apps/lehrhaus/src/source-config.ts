@@ -25,6 +25,14 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1167,
     lon: 8.6712,
   },
+  {
+    slug: "literaturhaus-frankfurt",
+    name: "Literaturhaus Frankfurt",
+    short_name: "Literaturhaus",
+    url: "https://www.literaturhaus-frankfurt.de",
+    lat: 50.1173,
+    lon: 8.6814,
+  },
   // v2 sources (not yet scraped)
   // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
   // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut, depth psychology)
