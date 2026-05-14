@@ -73,6 +73,14 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1183,
     lon: 8.7078,
   },
+  {
+    slug: "denkbar-frankfurt",
+    name: "Denkbar Frankfurt",
+    short_name: "Denkbar",
+    url: "https://denkbar-ffm.de",
+    lat: 50.1189,
+    lon: 8.6601,
+  },
   // v2 sources (not yet scraped)
   // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
   // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut, depth psychology)
@@ -80,7 +88,6 @@ export const SOURCES: LehrhausSource[] = [
   // instituto-cervantes-frankfurt: https://frankfurt.cervantes.es/de/kultur_spanisch/kulturprogramm.htm (Spanish cultural institute)
   // dig-frankfurt: https://frankfurt.deutsch-israelische-gesellschaft.de/termine/ — The Events Calendar REST API (same as buergeruniversitaet); currently sparse (~2 events)
   // openbooks-frankfurt: https://www.openbooks-frankfurt.de/programm/ — WordPress, Buchmesse-week only (Oct), ~100 readings
-  // denkbar-frankfurt: https://denkbar-ffm.de/programmarchiv-2/ — WordPress WP REST API (category ID 4 = aktuelles-programm); date in post title; mixed music/talks
 
   // Cross-imports — not independently scraped; events flow from existing apps.
   {

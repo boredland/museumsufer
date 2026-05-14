@@ -10,7 +10,8 @@
       "packages/**/src/**/*.tsx",
       "!apps/frankfurt-theaters/src/scrape-data.ts",
       "!apps/frankfurt-museums/src/scrape-data.ts",
-      "!apps/konzert-haus/src/scrape-data.ts"
+      "!apps/konzert-haus/src/scrape-data.ts",
+      "!apps/lehrhaus/src/scrape-data.ts"
     ]
   }
 }

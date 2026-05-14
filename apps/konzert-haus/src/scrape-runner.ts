@@ -3,6 +3,7 @@ import { scrapeAndreasKoehs } from "./scrapers/andreas-koehs";
 import { scrapeBadHomburgSchloss } from "./scrapers/bad-homburg-schloss";
 import { scrapeBadSoden } from "./scrapers/bad-soden";
 import { scrapeBrotfabrik } from "./scrapers/brotfabrik";
+import { scrapeDenkbar } from "./scrapers/denkbar";
 import { scrapeDrHochs } from "./scrapers/dr-hochs";
 import { scrapeEnsembleModern } from "./scrapers/ensemble-modern";
 import { scrapeEvangelischeAkademie } from "./scrapers/evangelische-akademie";
@@ -62,5 +63,7 @@ export async function runScraper(name: ScraperName): Promise<ScrapeResult> {
       return scrapeBadSoden();
     case "evangelische-akademie":
       return scrapeEvangelischeAkademie();
+    case "denkbar":
+      return scrapeDenkbar();
   }
 }

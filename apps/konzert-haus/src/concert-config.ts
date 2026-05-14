@@ -243,6 +243,18 @@ export const VENUES: VenueConfig[] = [
     scraper: "bad-homburg-schloss",
   },
   {
+    slug: "denkbar",
+    name: "Denkbar Frankfurt",
+    short_name: "Denkbar",
+    address: "Spohrstraße 46a, 60327 Frankfurt am Main",
+    lat: 50.1189,
+    lon: 8.6601,
+    city: "frankfurt",
+    website_url: "https://denkbar-ffm.de",
+    default_genre: "jazz",
+    scraper: "denkbar",
+  },
+  {
     slug: "bad-soden",
     name: "Bad Sodener Kammerkonzerte",
     short_name: "Bad Soden",
