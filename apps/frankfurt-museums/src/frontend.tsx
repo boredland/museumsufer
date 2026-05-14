@@ -23,7 +23,6 @@ import { berlinNow, todayIso } from "./date";
 import { DEFAULT_LOCALE, dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
-import { getAllMuseums } from "./queries";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { INLINE_CSS } from "./styles-inline";
