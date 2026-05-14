@@ -28,6 +28,14 @@ export const SCRAPE_DATA: ScrapeData = {
       url: "https://jg-ffm.de",
     },
     {
+      lat: 50.1108,
+      lon: 8.6622,
+      name: "FGZ StreitClub",
+      short_name: "StreitClub",
+      slug: "fgz-streitclub",
+      url: "https://fgz-risc.uni-frankfurt.de",
+    },
+    {
       lat: 50.1173,
       lon: 8.6814,
       name: "Literaturhaus Frankfurt",
@@ -983,6 +991,18 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Madita Oeming: Aufgeklärt statt aufgeregt",
     },
     {
+      category: "Diskussion",
+      date: "2026-06-15",
+      detail_url: "https://fgz-risc.uni-frankfurt.de/streitclub-18-medienkrise-erlischt-das-lagerfeuer-der-nation/",
+      id: 3998360428,
+      source_name: "FGZ StreitClub",
+      source_slug: "fgz-streitclub",
+      ticket_url:
+        "https://english-theatre.de/tickets/event/streitclub-18-medienkrise-erlischt-das-lagerfeuer-der-nation/",
+      time: "19:30",
+      title: "StreitClub #18 – Medienkrise: Erlischt das ‚Lagerfeuer der Nation‘?",
+    },
+    {
       category: "Vortrag",
       date: "2026-06-16",
       description: "Friedensgutachten",
@@ -1857,6 +1877,18 @@ export const SCRAPE_DATA: ScrapeData = {
       source_name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
       source_slug: "haus-am-dom",
       title: 'Vernissage zur Ausstellung "Leben an den Rändern"',
+    },
+    {
+      category: "Diskussion",
+      date: "2026-09-07",
+      detail_url: "https://fgz-risc.uni-frankfurt.de/streitclub-19-extremismus-laesst-sich-die-demokratie-beschuetzen/",
+      id: 1702601393,
+      source_name: "FGZ StreitClub",
+      source_slug: "fgz-streitclub",
+      ticket_url:
+        "https://english-theatre.de/tickets/event/streitclub-19-extremismus-laesst-sich-die-demokratie-beschuetzen/",
+      time: "19:30",
+      title: "StreitClub #19 Extremismus – Lässt sich die Demokratie beschützen?",
     },
     {
       category: "Vortrag",

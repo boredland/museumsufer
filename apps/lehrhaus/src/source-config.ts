@@ -26,6 +26,14 @@ export const SOURCES: LehrhausSource[] = [
     lon: 8.6712,
   },
   {
+    slug: "fgz-streitclub",
+    name: "FGZ StreitClub",
+    short_name: "StreitClub",
+    url: "https://fgz-risc.uni-frankfurt.de",
+    lat: 50.1108,
+    lon: 8.6622,
+  },
+  {
     slug: "literaturhaus-frankfurt",
     name: "Literaturhaus Frankfurt",
     short_name: "Literaturhaus",
