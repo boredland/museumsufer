@@ -4,15 +4,12 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
 import {
-  attachLikeCounts,
   buildIcs,
   fetchDayData,
   getEventCountsByDate,
   getEventsForDate,
   getExhibitionsForDate,
-  getLikeCounts,
   getMuseumMap,
-  handleLike,
   markTranslated,
   proxyImages,
 } from "./api";
@@ -22,6 +19,7 @@ import { dispatchDigest, scheduleForNow } from "./digest";
 import { type InitialData, renderPage } from "./frontend";
 import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
+import { getAllMuseums } from "./queries";
 import docsRoute from "./routes/docs";
 import feedsRoute from "./routes/feeds";
 import imprintRoute from "./routes/imprint";
@@ -31,7 +29,7 @@ import pushRoute from "./routes/push";
 import staticRoute from "./routes/static";
 import { formatDateFull } from "./shared";
 import { translateFields } from "./translate";
-import type { Env, Event, EventWithLikes, Exhibition, ExhibitionWithLikes, MuseumInfo } from "./types";
+import type { Env, Event, Exhibition, MuseumInfo } from "./types";
 
 const dayQuery = z.object({
   date: z
@@ -216,10 +214,6 @@ app.post("/api/transit", async (c) => {
   return c.json(result, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400" } });
 });
 
-app.post("/api/like", async (c) => {
-  return handleLike(c.req.raw, c.env);
-});
-
 const FEEDBACK_FROM = "no-reply@ins.museum";
 const FEEDBACK_TO = "feedback@ins.museum";
 
@@ -237,14 +231,8 @@ app.get("/api/events", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
   const events = proxyImages(await getEventsForDate(date));
-  const counts = await getLikeCounts(
-    c.env,
-    "event",
-    events.map((e) => e.id),
-  );
-  const withLikes = attachLikeCounts(events, counts);
-  const translated = await translateFields(c.env, withLikes, ["title", "description"] as (keyof Event)[], lang);
-  return c.json(markTranslated(withLikes, translated, lang), {
+  const translated = await translateFields(c.env, events, ["title", "description"] as (keyof Event)[], lang);
+  return c.json(markTranslated(events, translated, lang), {
     headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
   });
 });
@@ -253,21 +241,14 @@ app.get("/api/exhibitions", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
   const exhibitions = proxyImages(await getExhibitionsForDate(date));
-  const counts = await getLikeCounts(
-    c.env,
-    "exhibition",
-    exhibitions.map((e) => e.id),
-  );
-  const withLikes = attachLikeCounts(exhibitions, counts);
-  const translated = await translateFields(c.env, withLikes, ["title"] as (keyof Exhibition)[], lang);
-  return c.json(markTranslated(withLikes, translated, lang), {
+  const translated = await translateFields(c.env, exhibitions, ["title"] as (keyof Exhibition)[], lang);
+  return c.json(markTranslated(exhibitions, translated, lang), {
     headers: { "Cache-Control": "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600" },
   });
 });
 
 app.get("/api/museums", async (c) => {
-  const { results } = await c.env.DB.prepare("SELECT * FROM museums ORDER BY name").all();
-  return c.json(results, {
+  return c.json(getAllMuseums(), {
     headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400" },
   });
 });
@@ -278,29 +259,15 @@ app.get("/api/day", async (c) => {
   const [rawExhibitions, rawEvents] = await Promise.all([getExhibitionsForDate(date), getEventsForDate(date)]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
-  const [exhCounts, evCounts] = await Promise.all([
-    getLikeCounts(
-      c.env,
-      "exhibition",
-      exhibitions.map((e) => e.id),
-    ),
-    getLikeCounts(
-      c.env,
-      "event",
-      events.map((e) => e.id),
-    ),
-  ]);
-  const exhWithLikes = attachLikeCounts(exhibitions, exhCounts);
-  const evWithLikes = attachLikeCounts(events, evCounts);
   const [trExh, trEv] = await Promise.all([
-    translateFields(c.env, exhWithLikes, ["title"] as (keyof Exhibition)[], lang),
-    translateFields(c.env, evWithLikes, ["title", "description"] as (keyof Event)[], lang),
+    translateFields(c.env, exhibitions, ["title"] as (keyof Exhibition)[], lang),
+    translateFields(c.env, events, ["title", "description"] as (keyof Event)[], lang),
   ]);
   return c.json(
     {
       date,
-      exhibitions: markTranslated(exhWithLikes, trExh, lang),
-      events: markTranslated(evWithLikes, trEv, lang),
+      exhibitions: markTranslated(exhibitions, trExh, lang),
+      events: markTranslated(events, trEv, lang),
     },
     {
       headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
@@ -313,13 +280,10 @@ app.get("/event/:id/feed.ics", async (c) => {
   if (!idStr) return c.json({ error: "invalid id" }, { status: 400 });
   const id = parseInt(idStr, 10);
   if (Number.isNaN(id)) return c.json({ error: "invalid id" }, { status: 400 });
-  const ev = await c.env.DB.prepare(
-    "SELECT ev.*, m.name as museum_name FROM events ev JOIN museums m ON ev.museum_id = m.id WHERE ev.id = ?",
-  )
-    .bind(id)
-    .first<Event & { museum_name: string }>();
+  const { getEventById } = await import("./queries");
+  const ev = await getEventById(id);
   if (!ev) return c.json({ error: "not found" }, { status: 404 });
-  return c.text(buildIcs([ev]), {
+  return c.text(buildIcs([ev as Event & { museum_name: string }]), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
@@ -381,7 +345,7 @@ function renderMarkdown(data: InitialData, locale: Locale, museums: Record<strin
     "",
   ];
 
-  const events = data.events as EventWithLikes[];
+  const events = data.events as Event[];
   if (events.length > 0) {
     lines.push(`## ${tr.events} (${events.length})`, "");
     for (const ev of events) {
@@ -396,7 +360,7 @@ function renderMarkdown(data: InitialData, locale: Locale, museums: Record<strin
     lines.push("");
   }
 
-  const exhibitions = data.exhibitions as ExhibitionWithLikes[];
+  const exhibitions = data.exhibitions as Exhibition[];
   if (exhibitions.length > 0) {
     lines.push(`## ${tr.exhibitions} (${exhibitions.length})`, "");
     for (const ex of exhibitions) {

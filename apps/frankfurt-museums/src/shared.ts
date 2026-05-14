@@ -110,24 +110,6 @@ export function buildYahooUrl(ev: CalendarEvent): string {
   return buildYahooCalendarUrl(toCore(ev));
 }
 
-export function sortByPopularity<T extends { museum_slug?: string; museum_name?: string; like_count?: number }>(
-  items: T[],
-): T[] {
-  const pop: Record<string, number> = {};
-  for (const item of items) {
-    const slug = item.museum_slug;
-    if (!slug) continue;
-    const count = item.like_count || 0;
-    if (!pop[slug] || count > pop[slug]) pop[slug] = count;
-  }
-  return [...items].sort((a, b) => {
-    const pa = pop[a.museum_slug || ""] || 0;
-    const pb = pop[b.museum_slug || ""] || 0;
-    if (pa !== pb) return pb - pa;
-    return (a.museum_name || "").localeCompare(b.museum_name || "");
-  });
-}
-
 export function classifyEvent(title: string, description?: string | null): string | null {
   const t = title.toLowerCase();
   const d = (description || "").toLowerCase();
