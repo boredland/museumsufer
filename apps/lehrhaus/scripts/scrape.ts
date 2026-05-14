@@ -4,7 +4,7 @@
  * src/scrape-data.ts. Sources:
  *   1. Cross-import from frankfurt-museums (events where category === "Vortrag")
  *   2. Cross-import from frankfurt-theaters (shows classified as talks)
- *   3. Dedicated scrapers: Polytechnische, Haus am Dom, KfW Stiftung
+ *   3. Dedicated scrapers: Polytechnische, Haus am Dom, Jüdische Gemeinde Frankfurt
  *
  * Output is deterministic: stable FNV-1a IDs, sorted by date. Two consecutive
  * runs on identical upstream data produce byte-identical output.
@@ -20,7 +20,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
-import { scrapeKfwSalon } from "../src/scrapers/kfw-salon";
+import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { talkCategory } from "../src/scrapers/shared";
 import { SOURCES } from "../src/source-config";
@@ -94,7 +94,7 @@ async function main(): Promise<void> {
   const scrapers: Array<[string, () => Promise<ScrapedEvent[]>]> = [
     ["polytechnische-gesellschaft", scrapePolytechnische],
     ["haus-am-dom", scrapeHausAmDom],
-    ["kfw-stiftung", scrapeKfwSalon],
+    ["juedische-gemeinde-frankfurt", scrapeJuedischeGemeinde],
   ];
 
   for (const [slug, fn] of scrapers) {
