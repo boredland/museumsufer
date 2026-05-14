@@ -18,6 +18,13 @@ Hourly performance schedule for 24 Frankfurt theaters — Schauspiel, Oper, Mous
 - Scrape: hourly 07–19 UTC via `.github/workflows/scrape.yml` (theaters job)
 - D1: `feedback` only (user reports)
 
+### [`apps/konzert-haus`](apps/konzert-haus) → [frankfurt.konzert.haus](https://frankfurt.konzert.haus)
+
+Hourly concert schedule for classical, jazz, sacred, world, experimental, and chamber music across Frankfurt and the Rhein-Main region — Alte Oper, Ensemble Modern, hr-Bigband, Holzhausenschlösschen, and more. Multi-city ready via host-header routing.
+
+- Scrape: hourly 09–21 CEST via `.github/workflows/scrape.yml` (konzert-haus job)
+- D1: none
+
 ### [`apps/fetch-proxy`](apps/fetch-proxy)
 
 Generic upstream-fetch proxy used by museums when a museum API blocks edge fetches by region or User-Agent.
