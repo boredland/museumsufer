@@ -20,6 +20,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
 import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
+import { scrapeDenkbar } from "../src/scrapers/denkbar";
 import { scrapeEvangelischeAkademie } from "../src/scrapers/evangelische-akademie";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
@@ -107,6 +108,7 @@ async function main(): Promise<void> {
     ["institut-fuer-sozialforschung", scrapeInstitutFuerSozialforschung],
     ["evangelische-akademie-frankfurt", scrapeEvangelischeAkademie],
     ["romanfabrik", scrapeRomanfabrikLehrhaus],
+    ["denkbar-frankfurt", scrapeDenkbar],
   ];
 
   for (const [slug, fn] of scrapers) {
