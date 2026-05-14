@@ -21,6 +21,7 @@ import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-d
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
 import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeDenkbar } from "../src/scrapers/denkbar";
+import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
 import { scrapeEvangelischeAkademie } from "../src/scrapers/evangelische-akademie";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
@@ -30,6 +31,7 @@ import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
 import { talkCategory } from "../src/scrapers/shared";
+import { scrapeSigmundFreudInstitut } from "../src/scrapers/sigmund-freud-institut";
 import { SOURCES } from "../src/source-config";
 import type { LehrhausEvent, ScrapeData, ScrapedEvent } from "../src/types";
 
@@ -109,6 +111,8 @@ async function main(): Promise<void> {
     ["evangelische-akademie-frankfurt", scrapeEvangelischeAkademie],
     ["romanfabrik", scrapeRomanfabrikLehrhaus],
     ["denkbar-frankfurt", scrapeDenkbar],
+    ["sigmund-freud-institut", scrapeSigmundFreudInstitut],
+    ["dig-frankfurt", scrapeDigFrankfurt],
   ];
 
   for (const [slug, fn] of scrapers) {
