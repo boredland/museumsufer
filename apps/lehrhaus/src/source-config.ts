@@ -81,12 +81,26 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1189,
     lon: 8.6601,
   },
+  {
+    slug: "sigmund-freud-institut",
+    name: "Sigmund-Freud-Institut Frankfurt",
+    short_name: "Freud-Institut",
+    url: "https://sigmund-freud-institut.de",
+    lat: 50.117,
+    lon: 8.6557,
+  },
+  {
+    slug: "dig-frankfurt",
+    name: "Deutsch-Israelische Gesellschaft Frankfurt",
+    short_name: "DIG Frankfurt",
+    url: "https://frankfurt.deutsch-israelische-gesellschaft.de",
+    lat: 50.1109,
+    lon: 8.6821,
+  },
   // v2 sources (not yet scraped)
-  // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
-  // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut, depth psychology)
-  // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/veranstaltungen-frankfurt-am-main#/ (French cultural institute)
-  // instituto-cervantes-frankfurt: https://frankfurt.cervantes.es/de/kultur_spanisch/kulturprogramm.htm (Spanish cultural institute)
-  // dig-frankfurt: https://frankfurt.deutsch-israelische-gesellschaft.de/termine/ — The Events Calendar REST API (same as buergeruniversitaet); currently sparse (~2 events)
+  // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut) — login required, skip
+  // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/veranstaltungen-frankfurt-am-main#/ — Drupal AJAX, mostly courses/films/concerts, few talks
+  // instituto-cervantes-frankfurt: https://frankfurt.cervantes.es/de/kultur_spanisch/kulturprogramm.htm — no structured event data
   // openbooks-frankfurt: https://www.openbooks-frankfurt.de/programm/ — WordPress, Buchmesse-week only (Oct), ~100 readings
 
   // Cross-imports — not independently scraped; events flow from existing apps.
