@@ -18,12 +18,12 @@ export const SOURCES: LehrhausSource[] = [
     lon: 8.6826,
   },
   {
-    slug: "kfw-stiftung",
-    name: "KfW Stiftung – Philosophie-Salon Villa 102",
-    short_name: "KfW Stiftung",
-    url: "https://www.kfw-stiftung.de",
-    lat: 50.1214,
-    lon: 8.6606,
+    slug: "juedische-gemeinde-frankfurt",
+    name: "Jüdische Gemeinde Frankfurt",
+    short_name: "Jüd. Gemeinde",
+    url: "https://jg-ffm.de",
+    lat: 50.1167,
+    lon: 8.6712,
   },
   // v2 sources (not yet scraped)
   // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
