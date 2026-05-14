@@ -51,6 +51,14 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "buergeruniversitaet",
       url: "https://aktuelles.uni-frankfurt.de",
     },
+    {
+      lat: 50.1217,
+      lon: 8.6558,
+      name: "Institut für Sozialforschung Frankfurt",
+      short_name: "IfS Frankfurt",
+      slug: "institut-fuer-sozialforschung",
+      url: "https://www.ifs.uni-frankfurt.de",
+    },
     { name: "Frankfurter Museen", short_name: "Museen", slug: "frankfurt-museums", url: "https://museumsufer.app" },
     { name: "Frankfurter Theater", short_name: "Theater", slug: "frankfurt-theaters", url: "https://ins.theater" },
   ],
@@ -1030,6 +1038,18 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Vortrag",
       date: "2026-06-08",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/widerstehen-versuche-eines-richtigen-lebens-im-falschen.html",
+      end_time: "15:45",
+      id: 3130606735,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "14:15",
+      title: "Widerstehen. Versuche eines richtigen Lebens im falschen",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-08",
       description:
         "Easy and Uneasy Collaborations with Plants Diesjährige Gastdozentin der Ad.E.Jensen-Gedächtnisvorlesung ist die Anthopologin Anne Meneley, Professorin fürAnthropologie an der Trent University in Kanada. In ihren Vorträgen widmet sie sich der Interaktion zwischen Menschen und Pflanzen. Dabei geht es vor allem auch um Eigendynamik von Pflanzen und um die Bewegung von Pflanzen, Samen, Menschen und Infrastrukturen. Meneley untersucht etwa Auswirkungen der britischen Kolonialzeit auf Gärten in Singapur und geht der Verbindung von Gärten in der heutigen Republik Georgien mit der lokalen und national",
       detail_url: "https://aktuelles.uni-frankfurt.de/event/how-to-do-things-with-plants/2026-06-08/",
@@ -1120,6 +1140,17 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "buergeruniversitaet",
       time: "18:30",
       title: "Aus der Praxis: Wie sieht der Arbeitsalltag einer Strafrichterin am Bundesgerichtshof aus?",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-09",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/buchvorstellung-subjekte-der-oekologischen-verwuestung-kritische-theorie-der-klimakatastrophe.html",
+      id: 3464229824,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "19:00",
+      title: "Buchvorstellung: Subjekte der ökologischen Verwüstung. Kritische Theorie der Klimakatastrophe",
     },
     {
       category: "Vortrag",
@@ -1385,6 +1416,18 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "20:00",
       title:
         "Dark Enlightenment: Platform Neofascism as Mass Deception – Bruna Della Torre im Gespräch mit Juana de Oliveira Lorena",
+    },
+    {
+      category: "Diskussion",
+      date: "2026-06-11",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/bruna-della-torre-im-gespraech-mit-juana-de-oliveira-lorena-in-englischer-sprache.html",
+      id: 539068184,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "20:00",
+      title:
+        "Dark Enlightenment: Platform Neofascism as Mass Deception – Bruna Della Torre im Gespräch mit Juana de Oliveira Lorena (in englischer Sprache)",
     },
     {
       category: "Vortrag",
@@ -2261,6 +2304,16 @@ export const SCRAPE_DATA: ScrapeData = {
     {
       category: "Diskussion",
       date: "2026-06-20",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/antidemokratische-mobilisierung-und-die-macht-der-gefuehle-diskussion-anlaesslich-der-oper-tancredi.html",
+      id: 2738268208,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      title: "Antidemokratische Mobilisierung und die Macht der Gefühle. Diskussion anlässlich der Oper »Tancredi«",
+    },
+    {
+      category: "Diskussion",
+      date: "2026-06-20",
       description:
         "Wie kann die Demokratie gestärkt werden angesichts zunehmender Angriffe von innen und außen? Unter dem Titel „Brüche – Demokratie in Zeiten der Regression“ soll eine neue Veranstaltungsreihe Erhellendes dazu beitragen. Die Initiative ist im Frankfurter Teil des Forschungsverbunds „Herausforderungen der Demokratie in Zeiten ihrer Regression“ angesiedelt. Der hessenweite Forschungsverbund nimmt Ursachen und Folgen demokratiegefährdender Entwicklungen in den Blick. Er verbindet die Initiative Grundlagenforschung mit empirischer Analyse und anwendungsorientierter Wissensproduktion – auch mit Blick",
       detail_url: "https://aktuelles.uni-frankfurt.de/event/brueche-demokratie-in-zeiten-ihrer-regression/",
@@ -2520,6 +2573,17 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Joshua Groß. Frankfurter Poetikvorlesungen",
     },
     {
+      category: "Diskussion",
+      date: "2026-06-24",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/die-demokratische-frage-guenter-frankenberg-im-gespraech-mit-samira-akbarian-und-stephan-lessenich.html",
+      id: 243280424,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "20:00",
+      title: "»Die demokratische Frage« – Günter Frankenberg im Gespräch mit Samira Akbarian und Stephan Lessenich",
+    },
+    {
       category: "Vortrag",
       date: "2026-06-25",
       description:
@@ -2615,6 +2679,17 @@ export const SCRAPE_DATA: ScrapeData = {
       source_slug: "buergeruniversitaet",
       time: "16:00",
       title: "Crossover &#8211; Inter.Trans.Undisciplined Anthropology",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-06-30",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/das-knappe-gut-arbeit-automatisierung-arbeitskraeftemangel-und-sozialer-konflikt.html",
+      id: 2908700312,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "18:00",
+      title: "Das knappe Gut Arbeit. Automatisierung, Arbeitskräftemangel und sozialer Konflikt",
     },
     {
       category: "Vortrag",
@@ -2745,6 +2820,19 @@ export const SCRAPE_DATA: ScrapeData = {
       time: "19:00",
       title:
         "By Authority of the Good People«: Freiheit und Gleichheit in Zeiten illiberaler und autokratischer Politik",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-07-06",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/kritik-an-gesichts-der-erwerbsarbeitsnorm-perspektiven-einer-ungleichheitsanalytischen-soziologie-der-kritik.html",
+      end_time: "15:45",
+      id: 2950106668,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "14:15",
+      title:
+        "Kritik an(gesichts) der Erwerbsarbeitsnorm. Perspektiven einer ungleichheitsanalytischen Soziologie der Kritik",
     },
     {
       category: "Vortrag",
@@ -3109,6 +3197,16 @@ export const SCRAPE_DATA: ScrapeData = {
     },
     {
       category: "Vortrag",
+      date: "2026-10-13",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/politik-der-reparatur-mit-wendy-brown-andreas-folkers-und-eva-von-redecker.html",
+      id: 2110909856,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      title: "Politik der Reparatur. Mit Wendy Brown, Andreas Folkers und Eva von Redecker",
+    },
+    {
+      category: "Vortrag",
       date: "2026-10-29",
       description: "Fußball- und Theatertalk",
       detail_url: "https://volksbuehne.net/programm/906-eintracht-buehne",
@@ -3133,6 +3231,49 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://www.frankfurter-stadtevents.de/Themen/Bhnen-Shows/Fluch-der-Karibik-Mit-Bppi-auf-den-Spuren-von-Jack-Sparrow-anderen-Piraten-Myten-im-Theater-Alte-Brcke_20020772/",
       time: "19:30",
       title: "Fluch der Karibik · mit Bäppi auf den Spuren von Jack Sparrow",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-18",
+      detail_url: "https://www.ifs.uni-frankfurt.de/eventleser/adorno-vorlesungen-2026.html",
+      end_time: "20:30",
+      id: 4156124076,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "18:30",
+      title: "Adorno-Vorlesungen 2026",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-19",
+      detail_url: "https://www.ifs.uni-frankfurt.de/eventleser/adorno-vorlesungen-2026-2.html",
+      end_time: "20:30",
+      id: 965353988,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "18:30",
+      title: "Adorno-Vorlesungen 2026",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-11-20",
+      detail_url: "https://www.ifs.uni-frankfurt.de/eventleser/adorno-vorlesungen-2026-3.html",
+      end_time: "20:30",
+      id: 3086670888,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      time: "18:30",
+      title: "Adorno-Vorlesungen 2026",
+    },
+    {
+      category: "Vortrag",
+      date: "2026-12-10",
+      detail_url:
+        "https://www.ifs.uni-frankfurt.de/eventleser/zukunftsbilder-demokratie-nach-den-zeiten-ihrer-regression.html",
+      id: 3245963796,
+      source_name: "Institut für Sozialforschung Frankfurt",
+      source_slug: "institut-fuer-sozialforschung",
+      title: "Zukunftsbilder. Demokratie nach den Zeiten ihrer Regression",
     },
     {
       category: "Vortrag",

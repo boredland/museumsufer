@@ -49,11 +49,20 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1284,
     lon: 8.6679,
   },
+  {
+    slug: "institut-fuer-sozialforschung",
+    name: "Institut für Sozialforschung Frankfurt",
+    short_name: "IfS Frankfurt",
+    url: "https://www.ifs.uni-frankfurt.de",
+    lat: 50.1217,
+    lon: 8.6558,
+  },
   // v2 sources (not yet scraped)
   // sigmund-freud-institut: https://sigmund-freud-institut.de/index.php/category/veranstaltungen/
   // fpi-frankfurt: https://fpi.de/veranstaltungen/veranstaltungskalender (Fritz-Perls-Institut, depth psychology)
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/veranstaltungen-frankfurt-am-main#/ (French cultural institute)
   // instituto-cervantes-frankfurt: https://frankfurt.cervantes.es/de/kultur_spanisch/kulturprogramm.htm (Spanish cultural institute)
+  // dig-frankfurt: https://frankfurt.deutsch-israelische-gesellschaft.de/termine/ — The Events Calendar REST API (same as buergeruniversitaet); currently sparse (~2 events)
 
   // Cross-imports — not independently scraped; events flow from existing apps.
   {
