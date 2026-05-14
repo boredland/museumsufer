@@ -619,7 +619,6 @@ export const SCRAPE_DATA: ScrapeData = {
     {"date":"2026-05-14","id":2036833045,"provider_event_id":"4548","show_id":3858198152,"status":"available","ticket_url":"https://oper-frankfurt.de/de/spielplan/turandot/?id_datum=4548","time":"18:00","venue_room":"Opernhaus"},
     {"date":"2026-05-14","id":814744184,"provider_event_id":"3","show_id":3354305356,"status":"available","ticket_url":"https://www.gallustheater.de/prog/vob.php?i=3","time":"19:00","venue_room":"Gallus Theater"},
     {"date":"2026-05-14","end_time":"21:15","id":3547784664,"price_max":68,"price_min":14,"show_id":2601518144,"status":"unknown","time":"19:30","venue_room":"Schauspielhaus"},
-    {"date":"2026-05-14","id":1506027300,"price_max":43,"price_min":31,"provider_event_id":"76248","show_id":3033200516,"status":"available","ticket_url":"https://english-theatre.eventim-inhouse.de/webshop/webticket/shop?event=76248","time":"19:30"},
     {"date":"2026-05-14","id":265956640,"provider_event_id":"2161","show_id":652491286,"status":"available","ticket_url":"https://indiv.themisweb.de/0748/fChoixSeanceWidget.aspx?idstructure=0748&EventId=42&yymm=20260514","time":"20:00"},
     {"date":"2026-05-14","end_time":"21:30","id":2155892699,"price_max":46,"price_min":15,"show_id":1702713796,"status":"unknown","time":"20:00","venue_room":"Kammerspiele"},
     {"date":"2026-05-14","id":425140116,"provider_event_id":"1422","show_id":2650292484,"status":"available","ticket_url":"https://www.internationales-theater.de/programm-ticketkauf/gidiki","time":"20:00","venue_room":"Konzert, Griechisch"},
