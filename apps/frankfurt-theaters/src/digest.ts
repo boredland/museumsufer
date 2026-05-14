@@ -1,12 +1,10 @@
 import { berlinHour, berlinWeekday, dateOffset, sendPush, todayIso, type VapidKeys } from "@museumsufer/core";
 import { type DayPerformance, getPerformancesForDate, getPerformancesInRange } from "./db";
-import { THEATERS } from "./theater-config";
 import type { Env } from "./types";
 
 export type Schedule = "morning" | "afternoon" | "weekly";
 
 const APP_URL = "https://frankfurt.ins.theater";
-const THEATER_SLUGS = new Set(THEATERS.map((t) => t.slug));
 
 interface SubRow {
   id: number;
@@ -15,31 +13,6 @@ interface SubRow {
   auth: string;
   schedule: Schedule;
   filters_json: string | null;
-}
-
-interface TheatersFilters {
-  theaters?: string[];
-}
-
-function parseFilters(json: string | null): TheatersFilters | null {
-  if (!json) return null;
-  try {
-    const v = JSON.parse(json);
-    if (!v || typeof v !== "object") return null;
-    if (!Array.isArray((v as { theaters?: unknown }).theaters)) return null;
-    const slugs = ((v as { theaters: unknown[] }).theaters as unknown[]).filter(
-      (t): t is string => typeof t === "string" && THEATER_SLUGS.has(t),
-    );
-    return slugs.length === 0 ? null : { theaters: slugs };
-  } catch {
-    return null;
-  }
-}
-
-function perfsMatching(perfs: DayPerformance[], filters: TheatersFilters | null): DayPerformance[] {
-  if (!filters?.theaters || filters.theaters.length === 0) return perfs;
-  const allowed = new Set(filters.theaters);
-  return perfs.filter((p) => allowed.has(p.theater.slug));
 }
 
 /**
@@ -51,7 +24,7 @@ export function scheduleForNow(now: Date): Schedule | null {
   const wd = berlinWeekday(now);
   if (wd === 0 && h === 9) return "weekly";
   if (h === 7) return "morning";
-  if (h === 17) return "afternoon";
+  if (h === 16) return "afternoon";
   return null;
 }
 
@@ -67,9 +40,9 @@ interface NotificationPayload {
   tag: string;
 }
 
-async function buildMorningPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
+async function buildMorningPayload(): Promise<NotificationPayload | null> {
   const date = todayIso();
-  const perfs = perfsMatching(await getPerformancesForDate(date), filters);
+  const perfs = await getPerformancesForDate(date);
   if (perfs.length === 0) return null;
   const sample = perfs.slice(0, 3).map((p) => {
     const time = formatTime(p.time);
@@ -84,10 +57,10 @@ async function buildMorningPayload(filters: TheatersFilters | null): Promise<Not
   };
 }
 
-async function buildAfternoonPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
+async function buildAfternoonPayload(): Promise<NotificationPayload | null> {
   const date = todayIso();
-  const all = perfsMatching(await getPerformancesForDate(date), filters);
-  const evening = all.filter((p) => p.time && p.time >= "17:00" && p.status !== "cancelled");
+  const all = await getPerformancesForDate(date);
+  const evening = all.filter((p) => p.time && p.time >= "16:30" && p.status !== "cancelled");
   if (evening.length === 0) return null;
   const sample = evening.slice(0, 3).map((p) => `${formatTime(p.time)} ${p.show.title}`);
   const body = evening.length <= 3 ? sample.join(" · ") : `${sample.join(" · ")} und ${evening.length - 3} weitere`;
@@ -99,10 +72,10 @@ async function buildAfternoonPayload(filters: TheatersFilters | null): Promise<N
   };
 }
 
-async function buildWeeklyPayload(filters: TheatersFilters | null): Promise<NotificationPayload | null> {
+async function buildWeeklyPayload(): Promise<NotificationPayload | null> {
   const from = todayIso();
   const to = dateOffset(6);
-  const perfs = perfsMatching(await getPerformancesInRange(from, to), filters);
+  const perfs = await getPerformancesInRange(from, to);
   if (perfs.length === 0) return null;
   const byDate = new Map<string, number>();
   for (const p of perfs) byDate.set(p.date, (byDate.get(p.date) ?? 0) + 1);
@@ -115,10 +88,10 @@ async function buildWeeklyPayload(filters: TheatersFilters | null): Promise<Noti
   };
 }
 
-async function buildPayload(schedule: Schedule, filters: TheatersFilters | null): Promise<NotificationPayload | null> {
-  if (schedule === "morning") return buildMorningPayload(filters);
-  if (schedule === "afternoon") return buildAfternoonPayload(filters);
-  return buildWeeklyPayload(filters);
+async function buildPayload(schedule: Schedule): Promise<NotificationPayload | null> {
+  if (schedule === "morning") return buildMorningPayload();
+  if (schedule === "afternoon") return buildAfternoonPayload();
+  return buildWeeklyPayload();
 }
 
 function vapidFromEnv(env: Env): VapidKeys | null {
@@ -156,8 +129,7 @@ export async function dispatchDigest(env: Env, schedule: Schedule): Promise<void
 
   await Promise.all(
     subs.map(async (sub) => {
-      const filters = parseFilters(sub.filters_json);
-      const payload = await buildPayload(schedule, filters);
+      const payload = await buildPayload(schedule);
       if (!payload) {
         skipped++;
         return;

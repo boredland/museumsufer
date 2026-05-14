@@ -1,13 +1,11 @@
 import { berlinHour, berlinWeekday, sendPush, type VapidKeys } from "@museumsufer/core";
 import { todayIso } from "./date";
-import { MUSEUMS } from "./museum-config";
 import { getEventsForDate, getEventsForRange, getExhibitionsForDate } from "./queries";
 import type { Env } from "./types";
 
 export type Schedule = "morning" | "afternoon" | "weekly";
 
 const APP_URL = "https://museumsufer.app";
-const MUSEUM_SLUGS = new Set(Object.keys(MUSEUMS));
 
 interface SubRow {
   id: number;
@@ -19,7 +17,7 @@ interface SubRow {
 }
 
 interface MuseumsFilters {
-  museums?: string[];
+  categories?: string[];
 }
 
 function parseFilters(json: string | null): MuseumsFilters | null {
@@ -27,20 +25,20 @@ function parseFilters(json: string | null): MuseumsFilters | null {
   try {
     const v = JSON.parse(json);
     if (!v || typeof v !== "object") return null;
-    if (!Array.isArray((v as { museums?: unknown }).museums)) return null;
-    const slugs = ((v as { museums: unknown[] }).museums as unknown[]).filter(
-      (s): s is string => typeof s === "string" && MUSEUM_SLUGS.has(s),
+    if (!Array.isArray((v as { categories?: unknown }).categories)) return null;
+    const categories = ((v as { categories: unknown[] }).categories as unknown[]).filter(
+      (c): c is string => typeof c === "string" && c.length > 0,
     );
-    return slugs.length === 0 ? null : { museums: slugs };
+    return categories.length === 0 ? null : { categories };
   } catch {
     return null;
   }
 }
 
-function withinMuseums<T extends { museum_slug?: string }>(items: T[], filters: MuseumsFilters | null): T[] {
-  if (!filters?.museums || filters.museums.length === 0) return items;
-  const allowed = new Set(filters.museums);
-  return items.filter((i) => i.museum_slug != null && allowed.has(i.museum_slug));
+function withinCategories<T extends { category?: string }>(items: T[], filters: MuseumsFilters | null): T[] {
+  if (!filters?.categories || filters.categories.length === 0) return items;
+  const allowed = new Set(filters.categories);
+  return items.filter((i) => i.category != null && allowed.has(i.category));
 }
 
 export function scheduleForNow(now: Date): Schedule | null {
@@ -48,7 +46,7 @@ export function scheduleForNow(now: Date): Schedule | null {
   const wd = berlinWeekday(now);
   if (wd === 0 && h === 9) return "weekly";
   if (h === 7) return "morning";
-  if (h === 17) return "afternoon";
+  if (h === 16) return "afternoon";
   return null;
 }
 
@@ -66,8 +64,8 @@ function formatTime(t: string | undefined): string {
 async function buildMorningPayload(filters: MuseumsFilters | null): Promise<NotificationPayload | null> {
   const date = todayIso();
   const [allEvents, allExhibitions] = await Promise.all([getEventsForDate(date), getExhibitionsForDate(date)]);
-  const events = withinMuseums(allEvents, filters);
-  const exhibitions = withinMuseums(allExhibitions, filters);
+  const events = withinCategories(allEvents, filters);
+  const exhibitions = allExhibitions;
   if (events.length === 0 && exhibitions.length === 0) return null;
 
   const parts: string[] = [];
@@ -97,8 +95,8 @@ async function buildMorningPayload(filters: MuseumsFilters | null): Promise<Noti
 
 async function buildAfternoonPayload(filters: MuseumsFilters | null): Promise<NotificationPayload | null> {
   const date = todayIso();
-  const events = withinMuseums(await getEventsForDate(date), filters);
-  const evening = events.filter((e) => e.time && e.time >= "17:00");
+  const events = withinCategories(await getEventsForDate(date), filters);
+  const evening = events.filter((e) => e.time && e.time >= "16:30");
   if (evening.length === 0) return null;
   const sample = evening.slice(0, 3).map((e) => `${formatTime(e.time)} ${e.title}`);
   const body = evening.length <= 3 ? sample.join(" · ") : `${sample.join(" · ")} +${evening.length - 3} weitere`;
@@ -115,7 +113,7 @@ async function buildWeeklyPayload(filters: MuseumsFilters | null): Promise<Notif
   const toDate = new Date(`${from}T12:00:00Z`);
   toDate.setUTCDate(toDate.getUTCDate() + 6);
   const to = toDate.toISOString().slice(0, 10);
-  const events = withinMuseums(await getEventsForRange(from, to), filters);
+  const events = withinCategories(await getEventsForRange(from, to), filters);
   if (events.length === 0) return null;
   const byDate = new Map<string, number>();
   for (const e of events) byDate.set(e.date, (byDate.get(e.date) ?? 0) + 1);

@@ -44,7 +44,7 @@ export function scheduleForNow(now: Date): Schedule | null {
   const wd = berlinWeekday(now);
   if (wd === 0 && h === 9) return "weekly";
   if (h === 7) return "morning";
-  if (h === 17) return "afternoon";
+  if (h === 16) return "afternoon";
   return null;
 }
 
@@ -92,7 +92,7 @@ function buildMorningPayload(filters: KhFilters | null): NotificationPayload | n
 function buildAfternoonPayload(filters: KhFilters | null): NotificationPayload | null {
   const date = todayIso();
   const all = eventsMatchingFilters(getEventsForDate(date) as EventLike[], filters);
-  const evening = all.filter((e) => e.time && e.time >= "17:00");
+  const evening = all.filter((e) => e.time && e.time >= "16:30");
   if (evening.length === 0) return null;
   const sample = evening.slice(0, 3).map((e) => `${formatTime(e.time)} ${e.title}`);
   const body = evening.length <= 3 ? sample.join(" · ") : `${sample.join(" · ")} und ${evening.length - 3} weitere`;
