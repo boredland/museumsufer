@@ -110,46 +110,4 @@ export function buildYahooUrl(ev: CalendarEvent): string {
   return buildYahooCalendarUrl(toCore(ev));
 }
 
-export function classifyEvent(title: string, description?: string | null): string | null {
-  const t = title.toLowerCase();
-  const d = (description || "").toLowerCase();
-  const haystack = `${t} ${d}`;
-
-  if (
-    haystack.includes("führung") ||
-    haystack.includes("fuehrung") ||
-    haystack.includes("rundgang") ||
-    haystack.includes("spaziergang") ||
-    haystack.includes("tour")
-  )
-    return "Führung";
-  if (
-    haystack.includes("workshop") ||
-    haystack.includes("kurs") ||
-    haystack.includes("atelier") ||
-    haystack.includes("werkstatt")
-  )
-    return "Workshop";
-  if (
-    haystack.includes("vortrag") ||
-    haystack.includes("lecture") ||
-    haystack.includes("gespräch") ||
-    haystack.includes("talk") ||
-    haystack.includes("buchpräsentation") ||
-    haystack.includes("diskussion")
-  )
-    return "Vortrag";
-  if (haystack.includes("konzert") || haystack.includes("musik")) return "Konzert";
-  if (haystack.includes("vernissage") || haystack.includes("eröffnung") || haystack.includes("eröffnungsfeier"))
-    return "Vernissage";
-  if (
-    haystack.includes("familie") ||
-    haystack.includes("kinder") ||
-    haystack.includes(" für kids") ||
-    haystack.includes("baby")
-  )
-    return "Familie";
-  if (haystack.includes("film") || haystack.includes("kino") || haystack.includes("cinema")) return "Film";
-
-  return null;
-}
+export { classifyEvent } from "@museumsufer/core";

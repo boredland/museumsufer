@@ -108,6 +108,17 @@
         "wrangler": "^4.90.0",
       },
     },
+    "apps/lehrhaus": {
+      "name": "@museumsufer/lehrhaus",
+      "version": "0.0.1",
+      "dependencies": {
+        "@museumsufer/core": "*",
+      },
+      "devDependencies": {
+        "@museumsufer/tsconfig": "*",
+        "typescript": "^5.9.3",
+      },
+    },
     "packages/config": {
       "name": "@museumsufer/tsconfig",
       "version": "0.0.0",
@@ -303,6 +314,8 @@
     "@museumsufer/konzert-haus": ["@museumsufer/konzert-haus@workspace:apps/konzert-haus"],
 
     "@museumsufer/landau-today": ["@museumsufer/landau-today@workspace:apps/landau-today"],
+
+    "@museumsufer/lehrhaus": ["@museumsufer/lehrhaus@workspace:apps/lehrhaus"],
 
     "@museumsufer/tsconfig": ["@museumsufer/tsconfig@workspace:packages/config"],
 

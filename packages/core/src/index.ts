@@ -1,6 +1,7 @@
 export * from "./api-catalog";
 export * from "./bundle-writer";
 export * from "./calendar";
+export * from "./classify";
 // calendar-popover (JSX) is import-via-subpath only — it pulls in
 // hono/jsx-runtime and breaks Bun script-runner contexts that evaluate
 // the barrel eagerly. Apps import from "@museumsufer/core/calendar-popover".
