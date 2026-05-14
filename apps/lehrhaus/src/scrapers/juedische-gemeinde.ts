@@ -1,4 +1,4 @@
-import { detectTalkLanguage } from "@museumsufer/core/classify";
+import { classifyEvent, detectTalkLanguage } from "@museumsufer/core/classify";
 import { todayIso } from "@museumsufer/core/date";
 import type { ScrapedEvent } from "../types";
 import { talkCategory } from "./shared";
@@ -16,11 +16,9 @@ interface JgEvent {
   category: { title: string };
 }
 
-// Categories on jg-ffm.de that can contain public talks
-const TALK_CATEGORIES = new Set(["Kultur & Events", "Museen und Bildung"]);
-
-// Title-level exclusions for non-talk event types that slip through
-const EXCLUDE_RE = /führung|konzert|liraz|markt|ausflug|gottesdienst|shabbat|kiddusch/i;
+// JGF events rarely say "Vortrag" in the title, so classifyEvent is used as a
+// negative filter only: exclude anything that classifies as a non-talk type.
+const NON_TALK_TYPES = new Set(["Konzert", "Film", "Führung", "Workshop", "Vernissage", "Familie"]);
 
 export async function scrapeJuedischeGemeinde(): Promise<ScrapedEvent[]> {
   const today = todayIso();
@@ -35,8 +33,13 @@ export async function scrapeJuedischeGemeinde(): Promise<ScrapedEvent[]> {
   for (const e of events) {
     const date = e.start.slice(0, 10);
     if (date < today) continue;
-    if (!TALK_CATEGORIES.has(e.category?.title)) continue;
-    if (EXCLUDE_RE.test(e.title)) continue;
+
+    // jg-ffm uses non-breaking spaces in category names
+    const catTitle = e.category?.title?.replace(/ /g, " ") ?? "";
+    if (catTitle !== "Kultur & Events" && catTitle !== "Museen und Bildung") continue;
+
+    const classified = classifyEvent(e.title);
+    if (classified !== null && NON_TALK_TYPES.has(classified)) continue;
 
     const timeRaw = e.start.slice(11, 16);
     const time = timeRaw !== "00:00" ? timeRaw : null;
