@@ -24,6 +24,7 @@ import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeDenkbar } from "../src/scrapers/denkbar";
 import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
 import { scrapeEvangelischeAkademie } from "../src/scrapers/evangelische-akademie";
+import { scrapeFesHessen } from "../src/scrapers/fes-hessen";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "../src/scrapers/forschungskolleg-humanwissenschaften";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
@@ -34,6 +35,7 @@ import { scrapeMousonturm } from "../src/scrapers/mousonturm";
 import { scrapeNormativeOrders } from "../src/scrapers/normative-orders";
 import { scrapeOpenBooks } from "../src/scrapers/openbooks";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
+import { scrapeRlsHessen } from "../src/scrapers/rls-hessen";
 import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche";
 import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
 import { talkCategory } from "../src/scrapers/shared";
@@ -137,6 +139,8 @@ async function main(): Promise<void> {
     ["mousonturm", scrapeMousonturm],
     ["normative-orders", scrapeNormativeOrders],
     ["forschungskolleg-humanwissenschaften", scrapeForschungskollegHumanwissenschaften],
+    ["fes-hessen", scrapeFesHessen],
+    ["rls-hessen", scrapeRlsHessen],
     ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 
