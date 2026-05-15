@@ -8,7 +8,7 @@ import { APP_URL, REPO_URL } from "./static";
 
 const OPERATOR = {
   name: "Jonas Strassel",
-  email: "feedback@lehrhaus.app",
+  email: "feedback@lehr.salon",
   city: "Frankfurt am Main, Germany",
 };
 
@@ -34,8 +34,8 @@ app.get("/impressum", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title="Impressum · lehrhaus"
-            description="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu lehrhaus."
+            title="Impressum · lehr.salon"
+            description="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu lehr.salon."
             canonical={`${APP_URL}/impressum`}
             locale={locale}
             currentPath={currentPath}

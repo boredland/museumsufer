@@ -3,12 +3,12 @@ import { Hono } from "hono";
 import { SOURCES } from "../source-config";
 import { CATEGORIES, type Env } from "../types";
 
-const APP_URL = "https://frankfurt.lehrhaus.app";
+const APP_URL = "https://frankfurt.lehr.salon";
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const MANIFEST = buildManifest({
-  name: "lehrhaus",
-  shortName: "lehrhaus",
+  name: "lehr.salon",
+  shortName: "lehr.salon",
   description:
     "Öffentliche Vorträge, Lesungen und Diskussionen in Frankfurt — täglich aktualisiert aus Universität, Akademien, Stiftungen und Salons.",
   themeColor: "#F2E9D5",
@@ -22,12 +22,12 @@ const MANIFEST = buildManifest({
     { src: "/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
   ],
   screenshots: [
-    { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "lehrhaus" },
-    { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "lehrhaus" },
+    { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "lehr.salon" },
+    { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "lehr.salon" },
   ],
 });
 
-const LLMS_TXT = `# lehrhaus
+const LLMS_TXT = `# lehr.salon
 
 > Öffentliche Vorträge, Lesungen und Diskussionen in Frankfurt — aggregiert aus ${SOURCES.length} Quellen: Polytechnische Gesellschaft, Haus am Dom, Jüdische Gemeinde, FGZ StreitClub, Literaturhaus, Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, Romanfabrik, DIG Frankfurt, OPEN BOOKS und mehr.
 

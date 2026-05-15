@@ -7,14 +7,14 @@ const app = new Hono<{ Bindings: Env }>();
 const spec = {
   openapi: "3.1.0",
   info: {
-    title: "lehrhaus API",
+    title: "lehr.salon API",
     description:
       "Public API for lectures, readings, and discussions in Frankfurt am Main. Aggregates from universities, academies, foundations, and salons. Underlying data refreshes multiple times daily via a GitHub Action.",
     version: "1.0.0",
     contact: { url: "https://github.com/boredland/museumsufer" },
     license: { name: "MIT", url: "https://github.com/boredland/museumsufer/blob/main/LICENSE" },
   },
-  servers: [{ url: "https://frankfurt.lehrhaus.app" }],
+  servers: [{ url: "https://frankfurt.lehr.salon" }],
   tags: [
     { name: "Events", description: "Lecture and discussion event queries" },
     { name: "Sources", description: "Lecture-hosting institutions" },
@@ -121,7 +121,7 @@ app.get(
   Scalar({
     url: "/api/docs/openapi.json",
     theme: "saturn",
-    pageTitle: "lehrhaus API",
+    pageTitle: "lehr.salon API",
   }),
 );
 

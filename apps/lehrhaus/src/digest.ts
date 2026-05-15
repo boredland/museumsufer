@@ -4,7 +4,7 @@ import { CATEGORIES, type Category, type Env } from "./types";
 
 export type Schedule = "morning" | "afternoon" | "weekly";
 
-const APP_URL = "https://frankfurt.lehrhaus.app";
+const APP_URL = "https://frankfurt.lehr.salon";
 
 interface SubRow {
   id: number;
@@ -126,7 +126,7 @@ function vapidFromEnv(env: Env): VapidKeys | null {
   return {
     publicKey: env.VAPID_PUBLIC_KEY,
     privateKey: env.VAPID_PRIVATE_KEY,
-    subject: env.VAPID_SUBJECT ?? "mailto:feedback@lehrhaus.app",
+    subject: env.VAPID_SUBJECT ?? "mailto:feedback@lehr.salon",
   };
 }
 

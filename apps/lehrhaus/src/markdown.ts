@@ -8,7 +8,7 @@ import type { LehrhausSource } from "./types";
 
 export { wantsMarkdown };
 
-const UTM_SOURCE = "frankfurt.lehrhaus.app";
+const UTM_SOURCE = "frankfurt.lehr.salon";
 const LOCALE_TAG = "de-DE";
 
 function toMarkdownEvent(e: DayEvent) {
@@ -31,7 +31,7 @@ export function renderDayMarkdown(date: string, events: DayEvent[]): string {
   return coreRenderDay({
     date,
     events: events.map(toMarkdownEvent),
-    brand: "lehrhaus",
+    brand: "lehr.salon",
     localeTag: LOCALE_TAG,
     emptyCopy: "Heute kein Eintrag gemeldet.",
     nounSingular: "Vortrag",

@@ -164,6 +164,15 @@ body::before {
   letter-spacing: 0;
 }
 .wordmark__lehr { color: var(--ink); }
+.wordmark__dot {
+  color: var(--rubric);
+  font-weight: 600;
+  font-size: 0.85em;
+  margin: 0 -0.02em;
+  position: relative;
+  top: 0.02em;
+}
+.wordmark__salon,
 .wordmark__haus {
   color: var(--rubric);
   font-weight: 600;

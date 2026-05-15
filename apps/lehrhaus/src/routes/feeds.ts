@@ -13,7 +13,7 @@ import { type DayEvent, getEventById, getEventsInRange, getSourceBySlug } from "
 import { type Env, parseCategory } from "../types";
 import { APP_URL } from "./static";
 
-const utm = buildUtm("frankfurt.lehrhaus.app");
+const utm = buildUtm("frankfurt.lehr.salon");
 const app = new Hono<{ Bindings: Env }>();
 
 const ICS_HEADERS = {
@@ -28,7 +28,7 @@ const RSS_HEADERS = {
 
 app.get("/feed.ics", (c) => {
   const events = getEventsInRange(todayIso(), dateOffset(14));
-  return c.body(buildIcs(events, "lehrhaus"), { headers: ICS_HEADERS });
+  return c.body(buildIcs(events, "lehr.salon"), { headers: ICS_HEADERS });
 });
 
 app.get("/feed.rss", (c) => {
@@ -50,7 +50,7 @@ app.get("/format/:slug/feed.ics", (c) => {
   const category = parseCategory(c.req.param("slug"));
   if (!category) return c.notFound();
   const events = getEventsInRange(todayIso(), dateOffset(60), { category });
-  return c.body(buildIcs(events, `lehrhaus — ${category}`), { headers: ICS_HEADERS });
+  return c.body(buildIcs(events, `lehr.salon — ${category}`), { headers: ICS_HEADERS });
 });
 
 app.get("/event/:id{[0-9]+}/feed.ics", (c) => {
@@ -77,7 +77,7 @@ function toIcsInput(e: DayEvent): IcsEventInput {
   if (e.ticket_url) descLines.push(utm(e.ticket_url, "ics"));
   const linkSource = e.detail_url ?? e.ticket_url ?? `${APP_URL}/api/events/${e.id}`;
   return {
-    uid: `event-${e.id}@frankfurt.lehrhaus.app`,
+    uid: `event-${e.id}@frankfurt.lehr.salon`,
     date: e.date,
     time: e.time ?? null,
     end_time: e.end_time ?? null,
@@ -94,7 +94,7 @@ function toIcsInput(e: DayEvent): IcsEventInput {
 
 function buildIcs(events: DayEvent[], calName: string): string {
   return buildIcsCalendar({
-    prodId: "-//lehrhaus//DE",
+    prodId: "-//lehr.salon//DE",
     name: calName,
     events: events.map(toIcsInput),
   });
@@ -109,14 +109,14 @@ function buildRss(events: DayEvent[]): string {
     return {
       title: e.title + (e.time ? ` — ${e.time} Uhr` : ""),
       link: utm(linkSource, "rss"),
-      guid: `event-${e.id}@frankfurt.lehrhaus.app`,
+      guid: `event-${e.id}@frankfurt.lehr.salon`,
       pubDate: new Date(dateStr),
       category: e.source.name,
       description: parts.join(" — "),
     };
   });
   return buildRssFeed({
-    title: "lehrhaus",
+    title: "lehr.salon",
     link: APP_URL,
     selfLink: `${APP_URL}/feed.rss`,
     description: "Vorträge & Diskussionen in Frankfurt — die nächsten 14 Tage",

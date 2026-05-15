@@ -35,8 +35,8 @@ app.use("*", async (c, next) => {
   // more cities later as additional custom_domain entries.
   const url = new URL(c.req.url);
   const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "lehrhaus.app") {
-    return c.redirect(`https://frankfurt.lehrhaus.app${url.pathname}${url.search}`, 301);
+  if (host === "lehr.salon") {
+    return c.redirect(`https://frankfurt.lehr.salon${url.pathname}${url.search}`, 301);
   }
   await next();
 });

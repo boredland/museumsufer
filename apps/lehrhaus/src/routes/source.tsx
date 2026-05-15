@@ -50,7 +50,7 @@ app.get("/quelle/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${source.name} — lehrhaus`}
+            title={`${source.name} — lehr.salon`}
             description={tr.sourceDescription(source.name, events.length)}
             canonical={`${APP_URL}/quelle/${slug}`}
             locale={locale}
