@@ -37,7 +37,10 @@ export type ScraperName =
   | "bad-homburg-schloss"
   | "bad-soden"
   | "evangelische-akademie"
-  | "denkbar";
+  | "denkbar"
+  | "naxos"
+  | "waggong"
+  | "musikschule-frankfurt";
 
 export interface Event {
   id: number;

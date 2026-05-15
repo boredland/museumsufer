@@ -15,10 +15,13 @@ import { scrapeJazzFrankfurt } from "./scrapers/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./scrapers/jazz-palmengarten";
 import { scrapeKirchenmusikDreikoenig } from "./scrapers/kirchenmusik-dreikoenig";
 import { scrapeKronbergAcademy } from "./scrapers/kronberg-academy";
+import { scrapeMusikschuleFrankfurt } from "./scrapers/musikschule-frankfurt";
+import { scrapeNaxos } from "./scrapers/naxos";
 import { scrapeOper } from "./scrapers/oper";
 import { scrapeRheingauFestival } from "./scrapers/rheingau-festival";
 import { scrapeRomanfabrik } from "./scrapers/romanfabrik";
 import { scrapeStKatharinen } from "./scrapers/stk-musik";
+import { scrapeWaggong } from "./scrapers/waggong";
 import type { ScrapeResult, ScraperName } from "./types";
 
 export async function runScraper(name: ScraperName): Promise<ScrapeResult> {
@@ -65,5 +68,11 @@ export async function runScraper(name: ScraperName): Promise<ScrapeResult> {
       return scrapeEvangelischeAkademie();
     case "denkbar":
       return scrapeDenkbar();
+    case "naxos":
+      return scrapeNaxos();
+    case "waggong":
+      return scrapeWaggong();
+    case "musikschule-frankfurt":
+      return scrapeMusikschuleFrankfurt();
   }
 }
