@@ -1,5 +1,5 @@
 {
-  "extends": "@museumsufer/tsconfig/base.json",
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "extends": "@museumsufer/tsconfig/worker.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", ".wrangler"]
 }
