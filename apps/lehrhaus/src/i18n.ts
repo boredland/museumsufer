@@ -19,6 +19,8 @@ export interface Translations {
   categoryLesung: string;
   dateStripLabel: string;
   todayProgrammeTitle: string;
+  rangeUpcomingLabel: string;
+  rangeUpcomingHeading: (n: number) => string;
   emptyTitle: string;
   emptyTodayAfterPast: string;
   emptyHint: string;
@@ -109,6 +111,8 @@ const de: Translations = {
   categoryLesung: "Lesung",
   dateStripLabel: "Tage",
   todayProgrammeTitle: "Heute im lehr.salon",
+  rangeUpcomingLabel: "Nächste 7 Tage",
+  rangeUpcomingHeading: (n) => `Nächste ${n} Tage`,
   emptyTitle: "Heute kein Eintrag — der Saal bleibt zu.",
   emptyTodayAfterPast: "Keine weiteren Vorträge mehr für heute.",
   emptyHint: "Morgen wieder versuchen oder oben ein anderes Datum wählen.",
@@ -230,6 +234,8 @@ const en: Translations = {
   categoryLesung: "Reading",
   dateStripLabel: "Days",
   todayProgrammeTitle: "Today at lehr.salon",
+  rangeUpcomingLabel: "Next 7 days",
+  rangeUpcomingHeading: (n) => `Next ${n} days`,
   emptyTitle: "No entry today — the hall is closed.",
   emptyTodayAfterPast: "No more lectures left today.",
   emptyHint: "Try tomorrow, or pick another date above.",

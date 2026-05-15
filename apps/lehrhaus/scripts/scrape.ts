@@ -55,6 +55,13 @@ async function main(): Promise<void> {
   for (const e of MUSEUM_DATA.events) {
     if (e.category !== "Vortrag") continue;
     if (!e.date || e.date < today) continue;
+    // Upstream museum classifier sometimes mistags guided exhibition tours
+    // ("Ausstellungsführung", "Rundgang") as Vortrag. Re-run the classifier
+    // on the title/description and reject anything that comes back as a
+    // non-Vortrag category (Führung, Workshop, etc.). classifyEvent returns
+    // null when no category matches — in that case we trust the upstream flag.
+    const reclassified = classifyEvent(e.title, e.description);
+    if (reclassified && reclassified !== "Vortrag") continue;
     const hostName = museumNameById.get(e.museum_id) ?? museumSource.name;
     allEvents.push(
       toEvent(

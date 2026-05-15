@@ -411,6 +411,122 @@ body::before {
 }
 @media (min-width: 1024px) { .datestrip::after { display: none; } }
 
+/* ─────────────  Range row (Next 7 days)  ────────────────────────────── */
+/* Sits between the datestrip and the digest cue. A single pill toggles the
+   rolling-week view; when active it carries the rubric ⁂ asterism, otherwise
+   the pill is the quiet "back to the index" link from a single-day permalink. */
+.range-row {
+  position: relative;
+  z-index: 3;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0.65rem var(--gut) 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fade 700ms 260ms both;
+}
+.range-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.85rem 0.28rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 1px;
+  cursor: pointer;
+  transition: color 200ms, border-color 200ms, background 200ms;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.range-pill:hover { color: var(--rubric); border-color: var(--rubric); background: var(--rubric-soft); }
+.range-pill--active {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.range-pill--active:hover {
+  background: var(--rubric);
+  border-color: var(--rubric);
+  color: var(--paper);
+}
+.range-pill__glyph {
+  font-family: var(--serif);
+  font-size: 1.1em;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--rubric);
+}
+.range-pill--active .range-pill__glyph { color: var(--paper); }
+
+/* ─────────────  Day groups (range view)  ─────────────────────────────── */
+/* Used when the programme renders multiple days at once. Each <section> is a
+   single date with its own compact head + nested <ol class="concerts">. The
+   spine reads "12. May · Tuesday · 4" in mixed serif + mono. */
+.day-groups {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 4vw, 3rem);
+}
+.day-group {
+  display: block;
+}
+.day-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--rubric);
+}
+.day-group__day {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  line-height: 1;
+}
+.day-group__month {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+  color: var(--rubric);
+  line-height: 1.05;
+}
+.day-group__sep {
+  color: var(--ink-quiet);
+  font-family: var(--serif);
+  font-style: italic;
+}
+.day-group__weekday {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.day-group__count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-quiet);
+  font-variant-numeric: tabular-nums;
+}
+.day-group .concerts {
+  border-top: none;
+}
+.day-group .prog-entry:last-child {
+  border-bottom: none;
+}
+
 /* ─────────────  Programme heading + per-entry rows  ────────────────── */
 
 .programme {

@@ -1,6 +1,6 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
 import { type Context, Hono } from "hono";
-import { getDatesWithEvents, getEventsForDate } from "./db";
+import { getDatesWithEvents, getEventsForDate, getEventsInRange } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
 import { detectLocale, getTranslations } from "./i18n";
@@ -63,11 +63,29 @@ app.get("/healthz", (c) => c.json({ ok: true }));
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
-function renderHome(c: Context<AppEnv>, date: string) {
+const RANGE_MAX = 14;
+const RANGE_DEFAULT_HOME = 7;
+
+function addDays(iso: string, days: number): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function parseRange(raw: string | undefined | null): number | null {
+  if (!raw) return null;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 1 || n > RANGE_MAX) return null;
+  return n;
+}
+
+function renderHome(c: Context<AppEnv>, date: string, range: number | null) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const today = todayIso();
   const category = parseCategory(c.req.query("format"));
-  const events = getEventsForDate(date, { category });
+  const events = range
+    ? getEventsInRange(date, addDays(date, range - 1), { category })
+    : getEventsForDate(date, { category });
   const dateStrip = getDatesWithEvents(today, dateOffset(60));
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderDayMarkdown(date, events), {
@@ -86,6 +104,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
       events,
       dateStrip,
       category,
+      range: range ?? undefined,
       locale,
       tr,
       turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
@@ -100,17 +119,28 @@ function renderHome(c: Context<AppEnv>, date: string) {
   );
 }
 
-app.get("/", (c) => renderHome(c, c.req.query("date") || todayIso()));
-app.get("/tag/:date", (c) => renderHome(c, c.req.param("date")));
+// Home /: rolling next-N-days view by default. `?range=N` overrides the size;
+// `?date=YYYY-MM-DD` keeps the single-day behaviour for backwards-compatible
+// permalinks.
+app.get("/", (c) => {
+  const dateQ = c.req.query("date");
+  if (dateQ) return renderHome(c, dateQ, null);
+  const range = parseRange(c.req.query("range")) ?? RANGE_DEFAULT_HOME;
+  return renderHome(c, todayIso(), range);
+});
+app.get("/tag/:date", (c) => renderHome(c, c.req.param("date"), null));
 
 app.get("/partial/content", (c) => {
+  const range = parseRange(c.req.query("range"));
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const category = parseCategory(c.req.query("format"));
-  const events = getEventsForDate(date, { category });
+  const events = range
+    ? getEventsInRange(date, addDays(date, range - 1), { category })
+    : getEventsForDate(date, { category });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, events, tr, locale), {
+  return c.html(renderProgrammePartial(date, events, tr, locale, range ?? undefined), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,
