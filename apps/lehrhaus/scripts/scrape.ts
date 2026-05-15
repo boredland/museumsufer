@@ -25,11 +25,13 @@ import { scrapeDenkbar } from "../src/scrapers/denkbar";
 import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
 import { scrapeEvangelischeAkademie } from "../src/scrapers/evangelische-akademie";
 import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
+import { scrapeForschungskollegHumanwissenschaften } from "../src/scrapers/forschungskolleg-humanwissenschaften";
 import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
 import { scrapeInstitutFuerSozialforschung } from "../src/scrapers/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
 import { scrapeMousonturm } from "../src/scrapers/mousonturm";
+import { scrapeNormativeOrders } from "../src/scrapers/normative-orders";
 import { scrapeOpenBooks } from "../src/scrapers/openbooks";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche";
@@ -133,6 +135,8 @@ async function main(): Promise<void> {
     ["dig-frankfurt", scrapeDigFrankfurt],
     ["roemerberggespraeche", scrapeRoemerberggespraeche],
     ["mousonturm", scrapeMousonturm],
+    ["normative-orders", scrapeNormativeOrders],
+    ["forschungskolleg-humanwissenschaften", scrapeForschungskollegHumanwissenschaften],
     ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 

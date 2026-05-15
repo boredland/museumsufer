@@ -115,6 +115,24 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1158,
     lon: 8.7011,
   },
+  {
+    slug: "normative-orders",
+    name: "Forschungsverbund Normative Ordnungen",
+    short_name: "Normative Orders",
+    url: "https://normativeorders.net",
+    // Goethe-Uni Westend campus
+    lat: 50.1287,
+    lon: 8.666,
+  },
+  {
+    slug: "forschungskolleg-humanwissenschaften",
+    name: "Forschungskolleg Humanwissenschaften (Bad Homburg)",
+    short_name: "FKH Bad Homburg",
+    url: "https://www.forschungskolleg-humanwissenschaften.de",
+    // Am Wingertsberg 4, Bad Homburg
+    lat: 50.2273,
+    lon: 8.6088,
+  },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts
