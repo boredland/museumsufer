@@ -172,53 +172,6 @@ export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale
   );
 }
 
-function CategoryFilter({
-  date,
-  active,
-  tr,
-  locale,
-}: {
-  date: string;
-  active?: Category | null;
-  tr: Translations;
-  locale: Locale;
-}) {
-  const lang = langSuffix(locale);
-  const langAmp = langSuffix(locale, "&");
-  return (
-    <div class="category-filter">
-      <span class="category-filter__label">{tr.category}</span>
-      <a
-        class={`category-pill ${!active ? "category-pill--active" : ""}`}
-        href={`/tag/${date}${lang}`}
-        hx-get={`/partial/content?date=${date}`}
-        hx-target="#programme-content"
-        hx-push-url={`/tag/${date}${lang}`}
-      >
-        {tr.categoryAll}
-      </a>
-      {CATEGORY_ORDER.map((c) => {
-        const href = `/tag/${date}?format=${encodeURIComponent(c)}${langAmp}`;
-        return (
-          <a
-            key={c}
-            class={`category-pill ${active === c ? "category-pill--active" : ""}`}
-            href={href}
-            hx-get={`/partial/content?date=${date}&format=${encodeURIComponent(c)}`}
-            hx-target="#programme-content"
-            hx-push-url={href}
-          >
-            <span class="category-pill__pilcrow" style={`color:${CATEGORY_COLOR_VAR[c]}`} aria-hidden="true">
-              ¶
-            </span>
-            {categoryLabel(c, tr)}
-          </a>
-        );
-      })}
-    </div>
-  );
-}
-
 function DateStrip({
   strip,
   active,
@@ -366,7 +319,12 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
       <header class="prog-entry__head">
         {!opts.hideSource ? (
           <p class="prog-entry__house">
-            <a href={`/quelle/${e.source.slug}`}>{e.source.short_name ?? e.source.name}</a>
+            {/* For cross-imports (aggregators), the per-event source_name carries
+                the actual host museum / theater. Prefer it over the aggregator's
+                short_name; the link still points to the aggregator's page. */}
+            <a href={`/quelle/${e.source.slug}`}>
+              {e.source_name !== e.source.name ? e.source_name : (e.source.short_name ?? e.source.name)}
+            </a>
             {isForeignLang ? (
               <>
                 <span class="prog-entry__house-sep" aria-hidden="true">
@@ -573,54 +531,31 @@ if ('serviceWorker' in navigator) {
     try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
   });
 
+  // URL state: either /tag/YYYY-MM-DD (single day) or / (which means the
+  // rolling next-7-days view). The range pill toggles between the two.
   function currentDate(){
     var m = location.pathname.match(/^\\/tag\\/(\\d{4}-\\d{2}-\\d{2})/);
     return m ? m[1] : null;
   }
-  function currentCategory(){ return new URLSearchParams(location.search).get('format'); }
-
-  function setAttrIfPresent(el, name, value){ if (el.hasAttribute(name)) el.setAttribute(name, value); }
+  function isRangeView(){ return location.pathname === '/' || location.pathname === ''; }
 
   function syncDateStrip(){
-    var date = currentDate(); if (!date) return;
-    var cat = currentCategory();
-    var qs = cat ? ('?format=' + encodeURIComponent(cat)) : '';
-    var hxQs = cat ? ('&format=' + encodeURIComponent(cat)) : '';
+    var date = currentDate();
+    var range = isRangeView();
     document.querySelectorAll('.datetile').forEach(function(t){
       var tileDate = (t.getAttribute('href') || '').match(/\\/tag\\/(\\d{4}-\\d{2}-\\d{2})/);
       if (!tileDate) return;
-      var d = tileDate[1];
-      var active = d === date;
+      var active = !range && tileDate[1] === date;
       t.classList.toggle('datetile--active', active);
       t.setAttribute('aria-current', active ? 'true' : 'false');
-      t.setAttribute('href', '/tag/' + d + qs);
-      setAttrIfPresent(t, 'hx-get', '/partial/content?date=' + d + hxQs);
-      setAttrIfPresent(t, 'hx-push-url', '/tag/' + d + qs);
     });
-    var activeTile = document.querySelector('.datetile--active');
-    if (activeTile && activeTile.scrollIntoView) activeTile.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-  }
-
-  function syncCategoryFilter(){
-    var date = currentDate(); if (!date) return;
-    var cat = currentCategory();
-    document.querySelectorAll('.category-pill').forEach(function(p){
-      var href = p.getAttribute('href') || '';
-      var pillCat = (href.match(/[?&]format=([^&]+)/) || [])[1] || null;
-      var pillDecoded = pillCat ? decodeURIComponent(pillCat) : null;
-      var active = (cat || null) === pillDecoded;
-      p.classList.toggle('category-pill--active', active);
-      var base = '/tag/' + date;
-      var partial = '/partial/content?date=' + date;
-      if (pillCat){
-        p.setAttribute('href', base + '?format=' + pillCat);
-        setAttrIfPresent(p, 'hx-get', partial + '&format=' + pillCat);
-        setAttrIfPresent(p, 'hx-push-url', base + '?format=' + pillCat);
-      } else {
-        p.setAttribute('href', base);
-        setAttrIfPresent(p, 'hx-get', partial);
-        setAttrIfPresent(p, 'hx-push-url', base);
-      }
+    if (!range) {
+      var activeTile = document.querySelector('.datetile--active');
+      if (activeTile && activeTile.scrollIntoView) activeTile.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    }
+    document.querySelectorAll('.range-pill').forEach(function(p){
+      p.classList.toggle('range-pill--active', range);
+      p.setAttribute('aria-pressed', range ? 'true' : 'false');
     });
   }
 
@@ -629,22 +564,23 @@ if ('serviceWorker' in navigator) {
     if (tile){
       document.querySelectorAll('.datetile--active').forEach(function(el){ el.classList.remove('datetile--active'); el.setAttribute('aria-current', 'false'); });
       tile.classList.add('datetile--active'); tile.setAttribute('aria-current', 'true');
+      document.querySelectorAll('.range-pill').forEach(function(p){ p.classList.remove('range-pill--active'); p.setAttribute('aria-pressed', 'false'); });
       return;
     }
-    var pill = e.target.closest('.category-pill');
-    if (pill){
-      document.querySelectorAll('.category-pill--active').forEach(function(el){ el.classList.remove('category-pill--active'); });
-      pill.classList.add('category-pill--active');
+    var rangePill = e.target.closest('.range-pill');
+    if (rangePill){
+      document.querySelectorAll('.datetile--active').forEach(function(el){ el.classList.remove('datetile--active'); el.setAttribute('aria-current', 'false'); });
+      rangePill.classList.add('range-pill--active'); rangePill.setAttribute('aria-pressed', 'true');
     }
   });
 
   document.body.addEventListener('htmx:afterSwap', function(e){
     if (!e.detail || !e.detail.target || e.detail.target.id !== 'programme-content') return;
-    syncDateStrip(); syncCategoryFilter();
+    syncDateStrip();
   });
-  window.addEventListener('popstate', function(){ syncDateStrip(); syncCategoryFilter(); });
+  window.addEventListener('popstate', function(){ syncDateStrip(); });
 
-  function onReady(){ syncDateStrip(); syncCategoryFilter(); }
+  function onReady(){ syncDateStrip(); }
   if (document.readyState !== 'loading') onReady();
   else document.addEventListener('DOMContentLoaded', onReady);
 
@@ -972,7 +908,6 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         <body>
           <Foxing />
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
-          <CategoryFilter date={date} active={category} tr={tr} locale={locale} />
           <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />

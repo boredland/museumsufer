@@ -19,6 +19,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 // Cross-app imports — used only at build time (never bundled into the Worker).
 import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
+import { THEATERS } from "../../frankfurt-theaters/src/theater-config";
 import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeDenkbar } from "../src/scrapers/denkbar";
 import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
@@ -46,10 +47,15 @@ async function main(): Promise<void> {
   const allEvents: LehrhausEvent[] = [];
 
   // ── Cross-import: museums ────────────────────────────────────────────────
+  // source_slug stays "frankfurt-museums" so /quelle/frankfurt-museums groups
+  // these together, but source_name carries the actual host museum so the
+  // card label shows "Senckenberg" / "Städel" / etc. instead of just "Museen".
   const museumSource = SOURCES.find((s) => s.slug === "frankfurt-museums")!;
+  const museumNameById = new Map<number, string>(MUSEUM_DATA.museums.map((m) => [m.id, m.name]));
   for (const e of MUSEUM_DATA.events) {
     if (e.category !== "Vortrag") continue;
     if (!e.date || e.date < today) continue;
+    const hostName = museumNameById.get(e.museum_id) ?? museumSource.name;
     allEvents.push(
       toEvent(
         {
@@ -64,7 +70,7 @@ async function main(): Promise<void> {
           language: detectTalkLanguage(e.title, e.description),
         },
         museumSource.slug,
-        museumSource.name,
+        hostName,
       ),
     );
   }
@@ -72,11 +78,13 @@ async function main(): Promise<void> {
 
   // ── Cross-import: theaters ───────────────────────────────────────────────
   const theaterSource = SOURCES.find((s) => s.slug === "frankfurt-theaters")!;
+  const theaterNameBySlug = new Map<string, string>(THEATERS.map((t) => [t.slug, t.name]));
   const theaterCountBefore = allEvents.length;
 
   for (const show of THEATER_DATA.shows) {
     if (classifyEvent(show.title, show.description) !== "Vortrag") continue;
 
+    const hostName = theaterNameBySlug.get(show.theater_slug) ?? theaterSource.name;
     const perfs = THEATER_DATA.performances.filter((p) => p.show_id === show.id && p.date >= today);
     for (const perf of perfs) {
       allEvents.push(
@@ -93,7 +101,7 @@ async function main(): Promise<void> {
             language: detectTalkLanguage(show.title, show.description),
           },
           theaterSource.slug,
-          theaterSource.name,
+          hostName,
         ),
       );
     }
