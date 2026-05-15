@@ -106,6 +106,15 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1077,
     lon: 8.6726,
   },
+  {
+    slug: "mousonturm",
+    name: "Künstler*innenhaus Mousonturm",
+    short_name: "Mousonturm",
+    url: "https://www.mousonturm.de",
+    // Waldschmidtstraße 4, Ostend
+    lat: 50.1158,
+    lon: 8.7011,
+  },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts

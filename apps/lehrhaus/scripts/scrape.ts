@@ -29,6 +29,7 @@ import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
 import { scrapeInstitutFuerSozialforschung } from "../src/scrapers/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
+import { scrapeMousonturm } from "../src/scrapers/mousonturm";
 import { scrapeOpenBooks } from "../src/scrapers/openbooks";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
 import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche";
@@ -131,6 +132,7 @@ async function main(): Promise<void> {
     ["sigmund-freud-institut", scrapeSigmundFreudInstitut],
     ["dig-frankfurt", scrapeDigFrankfurt],
     ["roemerberggespraeche", scrapeRoemerberggespraeche],
+    ["mousonturm", scrapeMousonturm],
     ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 
