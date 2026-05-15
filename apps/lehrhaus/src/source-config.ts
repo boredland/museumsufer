@@ -133,6 +133,24 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.2273,
     lon: 8.6088,
   },
+  {
+    slug: "fes-hessen",
+    name: "Friedrich-Ebert-Stiftung Hessen",
+    short_name: "FES Hessen",
+    url: "https://www.fes.de/landesbuero-hessen",
+    // Wiesenhüttenstr. 11
+    lat: 50.1075,
+    lon: 8.6655,
+  },
+  {
+    slug: "rls-hessen",
+    name: "Rosa-Luxemburg-Stiftung Hessen",
+    short_name: "RLS Hessen",
+    url: "https://hessen.rosalux.de",
+    // covers all of Hessen; coords are Frankfurt centroid
+    lat: 50.1109,
+    lon: 8.6821,
+  },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts
@@ -141,6 +159,11 @@ export const SOURCES: LehrhausSource[] = [
   // loge-zur-einigkeit: domain TLS broken, inaccessible
   // house-of-finance: hof.uni-frankfurt.de — scrappable but content is academic research seminars/conferences, not general public
   // juedische-akademie: juedische-akademie.de — domain not launched yet (TLS broken); revisit Sept 2026
+  // vhs-frankfurt: vhs.frankfurt.de — Kentico + Angular SPA, API base injected at runtime, no public REST/feed; would need a headless-browser scraper. Signal/noise also poor (mostly courses, not lectures).
+  // kas-hessen: kas.de/de/web/hessen — Konrad-Adenauer-Stiftung Hessen office. 403 across all paths regardless of user-agent; aggressive bot mitigation (Cloudflare). Skipped.
+  // hbs-hessen: boell-hessen.de — Heinrich-Böll-Stiftung Hessen. /event/ page is empty; the site is mostly publications/documentations of past events. No active forward calendar.
+  // fns-hessen: freiheit.org — Friedrich-Naumann-Stiftung. No dedicated Hessen office page; events listed globally with no clean per-state filter.
+  // stadtbuecherei-frankfurt: frankfurt.de/.../stadtbuecherei/veranstaltungen — Cloudflare "Just a moment…" JS challenge on event listings; needs a headless browser. Skipped.
   {
     slug: "openbooks-frankfurt",
     name: "OPEN BOOKS Frankfurt",
