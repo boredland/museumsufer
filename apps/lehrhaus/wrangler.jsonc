@@ -3,13 +3,14 @@
   "name": "lehrhaus",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
-  // Apex → frankfurt.lehr.salon 301 is handled in src/index.tsx. lehrhaus is
-  // currently Frankfurt-only; additional cities can be added later via more
-  // custom_domain entries.
-  "routes": [
-    { "pattern": "frankfurt.lehr.salon", "custom_domain": true },
-    { "pattern": "lehr.salon", "custom_domain": true }
-  ],
+  // Apex → frankfurt.lehr.salon 301 is handled in src/index.tsx. Re-enable
+  // these route entries once the lehr.salon zone is added to the Cloudflare
+  // account (Add Site → lehr.salon). Until then, the worker is reachable
+  // only at lehrhaus.<account-subdomain>.workers.dev.
+  // "routes": [
+  //   { "pattern": "frankfurt.lehr.salon", "custom_domain": true },
+  //   { "pattern": "lehr.salon", "custom_domain": true }
+  // ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action
   // regenerates src/scrape-data.ts and pushes; CF redeploys on push.
   "d1_databases": [
@@ -22,12 +23,15 @@
   "triggers": {
     "crons": ["0 5,6 * * *", "0 15,16 * * *", "0 7,8 * * SUN"]
   },
-  "send_email": [
-    {
-      "name": "FEEDBACK_EMAIL",
-      "destination_address": "feedback@lehr.salon"
-    }
-  ],
+  // Re-enable once Email Routing is configured for the lehr.salon zone with
+  // a verified feedback@lehr.salon destination. Without this, the contact
+  // form will error on submit; everything else works.
+  // "send_email": [
+  //   {
+  //     "name": "FEEDBACK_EMAIL",
+  //     "destination_address": "feedback@lehr.salon"
+  //   }
+  // ],
   "vars": {
     "TURNSTILE_SITE_KEY": "0x4AAAAAADNxRIr9duIRP8ag"
   },
