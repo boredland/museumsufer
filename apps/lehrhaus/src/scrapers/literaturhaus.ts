@@ -27,6 +27,9 @@ export async function scrapeLiteraturhaus(): Promise<ScrapedEvent[]> {
 
     const title = stripHtml(m[2]).trim();
     if (!title) continue;
+    // SEXYUNDERGROUND is a recurring writing workshop, not a public lecture
+    // or reading. Out of scope for lehr.salon.
+    if (/sexyunderground/i.test(title)) continue;
 
     // DD.MM.YY → YYYY-MM-DD
     const [day, month, yr] = m[3].split(".");
