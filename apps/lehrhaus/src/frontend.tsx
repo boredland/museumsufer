@@ -79,6 +79,9 @@ interface PageProps {
   events: DayEvent[];
   dateStrip: DateWithCount[];
   category?: Category | null;
+  /** When set, render the events as a grouped-by-date list spanning this many
+   *  days starting at `date`. When undefined, render a single-day view. */
+  range?: number;
   locale: Locale;
   tr: Translations;
   turnstileSiteKey?: string;
@@ -221,6 +224,33 @@ function DateStrip({
         })}
       </div>
     </nav>
+  );
+}
+
+/**
+ * The "Next 7 days" toggle pill. Sits just below the date strip; when active,
+ * the date strip's per-tile highlight clears and the programme content
+ * switches to a date-grouped list of the upcoming week. Mirrors museumsufer's
+ * range-pill UX (see frankfurt-museums/src/frontend.tsx).
+ */
+function RangeRow({ active, tr, locale }: { active: boolean; tr: Translations; locale: Locale }) {
+  const lang = langSuffix(locale);
+  return (
+    <div class="range-row">
+      <a
+        class={`range-pill${active ? " range-pill--active" : ""}`}
+        href={`/${lang}`}
+        hx-get="/partial/content?range=7"
+        hx-target="#programme-content"
+        hx-push-url={`/${lang}`}
+        aria-current={active ? "true" : "false"}
+      >
+        <span class="range-pill__glyph" aria-hidden="true">
+          ⁂
+        </span>
+        {tr.rangeUpcomingLabel}
+      </a>
+    </div>
   );
 }
 
@@ -555,7 +585,7 @@ if ('serviceWorker' in navigator) {
     }
     document.querySelectorAll('.range-pill').forEach(function(p){
       p.classList.toggle('range-pill--active', range);
-      p.setAttribute('aria-pressed', range ? 'true' : 'false');
+      p.setAttribute('aria-current', range ? 'true' : 'false');
     });
   }
 
@@ -564,13 +594,13 @@ if ('serviceWorker' in navigator) {
     if (tile){
       document.querySelectorAll('.datetile--active').forEach(function(el){ el.classList.remove('datetile--active'); el.setAttribute('aria-current', 'false'); });
       tile.classList.add('datetile--active'); tile.setAttribute('aria-current', 'true');
-      document.querySelectorAll('.range-pill').forEach(function(p){ p.classList.remove('range-pill--active'); p.setAttribute('aria-pressed', 'false'); });
+      document.querySelectorAll('.range-pill').forEach(function(p){ p.classList.remove('range-pill--active'); p.setAttribute('aria-current', 'false'); });
       return;
     }
     var rangePill = e.target.closest('.range-pill');
     if (rangePill){
       document.querySelectorAll('.datetile--active').forEach(function(el){ el.classList.remove('datetile--active'); el.setAttribute('aria-current', 'false'); });
-      rangePill.classList.add('range-pill--active'); rangePill.setAttribute('aria-pressed', 'true');
+      rangePill.classList.add('range-pill--active'); rangePill.setAttribute('aria-current', 'true');
     }
   });
 
@@ -813,17 +843,102 @@ function filterPastForToday(date: string, events: DayEvent[]): DayEvent[] {
   });
 }
 
+function DayGroup({
+  date,
+  events,
+  tr,
+  locale,
+  startIndex,
+}: {
+  date: string;
+  events: DayEvent[];
+  tr: Translations;
+  locale: Locale;
+  startIndex: number;
+}) {
+  const dp = dateParts(date);
+  const dateObj = new Date(`${date}T12:00:00Z`);
+  const dl = dateLocale(locale);
+  const weekdayShort = dateFormatter(dl, { weekday: "long", timeZone: "UTC" }).format(dateObj);
+  const monthShort = dateFormatter(dl, { month: "long", timeZone: "UTC" }).format(dateObj);
+  return (
+    <section class="day-group">
+      <header class="day-group__head">
+        <span class="day-group__day">{dp.day}.</span>
+        <span class="day-group__month">{monthShort}</span>
+        <span class="day-group__sep" aria-hidden="true">
+          ·
+        </span>
+        <span class="day-group__weekday">{weekdayShort}</span>
+        <span class="day-group__count">{events.length}</span>
+      </header>
+      <ol class="concerts">
+        {events.map((e, i) => (
+          <Event key={e.id} e={e} opts={{ index: startIndex + i }} tr={tr} />
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 export function ProgrammePartial({
   date,
   events,
   tr,
   locale = DEFAULT_LOCALE,
+  range,
 }: {
   date: string;
   events: DayEvent[];
   tr: Translations;
   locale?: Locale;
+  range?: number;
 }) {
+  // Range view: events span multiple days, grouped by date, no "past" filtering
+  // (the past-today logic only makes sense on a single-day view).
+  if (range) {
+    const groups = new Map<string, DayEvent[]>();
+    for (const e of events) {
+      const arr = groups.get(e.date);
+      if (arr) arr.push(e);
+      else groups.set(e.date, [e]);
+    }
+    const sortedDates = [...groups.keys()].sort();
+    let cursor = 0;
+    return (
+      <>
+        <header class="programme__header">
+          <p class="programme__line" />
+          <p class="programme__weekday">{tr.dateStripLabel}</p>
+          <h2 class="programme__date">
+            <span class="programme__day">{tr.rangeUpcomingHeading(range)}</span>
+          </h2>
+        </header>
+        {events.length === 0 ? (
+          <div class="empty empty--paginavacua">
+            <p class="empty__mark" aria-hidden="true">
+              ⁂
+            </p>
+            <p class="empty__direction">{tr.emptyDirection}</p>
+            <p class="empty__line">{tr.emptyTitle}</p>
+            <p class="empty__hint">{tr.emptyHint}</p>
+          </div>
+        ) : (
+          <div class="day-groups">
+            {sortedDates.map((d) => {
+              const dayEvents = groups.get(d) ?? [];
+              const startIndex = cursor;
+              cursor += dayEvents.length;
+              return <DayGroup key={d} date={d} events={dayEvents} tr={tr} locale={locale} startIndex={startIndex} />;
+            })}
+          </div>
+        )}
+        <SiblingStrap tr={tr} />
+      </>
+    );
+  }
+
+  // Single-day view (the original behaviour, unchanged).
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
   const dl = dateLocale(locale);
@@ -882,23 +997,27 @@ export function renderProgrammePartial(
   events: DayEvent[],
   tr: Translations = DEFAULT_TR,
   locale: Locale = DEFAULT_LOCALE,
+  range?: number,
 ): HtmlEscapedString {
-  return (<ProgrammePartial date={date} events={events} tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
+  return (
+    <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} />
+  ) as unknown as HtmlEscapedString;
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, events, dateStrip, category, locale, tr, turnstileSiteKey } = props;
+  const { date, today, events, dateStrip, category, range, locale, tr, turnstileSiteKey } = props;
   const niceDate = niceDateFor(date, locale);
-  const currentPath = category ? `/tag/${date}?format=${encodeURIComponent(category)}` : `/tag/${date}`;
+  const currentPath = range ? "/" : category ? `/tag/${date}?format=${encodeURIComponent(category)}` : `/tag/${date}`;
+  const pageTitle = range ? `lehr.salon · ${tr.rangeUpcomingHeading(range)}` : `lehr.salon · ${niceDate}`;
   return (
     <>
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
           <Head
-            title={`lehr.salon · ${niceDate}`}
+            title={pageTitle}
             description={tr.homeDescription}
-            canonical={`${APP_URL}/tag/${date}${langSuffix(locale)}`}
+            canonical={range ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`}
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
@@ -908,12 +1027,13 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         <body>
           <Foxing />
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
-          <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
+          <DateStrip strip={dateStrip} active={range ? "" : date} today={today} tr={tr} locale={locale} />
+          <RangeRow active={!!range} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} />
+              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} />
             </div>
           </main>
           <Faq tr={tr} />
