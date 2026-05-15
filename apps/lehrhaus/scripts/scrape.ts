@@ -31,6 +31,7 @@ import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
 import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
 import { scrapeOpenBooks } from "../src/scrapers/openbooks";
 import { scrapePolytechnische } from "../src/scrapers/polytechnische";
+import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche";
 import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
 import { talkCategory } from "../src/scrapers/shared";
 import { scrapeSigmundFreudInstitut } from "../src/scrapers/sigmund-freud-institut";
@@ -129,6 +130,7 @@ async function main(): Promise<void> {
     ["denkbar-frankfurt", scrapeDenkbar],
     ["sigmund-freud-institut", scrapeSigmundFreudInstitut],
     ["dig-frankfurt", scrapeDigFrankfurt],
+    ["roemerberggespraeche", scrapeRoemerberggespraeche],
     ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 
