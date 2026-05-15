@@ -108,7 +108,7 @@ const de: Translations = {
   categoryDiskussion: "Diskussion",
   categoryLesung: "Lesung",
   dateStripLabel: "Tage",
-  todayProgrammeTitle: "Heute im Lehrhaus",
+  todayProgrammeTitle: "Heute im lehr.salon",
   emptyTitle: "Heute kein Eintrag — der Saal bleibt zu.",
   emptyTodayAfterPast: "Keine weiteren Vorträge mehr für heute.",
   emptyHint: "Morgen wieder versuchen oder oben ein anderes Datum wählen.",
@@ -125,7 +125,7 @@ const de: Translations = {
   imprint: "Impressum",
   digestKicker: "Push-Digest",
   digestCueText: "Morgens lesen, was heute in Frankfurt diskutiert wird.",
-  digestTitle: "Lehrhaus abonnieren",
+  digestTitle: "lehr.salon abonnieren",
   digestIntro: "Push-Nachrichten direkt aufs Gerät — keine E-Mail, kein Konto. Jederzeit abbestellbar.",
   digestIosHint:
     "<strong>iPhone:</strong> Tippe »Teilen« und »Zum Home-Bildschirm hinzufügen«. Öffne dann über das App-Icon — erst dann sind Push-Nachrichten möglich.",
@@ -140,7 +140,7 @@ const de: Translations = {
   digestMorning: "Jeden Morgen",
   digestAfternoon: "Jeden Nachmittag",
   digestSunday: "Sonntag-Digest",
-  digestMorningSub: "Was heute im Lehrhaus zu hören ist.",
+  digestMorningSub: "Was heute im lehr.salon zu hören ist.",
   digestAfternoonSub: "Was heute Abend noch beginnt.",
   digestSundaySub: "Wochenüberblick — die kommenden sieben Tage.",
   digestFilterLabel: "Auf Format einschränken",
@@ -167,7 +167,7 @@ const de: Translations = {
   contactSending: "Wird gesendet…",
   contactSent: "Vielen Dank — wir sehen es uns an.",
   contactErr: "Senden fehlgeschlagen.",
-  homeTitle: "lehrhaus — Vorträge und Diskussionen heute in Frankfurt",
+  homeTitle: "lehr.salon — Vorträge und Diskussionen heute in Frankfurt",
   homeDescription:
     "Öffentliche Vorträge, Lesungen und Diskussionen in Frankfurt — täglich aktualisiert aus Universität, Akademien, Stiftungen und Salons.",
   endTimePrefix: "bis",
@@ -190,7 +190,7 @@ const de: Translations = {
   siblingConcertLabel: "ein Konzert",
   askAiLabel: "Frag eine KI",
   askAiPrompt: (date) =>
-    `Welche Vorträge und Diskussionen finden am ${date} in Frankfurt statt? Quelle: https://frankfurt.lehrhaus.app`,
+    `Welche Vorträge und Diskussionen finden am ${date} in Frankfurt statt? Quelle: https://frankfurt.lehr.salon`,
   askAiAria: "Frag eine KI nach dem heutigen Programm",
   faqKicker: "Häufige Fragen",
   faqItems: [
@@ -229,7 +229,7 @@ const en: Translations = {
   categoryDiskussion: "Discussion",
   categoryLesung: "Reading",
   dateStripLabel: "Days",
-  todayProgrammeTitle: "Today at the Lehrhaus",
+  todayProgrammeTitle: "Today at lehr.salon",
   emptyTitle: "No entry today — the hall is closed.",
   emptyTodayAfterPast: "No more lectures left today.",
   emptyHint: "Try tomorrow, or pick another date above.",
@@ -246,7 +246,7 @@ const en: Translations = {
   imprint: "Imprint",
   digestKicker: "Push digest",
   digestCueText: "Read in the morning what Frankfurt will discuss today.",
-  digestTitle: "Subscribe to the Lehrhaus",
+  digestTitle: "Subscribe to lehr.salon",
   digestIntro: "Push notifications straight to your device — no email, no account. Cancel any time.",
   digestIosHint:
     '<strong>iPhone:</strong> Tap "Share" and "Add to Home Screen". Then open from the app icon — only then can push notifications work.',
@@ -287,7 +287,7 @@ const en: Translations = {
   contactSending: "Sending…",
   contactSent: "Thank you — we'll take a look.",
   contactErr: "Sending failed.",
-  homeTitle: "lehrhaus — lectures and discussions today in Frankfurt",
+  homeTitle: "lehr.salon — lectures and discussions today in Frankfurt",
   homeDescription:
     "Public lectures, readings and discussions in Frankfurt — daily updates from the university, academies, foundations and salons.",
   endTimePrefix: "until",
@@ -310,7 +310,7 @@ const en: Translations = {
   siblingConcertLabel: "a concert",
   askAiLabel: "Ask an AI",
   askAiPrompt: (date) =>
-    `Which lectures and discussions are happening in Frankfurt on ${date}? Source: https://frankfurt.lehrhaus.app`,
+    `Which lectures and discussions are happening in Frankfurt on ${date}? Source: https://frankfurt.lehr.salon`,
   askAiAria: "Ask an AI about today's lecture programme",
   faqKicker: "Frequently asked",
   faqItems: [

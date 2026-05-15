@@ -4,8 +4,8 @@ import { getEventById, getEventsForDate, getEventsInRange, getSourceBySlug } fro
 import { SOURCES } from "../source-config";
 import { type Env, parseCategory } from "../types";
 
-const FEEDBACK_FROM = "no-reply@lehrhaus.app";
-const FEEDBACK_TO = "feedback@lehrhaus.app";
+const FEEDBACK_FROM = "no-reply@lehr.salon";
+const FEEDBACK_TO = "feedback@lehr.salon";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -84,7 +84,7 @@ app.post("/api/contact", (c) =>
   handleContactRequest({
     request: c.req.raw,
     env: c.env,
-    app: "lehrhaus",
+    app: "lehr.salon",
     from: FEEDBACK_FROM,
     to: FEEDBACK_TO,
   }),

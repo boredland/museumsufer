@@ -40,10 +40,10 @@ import { CATEGORIES, type Category } from "./types";
 
 export type { DayEvent } from "./db";
 
-export const APP_URL = "https://frankfurt.lehrhaus.app";
+export const APP_URL = "https://frankfurt.lehr.salon";
 export const REPO_URL = "https://github.com/boredland/museumsufer";
 
-const utm = buildUtm("frankfurt.lehrhaus.app");
+const utm = buildUtm("frankfurt.lehr.salon");
 
 export function categoryLabel(c: Category, tr: Translations): string {
   switch (c) {
@@ -120,7 +120,7 @@ export function Head(opts: HeadOptions) {
       themeColor="#F2E9D5"
       icons={{ svg: "/favicon.svg", appleTouch: "/icon-192.png" }}
       alternates={[
-        { rel: "alternate", type: "application/json", title: "lehrhaus API", href: "/api/events" },
+        { rel: "alternate", type: "application/json", title: "lehr.salon API", href: "/api/events" },
         { rel: "alternate", type: "text/calendar", title: "Programm iCal", href: "/feed.ics" },
         ...(opts.extraLinks ?? []),
       ]}
@@ -162,7 +162,8 @@ export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale
             ¶
           </span>
           <span class="wordmark__lehr">lehr</span>
-          <span class="wordmark__haus">haus</span>
+          <span class="wordmark__dot">.</span>
+          <span class="wordmark__salon">salon</span>
         </h1>
         <p class="tagline">{tr.tagline}</p>
       </a>
@@ -770,13 +771,13 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   },
   {
     name: "list_source_slugs",
-    description: "List the slug + display name of every source configured on lehrhaus (no network call).",
+    description: "List the slug + display name of every source configured on lehr.salon (no network call).",
     inputSchema: { type: "object", properties: {} },
     executeBody: `return Promise.resolve(${JSON.stringify(SOURCES.map((s) => ({ slug: s.slug, name: s.name })))});`,
   },
   {
     name: "list_formats",
-    description: "List the format slugs available for filtering on lehrhaus.",
+    description: "List the format slugs available for filtering on lehr.salon.",
     inputSchema: { type: "object", properties: {} },
     executeBody: `return Promise.resolve(${JSON.stringify([...CATEGORIES])});`,
   },
@@ -962,7 +963,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
       <html lang={locale}>
         <head>
           <Head
-            title={`lehrhaus · ${niceDate}`}
+            title={`lehr.salon · ${niceDate}`}
             description={tr.homeDescription}
             canonical={`${APP_URL}/tag/${date}${langSuffix(locale)}`}
             locale={locale}

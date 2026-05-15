@@ -6,7 +6,7 @@
  * 7-day TTL; CF caches by full URL.
  */
 
-const USER_AGENT = "lehrhaus/1.0 (+https://frankfurt.lehrhaus.app)";
+const USER_AGENT = "lehrhaus/1.0 (+https://frankfurt.lehr.salon)";
 
 const ALLOWED_HOSTS = new Set([
   "aktuelles.uni-frankfurt.de",

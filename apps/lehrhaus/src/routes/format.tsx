@@ -25,7 +25,7 @@ app.get("/format/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${label} — lehrhaus`}
+            title={`${label} — lehr.salon`}
             description={tr.categoryDescription(label, events.length)}
             canonical={`${APP_URL}/format/${slug}`}
             locale={locale}
