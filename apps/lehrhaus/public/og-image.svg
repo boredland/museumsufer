@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="lehrhaus">
+  <rect width="1200" height="630" fill="#F2E9D5"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#1C1812"/>
+  <rect x="0" y="10" width="600" height="2" fill="#A33222"/>
+  <rect x="0" y="618" width="1200" height="6" fill="#1C1812"/>
+  <rect x="600" y="622" width="600" height="2" fill="#A33222"/>
+
+  <text x="600" y="80" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="18" font-weight="500" fill="#A33222" letter-spacing="6">¶  FRANKFURT  ·  VORTRÄGE &amp; DISKUSSIONEN</text>
+
+  <text x="600" y="320" text-anchor="middle" font-family="'Cormorant Garamond','EB Garamond','Garamond','Liberation Serif',Georgia,serif" font-size="200" font-weight="500" fill="#1C1812" letter-spacing="-6">lehr<tspan font-style="italic" fill="#A33222">haus</tspan></text>
+
+  <line x1="320" y1="378" x2="880" y2="378" stroke="#1C1812" stroke-width="1" opacity="0.6"/>
+  <line x1="320" y1="386" x2="600" y2="386" stroke="#A33222" stroke-width="1" opacity="0.7"/>
+
+  <text x="600" y="438" text-anchor="middle" font-family="'Cormorant Garamond','EB Garamond','Garamond','Liberation Serif',Georgia,serif" font-style="italic" font-size="38" font-weight="400" fill="#1C1812">Frankfurt diskutiert.</text>
+
+  <text x="600" y="498" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="16" font-weight="400" fill="rgba(28,18,12,0.58)" letter-spacing="4">VORTRAG  ·  LESUNG  ·  DISKUSSION</text>
+
+  <text x="600" y="560" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="14" font-weight="400" fill="#A33222" letter-spacing="4">⁂  pagina vacua  ⁂</text>
+</svg>

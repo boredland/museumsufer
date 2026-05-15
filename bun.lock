@@ -112,11 +112,23 @@
       "name": "@museumsufer/lehrhaus",
       "version": "0.0.1",
       "dependencies": {
+        "@fontsource/cormorant-garamond": "^5.2.11",
+        "@fontsource/dm-mono": "^5.2.7",
+        "@hono/zod-validator": "^0.7.6",
         "@museumsufer/core": "*",
+        "@scalar/hono-api-reference": "^0.10.14",
+        "dayjs": "^1.11.20",
+        "hono": "^4.12.18",
+        "htmx.org": "^2.0.10",
+        "p-queue": "^9.2.0",
+        "zod": "^4.4.3",
       },
       "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260509.1",
         "@museumsufer/tsconfig": "*",
+        "lightningcss-cli": "^1.32.0",
         "typescript": "^5.9.3",
+        "wrangler": "^4.90.0",
       },
     },
     "packages/config": {
