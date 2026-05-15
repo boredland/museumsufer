@@ -158,9 +158,6 @@ export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
         <h1 class="wordmark">
-          <span class="wordmark__pilcrow" aria-hidden="true">
-            ¶
-          </span>
           <span class="wordmark__lehr">lehr</span>
           <span class="wordmark__dot">.</span>
           <span class="wordmark__salon">salon</span>
