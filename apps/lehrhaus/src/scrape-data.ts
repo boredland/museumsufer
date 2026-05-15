@@ -21,6 +21,7 @@ export const SCRAPE_DATA: ScrapeData = {
     {"lat":50.2273,"lon":8.6088,"name":"Forschungskolleg Humanwissenschaften (Bad Homburg)","short_name":"FKH Bad Homburg","slug":"forschungskolleg-humanwissenschaften","url":"https://www.forschungskolleg-humanwissenschaften.de"},
     {"lat":50.1075,"lon":8.6655,"name":"Friedrich-Ebert-Stiftung Hessen","short_name":"FES Hessen","slug":"fes-hessen","url":"https://www.fes.de/landesbuero-hessen"},
     {"lat":50.1109,"lon":8.6821,"name":"Rosa-Luxemburg-Stiftung Hessen","short_name":"RLS Hessen","slug":"rls-hessen","url":"https://hessen.rosalux.de"},
+    {"lat":50.1116,"lon":8.6831,"name":"Stadtbücherei Frankfurt","short_name":"Stadtbücherei","slug":"stadtbuecherei-frankfurt","url":"https://www.stadtbuecherei.frankfurt.de"},
     {"lat":50.1109,"lon":8.6821,"name":"OPEN BOOKS Frankfurt","short_name":"Open Books","slug":"openbooks-frankfurt","url":"https://www.openbooks-frankfurt.de"},
     {"name":"Frankfurter Museen","short_name":"Museen","slug":"frankfurt-museums","url":"https://museumsufer.app"},
     {"name":"Frankfurter Theater","short_name":"Theater","slug":"frankfurt-theaters","url":"https://ins.theater"}

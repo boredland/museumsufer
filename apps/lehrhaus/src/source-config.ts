@@ -151,6 +151,15 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1109,
     lon: 8.6821,
   },
+  {
+    slug: "stadtbuecherei-frankfurt",
+    name: "Stadtbücherei Frankfurt",
+    short_name: "Stadtbücherei",
+    url: "https://www.stadtbuecherei.frankfurt.de",
+    // Zentralbibliothek, Hasengasse 4
+    lat: 50.1116,
+    lon: 8.6831,
+  },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts
@@ -163,7 +172,6 @@ export const SOURCES: LehrhausSource[] = [
   // kas-hessen: kas.de/de/web/hessen — Konrad-Adenauer-Stiftung Hessen office. 403 across all paths regardless of user-agent; aggressive bot mitigation (Cloudflare). Skipped.
   // hbs-hessen: boell-hessen.de — Heinrich-Böll-Stiftung Hessen. /event/ page is empty; the site is mostly publications/documentations of past events. No active forward calendar.
   // fns-hessen: freiheit.org — Friedrich-Naumann-Stiftung. No dedicated Hessen office page; events listed globally with no clean per-state filter.
-  // stadtbuecherei-frankfurt: frankfurt.de/.../stadtbuecherei/veranstaltungen — Cloudflare "Just a moment…" JS challenge on event listings; needs a headless browser. Skipped.
   {
     slug: "openbooks-frankfurt",
     name: "OPEN BOOKS Frankfurt",
