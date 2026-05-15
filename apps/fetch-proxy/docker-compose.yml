@@ -12,8 +12,12 @@ services:
   fetch-proxy:
     build: .
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # No host-port bind — Dokploy/Traefik reaches the container on the
+    # internal docker network on port 3000 (the container's EXPOSE) and
+    # handles public ingress via the attached domain. A host bind would
+    # collide with any other service also listening on :3000.
+    expose:
+      - "3000"
     environment:
       AUTH_TOKEN: ${AUTH_TOKEN:-}
       FLARESOLVERR_URL: http://flaresolverr:8191
