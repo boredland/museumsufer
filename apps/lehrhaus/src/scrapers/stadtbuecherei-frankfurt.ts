@@ -159,6 +159,11 @@ function parseDetail(html: string, detailUrl: string): ParsedDetail | null {
   // frankfurt.de injects at the top of every Sitecore page.
   const description = pickDescription(html);
 
+  // frankfurt.de's CMS sometimes files concerts under `/lesung/` (e.g. the
+  // Stadtbücherei's "Swing Belleville" jazz evening). Drop these — lehrhaus
+  // only carries talks/readings, music belongs in konzert-haus.
+  if (looksLikeConcert(title, description)) return null;
+
   // URL slug carries the format ("/lesung/" / "/vortrag/" / "/diskussion/").
   const category: Category = /\/lesung\//.test(detailUrl)
     ? "Lesung"
@@ -201,6 +206,16 @@ function classifyHaystack(s: string): Category {
   if (/lesung|buchpräsentation|buchvorstellung/.test(h)) return "Lesung";
   if (/diskussion|podium|debatte|gespräch/.test(h)) return "Diskussion";
   return "Vortrag";
+}
+
+const CONCERT_RE =
+  /\b(konzert|live[- ]musik|jazz|swing|bigband|big band|chor(?:konzert)?|orchester|quartett|quintett|sextett|matinée|matinee|musikabend|musikalisch[er] abend|liederabend)\b/i;
+const LITERARY_RE = /\b(lesung|liest|buchvorstellung|buchpräsentation|buchpremiere|autorenlesung|autor:in)\b/i;
+
+function looksLikeConcert(title: string, description: string | null): boolean {
+  const haystack = `${title} ${description ?? ""}`;
+  if (LITERARY_RE.test(haystack)) return false;
+  return CONCERT_RE.test(haystack);
 }
 
 function extractDateTime(html: string): { date: string; time: string | null } | null {
