@@ -25,6 +25,13 @@ Hourly concert schedule for classical, jazz, sacred, world, experimental, and ch
 - Scrape: hourly 09–21 CEST via `.github/workflows/scrape.yml` (konzert-haus job)
 - D1: none
 
+### [`apps/lehrhaus`](apps/lehrhaus) → [frankfurt.lehr.salon](https://frankfurt.lehr.salon)
+
+Daily index of public lectures, readings, and discussions in Frankfurt — Polytechnische Gesellschaft, Haus am Dom, Jüdische Gemeinde, Literaturhaus, Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, and more. Three formats (Vortrag / Lesung / Diskussion), with a rolling next-7-days view and cross-imports of Vortrag-class events from the museums and theaters apps. Editorial "annotated quarto" identity — foxed paper, iron-gall ink, rubric red, pilcrow anchors.
+
+- Scrape: daily 08:30 CEST via `.github/workflows/scrape.yml` (lehrhaus job)
+- D1: `push_subscriptions` (Web Push digest opt-ins)
+
 ### [`apps/fetch-proxy`](apps/fetch-proxy)
 
 Generic upstream-fetch proxy used by museums when a museum API blocks edge fetches by region or User-Agent.

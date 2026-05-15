@@ -649,22 +649,24 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
  * who didn't find anything in today's museum line-up.
  */
 function SiblingStrap({ tr }: { tr: Record<string, string> }) {
-  const template = tr.siblingTemplate;
-  const [before, midRaw] = template.split("{first}");
-  const [mid, after] = (midRaw ?? "").split("{second}");
+  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="sibling-strap">
       <hr class="sibling-strap__rule" />
       <p class="sibling-strap__text">
-        {before}
+        {parts[0]}
         <a href="https://frankfurt.ins.theater" class="sibling-strap__link">
           {tr.siblingTheaterLabel}
         </a>
-        {mid}
+        {parts[1]}
         <a href="https://frankfurt.konzert.haus" class="sibling-strap__link">
           {tr.siblingKonzertLabel}
         </a>
-        {after}
+        {parts[2]}
+        <a href="https://frankfurt.lehr.salon" class="sibling-strap__link">
+          {tr.siblingLehrLabel}
+        </a>
+        {parts[3]}
       </p>
     </section>
   );

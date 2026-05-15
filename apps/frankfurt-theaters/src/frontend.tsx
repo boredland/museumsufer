@@ -683,13 +683,17 @@ function SiblingStrap() {
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
-        Nichts dabei? Wie wäre es stattdessen mit einem{" "}
+        Nichts dabei? Vielleicht stattdessen ein{" "}
         <a href="https://frankfurt.konzert.haus" target="_blank" rel="noopener">
           Konzert
-        </a>{" "}
-        oder einem{" "}
+        </a>
+        , ein{" "}
         <a href="https://museumsufer.app" target="_blank" rel="noopener">
           Museumsbesuch
+        </a>{" "}
+        oder ein{" "}
+        <a href="https://frankfurt.lehr.salon" target="_blank" rel="noopener">
+          Vortrag
         </a>
         ?
       </p>
