@@ -20,6 +20,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
 import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
 import { THEATERS } from "../../frankfurt-theaters/src/theater-config";
+import type { ProxyConfig } from "../src/scrapers/_proxy";
 import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
 import { scrapeDenkbar } from "../src/scrapers/denkbar";
 import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
@@ -40,6 +41,7 @@ import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche
 import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
 import { talkCategory } from "../src/scrapers/shared";
 import { scrapeSigmundFreudInstitut } from "../src/scrapers/sigmund-freud-institut";
+import { scrapeStadtbuechereiFrankfurt } from "../src/scrapers/stadtbuecherei-frankfurt";
 import { SOURCES } from "../src/source-config";
 import type { LehrhausEvent, ScrapeData, ScrapedEvent } from "../src/types";
 
@@ -122,6 +124,15 @@ async function main(): Promise<void> {
   log(`theaters cross-import: ${allEvents.length - theaterCountBefore} talk events`);
 
   // ── Dedicated scrapers ───────────────────────────────────────────────────
+  // Some sources need an outbound proxy (datacenter-IP blocks, broken TLS
+  // chains, Cloudflare bot-mitigation). Configured via FETCH_PROXY_URL /
+  // FETCH_PROXY_TOKEN env vars in CI. When unset, scrapers fall back to
+  // direct fetch — most don't need the proxy.
+  const proxy: ProxyConfig | null = process.env.FETCH_PROXY_URL
+    ? { url: process.env.FETCH_PROXY_URL, token: process.env.FETCH_PROXY_TOKEN }
+    : null;
+  if (proxy) log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
+
   const scrapers: Array<[string, () => Promise<ScrapedEvent[]>]> = [
     ["polytechnische-gesellschaft", scrapePolytechnische],
     ["haus-am-dom", scrapeHausAmDom],
@@ -141,6 +152,7 @@ async function main(): Promise<void> {
     ["forschungskolleg-humanwissenschaften", scrapeForschungskollegHumanwissenschaften],
     ["fes-hessen", scrapeFesHessen],
     ["rls-hessen", scrapeRlsHessen],
+    ["stadtbuecherei-frankfurt", () => scrapeStadtbuechereiFrankfurt(proxy)],
     ["openbooks-frankfurt", scrapeOpenBooks],
   ];
 

@@ -150,6 +150,9 @@ jobs:
 
       - name: Run scraper
         working-directory: apps/lehrhaus
+        env:
+          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
+          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
         run: bun scripts/scrape.ts
 
       - name: Commit if changed
