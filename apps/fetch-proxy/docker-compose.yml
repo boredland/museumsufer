@@ -17,9 +17,13 @@ services:
     environment:
       AUTH_TOKEN: ${AUTH_TOKEN:-}
       FLARESOLVERR_URL: http://flaresolverr:8191
+    # No `condition: service_healthy` — the FlareSolverr image doesn't ship
+    # with wget/curl, so a portable healthcheck is hard. Plain `depends_on`
+    # just enforces start order. If a CF challenge hits before FS is ready,
+    # the FS call fails with a connection error and the proxy returns the
+    # original 403 (caller can retry).
     depends_on:
-      flaresolverr:
-        condition: service_healthy
+      - flaresolverr
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
@@ -30,9 +34,3 @@ services:
       # Keep the Chromium pool small — we burst-call FS for a handful of
       # detail-page fetches per scrape, not parallel high-volume use.
       BROWSER_LIMIT: "2"
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:8191/"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
