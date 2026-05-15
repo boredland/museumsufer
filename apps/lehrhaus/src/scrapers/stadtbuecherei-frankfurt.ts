@@ -30,8 +30,15 @@ const VERANSTALTUNGEN_URL =
 const UA = "lehrhaus crawler / contact: jonas@bgdlabs.com";
 const HEADERS = { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" };
 
+// Hrefs on frankfurt.de are sometimes absolute, sometimes relative. We
+// match both and normalise to absolute downstream. Only buckets that
+// represent actual lehr.salon-shaped events (Lesung / Vortrag /
+// Diskussion / Buchpräsentation) — `/kategorie-level-4-seite/` is the
+// site's catch-all bin and contains family-day festivals, STEM events,
+// children's programming etc. which we don't want here.
 const DETAIL_HREF_RE =
-  /https:\/\/frankfurt\.de\/service-und-rathaus\/verwaltung\/aemter-und-institutionen\/stadtbuecherei\/veranstaltungen\/(?:lesung|kategorie-level-4-seite|vortrag|diskussion|buchpraesentation)\/[a-z0-9-]+/g;
+  /(?:https:\/\/frankfurt\.de)?\/service-und-rathaus\/verwaltung\/aemter-und-institutionen\/stadtbuecherei\/veranstaltungen\/(?:lesung|vortrag|diskussion|buchpraesentation)\/[a-z0-9-]+/g;
+const FRANKFURT_DE_BASE = "https://frankfurt.de";
 
 const MONTHS_DE: Record<string, number> = {
   jan: 1,
@@ -65,6 +72,13 @@ export async function scrapeStadtbuechereiFrankfurt(proxy: ProxyConfig | null): 
   const seen = new Set<string>();
   const detailUrls = new Set<string>();
 
+  const addHrefsFrom = (html: string): void => {
+    for (const m of html.matchAll(DETAIL_HREF_RE)) {
+      const href = m[0].startsWith("http") ? m[0] : `${FRANKFURT_DE_BASE}${m[0]}`;
+      detailUrls.add(href);
+    }
+  };
+
   // Source 1: structured frankfurt.de listing (CF-challenged — needs proxy).
   // Tolerated to fail: we'll still try the subdomain fallback below.
   try {
@@ -72,7 +86,7 @@ export async function scrapeStadtbuechereiFrankfurt(proxy: ProxyConfig | null): 
     if (isCloudflareChallenge(listingHtml)) {
       console.warn("[stadtbuecherei] frankfurt.de listing is Cloudflare-challenged even via proxy");
     } else {
-      for (const m of listingHtml.matchAll(DETAIL_HREF_RE)) detailUrls.add(m[0]);
+      addHrefsFrom(listingHtml);
     }
   } catch (err) {
     console.warn(`[stadtbuecherei] listing fetch failed: ${err instanceof Error ? err.message : err}`);
@@ -83,7 +97,7 @@ export async function scrapeStadtbuechereiFrankfurt(proxy: ProxyConfig | null): 
   // returns 200 OK; doesn't need the proxy.
   try {
     const subdomainHtml = await fetchHtml(STADTBUECHEREI_HOME, null);
-    for (const m of subdomainHtml.matchAll(DETAIL_HREF_RE)) detailUrls.add(m[0]);
+    addHrefsFrom(subdomainHtml);
   } catch {
     // Non-fatal.
   }
@@ -127,19 +141,23 @@ interface ParsedDetail {
 }
 
 function parseDetail(html: string, detailUrl: string): ParsedDetail | null {
-  // frankfurt.de detail pages use Sitecore — title in <h1>, date+time in a
-  // metadata block, description in the first prominent <p>. We extract
-  // defensively because the markup may not match the official styleguide.
-  const titleRaw = html.match(/<h1[^>]*>([\s\S]+?)<\/h1>/i)?.[1];
-  const title = titleRaw ? cleanText(titleRaw) : null;
+  // frankfurt.de detail pages use Sitecore. Title sources, in priority order:
+  //   1) <title> minus the " | Stadt Frankfurt am Main" suffix (canonical,
+  //      always includes the full talk title — e.g. "Author: Book (Verlag)")
+  //   2) <h1> (often just the author name, missing the talk's actual title —
+  //      use only as fallback)
+  const titleTag = html.match(/<title[^>]*>([\s\S]+?)<\/title>/i)?.[1];
+  const titleFromTag = titleTag ? cleanText(titleTag).replace(/\s*\|\s*Stadt Frankfurt am Main\s*$/i, "") : "";
+  const titleFromH1 = cleanText(html.match(/<h1[^>]*>([\s\S]+?)<\/h1>/i)?.[1] ?? "");
+  const title = titleFromTag || titleFromH1;
   if (!title) return null;
 
   const dateTime = extractDateTime(html);
   if (!dateTime) return null;
 
-  // First non-empty <p> in main content as the description.
-  const descMatch = html.match(/<p[^>]*>([\s\S]{40,800}?)<\/p>/i);
-  const description = descMatch ? cleanText(descMatch[1]).slice(0, 500) || null : null;
+  // First substantive <p> as the description — skip the cookie banner that
+  // frankfurt.de injects at the top of every Sitecore page.
+  const description = pickDescription(html);
 
   // URL slug carries the format ("/lesung/" / "/vortrag/" / "/diskussion/").
   const category: Category = /\/lesung\//.test(detailUrl)
@@ -161,6 +179,23 @@ function parseDetail(html: string, detailUrl: string): ParsedDetail | null {
   };
 }
 
+function pickDescription(html: string): string | null {
+  // Walk paragraphs in order; skip cookie-banner / consent / boilerplate
+  // text until we hit one that looks like real event copy. Cap at 500 chars.
+  for (const m of html.matchAll(/<p[^>]*>([\s\S]{40,1500}?)<\/p>/gi)) {
+    const text = cleanText(m[1]);
+    if (!text) continue;
+    if (
+      /cookies?|datenschutzerklärung|google fonts|tracking|jetzt zustimmen|nur notwendige|alle akzeptieren|matomo|piwik/i.test(
+        text,
+      )
+    )
+      continue;
+    return text.slice(0, 500);
+  }
+  return null;
+}
+
 function classifyHaystack(s: string): Category {
   const h = s.toLowerCase();
   if (/lesung|buchpräsentation|buchvorstellung/.test(h)) return "Lesung";
@@ -170,16 +205,18 @@ function classifyHaystack(s: string): Category {
 
 function extractDateTime(html: string): { date: string; time: string | null } | null {
   // Patterns we accept (in priority order):
+  //   "Mittwoch, 20.5.2026, 19.30 Uhr"  ← frankfurt.de canonical form
   //   "Donnerstag, 20.05.2026, 19:30 Uhr"
   //   "20. Mai 2026, 19:30 Uhr"
-  //   "20.05.2026"  (no time)
-  const numeric = html.match(/(\d{2})\.(\d{2})\.(20\d{2})(?:[\s,]+\s*(\d{1,2})[:.](\d{2}))?/);
+  //   "20.05.2026" (no time)
+  // Day and month may be single- or two-digit; time separator may be . or :.
+  const numeric = html.match(/(\d{1,2})\.(\d{1,2})\.(20\d{2})(?:[\s,]+(\d{1,2})[:.](\d{2}))?/);
   if (numeric) {
     const [, dd, mm, yyyy, hh, mi] = numeric;
     const time = hh && mi ? `${hh.padStart(2, "0")}:${mi}` : null;
-    return { date: `${yyyy}-${mm}-${dd}`, time };
+    return { date: `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`, time };
   }
-  const written = html.match(/(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)\s*(20\d{2})(?:[\s,]+\s*(\d{1,2})[:.](\d{2}))?/);
+  const written = html.match(/(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)\s*(20\d{2})(?:[\s,]+(\d{1,2})[:.](\d{2}))?/);
   if (written) {
     const day = parseInt(written[1], 10);
     const month = MONTHS_DE[written[2].toLowerCase().replace(/[^a-zäöü]/g, "")];
