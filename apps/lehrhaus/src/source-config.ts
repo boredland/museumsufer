@@ -97,6 +97,15 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1109,
     lon: 8.6821,
   },
+  {
+    slug: "roemerberggespraeche",
+    name: "Römerberggespräche Frankfurt",
+    short_name: "Römerberggespräche",
+    url: "https://roemerberggespraeche-ffm.de",
+    // Chagallsaal, Schauspiel Frankfurt
+    lat: 50.1077,
+    lon: 8.6726,
+  },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
   // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts
