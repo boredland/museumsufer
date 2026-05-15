@@ -103,6 +103,7 @@ export interface Translations {
   siblingTemplate: string;
   siblingTheaterLabel: string;
   siblingMuseumLabel: string;
+  siblingLehrLabel: string;
   // Ask AI
   askAiLabel: string;
   askAiPrompt: (date: string) => string;
@@ -198,9 +199,10 @@ const de: Translations = {
   genreDescription: (genre, count) =>
     `${genre}-Konzerte in Frankfurt und Umgebung. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
   langSwitchAria: "Sprache",
-  siblingTemplate: "Nichts dabei? Wie wäre es stattdessen mit einem {first} oder {second}?",
+  siblingTemplate: "Nichts dabei? Vielleicht stattdessen ein {first}, ein {second} oder ein {third}?",
   siblingTheaterLabel: "Theaterstück",
   siblingMuseumLabel: "Museumsbesuch",
+  siblingLehrLabel: "Vortrag",
   askAiLabel: "Frag eine KI",
   askAiPrompt: (date) =>
     `Was wird am ${date} in Frankfurt und Umgebung gespielt? Quelle: https://frankfurt.konzert.haus`,
@@ -323,9 +325,10 @@ const en: Translations = {
   genreDescription: (genre, count) =>
     `${genre} concerts in Frankfurt and around. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
   langSwitchAria: "Language",
-  siblingTemplate: "Nothing for you? How about {first} or {second} instead?",
+  siblingTemplate: "Nothing for you? How about {first}, {second}, or {third} instead?",
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",
+  siblingLehrLabel: "a lecture",
   askAiLabel: "Ask an AI",
   askAiPrompt: (date) =>
     `What's on in Frankfurt and the wider region on ${date}? Source: https://frankfurt.konzert.haus`,
@@ -449,9 +452,10 @@ const fr: Translations = {
   genreDescription: (genre, count) =>
     `Concerts de ${genre.toLowerCase()} à Francfort et alentour. ${count} rendez-vous dans les 60 prochains jours.`,
   langSwitchAria: "Langue",
-  siblingTemplate: "Rien pour toi ? Pourquoi pas {first} ou {second} à la place ?",
+  siblingTemplate: "Rien pour toi ? Pourquoi pas {first}, {second} ou {third} à la place ?",
   siblingTheaterLabel: "une pièce",
   siblingMuseumLabel: "une visite au musée",
+  siblingLehrLabel: "une conférence",
   askAiLabel: "Demande à une IA",
   askAiPrompt: (date) =>
     `Que joue-t-on à Francfort et dans la région le ${date} ? Source : https://frankfurt.konzert.haus`,

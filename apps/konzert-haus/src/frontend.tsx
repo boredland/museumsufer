@@ -927,21 +927,24 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
  * find anything in today's programme.
  */
 function SiblingStrap({ tr }: { tr: Translations }) {
-  const [before, midRaw] = tr.siblingTemplate.split("{first}");
-  const [mid, after] = (midRaw ?? "").split("{second}");
+  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
-        {before}
+        {parts[0]}
         <a href="https://frankfurt.ins.theater" target="_blank" rel="noopener">
           {tr.siblingTheaterLabel}
         </a>
-        {mid}
+        {parts[1]}
         <a href="https://museumsufer.app" target="_blank" rel="noopener">
           {tr.siblingMuseumLabel}
         </a>
-        {after}
+        {parts[2]}
+        <a href="https://frankfurt.lehr.salon" target="_blank" rel="noopener">
+          {tr.siblingLehrLabel}
+        </a>
+        {parts[3]}
       </p>
     </section>
   );
