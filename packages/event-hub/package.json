@@ -1,0 +1,29 @@
+{
+  "name": "@museumsufer/event-hub",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./data": "./data/events.ts"
+  },
+  "scripts": {
+    "scrape": "bun scripts/scrape.ts",
+    "query": "bun bin/query.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@museumsufer/classify": "*",
+    "@museumsufer/core": "*",
+    "@museumsufer/scrapers": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260509.1",
+    "@museumsufer/tsconfig": "*",
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.9.3"
+  }
+}

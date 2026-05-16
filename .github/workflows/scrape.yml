@@ -2,12 +2,12 @@ name: scrape
 
 on:
   schedule:
-    - cron: "0 7-19 * * *" # theaters + konzert-haus — hourly 09–21 CEST (07–19 UTC)
+    - cron: "0 7-19 * * *" # theaters + konzert-haus + event-hub — hourly 09–21 CEST (07–19 UTC)
     - cron: "30 6 * * *" # landau   — daily 08:30 CEST (06:30 UTC)
   workflow_dispatch:
     inputs:
       app:
-        description: "Workspace to scrape (theaters | konzert-haus | museums | landau | lehrhaus | all). Defaults to all."
+        description: "Workspace to scrape (theaters | konzert-haus | museums | landau | lehrhaus | event-hub | all). Defaults to all."
         required: false
         default: "all"
 
@@ -209,3 +209,42 @@ jobs:
             return 1
           }
           push_with_retry
+
+  event-hub:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 7-19 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.app == 'event-hub' || inputs.app == 'all'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Run hub scrape
+        working-directory: packages/event-hub
+        env:
+          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
+          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
+        run: bun scripts/scrape.ts
+
+      - name: Commit if changed
+        run: |
+          git config user.name "scrape-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/event-hub/data/events.ts
+          if git diff --cached --quiet; then
+            echo "no diff, skipping commit"
+            exit 0
+          fi
+          git commit -m "data(event-hub): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push; then exit 0; fi
+            echo "push attempt $attempt failed, retrying"
+            sleep $((attempt * 2))
+          done
+          exit 1
