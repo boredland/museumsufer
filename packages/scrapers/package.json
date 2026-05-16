@@ -11,6 +11,8 @@
     "./proxy": "./src/proxy.ts",
     "./venues/alte-oper": "./src/venues/alte-oper.ts",
     "./venues/andreas-koehs": "./src/venues/andreas-koehs.ts",
+    "./venues/bad-homburg-schloss": "./src/venues/bad-homburg-schloss.ts",
+    "./venues/bad-soden": "./src/venues/bad-soden.ts",
     "./venues/brotfabrik": "./src/venues/brotfabrik.ts",
     "./venues/buergeruniversitaet": "./src/venues/buergeruniversitaet.ts",
     "./venues/denkbar": "./src/venues/denkbar.ts",
@@ -34,6 +36,8 @@
     "./venues/kronberg-academy": "./src/venues/kronberg-academy.ts",
     "./venues/literaturhaus-frankfurt": "./src/venues/literaturhaus-frankfurt.ts",
     "./venues/mousonturm": "./src/venues/mousonturm.ts",
+    "./venues/musikschule-frankfurt": "./src/venues/musikschule-frankfurt.ts",
+    "./venues/naxos": "./src/venues/naxos.ts",
     "./venues/normative-orders": "./src/venues/normative-orders.ts",
     "./venues/openbooks-frankfurt": "./src/venues/openbooks-frankfurt.ts",
     "./venues/oper": "./src/venues/oper.ts",
@@ -44,7 +48,8 @@
     "./venues/romanfabrik": "./src/venues/romanfabrik.ts",
     "./venues/sigmund-freud-institut": "./src/venues/sigmund-freud-institut.ts",
     "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts",
-    "./venues/stk-musik": "./src/venues/stk-musik.ts"
+    "./venues/stk-musik": "./src/venues/stk-musik.ts",
+    "./venues/waggong": "./src/venues/waggong.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
