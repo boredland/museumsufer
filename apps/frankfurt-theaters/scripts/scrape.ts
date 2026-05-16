@@ -1,15 +1,13 @@
 #!/usr/bin/env bun
 /**
- * Walks every theater config, calls the matching scraper module via a
- * concurrency-limited queue, and writes the aggregated result to
- * src/scrape-data.ts. Designed to run from a GitHub Action — no D1, no
- * SCRAPE_SECRET, no Cloudflare runtime dependencies. Bun runs the file
- * natively (no tsx).
+ * Derives frankfurt-theaters' `src/scrape-data.ts` from the central event
+ * hub. The hub stores one CanonicalScrapedEvent per dated performance
+ * (flat); this script regroups them back into shows + performances per
+ * theater. Two performances share a show when their (theater_slug, title)
+ * is the same — distinct shows have distinct titles within a theater.
  *
- * Output is deterministic: stable IDs (FNV-1a hashes), sorted arrays,
- * sorted object keys. Two consecutive runs on identical upstream data
- * produce byte-identical output, so the GH Action's commit-if-changed
- * step skips noisy commits.
+ * Per-venue scraping has moved into `packages/scrapers/src/venues/`; this
+ * file is now a pure transform.
  */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -17,101 +15,107 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import PQueue from "p-queue";
-import { runScraper } from "../src/scrape-runner";
+import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
 import { THEATERS } from "../src/theater-config";
-import type { Performance, ScrapeData, Show } from "../src/types";
+import type { AvailabilityStatus, Performance, ScrapeData, Show } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
-const CONCURRENCY = 5;
+
+const STATUSES: ReadonlySet<AvailabilityStatus> = new Set([
+  "unknown",
+  "available",
+  "few_left",
+  "sold_out",
+  "cancelled",
+]);
 
 await main();
 
 async function main(): Promise<void> {
+  const theaterSlugs = new Set(THEATERS.map((t) => t.slug));
   const showsById = new Map<number, Show>();
-  const allPerformances: Performance[] = [];
-  let okCount = 0;
-  let failCount = 0;
+  const performancesById = new Map<number, Performance>();
+  const counts = new Map<string, number>();
 
-  const queue = new PQueue({ concurrency: CONCURRENCY });
-  for (const t of THEATERS) {
-    queue.add(async () => {
-      try {
-        const result = await runScraper(t.scraper);
-        ingest(t.slug, result, showsById, allPerformances);
-        log(`${t.slug.padEnd(36, " ")} ok — ${result.shows.length} shows, ${result.performances.length} perfs`);
-        okCount++;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        log(`${t.slug.padEnd(36, " ")} FAIL — ${msg}`);
-        failCount++;
-      }
+  for (const ev of EVENTS) {
+    if (ev.date < today) continue;
+    if (!theaterSlugs.has(ev.source_slug)) continue;
+    if (!hasStageLabel(ev)) continue;
+
+    const showSlug = deriveShowSlug(ev);
+    const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);
+
+    if (!showsById.has(showId)) {
+      showsById.set(showId, {
+        id: showId,
+        theater_slug: ev.source_slug,
+        slug: showSlug,
+        title: ev.title,
+        subtitle: ev.subtitle ?? undefined,
+        description: ev.description ?? undefined,
+        language: ev.language ?? undefined,
+        image_url: ev.image_url ?? undefined,
+        detail_url: ev.detail_url ?? undefined,
+      });
+    }
+
+    const perfId = fnv1aInt(`${ev.source_slug}|${showSlug}|${ev.date}|${ev.time ?? ""}|${ev.venue_room ?? ""}`);
+    if (performancesById.has(perfId)) continue;
+    performancesById.set(perfId, {
+      id: perfId,
+      show_id: showId,
+      date: ev.date,
+      status: pickStatus(ev),
+      time: ev.time ?? undefined,
+      end_time: ev.end_time ?? undefined,
+      end_date: ev.end_date ?? undefined,
+      venue_room: ev.venue_room ?? undefined,
+      provider_event_id: ev.source_event_id,
+      ticket_url: ev.ticket_url ?? undefined,
+      price_min: ev.price_min ?? undefined,
+      price_max: ev.price_max ?? undefined,
     });
+    counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
   }
-  await queue.onIdle();
 
-  const data: ScrapeData = buildScrapeData(showsById, allPerformances);
+  const data: ScrapeData = buildScrapeData(showsById, performancesById);
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
 
-  log(
-    `${okCount}/${THEATERS.length} ok, ${failCount} failed — wrote src/scrape-data.ts (${data.shows.length} shows, ${data.performances.length} perfs)`,
-  );
-  if (failCount > 0 && okCount === 0) process.exit(1);
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  for (const [slug, n] of sorted) log(`  ${slug.padEnd(36, " ")} ${n} perfs`);
+  log(`wrote src/scrape-data.ts — ${data.shows.length} shows, ${data.performances.length} performances`);
 }
 
-function ingest(
-  theaterSlug: string,
-  result: Awaited<ReturnType<typeof runScraper>>,
-  showsById: Map<number, Show>,
-  allPerformances: Performance[],
-): void {
-  for (const s of result.shows) {
-    const showId = fnv1aInt(`${theaterSlug}|${s.slug}`);
-    if (showsById.has(showId)) continue;
-    showsById.set(showId, {
-      id: showId,
-      theater_slug: theaterSlug,
-      slug: s.slug,
-      title: s.title,
-      subtitle: s.subtitle ?? null,
-      description: s.description ?? null,
-      language: s.language ?? null,
-      age_recommendation: s.age_recommendation ?? null,
-      image_url: s.image_url ?? null,
-      detail_url: s.detail_url ?? null,
-      season: s.season ?? null,
-    });
-  }
-
-  for (const p of result.performances) {
-    if (p.date < today) continue;
-    const showId = fnv1aInt(`${theaterSlug}|${p.show_slug}`);
-    const id = fnv1aInt(`${theaterSlug}|${p.show_slug}|${p.date}|${p.time ?? ""}|${p.venue_room ?? ""}`);
-    allPerformances.push({
-      id,
-      show_id: showId,
-      date: p.date,
-      time: p.time,
-      end_time: p.end_time ?? null,
-      end_date: p.end_date ?? null,
-      venue_room: p.venue_room ?? null,
-      provider_event_id: p.provider_event_id ?? null,
-      ticket_url: p.ticket_url ?? null,
-      status: p.status ?? "unknown",
-      price_min: p.price_min ?? null,
-      price_max: p.price_max ?? null,
-    });
-  }
+function hasStageLabel(ev: CanonicalEvent): boolean {
+  return ev.labels.some((l) => l.label.startsWith("stage:"));
 }
 
-function buildScrapeData(showsById: Map<number, Show>, allPerformances: Performance[]): ScrapeData {
+function pickStatus(ev: CanonicalEvent): AvailabilityStatus {
+  if (ev.raw_category && STATUSES.has(ev.raw_category as AvailabilityStatus)) {
+    return ev.raw_category as AvailabilityStatus;
+  }
+  return ev.ticket_url ? "available" : "unknown";
+}
+
+/**
+ * The hub uses one source_event_id per dated performance. We need a
+ * show-stable id so performances of the same production group correctly.
+ * Title is the most reliable cross-performance invariant in the hub data;
+ * distinct shows have distinct titles within a theater.
+ */
+function deriveShowSlug(ev: CanonicalEvent): string {
+  return ev.title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function buildScrapeData(showsById: Map<number, Show>, performancesById: Map<number, Performance>): ScrapeData {
   const shows = [...showsById.values()].sort(
     (a, b) => a.theater_slug.localeCompare(b.theater_slug) || a.slug.localeCompare(b.slug),
   );
-  const performancesById = new Map<number, Performance>();
-  for (const p of allPerformances) performancesById.set(p.id, p);
   const performances = [...performancesById.values()].sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
@@ -134,5 +138,5 @@ ${bundleSection("performances", data.performances)}
 }
 
 function log(msg: string): void {
-  process.stderr.write(`[scrape] ${msg}\n`);
+  process.stderr.write(`[theaters] ${msg}\n`);
 }

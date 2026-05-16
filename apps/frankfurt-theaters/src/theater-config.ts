@@ -8,30 +8,6 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
-  scraper:
-    | "schauspiel"
-    | "oper"
-    | "english-theatre"
-    | "komoedie"
-    | "mousonturm"
-    | "neues-theater-hoechst"
-    | "volksbuehne"
-    | "stalburg"
-    | "tigerpalast"
-    | "schmiere"
-    | "dfdc"
-    | "dramatische-buehne"
-    | "willy-praml"
-    | "kellertheater"
-    | "gallus"
-    | "theaterhaus"
-    | "internationales-theater"
-    | "papageno"
-    | "galli"
-    | "alte-bruecke"
-    | "kaes"
-    | "lempenfieber"
-    | "landungsbruecken";
 }
 
 export const THEATERS: TheaterConfig[] = [
@@ -43,7 +19,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6745,
     website_url: "https://www.schauspielfrankfurt.de",
     ticketing_provider: "eventim_inhouse",
-    scraper: "schauspiel",
   },
   {
     slug: "oper-frankfurt",
@@ -53,7 +28,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6726,
     website_url: "https://oper-frankfurt.de",
     ticketing_provider: "eventim_inhouse",
-    scraper: "oper",
   },
   {
     slug: "english-theatre-frankfurt",
@@ -63,7 +37,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6712,
     website_url: "https://english-theatre.de",
     ticketing_provider: "eventim_inhouse",
-    scraper: "english-theatre",
   },
   {
     slug: "komoedie-frankfurt",
@@ -73,7 +46,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6739,
     website_url: "https://diekomoedie.de",
     ticketing_provider: "custom",
-    scraper: "komoedie",
   },
   {
     slug: "mousonturm",
@@ -83,7 +55,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.7019,
     website_url: "https://www.mousonturm.de",
     ticketing_provider: "reservix",
-    scraper: "mousonturm",
   },
   {
     slug: "neues-theater-hoechst",
@@ -93,7 +64,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.5443,
     website_url: "https://neues-theater.de",
     ticketing_provider: "custom",
-    scraper: "neues-theater-hoechst",
   },
   {
     slug: "volksbuehne-frankfurt",
@@ -103,7 +73,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6817,
     website_url: "https://volksbuehne.net",
     ticketing_provider: "reservix",
-    scraper: "volksbuehne",
   },
   {
     slug: "stalburg-theater",
@@ -113,7 +82,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6885,
     website_url: "https://stalburg.de",
     ticketing_provider: "reservix",
-    scraper: "stalburg",
   },
   {
     slug: "tigerpalast-variete",
@@ -123,7 +91,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6836,
     website_url: "https://www.tigerpalast.de",
     ticketing_provider: "reservix",
-    scraper: "tigerpalast",
   },
   {
     slug: "die-schmiere",
@@ -133,7 +100,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6833,
     website_url: "https://die-schmiere.de",
     ticketing_provider: "reservix",
-    scraper: "schmiere",
   },
   {
     slug: "dresden-frankfurt-dance-company",
@@ -143,7 +109,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6463,
     website_url: "https://www.dfdc.de",
     ticketing_provider: "eventim_inhouse",
-    scraper: "dfdc",
   },
   {
     slug: "dramatische-buehne",
@@ -153,7 +118,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6821,
     website_url: "https://www.diedramatischebuehne.de",
     ticketing_provider: "custom",
-    scraper: "dramatische-buehne",
   },
   {
     slug: "theater-willy-praml",
@@ -163,7 +127,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.7037,
     website_url: "https://theaterwillypraml.de",
     ticketing_provider: "custom",
-    scraper: "willy-praml",
   },
   {
     slug: "kellertheater-frankfurt",
@@ -173,7 +136,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6852,
     website_url: "https://www.kellertheater-frankfurt.de",
     ticketing_provider: "frankfurt_ticket",
-    scraper: "kellertheater",
   },
   {
     slug: "gallus-theater",
@@ -183,7 +145,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6334,
     website_url: "https://www.gallustheater.de",
     ticketing_provider: "custom",
-    scraper: "gallus",
   },
   {
     slug: "theaterhaus-frankfurt",
@@ -193,7 +154,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6877,
     website_url: "https://www.theaterhaus-frankfurt.de",
     ticketing_provider: "custom",
-    scraper: "theaterhaus",
   },
   {
     slug: "internationales-theater",
@@ -203,7 +163,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6976,
     website_url: "https://www.internationales-theater.de",
     ticketing_provider: "custom",
-    scraper: "internationales-theater",
   },
   {
     slug: "papageno-musiktheater",
@@ -213,7 +172,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6533,
     website_url: "https://www.papageno-theater.de",
     ticketing_provider: "frankfurt_ticket",
-    scraper: "papageno",
   },
   {
     slug: "galli-theater",
@@ -223,7 +181,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6841,
     website_url: "https://www.galli-frankfurt.de",
     ticketing_provider: "custom",
-    scraper: "galli",
   },
   {
     slug: "theater-alte-bruecke",
@@ -233,7 +190,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6874,
     website_url: "https://www.theater-alte-bruecke.de",
     ticketing_provider: "reservix",
-    scraper: "alte-bruecke",
   },
   {
     slug: "die-kaes",
@@ -243,7 +199,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.7041,
     website_url: "https://www.diekaes.de",
     ticketing_provider: "reservix",
-    scraper: "kaes",
   },
   {
     slug: "theater-lempenfieber",
@@ -253,7 +208,6 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6824,
     website_url: "https://www.lempenfieber.de",
     ticketing_provider: "reservix",
-    scraper: "lempenfieber",
   },
   {
     slug: "landungsbruecken",
@@ -263,6 +217,5 @@ export const THEATERS: TheaterConfig[] = [
     lon: 8.6519,
     website_url: "https://landungsbruecken.org",
     ticketing_provider: "custom",
-    scraper: "landungsbruecken",
   },
 ];
