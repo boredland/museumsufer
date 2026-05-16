@@ -9,10 +9,15 @@ export type {
 } from "./types";
 
 import type { ScraperContext, VenueScraper } from "./types";
+import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
+import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
+import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
+import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
+import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 
 /**
@@ -23,17 +28,27 @@ import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt
  * individual venues migrate over.
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
+  { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
+  { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
+  { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
+  { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "romanfabrik", run: (_ctx: ScraperContext) => scrapeRomanfabrik() },
+  { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
 ];
 
 export {
+  scrapeBuergeruniversitaet,
   scrapeDenkbar,
+  scrapeDigFrankfurt,
   scrapeEvangelischeAkademie,
+  scrapeJuedischeGemeinde,
+  scrapeLiteraturhaus,
   scrapeMousonturm,
   scrapeRomanfabrik,
+  scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
 };
