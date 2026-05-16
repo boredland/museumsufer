@@ -40,7 +40,7 @@ interface RawEvent {
  * Liederabende default to chamber, konzerte to classical; the keyword pass
  * may upgrade either when title/subtitle indicates sacred/jazz/etc.
  */
-export async function scrapeOper(): Promise<VenueScrapeResult> {
+export async function scrapeOperFrankfurtKonzerte(): Promise<VenueScrapeResult> {
   const konzerteHtml = await fetchHtml(KONZERTE_URL);
   await sleep(REQUEST_DELAY_MS);
   const liederHtml = await fetchHtml(LIEDERABENDE_URL);
@@ -106,7 +106,7 @@ export async function scrapeOper(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "oper-frankfurt", events };
+  return { source_slug: "oper-frankfurt-konzerte", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

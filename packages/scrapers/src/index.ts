@@ -47,6 +47,7 @@ import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeLandauDe } from "./venues/landau-de";
+import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
@@ -54,7 +55,8 @@ import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
-import { scrapeOper } from "./venues/oper";
+import { scrapeOperFrankfurt } from "./venues/oper-frankfurt";
+import { scrapeOperFrankfurtKonzerte } from "./venues/oper-frankfurt-konzerte";
 import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
@@ -63,6 +65,7 @@ import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
+import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStalburgTheater } from "./venues/stalburg-theater";
@@ -70,6 +73,7 @@ import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
 import { scrapeTheaterLempenfieber } from "./venues/theater-lempenfieber";
+import { scrapeTheaterWillyPraml } from "./venues/theater-willy-praml";
 import { scrapeTheaterhausFrankfurt } from "./venues/theaterhaus-frankfurt";
 import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
@@ -124,6 +128,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
   { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
+  { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
@@ -131,7 +136,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
-  { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
+  { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOperFrankfurt() },
+  { slug: "oper-frankfurt-konzerte", run: (_ctx: ScraperContext) => scrapeOperFrankfurtKonzerte() },
   { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
   { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
@@ -140,6 +146,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
   { slug: "romanfabrik", run: (_ctx: ScraperContext) => scrapeRomanfabrik() },
   { slug: "rptu-campuskultur", run: (_ctx: ScraperContext) => scrapeRptuCampuskultur() },
+  { slug: "schauspiel-frankfurt", run: (_ctx: ScraperContext) => scrapeSchauspielFrankfurt() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
@@ -147,6 +154,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
   { slug: "theater-lempenfieber", run: (_ctx: ScraperContext) => scrapeTheaterLempenfieber() },
+  { slug: "theater-willy-praml", run: (_ctx: ScraperContext) => scrapeTheaterWillyPraml() },
   { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
   { slug: "tigerpalast-variete", run: (_ctx: ScraperContext) => scrapeTigerpalastVariete() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
@@ -192,6 +200,7 @@ export {
   scrapeKronbergAcademy,
   scrapeKulturnetzLandau,
   scrapeLandauDe,
+  scrapeLandungsbruecken,
   scrapeLiteraturhaus,
   scrapeMousonturm,
   scrapeMusikschuleFrankfurt,
@@ -199,7 +208,8 @@ export {
   scrapeNeuesTheaterHoechst,
   scrapeNormativeOrders,
   scrapeOpenBooks,
-  scrapeOper,
+  scrapeOperFrankfurt,
+  scrapeOperFrankfurtKonzerte,
   scrapePapagenoMusiktheater,
   scrapePfalzDe,
   scrapePolytechnische,
@@ -208,6 +218,7 @@ export {
   scrapeRoemerberggespraeche,
   scrapeRomanfabrik,
   scrapeRptuCampuskultur,
+  scrapeSchauspielFrankfurt,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
   scrapeStalburgTheater,
@@ -216,6 +227,7 @@ export {
   scrapeTheaterAlteBruecke,
   scrapeTheaterhausFrankfurt,
   scrapeTheaterLempenfieber,
+  scrapeTheaterWillyPraml,
   scrapeTigerpalastVariete,
   scrapeVolksbuehneFrankfurt,
   scrapeWaggong,
