@@ -16,32 +16,6 @@ export function parseGenre(value: string | undefined | null): Genre | null {
   return (GENRES as readonly string[]).includes(value) ? (value as Genre) : null;
 }
 
-export type ScraperName =
-  | "alte-oper"
-  | "oper"
-  | "dr-hochs"
-  | "hfmdk"
-  | "ensemble-modern"
-  | "hr-sinfonieorchester"
-  | "hr-bigband"
-  | "holzhausenschloesschen"
-  | "jazz-frankfurt"
-  | "jazz-palmengarten"
-  | "brotfabrik"
-  | "romanfabrik"
-  | "andreas-koehs"
-  | "kirchenmusik-dreikoenig"
-  | "stk-musik"
-  | "kronberg-academy"
-  | "rheingau-festival"
-  | "bad-homburg-schloss"
-  | "bad-soden"
-  | "evangelische-akademie"
-  | "denkbar"
-  | "naxos"
-  | "waggong"
-  | "musikschule-frankfurt";
-
 export interface Event {
   id: number;
   venue_slug: string;
@@ -60,29 +34,6 @@ export interface Event {
   price_max?: number;
   venue_room?: string;
   performers?: string;
-}
-
-export interface ScrapedEvent {
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  description?: string | null;
-  date: string;
-  time?: string | null;
-  end_time?: string | null;
-  genre?: Genre | null;
-  image_url?: string | null;
-  detail_url?: string | null;
-  ticket_url?: string | null;
-  price_min?: number | null;
-  price_max?: number | null;
-  venue_room?: string | null;
-  performers?: string | null;
-}
-
-export interface ScrapeResult {
-  venue_slug: string;
-  events: ScrapedEvent[];
 }
 
 export interface ScrapeData {

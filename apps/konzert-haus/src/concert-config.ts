@@ -1,4 +1,4 @@
-import type { Genre, ScraperName } from "./types";
+import type { Genre } from "./types";
 
 export interface VenueConfig {
   slug: string;
@@ -10,7 +10,6 @@ export interface VenueConfig {
   city: string;
   website_url: string;
   default_genre: Genre;
-  scraper: ScraperName;
 }
 
 export const VENUES: VenueConfig[] = [
@@ -24,10 +23,9 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.alteoper.de",
     default_genre: "classical",
-    scraper: "alte-oper",
   },
   {
-    slug: "oper-frankfurt",
+    slug: "oper-frankfurt-konzerte",
     name: "Oper Frankfurt",
     short_name: "Oper Frankfurt",
     address: "Untermainanlage 11, 60311 Frankfurt am Main",
@@ -36,7 +34,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://oper-frankfurt.de",
     default_genre: "classical",
-    scraper: "oper",
   },
   {
     slug: "dr-hochs-konservatorium",
@@ -48,7 +45,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.dr-hochs.de",
     default_genre: "classical",
-    scraper: "dr-hochs",
   },
   {
     slug: "hfmdk",
@@ -60,7 +56,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.hfmdk-frankfurt.de",
     default_genre: "classical",
-    scraper: "hfmdk",
   },
   {
     slug: "ensemble-modern",
@@ -72,7 +67,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.ensemble-modern.com",
     default_genre: "experimental",
-    scraper: "ensemble-modern",
   },
   {
     slug: "hr-sinfonieorchester",
@@ -84,7 +78,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.hr-sinfonieorchester.de",
     default_genre: "classical",
-    scraper: "hr-sinfonieorchester",
   },
   {
     slug: "hr-bigband",
@@ -96,7 +89,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.hr-bigband.de",
     default_genre: "jazz",
-    scraper: "hr-bigband",
   },
   {
     slug: "holzhausenschloesschen",
@@ -108,7 +100,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.frankfurter-buergerstiftung.de",
     default_genre: "chamber",
-    scraper: "holzhausenschloesschen",
   },
   {
     slug: "jazz-frankfurt",
@@ -120,7 +111,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.jazz-frankfurt.de",
     default_genre: "jazz",
-    scraper: "jazz-frankfurt",
   },
   {
     slug: "jazz-palmengarten",
@@ -132,7 +122,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.palmengarten.de",
     default_genre: "jazz",
-    scraper: "jazz-palmengarten",
   },
   {
     slug: "brotfabrik",
@@ -144,7 +133,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.brotfabrik.info",
     default_genre: "world",
-    scraper: "brotfabrik",
   },
   {
     slug: "romanfabrik",
@@ -156,10 +144,9 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.romanfabrik.de",
     default_genre: "world",
-    scraper: "romanfabrik",
   },
   {
-    slug: "evangelische-akademie",
+    slug: "evangelische-akademie-frankfurt",
     name: "Evangelische Akademie Frankfurt",
     short_name: "Ev. Akademie",
     address: "Römerberg 9, 60311 Frankfurt am Main",
@@ -168,7 +155,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.evangelische-akademie.de",
     default_genre: "chamber",
-    scraper: "evangelische-akademie",
   },
   {
     slug: "andreas-koehs",
@@ -180,7 +166,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.andreas-koehs.de",
     default_genre: "sacred",
-    scraper: "andreas-koehs",
   },
   {
     slug: "kirchenmusik-dreikoenig",
@@ -192,7 +177,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.dreikoenigsgemeinde.de",
     default_genre: "sacred",
-    scraper: "kirchenmusik-dreikoenig",
   },
   {
     slug: "st-katharinen",
@@ -204,7 +188,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.st-katharinengemeinde.de",
     default_genre: "sacred",
-    scraper: "stk-musik",
   },
   {
     slug: "kronberg-academy",
@@ -216,7 +199,6 @@ export const VENUES: VenueConfig[] = [
     city: "kronberg",
     website_url: "https://www.kronbergacademy.de",
     default_genre: "classical",
-    scraper: "kronberg-academy",
   },
   {
     slug: "rheingau-musikfestival",
@@ -228,7 +210,6 @@ export const VENUES: VenueConfig[] = [
     city: "eltville",
     website_url: "https://www.rheingau-musik-festival.de",
     default_genre: "classical",
-    scraper: "rheingau-festival",
   },
   {
     slug: "bad-homburger-schlosskonzerte",
@@ -240,10 +221,9 @@ export const VENUES: VenueConfig[] = [
     city: "bad-homburg",
     website_url: "https://www.bad-homburger-schlosskonzerte.de",
     default_genre: "classical",
-    scraper: "bad-homburg-schloss",
   },
   {
-    slug: "denkbar",
+    slug: "denkbar-frankfurt",
     name: "Denkbar Frankfurt",
     short_name: "Denkbar",
     address: "Spohrstraße 46a, 60327 Frankfurt am Main",
@@ -252,7 +232,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://denkbar-ffm.de",
     default_genre: "jazz",
-    scraper: "denkbar",
   },
   {
     slug: "bad-soden",
@@ -264,7 +243,6 @@ export const VENUES: VenueConfig[] = [
     city: "bad-soden",
     website_url: "https://www.bad-soden.de",
     default_genre: "chamber",
-    scraper: "bad-soden",
   },
   {
     slug: "naxos-hallenkonzerte",
@@ -276,7 +254,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://naxoshallenkonzerte.de",
     default_genre: "experimental",
-    scraper: "naxos",
   },
   {
     slug: "waggong",
@@ -288,7 +265,6 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://waggong.de",
     default_genre: "jazz",
-    scraper: "waggong",
   },
   {
     slug: "musikschule-frankfurt",
@@ -300,6 +276,5 @@ export const VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.musikschule-frankfurt.de",
     default_genre: "classical",
-    scraper: "musikschule-frankfurt",
   },
 ];
