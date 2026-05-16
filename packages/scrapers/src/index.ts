@@ -23,6 +23,7 @@ import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
+import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
@@ -43,14 +44,17 @@ import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOper } from "./venues/oper";
+import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
 import { scrapeRheingauFestival } from "./venues/rheingau-festival";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
+import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStKatharinen } from "./venues/stk-musik";
+import { scrapeSuew } from "./venues/suew";
 import { scrapeWaggong } from "./venues/waggong";
 
 /**
@@ -78,6 +82,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
+  { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
@@ -98,14 +103,17 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
+  { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
   { slug: "rheingau-musikfestival", run: (_ctx: ScraperContext) => scrapeRheingauFestival() },
   { slug: "rls-hessen", run: (_ctx: ScraperContext) => scrapeRlsHessen() },
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
   { slug: "romanfabrik", run: (_ctx: ScraperContext) => scrapeRomanfabrik() },
+  { slug: "rptu-campuskultur", run: (_ctx: ScraperContext) => scrapeRptuCampuskultur() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
+  { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
 ];
 
@@ -124,6 +132,7 @@ export {
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
+  scrapeHambacherSchloss,
   scrapeHausAmDom,
   scrapeHfmdk,
   scrapeHolzhausenschloesschen,
@@ -144,13 +153,16 @@ export {
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOper,
+  scrapePfalzDe,
   scrapePolytechnische,
   scrapeRheingauFestival,
   scrapeRlsHessen,
   scrapeRoemerberggespraeche,
   scrapeRomanfabrik,
+  scrapeRptuCampuskultur,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
   scrapeStKatharinen,
+  scrapeSuew,
   scrapeWaggong,
 };
