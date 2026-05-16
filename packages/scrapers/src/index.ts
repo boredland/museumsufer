@@ -16,6 +16,8 @@ import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
+import { scrapeDieKaes } from "./venues/die-kaes";
+import { scrapeDieSchmiere } from "./venues/die-schmiere";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
 import { scrapeDrHochs } from "./venues/dr-hochs";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
@@ -55,6 +57,7 @@ import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
+import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
 import { scrapeWaggong } from "./venues/waggong";
 
 /**
@@ -72,6 +75,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
+  { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
+  { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
@@ -114,6 +119,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
+  { slug: "tigerpalast-variete", run: (_ctx: ScraperContext) => scrapeTigerpalastVariete() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
 ];
 
@@ -125,6 +131,8 @@ export {
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
   scrapeDenkbar,
+  scrapeDieKaes,
+  scrapeDieSchmiere,
   scrapeDigFrankfurt,
   scrapeDrHochs,
   scrapeEnsembleModern,
@@ -164,5 +172,6 @@ export {
   scrapeStadtbuechereiFrankfurt,
   scrapeStKatharinen,
   scrapeSuew,
+  scrapeTigerpalastVariete,
   scrapeWaggong,
 };
