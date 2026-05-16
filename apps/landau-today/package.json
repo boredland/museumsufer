@@ -21,6 +21,7 @@
     "@fontsource-variable/newsreader": "^5.2.10",
     "@fontsource/bodoni-moda-sc": "^5.2.10",
     "@museumsufer/core": "*",
+    "@museumsufer/event-hub": "*",
     "@scalar/hono-api-reference": "^0.10.14",
     "dayjs": "^1.11.20",
     "hono": "^4.12.18",
