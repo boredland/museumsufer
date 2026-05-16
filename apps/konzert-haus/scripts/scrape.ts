@@ -1,11 +1,10 @@
 #!/usr/bin/env bun
 /**
- * Walks every venue config, dispatches the matching scraper via a
- * concurrency-limited queue, applies genre heuristics, computes stable
- * FNV-1a IDs, and writes the aggregated result to src/scrape-data.ts.
- *
- * Deterministic output: stable IDs, sorted arrays, sorted object keys.
- * Two runs on identical upstream data produce byte-identical output.
+ * Derives konzert-haus's `src/scrape-data.ts` from the central event hub.
+ * Filters `EVENTS` to entries whose `source_slug` is a konzert-haus venue
+ * and that carry a `music:*` label, then maps each canonical event onto
+ * the konzert-haus `Event` shape. Per-venue scraping moved into
+ * `packages/scrapers/src/venues/`; this script is now a pure transform.
  */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -13,90 +12,86 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import PQueue from "p-queue";
-import { VENUES, type VenueConfig } from "../src/concert-config";
+import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
+import { VENUES } from "../src/concert-config";
 import { dedupEvents } from "../src/dedup";
-import { classify } from "../src/genre-heuristics";
-import { runScraper } from "../src/scrape-runner";
-import type { Event, ScrapeData, ScrapedEvent } from "../src/types";
+import { type Event, GENRES, type Genre, parseGenre, type ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
-const CONCURRENCY = 5;
 
 await main();
 
 async function main(): Promise<void> {
+  const venueSlugs = new Set(VENUES.map((v) => v.slug));
+  const defaultGenreBySlug = new Map(VENUES.map((v) => [v.slug, v.default_genre]));
   const eventsById = new Map<number, Event>();
-  let okCount = 0;
-  let failCount = 0;
+  const counts = new Map<string, number>();
 
-  const queue = new PQueue({ concurrency: CONCURRENCY });
-  for (const venue of VENUES) {
-    queue.add(async () => {
-      try {
-        const result = await runScraper(venue.scraper);
-        ingest(venue, result.events, eventsById);
-        log(`${venue.slug.padEnd(36, " ")} ok — ${result.events.length} events`);
-        okCount++;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        log(`${venue.slug.padEnd(36, " ")} FAIL — ${msg}`);
-        failCount++;
-      }
-    });
-  }
-  await queue.onIdle();
+  for (const ev of EVENTS) {
+    if (ev.date < today) continue;
+    if (!venueSlugs.has(ev.source_slug)) continue;
+    const genre = pickGenre(ev) ?? defaultGenreBySlug.get(ev.source_slug);
+    if (!genre) continue;
 
-  const data: ScrapeData = buildScrapeData(eventsById);
-  await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
-
-  log(`${okCount}/${VENUES.length} ok, ${failCount} failed — wrote src/scrape-data.ts (${data.events.length} events)`);
-  if (failCount > 0 && okCount === 0) process.exit(1);
-}
-
-function ingest(venue: VenueConfig, scraped: ScrapedEvent[], eventsById: Map<number, Event>): void {
-  for (const s of scraped) {
-    if (s.date < today) continue;
-    const genre = s.genre ?? classify(s.title, s.subtitle, s.description, venue.default_genre);
-    const canonicalTitle = s.title.toLowerCase().replace(/[^a-z0-9]+/g, "");
-    const canonicalTitleHash = fnv1aInt(canonicalTitle);
-    const id = fnv1aInt(`${venue.slug}|${s.date}|${s.time ?? ""}|${s.venue_room ?? ""}|${canonicalTitleHash}`);
+    const canonicalTitleHash = fnv1aInt(ev.title.toLowerCase().replace(/[^a-z0-9]+/g, ""));
+    const id = fnv1aInt(`${ev.source_slug}|${ev.date}|${ev.time ?? ""}|${ev.venue_room ?? ""}|${canonicalTitleHash}`);
     if (eventsById.has(id)) continue;
     eventsById.set(id, {
       id,
-      venue_slug: venue.slug,
-      slug: s.slug,
-      title: s.title,
-      subtitle: s.subtitle ?? undefined,
-      description: s.description ?? undefined,
-      date: s.date,
-      time: s.time ?? undefined,
-      end_time: s.end_time ?? undefined,
+      venue_slug: ev.source_slug,
+      slug: ev.source_event_id,
+      title: ev.title,
+      subtitle: ev.subtitle,
+      description: ev.description,
+      date: ev.date,
+      time: ev.time,
+      end_time: ev.end_time,
       genre,
-      image_url: s.image_url ?? undefined,
-      detail_url: s.detail_url ?? undefined,
-      ticket_url: s.ticket_url ?? undefined,
-      price_min: s.price_min ?? undefined,
-      price_max: s.price_max ?? undefined,
-      venue_room: s.venue_room ?? undefined,
-      performers: s.performers ?? undefined,
+      image_url: ev.image_url,
+      detail_url: ev.detail_url,
+      ticket_url: ev.ticket_url,
+      price_min: ev.price_min,
+      price_max: ev.price_max,
+      venue_room: ev.venue_room,
+      performers: ev.performers,
     });
+    counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
   }
-}
 
-function buildScrapeData(eventsById: Map<number, Event>): ScrapeData {
   const deduped = dedupEvents([...eventsById.values()]);
-  const events = deduped.sort(
+  deduped.sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
       (a.time ?? "").localeCompare(b.time ?? "") ||
       a.venue_slug.localeCompare(b.venue_slug) ||
       a.title.localeCompare(b.title),
   );
-  return { events };
+
+  const data: ScrapeData = { events: deduped };
+  await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
+
+  const seenCount = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  for (const [slug, n] of seenCount) log(`  ${slug.padEnd(36, " ")} ${n}`);
+  log(`wrote src/scrape-data.ts — ${deduped.length} events from ${counts.size} venues`);
 }
+
+/** Read the music genre off the highest-confidence `music:<genre>` label,
+ *  if any. Each hub event carries one music:* label per scrape-time pass. */
+function pickGenre(ev: CanonicalEvent): Genre | null {
+  let best: { genre: Genre; confidence: number } | null = null;
+  for (const l of ev.labels) {
+    if (!l.label.startsWith("music:")) continue;
+    const tail = l.label.slice("music:".length);
+    if (!(GENRES as readonly string[]).includes(tail)) continue;
+    const genre = tail as Genre;
+    if (!best || l.confidence > best.confidence) best = { genre, confidence: l.confidence };
+  }
+  return best?.genre ?? null;
+}
+
+void parseGenre;
 
 function generateModule(data: ScrapeData): string {
   return `// Auto-generated by scripts/scrape.ts — do not edit by hand.
@@ -109,5 +104,5 @@ ${bundleSection("events", data.events)}
 }
 
 function log(msg: string): void {
-  process.stderr.write(`[scrape] ${msg}\n`);
+  process.stderr.write(`[konzert-haus] ${msg}\n`);
 }
