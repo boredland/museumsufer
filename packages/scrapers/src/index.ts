@@ -20,11 +20,13 @@ import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
 import { scrapeDrHochs } from "./venues/dr-hochs";
+import { scrapeEnglishTheatreFrankfurt } from "./venues/english-theatre-frankfurt";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
+import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
@@ -38,6 +40,7 @@ import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
+import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeLandauDe } from "./venues/landau-de";
@@ -45,6 +48,7 @@ import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeNaxos } from "./venues/naxos";
+import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOper } from "./venues/oper";
@@ -58,6 +62,7 @@ import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
+import { scrapeStalburgTheater } from "./venues/stalburg-theater";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
@@ -84,6 +89,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
+  { slug: "english-theatre-frankfurt", run: (_ctx: ScraperContext) => scrapeEnglishTheatreFrankfurt() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
@@ -92,6 +98,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
+  { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
@@ -105,6 +112,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
+  { slug: "komoedie-frankfurt", run: (_ctx: ScraperContext) => scrapeKomoedieFrankfurt() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
   { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
@@ -112,6 +120,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
+  { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
@@ -126,6 +135,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
+  { slug: "stalburg-theater", run: (_ctx: ScraperContext) => scrapeStalburgTheater() },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
   { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
@@ -145,11 +155,13 @@ export {
   scrapeDieSchmiere,
   scrapeDigFrankfurt,
   scrapeDrHochs,
+  scrapeEnglishTheatreFrankfurt,
   scrapeEnsembleModern,
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
+  scrapeGalliTheater,
   scrapeGallusTheater,
   scrapeHambacherSchloss,
   scrapeHausAmDom,
@@ -163,6 +175,7 @@ export {
   scrapeJuedischeGemeinde,
   scrapeKellertheaterFrankfurt,
   scrapeKirchenmusikDreikoenig,
+  scrapeKomoedieFrankfurt,
   scrapeKronbergAcademy,
   scrapeKulturnetzLandau,
   scrapeLandauDe,
@@ -170,6 +183,7 @@ export {
   scrapeMousonturm,
   scrapeMusikschuleFrankfurt,
   scrapeNaxos,
+  scrapeNeuesTheaterHoechst,
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOper,
@@ -183,6 +197,7 @@ export {
   scrapeRptuCampuskultur,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
+  scrapeStalburgTheater,
   scrapeStKatharinen,
   scrapeSuew,
   scrapeTheaterAlteBruecke,
