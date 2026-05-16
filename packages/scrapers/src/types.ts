@@ -63,4 +63,9 @@ export interface ScraperContext {
   proxy: ProxyConfig | null;
 }
 
-export type VenueScraper = (ctx: ScraperContext) => Promise<VenueScrapeResult>;
+/**
+ * Most scrapers return a single VenueScrapeResult. The museum orchestrator
+ * is the exception: one entry that fans out to ~27 results, one per museum.
+ * The runner normalises both shapes via Array.isArray.
+ */
+export type VenueScraper = (ctx: ScraperContext) => Promise<VenueScrapeResult | VenueScrapeResult[]>;
