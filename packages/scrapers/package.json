@@ -30,17 +30,21 @@
     "./venues/jazz-frankfurt": "./src/venues/jazz-frankfurt.ts",
     "./venues/jazz-palmengarten": "./src/venues/jazz-palmengarten.ts",
     "./venues/juedische-gemeinde-frankfurt": "./src/venues/juedische-gemeinde-frankfurt.ts",
+    "./venues/kirchenmusik-dreikoenig": "./src/venues/kirchenmusik-dreikoenig.ts",
+    "./venues/kronberg-academy": "./src/venues/kronberg-academy.ts",
     "./venues/literaturhaus-frankfurt": "./src/venues/literaturhaus-frankfurt.ts",
     "./venues/mousonturm": "./src/venues/mousonturm.ts",
     "./venues/normative-orders": "./src/venues/normative-orders.ts",
     "./venues/openbooks-frankfurt": "./src/venues/openbooks-frankfurt.ts",
     "./venues/oper": "./src/venues/oper.ts",
     "./venues/polytechnische": "./src/venues/polytechnische.ts",
+    "./venues/rheingau-festival": "./src/venues/rheingau-festival.ts",
     "./venues/rls-hessen": "./src/venues/rls-hessen.ts",
     "./venues/roemerberggespraeche": "./src/venues/roemerberggespraeche.ts",
     "./venues/romanfabrik": "./src/venues/romanfabrik.ts",
     "./venues/sigmund-freud-institut": "./src/venues/sigmund-freud-institut.ts",
-    "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts"
+    "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts",
+    "./venues/stk-musik": "./src/venues/stk-musik.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

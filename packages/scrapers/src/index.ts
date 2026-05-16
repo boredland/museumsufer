@@ -30,17 +30,21 @@ import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozial
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
+import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
+import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOper } from "./venues/oper";
 import { scrapePolytechnische } from "./venues/polytechnische";
+import { scrapeRheingauFestival } from "./venues/rheingau-festival";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
+import { scrapeStKatharinen } from "./venues/stk-musik";
 
 /**
  * The set of canonical hub scrapers. Each emits canonical-shaped events
@@ -74,16 +78,20 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
   { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
+  { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
+  { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
+  { slug: "rheingau-musikfestival", run: (_ctx: ScraperContext) => scrapeRheingauFestival() },
   { slug: "rls-hessen", run: (_ctx: ScraperContext) => scrapeRlsHessen() },
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
   { slug: "romanfabrik", run: (_ctx: ScraperContext) => scrapeRomanfabrik() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
+  { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
 ];
 
@@ -109,15 +117,19 @@ export {
   scrapeJazzFrankfurt,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
+  scrapeKirchenmusikDreikoenig,
+  scrapeKronbergAcademy,
   scrapeLiteraturhaus,
   scrapeMousonturm,
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOper,
   scrapePolytechnische,
+  scrapeRheingauFestival,
   scrapeRlsHessen,
   scrapeRoemerberggespraeche,
   scrapeRomanfabrik,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
+  scrapeStKatharinen,
 };
