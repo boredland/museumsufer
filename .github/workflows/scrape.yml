@@ -47,15 +47,7 @@ jobs:
             exit 0
           fi
           git commit -m "data(theaters): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          push_with_retry() {
-            for attempt in 1 2 3; do
-              if git pull --rebase origin main && git push; then return 0; fi
-              echo "push attempt $attempt failed, retrying"
-              sleep $((attempt * 2))
-            done
-            return 1
-          }
-          push_with_retry
+          .github/scripts/push-scrape.sh apps/frankfurt-theaters/src/scrape-data.ts
 
   museums:
     if: |
@@ -90,12 +82,7 @@ jobs:
             exit 0
           fi
           git commit -m "data(museums): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push; then exit 0; fi
-            echo "push attempt $attempt failed, retrying"
-            sleep $((attempt * 2))
-          done
-          exit 1
+          .github/scripts/push-scrape.sh apps/frankfurt-museums/src/scrape-data.ts
 
   landau:
     if: |
@@ -126,12 +113,7 @@ jobs:
             exit 0
           fi
           git commit -m "data(landau): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push; then exit 0; fi
-            echo "push attempt $attempt failed, retrying"
-            sleep $((attempt * 2))
-          done
-          exit 1
+          .github/scripts/push-scrape.sh apps/landau-today/src/scrape-data.ts apps/landau-today/src/geocode-cache.ts
 
   lehrhaus:
     if: |
@@ -165,12 +147,7 @@ jobs:
             exit 0
           fi
           git commit -m "data(lehrhaus): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push; then exit 0; fi
-            echo "push attempt $attempt failed, retrying"
-            sleep $((attempt * 2))
-          done
-          exit 1
+          .github/scripts/push-scrape.sh apps/lehrhaus/src/scrape-data.ts
 
   konzert-haus:
     if: |
@@ -200,15 +177,7 @@ jobs:
             exit 0
           fi
           git commit -m "data(konzert-haus): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          push_with_retry() {
-            for attempt in 1 2 3; do
-              if git pull --rebase origin main && git push; then return 0; fi
-              echo "push attempt $attempt failed, retrying"
-              sleep $((attempt * 2))
-            done
-            return 1
-          }
-          push_with_retry
+          .github/scripts/push-scrape.sh apps/konzert-haus/src/scrape-data.ts
 
   event-hub:
     if: |
@@ -242,9 +211,4 @@ jobs:
             exit 0
           fi
           git commit -m "data(event-hub): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push; then exit 0; fi
-            echo "push attempt $attempt failed, retrying"
-            sleep $((attempt * 2))
-          done
-          exit 1
+          .github/scripts/push-scrape.sh packages/event-hub/data/events.ts
