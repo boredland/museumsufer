@@ -25,6 +25,7 @@ import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
+import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHfmdk } from "./venues/hfmdk";
@@ -35,6 +36,7 @@ import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozial
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
+import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
@@ -46,6 +48,7 @@ import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOper } from "./venues/oper";
+import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
 import { scrapeRheingauFestival } from "./venues/rheingau-festival";
@@ -57,6 +60,8 @@ import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
+import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
+import { scrapeTheaterhausFrankfurt } from "./venues/theaterhaus-frankfurt";
 import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
 import { scrapeWaggong } from "./venues/waggong";
 
@@ -87,6 +92,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
+  { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
@@ -97,6 +103,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
   { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
+  { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
@@ -108,6 +115,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
+  { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
   { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
   { slug: "rheingau-musikfestival", run: (_ctx: ScraperContext) => scrapeRheingauFestival() },
@@ -119,6 +127,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
+  { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
+  { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
   { slug: "tigerpalast-variete", run: (_ctx: ScraperContext) => scrapeTigerpalastVariete() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
 ];
@@ -140,6 +150,7 @@ export {
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
+  scrapeGallusTheater,
   scrapeHambacherSchloss,
   scrapeHausAmDom,
   scrapeHfmdk,
@@ -150,6 +161,7 @@ export {
   scrapeJazzFrankfurt,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
+  scrapeKellertheaterFrankfurt,
   scrapeKirchenmusikDreikoenig,
   scrapeKronbergAcademy,
   scrapeKulturnetzLandau,
@@ -161,6 +173,7 @@ export {
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOper,
+  scrapePapagenoMusiktheater,
   scrapePfalzDe,
   scrapePolytechnische,
   scrapeRheingauFestival,
@@ -172,6 +185,8 @@ export {
   scrapeStadtbuechereiFrankfurt,
   scrapeStKatharinen,
   scrapeSuew,
+  scrapeTheaterAlteBruecke,
+  scrapeTheaterhausFrankfurt,
   scrapeTigerpalastVariete,
   scrapeWaggong,
 };
