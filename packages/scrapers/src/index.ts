@@ -11,6 +11,8 @@ export type {
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
+import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
+import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
@@ -34,6 +36,8 @@ import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
+import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
+import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOper } from "./venues/oper";
@@ -45,6 +49,7 @@ import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStKatharinen } from "./venues/stk-musik";
+import { scrapeWaggong } from "./venues/waggong";
 
 /**
  * The set of canonical hub scrapers. Each emits canonical-shaped events
@@ -56,6 +61,8 @@ import { scrapeStKatharinen } from "./venues/stk-musik";
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
+  { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
+  { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
@@ -82,6 +89,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
+  { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
+  { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
@@ -93,11 +102,14 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
+  { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
 ];
 
 export {
   scrapeAlteOper,
   scrapeAndreasKoehs,
+  scrapeBadHomburgSchloss,
+  scrapeBadSoden,
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
   scrapeDenkbar,
@@ -121,6 +133,8 @@ export {
   scrapeKronbergAcademy,
   scrapeLiteraturhaus,
   scrapeMousonturm,
+  scrapeMusikschuleFrankfurt,
+  scrapeNaxos,
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOper,
@@ -132,4 +146,5 @@ export {
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
   scrapeStKatharinen,
+  scrapeWaggong,
 };
