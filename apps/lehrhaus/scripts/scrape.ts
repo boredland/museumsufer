@@ -1,209 +1,188 @@
 #!/usr/bin/env bun
 /**
- * Aggregates public lectures and debates from Frankfurt institutions into
- * src/scrape-data.ts. Sources:
- *   1. Cross-import from frankfurt-museums (events where category === "Vortrag")
- *   2. Cross-import from frankfurt-theaters (shows classified as talks)
- *   3. Dedicated scrapers: Polytechnische, Haus am Dom, Jüdische Gemeinde Frankfurt, Literaturhaus
- *
- * Output is deterministic: stable FNV-1a IDs, sorted by date. Two consecutive
- * runs on identical upstream data produce byte-identical output.
+ * Derives lehrhaus's `src/scrape-data.ts` from the central event hub.
+ * Filters `EVENTS` to entries with a `talk:*` label, maps each canonical
+ * event onto the LehrhausEvent shape, and rolls museum/theater hosts under
+ * the `frankfurt-museums` / `frankfurt-theaters` source slugs so the UI's
+ * existing /quelle pages keep working. The 20 direct lehrhaus sources
+ * (Polytechnische, Haus am Dom, …) keep their dedicated routes.
  */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
-import { classifyEvent, detectTalkLanguage } from "@museumsufer/core/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-// Cross-app imports — used only at build time (never bundled into the Worker).
-import { SCRAPE_DATA as MUSEUM_DATA } from "../../frankfurt-museums/src/scrape-data";
-import { SCRAPE_DATA as THEATER_DATA } from "../../frankfurt-theaters/src/scrape-data";
-import { THEATERS } from "../../frankfurt-theaters/src/theater-config";
-import type { ProxyConfig } from "../src/scrapers/_proxy";
-import { scrapeBuergeruniversitaet } from "../src/scrapers/buergeruniversitaet";
-import { scrapeDenkbar } from "../src/scrapers/denkbar";
-import { scrapeDigFrankfurt } from "../src/scrapers/dig-frankfurt";
-import { scrapeEvangelischeAkademie } from "../src/scrapers/evangelische-akademie";
-import { scrapeFesHessen } from "../src/scrapers/fes-hessen";
-import { scrapeFgzStreitclub } from "../src/scrapers/fgz-streitclub";
-import { scrapeForschungskollegHumanwissenschaften } from "../src/scrapers/forschungskolleg-humanwissenschaften";
-import { scrapeHausAmDom } from "../src/scrapers/haus-am-dom";
-import { scrapeInstitutFuerSozialforschung } from "../src/scrapers/institut-fuer-sozialforschung";
-import { scrapeJuedischeGemeinde } from "../src/scrapers/juedische-gemeinde";
-import { scrapeLiteraturhaus } from "../src/scrapers/literaturhaus";
-import { scrapeMousonturm } from "../src/scrapers/mousonturm";
-import { scrapeNormativeOrders } from "../src/scrapers/normative-orders";
-import { scrapeOpenBooks } from "../src/scrapers/openbooks";
-import { scrapePolytechnische } from "../src/scrapers/polytechnische";
-import { scrapeRlsHessen } from "../src/scrapers/rls-hessen";
-import { scrapeRoemerberggespraeche } from "../src/scrapers/roemerberggespraeche";
-import { scrapeRomanfabrikLehrhaus } from "../src/scrapers/romanfabrik";
-import { talkCategory } from "../src/scrapers/shared";
-import { scrapeSigmundFreudInstitut } from "../src/scrapers/sigmund-freud-institut";
-import { scrapeStadtbuechereiFrankfurt } from "../src/scrapers/stadtbuecherei-frankfurt";
+import { type CanonicalEvent, displayNameFor, EVENTS } from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
-import type { LehrhausEvent, ScrapeData, ScrapedEvent } from "../src/types";
+import type { Category, LehrhausEvent, ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
 
+/** Stable list of hub source_slugs that should roll up under
+ *  frankfurt-museums. Mirrors the 32-museum config in
+ *  packages/scrapers/src/_museums/config.ts. */
+const MUSEUM_SLUGS = new Set([
+  "archaeologisches-museum-frankfurt",
+  "bibelhaus-erlebnismuseum",
+  "caricatura-museum-frankfurt",
+  "deutsches-architekturmuseum",
+  "deutsches-ledermuseum-of",
+  "deutsches-romantik-museum",
+  "dff-deutsches-filminstitut-filmmuseum",
+  "dommuseum-frankfurt",
+  "experiminta",
+  "fotografie-forum-frankfurt",
+  "frankfurter-buergerstiftung",
+  "frankfurter-goethe-haus",
+  "frankfurter-kunstverein",
+  "historisches-museum-frankfurt",
+  "ikonenmuseum-frankfurt",
+  "institut-fuer-stadtgeschichte",
+  "juedisches-museum-frankfurt",
+  "juedisches-museum-museum-judengasse-frankfurt",
+  "junges-museum-frankfurt",
+  "liebieghaus-skulpturensammlung",
+  "museum-angewandte-kunst",
+  "museum-fuer-kommunikation-frankfurt",
+  "museum-giersch-der-goethe-universitaet",
+  "museum-mmk-museum-mmk-fuer-moderne-kunst",
+  "schirn-in-bockenheim",
+  "schirn-kunsthalle-frankfurt",
+  "senckenberg-naturmuseum",
+  "staedel-museum",
+  "tower-mmk-museum-mmk-fuer-moderne-kunst",
+  "verkehrsmuseum-frankfurt",
+  "weltkulturen-museum",
+  "wollheim-memorial-frankfurt",
+  "zollamt-mmk-museum-mmk-fuer-moderne-kunst",
+]);
+
+/** Hub source_slugs that should roll up under frankfurt-theaters. Mirrors
+ *  the venue list in packages/scrapers/src/venues/ for theater-shape
+ *  scrapers. mousonturm is excluded because it's a direct lehrhaus source. */
+const THEATER_SLUGS = new Set([
+  "die-kaes",
+  "die-schmiere",
+  "dramatische-buehne",
+  "dresden-frankfurt-dance-company",
+  "english-theatre-frankfurt",
+  "galli-theater",
+  "gallus-theater",
+  "internationales-theater",
+  "kellertheater-frankfurt",
+  "komoedie-frankfurt",
+  "landungsbruecken",
+  "neues-theater-hoechst",
+  "oper-frankfurt",
+  "papageno-musiktheater",
+  "schauspiel-frankfurt",
+  "stalburg-theater",
+  "theater-alte-bruecke",
+  "theater-lempenfieber",
+  "theater-willy-praml",
+  "theaterhaus-frankfurt",
+  "tigerpalast-variete",
+  "volksbuehne-frankfurt",
+]);
+
 await main();
 
 async function main(): Promise<void> {
-  const allEvents: LehrhausEvent[] = [];
+  const directSlugs = new Set(
+    SOURCES.filter((s) => s.slug !== "frankfurt-museums" && s.slug !== "frankfurt-theaters").map((s) => s.slug),
+  );
+  const directByName = new Map(SOURCES.map((s) => [s.slug, s.name]));
 
-  // ── Cross-import: museums ────────────────────────────────────────────────
-  // source_slug stays "frankfurt-museums" so /quelle/frankfurt-museums groups
-  // these together, but source_name carries the actual host museum so the
-  // card label shows "Senckenberg" / "Städel" / etc. instead of just "Museen".
-  const museumSource = SOURCES.find((s) => s.slug === "frankfurt-museums")!;
-  const museumNameById = new Map<number, string>(MUSEUM_DATA.museums.map((m) => [m.id, m.name]));
-  for (const e of MUSEUM_DATA.events) {
-    if (e.category !== "Vortrag") continue;
-    if (!e.date || e.date < today) continue;
-    // Upstream museum classifier sometimes mistags guided exhibition tours
-    // ("Ausstellungsführung", "Rundgang") as Vortrag. Re-run the classifier
-    // on the title/description and reject anything that comes back as a
-    // non-Vortrag category (Führung, Workshop, etc.). classifyEvent returns
-    // null when no category matches — in that case we trust the upstream flag.
-    const reclassified = classifyEvent(e.title, e.description);
-    if (reclassified && reclassified !== "Vortrag") continue;
-    const hostName = museumNameById.get(e.museum_id) ?? museumSource.name;
-    allEvents.push(
-      toEvent(
-        {
-          title: e.title,
-          date: e.date,
-          time: e.time ?? null,
-          end_time: e.end_time ?? null,
-          description: e.description ?? null,
-          detail_url: e.detail_url ?? e.url ?? null,
-          ticket_url: null,
-          category: talkCategory(e.title, e.description),
-          language: detectTalkLanguage(e.title, e.description),
-        },
-        museumSource.slug,
-        hostName,
-      ),
-    );
-  }
-  log(`museums cross-import: ${allEvents.length} talk events`);
+  const events: LehrhausEvent[] = [];
+  const counts = { direct: 0, museums: 0, theaters: 0, skipped: 0 };
 
-  // ── Cross-import: theaters ───────────────────────────────────────────────
-  const theaterSource = SOURCES.find((s) => s.slug === "frankfurt-theaters")!;
-  const theaterNameBySlug = new Map<string, string>(THEATERS.map((t) => [t.slug, t.name]));
-  const theaterCountBefore = allEvents.length;
+  for (const ev of EVENTS) {
+    if (ev.date < today) continue;
+    const category = pickCategory(ev);
+    if (!category) continue;
 
-  for (const show of THEATER_DATA.shows) {
-    if (classifyEvent(show.title, show.description) !== "Vortrag") continue;
-
-    const hostName = theaterNameBySlug.get(show.theater_slug) ?? theaterSource.name;
-    const perfs = THEATER_DATA.performances.filter((p) => p.show_id === show.id && p.date >= today);
-    for (const perf of perfs) {
-      allEvents.push(
-        toEvent(
-          {
-            title: show.title,
-            date: perf.date,
-            time: perf.time ?? null,
-            end_time: perf.end_time ?? null,
-            description: show.description ?? null,
-            detail_url: show.detail_url ?? null,
-            ticket_url: perf.ticket_url ?? null,
-            category: talkCategory(show.title, show.description),
-            language: detectTalkLanguage(show.title, show.description),
-          },
-          theaterSource.slug,
-          hostName,
-        ),
-      );
+    const placement = placeEvent(ev, directSlugs);
+    if (!placement) {
+      counts.skipped++;
+      continue;
     }
-  }
-  log(`theaters cross-import: ${allEvents.length - theaterCountBefore} talk events`);
+    if (placement.sourceSlug === "frankfurt-museums") counts.museums++;
+    else if (placement.sourceSlug === "frankfurt-theaters") counts.theaters++;
+    else counts.direct++;
 
-  // ── Dedicated scrapers ───────────────────────────────────────────────────
-  // Some sources need an outbound proxy (datacenter-IP blocks, broken TLS
-  // chains, Cloudflare bot-mitigation). Configured via FETCH_PROXY_URL /
-  // FETCH_PROXY_TOKEN env vars in CI. When unset, scrapers fall back to
-  // direct fetch — most don't need the proxy.
-  const proxy: ProxyConfig | null = process.env.FETCH_PROXY_URL
-    ? { url: process.env.FETCH_PROXY_URL, token: process.env.FETCH_PROXY_TOKEN }
-    : null;
-  if (proxy) log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
+    const sourceName =
+      placement.sourceSlug === ev.source_slug
+        ? (directByName.get(placement.sourceSlug) ?? displayNameFor(ev.source_slug))
+        : displayNameFor(ev.source_slug);
 
-  const scrapers: Array<[string, () => Promise<ScrapedEvent[]>]> = [
-    ["polytechnische-gesellschaft", scrapePolytechnische],
-    ["haus-am-dom", scrapeHausAmDom],
-    ["juedische-gemeinde-frankfurt", scrapeJuedischeGemeinde],
-    ["fgz-streitclub", scrapeFgzStreitclub],
-    ["literaturhaus-frankfurt", scrapeLiteraturhaus],
-    ["buergeruniversitaet", scrapeBuergeruniversitaet],
-    ["institut-fuer-sozialforschung", scrapeInstitutFuerSozialforschung],
-    ["evangelische-akademie-frankfurt", scrapeEvangelischeAkademie],
-    ["romanfabrik", scrapeRomanfabrikLehrhaus],
-    ["denkbar-frankfurt", scrapeDenkbar],
-    ["sigmund-freud-institut", scrapeSigmundFreudInstitut],
-    ["dig-frankfurt", scrapeDigFrankfurt],
-    ["roemerberggespraeche", scrapeRoemerberggespraeche],
-    ["mousonturm", scrapeMousonturm],
-    ["normative-orders", scrapeNormativeOrders],
-    ["forschungskolleg-humanwissenschaften", scrapeForschungskollegHumanwissenschaften],
-    ["fes-hessen", scrapeFesHessen],
-    ["rls-hessen", scrapeRlsHessen],
-    ["stadtbuecherei-frankfurt", () => scrapeStadtbuechereiFrankfurt(proxy)],
-    ["openbooks-frankfurt", scrapeOpenBooks],
-  ];
-
-  for (const [slug, fn] of scrapers) {
-    const source = SOURCES.find((s) => s.slug === slug)!;
-    try {
-      const events = await fn();
-      for (const e of events) allEvents.push(toEvent(e, source.slug, source.name));
-      log(`${slug}: ${events.length} events`);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      log(`${slug}: FAIL — ${msg}`);
-    }
+    events.push({
+      id: fnv1aInt(`${placement.sourceSlug}|${ev.title}|${ev.date}|${ev.time ?? ""}`),
+      source_slug: placement.sourceSlug,
+      source_name: sourceName,
+      title: ev.title,
+      date: ev.date,
+      time: ev.time,
+      end_time: ev.end_time,
+      description: ev.description,
+      detail_url: ev.detail_url,
+      ticket_url: ev.ticket_url,
+      category,
+      language: ev.language,
+      image_url: ev.image_url,
+    });
   }
 
-  // ── Deduplicate, assign stable IDs, sort ─────────────────────────────────
+  // Deduplicate by id (same talk picked up from multiple labels).
   const seen = new Set<number>();
   const unique: LehrhausEvent[] = [];
-  for (const e of allEvents) {
-    if (!seen.has(e.id)) {
-      seen.add(e.id);
-      unique.push(e);
-    }
+  for (const e of events) {
+    if (seen.has(e.id)) continue;
+    seen.add(e.id);
+    unique.push(e);
   }
   unique.sort(
     (a, b) =>
       a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "") || a.title.localeCompare(b.title),
   );
 
+  log(
+    `direct: ${counts.direct}, museums: ${counts.museums}, theaters: ${counts.theaters}, skipped: ${counts.skipped} → ${unique.length} unique events`,
+  );
+
   const data: ScrapeData = { sources: SOURCES, events: unique };
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
-  log(`wrote src/scrape-data.ts — ${unique.length} events total`);
+  log(`wrote src/scrape-data.ts — ${unique.length} events`);
 }
 
-function toEvent(e: ScrapedEvent, sourceSlug: string, sourceName: string): LehrhausEvent {
-  const id = fnv1aInt(`${sourceSlug}|${e.title}|${e.date}|${e.time ?? ""}`);
-  return {
-    id,
-    source_slug: sourceSlug,
-    source_name: sourceName,
-    title: e.title,
-    date: e.date,
-    time: e.time ?? undefined,
-    end_time: e.end_time ?? undefined,
-    description: e.description ?? undefined,
-    detail_url: e.detail_url ?? undefined,
-    ticket_url: e.ticket_url ?? undefined,
-    category: e.category,
-    language: e.language ?? undefined,
-    image_url: e.image_url ?? undefined,
-  };
+function pickCategory(ev: CanonicalEvent): Category | null {
+  for (const l of ev.labels) {
+    if (l.label === "talk:vortrag") return "Vortrag";
+    if (l.label === "talk:diskussion") return "Diskussion";
+    if (l.label === "talk:lesung") return "Lesung";
+  }
+  return null;
+}
+
+/**
+ * Decide which `LehrhausSource` slug a hub event belongs to. Direct mappings
+ * win for the 20 institution-specific sources. Museum and theater venues
+ * roll up under the catch-all `frankfurt-museums` / `frankfurt-theaters`
+ * sources, identified via stable source_slug lists below — the orchestrator
+ * replaces `museum:*` with `talk:*` when classifyEvent flags an event as a
+ * Vortrag, so we can't rely on the label namespace to identify the venue's
+ * primary type.
+ */
+function placeEvent(ev: CanonicalEvent, directSlugs: Set<string>): { sourceSlug: string } | null {
+  if (directSlugs.has(ev.source_slug)) return { sourceSlug: ev.source_slug };
+  if (MUSEUM_SLUGS.has(ev.source_slug)) return { sourceSlug: "frankfurt-museums" };
+  if (THEATER_SLUGS.has(ev.source_slug)) return { sourceSlug: "frankfurt-theaters" };
+  // Hub events from upstreams that don't match any lehrhaus source slip
+  // through. Examples: regional landau sources, konzert-haus venues with the
+  // occasional spoken-word evening.
+  return null;
 }
 
 function generateModule(data: ScrapeData): string {

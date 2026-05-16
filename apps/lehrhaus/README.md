@@ -49,11 +49,28 @@ curl http://localhost:8787/feed.ics
 
 ## Adding a new source
 
-1. Add a `LehrhausSource` entry in `src/source-config.ts` (slug, name, short_name, url, lat/lon).
-2. Add a scraper in `src/scrapers/<slug>.ts` returning `Promise<ScrapedEvent[]>`. Use `talkCategory()` from `./shared` to classify into Vortrag / Lesung / Diskussion.
-3. Wire the new scraper in the `scrapers` array in `scripts/scrape.ts`.
-4. Trigger the workflow (`Actions → scrape → lehrhaus`) or wait for the next hourly run.
+Lehrhaus reads its events from the central event hub at
+`@museumsufer/event-hub`. The actual scraping happens in
+`packages/scrapers/src/venues/`; `scripts/scrape.ts` here just filters
+`EVENTS` to entries with a `talk:*` label and maps them onto
+`LehrhausEvent`.
 
-## Cross-imports
+1. Add a canonical scraper under `packages/scrapers/src/venues/<slug>.ts`
+   that emits a `talk:vortrag` / `talk:diskussion` / `talk:lesung` label
+   for the talk-shaped events. Register it in
+   `packages/scrapers/src/index.ts`.
+2. Add a `LehrhausSource` entry in `src/source-config.ts` whose slug
+   matches the hub `source_slug`. Lehrhaus picks it up automatically on
+   the next `bun scrape` run.
+3. Optionally curate a display name in
+   `packages/event-hub/src/venue-names.ts`.
 
-Vortrag-class events from `frankfurt-museums` and `frankfurt-theaters` are pulled in at scrape time. `source_slug` stays at the aggregator (`frankfurt-museums` / `frankfurt-theaters`) so `/quelle/...` still groups them, but `source_name` carries the actual host museum / theater (e.g. "Senckenberg Naturmuseum", "Schauspiel Frankfurt") so the card label is specific. Misclassified guided-tour events ("Ausstellungsführung", "Rundgang") are filtered out by re-running `classifyEvent()`.
+## Museum / theater rollups
+
+Museums and theaters that emit talks fold under the catch-all
+`frankfurt-museums` / `frankfurt-theaters` source slugs so
+`/quelle/frankfurt-museums` and `/quelle/frankfurt-theaters` keep
+working. The host venue's display name (e.g. "Senckenberg Naturmuseum",
+"Schauspiel Frankfurt") rides in `source_name`. The MUSEUM_SLUGS and
+THEATER_SLUGS sets in `scripts/scrape.ts` decide which hub source slugs
+roll up under each aggregator.
