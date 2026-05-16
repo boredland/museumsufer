@@ -9,20 +9,24 @@ export type {
 } from "./types";
 
 import type { ScraperContext, VenueScraper } from "./types";
+import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
+import { scrapeDrHochs } from "./venues/dr-hochs";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
+import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
+import { scrapeOper } from "./venues/oper";
 import { scrapePolytechnische } from "./venues/polytechnische";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
@@ -38,9 +42,11 @@ import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt
  * individual venues migrate over.
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
+  { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
+  { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
@@ -49,12 +55,14 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
+  { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
+  { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOper() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
   { slug: "rls-hessen", run: (_ctx: ScraperContext) => scrapeRlsHessen() },
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
@@ -64,20 +72,24 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 ];
 
 export {
+  scrapeAlteOper,
   scrapeBuergeruniversitaet,
   scrapeDenkbar,
   scrapeDigFrankfurt,
+  scrapeDrHochs,
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
   scrapeHausAmDom,
+  scrapeHfmdk,
   scrapeInstitutFuerSozialforschung,
   scrapeJuedischeGemeinde,
   scrapeLiteraturhaus,
   scrapeMousonturm,
   scrapeNormativeOrders,
   scrapeOpenBooks,
+  scrapeOper,
   scrapePolytechnische,
   scrapeRlsHessen,
   scrapeRoemerberggespraeche,
