@@ -86,6 +86,7 @@ function mergeEvent(
     description: scraped.description ?? undefined,
     date: scraped.date,
     time: scraped.time ?? undefined,
+    end_date: scraped.end_date ?? undefined,
     end_time: scraped.end_time ?? undefined,
     detail_url: scraped.detail_url ?? undefined,
     ticket_url: scraped.ticket_url ?? undefined,
