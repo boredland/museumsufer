@@ -13,6 +13,9 @@ export interface CanonicalEvent {
   description?: string;
   date: string;
   time?: string;
+  /** End date for multi-day events (Ausstellungen, festivals); ISO YYYY-MM-DD.
+   *  Absent for single-day events. */
+  end_date?: string;
   end_time?: string;
   detail_url?: string;
   ticket_url?: string;

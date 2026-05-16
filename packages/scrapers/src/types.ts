@@ -11,6 +11,9 @@ export interface CanonicalScrapedEvent {
   description?: string | null;
   date: string;
   time?: string | null;
+  /** End date for multi-day events (Ausstellungen, festivals); ISO YYYY-MM-DD.
+   *  Absent for single-day events. */
+  end_date?: string | null;
   end_time?: string | null;
   detail_url?: string | null;
   ticket_url?: string | null;

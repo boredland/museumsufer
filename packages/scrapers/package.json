@@ -34,6 +34,8 @@
     "./venues/juedische-gemeinde-frankfurt": "./src/venues/juedische-gemeinde-frankfurt.ts",
     "./venues/kirchenmusik-dreikoenig": "./src/venues/kirchenmusik-dreikoenig.ts",
     "./venues/kronberg-academy": "./src/venues/kronberg-academy.ts",
+    "./venues/kulturnetz-landau": "./src/venues/kulturnetz-landau.ts",
+    "./venues/landau-de": "./src/venues/landau-de.ts",
     "./venues/literaturhaus-frankfurt": "./src/venues/literaturhaus-frankfurt.ts",
     "./venues/mousonturm": "./src/venues/mousonturm.ts",
     "./venues/musikschule-frankfurt": "./src/venues/musikschule-frankfurt.ts",

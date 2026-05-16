@@ -34,6 +34,8 @@ import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
+import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
+import { scrapeLandauDe } from "./venues/landau-de";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
@@ -87,6 +89,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
+  { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
+  { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
@@ -131,6 +135,8 @@ export {
   scrapeJuedischeGemeinde,
   scrapeKirchenmusikDreikoenig,
   scrapeKronbergAcademy,
+  scrapeKulturnetzLandau,
+  scrapeLandauDe,
   scrapeLiteraturhaus,
   scrapeMousonturm,
   scrapeMusikschuleFrankfurt,
