@@ -52,4 +52,12 @@ export interface VenueScrapeResult {
   events: CanonicalScrapedEvent[];
 }
 
-export type VenueScraper = () => Promise<VenueScrapeResult>;
+import type { ProxyConfig } from "./proxy";
+
+/** Per-run context handed to each scraper. `proxy` is set only when the
+ *  caller has FETCH_PROXY_* configured; most scrapers ignore it. */
+export interface ScraperContext {
+  proxy: ProxyConfig | null;
+}
+
+export type VenueScraper = (ctx: ScraperContext) => Promise<VenueScrapeResult>;

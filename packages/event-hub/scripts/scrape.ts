@@ -21,7 +21,11 @@ await main();
 
 async function main(): Promise<void> {
   const previous: EventHubData = { events: PREVIOUS_EVENTS };
-  const next = await runHub(previous, { log });
+  const proxy = process.env.FETCH_PROXY_URL
+    ? { url: process.env.FETCH_PROXY_URL, token: process.env.FETCH_PROXY_TOKEN }
+    : null;
+  if (proxy) log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
+  const next = await runHub(previous, { log, proxy });
   await writeFile(resolve(root, "data/events.ts"), generateModule(next), "utf8");
   log(`wrote data/events.ts — ${next.events.length} events`);
   summariseLabels(next);
