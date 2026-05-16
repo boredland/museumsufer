@@ -20,6 +20,8 @@ import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
 import { scrapeDrHochs } from "./venues/dr-hochs";
+import { scrapeDramatischeBuehne } from "./venues/dramatische-buehne";
+import { scrapeDresdenFrankfurtDanceCompany } from "./venues/dresden-frankfurt-dance-company";
 import { scrapeEnglishTheatreFrankfurt } from "./venues/english-theatre-frankfurt";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
@@ -35,6 +37,7 @@ import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
+import { scrapeInternationalesTheater } from "./venues/internationales-theater";
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
@@ -66,8 +69,10 @@ import { scrapeStalburgTheater } from "./venues/stalburg-theater";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
+import { scrapeTheaterLempenfieber } from "./venues/theater-lempenfieber";
 import { scrapeTheaterhausFrankfurt } from "./venues/theaterhaus-frankfurt";
 import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
+import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
 
 /**
@@ -88,6 +93,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
+  { slug: "dramatische-buehne", run: (_ctx: ScraperContext) => scrapeDramatischeBuehne() },
+  { slug: "dresden-frankfurt-dance-company", run: (_ctx: ScraperContext) => scrapeDresdenFrankfurtDanceCompany() },
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
   { slug: "english-theatre-frankfurt", run: (_ctx: ScraperContext) => scrapeEnglishTheatreFrankfurt() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
@@ -107,6 +114,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
   { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
+  { slug: "internationales-theater", run: (_ctx: ScraperContext) => scrapeInternationalesTheater() },
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
   { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
@@ -138,8 +146,10 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "stalburg-theater", run: (_ctx: ScraperContext) => scrapeStalburgTheater() },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
+  { slug: "theater-lempenfieber", run: (_ctx: ScraperContext) => scrapeTheaterLempenfieber() },
   { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
   { slug: "tigerpalast-variete", run: (_ctx: ScraperContext) => scrapeTigerpalastVariete() },
+  { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
 ];
 
@@ -154,6 +164,8 @@ export {
   scrapeDieKaes,
   scrapeDieSchmiere,
   scrapeDigFrankfurt,
+  scrapeDramatischeBuehne,
+  scrapeDresdenFrankfurtDanceCompany,
   scrapeDrHochs,
   scrapeEnglishTheatreFrankfurt,
   scrapeEnsembleModern,
@@ -170,6 +182,7 @@ export {
   scrapeHrBigband,
   scrapeHrSinfonieorchester,
   scrapeInstitutFuerSozialforschung,
+  scrapeInternationalesTheater,
   scrapeJazzFrankfurt,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
@@ -202,6 +215,8 @@ export {
   scrapeSuew,
   scrapeTheaterAlteBruecke,
   scrapeTheaterhausFrankfurt,
+  scrapeTheaterLempenfieber,
   scrapeTigerpalastVariete,
+  scrapeVolksbuehneFrankfurt,
   scrapeWaggong,
 };

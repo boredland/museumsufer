@@ -19,6 +19,8 @@
     "./venues/die-kaes": "./src/venues/die-kaes.ts",
     "./venues/die-schmiere": "./src/venues/die-schmiere.ts",
     "./venues/dig-frankfurt": "./src/venues/dig-frankfurt.ts",
+    "./venues/dramatische-buehne": "./src/venues/dramatische-buehne.ts",
+    "./venues/dresden-frankfurt-dance-company": "./src/venues/dresden-frankfurt-dance-company.ts",
     "./venues/dr-hochs": "./src/venues/dr-hochs.ts",
     "./venues/english-theatre-frankfurt": "./src/venues/english-theatre-frankfurt.ts",
     "./venues/ensemble-modern": "./src/venues/ensemble-modern.ts",
@@ -35,6 +37,7 @@
     "./venues/hr-bigband": "./src/venues/hr-bigband.ts",
     "./venues/hr-sinfonieorchester": "./src/venues/hr-sinfonieorchester.ts",
     "./venues/institut-fuer-sozialforschung": "./src/venues/institut-fuer-sozialforschung.ts",
+    "./venues/internationales-theater": "./src/venues/internationales-theater.ts",
     "./venues/jazz-frankfurt": "./src/venues/jazz-frankfurt.ts",
     "./venues/jazz-palmengarten": "./src/venues/jazz-palmengarten.ts",
     "./venues/juedische-gemeinde-frankfurt": "./src/venues/juedische-gemeinde-frankfurt.ts",
@@ -66,8 +69,10 @@
     "./venues/stk-musik": "./src/venues/stk-musik.ts",
     "./venues/suew": "./src/venues/suew.ts",
     "./venues/theater-alte-bruecke": "./src/venues/theater-alte-bruecke.ts",
+    "./venues/theater-lempenfieber": "./src/venues/theater-lempenfieber.ts",
     "./venues/theaterhaus-frankfurt": "./src/venues/theaterhaus-frankfurt.ts",
     "./venues/tigerpalast-variete": "./src/venues/tigerpalast-variete.ts",
+    "./venues/volksbuehne-frankfurt": "./src/venues/volksbuehne-frankfurt.ts",
     "./venues/waggong": "./src/venues/waggong.ts"
   },
   "scripts": {
