@@ -1,42 +1,42 @@
 #!/usr/bin/env bun
 /**
- * landau.today scrape pipeline. Drives all source scrapers in parallel
- * and writes a typed `src/scrape-data.ts` bundle. Designed for the GitHub
- * Action and for local one-off runs.
+ * Derives landau-today's `src/scrape-data.ts` from the central event hub.
+ * Filters `EVENTS` to entries with a `region:landau:*` label, maps each
+ * onto the landau `Event` shape, then runs the four-pass cross-source
+ * dedup and Nominatim-backed geocoding (cached in src/geocode-cache.ts).
  *
- *   1. scrapeKulturnetz()        — kulturnetz-landau.de (Django, schema.org microdata)
- *   2. scrapeLandauDe()          — www.landau.de (Advantic CMS, ICS feed + HTML cards)
- *   3. scrapeHambacherSchloss()  — hambacher-schloss.de (WP / MEC RSS)
- *   4. scrapeRptu()              — rptu.de (university RSS, Landau-filtered)
- *   5. scrapeSuew()              — suedlicheweinstrasse.de (TYPO3 sfcontenthub)
- *
- * Stable ids are FNV-1a hashes of `(source | source_uid)`. Past events are
- * pruned at scrape time so the worker never has to.
+ * Per-source scraping has moved into `packages/scrapers/src/venues/`; this
+ * script is now a pure transform + geocode.
  */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
+import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
 import { GEOCODE_CACHE } from "../src/geocode-cache";
-import { scrapeHambacherSchloss } from "../src/scrapers/hambacher-schloss";
-import { scrapeKulturnetz } from "../src/scrapers/kulturnetz";
-import { scrapeLandauDe } from "../src/scrapers/landau-de";
-import { scrapePfalzDe } from "../src/scrapers/pfalz-de";
-import { scrapeRptu } from "../src/scrapers/rptu";
-import { scrapeSuew } from "../src/scrapers/suew";
-import type { Event, ScrapeData } from "../src/types";
+import type { Event, EventSource, ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const dataPath = resolve(root, "src/scrape-data.ts");
 const geocodeCachePath = resolve(root, "src/geocode-cache.ts");
 
+/** Map the hub's source_slug onto landau-today's local `EventSource`
+ *  union. Slugs that diverge (kulturnetz-landau → kulturnetz) are remapped
+ *  so the app's existing `/quelle/<source>` URLs keep working. */
+const HUB_TO_LOCAL_SOURCE: Record<string, EventSource> = {
+  "kulturnetz-landau": "kulturnetz",
+  "landau-de": "landau-de",
+  "hambacher-schloss": "hambacher-schloss",
+  "rptu-campuskultur": "rptu-campuskultur",
+  suew: "suew",
+  "pfalz-de": "pfalz-de",
+};
+
 /** Source priority for cross-source dedup. Lower wins. Kulturnetz first
  *  because its categorisation is most reliable; landau.de second because
- *  its ICS feed has the cleanest time data. Defined here (above the
- *  top-level call to `mergeAndId`) to avoid TDZ — `const` bindings are
- *  hoisted lexically but not initialised. */
-const SOURCE_RANK: Record<Event["source"], number> = {
+ *  its ICS feed has the cleanest time data. */
+const SOURCE_RANK: Record<EventSource, number> = {
   kulturnetz: 0,
   "landau-de": 1,
   "hambacher-schloss": 2,
@@ -47,36 +47,74 @@ const SOURCE_RANK: Record<Event["source"], number> = {
 };
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
-/** Nominatim's usage policy is 1 req/s with an identifying User-Agent.
- *  We respect both — the cache means this only matters for cold starts
- *  on net-new venues, not the hot daily path. */
 const NOMINATIM_DELAY_MS = 1100;
 const NOMINATIM_USER_AGENT = "landau.today (https://landau.today; hello@landau.today)";
 
 const startMain = Date.now();
-
-const [knl, lde, hbs, rptu, suew, pfalz] = await Promise.all([
-  stage("kulturnetz", () => scrapeKulturnetz()),
-  stage("landau.de", () => scrapeLandauDe()),
-  stage("hambacher-schloss", () => scrapeHambacherSchloss()),
-  stage("rptu", () => scrapeRptu()),
-  stage("suew", () => scrapeSuew()),
-  stage("pfalz-de", () => scrapePfalzDe()),
-]);
-
-const merged = mergeAndId([...knl, ...lde, ...hbs, ...rptu, ...suew, ...pfalz]);
 const today = todayIso();
-const future = merged.filter((ev) => (ev.end_date ?? ev.date) >= today);
-future.sort(eventSort);
 
-await stage("geocode", () => geocodeAll(future));
+const candidates: Omit<Event, "id">[] = [];
+let labeledCount = 0;
+let unknownSource = 0;
 
-await writeBundle(future);
+for (const ev of EVENTS) {
+  if (!hasRegionLabel(ev)) continue;
+  labeledCount++;
+  const source = HUB_TO_LOCAL_SOURCE[ev.source_slug];
+  if (!source) {
+    unknownSource++;
+    continue;
+  }
+  if ((ev.end_date ?? ev.date) < today) continue;
+  candidates.push(toLocalEvent(ev, source));
+}
+log(`hub → landau: ${labeledCount} region-labeled, ${candidates.length} kept, ${unknownSource} unknown source`);
+
+const merged = mergeAndId(candidates);
+merged.sort(eventSort);
+
+await stage("geocode", () => geocodeAll(merged));
+await writeBundle(merged);
 
 const elapsed = ((Date.now() - startMain) / 1000).toFixed(1);
-log(`done in ${elapsed}s — wrote ${future.length} events to ${dataPath}`);
+log(`done in ${elapsed}s — wrote ${merged.length} events to ${dataPath}`);
 
 // ─── helpers ────────────────────────────────────────────────────────
+
+function hasRegionLabel(ev: CanonicalEvent): boolean {
+  return ev.labels.some((l) => l.label.startsWith("region:landau:"));
+}
+
+function toLocalEvent(ev: CanonicalEvent, source: EventSource): Omit<Event, "id"> {
+  const category = pickCategory(ev);
+  return {
+    source,
+    source_uid: ev.source_event_id,
+    title: ev.title,
+    date: ev.date,
+    ...(ev.time ? { time: ev.time } : {}),
+    ...(ev.end_date ? { end_date: ev.end_date } : {}),
+    ...(ev.end_time ? { end_time: ev.end_time } : {}),
+    category,
+    ...(ev.venue_room ? { venue: ev.venue_room } : {}),
+    ...(ev.city ? { city: ev.city } : {}),
+    ...(ev.performers ? { organizer: ev.performers } : {}),
+    ...(ev.description ? { description: ev.description } : {}),
+    detail_url: ev.detail_url ?? "",
+    ...(ev.image_url ? { image_url: ev.image_url } : {}),
+    ...(ev.price_min != null ? { price: `${ev.price_min} €` } : {}),
+  };
+}
+
+function pickCategory(ev: CanonicalEvent): string {
+  let best: { category: string; confidence: number } | null = null;
+  for (const l of ev.labels) {
+    if (!l.label.startsWith("region:landau:")) continue;
+    const tail = l.label.slice("region:landau:".length);
+    if (!best || l.confidence > best.confidence) best = { category: tail, confidence: l.confidence };
+  }
+  return best?.category ?? "sonstiges";
+}
 
 async function stage<T>(label: string, fn: () => Promise<T>): Promise<T> {
   const t0 = Date.now();
@@ -93,27 +131,29 @@ async function stage<T>(label: string, fn: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * Four-pass dedup. The same event surfaces in different shapes across
+ * sources, so we try increasingly tolerant matches:
+ *
+ * Pass 1: bit-identical submissions — group by (date, strict-normalised
+ *         title). E.g., the same press release ingested by both
+ *         Kulturnetz and the city calendar.
+ * Pass 2: prefix collapse — group by (date, "core" title). Catches the
+ *         common SÜW pattern of prefixing a venue or series name to the
+ *         title, e.g., "atelier29: Thalamus" vs Kulturnetz's "Thalamus".
+ * Pass 3: multi-day vs per-occurrence — landau.de records a long-running
+ *         Ausstellung once with `end_date`, while SÜW emits one record
+ *         per day. We drop the single-day records whose title matches a
+ *         multi-day record covering the same date.
+ * Pass 4: title-prefix overlap on same (date, time) — one source uses
+ *         the title only, another appends "- Subtitle" with extra detail.
+ *         Drop the longer-titled duplicate and keep the canonical short
+ *         form; merge end_time / image_url / city up if missing.
+ *
+ * Within each group the lowest-ranked source wins (see SOURCE_RANK).
+ */
 function mergeAndId(events: Omit<Event, "id">[]): Event[] {
-  // Four-pass dedup. The same event surfaces in different shapes across
-  // sources, so we try increasingly tolerant matches:
-  //
-  // Pass 1: bit-identical submissions — group by (date, strict-normalised
-  //         title). E.g., the same press release ingested by both
-  //         Kulturnetz and the city calendar.
-  // Pass 2: prefix collapse — group by (date, "core" title). Catches the
-  //         common SÜW pattern of prefixing a venue or series name to the
-  //         title, e.g., "atelier29: Thalamus" vs Kulturnetz's "Thalamus".
-  // Pass 3: multi-day vs per-occurrence — landau.de records a long-running
-  //         Ausstellung once with `end_date`, while SÜW emits one record
-  //         per day. We drop the single-day records whose title matches a
-  //         multi-day record covering the same date.
-  // Pass 4: title-prefix overlap on same (date, time) — one source uses
-  //         the title only, another appends "- Subtitle" with extra detail.
-  //         Drop the longer-titled duplicate and keep the canonical short
-  //         form; merge end_time / image_url / city up if missing.
-  //
-  // Within each group the lowest-ranked source wins (see SOURCE_RANK).
-  const stamped = events.map((ev) => ({ ...ev, id: fnv1aInt(`${ev.source}|${ev.source_uid}`) }));
+  const stamped: Event[] = events.map((ev) => ({ ...ev, id: fnv1aInt(`${ev.source}|${ev.source_uid}`) }));
   const byKey = new Map<string, Event>();
   for (const ev of stamped) {
     const key = `${ev.date}|${normalizeTitle(ev.title)}`;
@@ -131,7 +171,6 @@ function mergeAndId(events: Omit<Event, "id">[]): Event[] {
       byCore.set(key, ev);
       continue;
     }
-    // Prefer the shorter title (likely "X" over "Venue: X"); break ties by source rank.
     const evShorter = ev.title.length < existing.title.length;
     const sameRank = SOURCE_RANK[ev.source] === SOURCE_RANK[existing.source];
     const evWinsByRank = SOURCE_RANK[ev.source] < SOURCE_RANK[existing.source];
@@ -143,15 +182,7 @@ function mergeAndId(events: Omit<Event, "id">[]): Event[] {
   return collapseTitlePrefixDuplicates(afterMultiDay);
 }
 
-/** Pass 4: when two events share the same date AND time AND one's
- *  normalised title is a strict prefix of the other's, treat them as the
- *  same event. The shorter title is canonical (e.g., Kulturnetz's
- *  "Dialog statt Rache" vs landau.de's "Dialog statt Rache - Eine
- *  Israelin und eine Palästinenserin in Trauer …"); merge missing
- *  end_time / image_url / city / description from the longer record so
- *  no upstream detail is lost. */
 function collapseTitlePrefixDuplicates(events: Event[]): Event[] {
-  // Group by (date, time?). No time → treat as "all-day" bucket.
   const groups = new Map<string, Event[]>();
   for (const ev of events) {
     const key = `${ev.date}|${ev.time ?? ""}`;
@@ -163,7 +194,6 @@ function collapseTitlePrefixDuplicates(events: Event[]): Event[] {
   const merged = new Map<number, Event>();
   for (const list of groups.values()) {
     if (list.length < 2) continue;
-    // Sort shortest title first so prefix checks run from canonical → variant.
     const sorted = [...list].sort((a, b) => a.title.length - b.title.length);
     for (let i = 0; i < sorted.length; i++) {
       for (let j = i + 1; j < sorted.length; j++) {
@@ -171,8 +201,6 @@ function collapseTitlePrefixDuplicates(events: Event[]): Event[] {
         const longer = sorted[j];
         if (dropped.has(longer.id) || dropped.has(shorter.id)) continue;
         if (!isTitlePrefixOf(shorter.title, longer.title)) continue;
-        // Keep the shorter; merge any field the shorter is missing from the
-        // longer. Mutating the value in-map keeps the iteration stable.
         const enriched = mergeMissingFields(merged.get(shorter.id) ?? shorter, longer);
         merged.set(shorter.id, enriched);
         dropped.add(longer.id);
@@ -182,23 +210,15 @@ function collapseTitlePrefixDuplicates(events: Event[]): Event[] {
   return events.filter((ev) => !dropped.has(ev.id)).map((ev) => merged.get(ev.id) ?? ev);
 }
 
-/** True when normalize(short) is a strict prefix of normalize(long) AND
- *  the long has at least one extra word. Avoids merging unrelated events
- *  whose titles happen to start with the same word. */
 function isTitlePrefixOf(short: string, long: string): boolean {
   const s = normalizeTitle(short);
   const l = normalizeTitle(long);
   if (s.length === 0 || l.length === 0 || s.length >= l.length) return false;
   if (!l.startsWith(s)) return false;
-  // Demand a word boundary right after the short title; "abend" must not
-  // match "abendlich".
   const next = l[s.length];
   return next === " ";
 }
 
-/** Copy `extra` fields onto `base` only when `base` has them undefined.
- *  We never overwrite — the canonical short-titled record stays in charge
- *  of its primary fields. */
 function mergeMissingFields(base: Event, extra: Event): Event {
   const out = { ...base };
   if (!out.end_time && extra.end_time) out.end_time = extra.end_time;
@@ -211,10 +231,6 @@ function mergeMissingFields(base: Event, extra: Event): Event {
   return out;
 }
 
-/** When a multi-day event (with `end_date`) and a per-day event share the
- *  same core title and the per-day event falls within the multi-day range,
- *  drop the per-day duplicate — the multi-day record already lights the
- *  per-day strip via queries.ts:eventCoversDate. */
 function collapseMultiDayDuplicates(events: Event[]): Event[] {
   const multiDayByTitle = new Map<string, Event[]>();
   for (const ev of events) {
@@ -247,12 +263,6 @@ function normalizeTitle(s: string): string {
     .trim();
 }
 
-/** Strip a leading "Venue:" / "Series —" prefix so cross-source dedup can
- *  collapse the two title variants that show up when a venue prefixes its
- *  own programming on the SÜW listing (e.g., "atelier29: Thalamus" vs
- *  "Thalamus"). The prefix-strip runs on the raw string BEFORE
- *  normalisation, otherwise the normaliser flattens `:` → space and the
- *  regex can't anchor on it. */
 function coreTitle(s: string): string {
   const m = s.match(/^([\p{L}\d ]{2,30})\s*[:—–-]\s+(.+)$/u);
   if (m) return normalizeTitle(m[2]);
@@ -287,13 +297,10 @@ async function geocodeAll(events: Event[]): Promise<void> {
   for (const q of newQueries) {
     const result = await geocodeOne(q.venue, q.city);
     if (result) cache[q.key] = [round6(result.lat), round6(result.lng)];
-    // Tombstone misses so we don't keep retrying every day. Use [0, 0] as
-    // sentinel; client-side sort already excludes that pair.
     else cache[q.key] = [0, 0];
     await sleep(NOMINATIM_DELAY_MS);
   }
 
-  // Inject coords back onto events and write the cache module.
   for (const ev of events) {
     if (!ev.venue) continue;
     const coords = cache[cacheKey(ev.venue, ev.city)];
@@ -305,10 +312,6 @@ async function geocodeAll(events: Event[]): Promise<void> {
 }
 
 async function geocodeOne(venue: string, city: string): Promise<GeocodeResult | null> {
-  // Two-tier query: prefer "<venue>, <city>", fall back to just "<city>"
-  // if the venue search yields nothing. Constraining to Germany keeps
-  // ambiguous venue names (e.g., "Stadtbibliothek") on the right
-  // continent.
   const queries = [`${venue}, ${city}, Deutschland`, `${city}, Deutschland`];
   for (const q of queries) {
     const url = `${NOMINATIM_URL}?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=de`;
@@ -345,7 +348,6 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function writeGeocodeCache(cache: Record<string, [number, number]>): Promise<void> {
-  // Sort keys alphabetically so the diff is reviewable across runs.
   const entries = Object.keys(cache)
     .sort()
     .map((k) => `  ${JSON.stringify(k)}: [${cache[k][0]}, ${cache[k][1]}],`);

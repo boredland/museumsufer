@@ -11,7 +11,10 @@
       "!apps/frankfurt-theaters/src/scrape-data.ts",
       "!apps/frankfurt-museums/src/scrape-data.ts",
       "!apps/konzert-haus/src/scrape-data.ts",
-      "!apps/lehrhaus/src/scrape-data.ts"
+      "!apps/landau-today/src/scrape-data.ts",
+      "!apps/landau-today/src/geocode-cache.ts",
+      "!apps/lehrhaus/src/scrape-data.ts",
+      "!packages/event-hub/data/events.ts"
     ]
   }
 }
