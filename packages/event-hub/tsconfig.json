@@ -1,0 +1,5 @@
+{
+  "extends": "@museumsufer/tsconfig/worker.json",
+  "include": ["src/**/*.ts", "data/**/*.ts"],
+  "exclude": ["node_modules"]
+}

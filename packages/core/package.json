@@ -49,6 +49,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@museumsufer/classify": "*",
     "dayjs": "^1.11.20",
     "hono": "^4.12.18"
   },

@@ -1,0 +1,29 @@
+{
+  "name": "@museumsufer/scrapers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./proxy": "./src/proxy.ts",
+    "./venues/denkbar": "./src/venues/denkbar.ts",
+    "./venues/romanfabrik": "./src/venues/romanfabrik.ts",
+    "./venues/evangelische-akademie": "./src/venues/evangelische-akademie.ts",
+    "./venues/mousonturm": "./src/venues/mousonturm.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@museumsufer/classify": "*",
+    "@museumsufer/core": "*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260509.1",
+    "@museumsufer/tsconfig": "*",
+    "typescript": "^5.9.3"
+  }
+}
