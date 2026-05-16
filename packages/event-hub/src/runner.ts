@@ -30,13 +30,17 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
 
   for (const { slug, run } of VENUE_SCRAPERS) {
     try {
-      const result = await run(ctx);
-      log(`${slug}: ${result.events.length} canonical events`);
-      for (const scraped of result.events) {
-        const id = makeId(result.source_slug, scraped.source_event_id);
-        seenThisRun.add(id);
-        const existing = merged.get(id);
-        merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, nowIso));
+      const raw = await run(ctx);
+      const results = Array.isArray(raw) ? raw : [raw];
+      for (const result of results) {
+        const label = results.length === 1 ? slug : `${slug}/${result.source_slug}`;
+        log(`${label}: ${result.events.length} canonical events`);
+        for (const scraped of result.events) {
+          const id = makeId(result.source_slug, scraped.source_event_id);
+          seenThisRun.add(id);
+          const existing = merged.get(id);
+          merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, nowIso));
+        }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
