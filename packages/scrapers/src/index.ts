@@ -10,6 +10,8 @@ export type {
 
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeAlteOper } from "./venues/alte-oper";
+import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
+import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
@@ -21,9 +23,12 @@ import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHfmdk } from "./venues/hfmdk";
+import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
+import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
+import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
@@ -46,6 +51,8 @@ import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
+  { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
+  { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
@@ -60,9 +67,12 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
+  { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
   { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
+  { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
+  { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
@@ -79,6 +89,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 
 export {
   scrapeAlteOper,
+  scrapeAndreasKoehs,
+  scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
   scrapeDenkbar,
   scrapeDigFrankfurt,
@@ -90,9 +102,12 @@ export {
   scrapeForschungskollegHumanwissenschaften,
   scrapeHausAmDom,
   scrapeHfmdk,
+  scrapeHolzhausenschloesschen,
   scrapeHrBigband,
   scrapeHrSinfonieorchester,
   scrapeInstitutFuerSozialforschung,
+  scrapeJazzFrankfurt,
+  scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
   scrapeLiteraturhaus,
   scrapeMousonturm,
