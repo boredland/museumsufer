@@ -16,6 +16,8 @@
     "./venues/brotfabrik": "./src/venues/brotfabrik.ts",
     "./venues/buergeruniversitaet": "./src/venues/buergeruniversitaet.ts",
     "./venues/denkbar": "./src/venues/denkbar.ts",
+    "./venues/die-kaes": "./src/venues/die-kaes.ts",
+    "./venues/die-schmiere": "./src/venues/die-schmiere.ts",
     "./venues/dig-frankfurt": "./src/venues/dig-frankfurt.ts",
     "./venues/dr-hochs": "./src/venues/dr-hochs.ts",
     "./venues/ensemble-modern": "./src/venues/ensemble-modern.ts",
@@ -55,6 +57,7 @@
     "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts",
     "./venues/stk-musik": "./src/venues/stk-musik.ts",
     "./venues/suew": "./src/venues/suew.ts",
+    "./venues/tigerpalast-variete": "./src/venues/tigerpalast-variete.ts",
     "./venues/waggong": "./src/venues/waggong.ts"
   },
   "scripts": {
