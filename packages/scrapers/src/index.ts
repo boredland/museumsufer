@@ -14,12 +14,15 @@ import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
 import { scrapeDrHochs } from "./venues/dr-hochs";
+import { scrapeEnsembleModern } from "./venues/ensemble-modern";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHfmdk } from "./venues/hfmdk";
+import { scrapeHrBigband } from "./venues/hr-bigband";
+import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
@@ -47,6 +50,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
+  { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
@@ -56,6 +60,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
+  { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
+  { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
@@ -77,12 +83,15 @@ export {
   scrapeDenkbar,
   scrapeDigFrankfurt,
   scrapeDrHochs,
+  scrapeEnsembleModern,
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
   scrapeHausAmDom,
   scrapeHfmdk,
+  scrapeHrBigband,
+  scrapeHrSinfonieorchester,
   scrapeInstitutFuerSozialforschung,
   scrapeJuedischeGemeinde,
   scrapeLiteraturhaus,
