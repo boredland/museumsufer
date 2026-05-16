@@ -1,6 +1,6 @@
 import { classifyEvent } from "@museumsufer/classify";
 import { fnv1a } from "@museumsufer/core/hash";
-import type { CanonicalScrapedEvent, ScrapedLabel } from "@museumsufer/scrapers";
+import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
 import { VENUE_SCRAPERS } from "@museumsufer/scrapers";
 import type { CanonicalEvent, EventHubData, Label } from "./types";
 
@@ -9,6 +9,7 @@ export type Logger = (msg: string) => void;
 export interface RunOptions {
   now?: Date;
   log?: Logger;
+  proxy?: ProxyConfig | null;
 }
 
 /**
@@ -22,13 +23,14 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const now = opts.now ?? new Date();
   const log: Logger = opts.log ?? (() => undefined);
   const nowIso = now.toISOString();
+  const ctx: ScraperContext = { proxy: opts.proxy ?? null };
   const previousById = new Map(previous.events.map((e) => [e.id, e]));
   const merged = new Map<string, CanonicalEvent>(previousById);
   const seenThisRun = new Set<string>();
 
   for (const { slug, run } of VENUE_SCRAPERS) {
     try {
-      const result = await run();
+      const result = await run(ctx);
       log(`${slug}: ${result.events.length} canonical events`);
       for (const scraped of result.events) {
         const id = makeId(result.source_slug, scraped.source_event_id);

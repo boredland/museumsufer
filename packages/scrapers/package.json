@@ -12,7 +12,8 @@
     "./venues/denkbar": "./src/venues/denkbar.ts",
     "./venues/romanfabrik": "./src/venues/romanfabrik.ts",
     "./venues/evangelische-akademie": "./src/venues/evangelische-akademie.ts",
-    "./venues/mousonturm": "./src/venues/mousonturm.ts"
+    "./venues/mousonturm": "./src/venues/mousonturm.ts",
+    "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
