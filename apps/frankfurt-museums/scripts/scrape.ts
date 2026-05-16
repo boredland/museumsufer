@@ -1,20 +1,16 @@
 #!/usr/bin/env bun
 /**
- * Drives the museums scrape pipeline as a linear sequence of pure
- * functions and writes the result to src/scrape-data.ts. No D1, no
- * Cloudflare runtime, no SCRAPE_SECRET. Designed for the GitHub Action.
+ * Derives frankfurt-museums' `src/scrape-data.ts`. Museum metadata and the
+ * museumsufer.de editorial exhibitions list still come from the directory
+ * scraper (`src/scraper.ts`) — there's no other source for those. Events
+ * and per-museum exhibition feeds come from the central event hub:
+ * `EVENTS` filtered to entries whose source_slug is a museum slug, with
+ * `museum:ausstellung` events surfaced as Exhibitions (start = date, end
+ * = end_date) and everything else as Events.
  *
- *   1. scrape()                      — museumsufer.de directory + manual list
- *                                       + Wikipedia images + exhibition descs
- *   2. scrapeMuseumExhibitions()     — per-museum exhibition APIs (only for
- *                                       museums whose exhibitions weren't in
- *                                       the directory result)
- *   3. scrapeMuseumWebsites()        — per-museum event APIs + 7-day enrichment
- *   4. translateEvents()             — DeepL en/fr (only for new strings)
- *
- * Stable IDs are FNV-1a hashes of (museum_slug | title | …) so likes/deep-link
- * URLs survive across runs. The previous bundle is loaded once and used as
- * the seed/cache for sticky fields and DeepL hit-or-miss.
+ * The per-museum scrapers in src/event-scraper.ts + src/exhibition-scraper.ts
+ * + src/api-scrapers.ts moved into packages/scrapers/src/_museums/ during
+ * Phase 1; this script no longer drives them directly.
  */
 import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
@@ -23,8 +19,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { scrapeMuseumWebsites } from "../src/event-scraper";
-import { scrapeMuseumExhibitions } from "../src/exhibition-scraper";
+import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
 import { translateEvents } from "../src/translate";
 import type { Event, Exhibition, Museum, ScrapeData, Translation } from "../src/types";
@@ -33,18 +28,12 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const dataPath = resolve(root, "src/scrape-data.ts");
 
-// Hoisted above the top-level await so `buildScrapeData()` sees them
-// initialised — `const` is in TDZ at module-eval start, `function` is not.
 const CLOSURE_KEYWORDS = /geschlossen|feiertag|holiday|closed|fermeture|ruhetag/i;
 
 const previous = await loadPreviousBundle(dataPath);
 log(
   `seeded from previous bundle: ${previous.museums.length} museums · ${previous.exhibitions.length} exhibitions · ${previous.events.length} events · ${previous.translations.length} translations`,
 );
-
-const proxy = process.env.FETCH_PROXY_URL
-  ? { url: process.env.FETCH_PROXY_URL, token: process.env.FETCH_PROXY_TOKEN }
-  : undefined;
 
 const startMain = Date.now();
 const directory = await stage("scrape (museumsufer.de)", () =>
@@ -55,50 +44,41 @@ const directory = await stage("scrape (museumsufer.de)", () =>
     },
   }),
 );
-const museumsByEslug = new Map<string, ParsedMuseum>(directory.museums.map((m) => [m.slug, m]));
+const museumsBySlug = new Map<string, ParsedMuseum>(directory.museums.map((m) => [m.slug, m]));
+const museumSlugs = new Set(museumsBySlug.keys());
 
-const apiExhibitions = await stage("scrapeMuseumExhibitions", () =>
-  scrapeMuseumExhibitions(museumsByEslug, directory.exhibitions, { proxy }),
-);
-const allExhibitions = [...directory.exhibitions, ...apiExhibitions];
+// Hub events and exhibitions for known museum slugs. The hub orchestrator
+// already classified each item: `museum:ausstellung` for exhibitions
+// (multi-day, `end_date` set), `museum:*` / `talk:*` / `music:*` for
+// single-day events.
+const hubEvents: HubMuseumEvent[] = [];
+const hubExhibitions: ParsedExhibition[] = [];
+for (const ev of EVENTS) {
+  if (!museumSlugs.has(ev.source_slug)) continue;
+  if (isHubExhibition(ev)) {
+    hubExhibitions.push(toParsedExhibitionFromHub(ev));
+  } else {
+    hubEvents.push(toHubMuseumEvent(ev));
+  }
+}
+log(`hub → museums: ${hubEvents.length} events, ${hubExhibitions.length} exhibitions for ${museumSlugs.size} museums`);
 
-const events = await stage("scrapeMuseumWebsites", () =>
-  scrapeMuseumWebsites(museumsByEslug, {
-    previous: {
-      museums: previous.museums.map(toParsedMuseum),
-      events: previous.events.map((e) => ({
-        museum_slug: slugFromMuseumId(e.museum_id, previous.museums),
-        title: e.title,
-        date: e.date,
-        time: e.time ?? null,
-        end_time: e.end_time ?? null,
-        end_date: e.end_date ?? null,
-        description: e.description ?? null,
-        url: e.url ?? null,
-        detail_url: e.detail_url ?? null,
-        image_url: e.image_url ?? null,
-        price: e.price ?? null,
-        category: e.category ?? null,
-      })),
-    },
-    proxy,
-  }),
-);
+const allExhibitions = [...directory.exhibitions, ...hubExhibitions];
 
 const translations = await stage("translateEvents", () =>
   translateEvents({
-    events,
+    events: hubEvents,
     exhibitions: allExhibitions,
-    museums: [...museumsByEslug.values()],
+    museums: [...museumsBySlug.values()],
     existing: previous.translations,
     apiKeys: process.env.DEEPL_API_KEYS,
   }),
 );
 
 const data = buildScrapeData({
-  museums: [...museumsByEslug.values()],
+  museums: [...museumsBySlug.values()],
   exhibitions: allExhibitions,
-  events,
+  events: hubEvents,
   translations,
 });
 
@@ -107,16 +87,96 @@ log(
   `wrote scrape-data.ts in ${Date.now() - startMain}ms — ${data.museums.length} museums · ${data.exhibitions.length} exhibitions · ${data.events.length} events · ${data.translations.length} translations`,
 );
 
+// ─── hub → app shapes ─────────────────────────────────────────────────
+
+/** Local mirror of the original ScrapedEvent shape so translate.ts and
+ *  the buildScrapeData function can stay unchanged. */
+interface HubMuseumEvent {
+  museum_slug: string;
+  title: string;
+  date: string;
+  time: string | null;
+  end_time: string | null;
+  end_date: string | null;
+  description: string | null;
+  url: string | null;
+  detail_url: string | null;
+  image_url: string | null;
+  price: string | null;
+  category: string | null;
+}
+
+function isHubExhibition(ev: CanonicalEvent): boolean {
+  return ev.labels.some((l) => l.label === "museum:ausstellung");
+}
+
+function toHubMuseumEvent(ev: CanonicalEvent): HubMuseumEvent {
+  return {
+    museum_slug: ev.source_slug,
+    title: ev.title,
+    date: ev.date,
+    time: ev.time ?? null,
+    end_time: ev.end_time ?? null,
+    end_date: ev.end_date ?? null,
+    description: ev.description ?? null,
+    url: ev.detail_url ?? null,
+    detail_url: ev.detail_url ?? null,
+    image_url: ev.image_url ?? null,
+    price: ev.price_min != null ? `${ev.price_min} €` : null,
+    category: pickMuseumCategory(ev),
+  };
+}
+
+function toParsedExhibitionFromHub(ev: CanonicalEvent): ParsedExhibition {
+  return {
+    museum_slug: ev.source_slug,
+    title: ev.title,
+    start_date: ev.date,
+    end_date: ev.end_date ?? null,
+    description: ev.description ?? null,
+    image_url: ev.image_url ?? null,
+    detail_url: ev.detail_url ?? "",
+  };
+}
+
+/** Recover the original event category ("Vortrag" / "Konzert" / "Führung"
+ *  / "Workshop" / "Vernissage" / "Familie" / "Film") from the hub labels,
+ *  in the same string shape the read-time renderers already accept. */
+function pickMuseumCategory(ev: CanonicalEvent): string | null {
+  for (const l of ev.labels) {
+    switch (l.label) {
+      case "talk:vortrag":
+        return "Vortrag";
+      case "music:classical":
+      case "music:chamber":
+      case "music:jazz":
+      case "music:sacred":
+      case "music:world":
+      case "music:experimental":
+        return "Konzert";
+      case "museum:fuehrung":
+        return "Führung";
+      case "museum:workshop":
+        return "Workshop";
+      case "museum:vernissage":
+        return "Vernissage";
+      case "museum:familie":
+        return "Familie";
+      case "museum:film":
+        return "Film";
+    }
+  }
+  return null;
+}
+
 // ─── helpers ──────────────────────────────────────────────────────────
 
 function buildScrapeData(input: {
   museums: ParsedMuseum[];
   exhibitions: ParsedExhibition[];
-  events: import("../src/event-scraper").ScrapedEvent[];
+  events: HubMuseumEvent[];
   translations: Translation[];
 }): ScrapeData {
-  // Stable IDs: hash slug-keyed composites so URL-anchored likes survive
-  // across runs.
   const museumIdBySlug = new Map<string, number>();
   const museums: Museum[] = input.museums
     .map((m) => {
@@ -134,10 +194,6 @@ function buildScrapeData(input: {
     })
     .sort((a, b) => a.slug.localeCompare(b.slug));
 
-  // Drop past exhibitions and ones starting more than 90 days out;
-  // fuzzy-dedup by title within the same museum (handles trailing-
-  // punctuation / whitespace divergence between museumsufer.de and
-  // museum-API copies of the same exhibition).
   const today = todayIso();
   const horizon = addDays(today, 90);
   const exhibitionsRaw: Exhibition[] = [];
@@ -165,9 +221,6 @@ function buildScrapeData(input: {
       a.title.localeCompare(b.title),
   );
 
-  // Drop events outside the [yesterday, today + 90d] window + closure
-  // entries (museum opening-hours pages occasionally surface as
-  // "Geschlossen" events).
   const yesterday = addDays(today, -1);
   const eventsRaw: Event[] = [];
   for (const ev of input.events) {
@@ -193,10 +246,6 @@ function buildScrapeData(input: {
       ...(ev.category ? { category: ev.category } : {}),
     });
   }
-  // Two-pass dedup mirrors the previous read-time logic: pass 1 collapses
-  // events with the same museum + normalized title; pass 2 collapses
-  // same-museum same-time entries whose titles share all significant
-  // words (e.g. "Workshop für Kinder" vs "Workshop für Kinder!").
   const events = deduplicateEvents(deduplicateByTitle(eventsRaw)).sort(
     (a, b) =>
       a.date.localeCompare(b.date) ||
@@ -205,7 +254,6 @@ function buildScrapeData(input: {
       a.title.localeCompare(b.title),
   );
 
-  // Prune translations whose source_text no longer appears in the output.
   const livingTexts = new Set<string>();
   for (const m of museums) if (m.description) livingTexts.add(m.description);
   for (const ex of exhibitions) {
@@ -231,9 +279,6 @@ function normalizeForDedup(title: string): string {
     .trim();
 }
 
-/** O(n) collapse of items sharing a `(museum_id, normalized title)` key —
- *  keeps the highest-id item per group. Replaces the read-time fuzzy
- *  dedup that used to walk the result array on every request. */
 function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
   const byKey = new Map<string, T>();
   for (const item of items) {
@@ -244,18 +289,10 @@ function deduplicateByTitle<T extends { museum_id: number; title: string; id: nu
   return [...byKey.values()];
 }
 
-/** Cross-feed dedup: same museum + same time + sufficiently overlapping
- *  titles collapse into the highest-id row. This is O(n²) on the same-time
- *  partition only (events sharing a single timestamp at one museum) — at
- *  museumsufer's scale that's typically <5 candidates per partition. */
 function deduplicateEvents<T extends { museum_id: number; title: string; id: number; time?: string | null }>(
   events: T[],
 ): T[] {
-  // Pre-normalise once.
   const annotated = events.map((ev) => ({ ev, words: significantWords(ev.title) }));
-
-  // Index by (museum_id, time) so the inner overlap-check only scans the
-  // small same-bucket partition.
   const buckets = new Map<string, typeof annotated>();
   const passthrough: T[] = [];
   for (const a of annotated) {
@@ -315,9 +352,6 @@ function toParsedMuseum(m: Museum): ParsedMuseum {
 }
 
 function toParsedExhibition(ex: Exhibition): ParsedExhibition {
-  // The previous bundle stored museum_id (numeric hash). The script
-  // doesn't need to round-trip the slug for sticky-description reuse —
-  // matching is done by detail_url, so leave museum_slug blank.
   return {
     museum_slug: "",
     title: ex.title,
@@ -327,13 +361,6 @@ function toParsedExhibition(ex: Exhibition): ParsedExhibition {
     image_url: ex.image_url ?? null,
     detail_url: ex.detail_url ?? "",
   };
-}
-
-function slugFromMuseumId(museumId: number, museums: Museum[]): string {
-  for (const m of museums) {
-    if (m.id === museumId) return m.slug;
-  }
-  return "";
 }
 
 function generateModule(data: ScrapeData): string {
