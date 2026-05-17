@@ -113,10 +113,23 @@ function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): Canonica
   };
 }
 
+/** Every event from a museum source carries a `museum:<category>` label so
+ *  frankfurt-museums can filter by namespace. Talks and concerts at museums
+ *  also carry their topical label (talk:* / music:*) so lehrhaus and
+ *  konzert-haus pick them up via their natural filters. */
 function labelsForEvent(type: EventType | null, title: string, description: string | null): ScrapedLabel[] {
   if (type === "Vortrag") {
     const sub = classifyTalk(title, description).toLowerCase();
-    return [{ label: `talk:${sub}`, confidence: 0.85, classifier: "keyword:event" }];
+    return [
+      { label: `talk:${sub}`, confidence: 0.85, classifier: "keyword:event" },
+      { label: "museum:vortrag", confidence: 0.85, classifier: "keyword:event" },
+    ];
+  }
+  if (type === "Konzert") {
+    return [
+      { label: "music:classical", confidence: 0.85, classifier: "keyword:event" },
+      { label: "museum:konzert", confidence: 0.85, classifier: "keyword:event" },
+    ];
   }
   const mapped = eventTypeToLabel(type);
   if (!mapped) return [{ label: "museum:event", confidence: 0.5, classifier: "scraper-hardcoded" }];

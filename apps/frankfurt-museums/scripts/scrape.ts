@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
+import { type CanonicalEvent, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
 import { translateEvents } from "../src/translate";
 import type { Event, Exhibition, Museum, ScrapeData, Translation } from "../src/types";
@@ -31,19 +31,21 @@ const directory = await stage("scrape (museumsufer.de)", () =>
   }),
 );
 const museumsBySlug = new Map<string, ParsedMuseum>(directory.museums.map((m) => [m.slug, m]));
-const museumSlugs = new Set(museumsBySlug.keys());
 
 const hubEvents: CanonicalEvent[] = [];
 const hubExhibitions: ParsedExhibition[] = [];
 for (const ev of EVENTS) {
-  if (!museumSlugs.has(ev.source_slug)) continue;
+  if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+  if (!hasMuseumLabel(ev)) continue;
   if (isHubExhibition(ev)) {
     hubExhibitions.push(toParsedExhibitionFromHub(ev));
   } else {
     hubEvents.push(ev);
   }
 }
-log(`hub → museums: ${hubEvents.length} events, ${hubExhibitions.length} exhibitions for ${museumSlugs.size} museums`);
+log(
+  `hub → museums: ${hubEvents.length} events, ${hubExhibitions.length} exhibitions for ${museumsBySlug.size} museums`,
+);
 
 const allExhibitions = [...directory.exhibitions, ...hubExhibitions];
 
@@ -69,6 +71,10 @@ log(
   `wrote scrape-data.ts in ${Date.now() - startMain}ms — ${data.museums.length} museums · ${data.exhibitions.length} exhibitions · ${data.events.length} events · ${data.translations.length} translations`,
 );
 
+function hasMuseumLabel(ev: CanonicalEvent): boolean {
+  return ev.labels.some((l) => l.label.startsWith("museum:"));
+}
+
 function isHubExhibition(ev: CanonicalEvent): boolean {
   return ev.labels.some((l) => l.label === "museum:ausstellung");
 }
@@ -85,20 +91,14 @@ function toParsedExhibitionFromHub(ev: CanonicalEvent): ParsedExhibition {
   };
 }
 
-/** Recover the original event category ("Vortrag" / "Konzert" / "Führung"
- *  / "Workshop" / "Vernissage" / "Familie" / "Film") from the hub labels,
- *  in the same string shape the read-time renderers already accept. */
+/** Recover the original event category from the museum:* label that the
+ *  orchestrator attaches to every museum-hosted event. */
 function pickMuseumCategory(ev: CanonicalEvent): string | null {
   for (const l of ev.labels) {
     switch (l.label) {
-      case "talk:vortrag":
+      case "museum:vortrag":
         return "Vortrag";
-      case "music:classical":
-      case "music:chamber":
-      case "music:jazz":
-      case "music:sacred":
-      case "music:world":
-      case "music:experimental":
+      case "museum:konzert":
         return "Konzert";
       case "museum:fuehrung":
         return "Führung";
