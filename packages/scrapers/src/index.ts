@@ -26,6 +26,7 @@ import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
+import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeDenkbar } from "./venues/denkbar";
@@ -106,6 +107,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
+  { slug: "bnai-brith-frankfurt", run: (_ctx: ScraperContext) => scrapeBnaiBrithFrankfurt() },
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
@@ -184,6 +186,7 @@ export {
   scrapeAndreasKoehs,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
+  scrapeBnaiBrithFrankfurt,
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
   scrapeDenkbar,
