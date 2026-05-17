@@ -30,6 +30,7 @@ import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
+import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
@@ -115,6 +116,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "boell-hessen", run: (_ctx: ScraperContext) => scrapeBoellHessen() },
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
+  { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
@@ -198,6 +200,7 @@ export {
   scrapeBoellHessen,
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
+  scrapeCrespoFoundation,
   scrapeDenkbar,
   scrapeDieKaes,
   scrapeDieSchmiere,
