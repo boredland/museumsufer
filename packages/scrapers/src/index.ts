@@ -24,6 +24,7 @@ import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
+import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
@@ -61,12 +62,14 @@ import { scrapeInternationalesTheater } from "./venues/internationales-theater";
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
+import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeLandauDe } from "./venues/landau-de";
+import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
 import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMousonturm } from "./venues/mousonturm";
@@ -99,6 +102,7 @@ import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
+import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 
 /**
  * The set of canonical hub scrapers. Each emits canonical-shaped events
@@ -110,6 +114,7 @@ import { scrapeWaggong } from "./venues/waggong";
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
+  { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
   { slug: "bnai-brith-frankfurt", run: (_ctx: ScraperContext) => scrapeBnaiBrithFrankfurt() },
@@ -150,12 +155,14 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
   { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
+  { slug: "karl-marx-buchhandlung", run: (_ctx: ScraperContext) => scrapeKarlMarxBuchhandlung() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "komoedie-frankfurt", run: (_ctx: ScraperContext) => scrapeKomoedieFrankfurt() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
   { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
+  { slug: "landinsicht-buchladen", run: (_ctx: ScraperContext) => scrapeLandinsichtBuchladen() },
   { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
@@ -189,11 +196,13 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "union-club-frankfurt", run: (_ctx: ScraperContext) => scrapeUnionClubFrankfurt() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
+  { slug: "ypsilon-buchladen", run: (_ctx: ScraperContext) => scrapeYpsilonBuchladen() },
 ];
 
 export {
   scrapeAlteOper,
   scrapeAndreasKoehs,
+  scrapeAutorenbuchhandlungMarx,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
   scrapeBnaiBrithFrankfurt,
@@ -231,12 +240,14 @@ export {
   scrapeJazzFrankfurt,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
+  scrapeKarlMarxBuchhandlung,
   scrapeKellertheaterFrankfurt,
   scrapeKirchenmusikDreikoenig,
   scrapeKomoedieFrankfurt,
   scrapeKronbergAcademy,
   scrapeKulturnetzLandau,
   scrapeLandauDe,
+  scrapeLandinsichtBuchladen,
   scrapeLandungsbruecken,
   scrapeLiteraturhaus,
   scrapeMousonturm,
@@ -270,4 +281,5 @@ export {
   scrapeUnionClubFrankfurt,
   scrapeVolksbuehneFrankfurt,
   scrapeWaggong,
+  scrapeYpsilonBuchladen,
 };
