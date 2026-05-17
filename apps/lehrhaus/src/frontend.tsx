@@ -897,8 +897,6 @@ export function ProgrammePartial({
   locale?: Locale;
   range?: number;
 }) {
-  // Range view: events span multiple days, grouped by date, no "past" filtering
-  // (the past-today logic only makes sense on a single-day view).
   if (range) {
     const groups = new Map<string, DayEvent[]>();
     for (const e of events) {
@@ -929,7 +927,7 @@ export function ProgrammePartial({
         ) : (
           <div class="day-groups">
             {sortedDates.map((d) => {
-              const dayEvents = groups.get(d) ?? [];
+              const dayEvents = filterPastForToday(d, groups.get(d) ?? []);
               const startIndex = cursor;
               cursor += dayEvents.length;
               return <DayGroup key={d} date={d} events={dayEvents} tr={tr} locale={locale} startIndex={startIndex} />;
