@@ -114,6 +114,13 @@ function parseListing(block: string, categories: readonly string[]): Parsed | nu
   return { event, dedupKey: `${slug}|${date}|${time ?? ""}` };
 }
 
+/** Romanfabrik's "Thema" category covers talks but also one-off venue
+ *  programmes like Flohmarkt, Sommerfest, Kunstmarkt — those aren't
+ *  talks; route them to museum:event (catchall) so lehrhaus doesn't
+ *  pick them up via its talk:* filter. */
+const NON_TALK_TITLE_RE =
+  /\b(?:flohmarkt|kunstmarkt|sommerfest|winterfest|herbstfest|fr[üu]hlingsfest|party|probe|workshop|kurs)\b/i;
+
 function labelsFromCategories(title: string, subtitle: string | null, categories: readonly string[]): ScrapedLabel[] {
   const labels: ScrapedLabel[] = [];
   if (categories.includes("Ton")) {
@@ -127,11 +134,15 @@ function labelsFromCategories(title: string, subtitle: string | null, categories
     labels.push({ label: "talk:lesung", confidence: 1.0, classifier: "upstream-tag" });
   }
   if (categories.includes("Thema")) {
-    labels.push({
-      label: `talk:${classifyTalk(title, subtitle).toLowerCase()}`,
-      confidence: 0.95,
-      classifier: "upstream-tag",
-    });
+    if (NON_TALK_TITLE_RE.test(title)) {
+      labels.push({ label: "museum:event", confidence: 0.7, classifier: "scraper-hardcoded" });
+    } else {
+      labels.push({
+        label: `talk:${classifyTalk(title, subtitle).toLowerCase()}`,
+        confidence: 0.95,
+        classifier: "upstream-tag",
+      });
+    }
   }
   return labels;
 }

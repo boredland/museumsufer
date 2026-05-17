@@ -1,6 +1,5 @@
 import { compareNullsLast } from "@museumsufer/core";
 import { SCRAPE_DATA } from "./scrape-data";
-import { SOURCES } from "./source-config";
 import type { Category, LehrhausEvent, LehrhausSource } from "./types";
 
 export interface DateWithCount {
@@ -18,7 +17,11 @@ export interface EventFilter {
 }
 
 const EVENTS_BY_ID = new Map<number, LehrhausEvent>(SCRAPE_DATA.events.map((e) => [e.id, e]));
-const SOURCES_BY_SLUG = new Map<string, LehrhausSource>(SOURCES.map((s) => [s.slug, s]));
+// SCRAPE_DATA.sources merges the hand-curated SOURCES with synthesized
+// entries for any orphan source_slug the scrape picked up — see
+// scripts/scrape.ts > augmentSources(). Reading from static SOURCES here
+// would drop those orphans at render-time.
+const SOURCES_BY_SLUG = new Map<string, LehrhausSource>(SCRAPE_DATA.sources.map((s) => [s.slug, s]));
 
 const EVENTS_BY_DATE = (() => {
   const map = new Map<string, LehrhausEvent[]>();

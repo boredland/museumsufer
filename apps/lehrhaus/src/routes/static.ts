@@ -1,6 +1,9 @@
 import { buildApiCatalog, buildManifest, buildRobotsTxt, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
-import { SOURCES } from "../source-config";
+import { SCRAPE_DATA } from "../scrape-data";
+
+const SOURCES = SCRAPE_DATA.sources;
+
 import { CATEGORIES, type Env } from "../types";
 
 const APP_URL = "https://frankfurt.lehr.salon";
