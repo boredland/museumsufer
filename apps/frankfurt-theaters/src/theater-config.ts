@@ -1,3 +1,4 @@
+import { SYNTHESIZED_THEATERS } from "./synthesized-theaters";
 import type { TicketingProvider } from "./types";
 
 export interface TheaterConfig {
@@ -10,7 +11,10 @@ export interface TheaterConfig {
   ticketing_provider: TicketingProvider;
 }
 
-export const THEATERS: TheaterConfig[] = [
+/** Hand-curated theater list. Combined with auto-generated
+ *  SYNTHESIZED_THEATERS (from scripts/scrape.ts) below to form the final
+ *  THEATERS export. */
+export const CURATED_THEATERS: TheaterConfig[] = [
   {
     slug: "schauspiel-frankfurt",
     name: "Schauspiel Frankfurt",
@@ -219,3 +223,5 @@ export const THEATERS: TheaterConfig[] = [
     ticketing_provider: "custom",
   },
 ];
+
+export const THEATERS: TheaterConfig[] = [...CURATED_THEATERS, ...SYNTHESIZED_THEATERS];
