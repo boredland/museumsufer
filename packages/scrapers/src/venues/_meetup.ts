@@ -57,13 +57,6 @@ const GROUPS: MeetupGroup[] = [
 const BASE = "https://www.meetup.com";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
-/** Meetup venues aren't carried with lat/lon in the page state, only
- *  city + address. Meetup groups also rotate venues frequently. We tag
- *  every event with the Frankfurt CBD centroid so the hub's geofence
- *  passes; the per-event venue_room + city carry the actual location. */
-const FRANKFURT_LAT = 50.1112;
-const FRANKFURT_LON = 8.6749;
-
 /** Frankfurt + nearby city names that we accept on venue.city. The hub's
  *  FRANKFURT_BBOX geofence catches outliers, but matching by city here is
  *  cheaper and gives a more readable per-source count. */
@@ -87,6 +80,8 @@ interface ApolloEvent {
   isOnline?: boolean;
   status?: string;
   venue?: { __ref?: string };
+  maxTickets?: number;
+  going?: { totalCount?: number };
 }
 interface ApolloVenue {
   __typename: "Venue";
@@ -96,6 +91,8 @@ interface ApolloVenue {
   city?: string;
   state?: string;
   country?: string;
+  lat?: number;
+  lon?: number;
 }
 
 export async function scrapeMeetup(): Promise<VenueScrapeResult[]> {
@@ -116,63 +113,94 @@ async function scrapeGroup(group: MeetupGroup, today: string): Promise<VenueScra
     const apollo = extractApolloState(html);
     if (!apollo) return { source_slug: sourceSlug, display_name: group.displayName, events: [] };
 
-    const events: CanonicalScrapedEvent[] = [];
+    const candidates: ApolloEvent[] = [];
     for (const [key, value] of Object.entries(apollo)) {
       if (!key.startsWith("Event:")) continue;
-      const ev = value as ApolloEvent;
-      const event = toCanonicalEvent(ev, apollo, group, today);
-      if (event) events.push(event);
+      if (!passesListingFilters(value as ApolloEvent, group, today)) continue;
+      candidates.push(value as ApolloEvent);
     }
-    return { source_slug: sourceSlug, display_name: group.displayName, events };
+
+    const events = await Promise.all(candidates.map((ev) => enrichWithVenue(ev)));
+    return {
+      source_slug: sourceSlug,
+      display_name: group.displayName,
+      events: events.filter((e): e is CanonicalScrapedEvent => e !== null),
+    };
   } catch (err) {
     console.warn(`meetup ${group.slug}: ${err instanceof Error ? err.message : err}`);
     return { source_slug: sourceSlug, display_name: group.displayName, events: [] };
   }
 }
 
-function toCanonicalEvent(
-  ev: ApolloEvent,
-  apollo: Record<string, unknown>,
-  group: MeetupGroup,
-  today: string,
-): CanonicalScrapedEvent | null {
-  if (ev.status !== "ACTIVE") return null;
-  if (ev.eventType !== "PHYSICAL" || ev.isOnline) return null;
-  if (!ev.dateTime || !ev.title) return null;
+/** Cheap filters that don't need the detail page — title shape, status,
+ *  date, online vs physical, capacity. Drops events whose capacity is
+ *  reached: maxTickets > 0 && going >= maxTickets means new RSVPs go to
+ *  the waitlist, so the event isn't usefully open anymore. */
+function passesListingFilters(ev: ApolloEvent, group: MeetupGroup, today: string): boolean {
+  if (ev.status !== "ACTIVE") return false;
+  if (ev.eventType !== "PHYSICAL" || ev.isOnline) return false;
+  if (!ev.dateTime || !ev.title) return false;
+  if (ev.dateTime.slice(0, 10) < today) return false;
+  if (NON_TALK_RE.test(ev.title)) return false;
+  if (group.kind === "mixed" && !TALK_RE.test(ev.title)) return false;
+  const cap = ev.maxTickets ?? 0;
+  const going = ev.going?.totalCount ?? 0;
+  if (cap > 0 && going >= cap) return false;
+  return true;
+}
 
-  const date = ev.dateTime.slice(0, 10);
-  if (date < today) return null;
-  const time = ev.dateTime.slice(11, 16);
-  const endTime = ev.endTime?.slice(11, 16) ?? null;
-  const endDateCandidate = ev.endTime?.slice(0, 10) ?? null;
-  const endDate = endDateCandidate && endDateCandidate !== date ? endDateCandidate : null;
+/** Fetch the event-detail page; the listing strips venue.lat/lon but
+ *  the detail page carries them. Returns null if the venue is outside
+ *  our city allowlist (so the geofence isn't load-bearing here either). */
+async function enrichWithVenue(ev: ApolloEvent): Promise<CanonicalScrapedEvent | null> {
+  if (!ev.eventUrl) return null;
+  try {
+    const res = await fetch(ev.eventUrl, { headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" } });
+    if (!res.ok) return null;
+    const apollo = extractApolloState(await res.text());
+    if (!apollo) return null;
 
-  if (NON_TALK_RE.test(ev.title)) return null;
-  if (group.kind === "mixed" && !TALK_RE.test(ev.title)) return null;
+    const venueRef =
+      ev.venue?.__ref ?? `Venue:${(apollo[`Event:${ev.id}`] as ApolloEvent | undefined)?.venue?.__ref ?? ""}`;
+    const venue = (apollo[venueRef] as ApolloVenue | undefined) ?? findVenue(apollo);
+    if (!venue) return null;
+    if (!ALLOWED_CITY_RE.test(venue.city ?? "")) return null;
+    if (typeof venue.lat !== "number" || typeof venue.lon !== "number") return null;
 
-  const venueRef = ev.venue?.__ref;
-  const venue = venueRef ? (apollo[venueRef] as ApolloVenue | undefined) : undefined;
-  if (!venue) return null;
-  if (!ALLOWED_CITY_RE.test(venue.city ?? "")) return null;
+    const date = ev.dateTime!.slice(0, 10);
+    const time = ev.dateTime!.slice(11, 16);
+    const endTime = ev.endTime?.slice(11, 16) ?? null;
+    const endDateCandidate = ev.endTime?.slice(0, 10) ?? null;
+    const endDate = endDateCandidate && endDateCandidate !== date ? endDateCandidate : null;
 
-  return {
-    source_event_id: ev.id,
-    title: ev.title,
-    description: ev.description?.slice(0, 800) ?? null,
-    date,
-    time,
-    end_date: endDate,
-    end_time: endTime,
-    detail_url: ev.eventUrl ?? null,
-    ticket_url: ev.eventUrl ?? null,
-    image_url: null,
-    venue_room: venue.name ?? null,
-    city: venue.city ?? null,
-    lat: FRANKFURT_LAT,
-    lon: FRANKFURT_LON,
-    raw_category: null,
-    labels: [{ label: "talk:vortrag", confidence: 0.8, classifier: "scraper-hardcoded" }],
-  };
+    return {
+      source_event_id: ev.id,
+      title: ev.title!,
+      description: ev.description?.slice(0, 800) ?? null,
+      date,
+      time,
+      end_date: endDate,
+      end_time: endTime,
+      detail_url: ev.eventUrl,
+      ticket_url: ev.eventUrl,
+      image_url: null,
+      venue_room: venue.name ?? null,
+      city: venue.city ?? null,
+      lat: venue.lat,
+      lon: venue.lon,
+      raw_category: null,
+      labels: [{ label: "talk:vortrag", confidence: 0.8, classifier: "scraper-hardcoded" }],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function findVenue(apollo: Record<string, unknown>): ApolloVenue | undefined {
+  for (const [k, v] of Object.entries(apollo)) {
+    if (k.startsWith("Venue:") && (v as ApolloVenue).__typename === "Venue") return v as ApolloVenue;
+  }
+  return undefined;
 }
 
 function extractApolloState(html: string): Record<string, unknown> | null {
