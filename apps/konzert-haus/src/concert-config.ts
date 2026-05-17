@@ -1,3 +1,4 @@
+import { SYNTHESIZED_VENUES } from "./synthesized-venues";
 import type { Genre } from "./types";
 
 export interface VenueConfig {
@@ -12,7 +13,9 @@ export interface VenueConfig {
   default_genre: Genre;
 }
 
-export const VENUES: VenueConfig[] = [
+/** Hand-curated venue list. Combined with auto-generated SYNTHESIZED_VENUES
+ *  (from scripts/scrape.ts) below to form the final VENUES export. */
+export const CURATED_VENUES: VenueConfig[] = [
   {
     slug: "alte-oper",
     name: "Alte Oper Frankfurt",
@@ -278,3 +281,5 @@ export const VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
 ];
+
+export const VENUES: VenueConfig[] = [...CURATED_VENUES, ...SYNTHESIZED_VENUES];
