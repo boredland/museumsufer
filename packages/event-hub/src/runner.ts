@@ -1,7 +1,7 @@
 import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
 import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
-import { VENUE_SCRAPERS } from "@museumsufer/scrapers";
+import { coordinatesFor, VENUE_SCRAPERS, withinGeofence } from "@museumsufer/scrapers";
 import PQueue from "p-queue";
 import type { CanonicalEvent, EventHubData, Label } from "./types";
 
@@ -37,6 +37,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   // doesn't erase a curated label. This-run scrapers override last-run.
   const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
+  const geofenceDrops = new Map<string, number>();
   const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
     queue.add(async () => {
@@ -48,10 +49,15 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
           log(`${label}: ${result.events.length} canonical events`);
           if (result.display_name) venueNames[result.source_slug] = result.display_name;
           for (const scraped of result.events) {
+            const coords = resolveCoords(scraped, result.source_slug);
+            if (!coords) {
+              geofenceDrops.set(label, (geofenceDrops.get(label) ?? 0) + 1);
+              continue;
+            }
             const id = makeId(result.source_slug, scraped.source_event_id);
             seenThisRun.add(id);
             const existing = merged.get(id);
-            merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, nowIso));
+            merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, coords, nowIso));
           }
         }
       } catch (err) {
@@ -61,6 +67,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     });
   }
   await queue.onIdle();
+  for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
 
   // Prune past events that have not been re-confirmed this run, and drop
   // future events that disappeared from their source more than TTL days
@@ -95,11 +102,26 @@ function makeId(sourceSlug: string, sourceEventId: string): string {
   return fnv1a(`${sourceSlug}|${sourceEventId}`);
 }
 
+/** Resolve final per-event coordinates and apply the bbox geofence.
+ *  Returns null if the event has no usable coords (scraper omitted + no
+ *  default for the source) or sits outside the Frankfurt / Landau box. */
+function resolveCoords(scraped: CanonicalScrapedEvent, sourceSlug: string): readonly [number, number] | null {
+  const lat = scraped.lat ?? undefined;
+  const lon = scraped.lon ?? undefined;
+  if (typeof lat === "number" && typeof lon === "number") {
+    return withinGeofence(lat, lon) ? [lat, lon] : null;
+  }
+  const fallback = coordinatesFor(sourceSlug);
+  if (!fallback) return null;
+  return withinGeofence(fallback[0], fallback[1]) ? fallback : null;
+}
+
 function mergeEvent(
   existing: CanonicalEvent | undefined,
   sourceSlug: string,
   id: string,
   scraped: CanonicalScrapedEvent,
+  coords: readonly [number, number],
   nowIso: string,
 ): CanonicalEvent {
   const scraperLabels: Label[] = scraped.labels.map((l) => ({ ...l }));
@@ -128,8 +150,8 @@ function mergeEvent(
     performers: scraped.performers ?? undefined,
     venue_room: scraped.venue_room ?? undefined,
     city: scraped.city ?? undefined,
-    lat: scraped.lat ?? undefined,
-    lon: scraped.lon ?? undefined,
+    lat: coords[0],
+    lon: coords[1],
     raw_category: scraped.raw_category ?? undefined,
     labels: finalLabels,
     first_seen_at: base.first_seen_at,

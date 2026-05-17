@@ -26,8 +26,11 @@ export interface CanonicalEvent {
   performers?: string;
   venue_room?: string;
   city?: string;
-  lat?: number;
-  lon?: number;
+  /** Canonical coordinates used for the hub's bbox geofence and downstream
+   *  distance sorts. Auto-filled by the runner from VENUE_COORDS / MUSEUMS
+   *  config when the scraper doesn't emit per-event coordinates. */
+  lat: number;
+  lon: number;
   raw_category?: string;
   labels: Label[];
   first_seen_at: string;
