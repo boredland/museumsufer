@@ -22,6 +22,7 @@ export {
 
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
+import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
@@ -167,6 +168,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
+  { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
