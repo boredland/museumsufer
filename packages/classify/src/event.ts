@@ -30,7 +30,15 @@ export function classifyEvent(title: string, description?: string | null): Event
     haystack.includes("gespräch") ||
     haystack.includes("talk") ||
     haystack.includes("buchpräsentation") ||
-    haystack.includes("diskussion")
+    haystack.includes("buchpraesentation") ||
+    haystack.includes("buchvorstellung") ||
+    haystack.includes("diskussion") ||
+    haystack.includes("podium") ||
+    haystack.includes("debatte") ||
+    haystack.includes("lesung") ||
+    haystack.includes("liest aus") ||
+    haystack.includes("book launch") ||
+    haystack.includes("book presentation")
   )
     return "Vortrag";
   if (haystack.includes("konzert") || haystack.includes("musik")) return "Konzert";

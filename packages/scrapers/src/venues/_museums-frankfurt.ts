@@ -1,4 +1,4 @@
-import { classifyEvent, type EventType, eventTypeToLabel } from "@museumsufer/classify";
+import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@museumsufer/classify";
 import PQueue from "p-queue";
 import { type ApiEvent, type ApiExhibition, fetchEventsFromApi, fetchExhibitionsFromApi } from "../_museums/api";
 import { MUSEUMS, museumDisplayName } from "../_museums/config";
@@ -89,7 +89,7 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
     ticket_url: ev.detail_url,
     image_url: ev.image_url,
     raw_category: ev.price ?? null,
-    labels: labelsForEvent(eventType),
+    labels: labelsForEvent(eventType, title, description),
   };
 }
 
@@ -113,7 +113,11 @@ function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): Canonica
   };
 }
 
-function labelsForEvent(type: EventType | null): ScrapedLabel[] {
+function labelsForEvent(type: EventType | null, title: string, description: string | null): ScrapedLabel[] {
+  if (type === "Vortrag") {
+    const sub = classifyTalk(title, description).toLowerCase();
+    return [{ label: `talk:${sub}`, confidence: 0.85, classifier: "keyword:event" }];
+  }
   const mapped = eventTypeToLabel(type);
   if (!mapped) return [{ label: "museum:event", confidence: 0.5, classifier: "scraper-hardcoded" }];
   return [{ label: mapped, confidence: 0.85, classifier: "keyword:event" }];
