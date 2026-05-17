@@ -42,6 +42,7 @@ import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
+import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
@@ -50,6 +51,7 @@ import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
+import { scrapeHsfkFrankfurt } from "./venues/hsfk-frankfurt";
 import { scrapeInstitutFrancaisFrankfurt } from "./venues/institut-francais-frankfurt";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
 import { scrapeInstitutoCervantesFrankfurt } from "./venues/instituto-cervantes-frankfurt";
@@ -127,6 +129,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
+  { slug: "frankfurt-uas", run: (_ctx: ScraperContext) => scrapeFrankfurtUas() },
   { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
@@ -135,6 +138,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
   { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
+  { slug: "hsfk-frankfurt", run: (_ctx: ScraperContext) => scrapeHsfkFrankfurt() },
   { slug: "institut-francais-frankfurt", run: (_ctx: ScraperContext) => scrapeInstitutFrancaisFrankfurt() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
   { slug: "instituto-cervantes-frankfurt", run: (_ctx: ScraperContext) => scrapeInstitutoCervantesFrankfurt() },
@@ -204,6 +208,7 @@ export {
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
+  scrapeFrankfurtUas,
   scrapeGalliTheater,
   scrapeGallusTheater,
   scrapeHambacherSchloss,
@@ -212,6 +217,7 @@ export {
   scrapeHolzhausenschloesschen,
   scrapeHrBigband,
   scrapeHrSinfonieorchester,
+  scrapeHsfkFrankfurt,
   scrapeInstitutFrancaisFrankfurt,
   scrapeInstitutFuerSozialforschung,
   scrapeInstitutoCervantesFrankfurt,
