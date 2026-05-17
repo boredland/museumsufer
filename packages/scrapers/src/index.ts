@@ -47,6 +47,7 @@ import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
+import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
 import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
@@ -141,6 +142,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
   { slug: "frankfurt-uas", run: (_ctx: ScraperContext) => scrapeFrankfurtUas() },
+  { slug: "frankfurter-sparkasse", run: (_ctx: ScraperContext) => scrapeFrankfurterSparkasse() },
   { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
@@ -227,6 +229,7 @@ export {
   scrapeFesHessen,
   scrapeFgzStreitclub,
   scrapeForschungskollegHumanwissenschaften,
+  scrapeFrankfurterSparkasse,
   scrapeFrankfurtUas,
   scrapeGalliTheater,
   scrapeGallusTheater,
