@@ -1,18 +1,4 @@
 #!/usr/bin/env bun
-/**
- * Derives frankfurt-museums' `src/scrape-data.ts`. Museum metadata and the
- * museumsufer.de editorial exhibitions list still come from the directory
- * scraper (`src/scraper.ts`) — there's no other source for those. Events
- * and per-museum exhibition feeds come from the central event hub:
- * `EVENTS` filtered to entries whose source_slug is a museum slug, with
- * `museum:ausstellung` events surfaced as Exhibitions (start = date, end
- * = end_date) and everything else as Events.
- *
- * The per-museum scrapers in src/event-scraper.ts + src/exhibition-scraper.ts
- * + src/api-scrapers.ts moved into packages/scrapers/src/_museums/ during
- * Phase 1; this script no longer drives them directly.
- */
-import { existsSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,18 +33,14 @@ const directory = await stage("scrape (museumsufer.de)", () =>
 const museumsBySlug = new Map<string, ParsedMuseum>(directory.museums.map((m) => [m.slug, m]));
 const museumSlugs = new Set(museumsBySlug.keys());
 
-// Hub events and exhibitions for known museum slugs. The hub orchestrator
-// already classified each item: `museum:ausstellung` for exhibitions
-// (multi-day, `end_date` set), `museum:*` / `talk:*` / `music:*` for
-// single-day events.
-const hubEvents: HubMuseumEvent[] = [];
+const hubEvents: CanonicalEvent[] = [];
 const hubExhibitions: ParsedExhibition[] = [];
 for (const ev of EVENTS) {
   if (!museumSlugs.has(ev.source_slug)) continue;
   if (isHubExhibition(ev)) {
     hubExhibitions.push(toParsedExhibitionFromHub(ev));
   } else {
-    hubEvents.push(toHubMuseumEvent(ev));
+    hubEvents.push(ev);
   }
 }
 log(`hub → museums: ${hubEvents.length} events, ${hubExhibitions.length} exhibitions for ${museumSlugs.size} museums`);
@@ -87,44 +69,8 @@ log(
   `wrote scrape-data.ts in ${Date.now() - startMain}ms — ${data.museums.length} museums · ${data.exhibitions.length} exhibitions · ${data.events.length} events · ${data.translations.length} translations`,
 );
 
-// ─── hub → app shapes ─────────────────────────────────────────────────
-
-/** Local mirror of the original ScrapedEvent shape so translate.ts and
- *  the buildScrapeData function can stay unchanged. */
-interface HubMuseumEvent {
-  museum_slug: string;
-  title: string;
-  date: string;
-  time: string | null;
-  end_time: string | null;
-  end_date: string | null;
-  description: string | null;
-  url: string | null;
-  detail_url: string | null;
-  image_url: string | null;
-  price: string | null;
-  category: string | null;
-}
-
 function isHubExhibition(ev: CanonicalEvent): boolean {
   return ev.labels.some((l) => l.label === "museum:ausstellung");
-}
-
-function toHubMuseumEvent(ev: CanonicalEvent): HubMuseumEvent {
-  return {
-    museum_slug: ev.source_slug,
-    title: ev.title,
-    date: ev.date,
-    time: ev.time ?? null,
-    end_time: ev.end_time ?? null,
-    end_date: ev.end_date ?? null,
-    description: ev.description ?? null,
-    url: ev.detail_url ?? null,
-    detail_url: ev.detail_url ?? null,
-    image_url: ev.image_url ?? null,
-    price: ev.price_min != null ? `${ev.price_min} €` : null,
-    category: pickMuseumCategory(ev),
-  };
 }
 
 function toParsedExhibitionFromHub(ev: CanonicalEvent): ParsedExhibition {
@@ -174,7 +120,7 @@ function pickMuseumCategory(ev: CanonicalEvent): string | null {
 function buildScrapeData(input: {
   museums: ParsedMuseum[];
   exhibitions: ParsedExhibition[];
-  events: HubMuseumEvent[];
+  events: CanonicalEvent[];
   translations: Translation[];
 }): ScrapeData {
   const museumIdBySlug = new Map<string, number>();
@@ -227,9 +173,11 @@ function buildScrapeData(input: {
     if (ev.date < yesterday) continue;
     if (ev.date > horizon) continue;
     if (CLOSURE_KEYWORDS.test(ev.title)) continue;
-    const museumId = museumIdBySlug.get(ev.museum_slug);
+    const museumId = museumIdBySlug.get(ev.source_slug);
     if (!museumId) continue;
-    const id = fnv1aInt(`${ev.museum_slug}|${ev.title}|${ev.date}|${ev.time ?? ""}`);
+    const id = fnv1aInt(`${ev.source_slug}|${ev.title}|${ev.date}|${ev.time ?? ""}`);
+    const price = ev.price_min != null ? `${ev.price_min} €` : null;
+    const category = pickMuseumCategory(ev);
     eventsRaw.push({
       id,
       museum_id: museumId,
@@ -239,11 +187,10 @@ function buildScrapeData(input: {
       ...(ev.end_time ? { end_time: ev.end_time } : {}),
       ...(ev.end_date ? { end_date: ev.end_date } : {}),
       ...(ev.description ? { description: ev.description } : {}),
-      ...(ev.url ? { url: ev.url } : {}),
-      ...(ev.detail_url ? { detail_url: ev.detail_url } : {}),
+      ...(ev.detail_url ? { url: ev.detail_url, detail_url: ev.detail_url } : {}),
       ...(ev.image_url ? { image_url: ev.image_url } : {}),
-      ...(ev.price ? { price: ev.price } : {}),
-      ...(ev.category ? { category: ev.category } : {}),
+      ...(price ? { price } : {}),
+      ...(category ? { category } : {}),
     });
   }
   const events = deduplicateEvents(deduplicateByTitle(eventsRaw)).sort(
@@ -333,11 +280,13 @@ function wordsOverlapPrenormalised(a: string[], b: string[]): boolean {
 }
 
 async function loadPreviousBundle(path: string): Promise<ScrapeData> {
-  if (!existsSync(path)) {
-    return { museums: [], exhibitions: [], events: [], translations: [] };
+  const empty: ScrapeData = { museums: [], exhibitions: [], events: [], translations: [] };
+  try {
+    const mod = (await import(path)) as { SCRAPE_DATA?: ScrapeData };
+    return mod.SCRAPE_DATA ?? empty;
+  } catch {
+    return empty;
   }
-  const mod = (await import(path)) as { SCRAPE_DATA?: ScrapeData };
-  return mod.SCRAPE_DATA ?? { museums: [], exhibitions: [], events: [], translations: [] };
 }
 
 function toParsedMuseum(m: Museum): ParsedMuseum {

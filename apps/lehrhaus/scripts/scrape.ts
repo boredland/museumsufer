@@ -1,92 +1,17 @@
 #!/usr/bin/env bun
-/**
- * Derives lehrhaus's `src/scrape-data.ts` from the central event hub.
- * Filters `EVENTS` to entries with a `talk:*` label, maps each canonical
- * event onto the LehrhausEvent shape, and rolls museum/theater hosts under
- * the `frankfurt-museums` / `frankfurt-theaters` source slugs so the UI's
- * existing /quelle pages keep working. The 20 direct lehrhaus sources
- * (Polytechnische, Haus am Dom, …) keep their dedicated routes.
- */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, displayNameFor, EVENTS } from "@museumsufer/event-hub";
+import { type CanonicalEvent, displayNameFor, EVENTS, MUSEUM_SLUGS, THEATER_SLUGS } from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
 import type { Category, LehrhausEvent, ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
-
-/** Stable list of hub source_slugs that should roll up under
- *  frankfurt-museums. Mirrors the 32-museum config in
- *  packages/scrapers/src/_museums/config.ts. */
-const MUSEUM_SLUGS = new Set([
-  "archaeologisches-museum-frankfurt",
-  "bibelhaus-erlebnismuseum",
-  "caricatura-museum-frankfurt",
-  "deutsches-architekturmuseum",
-  "deutsches-ledermuseum-of",
-  "deutsches-romantik-museum",
-  "dff-deutsches-filminstitut-filmmuseum",
-  "dommuseum-frankfurt",
-  "experiminta",
-  "fotografie-forum-frankfurt",
-  "frankfurter-buergerstiftung",
-  "frankfurter-goethe-haus",
-  "frankfurter-kunstverein",
-  "historisches-museum-frankfurt",
-  "ikonenmuseum-frankfurt",
-  "institut-fuer-stadtgeschichte",
-  "juedisches-museum-frankfurt",
-  "juedisches-museum-museum-judengasse-frankfurt",
-  "junges-museum-frankfurt",
-  "liebieghaus-skulpturensammlung",
-  "museum-angewandte-kunst",
-  "museum-fuer-kommunikation-frankfurt",
-  "museum-giersch-der-goethe-universitaet",
-  "museum-mmk-museum-mmk-fuer-moderne-kunst",
-  "schirn-in-bockenheim",
-  "schirn-kunsthalle-frankfurt",
-  "senckenberg-naturmuseum",
-  "staedel-museum",
-  "tower-mmk-museum-mmk-fuer-moderne-kunst",
-  "verkehrsmuseum-frankfurt",
-  "weltkulturen-museum",
-  "wollheim-memorial-frankfurt",
-  "zollamt-mmk-museum-mmk-fuer-moderne-kunst",
-]);
-
-/** Hub source_slugs that should roll up under frankfurt-theaters. Mirrors
- *  the venue list in packages/scrapers/src/venues/ for theater-shape
- *  scrapers. mousonturm is excluded because it's a direct lehrhaus source. */
-const THEATER_SLUGS = new Set([
-  "die-kaes",
-  "die-schmiere",
-  "dramatische-buehne",
-  "dresden-frankfurt-dance-company",
-  "english-theatre-frankfurt",
-  "galli-theater",
-  "gallus-theater",
-  "internationales-theater",
-  "kellertheater-frankfurt",
-  "komoedie-frankfurt",
-  "landungsbruecken",
-  "neues-theater-hoechst",
-  "oper-frankfurt",
-  "papageno-musiktheater",
-  "schauspiel-frankfurt",
-  "stalburg-theater",
-  "theater-alte-bruecke",
-  "theater-lempenfieber",
-  "theater-willy-praml",
-  "theaterhaus-frankfurt",
-  "tigerpalast-variete",
-  "volksbuehne-frankfurt",
-]);
 
 await main();
 

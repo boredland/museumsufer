@@ -170,6 +170,7 @@
         "@museumsufer/classify": "*",
         "@museumsufer/core": "*",
         "@museumsufer/scrapers": "*",
+        "p-queue": "^9.2.0",
       },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20260509.1",
