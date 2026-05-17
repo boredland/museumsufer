@@ -22,6 +22,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "bad-homburger-schlosskonzerte": [50.2275, 8.6172],
   "bad-soden": [50.1411, 8.4985],
   "bnai-brith-frankfurt": [50.1182, 8.6611],
+  "boell-hessen": [50.1056, 8.6517],
   brotfabrik: [50.1303, 8.6071],
   "denkbar-frankfurt": [50.1189, 8.6601],
   "dr-hochs-konservatorium": [50.1115, 8.7016],
