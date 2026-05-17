@@ -49,6 +49,7 @@ import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
+import { scrapeInstitutFrancaisFrankfurt } from "./venues/institut-francais-frankfurt";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
 import { scrapeInternationalesTheater } from "./venues/internationales-theater";
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
@@ -130,6 +131,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
   { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
+  { slug: "institut-francais-frankfurt", run: (_ctx: ScraperContext) => scrapeInstitutFrancaisFrankfurt() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
   { slug: "internationales-theater", run: (_ctx: ScraperContext) => scrapeInternationalesTheater() },
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
@@ -203,6 +205,7 @@ export {
   scrapeHolzhausenschloesschen,
   scrapeHrBigband,
   scrapeHrSinfonieorchester,
+  scrapeInstitutFrancaisFrankfurt,
   scrapeInstitutFuerSozialforschung,
   scrapeInternationalesTheater,
   scrapeJazzFrankfurt,
