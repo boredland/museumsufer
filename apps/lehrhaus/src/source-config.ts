@@ -162,7 +162,6 @@ export const SOURCES: LehrhausSource[] = [
   },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
-  // bnai-brith-frankfurt: domain NXDOMAIN, no web presence
   // loge-zur-einigkeit: domain TLS broken, inaccessible
   // house-of-finance: hof.uni-frankfurt.de — scrappable but content is academic research seminars/conferences, not general public
   // juedische-akademie: juedische-akademie.de — domain not launched yet (TLS broken); revisit Sept 2026
