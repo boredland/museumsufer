@@ -56,7 +56,7 @@ export async function scrapeBadHomburgSchloss(): Promise<VenueScrapeResult> {
     await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "bad-homburger-schlosskonzerte", events };
+  return { source_slug: "bad-homburger-schlosskonzerte", display_name: "Bad Homburger Schlosskonzerte", events };
 }
 
 async function fetchSeason(path: string): Promise<string | null> {

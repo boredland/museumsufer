@@ -31,14 +31,18 @@ export async function scrapeRptuCampuskultur(): Promise<VenueScrapeResult> {
     const res = await fetch(FEED_URL, { headers: { "User-Agent": UA } });
     if (!res.ok) {
       console.warn(`rptu-campuskultur: HTTP ${res.status}`);
-      return { source_slug: "rptu-campuskultur", events: [] };
+      return { source_slug: "rptu-campuskultur", display_name: "RPTU Landau – Campuskultur", events: [] };
     }
     const xml = await res.text();
     const items = parseFeed(xml).filter(isLandauRelevant);
-    return { source_slug: "rptu-campuskultur", events: items.map(toCanonical) };
+    return {
+      source_slug: "rptu-campuskultur",
+      display_name: "RPTU Landau – Campuskultur",
+      events: items.map(toCanonical),
+    };
   } catch (err) {
     console.warn(`rptu-campuskultur: ${(err as Error).message}`);
-    return { source_slug: "rptu-campuskultur", events: [] };
+    return { source_slug: "rptu-campuskultur", display_name: "RPTU Landau – Campuskultur", events: [] };
   }
 }
 

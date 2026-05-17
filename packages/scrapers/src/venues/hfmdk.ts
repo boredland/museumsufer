@@ -130,7 +130,7 @@ export async function scrapeHfmdk(): Promise<VenueScrapeResult> {
     await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "hfmdk", events };
+  return { source_slug: "hfmdk", display_name: "Hochschule für Musik und Darstellende Kunst Frankfurt", events };
 }
 
 async function fetchPage(from: string, offset: number, limit: number): Promise<HfmdkEvent[]> {

@@ -11,6 +11,7 @@ import { scrapeReservixVenue } from "./_reservix";
 export async function scrapeTigerpalastVariete(): Promise<VenueScrapeResult> {
   return scrapeReservixVenue({
     sourceSlug: "tigerpalast-variete",
+    displayName: "Tigerpalast Varieté",
     host: "tigerpalast-variete.reservix.de",
   });
 }

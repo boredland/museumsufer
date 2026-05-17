@@ -100,7 +100,7 @@ function parse(html: string): VenueScrapeResult {
     }
   }
 
-  return { source_slug: "theater-lempenfieber", events };
+  return { source_slug: "theater-lempenfieber", display_name: "Theater Lempenfieber", events };
 }
 
 function deriveSlug(url: string): string | null {

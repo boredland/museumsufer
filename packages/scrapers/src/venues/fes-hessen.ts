@@ -69,7 +69,7 @@ export async function scrapeFesHessen(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "fes-hessen", events };
+  return { source_slug: "fes-hessen", display_name: "Friedrich-Ebert-Stiftung Hessen", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

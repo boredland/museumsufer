@@ -35,7 +35,7 @@ export async function scrapeLandungsbruecken(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "landungsbruecken", events };
+  return { source_slug: "landungsbruecken", display_name: "Landungsbrücken Frankfurt", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

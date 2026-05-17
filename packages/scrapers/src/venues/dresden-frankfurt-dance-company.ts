@@ -115,7 +115,7 @@ function parse(data: DfdcSpielplan): VenueScrapeResult {
     }
   }
 
-  return { source_slug: "dresden-frankfurt-dance-company", events };
+  return { source_slug: "dresden-frankfurt-dance-company", display_name: "Dresden Frankfurt Dance Company", events };
 }
 
 function slugOfEvening(evening: DfdcEvening): string {

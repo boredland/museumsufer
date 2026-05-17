@@ -102,7 +102,7 @@ export async function scrapeBrotfabrik(): Promise<VenueScrapeResult> {
   }
 
   await enrichWithDetails(events);
-  return { source_slug: "brotfabrik", events };
+  return { source_slug: "brotfabrik", display_name: "Brotfabrik", events };
 }
 
 interface ParsedEvent {

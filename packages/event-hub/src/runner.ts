@@ -27,6 +27,9 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const previousById = new Map(previous.events.map((e) => [e.id, e]));
   const merged = new Map<string, CanonicalEvent>(previousById);
   const seenThisRun = new Set<string>();
+  // Seed venue names from the previous run so a transient scrape failure
+  // doesn't erase a curated label. This-run scrapers override last-run.
+  const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
   for (const { slug, run } of VENUE_SCRAPERS) {
     try {
@@ -35,6 +38,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
       for (const result of results) {
         const label = results.length === 1 ? slug : `${slug}/${result.source_slug}`;
         log(`${label}: ${result.events.length} canonical events`);
+        if (result.display_name) venueNames[result.source_slug] = result.display_name;
         for (const scraped of result.events) {
           const id = makeId(result.source_slug, scraped.source_event_id);
           seenThisRun.add(id);
@@ -61,7 +65,12 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
       a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "") || a.title.localeCompare(b.title),
   );
 
-  return { events };
+  // Sort venue-names keys so the generated module is byte-identical
+  // across runs when content matches.
+  const sortedNames: Record<string, string> = {};
+  for (const k of Object.keys(venueNames).sort()) sortedNames[k] = venueNames[k];
+
+  return { events, venueNames: sortedNames };
 }
 
 function makeId(sourceSlug: string, sourceEventId: string): string {

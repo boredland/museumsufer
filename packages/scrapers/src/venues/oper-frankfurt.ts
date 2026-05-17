@@ -70,7 +70,7 @@ export async function scrapeOperFrankfurt(): Promise<VenueScrapeResult> {
     };
   });
 
-  return { source_slug: "oper-frankfurt", events };
+  return { source_slug: "oper-frankfurt", display_name: "Oper Frankfurt", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

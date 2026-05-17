@@ -52,6 +52,12 @@ export type ClassifierName =
 
 export interface VenueScrapeResult {
   source_slug: string;
+  /** Editorial display name (e.g., "Senckenberg Naturmuseum"). The runner
+   *  collects these into the hub's venue-names map so apps can render
+   *  human-readable labels for each source slug. When unset, consumers
+   *  fall back to a titleized slug — used for brand-new venues that
+   *  haven't been curated yet. */
+  display_name?: string;
   events: CanonicalScrapedEvent[];
 }
 

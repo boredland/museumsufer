@@ -79,7 +79,7 @@ function parse(html: string): VenueScrapeResult {
     }
   }
 
-  return { source_slug: "papageno-musiktheater", events };
+  return { source_slug: "papageno-musiktheater", display_name: "Papageno Musiktheater", events };
 }
 
 function deriveSlug(url: string): string | null {

@@ -60,7 +60,7 @@ export async function scrapeKomoedieFrankfurt(): Promise<VenueScrapeResult> {
     };
   });
 
-  return { source_slug: "komoedie-frankfurt", events };
+  return { source_slug: "komoedie-frankfurt", display_name: "Die Komödie Frankfurt", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

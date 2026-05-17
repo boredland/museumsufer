@@ -110,7 +110,7 @@ export async function scrapeRlsHessen(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "rls-hessen", events };
+  return { source_slug: "rls-hessen", display_name: "Rosa-Luxemburg-Stiftung Hessen", events };
 }
 
 function labelFromFormat(formatLabel: string, title: string): string {

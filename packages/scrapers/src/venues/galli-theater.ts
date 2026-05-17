@@ -113,7 +113,7 @@ function parse(html: string): VenueScrapeResult {
     }
   }
 
-  return { source_slug: "galli-theater", events };
+  return { source_slug: "galli-theater", display_name: "Galli Theater Frankfurt", events };
 }
 
 function deriveSlug(url: string): string | null {

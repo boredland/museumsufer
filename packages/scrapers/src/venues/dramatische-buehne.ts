@@ -84,7 +84,7 @@ export async function scrapeDramatischeBuehne(): Promise<VenueScrapeResult> {
     };
   });
 
-  return { source_slug: "dramatische-buehne", events };
+  return { source_slug: "dramatische-buehne", display_name: "Die Dramatische Bühne", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

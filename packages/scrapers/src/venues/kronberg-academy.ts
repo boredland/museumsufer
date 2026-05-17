@@ -45,7 +45,7 @@ export async function scrapeKronbergAcademy(): Promise<VenueScrapeResult> {
     if (page < MAX_PAGES) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "kronberg-academy", events };
+  return { source_slug: "kronberg-academy", display_name: "Kronberg Academy / Casals Forum", events };
 }
 
 function extractEventBlocks(html: string): string[] {

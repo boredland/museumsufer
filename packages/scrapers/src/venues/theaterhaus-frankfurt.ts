@@ -86,7 +86,7 @@ function parse(html: string): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "theaterhaus-frankfurt", events };
+  return { source_slug: "theaterhaus-frankfurt", display_name: "Theaterhaus Frankfurt", events };
 }
 
 function mapStatus(text: string): string | null {

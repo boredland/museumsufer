@@ -108,7 +108,7 @@ export async function scrapeAlteOper(): Promise<VenueScrapeResult> {
     if (url) await sleep(200);
   }
 
-  return { source_slug: "alte-oper", events };
+  return { source_slug: "alte-oper", display_name: "Alte Oper Frankfurt", events };
 }
 
 function absoluteUrl(path: string): string {

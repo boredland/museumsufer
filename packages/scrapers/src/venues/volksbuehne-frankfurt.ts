@@ -70,7 +70,7 @@ export async function scrapeVolksbuehneFrankfurt(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "volksbuehne-frankfurt", events };
+  return { source_slug: "volksbuehne-frankfurt", display_name: "Volksbühne im Großen Hirschgraben", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

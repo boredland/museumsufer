@@ -50,7 +50,7 @@ export async function scrapeAndreasKoehs(): Promise<VenueScrapeResult> {
     if (year < horizonYear) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "andreas-koehs", events };
+  return { source_slug: "andreas-koehs", display_name: "Kirchenmusik Andreas Köhs", events };
 }
 
 function parseItems(html: string, today: string, horizon: string): CanonicalScrapedEvent[] {

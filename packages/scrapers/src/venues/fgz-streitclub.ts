@@ -74,5 +74,5 @@ export async function scrapeFgzStreitclub(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "fgz-streitclub", events };
+  return { source_slug: "fgz-streitclub", display_name: "FGZ StreitClub", events };
 }

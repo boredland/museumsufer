@@ -90,7 +90,7 @@ export async function scrapeDrHochs(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "dr-hochs-konservatorium", events };
+  return { source_slug: "dr-hochs-konservatorium", display_name: "Dr. Hoch's Konservatorium", events };
 }
 
 function enumerateMonths(fromIso: string, toIso: string): string[] {

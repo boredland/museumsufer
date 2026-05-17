@@ -10,6 +10,7 @@ import { scrapeReservixVenue } from "./_reservix";
 export async function scrapeDieSchmiere(): Promise<VenueScrapeResult> {
   return scrapeReservixVenue({
     sourceSlug: "die-schmiere",
+    displayName: "Die Schmiere",
     host: "die-schmiere.reservix.de",
   });
 }

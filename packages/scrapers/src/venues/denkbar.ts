@@ -89,7 +89,7 @@ export async function scrapeDenkbar(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "denkbar-frankfurt", events };
+  return { source_slug: "denkbar-frankfurt", display_name: "Denkbar Frankfurt", events };
 }
 
 function inferYear(day: string, mm: string, today: string): number {

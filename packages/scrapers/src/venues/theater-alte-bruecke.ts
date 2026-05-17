@@ -98,5 +98,5 @@ function parse(events: TribeEvent[]): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "theater-alte-bruecke", events: out };
+  return { source_slug: "theater-alte-bruecke", display_name: "Theater Alte Brücke", events: out };
 }

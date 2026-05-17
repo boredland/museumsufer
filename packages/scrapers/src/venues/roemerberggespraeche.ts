@@ -40,14 +40,15 @@ const INSTALLMENT_HREF_RE = /https:\/\/roemerberggespraeche-ffm\.de\/(\d+)-roeme
 export async function scrapeRoemerberggespraeche(): Promise<VenueScrapeResult> {
   const homepage = await fetchHtml(BASE);
   const latest = pickLatestInstallment(homepage);
-  if (!latest) return { source_slug: "roemerberggespraeche", events: [] };
+  if (!latest) return { source_slug: "roemerberggespraeche", display_name: "Römerberggespräche Frankfurt", events: [] };
 
   const page = await fetchHtml(latest.url);
   const date = extractDate(page);
-  if (!date) return { source_slug: "roemerberggespraeche", events: [] };
+  if (!date) return { source_slug: "roemerberggespraeche", display_name: "Römerberggespräche Frankfurt", events: [] };
 
   const today = todayIso();
-  if (date < today) return { source_slug: "roemerberggespraeche", events: [] };
+  if (date < today)
+    return { source_slug: "roemerberggespraeche", display_name: "Römerberggespräche Frankfurt", events: [] };
 
   const events: CanonicalScrapedEvent[] = parseProgramme(page).map(({ time, speakers, title }) => ({
     source_event_id: `rb-${latest.n}-${time.replace(":", "")}`,
@@ -60,7 +61,7 @@ export async function scrapeRoemerberggespraeche(): Promise<VenueScrapeResult> {
     labels: [{ label: "talk:vortrag", confidence: 0.9, classifier: "scraper-hardcoded" }],
   }));
 
-  return { source_slug: "roemerberggespraeche", events };
+  return { source_slug: "roemerberggespraeche", display_name: "Römerberggespräche Frankfurt", events };
 }
 
 function pickLatestInstallment(html: string): { n: number; url: string } | null {

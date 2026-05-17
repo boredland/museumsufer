@@ -82,7 +82,7 @@ function parse(html: string): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "neues-theater-hoechst", events };
+  return { source_slug: "neues-theater-hoechst", display_name: "Neues Theater Höchst", events };
 }
 
 function deriveSlug(href: string | null | undefined, title: string): string {

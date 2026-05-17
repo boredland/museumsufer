@@ -61,5 +61,5 @@ export async function scrapeDigFrankfurt(): Promise<VenueScrapeResult> {
     page++;
   }
 
-  return { source_slug: "dig-frankfurt", events };
+  return { source_slug: "dig-frankfurt", display_name: "Deutsch-Israelische Gesellschaft Frankfurt", events };
 }

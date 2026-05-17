@@ -40,6 +40,8 @@ const FFM_ROOM_KEYWORDS = [
 
 export interface HrVenueConfig {
   sourceSlug: string;
+  /** Editorial display name surfaced to apps via the hub's venue-names map. */
+  displayName: string;
   baseUrl: string;
   /** e.g. "veranstaltungen-110" for sinfonie, "veranstaltungen-112" for bigband. */
   listPath: string;
@@ -104,7 +106,7 @@ export async function scrapeHrVenue(cfg: HrVenueConfig): Promise<VenueScrapeResu
     });
   }
 
-  return { source_slug: cfg.sourceSlug, events };
+  return { source_slug: cfg.sourceSlug, display_name: cfg.displayName, events };
 }
 
 async function fetchAllMonths(cfg: HrVenueConfig): Promise<HrCard[]> {

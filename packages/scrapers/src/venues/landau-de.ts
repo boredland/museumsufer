@@ -59,7 +59,7 @@ export async function scrapeLandauDe(): Promise<VenueScrapeResult> {
     if (synthesised) events.push(synthesised);
   }
 
-  return { source_slug: "landau-de", events };
+  return { source_slug: "landau-de", display_name: "Stadt Landau in der Pfalz", events };
 }
 
 async function fetchIcs(): Promise<IcsEvent[]> {

@@ -42,4 +42,8 @@ export interface Label {
 
 export interface EventHubData {
   events: CanonicalEvent[];
+  /** Editorial display names keyed by source_slug. Aggregated by the
+   *  runner from each VenueScrapeResult.display_name. Apps read this
+   *  to render human-readable venue labels. */
+  venueNames?: Record<string, string>;
 }

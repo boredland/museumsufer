@@ -75,7 +75,7 @@ export async function scrapeKulturnetzLandau(): Promise<VenueScrapeResult> {
     events.push(toCanonical(card));
   }
 
-  return { source_slug: "kulturnetz-landau", events };
+  return { source_slug: "kulturnetz-landau", display_name: "Kulturnetz Landau", events };
 }
 
 function parseListing(html: string, upstreamCat: string): ParsedCard[] {

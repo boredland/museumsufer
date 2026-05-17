@@ -63,7 +63,7 @@ export async function scrapeSuew(): Promise<VenueScrapeResult> {
   }
 
   const events: CanonicalScrapedEvent[] = [...seen.values()].map(toCanonical);
-  return { source_slug: SOURCE_SLUG, events };
+  return { source_slug: SOURCE_SLUG, display_name: "Südliche Weinstraße", events };
 }
 
 function parseListing(html: string): ParsedCard[] {

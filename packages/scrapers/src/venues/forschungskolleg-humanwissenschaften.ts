@@ -68,7 +68,11 @@ export async function scrapeForschungskollegHumanwissenschaften(): Promise<Venue
     });
   }
 
-  return { source_slug: "forschungskolleg-humanwissenschaften", events };
+  return {
+    source_slug: "forschungskolleg-humanwissenschaften",
+    display_name: "Forschungskolleg Humanwissenschaften (Bad Homburg)",
+    events,
+  };
 }
 
 function detectEnglish(title: string): boolean {

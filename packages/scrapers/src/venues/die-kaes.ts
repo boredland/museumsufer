@@ -9,6 +9,7 @@ import { scrapeReservixVenue } from "./_reservix";
 export async function scrapeDieKaes(): Promise<VenueScrapeResult> {
   return scrapeReservixVenue({
     sourceSlug: "die-kaes",
+    displayName: "Die Käs",
     host: "diekaes.reservix.de",
   });
 }

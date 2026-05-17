@@ -60,7 +60,7 @@ export async function scrapeRomanfabrik(): Promise<VenueScrapeResult> {
   }
 
   await enrichWithDetails(events);
-  return { source_slug: "romanfabrik", events };
+  return { source_slug: "romanfabrik", display_name: "Romanfabrik Frankfurt", events };
 }
 
 interface Parsed {

@@ -69,7 +69,7 @@ export async function scrapeStalburgTheater(): Promise<VenueScrapeResult> {
     labels: resolveStageLabels({ title: p.title, subtitle: p.subtitle, confidence: 0.85 }),
   }));
 
-  return { source_slug: "stalburg-theater", events };
+  return { source_slug: "stalburg-theater", display_name: "Stalburg Theater", events };
 }
 
 async function enrichWithDetailPages(events: ParsedEvent[]): Promise<Map<string, string>> {

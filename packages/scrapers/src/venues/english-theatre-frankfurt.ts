@@ -83,7 +83,7 @@ function parse(html: string): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "english-theatre-frankfurt", events };
+  return { source_slug: "english-theatre-frankfurt", display_name: "The English Theatre Frankfurt", events };
 }
 
 /**

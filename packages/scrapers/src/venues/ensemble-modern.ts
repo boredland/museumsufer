@@ -112,7 +112,7 @@ export async function scrapeEnsembleModern(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "ensemble-modern", events };
+  return { source_slug: "ensemble-modern", display_name: "Ensemble Modern", events };
 }
 
 async function fetchCalendarCards(): Promise<CalendarCard[]> {
