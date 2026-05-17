@@ -99,7 +99,7 @@ const spec = {
           id: { type: "integer", description: "FNV-1a hash of (source, source_uid)" },
           source: {
             type: "string",
-            enum: ["kulturnetz", "landau-de", "hambacher-schloss", "rptu-campuskultur", "suew", "pfalz-de"],
+            enum: ["kulturnetz-landau", "landau-de", "hambacher-schloss", "rptu-campuskultur", "suew", "pfalz-de"],
           },
           source_uid: { type: "string", description: "Stable upstream identifier" },
           title: { type: "string" },

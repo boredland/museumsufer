@@ -8,13 +8,12 @@ export interface Env extends FeedbackEnv {
 }
 
 export type EventSource =
-  | "kulturnetz"
+  | "kulturnetz-landau"
   | "landau-de"
   | "hambacher-schloss"
   | "rptu-campuskultur"
   | "suew"
-  | "pfalz-de"
-  | "stiftskirche";
+  | "pfalz-de";
 
 /**
  * A single event in Landau. Multi-day events (Ausstellung, Festival) are

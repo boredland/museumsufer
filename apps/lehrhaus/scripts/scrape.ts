@@ -7,7 +7,7 @@ import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, displayNameFor, EVENTS, MUSEUM_SLUGS, THEATER_SLUGS } from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
-import type { Category, LehrhausEvent, ScrapeData } from "../src/types";
+import type { Category, LehrhausEvent, LehrhausSource, ScrapeData } from "../src/types";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -16,36 +16,37 @@ const today = todayIso();
 await main();
 
 async function main(): Promise<void> {
+  const sourcesBySlug = new Map(SOURCES.map((s) => [s.slug, s]));
   const directSlugs = new Set(
     SOURCES.filter((s) => s.slug !== "frankfurt-museums" && s.slug !== "frankfurt-theaters").map((s) => s.slug),
   );
-  const directByName = new Map(SOURCES.map((s) => [s.slug, s.name]));
 
   const events: LehrhausEvent[] = [];
-  const counts = { direct: 0, museums: 0, theaters: 0, skipped: 0 };
+  const counts = { direct: 0, museums: 0, theaters: 0, other: 0 };
+  const orphanUrls = new Map<string, string>();
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
     const category = pickCategory(ev);
     if (!category) continue;
 
-    const placement = placeEvent(ev, directSlugs);
-    if (!placement) {
-      counts.skipped++;
-      continue;
+    const sourceSlug = placeEvent(ev, directSlugs);
+    if (sourceSlug === "frankfurt-museums") counts.museums++;
+    else if (sourceSlug === "frankfurt-theaters") counts.theaters++;
+    else if (directSlugs.has(sourceSlug)) counts.direct++;
+    else {
+      counts.other++;
+      if (!orphanUrls.has(sourceSlug) && ev.detail_url) orphanUrls.set(sourceSlug, originOf(ev.detail_url));
     }
-    if (placement.sourceSlug === "frankfurt-museums") counts.museums++;
-    else if (placement.sourceSlug === "frankfurt-theaters") counts.theaters++;
-    else counts.direct++;
 
     const sourceName =
-      placement.sourceSlug === ev.source_slug
-        ? (directByName.get(placement.sourceSlug) ?? displayNameFor(ev.source_slug))
+      sourceSlug === ev.source_slug
+        ? (sourcesBySlug.get(sourceSlug)?.name ?? displayNameFor(ev.source_slug))
         : displayNameFor(ev.source_slug);
 
     events.push({
-      id: fnv1aInt(`${placement.sourceSlug}|${ev.title}|${ev.date}|${ev.time ?? ""}`),
-      source_slug: placement.sourceSlug,
+      id: fnv1aInt(`${sourceSlug}|${ev.title}|${ev.date}|${ev.time ?? ""}`),
+      source_slug: sourceSlug,
       source_name: sourceName,
       title: ev.title,
       date: ev.date,
@@ -73,13 +74,33 @@ async function main(): Promise<void> {
       a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "") || a.title.localeCompare(b.title),
   );
 
+  const sources = augmentSources(SOURCES, orphanUrls);
   log(
-    `direct: ${counts.direct}, museums: ${counts.museums}, theaters: ${counts.theaters}, skipped: ${counts.skipped} → ${unique.length} unique events`,
+    `direct: ${counts.direct}, museums: ${counts.museums}, theaters: ${counts.theaters}, other: ${counts.other} (${orphanUrls.size} extra sources) → ${unique.length} unique events`,
   );
 
-  const data: ScrapeData = { sources: SOURCES, events: unique };
+  const data: ScrapeData = { sources, events: unique };
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
   log(`wrote src/scrape-data.ts — ${unique.length} events`);
+}
+
+function augmentSources(curated: LehrhausSource[], orphanUrls: Map<string, string>): LehrhausSource[] {
+  const known = new Set(curated.map((s) => s.slug));
+  const extras: LehrhausSource[] = [];
+  for (const [slug, url] of orphanUrls) {
+    if (known.has(slug)) continue;
+    extras.push({ slug, name: displayNameFor(slug), url });
+  }
+  extras.sort((a, b) => a.slug.localeCompare(b.slug));
+  return [...curated, ...extras];
+}
+
+function originOf(url: string): string {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return "";
+  }
 }
 
 function pickCategory(ev: CanonicalEvent): Category | null {
@@ -93,21 +114,16 @@ function pickCategory(ev: CanonicalEvent): Category | null {
 
 /**
  * Decide which `LehrhausSource` slug a hub event belongs to. Direct mappings
- * win for the 20 institution-specific sources. Museum and theater venues
- * roll up under the catch-all `frankfurt-museums` / `frankfurt-theaters`
- * sources, identified via stable source_slug lists below — the orchestrator
- * replaces `museum:*` with `talk:*` when classifyEvent flags an event as a
- * Vortrag, so we can't rely on the label namespace to identify the venue's
- * primary type.
+ * win for the 20 institution-specific sources; museum and theater venues
+ * roll up under `frankfurt-museums` / `frankfurt-theaters`. Anything else
+ * (e.g. brotfabrik's occasional talks) keeps its own slug — a synthesized
+ * source row gets added so the UI can render it.
  */
-function placeEvent(ev: CanonicalEvent, directSlugs: Set<string>): { sourceSlug: string } | null {
-  if (directSlugs.has(ev.source_slug)) return { sourceSlug: ev.source_slug };
-  if (MUSEUM_SLUGS.has(ev.source_slug)) return { sourceSlug: "frankfurt-museums" };
-  if (THEATER_SLUGS.has(ev.source_slug)) return { sourceSlug: "frankfurt-theaters" };
-  // Hub events from upstreams that don't match any lehrhaus source slip
-  // through. Examples: regional landau sources, konzert-haus venues with the
-  // occasional spoken-word evening.
-  return null;
+function placeEvent(ev: CanonicalEvent, directSlugs: Set<string>): string {
+  if (directSlugs.has(ev.source_slug)) return ev.source_slug;
+  if (MUSEUM_SLUGS.has(ev.source_slug)) return "frankfurt-museums";
+  if (THEATER_SLUGS.has(ev.source_slug)) return "frankfurt-theaters";
+  return ev.source_slug;
 }
 
 function generateModule(data: ScrapeData): string {
