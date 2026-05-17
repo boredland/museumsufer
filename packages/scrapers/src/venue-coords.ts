@@ -80,6 +80,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "fgz-streitclub": [50.1108, 8.6622],
   "forschungskolleg-humanwissenschaften": [50.2273, 8.6088],
   "frankfurt-uas": [50.1247, 8.692],
+  "frankfurter-sparkasse": [50.1112, 8.675],
   "haus-am-dom": [50.1107, 8.6826],
   "hospital-zum-heiligen-geist": [50.1109, 8.6852],
   "hsfk-frankfurt": [50.0925, 8.6863],
