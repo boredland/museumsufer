@@ -66,9 +66,12 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
             packages/event-hub/data/events.ts \
+            packages/event-hub/data/venue-names.ts \
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
+            apps/konzert-haus/src/synthesized-venues.ts \
             apps/frankfurt-theaters/src/scrape-data.ts \
+            apps/frankfurt-theaters/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
             apps/frankfurt-museums/src/scrape-data.ts
@@ -79,9 +82,12 @@ jobs:
           git commit -m "data: scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
           .github/scripts/push-scrape.sh \
             packages/event-hub/data/events.ts \
+            packages/event-hub/data/venue-names.ts \
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
+            apps/konzert-haus/src/synthesized-venues.ts \
             apps/frankfurt-theaters/src/scrape-data.ts \
+            apps/frankfurt-theaters/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
             apps/frankfurt-museums/src/scrape-data.ts
