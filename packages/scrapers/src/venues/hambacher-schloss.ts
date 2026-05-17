@@ -113,7 +113,7 @@ function toCanonical(item: MecItem): CanonicalScrapedEvent {
     performers: "Stiftung Hambacher Schloss",
     venue_room: VENUE,
     city: "Neustadt-Hambach",
-    labels: [{ label: `region:landau:${category}`, confidence: 0.75, classifier: "keyword:landau" }],
+    labels: [{ label: `landau:${category}`, confidence: 0.75, classifier: "keyword:landau" }],
   };
 }
 

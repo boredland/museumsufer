@@ -105,7 +105,7 @@ function toCanonical(item: RssItem): CanonicalScrapedEvent {
     performers: "RPTU Kaiserslautern-Landau",
     venue_room: "RPTU Landau",
     city: "Landau in der Pfalz",
-    labels: [{ label: `region:landau:${category}`, confidence: 0.75, classifier: "keyword:landau" }],
+    labels: [{ label: `landau:${category}`, confidence: 0.75, classifier: "keyword:landau" }],
   };
 }
 

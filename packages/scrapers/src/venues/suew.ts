@@ -162,12 +162,12 @@ function toCanonical(card: ParsedCard): CanonicalScrapedEvent {
 function buildLabels(label: string | undefined, title: string, description: string | null): ScrapedLabel[] {
   const mapped = mapUpstreamLabel(label);
   if (mapped) {
-    return [{ label: `region:landau:${mapped}`, confidence: 0.9, classifier: "upstream-category" }];
+    return [{ label: `landau:${mapped}`, confidence: 0.9, classifier: "upstream-category" }];
   }
   const slug = classifyLandauByText(title, description);
   return [
     {
-      label: `region:landau:${isLandauCategory(slug) ? slug : "sonstiges"}`,
+      label: `landau:${isLandauCategory(slug) ? slug : "sonstiges"}`,
       confidence: 0.7,
       classifier: "keyword:landau",
     },
