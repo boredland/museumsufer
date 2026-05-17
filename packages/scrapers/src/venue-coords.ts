@@ -19,6 +19,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   // ─── konzert-haus venues ─────────────────────────────────────────
   "alte-oper": [50.1158, 8.6713],
   "andreas-koehs": [50.1115, 8.6839],
+  "autorenbuchhandlung-marx": [50.1029, 8.6748],
   "bad-homburger-schlosskonzerte": [50.2275, 8.6172],
   "bad-soden": [50.1411, 8.4985],
   "bnai-brith-frankfurt": [50.1182, 8.6611],
@@ -84,6 +85,9 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "institut-fuer-sozialforschung": [50.1217, 8.6558],
   "instituto-cervantes-frankfurt": [50.1108, 8.6749],
   "juedische-gemeinde-frankfurt": [50.1167, 8.6712],
+  "karl-marx-buchhandlung": [50.1228, 8.6529],
+  "landinsicht-buchladen": [50.1247, 8.6973],
+  "ypsilon-buchladen": [50.1306, 8.6968],
   "literaturhaus-frankfurt": [50.1173, 8.6814],
   "normative-orders": [50.1287, 8.666],
   "openbooks-frankfurt": [50.1109, 8.6821],
