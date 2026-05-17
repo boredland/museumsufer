@@ -100,6 +100,7 @@ import { scrapeTheaterLempenfieber } from "./venues/theater-lempenfieber";
 import { scrapeTheaterWillyPraml } from "./venues/theater-willy-praml";
 import { scrapeTheaterhausFrankfurt } from "./venues/theaterhaus-frankfurt";
 import { scrapeTigerpalastVariete } from "./venues/tigerpalast-variete";
+import { scrapeUnimedizinFrankfurt } from "./venues/unimedizin-frankfurt";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
@@ -195,6 +196,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "theater-willy-praml", run: (_ctx: ScraperContext) => scrapeTheaterWillyPraml() },
   { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
   { slug: "tigerpalast-variete", run: (_ctx: ScraperContext) => scrapeTigerpalastVariete() },
+  { slug: "unimedizin-frankfurt", run: (ctx: ScraperContext) => scrapeUnimedizinFrankfurt(ctx.proxy) },
   { slug: "union-club-frankfurt", run: (_ctx: ScraperContext) => scrapeUnionClubFrankfurt() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
@@ -280,6 +282,7 @@ export {
   scrapeTheaterLempenfieber,
   scrapeTheaterWillyPraml,
   scrapeTigerpalastVariete,
+  scrapeUnimedizinFrankfurt,
   scrapeUnionClubFrankfurt,
   scrapeVolksbuehneFrankfurt,
   scrapeWaggong,

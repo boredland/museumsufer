@@ -69,6 +69,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "theater-willy-praml": [50.1199, 8.7037],
   "theaterhaus-frankfurt": [50.1116, 8.6877],
   "tigerpalast-variete": [50.1146, 8.6836],
+  "unimedizin-frankfurt": [50.0942, 8.6536],
   "union-club-frankfurt": [50.1226, 8.647],
   "volksbuehne-frankfurt": [50.1116, 8.6817],
 
