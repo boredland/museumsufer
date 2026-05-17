@@ -123,6 +123,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "theaterhaus-frankfurt": "Theaterhaus Frankfurt",
   "tigerpalast-variete": "Tigerpalast Varieté",
   "tower-mmk-museum-mmk-fuer-moderne-kunst": "Tower MMK – Museum MMK für Moderne Kunst",
+  "unimedizin-frankfurt": "Universitätsklinikum Frankfurt",
   "union-club-frankfurt": "Union International Club Frankfurt",
   "verkehrsmuseum-frankfurt": "Verkehrsmuseum Frankfurt am Main",
   "volksbuehne-frankfurt": "Volksbühne im Großen Hirschgraben",
