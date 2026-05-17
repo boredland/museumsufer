@@ -1,13 +1,6 @@
 #!/usr/bin/env bun
-/**
- * Derives landau-today's `src/scrape-data.ts` from the central event hub.
- * Filters `EVENTS` to entries with a `region:landau:*` label, maps each
- * onto the landau `Event` shape, then runs the four-pass cross-source
- * dedup and Nominatim-backed geocoding (cached in src/geocode-cache.ts).
- *
- * Per-source scraping has moved into `packages/scrapers/src/venues/`; this
- * script is now a pure transform + geocode.
- */
+/** Bundles src/scrape-data.ts from hub `EVENTS` filtered to `region:landau:*`,
+ *  then runs the four-pass cross-source dedup and Nominatim geocoding. */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,29 +14,15 @@ const root = resolve(here, "..");
 const dataPath = resolve(root, "src/scrape-data.ts");
 const geocodeCachePath = resolve(root, "src/geocode-cache.ts");
 
-/** Map the hub's source_slug onto landau-today's local `EventSource`
- *  union. Slugs that diverge (kulturnetz-landau → kulturnetz) are remapped
- *  so the app's existing `/quelle/<source>` URLs keep working. */
-const HUB_TO_LOCAL_SOURCE: Record<string, EventSource> = {
-  "kulturnetz-landau": "kulturnetz",
-  "landau-de": "landau-de",
-  "hambacher-schloss": "hambacher-schloss",
-  "rptu-campuskultur": "rptu-campuskultur",
-  suew: "suew",
-  "pfalz-de": "pfalz-de",
-};
-
-/** Source priority for cross-source dedup. Lower wins. Kulturnetz first
- *  because its categorisation is most reliable; landau.de second because
- *  its ICS feed has the cleanest time data. */
+/** Cross-source dedup priority. Kulturnetz first (most reliable
+ *  categorisation), landau.de second (cleanest time data via ICS). */
 const SOURCE_RANK: Record<EventSource, number> = {
-  kulturnetz: 0,
+  "kulturnetz-landau": 0,
   "landau-de": 1,
   "hambacher-schloss": 2,
   "rptu-campuskultur": 3,
   suew: 4,
   "pfalz-de": 5,
-  stiftskirche: 6,
 };
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/search";
@@ -54,21 +33,13 @@ const startMain = Date.now();
 const today = todayIso();
 
 const candidates: Omit<Event, "id">[] = [];
-let labeledCount = 0;
-let unknownSource = 0;
-
 for (const ev of EVENTS) {
   if (!hasRegionLabel(ev)) continue;
-  labeledCount++;
-  const source = HUB_TO_LOCAL_SOURCE[ev.source_slug];
-  if (!source) {
-    unknownSource++;
-    continue;
-  }
+  if (!(ev.source_slug in SOURCE_RANK)) continue;
   if ((ev.end_date ?? ev.date) < today) continue;
-  candidates.push(toLocalEvent(ev, source));
+  candidates.push(toLocalEvent(ev, ev.source_slug as EventSource));
 }
-log(`hub → landau: ${labeledCount} region-labeled, ${candidates.length} kept, ${unknownSource} unknown source`);
+log(`hub → landau: ${candidates.length} kept`);
 
 const merged = mergeAndId(candidates);
 merged.sort(eventSort);
@@ -278,27 +249,29 @@ interface GeocodeResult {
 
 async function geocodeAll(events: Event[]): Promise<void> {
   const cache = { ...GEOCODE_CACHE };
-  const cacheHits: string[] = [];
+  let cacheHitCount = 0;
+  const seen = new Set<string>();
   const newQueries: { key: string; venue: string; city: string }[] = [];
 
   for (const ev of events) {
     if (!ev.venue) continue;
     const key = cacheKey(ev.venue, ev.city);
     if (cache[key]) {
-      cacheHits.push(key);
+      cacheHitCount++;
       continue;
     }
-    if (newQueries.find((q) => q.key === key)) continue;
+    if (seen.has(key)) continue;
+    seen.add(key);
     newQueries.push({ key, venue: ev.venue, city: ev.city ?? "Landau in der Pfalz" });
   }
 
-  log(`  geocode cache: ${cacheHits.length} hit, ${newQueries.length} to fetch`);
+  log(`  geocode cache: ${cacheHitCount} hit, ${newQueries.length} to fetch`);
 
-  for (const q of newQueries) {
+  for (let i = 0; i < newQueries.length; i++) {
+    if (i > 0) await sleep(NOMINATIM_DELAY_MS);
+    const q = newQueries[i];
     const result = await geocodeOne(q.venue, q.city);
-    if (result) cache[q.key] = [round6(result.lat), round6(result.lng)];
-    else cache[q.key] = [0, 0];
-    await sleep(NOMINATIM_DELAY_MS);
+    cache[q.key] = result ? [round6(result.lat), round6(result.lng)] : [0, 0];
   }
 
   for (const ev of events) {
@@ -313,7 +286,9 @@ async function geocodeAll(events: Event[]): Promise<void> {
 
 async function geocodeOne(venue: string, city: string): Promise<GeocodeResult | null> {
   const queries = [`${venue}, ${city}, Deutschland`, `${city}, Deutschland`];
-  for (const q of queries) {
+  for (let i = 0; i < queries.length; i++) {
+    if (i > 0) await sleep(NOMINATIM_DELAY_MS);
+    const q = queries[i];
     const url = `${NOMINATIM_URL}?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=de`;
     try {
       const res = await fetch(url, { headers: { "User-Agent": NOMINATIM_USER_AGENT } });
@@ -330,7 +305,6 @@ async function geocodeOne(venue: string, city: string): Promise<GeocodeResult | 
     } catch (err) {
       log(`  nominatim error for "${q}": ${(err as Error).message}`);
     }
-    await sleep(NOMINATIM_DELAY_MS);
   }
   return null;
 }

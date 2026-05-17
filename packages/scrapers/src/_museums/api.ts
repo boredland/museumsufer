@@ -96,10 +96,7 @@ export interface ExhibitionApiConfig {
   endpoint: string;
 }
 
-export async function fetchExhibitionsFromApi(
-  config: ExhibitionApiConfig,
-  proxy?: ProxyConfig,
-): Promise<ApiExhibition[]> {
+export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Promise<ApiExhibition[]> {
   switch (config.type) {
     case "mmk-cms":
       return fetchMmkExhibitions(config.endpoint);
@@ -140,7 +137,6 @@ export async function fetchExhibitionsFromApi(
     case "mfk":
       return fetchMfkExhibitions(config.endpoint);
     default: {
-      void proxy;
       const _exhaustive: never = config.type;
       return [];
     }
@@ -2755,13 +2751,13 @@ async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
 
   const today = todayIso();
   const blockRe =
-    /<div\s+data-item-id="(\d+)"\s+class="CustomProduct[^"]*"[^>]*data-archive="(\d{4})"[^>]*>([\s\S]*?)<\/div>\s*(?=<div\s+data-item-id|<\/div>\s*<\/div>)/g;
+    /<div\s+data-item-id="(\d+)"\s+class="CustomProduct[^"]*"[^>]*data-archive="\d{4}"[^>]*>([\s\S]*?)<\/div>\s*(?=<div\s+data-item-id|<\/div>\s*<\/div>)/g;
   const out: ApiExhibition[] = [];
   const seen = new Set<string>();
 
   let m: RegExpExecArray | null = blockRe.exec(html);
   while (m !== null) {
-    const [, id, year, body] = m;
+    const [, id, body] = m;
     const teaser1 = body
       .match(/<div class="teaserText1">([\s\S]*?)<\/div>/)?.[1]
       ?.replace(/<[^>]+>/g, "")
@@ -2827,9 +2823,6 @@ async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       continue;
     }
     seen.add(key);
-
-    // The data-archive year matches our extracted end year — no use yet.
-    void year;
 
     out.push({
       title,

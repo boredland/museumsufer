@@ -1,4 +1,6 @@
+export { MUSEUM_SLUGS } from "./_museums/config";
 export { type ProxyConfig, proxyFetch } from "./proxy";
+export { THEATER_SLUGS } from "./theater-slugs";
 export type {
   CanonicalScrapedEvent,
   ClassifierName,

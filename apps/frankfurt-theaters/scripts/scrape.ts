@@ -1,14 +1,4 @@
 #!/usr/bin/env bun
-/**
- * Derives frankfurt-theaters' `src/scrape-data.ts` from the central event
- * hub. The hub stores one CanonicalScrapedEvent per dated performance
- * (flat); this script regroups them back into shows + performances per
- * theater. Two performances share a show when their (theater_slug, title)
- * is the same — distinct shows have distinct titles within a theater.
- *
- * Per-venue scraping has moved into `packages/scrapers/src/venues/`; this
- * file is now a pure transform.
- */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";

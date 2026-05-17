@@ -1,7 +1,8 @@
-import { classifyEvent } from "@museumsufer/classify";
+import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
 import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
 import { VENUE_SCRAPERS } from "@museumsufer/scrapers";
+import PQueue from "p-queue";
 import type { CanonicalEvent, EventHubData, Label } from "./types";
 
 export type Logger = (msg: string) => void;
@@ -10,7 +11,12 @@ export interface RunOptions {
   now?: Date;
   log?: Logger;
   proxy?: ProxyConfig | null;
+  concurrency?: number;
 }
+
+const DEFAULT_CONCURRENCY = 8;
+const STALE_TTL_DAYS = 14;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * Runs every venue scraper, applies the keyword-pass classifier, and
@@ -31,32 +37,44 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   // doesn't erase a curated label. This-run scrapers override last-run.
   const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
+  const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
-    try {
-      const raw = await run(ctx);
-      const results = Array.isArray(raw) ? raw : [raw];
-      for (const result of results) {
-        const label = results.length === 1 ? slug : `${slug}/${result.source_slug}`;
-        log(`${label}: ${result.events.length} canonical events`);
-        if (result.display_name) venueNames[result.source_slug] = result.display_name;
-        for (const scraped of result.events) {
-          const id = makeId(result.source_slug, scraped.source_event_id);
-          seenThisRun.add(id);
-          const existing = merged.get(id);
-          merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, nowIso));
+    queue.add(async () => {
+      try {
+        const raw = await run(ctx);
+        const results = Array.isArray(raw) ? raw : [raw];
+        for (const result of results) {
+          const label = results.length === 1 ? slug : `${slug}/${result.source_slug}`;
+          log(`${label}: ${result.events.length} canonical events`);
+          if (result.display_name) venueNames[result.source_slug] = result.display_name;
+          for (const scraped of result.events) {
+            const id = makeId(result.source_slug, scraped.source_event_id);
+            seenThisRun.add(id);
+            const existing = merged.get(id);
+            merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, nowIso));
+          }
         }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        log(`${slug}: FAIL — ${msg}`);
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      log(`${slug}: FAIL — ${msg}`);
-    }
+    });
   }
+  await queue.onIdle();
 
-  // Prune past events that have not been re-confirmed this run.
+  // Prune past events that have not been re-confirmed this run, and drop
+  // future events that disappeared from their source more than TTL days
+  // ago — without this, cancellations would linger until the date passes.
   const today = nowIso.slice(0, 10);
+  const staleCutoff = new Date(now.getTime() - STALE_TTL_DAYS * MS_PER_DAY).toISOString();
   const events: CanonicalEvent[] = [];
   for (const ev of merged.values()) {
-    if (ev.date < today && !seenThisRun.has(ev.id)) continue;
+    if (seenThisRun.has(ev.id)) {
+      events.push(ev);
+      continue;
+    }
+    if (ev.date < today) continue;
+    if (ev.last_seen_at < staleCutoff) continue;
     events.push(ev);
   }
 
@@ -141,33 +159,9 @@ function keywordPass(ev: CanonicalScrapedEvent, scraperLabels: ReadonlyArray<Lab
   if (scraperLabels.length > 0) return [];
 
   const labels: Label[] = [];
-  const type = classifyEvent(ev.title, ev.description);
-  if (type) {
-    const mapped = mapEventTypeToLabel(type);
-    if (mapped) labels.push({ label: mapped, confidence: 0.6, classifier: "keyword:event" });
-  }
+  const mapped = eventTypeToLabel(classifyEvent(ev.title, ev.description));
+  if (mapped) labels.push({ label: mapped, confidence: 0.6, classifier: "keyword:event" });
   return labels;
-}
-
-function mapEventTypeToLabel(t: string): string | null {
-  switch (t) {
-    case "Vortrag":
-      return "talk:vortrag";
-    case "Konzert":
-      return "music:classical";
-    case "Führung":
-      return "museum:fuehrung";
-    case "Workshop":
-      return "museum:workshop";
-    case "Vernissage":
-      return "museum:vernissage";
-    case "Familie":
-      return "museum:familie";
-    case "Film":
-      return "museum:film";
-    default:
-      return null;
-  }
 }
 
 function mergeLabels(a: ReadonlyArray<Label | ScrapedLabel>, b: ReadonlyArray<Label | ScrapedLabel>): Label[] {

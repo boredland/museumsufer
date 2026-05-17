@@ -1,4 +1,4 @@
-import { decodeEntities, normalizeUrl, nullIfMidnight, slugify, stripHtml, todayIso } from "@museumsufer/core";
+import { decodeEntities, normalizeUrl, nullIfMidnight, stripHtml, todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 import { resolveStageLabels } from "./_stage-labels";
 
@@ -95,7 +95,6 @@ function parse(html: string): VenueScrapeResult {
     const isCancelled =
       /class=['"]hinweis_message['"][^>]*>\s*(?:Abgesagt|Entf[äa]llt)/i.test(block) || /event_stroke_class/.test(block);
 
-    const slug = deriveSlug(detailHref) || slugify(title);
     const sourceEventId = `${eventId}`;
     if (seen.has(sourceEventId)) continue;
     seen.add(sourceEventId);
@@ -114,18 +113,9 @@ function parse(html: string): VenueScrapeResult {
       raw_category: isCancelled ? "cancelled" : category,
       labels: resolveStageLabels({ title, subtitle, hint: category, confidence: 0.9 }),
     });
-    // Mark slug for potential downstream show-grouping (used by the keyword pass
-    // to keep alike productions joined even though source_event_id is per-date).
-    void slug;
   }
 
   return { source_slug: "internationales-theater", display_name: "Internationales Theater Frankfurt", events };
-}
-
-function deriveSlug(href: string): string | null {
-  const m = href.match(/\/programm-ticketkauf\/([^/?#]+)/i);
-  if (!m) return null;
-  return m[1].replace(/^\d+-/, "");
 }
 
 /** ITF writes titles in screaming uppercase; title-case them. */

@@ -1,4 +1,4 @@
-export { classifyEvent, type EventType } from "./event";
+export { classifyEvent, type EventType, eventTypeToLabel } from "./event";
 export {
   classifyLandauByText,
   isLandauCategory,

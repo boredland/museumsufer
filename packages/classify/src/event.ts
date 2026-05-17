@@ -47,3 +47,17 @@ export function classifyEvent(title: string, description?: string | null): Event
 
   return null;
 }
+
+const EVENT_TYPE_LABEL: Record<EventType, string> = {
+  Vortrag: "talk:vortrag",
+  Konzert: "music:classical",
+  Führung: "museum:fuehrung",
+  Workshop: "museum:workshop",
+  Vernissage: "museum:vernissage",
+  Familie: "museum:familie",
+  Film: "museum:film",
+};
+
+export function eventTypeToLabel(t: EventType | null): string | null {
+  return t ? EVENT_TYPE_LABEL[t] : null;
+}
