@@ -13,6 +13,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "crespo-foundation",
+    name: "Crespo Foundation",
+    address: "",
+    lat: 50.1095,
+    lon: 8.6774,
+    city: "frankfurt",
+    website_url: "https://www.crespo-foundation.de",
+    default_genre: "classical",
+  },
+  {
     slug: "deutsches-architekturmuseum",
     name: "Deutsches Architekturmuseum (DAM)",
     address: "",
@@ -150,6 +160,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6885,
     city: "frankfurt",
     website_url: "https://stalburg.de",
+    default_genre: "classical",
+  },
+  {
+    slug: "union-club-frankfurt",
+    name: "Union International Club Frankfurt",
+    address: "",
+    lat: 50.1226,
+    lon: 8.647,
+    city: "frankfurt",
+    website_url: "https://www.union-club.com",
     default_genre: "classical",
   },
   {
