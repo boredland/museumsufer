@@ -905,8 +905,8 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
     const date = `${year}-${monthNum}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
-    const timeMatch = desc.match(/(\d{1,2}:\d{2})\s*Uhr/);
-    const endTimeMatch = desc.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/);
+    const timeMatch = desc.match(/(\d{1,2}:\d{2})\s*Uhr/i);
+    const endTimeMatch = desc.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/i);
     const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
     const priceMatch = desc.match(/(\d+\s*€[^<,]*(?:,\s*ermäßigt\s*\d+\s*€)?)/i);
 
