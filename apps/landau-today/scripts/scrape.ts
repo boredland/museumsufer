@@ -76,8 +76,8 @@ function toLocalEvent(ev: CanonicalEvent, source: EventSource): Omit<Event, "id"
 function pickCategory(ev: CanonicalEvent): string {
   let best: { category: string; confidence: number } | null = null;
   for (const l of ev.labels) {
-    if (!l.label.startsWith("region:landau:")) continue;
-    const tail = l.label.slice("region:landau:".length);
+    if (!l.label.startsWith("landau:")) continue;
+    const tail = l.label.slice("landau:".length);
     if (!best || l.confidence > best.confidence) best = { category: tail, confidence: l.confidence };
   }
   return best?.category ?? "sonstiges";

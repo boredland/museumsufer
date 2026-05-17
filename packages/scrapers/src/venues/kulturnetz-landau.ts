@@ -151,7 +151,7 @@ function buildLabels(card: ParsedCard): ScrapedLabel[] {
   const fromUpstream = KULTURNETZ_CATEGORY_MAP[card.upstreamCat] !== undefined;
   return [
     {
-      label: `region:landau:${slug}`,
+      label: `landau:${slug}`,
       confidence: fromUpstream ? 0.95 : 0.7,
       classifier: fromUpstream ? "upstream-category" : "keyword:landau",
     },

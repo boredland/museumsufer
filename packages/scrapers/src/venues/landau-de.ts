@@ -232,13 +232,13 @@ function buildLabels(title: string, description: string | null, katid?: string):
   if (katid) {
     const mapped = LANDAU_DE_KATID_MAP[katid];
     if (mapped) {
-      return [{ label: `region:landau:${mapped}`, confidence: 0.95, classifier: "upstream-category" }];
+      return [{ label: `landau:${mapped}`, confidence: 0.95, classifier: "upstream-category" }];
     }
   }
   const slug = classifyLandauByText(title, description);
   return [
     {
-      label: `region:landau:${isLandauCategory(slug) ? slug : "sonstiges"}`,
+      label: `landau:${isLandauCategory(slug) ? slug : "sonstiges"}`,
       confidence: 0.7,
       classifier: "keyword:landau",
     },

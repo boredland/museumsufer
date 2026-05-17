@@ -273,7 +273,7 @@ function expandOccurrences(page: DetailPage, today: string, horizon: string): Ca
       performers: null,
       venue_room: page.venue ?? page.city ?? "Landau",
       city: page.city ?? null,
-      labels: [{ label: `region:landau:${category}`, confidence: 0.7, classifier: "keyword:landau" }],
+      labels: [{ label: `landau:${category}`, confidence: 0.7, classifier: "keyword:landau" }],
     });
   }
   return out;
