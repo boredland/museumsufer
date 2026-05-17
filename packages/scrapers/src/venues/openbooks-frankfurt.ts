@@ -22,7 +22,7 @@ export async function scrapeOpenBooks(): Promise<VenueScrapeResult> {
   for (const m of html.matchAll(DAYTITLE_RE)) {
     days.add(m[1]);
   }
-  if (days.size === 0) return { source_slug: "openbooks-frankfurt", events: [] };
+  if (days.size === 0) return { source_slug: "openbooks-frankfurt", display_name: "OPEN BOOKS Frankfurt", events: [] };
 
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
@@ -71,7 +71,7 @@ export async function scrapeOpenBooks(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "openbooks-frankfurt", events };
+  return { source_slug: "openbooks-frankfurt", display_name: "OPEN BOOKS Frankfurt", events };
 }
 
 function ddmmyyyyToIso(ddmmyyyy: string): string {

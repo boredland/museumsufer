@@ -106,7 +106,7 @@ export async function scrapeOperFrankfurtKonzerte(): Promise<VenueScrapeResult> 
     }
   }
 
-  return { source_slug: "oper-frankfurt-konzerte", events };
+  return { source_slug: "oper-frankfurt-konzerte", display_name: "Oper Frankfurt – Konzerte & Liederabende", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

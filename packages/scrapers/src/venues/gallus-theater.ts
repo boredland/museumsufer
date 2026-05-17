@@ -90,5 +90,5 @@ function parse(html: string): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "gallus-theater", events };
+  return { source_slug: "gallus-theater", display_name: "Gallus Theater", events };
 }

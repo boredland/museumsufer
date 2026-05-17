@@ -123,6 +123,8 @@ export function parseReservixListing(html: string): ReservixCard[] {
 
 export interface ReservixScrapeOptions {
   sourceSlug: string;
+  /** Editorial display name surfaced to apps via the hub's venue-names map. */
+  displayName: string;
   host: string;
   /** Optional override for the venue room when Reservix's own value is too generic. */
   defaultVenueRoom?: string | null;
@@ -174,7 +176,7 @@ export async function scrapeReservixVenue(opts: ReservixScrapeOptions): Promise<
     });
   }
 
-  return { source_slug: opts.sourceSlug, events };
+  return { source_slug: opts.sourceSlug, display_name: opts.displayName, events };
 }
 
 function parsePriceEuro(raw: string | undefined): number | null {

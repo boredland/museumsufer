@@ -149,7 +149,7 @@ export async function scrapePfalzDe(): Promise<VenueScrapeResult> {
       });
     }),
   ]);
-  return { source_slug: SOURCE_SLUG, events };
+  return { source_slug: SOURCE_SLUG, display_name: "Pfalz Tourismus", events };
 }
 
 async function scrapeInner(budget: AbortSignal): Promise<CanonicalScrapedEvent[]> {

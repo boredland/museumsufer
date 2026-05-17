@@ -81,7 +81,7 @@ export async function scrapeMousonturm(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "mousonturm", events };
+  return { source_slug: "mousonturm", display_name: "Künstler*innenhaus Mousonturm", events };
 }
 
 function parseEntry(article: string, date: string): CanonicalScrapedEvent | null {

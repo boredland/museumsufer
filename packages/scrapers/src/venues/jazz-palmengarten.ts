@@ -87,7 +87,7 @@ export async function scrapeJazzPalmengarten(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "jazz-palmengarten", events };
+  return { source_slug: "jazz-palmengarten", display_name: "Jazz im Palmengarten", events };
 }
 
 async function fetchCalendar(start: string, end: string): Promise<CalendarItem[]> {

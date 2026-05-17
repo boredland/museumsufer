@@ -48,7 +48,7 @@ export async function scrapeKirchenmusikDreikoenig(): Promise<VenueScrapeResult>
     if (year < horizonYear) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "kirchenmusik-dreikoenig", events };
+  return { source_slug: "kirchenmusik-dreikoenig", display_name: "Kirchenmusik Dreikönigsgemeinde", events };
 }
 
 function parseItems(html: string, today: string, horizon: string): CanonicalScrapedEvent[] {

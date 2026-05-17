@@ -58,7 +58,7 @@ export async function scrapeHausAmDom(): Promise<VenueScrapeResult> {
 
   const results = await Promise.all(cards.map(({ url, date }) => fetchDetail(url, date)));
   const events = results.filter((e): e is CanonicalScrapedEvent => e !== null);
-  return { source_slug: "haus-am-dom", events };
+  return { source_slug: "haus-am-dom", display_name: "Haus am Dom – Kath. Akademie Rabanus Maurus", events };
 }
 
 async function fetchDetail(url: string, date: string): Promise<CanonicalScrapedEvent | null> {

@@ -69,7 +69,7 @@ export async function scrapeSchauspielFrankfurt(): Promise<VenueScrapeResult> {
     };
   });
 
-  return { source_slug: "schauspiel-frankfurt", events };
+  return { source_slug: "schauspiel-frankfurt", display_name: "Schauspiel Frankfurt", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

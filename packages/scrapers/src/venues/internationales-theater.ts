@@ -119,7 +119,7 @@ function parse(html: string): VenueScrapeResult {
     void slug;
   }
 
-  return { source_slug: "internationales-theater", events };
+  return { source_slug: "internationales-theater", display_name: "Internationales Theater Frankfurt", events };
 }
 
 function deriveSlug(href: string): string | null {

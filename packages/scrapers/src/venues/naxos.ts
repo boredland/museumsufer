@@ -111,7 +111,7 @@ export async function scrapeNaxos(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "naxos-hallenkonzerte", events };
+  return { source_slug: "naxos-hallenkonzerte", display_name: "Naxos Hallenkonzerte", events };
 }
 
 function parseMonth(s: string): number | null {

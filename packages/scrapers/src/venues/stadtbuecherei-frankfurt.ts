@@ -85,7 +85,8 @@ export async function scrapeStadtbuechereiFrankfurt(proxy: ProxyConfig | null): 
     // Non-fatal — subdomain landing is a secondary discovery channel.
   }
 
-  if (detailUrls.size === 0) return { source_slug: "stadtbuecherei-frankfurt", events };
+  if (detailUrls.size === 0)
+    return { source_slug: "stadtbuecherei-frankfurt", display_name: "Stadtbücherei Frankfurt", events };
 
   for (const detailUrl of detailUrls) {
     if (seen.has(detailUrl)) continue;
@@ -106,7 +107,7 @@ export async function scrapeStadtbuechereiFrankfurt(proxy: ProxyConfig | null): 
     events.push(parsed);
   }
 
-  return { source_slug: "stadtbuecherei-frankfurt", events };
+  return { source_slug: "stadtbuecherei-frankfurt", display_name: "Stadtbücherei Frankfurt", events };
 }
 
 function isCloudflareChallenge(html: string): boolean {

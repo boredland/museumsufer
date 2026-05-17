@@ -52,7 +52,7 @@ export async function scrapeLiteraturhaus(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "literaturhaus-frankfurt", events };
+  return { source_slug: "literaturhaus-frankfurt", display_name: "Literaturhaus Frankfurt", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

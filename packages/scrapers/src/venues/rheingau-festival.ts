@@ -107,7 +107,7 @@ export async function scrapeRheingauFestival(): Promise<VenueScrapeResult> {
     if (page < MAX_PAGES) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "rheingau-musikfestival", events };
+  return { source_slug: "rheingau-musikfestival", display_name: "Rheingau Musik Festival", events };
 }
 
 const TILE_OPENER = /<div class="ahz-event-overview-tile-first-row[^"]*">/g;

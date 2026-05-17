@@ -68,7 +68,7 @@ export async function scrapeWaggong(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "waggong", events };
+  return { source_slug: "waggong", display_name: "Waggong e.V. — Kulturwerkstatt Germaniastraße", events };
 }
 
 function parseDate(text: string): string | null {

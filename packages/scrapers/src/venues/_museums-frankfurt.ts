@@ -56,11 +56,51 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
 
   const results: VenueScrapeResult[] = [];
   for (const [sourceSlug, events] of byMuseum) {
-    results.push({ source_slug: sourceSlug, events });
+    const displayName = MUSEUMS[sourceSlug]?.name ?? MUSEUM_DISPLAY_NAMES[sourceSlug];
+    results.push({ source_slug: sourceSlug, display_name: displayName, events });
   }
   results.sort((a, b) => a.source_slug.localeCompare(b.source_slug));
   return results;
 }
+
+/**
+ * Fallback display names for museums whose config in
+ * packages/scrapers/src/_museums/config.ts doesn't carry a `name` field
+ * (most directory museums — names come from museumsufer.de at scrape time
+ * in the app, not from the hub config). Curated subset; new museums fall
+ * back to a titleized slug via displayNameFor() until they're added.
+ */
+const MUSEUM_DISPLAY_NAMES: Record<string, string> = {
+  "archaeologisches-museum-frankfurt": "Archäologisches Museum Frankfurt",
+  "bibelhaus-erlebnismuseum": "Bibelhaus ErlebnisMuseum",
+  "caricatura-museum-frankfurt": "Caricatura Museum Frankfurt – Museum für Komische Kunst",
+  "deutsches-architekturmuseum": "Deutsches Architekturmuseum (DAM)",
+  "deutsches-ledermuseum-of": "Deutsches Ledermuseum Offenbach am Main",
+  "deutsches-romantik-museum": "Deutsches Romantik-Museum / Freies Deutsches Hochstift",
+  "dff-deutsches-filminstitut-filmmuseum": "DFF – Deutsches Filminstitut & Filmmuseum",
+  "dommuseum-frankfurt": "Dommuseum Frankfurt",
+  "fotografie-forum-frankfurt": "Fotografie Forum Frankfurt",
+  "frankfurter-goethe-haus": "Frankfurter Goethe-Haus / Freies Deutsches Hochstift",
+  "frankfurter-kunstverein": "Frankfurter Kunstverein",
+  "historisches-museum-frankfurt": "Historisches Museum Frankfurt",
+  "ikonenmuseum-frankfurt": "Ikonenmuseum Frankfurt",
+  "institut-fuer-stadtgeschichte": "Institut für Stadtgeschichte",
+  "juedisches-museum-frankfurt": "Jüdisches Museum Frankfurt",
+  "juedisches-museum-museum-judengasse-frankfurt": "Jüdisches Museum / Museum Judengasse Frankfurt",
+  "junges-museum-frankfurt": "Junges Museum Frankfurt",
+  "liebieghaus-skulpturensammlung": "Liebieghaus Skulpturensammlung",
+  "museum-angewandte-kunst": "Museum Angewandte Kunst",
+  "museum-fuer-kommunikation-frankfurt": "Museum für Kommunikation Frankfurt",
+  "museum-giersch-der-goethe-universitaet": "MGGU – Museum Giersch der Goethe-Universität",
+  "museum-mmk-museum-mmk-fuer-moderne-kunst": "Museum MMK – Museum MMK für Moderne Kunst",
+  "schirn-in-bockenheim": "Schirn in Bockenheim",
+  "schirn-kunsthalle-frankfurt": "Schirn Kunsthalle Frankfurt",
+  "senckenberg-naturmuseum": "Senckenberg Naturmuseum",
+  "staedel-museum": "Städel Museum",
+  "tower-mmk-museum-mmk-fuer-moderne-kunst": "Tower MMK – Museum MMK für Moderne Kunst",
+  "weltkulturen-museum": "Weltkulturen Museum",
+  "zollamt-mmk-museum-mmk-fuer-moderne-kunst": "Zollamt MMK – Museum MMK für Moderne Kunst",
+};
 
 function appendTo(byMuseum: Map<string, CanonicalScrapedEvent[]>, slug: string, event: CanonicalScrapedEvent): void {
   let bucket = byMuseum.get(slug);

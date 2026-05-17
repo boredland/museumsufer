@@ -130,7 +130,7 @@ export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "evangelische-akademie-frankfurt", events };
+  return { source_slug: "evangelische-akademie-frankfurt", display_name: "Evangelische Akademie Frankfurt", events };
 }
 
 interface DetailFields {

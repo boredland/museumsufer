@@ -46,7 +46,11 @@ export async function scrapeBadSoden(): Promise<VenueScrapeResult> {
     headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
   });
   if (!res.ok) throw new Error(`bad-soden fetch failed: ${PROGRAM_URL} → ${res.status}`);
-  return { source_slug: "bad-soden", events: parseGdmProgram(await res.text()) };
+  return {
+    source_slug: "bad-soden",
+    display_name: "Bad Sodener Kammerkonzerte",
+    events: parseGdmProgram(await res.text()),
+  };
 }
 
 function parseGdmProgram(html: string): CanonicalScrapedEvent[] {

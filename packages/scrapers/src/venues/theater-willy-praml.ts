@@ -74,7 +74,7 @@ export async function scrapeTheaterWillyPraml(): Promise<VenueScrapeResult> {
     }
   }
 
-  return { source_slug: "theater-willy-praml", events };
+  return { source_slug: "theater-willy-praml", display_name: "Theater Willy Praml", events };
 }
 
 async function fetchHtml(url: string): Promise<string> {

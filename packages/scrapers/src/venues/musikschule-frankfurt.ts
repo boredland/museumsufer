@@ -81,7 +81,7 @@ export async function scrapeMusikschuleFrankfurt(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "musikschule-frankfurt", events };
+  return { source_slug: "musikschule-frankfurt", display_name: "Städtische Musikschule Frankfurt", events };
 }
 
 async function fetchText(url: string): Promise<string> {

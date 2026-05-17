@@ -18,7 +18,7 @@ export async function scrapePolytechnische(): Promise<VenueScrapeResult> {
   const futures = links.filter((l) => l.date >= today);
   const results = await Promise.all(futures.map(({ href, date }) => fetchDetail(href, date)));
   const events = results.filter((e): e is CanonicalScrapedEvent => e !== null);
-  return { source_slug: "polytechnische-gesellschaft", events };
+  return { source_slug: "polytechnische-gesellschaft", display_name: "Polytechnische Gesellschaft Frankfurt", events };
 }
 
 interface EventLink {

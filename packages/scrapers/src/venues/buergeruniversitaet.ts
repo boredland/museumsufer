@@ -67,5 +67,5 @@ export async function scrapeBuergeruniversitaet(): Promise<VenueScrapeResult> {
     page++;
   }
 
-  return { source_slug: "buergeruniversitaet", events };
+  return { source_slug: "buergeruniversitaet", display_name: "Goethe-Uni Bürgeruniversität", events };
 }

@@ -33,14 +33,14 @@ export async function scrapeHambacherSchloss(): Promise<VenueScrapeResult> {
     const res = await fetch(FEED_URL, { headers: { "User-Agent": UA } });
     if (!res.ok) {
       console.warn(`hambacher-schloss: HTTP ${res.status}`);
-      return { source_slug: "hambacher-schloss", events: [] };
+      return { source_slug: "hambacher-schloss", display_name: "Hambacher Schloss", events: [] };
     }
     const xml = await res.text();
     const events = parseFeed(xml).map(toCanonical);
-    return { source_slug: "hambacher-schloss", events };
+    return { source_slug: "hambacher-schloss", display_name: "Hambacher Schloss", events };
   } catch (err) {
     console.warn(`hambacher-schloss: ${(err as Error).message}`);
-    return { source_slug: "hambacher-schloss", events: [] };
+    return { source_slug: "hambacher-schloss", display_name: "Hambacher Schloss", events: [] };
   }
 }
 

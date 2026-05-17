@@ -53,5 +53,5 @@ export async function scrapeSigmundFreudInstitut(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "sigmund-freud-institut", events };
+  return { source_slug: "sigmund-freud-institut", display_name: "Sigmund-Freud-Institut Frankfurt", events };
 }

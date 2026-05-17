@@ -64,5 +64,9 @@ export async function scrapeInstitutFuerSozialforschung(): Promise<VenueScrapeRe
     });
   }
 
-  return { source_slug: "institut-fuer-sozialforschung", events };
+  return {
+    source_slug: "institut-fuer-sozialforschung",
+    display_name: "Institut für Sozialforschung Frankfurt",
+    events,
+  };
 }

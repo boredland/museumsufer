@@ -92,7 +92,7 @@ export async function scrapeJazzFrankfurt(): Promise<VenueScrapeResult> {
     page++;
   }
 
-  return { source_slug: "jazz-frankfurt", events };
+  return { source_slug: "jazz-frankfurt", display_name: "Jazz in Frankfurt", events };
 }
 
 function buildEvent(raw: MusicEventLd, date: string): CanonicalScrapedEvent | null {

@@ -74,7 +74,7 @@ export async function scrapeNormativeOrders(): Promise<VenueScrapeResult> {
     page++;
   }
 
-  return { source_slug: "normative-orders", events };
+  return { source_slug: "normative-orders", display_name: "Forschungsverbund Normative Ordnungen", events };
 }
 
 function labelFromTags(tagSlugs: string[], title: string, description: string | null): string {

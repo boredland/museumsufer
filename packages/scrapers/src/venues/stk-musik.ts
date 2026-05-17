@@ -83,7 +83,7 @@ export async function scrapeStKatharinen(): Promise<VenueScrapeResult> {
     if (page <= totalPages) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "st-katharinen", events };
+  return { source_slug: "st-katharinen", display_name: "Kantorei St. Katharinen", events };
 }
 
 function mapEvent(raw: TribeEvent): CanonicalScrapedEvent {

@@ -84,5 +84,5 @@ export async function scrapeJuedischeGemeinde(): Promise<VenueScrapeResult> {
     });
   }
 
-  return { source_slug: "juedische-gemeinde-frankfurt", events: out };
+  return { source_slug: "juedische-gemeinde-frankfurt", display_name: "Jüdische Gemeinde Frankfurt", events: out };
 }

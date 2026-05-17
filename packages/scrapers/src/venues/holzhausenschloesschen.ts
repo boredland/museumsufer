@@ -86,7 +86,7 @@ export async function scrapeHolzhausenschloesschen(): Promise<VenueScrapeResult>
     if (monthUrl) await sleep(THROTTLE_MS);
   }
 
-  return { source_slug: "holzhausenschloesschen", events };
+  return { source_slug: "holzhausenschloesschen", display_name: "Holzhausenschlösschen", events };
 }
 
 interface Tile {

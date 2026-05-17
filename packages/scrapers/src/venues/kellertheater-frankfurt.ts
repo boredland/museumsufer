@@ -81,5 +81,5 @@ function parse(html: string): VenueScrapeResult {
     });
   }
 
-  return { source_slug: "kellertheater-frankfurt", events };
+  return { source_slug: "kellertheater-frankfurt", display_name: "Kellertheater Frankfurt", events };
 }
