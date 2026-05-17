@@ -53,6 +53,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "frankfurter-sparkasse",
+    name: "Frankfurter Sparkasse Engagement",
+    address: "",
+    lat: 50.1112,
+    lon: 8.675,
+    city: "frankfurt",
+    website_url: "https://www.frankfurter-sparkasse.de",
+    default_genre: "classical",
+  },
+  {
     slug: "gallus-theater",
     name: "Gallus Theater",
     address: "",
