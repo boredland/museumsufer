@@ -105,21 +105,45 @@ export function coordinatesFor(sourceSlug: string): readonly [number, number] | 
   return null;
 }
 
+export interface Bbox {
+  readonly minLat: number;
+  readonly maxLat: number;
+  readonly minLon: number;
+  readonly maxLon: number;
+}
+
 /** Frankfurt + Landau corridor bbox. Anything outside is dropped by the
  *  hub runner; this is defense-in-depth against scraper-level filter
  *  bugs (e.g. an HR Sinfonie touring show at Wiesbaden slipping through). */
-export const GEOFENCE_BBOX = {
+export const GEOFENCE_BBOX: Bbox = {
   minLat: 48.9,
   maxLat: 50.45,
   minLon: 7.85,
   maxLon: 9.05,
-} as const;
+};
+
+/** Frankfurt metro + Taunus / Rheingau / Offenbach edge. Bad Homburg and
+ *  Forschungskolleg in the north (50.227), Rheingau festival in the west
+ *  (8.046), Höchst / Bad Soden in the south-west, Offenbach in the east. */
+export const FRANKFURT_BBOX: Bbox = {
+  minLat: 49.95,
+  maxLat: 50.3,
+  minLon: 7.95,
+  maxLon: 8.85,
+};
+
+/** Landau in der Pfalz + Südliche Weinstraße + Hambach. */
+export const LANDAU_BBOX: Bbox = {
+  minLat: 49.05,
+  maxLat: 49.45,
+  minLon: 7.95,
+  maxLon: 8.3,
+};
+
+export function inBbox(lat: number, lon: number, box: Bbox): boolean {
+  return lat >= box.minLat && lat <= box.maxLat && lon >= box.minLon && lon <= box.maxLon;
+}
 
 export function withinGeofence(lat: number, lon: number): boolean {
-  return (
-    lat >= GEOFENCE_BBOX.minLat &&
-    lat <= GEOFENCE_BBOX.maxLat &&
-    lon >= GEOFENCE_BBOX.minLon &&
-    lon <= GEOFENCE_BBOX.maxLon
-  );
+  return inBbox(lat, lon, GEOFENCE_BBOX);
 }

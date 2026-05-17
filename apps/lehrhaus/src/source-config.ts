@@ -180,18 +180,4 @@ export const SOURCES: LehrhausSource[] = [
     lat: 50.1109,
     lon: 8.6821,
   },
-
-  // Cross-imports — not independently scraped; events flow from existing apps.
-  {
-    slug: "frankfurt-museums",
-    name: "Frankfurter Museen",
-    short_name: "Museen",
-    url: "https://museumsufer.app",
-  },
-  {
-    slug: "frankfurt-theaters",
-    name: "Frankfurter Theater",
-    short_name: "Theater",
-    url: "https://ins.theater",
-  },
 ];

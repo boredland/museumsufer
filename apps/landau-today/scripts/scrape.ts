@@ -1,11 +1,11 @@
 #!/usr/bin/env bun
-/** Bundles src/scrape-data.ts from hub `EVENTS` filtered to `region:landau:*`,
+/** Bundles src/scrape-data.ts from hub `EVENTS` filtered to LANDAU_BBOX,
  *  then runs the four-pass cross-source dedup and Nominatim geocoding. */
 import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection, fnv1aInt, todayIso } from "@museumsufer/core";
-import { type CanonicalEvent, EVENTS } from "@museumsufer/event-hub";
+import { type CanonicalEvent, EVENTS, inBbox, LANDAU_BBOX } from "@museumsufer/event-hub";
 import { GEOCODE_CACHE } from "../src/geocode-cache";
 import type { Event, EventSource, ScrapeData } from "../src/types";
 
@@ -34,7 +34,7 @@ const today = todayIso();
 
 const candidates: Omit<Event, "id">[] = [];
 for (const ev of EVENTS) {
-  if (!hasRegionLabel(ev)) continue;
+  if (!inBbox(ev.lat, ev.lon, LANDAU_BBOX)) continue;
   if (!(ev.source_slug in SOURCE_RANK)) continue;
   if ((ev.end_date ?? ev.date) < today) continue;
   candidates.push(toLocalEvent(ev, ev.source_slug as EventSource));
@@ -51,10 +51,6 @@ const elapsed = ((Date.now() - startMain) / 1000).toFixed(1);
 log(`done in ${elapsed}s — wrote ${merged.length} events to ${dataPath}`);
 
 // ─── helpers ────────────────────────────────────────────────────────
-
-function hasRegionLabel(ev: CanonicalEvent): boolean {
-  return ev.labels.some((l) => l.label.startsWith("region:landau:"));
-}
 
 function toLocalEvent(ev: CanonicalEvent, source: EventSource): Omit<Event, "id"> {
   const category = pickCategory(ev);
