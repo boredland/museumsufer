@@ -162,8 +162,6 @@ export const SOURCES: LehrhausSource[] = [
   },
   // Evaluated — not viable:
   // fpi-frankfurt: https://fpi.de — public events page requires login
-  // institut-francais-frankfurt: https://www.institutfrancais.de/de/frankfurt-am-main/... — Drupal AJAX, mostly courses/films/concerts
-  // instituto-cervantes-frankfurt: https://frankfurt.cervantes.es — no structured event data
   // bnai-brith-frankfurt: domain NXDOMAIN, no web presence
   // loge-zur-einigkeit: domain TLS broken, inaccessible
   // house-of-finance: hof.uni-frankfurt.de — scrappable but content is academic research seminars/conferences, not general public

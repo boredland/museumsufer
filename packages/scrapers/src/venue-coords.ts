@@ -76,6 +76,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "haus-am-dom": [50.1107, 8.6826],
   "institut-francais-frankfurt": [50.1208, 8.6595],
   "institut-fuer-sozialforschung": [50.1217, 8.6558],
+  "instituto-cervantes-frankfurt": [50.1108, 8.6749],
   "juedische-gemeinde-frankfurt": [50.1167, 8.6712],
   "literaturhaus-frankfurt": [50.1173, 8.6814],
   "normative-orders": [50.1287, 8.666],
