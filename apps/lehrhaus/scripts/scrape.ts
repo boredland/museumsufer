@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, displayNameFor, EVENTS, MUSEUM_SLUGS, THEATER_SLUGS } from "@museumsufer/event-hub";
+import { type CanonicalEvent, displayNameFor, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
 import type { Category, LehrhausEvent, LehrhausSource, ScrapeData } from "../src/types";
 
@@ -17,37 +17,23 @@ await main();
 
 async function main(): Promise<void> {
   const sourcesBySlug = new Map(SOURCES.map((s) => [s.slug, s]));
-  const directSlugs = new Set(
-    SOURCES.filter((s) => s.slug !== "frankfurt-museums" && s.slug !== "frankfurt-theaters").map((s) => s.slug),
-  );
-
   const events: LehrhausEvent[] = [];
-  const counts = { direct: 0, museums: 0, theaters: 0, other: 0 };
   const orphanUrls = new Map<string, string>();
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
+    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
     const category = pickCategory(ev);
     if (!category) continue;
 
-    const sourceSlug = placeEvent(ev, directSlugs);
-    if (sourceSlug === "frankfurt-museums") counts.museums++;
-    else if (sourceSlug === "frankfurt-theaters") counts.theaters++;
-    else if (directSlugs.has(sourceSlug)) counts.direct++;
-    else {
-      counts.other++;
-      if (!orphanUrls.has(sourceSlug) && ev.detail_url) orphanUrls.set(sourceSlug, originOf(ev.detail_url));
+    if (!sourcesBySlug.has(ev.source_slug) && !orphanUrls.has(ev.source_slug) && ev.detail_url) {
+      orphanUrls.set(ev.source_slug, originOf(ev.detail_url));
     }
 
-    const sourceName =
-      sourceSlug === ev.source_slug
-        ? (sourcesBySlug.get(sourceSlug)?.name ?? displayNameFor(ev.source_slug))
-        : displayNameFor(ev.source_slug);
-
     events.push({
-      id: fnv1aInt(`${sourceSlug}|${ev.title}|${ev.date}|${ev.time ?? ""}`),
-      source_slug: sourceSlug,
-      source_name: sourceName,
+      id: fnv1aInt(`${ev.source_slug}|${ev.title}|${ev.date}|${ev.time ?? ""}`),
+      source_slug: ev.source_slug,
+      source_name: sourcesBySlug.get(ev.source_slug)?.name ?? displayNameFor(ev.source_slug),
       title: ev.title,
       date: ev.date,
       time: ev.time,
@@ -75,9 +61,7 @@ async function main(): Promise<void> {
   );
 
   const sources = augmentSources(SOURCES, orphanUrls);
-  log(
-    `direct: ${counts.direct}, museums: ${counts.museums}, theaters: ${counts.theaters}, other: ${counts.other} (${orphanUrls.size} extra sources) → ${unique.length} unique events`,
-  );
+  log(`${unique.length} talks across ${sources.length} sources (${orphanUrls.size} synthesised)`);
 
   const data: ScrapeData = { sources, events: unique };
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
@@ -110,20 +94,6 @@ function pickCategory(ev: CanonicalEvent): Category | null {
     if (l.label === "talk:lesung") return "Lesung";
   }
   return null;
-}
-
-/**
- * Decide which `LehrhausSource` slug a hub event belongs to. Direct mappings
- * win for the 20 institution-specific sources; museum and theater venues
- * roll up under `frankfurt-museums` / `frankfurt-theaters`. Anything else
- * (e.g. brotfabrik's occasional talks) keeps its own slug — a synthesized
- * source row gets added so the UI can render it.
- */
-function placeEvent(ev: CanonicalEvent, directSlugs: Set<string>): string {
-  if (directSlugs.has(ev.source_slug)) return ev.source_slug;
-  if (MUSEUM_SLUGS.has(ev.source_slug)) return "frankfurt-museums";
-  if (THEATER_SLUGS.has(ev.source_slug)) return "frankfurt-theaters";
-  return ev.source_slug;
 }
 
 function generateModule(data: ScrapeData): string {

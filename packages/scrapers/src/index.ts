@@ -9,7 +9,16 @@ export type {
   VenueScrapeResult,
   VenueScraper,
 } from "./types";
-export { coordinatesFor, GEOFENCE_BBOX, VENUE_COORDS, withinGeofence } from "./venue-coords";
+export {
+  type Bbox,
+  coordinatesFor,
+  FRANKFURT_BBOX,
+  GEOFENCE_BBOX,
+  inBbox,
+  LANDAU_BBOX,
+  VENUE_COORDS,
+  withinGeofence,
+} from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
