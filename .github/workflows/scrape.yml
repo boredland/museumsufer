@@ -2,14 +2,8 @@ name: scrape
 
 on:
   schedule:
-    - cron: "0 7-19 * * *" # theaters + konzert-haus + event-hub — hourly 09–21 CEST (07–19 UTC)
-    - cron: "30 6 * * *" # landau   — daily 08:30 CEST (06:30 UTC)
+    - cron: "0 7-19 * * *" # hourly 09–21 CEST (07–19 UTC)
   workflow_dispatch:
-    inputs:
-      app:
-        description: "Workspace to scrape (theaters | konzert-haus | museums | landau | lehrhaus | event-hub | all). Defaults to all."
-        required: false
-        default: "all"
 
 permissions:
   contents: write
@@ -18,173 +12,14 @@ concurrency:
   group: scrape
   cancel-in-progress: false
 
+# Phase 2 collapsed the per-app jobs into one linear pipeline: scrape the
+# hub upstream once, then derive each app's scrape-data from EVENTS, then
+# commit everything. There's no inter-job rebase contention anymore — the
+# whole run produces a single commit.
 jobs:
-  theaters:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '0 7-19 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'theaters' || inputs.app == 'all'))
+  scrape:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - name: Run scraper
-        working-directory: apps/frankfurt-theaters
-        run: bun scripts/scrape.ts
-
-      - name: Commit if changed
-        run: |
-          git config user.name "scrape-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/frankfurt-theaters/src/scrape-data.ts
-          if git diff --cached --quiet; then
-            echo "no diff, skipping commit"
-            exit 0
-          fi
-          git commit -m "data(theaters): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh apps/frankfurt-theaters/src/scrape-data.ts
-
-  museums:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '0 6 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'museums' || inputs.app == 'all'))
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - name: Run scraper
-        working-directory: apps/frankfurt-museums
-        env:
-          DEEPL_API_KEYS: ${{ secrets.DEEPL_API_KEYS }}
-          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
-          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
-        run: bun scripts/scrape.ts
-
-      - name: Commit if changed
-        run: |
-          git config user.name "scrape-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/frankfurt-museums/src/scrape-data.ts
-          if git diff --cached --quiet; then
-            echo "no diff, skipping commit"
-            exit 0
-          fi
-          git commit -m "data(museums): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh apps/frankfurt-museums/src/scrape-data.ts
-
-  landau:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '30 6 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'landau' || inputs.app == 'all'))
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - name: Run scraper
-        working-directory: apps/landau-today
-        run: bun scripts/scrape.ts
-
-      - name: Commit if changed
-        run: |
-          git config user.name "scrape-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/landau-today/src/scrape-data.ts apps/landau-today/src/geocode-cache.ts
-          if git diff --cached --quiet; then
-            echo "no diff, skipping commit"
-            exit 0
-          fi
-          git commit -m "data(landau): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh apps/landau-today/src/scrape-data.ts apps/landau-today/src/geocode-cache.ts
-
-  lehrhaus:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '30 6 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'lehrhaus' || inputs.app == 'all'))
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - name: Run scraper
-        working-directory: apps/lehrhaus
-        env:
-          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
-          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
-        run: bun scripts/scrape.ts
-
-      - name: Commit if changed
-        run: |
-          git config user.name "scrape-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/lehrhaus/src/scrape-data.ts
-          if git diff --cached --quiet; then
-            echo "no diff, skipping commit"
-            exit 0
-          fi
-          git commit -m "data(lehrhaus): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh apps/lehrhaus/src/scrape-data.ts
-
-  konzert-haus:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '0 7-19 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'konzert-haus' || inputs.app == 'all'))
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - run: bun install --frozen-lockfile
-
-      - name: Run scraper
-        working-directory: apps/konzert-haus
-        run: bun scripts/scrape.ts
-
-      - name: Commit if changed
-        run: |
-          git config user.name "scrape-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/konzert-haus/src/scrape-data.ts
-          if git diff --cached --quiet; then
-            echo "no diff, skipping commit"
-            exit 0
-          fi
-          git commit -m "data(konzert-haus): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh apps/konzert-haus/src/scrape-data.ts
-
-  event-hub:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '0 7-19 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (inputs.app == 'event-hub' || inputs.app == 'all'))
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
 
@@ -201,14 +36,52 @@ jobs:
           FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
         run: bun scripts/scrape.ts
 
+      - name: Derive lehrhaus
+        working-directory: apps/lehrhaus
+        run: bun scripts/scrape.ts
+
+      - name: Derive konzert-haus
+        working-directory: apps/konzert-haus
+        run: bun scripts/scrape.ts
+
+      - name: Derive frankfurt-theaters
+        working-directory: apps/frankfurt-theaters
+        run: bun scripts/scrape.ts
+
+      - name: Derive landau-today
+        working-directory: apps/landau-today
+        run: bun scripts/scrape.ts
+
+      - name: Derive frankfurt-museums
+        working-directory: apps/frankfurt-museums
+        env:
+          DEEPL_API_KEYS: ${{ secrets.DEEPL_API_KEYS }}
+          FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
+          FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
+        run: bun scripts/scrape.ts
+
       - name: Commit if changed
         run: |
           git config user.name "scrape-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add packages/event-hub/data/events.ts
+          git add \
+            packages/event-hub/data/events.ts \
+            apps/lehrhaus/src/scrape-data.ts \
+            apps/konzert-haus/src/scrape-data.ts \
+            apps/frankfurt-theaters/src/scrape-data.ts \
+            apps/landau-today/src/scrape-data.ts \
+            apps/landau-today/src/geocode-cache.ts \
+            apps/frankfurt-museums/src/scrape-data.ts
           if git diff --cached --quiet; then
             echo "no diff, skipping commit"
             exit 0
           fi
-          git commit -m "data(event-hub): scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
-          .github/scripts/push-scrape.sh packages/event-hub/data/events.ts
+          git commit -m "data: scheduled scrape $(date -u +%Y-%m-%dT%H:%MZ)"
+          .github/scripts/push-scrape.sh \
+            packages/event-hub/data/events.ts \
+            apps/lehrhaus/src/scrape-data.ts \
+            apps/konzert-haus/src/scrape-data.ts \
+            apps/frankfurt-theaters/src/scrape-data.ts \
+            apps/landau-today/src/scrape-data.ts \
+            apps/landau-today/src/geocode-cache.ts \
+            apps/frankfurt-museums/src/scrape-data.ts
