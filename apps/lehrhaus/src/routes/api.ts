@@ -1,7 +1,7 @@
 import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getEventById, getEventsForDate, getEventsInRange, getSourceBySlug } from "../db";
-import { SOURCES } from "../source-config";
+import { SCRAPE_DATA } from "../scrape-data";
 import { type Env, parseCategory } from "../types";
 
 const FEEDBACK_FROM = "no-reply@lehr.salon";
@@ -57,7 +57,7 @@ app.get("/api/events/:id{[0-9]+}", (c) => {
 app.get("/api/sources", (c) =>
   c.json(
     {
-      sources: SOURCES.map((s) => ({
+      sources: SCRAPE_DATA.sources.map((s) => ({
         slug: s.slug,
         name: s.name,
         short_name: s.short_name,

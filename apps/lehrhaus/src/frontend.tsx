@@ -34,7 +34,10 @@ import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayEvent } from "./db";
 import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { imageProxyUrl } from "./image-proxy";
-import { SOURCES } from "./source-config";
+import { SCRAPE_DATA } from "./scrape-data";
+
+const SOURCES = SCRAPE_DATA.sources;
+
 import { INLINE_CSS } from "./styles-inline";
 import { CATEGORIES, type Category } from "./types";
 
