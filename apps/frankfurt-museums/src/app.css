@@ -1116,7 +1116,7 @@ dialog::backdrop {
 }
 .event-tag__icon { width: 0.625rem; height: 0.625rem; fill: currentColor; }
 .event-tag--film    { color: #1d4ed8; background: #eff6ff; }
-.event-tag--guide   { color: #15803d; background: #f0fdf4; }
+.event-tag--guide   { color: #166534; background: #f0fdf4; }
 .event-tag--workshop{ color: #c2410c; background: #fff7ed; }
 .event-tag--talk    { color: #7e22ce; background: #faf5ff; }
 .event-tag--family  { color: #be185d; background: #fdf2f8; }
