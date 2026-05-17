@@ -1,5 +1,5 @@
 import { classifyEvent, classifyTalk, detectTalkLanguage } from "@museumsufer/classify";
-import { todayIso } from "@museumsufer/core/date";
+import { toBerlinDate, toBerlinTime, todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const API_URL = "https://jg-ffm.de/api/events.json";
@@ -31,13 +31,17 @@ export async function scrapeJuedischeGemeinde(): Promise<VenueScrapeResult> {
   const out: CanonicalScrapedEvent[] = [];
 
   for (const e of events) {
-    const date = e.start.slice(0, 10);
+    // The API returns UTC timestamps (suffix Z) — convert to Berlin time so
+    // a 12:00 CEST event isn't filed as 10:00.
+    const start = new Date(e.start);
+    if (Number.isNaN(start.getTime())) continue;
+    const date = toBerlinDate(start);
     if (date < today) continue;
 
     const catTitle = e.category?.title?.replace(/ /g, " ") ?? "";
     if (catTitle !== "Kultur & Events" && catTitle !== "Museen und Bildung") continue;
 
-    const timeRaw = e.start.slice(11, 16);
+    const timeRaw = toBerlinTime(start);
     const time = timeRaw !== "00:00" ? timeRaw : null;
     const classified = classifyEvent(e.title);
 
