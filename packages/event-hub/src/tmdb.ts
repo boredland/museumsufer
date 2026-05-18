@@ -54,20 +54,47 @@ function extractYear(ev: CanonicalEvent): number | undefined {
   return undefined;
 }
 
-/** Trim title noise that hurts TMDb match quality:
- *  - "(DF)", "(OV)", "OmU", parenthetical version markers
- *  - "vorpremiere:", "kinderkino:", "preview —" prefixes (German cinema-event
- *    chrome that TMDb doesn't know about)
- *  - trailing ", 2026" / " (2026)" duplicating the year
- */
+/** Curly-quote pairs around the title, common on Filmforum Höchst /
+ *  Kinopolis programmes: „Zirkuskind", "Mary", «Le Quai des Brumes». */
+const WRAPPING_QUOTES_RE = /^[„"«»"']\s*(.+?)\s*[""»«"'.]\s*$/;
+
+/** Trim title noise that hurts TMDb match quality. */
 function normaliseTitle(title: string): string {
   let t = title;
+  // Version + format markers (anywhere): "(OV)", "OmU", "DF", "3D"
   t = t.replace(/\([^)]*?(?:OV|OmU|OmeU|DF|stumm|silent|3D|IMAX)[^)]*\)/gi, "");
   t = t.replace(/\b(OV|OmU|OmeU|DF|stumm|silent|3D|IMAX)\b/gi, "");
-  t = t.replace(/^(vorpremiere|kinderkino|preview|premiere|special|sneak)\s*[:\-—–]\s*/i, "");
+  // Language-hint parentheticals: "(Telugu engl. UT)", "(OmeU)", "(franz. OmU)"
+  t = t.replace(
+    /\s*\([^)]*?(?:OmU|OmeU|UT|Untertitel|Originalfassung|Originalversion|Originalton|engl?\.|englisch|deutsch|franz\.?|french|spanisch|italienisch|original)[^)]*\)\s*$/i,
+    "",
+  );
+  // Bare prefixes without colon ("Vorpremiere — Foo")
+  t = t.replace(/^(vorpremiere|kinderkino|preview|premiere|special|sneak|klassiker)\s*[\-—–]\s*/i, "");
+  // Wrapping quotes — German „…" or French «…»
+  const quoted = t.match(WRAPPING_QUOTES_RE);
+  if (quoted) t = quoted[1];
+  // Trailing ", 2026" / " (2026)" duplicating the year
   t = t.replace(/\s*[,(]\s*(19|20)\d{2}\s*\)?\s*$/g, "");
+  // Trailing "*" decoration some venues add to flag a special screening
+  t = t.replace(/\s*\*+\s*$/g, "");
   t = t.replace(/\s+/g, " ").trim();
   return t;
+}
+
+/** Best-effort fallback when the cinema-house has bolted a series prefix
+ *  in front of the film title. Strips up to two leading colon-delimited
+ *  segments — "Schamlos Harmlos: Love Me Tender", "Aus der Isolation –
+ *  Feministische Experimentalfilme: Daughter of the Moon",
+ *  "Strickclub: Klassiker: Wanda". Only the part after the LAST colon is
+ *  used, so legit franchise titles like "Mad Max: Fury Road" are
+ *  unaffected because their first lookup succeeds before this fallback
+ *  even runs. */
+function tailAfterColon(title: string): string | undefined {
+  const idx = title.lastIndexOf(":");
+  if (idx === -1) return undefined;
+  const tail = title.slice(idx + 1).trim();
+  return tail.length >= 3 && tail.length < title.length ? tail : undefined;
 }
 
 function cacheKey(title: string, year: number | undefined): string {
@@ -79,7 +106,7 @@ function hasFilmCinemaLabel(ev: CanonicalEvent): boolean {
   return false;
 }
 
-async function fetchTmdb(title: string, year: number | undefined, apiKey: string): Promise<TmdbCacheEntry | null> {
+async function searchTmdb(title: string, year: number | undefined, apiKey: string): Promise<TmdbSearchResult | null> {
   const params = new URLSearchParams({
     query: title,
     api_key: apiKey,
@@ -91,7 +118,25 @@ async function fetchTmdb(title: string, year: number | undefined, apiKey: string
   const res = await fetch(url, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`tmdb ${res.status} for "${title}"`);
   const data = (await res.json()) as TmdbSearchResponse;
-  const hit = data.results?.[0];
+  return data.results?.[0] ?? null;
+}
+
+async function fetchTmdb(title: string, year: number | undefined, apiKey: string): Promise<TmdbCacheEntry | null> {
+  // 1) Year-restricted search on the full title — covers current releases.
+  let hit = await searchTmdb(title, year, apiKey);
+  // 2) Drop the year. TMDb often has the wrong primary_release_year for
+  //    restorations and arthouse re-releases of older films.
+  if (!hit && year) hit = await searchTmdb(title, undefined, apiKey);
+  // 3) Try the segment after the last colon — picks up the multi-word
+  //    German cinema-house prefixes ("Schamlos Harmlos: …", "Aus der
+  //    Isolation – Feministische Experimentalfilme: Daughter of the Moon")
+  //    without risking false positives on franchise titles like
+  //    "Mad Max: Fury Road", which already match at step 1.
+  const tail = tailAfterColon(title);
+  if (!hit && tail) {
+    hit = await searchTmdb(tail, year, apiKey);
+    if (!hit && year) hit = await searchTmdb(tail, undefined, apiKey);
+  }
   if (!hit) return null;
   return { id: hit.id, poster: hit.poster_path ?? null };
 }
