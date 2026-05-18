@@ -211,7 +211,7 @@ const de: Translations = {
   faqItems: [
     {
       q: "Welche Spielorte sind hier vertreten?",
-      a: "Aktuell 19 Häuser und Reihen in Frankfurt und Umgebung: Alte Oper Frankfurt, Oper Frankfurt, Dr. Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Musik Festival, Bad Homburger Schlosskonzerte und Bad Sodener Kammerkonzerte.",
+      a: "Aktuell {n} Häuser und Reihen in Frankfurt und Umgebung: {venues}.",
     },
     {
       q: "Wie aktuell ist das Programm?",
@@ -337,7 +337,7 @@ const en: Translations = {
   faqItems: [
     {
       q: "Which venues are covered?",
-      a: "Currently 19 venues and series in Frankfurt and the surrounding area: Alte Oper Frankfurt, Oper Frankfurt, Dr Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Music Festival, Bad Homburg Castle Concerts and Bad Soden Chamber Concerts.",
+      a: "Currently {n} venues and series in Frankfurt and the surrounding area: {venues}.",
     },
     {
       q: "How current is the programme?",
@@ -464,7 +464,7 @@ const fr: Translations = {
   faqItems: [
     {
       q: "Quelles salles sont couvertes ?",
-      a: "Actuellement 19 salles et séries à Francfort et ses environs : Alte Oper Frankfurt, Oper Frankfurt, Dr. Hoch's Konservatorium, Hochschule für Musik und Darstellende Kunst Frankfurt (HfMDK), Ensemble Modern, hr-Sinfonieorchester, hr-Bigband, Holzhausenschlösschen, Jazz in Frankfurt, Jazz im Palmengarten, Brotfabrik, Romanfabrik, Kirchenmusik Andreas Köhs, Kirchenmusik Dreikönigsgemeinde, Kantorei St. Katharinen, Kronberg Academy / Casals Forum, Rheingau Musik Festival, Bad Homburger Schlosskonzerte et Bad Sodener Kammerkonzerte.",
+      a: "Actuellement {n} salles et séries à Francfort et ses environs : {venues}.",
     },
     {
       q: "À quel point le programme est-il à jour ?",

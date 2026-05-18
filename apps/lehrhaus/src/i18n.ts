@@ -200,7 +200,7 @@ const de: Translations = {
   faqItems: [
     {
       q: "Welche Häuser sind hier vertreten?",
-      a: "Aktuell mehr als zehn Frankfurter Institutionen: Polytechnische Gesellschaft, Haus am Dom (Kath. Akademie Rabanus Maurus), Jüdische Gemeinde, FGZ StreitClub, Literaturhaus Frankfurt, Goethe-Uni Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, Romanfabrik, Deutsch-Israelische Gesellschaft, OPEN BOOKS. Hinzu kommen Vortragstermine aus den Schwesterseiten museumsufer.app und ins.theater.",
+      a: "Aktuell {n} Frankfurter Institutionen: {venues}. Hinzu kommen Vortragstermine aus den Schwesterseiten museumsufer.app und ins.theater.",
     },
     {
       q: "Was zählt als Vortrag, Lesung oder Diskussion?",
@@ -322,7 +322,7 @@ const en: Translations = {
   faqItems: [
     {
       q: "Which institutions are covered?",
-      a: "Currently more than ten Frankfurt institutions: Polytechnische Gesellschaft, Haus am Dom (Catholic Academy), Jewish Community, FGZ StreitClub, Literaturhaus Frankfurt, Goethe University Citizens' Programme, Institute for Social Research, Protestant Academy, Sigmund Freud Institute, Denkbar, Romanfabrik, German-Israeli Society, OPEN BOOKS. In addition, lecture-format events are cross-imported from the sister sites museumsufer.app and ins.theater.",
+      a: "Currently {n} Frankfurt institutions: {venues}. In addition, lecture-format events are cross-imported from the sister sites museumsufer.app and ins.theater.",
     },
     {
       q: "What counts as a lecture, a reading, or a discussion?",
