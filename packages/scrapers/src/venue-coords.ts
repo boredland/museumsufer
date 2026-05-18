@@ -103,6 +103,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
 
   // ─── arthouse cinemas ────────────────────────────────────────────
   "astor-frankfurt": [50.1136, 8.6856],
+  "caligari-wiesbaden": [50.083, 8.2412],
   "capitol-mainz": [50.0046, 8.2693],
   "cinema-frankfurt": [50.1132, 8.6786],
   "eldorado-frankfurt": [50.1138, 8.6843],
@@ -119,6 +120,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   malsehn: [50.1235, 8.6789],
   "murnau-filmtheater": [50.0857, 8.2456],
   "orfeos-erben": [50.1149, 8.6452],
+  "programmkino-rex": [49.8773, 8.6555],
   pupille: [50.1247, 8.6573],
 
   // ─── Landau / Pfalz regional sources ─────────────────────────────

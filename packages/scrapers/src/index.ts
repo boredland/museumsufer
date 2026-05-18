@@ -37,6 +37,7 @@ import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
+import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDieKaes } from "./venues/die-kaes";
@@ -97,6 +98,7 @@ import { scrapeOrfeosErben } from "./venues/orfeos-erben";
 import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
+import { scrapeProgrammkinoRex } from "./venues/programmkino-rex";
 import { scrapePupille } from "./venues/pupille";
 import { scrapeRheingauFestival } from "./venues/rheingau-festival";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
@@ -139,6 +141,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "boell-hessen", run: (_ctx: ScraperContext) => scrapeBoellHessen() },
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
+  { slug: "caligari-wiesbaden", run: (_ctx: ScraperContext) => scrapeCaligariWiesbaden() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
@@ -207,6 +210,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
   { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
+  { slug: "programmkino-rex", run: (_ctx: ScraperContext) => scrapeProgrammkinoRex() },
   { slug: "pupille", run: (_ctx: ScraperContext) => scrapePupille() },
   { slug: "rheingau-musikfestival", run: (_ctx: ScraperContext) => scrapeRheingauFestival() },
   { slug: "rls-hessen", run: (_ctx: ScraperContext) => scrapeRlsHessen() },
@@ -243,6 +247,7 @@ export {
   scrapeBoellHessen,
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
+  scrapeCaligariWiesbaden,
   scrapeCrespoFoundation,
   scrapeDenkbar,
   scrapeDieKaes,
@@ -304,6 +309,7 @@ export {
   scrapePapagenoMusiktheater,
   scrapePfalzDe,
   scrapePolytechnische,
+  scrapeProgrammkinoRex,
   scrapePupille,
   scrapeRheingauFestival,
   scrapeRlsHessen,
