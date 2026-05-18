@@ -29,12 +29,14 @@ import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch as SharedLangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
+import { joinNames, rankVenuesByEventCount } from "@museumsufer/core/venue-faq";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { VENUES } from "./concert-config";
 import type { DateWithCount, DayEvent } from "./db";
 import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
 import { imageProxyUrl } from "./image-proxy";
+import { SCRAPE_DATA } from "./scrape-data";
 import { INLINE_CSS } from "./styles-inline";
 import { GENRES, type Genre } from "./types";
 
@@ -1017,8 +1019,26 @@ export function ProgrammePartial({
 
 const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
 
-function Faq({ tr }: { tr: Translations }) {
-  return <SharedFaq kicker={tr.faqKicker} items={tr.faqItems} />;
+const VENUE_FAQ = ((): { count: number; byLocale: Record<Locale, string> } => {
+  const nameBySlug = new Map(VENUES.map((v) => [v.slug, v.name]));
+  const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => e.venue_slug, nameBySlug);
+  const names = ranked.map((v) => v.name);
+  return {
+    count: ranked.length,
+    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
+  };
+})();
+
+function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale): FaqItem[] {
+  return items.map((item) =>
+    item.a.includes("{venues}")
+      ? { q: item.q, a: item.a.replace("{n}", String(VENUE_FAQ.count)).replace("{venues}", VENUE_FAQ.byLocale[locale]) }
+      : item,
+  );
+}
+
+function Faq({ tr, locale }: { tr: Translations; locale: Locale }) {
+  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale)} />;
 }
 
 function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
@@ -1051,7 +1071,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={buildFaqPageSchema(tr.faqItems as FaqItem[])}
+            jsonLd={buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))}
           />
         </head>
         <body>
@@ -1066,7 +1086,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
               <ProgrammePartial date={date} events={events} tr={tr} locale={locale} />
             </div>
           </main>
-          <Faq tr={tr} />
+          <Faq tr={tr} locale={locale} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />

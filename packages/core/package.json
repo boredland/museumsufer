@@ -43,6 +43,7 @@
     "./theme-script": "./src/theme-script.ts",
     "./theme-toggle": "./src/theme-toggle.tsx",
     "./user-agents": "./src/user-agents.ts",
+    "./venue-faq": "./src/venue-faq.ts",
     "./webmcp": "./src/webmcp.ts"
   },
   "scripts": {

@@ -16,6 +16,7 @@ import { Footer } from "@museumsufer/core/footer";
 import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
+import { type FaqLocale, joinNames, rankVenuesByEventCount } from "@museumsufer/core/venue-faq";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
@@ -23,6 +24,7 @@ import { berlinNow, todayIso } from "./date";
 import { DEFAULT_LOCALE, dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
+import { SCRAPE_DATA } from "./scrape-data";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
 import { INLINE_CSS } from "./styles-inline";
@@ -430,9 +432,24 @@ function AboutSection({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-function faqItems(tr: Record<string, string>): FaqItem[] {
+const MUSEUM_FAQ = ((): { count: number; byLocale: Record<FaqLocale, string> } => {
+  const nameById = new Map(SCRAPE_DATA.museums.map((m) => [String(m.id), m.name] as const));
+  const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => String(e.museum_id), nameById);
+  const names = ranked.map((v) => v.name);
+  return {
+    count: ranked.length,
+    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
+  };
+})();
+
+function substituteVenues(answer: string, locale: Locale): string {
+  if (!answer.includes("{venues}")) return answer;
+  return answer.replace("{n}", String(MUSEUM_FAQ.count)).replace("{venues}", MUSEUM_FAQ.byLocale[locale]);
+}
+
+function faqItems(tr: Record<string, string>, locale: Locale): FaqItem[] {
   return [
-    { q: tr.faq1Q, a: tr.faq1A },
+    { q: tr.faq1Q, a: substituteVenues(tr.faq1A, locale) },
     { q: tr.faq2Q, a: tr.faq2A },
     { q: tr.faq3Q, a: tr.faq3A },
     { q: tr.faq4Q, a: tr.faq4A },
@@ -443,8 +460,8 @@ function faqItems(tr: Record<string, string>): FaqItem[] {
   ];
 }
 
-function FaqSection({ tr }: { tr: Record<string, string> }) {
-  return <Faq kicker={tr.faqTitle} items={faqItems(tr)} />;
+function FaqSection({ tr, locale }: { tr: Record<string, string>; locale: Locale }) {
+  return <Faq kicker={tr.faqTitle} items={faqItems(tr, locale)} />;
 }
 
 /** Renders the complete landing page with all sections, schemas, and interactivity */
@@ -514,7 +531,7 @@ export function renderPage(
   const publisherSchema = JSON.stringify(personSchema);
   const orgSchemaJson = JSON.stringify(orgSchema);
   const webAppSchemaJson = JSON.stringify(webAppSchema);
-  const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr)));
+  const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr, locale)));
 
   const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
   const jsonSchemas = [
@@ -620,7 +637,7 @@ export function renderPage(
             <MuseumsSection museums={museums || {}} tr={tr} />
 
             <AboutSection tr={tr} />
-            <FaqSection tr={tr} />
+            <FaqSection tr={tr} locale={locale} />
 
             <Footer
               description={tr.metaShort ?? tr.subtitle}

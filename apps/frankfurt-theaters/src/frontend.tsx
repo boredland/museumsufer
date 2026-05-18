@@ -25,10 +25,12 @@ import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
 import { Footer as SharedFooter } from "@museumsufer/core/footer";
 import { HtmlHead } from "@museumsufer/core/html-head";
 import { ThemeToggle } from "@museumsufer/core/theme-toggle";
+import { joinNames, rankVenuesByEventCount } from "@museumsufer/core/venue-faq";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { DateWithCount, DayPerformance } from "./db";
 import { imageProxyUrl } from "./image-proxy";
+import { SCRAPE_DATA } from "./scrape-data";
 import { INLINE_CSS } from "./styles-inline";
 import { THEATERS } from "./theater-config";
 
@@ -503,10 +505,23 @@ export function AskAi() {
   );
 }
 
+const VENUE_LIST_DE = ((): { count: number; list: string } => {
+  const nameBySlug = new Map(THEATERS.map((t) => [t.slug, t.name]));
+  const slugByShowId = new Map(SCRAPE_DATA.shows.map((s) => [s.id, s.theater_slug]));
+  const ranked = rankVenuesByEventCount(SCRAPE_DATA.performances, (p) => slugByShowId.get(p.show_id), nameBySlug);
+  return {
+    count: ranked.length,
+    list: joinNames(
+      ranked.map((v) => v.name),
+      "de",
+    ),
+  };
+})();
+
 const FAQ_ITEMS: FaqItem[] = [
   {
     q: "Welche Bühnen sind hier vertreten?",
-    a: "Aktuell 23 Frankfurter Häuser: Schauspiel Frankfurt, Oper Frankfurt, The English Theatre Frankfurt, Die Komödie Frankfurt, Künstlerhaus Mousonturm, Neues Theater Höchst, Volksbühne im Großen Hirschgraben, Stalburg Theater, Tigerpalast Varieté, Die Schmiere, Dresden Frankfurt Dance Company, Die Dramatische Bühne, Theater Willy Praml, Kellertheater Frankfurt, Gallus Theater, Theaterhaus Frankfurt, Internationales Theater Frankfurt, Papageno Musiktheater, Galli Theater Frankfurt, Theater Alte Brücke, Die Käs, Theater Lempenfieber und Landungsbrücken Frankfurt. Tanz und Musical sind dabei.",
+    a: `Aktuell ${VENUE_LIST_DE.count} Frankfurter Häuser: ${VENUE_LIST_DE.list}. Tanz und Musical sind dabei.`,
   },
   {
     q: "Wie aktuell ist der Spielplan?",
