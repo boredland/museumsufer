@@ -131,6 +131,12 @@ function labelsForEvent(type: EventType | null, title: string, description: stri
       { label: "museum:konzert", confidence: 0.85, classifier: "keyword:event" },
     ];
   }
+  if (type === "Film") {
+    return [
+      { label: "film:cinema", confidence: 0.85, classifier: "keyword:event" },
+      { label: "museum:film", confidence: 0.85, classifier: "keyword:event" },
+    ];
+  }
   const mapped = eventTypeToLabel(type);
   if (!mapped) return [{ label: "museum:event", confidence: 0.5, classifier: "scraper-hardcoded" }];
   return [{ label: mapped, confidence: 0.85, classifier: "keyword:event" }];
