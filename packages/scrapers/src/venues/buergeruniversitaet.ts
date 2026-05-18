@@ -1,6 +1,6 @@
 import { detectTalkLanguage } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
-import { stripHtml } from "@museumsufer/core/html";
+import { decodeEntities, stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const API_BASE = "https://aktuelles.uni-frankfurt.de/wp-json/tribe/events/v1/events";
@@ -42,17 +42,18 @@ export async function scrapeBuergeruniversitaet(): Promise<VenueScrapeResult> {
       const time = e.start_date.slice(11, 16);
       const endTime = e.end_date.slice(0, 10) === date ? e.end_date.slice(11, 16) : null;
       const description = stripHtml(e.description).trim().slice(0, 600) || null;
+      const title = decodeEntities(e.title).trim();
       const isDiskussion = e.categories.some((c) => DISKUSSION_CATS.has(c.id));
 
       events.push({
         source_event_id: String(e.id),
-        title: e.title,
+        title,
         date,
         time: time !== "00:00" ? time : null,
         end_time: endTime,
         description,
         detail_url: e.url,
-        language: detectTalkLanguage(e.title, description),
+        language: detectTalkLanguage(title, description),
         labels: [
           {
             label: isDiskussion ? "talk:diskussion" : "talk:vortrag",
