@@ -3,6 +3,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "alte-oper": "Alte Oper Frankfurt",
   "andreas-koehs": "Kirchenmusik Andreas Köhs",
   "archaeologisches-museum-frankfurt": "Archäologisches Museum Frankfurt",
+  "astor-frankfurt": "ASTOR Film Lounge MyZeil",
   "atelierfrankfurt": "Atelierfrankfurt",
   "autorenbuchhandlung-marx": "Autorenbuchhandlung Marx",
   "bad-homburger-schlosskonzerte": "Bad Homburger Schlosskonzerte",
