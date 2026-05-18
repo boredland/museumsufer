@@ -7,7 +7,7 @@ export type EventApiType =
   | "my-calendar"
   | "liebieghaus"
   | "mak"
-  | "stadtgeschichte-rss"
+  | "stadtgeschichte-html"
   | "dommuseum"
   | "ledermuseum"
   | "bibelhaus"
@@ -234,8 +234,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Willy-Brandt-Platz@X=8673898@Y=50108992@U=80@L=3000004@",
     exhibitionUrl: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/ausstellungen",
     eventApi: {
-      type: "stadtgeschichte-rss",
-      endpoint: "https://www.stadtgeschichte-ffm.de/rss/isg_rss.php?L=de",
+      type: "stadtgeschichte-html",
+      endpoint: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/kalender",
     },
   },
   "juedisches-museum-frankfurt": {
