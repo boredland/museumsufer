@@ -2,18 +2,7 @@ import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
-const BASE = "https://www.arthouse-kinos.de";
-const LISTING_URL = `${BASE}/programm-tickets/`;
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
-
-const CINEMA_SLUG: Record<string, { slug: string; name: string }> = {
-  "kino-frankfurt-am-main/cinema-frankfurt": { slug: "cinema-frankfurt", name: "Cinéma Frankfurt" },
-  "kino-frankfurt-am-main/eldorado-arthouse-kino": { slug: "eldorado-frankfurt", name: "Eldorado Arthouse Kino" },
-  "kino-frankfurt-am-main/harmonie-theater-frankfurt": {
-    slug: "harmonie-frankfurt",
-    name: "Harmonie Theater Frankfurt",
-  },
-};
 
 // Top-level film tiles carry `js-filter-movie-date`; this anchor avoids
 // false hits on the nested *-data / *-showtimes child divs that share the
@@ -21,19 +10,59 @@ const CINEMA_SLUG: Record<string, { slug: string; name: string }> = {
 const TILE_RE =
   /<div class="programme-table-main-grid-movieitem js-filter-movie-date[^"]*"[^>]*>([\s\S]*?)(?=<div class="programme-table-main-grid-movieitem js-filter-movie-date|<div id="programme-table-bottom)/g;
 
+interface CinemaEntry {
+  slug: string;
+  name: string;
+}
+
+interface ScrapeSite {
+  listingUrl: string;
+  /** Origin used to absolutise relative /filme/... detail URLs. */
+  base: string;
+  /** Map from the page's data-cinema-path attribute to our canonical slug + name. */
+  cinemas: Record<string, CinemaEntry>;
+}
+
+const FRANKFURT_SITE: ScrapeSite = {
+  listingUrl: "https://www.arthouse-kinos.de/programm-tickets/",
+  base: "https://www.arthouse-kinos.de",
+  cinemas: {
+    "kino-frankfurt-am-main/cinema-frankfurt": { slug: "cinema-frankfurt", name: "Cinéma Frankfurt" },
+    "kino-frankfurt-am-main/eldorado-arthouse-kino": { slug: "eldorado-frankfurt", name: "Eldorado Arthouse Kino" },
+    "kino-frankfurt-am-main/harmonie-theater-frankfurt": {
+      slug: "harmonie-frankfurt",
+      name: "Harmonie Theater Frankfurt",
+    },
+  },
+};
+
+const MAINZ_SITE: ScrapeSite = {
+  listingUrl: "https://www.arthouse-mainz.de/programm/",
+  base: "https://www.arthouse-mainz.de",
+  cinemas: {
+    "kino/mainz/capitol-mainz": { slug: "capitol-mainz", name: "Capitol Arthouse Kino Mainz" },
+  },
+};
+
 /**
- * Scrapes the shared programme page for the three Frankfurt arthouse cinemas
- * (Cinéma, Eldorado, Harmonie). Returns one result per cinema since each has
- * its own venue identity even though they publish their schedule in one place.
+ * Scrapes the shared programme page for Christopher Bausch's arthouse cinema
+ * group. Returns one VenueScrapeResult per cinema since each has its own venue
+ * identity even though they publish on the same TYPO3 template (Frankfurt:
+ * Cinéma / Eldorado / Harmonie; Mainz: Capitol).
  */
 export async function scrapeArthouseKinos(): Promise<VenueScrapeResult[]> {
   const today = todayIso();
-  const res = await fetch(LISTING_URL, { headers: { "User-Agent": UA } });
-  if (!res.ok) throw new Error(`arthouse-kinos fetch failed: ${res.status}`);
+  const results = await Promise.all([scrapeSite(FRANKFURT_SITE, today), scrapeSite(MAINZ_SITE, today)]);
+  return results.flat();
+}
+
+async function scrapeSite(site: ScrapeSite, today: string): Promise<VenueScrapeResult[]> {
+  const res = await fetch(site.listingUrl, { headers: { "User-Agent": UA } });
+  if (!res.ok) throw new Error(`arthouse-kinos fetch failed: ${res.status} ${site.listingUrl}`);
   const html = await res.text();
 
   const byCinema = new Map<string, CanonicalScrapedEvent[]>();
-  for (const c of Object.values(CINEMA_SLUG)) byCinema.set(c.slug, []);
+  for (const c of Object.values(site.cinemas)) byCinema.set(c.slug, []);
 
   for (const tileMatch of html.matchAll(TILE_RE)) {
     const tile = tileMatch[0];
@@ -44,7 +73,7 @@ export async function scrapeArthouseKinos(): Promise<VenueScrapeResult[]> {
     if (!title) continue;
 
     const detailMatch = tile.match(/<a[^>]+href="(\/filme\/[^"]+)"/);
-    const detail_url = detailMatch ? `${BASE}${detailMatch[1]}` : null;
+    const detail_url = detailMatch ? `${site.base}${detailMatch[1]}` : null;
 
     const filterDates = Array.from(tile.matchAll(/filter-date-(\d{4}-\d{2}-\d{2})/g), (m) => m[1]);
     const dateLookup = new Map<string, string>();
@@ -59,7 +88,7 @@ export async function scrapeArthouseKinos(): Promise<VenueScrapeResult[]> {
     const showtimes = parseShowtimes(tile, colDates);
     for (const s of showtimes) {
       if (s.date < today) continue;
-      const cinema = CINEMA_SLUG[s.cinemaPath];
+      const cinema = site.cinemas[s.cinemaPath];
       if (!cinema) continue;
       const bucket = byCinema.get(cinema.slug);
       if (!bucket) continue;
@@ -77,7 +106,7 @@ export async function scrapeArthouseKinos(): Promise<VenueScrapeResult[]> {
 
   return [...byCinema.entries()].map(([slug, events]) => ({
     source_slug: slug,
-    display_name: Object.values(CINEMA_SLUG).find((c) => c.slug === slug)?.name,
+    display_name: Object.values(site.cinemas).find((c) => c.slug === slug)?.name,
     events,
   }));
 }
