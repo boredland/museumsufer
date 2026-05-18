@@ -3,6 +3,7 @@ import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
 import { coordinatesFor, VENUE_SCRAPERS, withinGeofence } from "@museumsufer/scrapers";
 import PQueue from "p-queue";
+import { enrichFilmPosters, type TmdbCache } from "./tmdb";
 import type { CanonicalEvent, EventHubData, Label } from "./types";
 
 export type Logger = (msg: string) => void;
@@ -12,6 +13,13 @@ export interface RunOptions {
   log?: Logger;
   proxy?: ProxyConfig | null;
   concurrency?: number;
+  /** Optional TMDb v3 API key. When set, film:cinema events that lack an
+   *  image_url get enriched with a TMDb poster + tmdb_id after scraping. */
+  tmdbApiKey?: string;
+  /** Persistent cache for TMDb lookups. The script that drives this runner
+   *  is responsible for loading + persisting it; the runner mutates it in
+   *  place. */
+  tmdbCache?: TmdbCache;
 }
 
 const DEFAULT_CONCURRENCY = 8;
@@ -83,6 +91,10 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     if (ev.date < today) continue;
     if (ev.last_seen_at < staleCutoff) continue;
     events.push(ev);
+  }
+
+  if (opts.tmdbCache) {
+    await enrichFilmPosters(events, { apiKey: opts.tmdbApiKey, cache: opts.tmdbCache, log });
   }
 
   events.sort(

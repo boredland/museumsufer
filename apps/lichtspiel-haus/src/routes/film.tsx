@@ -141,6 +141,16 @@ app.get("/film/:id{[0-9]+}", (c) => {
                         {tr.websiteLink} ↗
                       </a>
                     ) : null}
+                    {screening.tmdb_id ? (
+                      <a
+                        class="film-detail__source"
+                        href={`https://www.themoviedb.org/movie/${screening.tmdb_id}`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        TMDb ↗
+                      </a>
+                    ) : null}
                   </div>
                 </div>
               </div>

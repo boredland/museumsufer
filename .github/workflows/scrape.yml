@@ -34,6 +34,7 @@ jobs:
         env:
           FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
           FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: bun scripts/scrape.ts
 
       - name: Derive lehrhaus
@@ -71,6 +72,7 @@ jobs:
           git add \
             packages/event-hub/data/events.ts \
             packages/event-hub/data/venue-names.ts \
+            packages/event-hub/data/tmdb-cache.ts \
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
             apps/konzert-haus/src/synthesized-venues.ts \
@@ -89,6 +91,7 @@ jobs:
           .github/scripts/push-scrape.sh \
             packages/event-hub/data/events.ts \
             packages/event-hub/data/venue-names.ts \
+            packages/event-hub/data/tmdb-cache.ts \
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
             apps/konzert-haus/src/synthesized-venues.ts \

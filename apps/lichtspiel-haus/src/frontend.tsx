@@ -487,6 +487,20 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
               <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
             </svg>
           </button>
+          {s.tmdb_id ? (
+            <a
+              class="icon-btn icon-btn--tmdb"
+              href={`https://www.themoviedb.org/movie/${s.tmdb_id}`}
+              target="_blank"
+              rel="noopener"
+              aria-label="TMDb"
+              title="TMDb"
+            >
+              <span class="icon-btn__text" aria-hidden="true">
+                TMDb
+              </span>
+            </a>
+          ) : null}
           {s.ticket_url && !isFree ? (
             <a class="action" href={utm(s.ticket_url, "karten")} target="_blank" rel="noopener">
               <span class="action__note" aria-hidden="true">

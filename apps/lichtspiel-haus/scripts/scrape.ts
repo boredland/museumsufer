@@ -66,6 +66,7 @@ async function main(): Promise<void> {
       language,
       format,
       series,
+      tmdb_id: ev.tmdb_id,
     });
     counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
     if (!curatedBySlug.has(ev.source_slug)) {

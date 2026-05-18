@@ -61,6 +61,9 @@ export interface Screening {
   format?: Format;
   /** Series this screening belongs to (Nippon Connection, Udo Kier, …). */
   series?: SeriesRef;
+  /** TMDb movie id (when the hub enrichment found a match). Front-end uses
+   *  it to deep-link to themoviedb.org/movie/{id} from the screening card. */
+  tmdb_id?: number;
 }
 
 export interface ScrapeData {
