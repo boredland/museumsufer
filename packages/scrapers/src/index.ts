@@ -21,6 +21,7 @@ export {
 } from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
+import { scrapeCineamo } from "./venues/_cineamo";
 import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
@@ -46,6 +47,7 @@ import { scrapeDramatischeBuehne } from "./venues/dramatische-buehne";
 import { scrapeDresdenFrankfurtDanceCompany } from "./venues/dresden-frankfurt-dance-company";
 import { scrapeEnglishTheatreFrankfurt } from "./venues/english-theatre-frankfurt";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
+import { scrapeEschbornK } from "./venues/eschborn-k";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
@@ -55,6 +57,7 @@ import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
 import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
+import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHfmdk } from "./venues/hfmdk";
@@ -146,6 +149,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
   { slug: "english-theatre-frankfurt", run: (_ctx: ScraperContext) => scrapeEnglishTheatreFrankfurt() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
+  { slug: "eschborn-k", run: (_ctx: ScraperContext) => scrapeEschbornK() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
@@ -158,6 +162,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "frankfurter-sparkasse", run: (_ctx: ScraperContext) => scrapeFrankfurterSparkasse() },
   { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
+  { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
   { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
@@ -185,6 +190,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
+  { slug: "cineamo-frankfurt-region", run: (_ctx: ScraperContext) => scrapeCineamo() },
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
@@ -247,6 +253,7 @@ export {
   scrapeDrHochs,
   scrapeEnglishTheatreFrankfurt,
   scrapeEnsembleModern,
+  scrapeEschbornK,
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
@@ -256,6 +263,7 @@ export {
   scrapeFrankfurtUas,
   scrapeGalliTheater,
   scrapeGallusTheater,
+  scrapeHafen2,
   scrapeHambacherSchloss,
   scrapeHausAmDom,
   scrapeHfmdk,
