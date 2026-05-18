@@ -9,6 +9,15 @@ export type EventType = "Führung" | "Workshop" | "Vortrag" | "Konzert" | "Verni
 export function classifyEvent(title: string, description?: string | null): EventType | null {
   const haystack = `${title.toLowerCase()} ${(description || "").toLowerCase()}`;
 
+  // Film check first — "Vorführung" / "Dokumentarfilm" / "Filmreihe" would
+  // otherwise fall into Führung via the "führung" substring.
+  if (
+    /\bfilm\b|\bkino\b|\bcinema\b|dokumentarfilm|dokuabend|filmreihe|filmvorführung|filmvorfuehrung|filmvorstellung|filmabend|filmpremier|kinoabend|screening|vorführung|vorfuehrung/.test(
+      haystack,
+    )
+  )
+    return "Film";
+
   if (
     haystack.includes("führung") ||
     haystack.includes("fuehrung") ||
@@ -51,8 +60,6 @@ export function classifyEvent(title: string, description?: string | null): Event
     haystack.includes("baby")
   )
     return "Familie";
-  if (haystack.includes("film") || haystack.includes("kino") || haystack.includes("cinema")) return "Film";
-
   return null;
 }
 
