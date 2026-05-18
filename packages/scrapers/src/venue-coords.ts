@@ -101,6 +101,14 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "sigmund-freud-institut": [50.117, 8.6557],
   "stadtbuecherei-frankfurt": [50.1116, 8.6831],
 
+  // ─── arthouse cinemas ────────────────────────────────────────────
+  "cinema-frankfurt": [50.1132, 8.6786],
+  "eldorado-frankfurt": [50.1138, 8.6843],
+  "harmonie-frankfurt": [50.0976, 8.6818],
+  malsehn: [50.1235, 8.6789],
+  "orfeos-erben": [50.1149, 8.6452],
+  pupille: [50.1247, 8.6573],
+
   // ─── Landau / Pfalz regional sources ─────────────────────────────
   "hambacher-schloss": [49.3236, 8.1153],
   "kulturnetz-landau": [49.198, 8.1192],
