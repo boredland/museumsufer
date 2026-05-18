@@ -26,6 +26,7 @@ import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
+import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
@@ -75,6 +76,7 @@ import { scrapeLandauDe } from "./venues/landau-de";
 import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
 import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
+import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeNaxos } from "./venues/naxos";
@@ -86,6 +88,7 @@ import { scrapeOperFrankfurtKonzerte } from "./venues/oper-frankfurt-konzerte";
 import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
+import { scrapePupille } from "./venues/pupille";
 import { scrapeRheingauFestival } from "./venues/rheingau-festival";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
@@ -118,6 +121,7 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
+  { slug: "arthouse-kinos-frankfurt", run: (_ctx: ScraperContext) => scrapeArthouseKinos() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -170,6 +174,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "landinsicht-buchladen", run: (_ctx: ScraperContext) => scrapeLandinsichtBuchladen() },
   { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
+  { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
@@ -184,6 +189,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
   { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
+  { slug: "pupille", run: (_ctx: ScraperContext) => scrapePupille() },
   { slug: "rheingau-musikfestival", run: (_ctx: ScraperContext) => scrapeRheingauFestival() },
   { slug: "rls-hessen", run: (_ctx: ScraperContext) => scrapeRlsHessen() },
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
@@ -210,6 +216,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 export {
   scrapeAlteOper,
   scrapeAndreasKoehs,
+  scrapeArthouseKinos,
   scrapeAutorenbuchhandlungMarx,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
@@ -259,6 +266,7 @@ export {
   scrapeLandinsichtBuchladen,
   scrapeLandungsbruecken,
   scrapeLiteraturhaus,
+  scrapeMalsehn,
   scrapeMousonturm,
   scrapeMuseumsFrankfurt,
   scrapeMusikschuleFrankfurt,
@@ -271,6 +279,7 @@ export {
   scrapePapagenoMusiktheater,
   scrapePfalzDe,
   scrapePolytechnische,
+  scrapePupille,
   scrapeRheingauFestival,
   scrapeRlsHessen,
   scrapeRoemerberggespraeche,
