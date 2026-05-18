@@ -136,7 +136,7 @@ function isoDate(day: string, monthName: string, year: string): string | null {
 function labelsForKind(kind: string): ScrapedLabel[] {
   const k = kind.toLowerCase();
   if (k === "buch") return [{ label: "talk:lesung", confidence: 0.85, classifier: "upstream-category" }];
-  if (k === "kino") return [{ label: "museum:film", confidence: 0.9, classifier: "upstream-category" }];
+  if (k === "kino") return [{ label: "film:cinema", confidence: 0.9, classifier: "upstream-category" }];
   if (k === "kunst") return [{ label: "museum:ausstellung", confidence: 0.85, classifier: "upstream-category" }];
   if (k === "konzert") return [{ label: "music:classical", confidence: 0.85, classifier: "upstream-category" }];
   if (k === "vortrag") return [{ label: "talk:vortrag", confidence: 0.85, classifier: "upstream-category" }];
