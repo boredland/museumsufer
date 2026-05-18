@@ -490,7 +490,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
           {s.tmdb_id ? (
             <a
               class="icon-btn icon-btn--tmdb"
-              href={`https://www.themoviedb.org/movie/${s.tmdb_id}`}
+              href={`https://www.themoviedb.org/${s.tmdb_kind ?? "movie"}/${s.tmdb_id}`}
               target="_blank"
               rel="noopener"
               aria-label="TMDb"

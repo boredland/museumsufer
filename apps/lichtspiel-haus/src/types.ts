@@ -53,6 +53,9 @@ export interface Screening {
   venue_room?: string;
   /** Director, performers, Q&A guest — free-form from the scraper. */
   credits?: string;
+  /** English-language synopsis from TMDb. Picked by the front-end when the
+   *  visitor's locale is `en`; otherwise the German `description` wins. */
+  description_en?: string;
   /** Audience-facing version markers parsed from title/description. */
   version?: Version;
   /** Original language of the print. */
@@ -61,9 +64,13 @@ export interface Screening {
   format?: Format;
   /** Series this screening belongs to (Nippon Connection, Udo Kier, …). */
   series?: SeriesRef;
-  /** TMDb movie id (when the hub enrichment found a match). Front-end uses
-   *  it to deep-link to themoviedb.org/movie/{id} from the screening card. */
+  /** TMDb id (when the hub enrichment found a match). Front-end uses it
+   *  to deep-link to themoviedb.org/{tmdb_kind}/{tmdb_id} from the
+   *  screening card. */
   tmdb_id?: number;
+  /** "movie" or "tv" — TV match catches MET Opera HD broadcasts and
+   *  similar stage-show recordings indexed under TMDb's TV side. */
+  tmdb_kind?: "movie" | "tv";
 }
 
 export interface ScrapeData {
