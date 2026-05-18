@@ -27,6 +27,7 @@ import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
+import { scrapeAstorFrankfurt } from "./venues/astor-frankfurt";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
@@ -123,6 +124,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
   { slug: "arthouse-kinos-frankfurt", run: (_ctx: ScraperContext) => scrapeArthouseKinos() },
+  { slug: "astor-frankfurt", run: (_ctx: ScraperContext) => scrapeAstorFrankfurt() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -219,6 +221,7 @@ export {
   scrapeAlteOper,
   scrapeAndreasKoehs,
   scrapeArthouseKinos,
+  scrapeAstorFrankfurt,
   scrapeAutorenbuchhandlungMarx,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
