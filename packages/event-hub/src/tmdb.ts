@@ -129,7 +129,7 @@ export async function enrichFilmPosters(
     const key = cacheKey(title, year);
 
     let entry = opts.cache[key];
-    let hadCacheHit = key in opts.cache;
+    const hadCacheHit = key in opts.cache;
 
     if (!hadCacheHit) {
       if (!apiKey || live >= maxLookups) {
