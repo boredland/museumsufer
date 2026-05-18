@@ -36,6 +36,7 @@ async function main(): Promise<void> {
     proxy,
     tmdbApiKey: process.env.TMDB_API_KEY,
     tmdbCache,
+    deeplApiKeys: process.env.DEEPL_API_KEYS,
   });
   await writeFile(resolve(root, "data/events.ts"), generateModule(next), "utf8");
   log(`wrote data/events.ts — ${next.events.length} events`);

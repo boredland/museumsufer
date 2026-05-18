@@ -20,6 +20,11 @@ export interface RunOptions {
    *  is responsible for loading + persisting it; the runner mutates it in
    *  place. */
   tmdbCache?: TmdbCache;
+  /** Optional DeepL API key(s), comma-separated. When set, TMDb cache
+   *  entries with a German overview but no English one get translated
+   *  DE→EN as a fallback so apps still have bilingual descriptions for
+   *  older European arthouse titles TMDb hasn't translated. */
+  deeplApiKeys?: string;
 }
 
 const DEFAULT_CONCURRENCY = 8;
@@ -94,7 +99,12 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   }
 
   if (opts.tmdbCache) {
-    await enrichFilmPosters(events, { apiKey: opts.tmdbApiKey, cache: opts.tmdbCache, log });
+    await enrichFilmPosters(events, {
+      apiKey: opts.tmdbApiKey,
+      cache: opts.tmdbCache,
+      deeplApiKeys: opts.deeplApiKeys,
+      log,
+    });
   }
 
   events.sort(
