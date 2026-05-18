@@ -14,6 +14,45 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.hfmdk-frankfurt.de";
 const GRAPHQL_ENDPOINT = "https://hfmdk-cs.e-fork.net/graphql";
+
+// Per-event coordinates for HfMDK's recurring external venues. Without
+// these the runner falls back to the campus coordinate so a Hamlet at
+// Nationaltheater Mannheim would still look Frankfurt-local. Anything
+// outside the matched prefixes keeps the campus fallback.
+const VENUE_COORDS: ReadonlyArray<readonly [RegExp, readonly [number, number]]> = [
+  // Mannheim
+  [/^Nationaltheater Mannheim/i, [49.4889, 8.4795]],
+  // Wiesbaden
+  [/^Staatstheater Wiesbaden/i, [50.0843, 8.2393]],
+  // Mainz
+  [/^Staatstheater Mainz/i, [50.001, 8.2696]],
+  // Darmstadt
+  [/St\.\s*Ludwig.*Darmstadt|Innenstadtkirche.*Darmstadt/i, [49.8717, 8.6515]],
+  // Gießen — outside the hub geofence (maxLat 50.45) so these will drop;
+  // we still emit the real coord rather than the campus fallback.
+  [/^Stadttheater Gießen/i, [50.5829, 8.6776]],
+  // Rheingau
+  [/^Kloster Eberbach/i, [50.0468, 8.048]],
+  // Bad Homburg / Friedrichsdorf
+  [/Burgholzhausen/i, [50.2503, 8.6536]],
+  // Frankfurt external campuses / venues that don't already overlap a
+  // sibling scraper's source_slug coord.
+  [/Künstler\W*innenhaus Mousonturm|^Mousonturm/i, [50.1183, 8.7019]],
+  [/^Palmengarten/i, [50.1241, 8.6584]],
+  [/^Holzhausenschlösschen/i, [50.1289, 8.6764]],
+  [/^Frankfurt LAB/i, [50.113, 8.7016]],
+  [/^Goethe Universität/i, [50.1262, 8.6679]],
+  [/^KunstKulturKirche Allerheiligen/i, [50.1156, 8.6911]],
+];
+
+function resolveVenueCoords(ort: string | null): readonly [number, number] | null {
+  if (!ort) return null;
+  for (const [re, coords] of VENUE_COORDS) {
+    if (re.test(ort)) return coords;
+  }
+  return null;
+}
+
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 const THROTTLE_MS = 200;
 const PAGE_SIZE = 50;
@@ -175,7 +214,9 @@ function transform(raw: HfmdkEvent, date: string, start: Date): CanonicalScraped
   const slug = alias ? alias.replace(/^\/+/, "").replace(/^veranstaltung\//, "") : `hfmdk-${raw.nid}`;
   const detailUrl = normalizeUrl(alias, BASE);
 
-  const venueRoom = splitVenueRoom(raw.fieldOrt?.name?.trim() ?? null);
+  const ort = raw.fieldOrt?.name?.trim() ?? null;
+  const venueRoom = splitVenueRoom(ort);
+  const venueCoords = resolveVenueCoords(ort);
 
   const { subtitle, performers, description } = extractContent(raw.fieldText, title);
 
@@ -208,6 +249,8 @@ function transform(raw: HfmdkEvent, date: string, start: Date): CanonicalScraped
     price_max: priceMin,
     performers,
     venue_room: venueRoom,
+    lat: venueCoords ? venueCoords[0] : null,
+    lon: venueCoords ? venueCoords[1] : null,
     labels,
   };
 }

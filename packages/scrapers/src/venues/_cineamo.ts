@@ -1,4 +1,4 @@
-import { todayIso } from "@museumsufer/core/date";
+import { toBerlinDate, toBerlinTime, todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const API_BASE = "https://api.cineamo.com";
@@ -66,11 +66,16 @@ async function scrapeCinema(cinema: CineamoCinema, today: string): Promise<Venue
   const events: CanonicalScrapedEvent[] = [];
   for (const show of showings) {
     if (!show.startDatetime || !show.name) continue;
-    const [date, timeFull] = show.startDatetime.split("T");
-    if (!date || date < today) continue;
+    // Cineamo serialises startDatetime in UTC ("…Z"); convert to Berlin
+    // local so 17:00 CEST stops landing as 15:00 in the feed.
+    const start = new Date(show.startDatetime);
+    if (Number.isNaN(start.getTime())) continue;
+    const date = toBerlinDate(start);
+    if (date < today) continue;
     if (show.state && show.state !== "scheduled") continue;
-    const time = timeFull ? timeFull.slice(0, 5) : null;
-    const endTime = show.endDatetime?.includes("T") ? show.endDatetime.split("T")[1].slice(0, 5) : null;
+    const time = toBerlinTime(start);
+    const endParsed = show.endDatetime ? new Date(show.endDatetime) : null;
+    const endTime = endParsed && !Number.isNaN(endParsed.getTime()) ? toBerlinTime(endParsed) : null;
 
     const dub: string[] = [];
     if (show.isOriginalLanguage) dub.push("OV");
