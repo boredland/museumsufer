@@ -16,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "lichtspiel-haus-db",
-      "database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE"
+      "database_id": "fb231e7f-2dfe-4eb1-860e-6c9cf2c65de2"
     }
   ],
   "triggers": {
