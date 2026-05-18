@@ -5,403 +5,6 @@ export const SCRAPE_DATA: ScrapeData = {
   screenings: [
     {
       cinema_slug: "cinema-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/der-verlorene-mann-49631/",
-      id: 2102080224,
-      slug: "38811",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/cinema-frankfurt?mode=widget&target=self&showId=38811",
-      time: "13:15",
-      title: "Der verlorene Mann",
-    },
-    {
-      cinema_slug: "cinema-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/glennkill-ein-schafskrimi-49633/",
-      id: 3078612840,
-      slug: "38763",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/cinema-frankfurt?mode=widget&target=self&showId=38763",
-      time: "13:15",
-      title: "Glennkill: Ein Schafskrimi",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/paris-murder-mystery/0/0/xRcu5Llv3j6WAxVhrL80kn41eE7J9SJc5p3g7FfI6cg~",
-      end_time: "16:15",
-      id: 3013097904,
-      image_url: "https://frankfurt.premiumkino.de/movie/2965/f168537ad3b2138b1cce5e39897d97ec",
-      slug: "xRcu5Llv3j6WAxVhrL80kn41eE7J9SJc5p3g7FfI6cg~",
-      subtitle: "2025 · 107 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/paris-murder-mystery/0/0/xRcu5Llv3j6WAxVhrL80kn41eE7J9SJc5p3g7FfI6cg~",
-      time: "14:00",
-      title: "Paris Murder Mystery",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/F_WZ0O7wT_NN62CdoBamoocAQo0610BTY29Zku_E_H8~",
-      end_time: "16:45",
-      id: 1396266328,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "F_WZ0O7wT_NN62CdoBamoocAQo0610BTY29Zku_E_H8~",
-      subtitle: "2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/F_WZ0O7wT_NN62CdoBamoocAQo0610BTY29Zku_E_H8~",
-      time: "14:15",
-      title: "Der Teufel trägt Prada 2",
-    },
-    {
-      cinema_slug: "capitol-mainz",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-mainz.de/filme/meine-freundin-conni-abenteuer-mit-kranich-klaus-50199/",
-      id: 2138447356,
-      slug: "14510",
-      ticket_url:
-        "https://www.kinoheld.de/kino/mainz/capitol-mainz?mode=widget&target=self&rb=1&change=0&layout=movies&showId=14510",
-      time: "14:15",
-      title: "Meine Freundin Conni - Abenteuer mit Kranich Klaus",
-    },
-    {
-      cinema_slug: "harmonie-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/das-drama-noch-mal-auf-anfang-49304/",
-      id: 617614672,
-      slug: "22366",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=22366",
-      time: "15:45",
-      title: "Das Drama - Noch mal auf Anfang",
-    },
-    {
-      cinema_slug: "capitol-mainz",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-mainz.de/filme/der-verlorene-mann-49675/",
-      id: 791097756,
-      slug: "14530",
-      ticket_url:
-        "https://www.kinoheld.de/kino/mainz/capitol-mainz?mode=widget&target=self&rb=1&change=0&layout=movies&showId=14530",
-      time: "16:00",
-      title: "Der verlorene Mann",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/b5DZ2gw9WotIQfHyMt74O-hws85Ut8-_ikNr7pKQsLw~",
-      end_time: "19:10",
-      id: 2550292888,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
-      slug: "b5DZ2gw9WotIQfHyMt74O-hws85Ut8-_ikNr7pKQsLw~",
-      subtitle: "2025 · 149 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/b5DZ2gw9WotIQfHyMt74O-hws85Ut8-_ikNr7pKQsLw~",
-      time: "16:15",
-      title: "Nürnberg",
-    },
-    {
-      cinema_slug: "eldorado-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/meine-freundin-conni-abenteuer-mit-kranich-klaus-49644/",
-      id: 3960464804,
-      slug: "202460",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/eldorado-arthouse-kino?mode=widget&target=self&showId=202460",
-      time: "16:15",
-      title: "Meine Freundin Conni - Abenteuer mit Kranich Klaus",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/zMnt5K4VwTUhg07gY4qioQ63pGTGHHXKU0WOR4ZdO4o~",
-      end_time: "19:05",
-      id: 653867604,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
-      slug: "zMnt5K4VwTUhg07gY4qioQ63pGTGHHXKU0WOR4ZdO4o~",
-      subtitle: "OV · 2026 · 127 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/zMnt5K4VwTUhg07gY4qioQ63pGTGHHXKU0WOR4ZdO4o~",
-      time: "16:30",
-      title: "Michael",
-      version: "OV",
-    },
-    {
-      cinema_slug: "harmonie-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/nachbeben-49637/",
-      id: 4073018420,
-      slug: "22382",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=22382",
-      time: "16:30",
-      title: "Nachbeben",
-    },
-    {
-      cinema_slug: "kino-kelkheim",
-      date: "2026-05-18",
-      detail_url:
-        "https://www.kinoheld.de/kino/kelkheim-taunus/kino-kelkheim/film/la-femme-la-plus-riche-du-monde-die-reichste-frau-der-welt-68f85ec4a58a3",
-      id: 3689892056,
-      slug: "125260101",
-      subtitle: "121 min",
-      ticket_url:
-        "https://booking.cinetixx.de/frontend/index.html?cinemaId=2382252145&showId=3530396665&bgswitch=false&resize=false",
-      time: "16:30",
-      title: "Die reichste Frau der Welt",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/I3yvqda1K5B9J0JRE-D4QFh1GrtDxKCenE-2vIckoXA~",
-      end_time: "19:20",
-      id: 4029187980,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
-      slug: "I3yvqda1K5B9J0JRE-D4QFh1GrtDxKCenE-2vIckoXA~",
-      subtitle: "2026 · 127 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/I3yvqda1K5B9J0JRE-D4QFh1GrtDxKCenE-2vIckoXA~",
-      time: "16:45",
-      title: "Michael",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/CtcSp4TPiqXt82mnmnlMKZKgMJJ3XFxgtqlYiipfnJM~",
-      end_time: "19:25",
-      id: 2667191504,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "CtcSp4TPiqXt82mnmnlMKZKgMJJ3XFxgtqlYiipfnJM~",
-      subtitle: "OV · 2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/CtcSp4TPiqXt82mnmnlMKZKgMJJ3XFxgtqlYiipfnJM~",
-      time: "17:00",
-      title: "Der Teufel trägt Prada 2",
-      version: "OV",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/6NaV_KnwtVOh9XwyA0aOwQy5A-shyxciitzKI7BrUMs~",
-      end_time: "20:00",
-      id: 2688920936,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "6NaV_KnwtVOh9XwyA0aOwQy5A-shyxciitzKI7BrUMs~",
-      subtitle: "2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/6NaV_KnwtVOh9XwyA0aOwQy5A-shyxciitzKI7BrUMs~",
-      time: "17:30",
-      title: "Der Teufel trägt Prada 2",
-    },
-    {
-      cinema_slug: "malsehn",
-      date: "2026-05-18",
-      description: "Von Valéry Carnoy, Belgien / Frankreich 2025, 94 Min. mehr",
-      detail_url: "https://malsehnkino.de/index.php?section=week&movieID=106570&date=2026-05-18&time=17:45",
-      id: 1890321608,
-      slug: "106570-2026-05-18-1745",
-      subtitle: "französische OmU",
-      time: "17:45",
-      title: "WILD FOXES",
-      version: "OmU",
-    },
-    {
-      cinema_slug: "filmforum-hoechst",
-      date: "2026-05-18",
-      description:
-        "Barbara Loden | US 1970 | FSK 12 | 103 Min. | OmU Wanda, unerfüllte Hausfrau und Mutter, weist eines Tages alle Verpflichtungen von sich und lässt sich ziellos durch die Kohlegebiete des ruralen Pennsylvanias treiben. Der in einem dokumentarisch anmutenden Direct-Cinema-Stil gedrehte Independentfilm gilt einerseits als archetypisch feministisch, andererseits als eigenwilliges unfassbares Unikat.",
-      detail_url: "https://filmforum-hoechst.com/film/klassiker-wanda/2026-05-18/",
-      id: 2363886163,
-      image_url: "https://filmforum-hoechst.com/wp-content/uploads/2026/04/01-Wanda-Grandfilm-web-e1776872501373.jpg",
-      slug: "10001850",
-      time: "18:30",
-      title: "Klassiker: Wanda",
-      version: "OmU",
-    },
-    {
-      cinema_slug: "harmonie-frankfurt",
-      date: "2026-05-18",
-      detail_url: "https://www.arthouse-kinos.de/filme/fremont-47442/",
-      id: 4269898847,
-      slug: "21089",
-      ticket_url:
-        "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=21089",
-      time: "18:30",
-      title: "Fremont",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/qldtUJViRkqa8riBu8DnqHyCuobvogH4mC1ueeA_7SY~",
-      end_time: "22:05",
-      id: 157884840,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
-      slug: "qldtUJViRkqa8riBu8DnqHyCuobvogH4mC1ueeA_7SY~",
-      subtitle: "OmU · 2026 · 127 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/qldtUJViRkqa8riBu8DnqHyCuobvogH4mC1ueeA_7SY~",
-      time: "19:30",
-      title: "Michael",
-      version: "OmU",
-    },
-    {
-      cinema_slug: "kino-kelkheim",
-      date: "2026-05-18",
-      detail_url:
-        "https://www.kinoheld.de/kino/kelkheim-taunus/kino-kelkheim/film/la-femme-la-plus-riche-du-monde-die-reichste-frau-der-welt-68f85ec4a58a3",
-      id: 1245024176,
-      slug: "125260103",
-      subtitle: "121 min",
-      ticket_url:
-        "https://booking.cinetixx.de/frontend/index.html?cinemaId=2382252145&showId=3526473634&bgswitch=false&resize=false",
-      time: "19:30",
-      title: "Die reichste Frau der Welt",
-    },
-    {
-      cinema_slug: "malsehn",
-      date: "2026-05-18",
-      description: "Von Anna Cazenave Cambet, Frankreich 2025, 133 Min. mehr",
-      detail_url: "https://malsehnkino.de/index.php?section=week&movieID=102842&date=2026-05-18&time=19:30",
-      id: 1945780592,
-      slug: "102842-2026-05-18-1930",
-      subtitle: "französische OmU",
-      time: "19:30",
-      title: "LOVE ME TENDER",
-      version: "OmU",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/X08NS1Lpz4EGCdZvkB35eSYprMjat9xbTvM6KZJmBmM~",
-      end_time: "22:20",
-      id: 3978555816,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
-      slug: "X08NS1Lpz4EGCdZvkB35eSYprMjat9xbTvM6KZJmBmM~",
-      subtitle: "2026 · 127 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/X08NS1Lpz4EGCdZvkB35eSYprMjat9xbTvM6KZJmBmM~",
-      time: "19:45",
-      title: "Michael",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/WpxO0gvvwaIY_87M271udPyxRL1F1YIOiFhq6kCF2uU~",
-      end_time: "22:25",
-      id: 516008320,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "WpxO0gvvwaIY_87M271udPyxRL1F1YIOiFhq6kCF2uU~",
-      subtitle: "OV · 2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/WpxO0gvvwaIY_87M271udPyxRL1F1YIOiFhq6kCF2uU~",
-      time: "20:00",
-      title: "Der Teufel trägt Prada 2",
-      version: "OV",
-    },
-    {
-      cinema_slug: "kino-koeppern",
-      date: "2026-05-18",
-      detail_url: "https://www.kinokoeppern.de/",
-      id: 37446200,
-      image_url: "https://www.kinokoeppern.de/src/filmposter/frau.jpg",
-      slug: "Die reichste Frau der Welt|2026-05-18|20:00",
-      subtitle: "122 min",
-      time: "20:00",
-      title: "Die reichste Frau der Welt",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/karuppu/0/0/W3LNXMtzqhtrIL_uVF9FRotAx8vEqiQFatCu9iPiooA~",
-      end_time: "23:15",
-      id: 1495685300,
-      image_url: "https://frankfurt.premiumkino.de/movie/1790/94d1f7abef81ce4424ff83e770fd87fa",
-      slug: "W3LNXMtzqhtrIL_uVF9FRotAx8vEqiQFatCu9iPiooA~",
-      subtitle: "OmU · 2026 · 150 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/karuppu/0/0/W3LNXMtzqhtrIL_uVF9FRotAx8vEqiQFatCu9iPiooA~",
-      time: "20:15",
-      title: "Karuppu",
-      version: "OmU",
-    },
-    {
-      cinema_slug: "kronberger-lichtspiele",
-      date: "2026-05-18",
-      detail_url:
-        "https://www.kinoheld.de/kino/kronberg-im-taunus/kronberger-lichtspiele/film/der-teufel-traegt-prada-2-694b7ef3d1c96",
-      id: 59481302,
-      slug: "123665977",
-      subtitle: "119 min",
-      ticket_url:
-        "https://booking.cinetixx.de/frontend/index.html?cinemaId=2378882978&showId=3476557295&bgswitch=false&resize=false",
-      time: "20:15",
-      title: "Der Teufel trägt Prada 2",
-    },
-    {
-      cinema_slug: "pupille",
-      date: "2026-05-18",
-      description:
-        "Ein Dorf am Maracaibo See muss durch Umweltverschmutzung um den Fortbestand kämpfen. Staatlich gebilligten Praktiken der Bestechung und Einschüchterung erschweren die Lage,",
-      detail_url: "https://pupille.org/screenings/953",
-      id: 629084320,
-      image_url: "https://pupille.org/static-files/bilder/filmbilder/Once_Upon_a_Time_in_Venezuela.jpg",
-      slug: "953",
-      subtitle: "R: Anabel Rodríguez Ríos · 2020 · 99 min",
-      time: "20:15",
-      title: "Once Upon a Time in Venezuela",
-    },
-    {
-      cinema_slug: "filmforum-hoechst",
-      date: "2026-05-18",
-      description:
-        "Adrian Goiginger | AT/DE 2026 | FSK 12 | 120 Min. Barbara und Heli nehmen als professionelle Clowns das Leben nicht allzu ernst und können auch über das Lachen, was misslingt. Als Barbara jedoch wie aus dem Nichts durch einen Unfall ihre gesamte Familie samt den zwei kleinen Kindern verliert, bricht die Welt über ihr zusammen.",
-      detail_url: "https://filmforum-hoechst.com/film/vier-minus-drei/2026-05-18/",
-      id: 2881004572,
-      image_url:
-        "https://filmforum-hoechst.com/wp-content/uploads/2026/04/Vier-minus-drei-5A©Alamode-Film_Polyfilm-scaled.jpg-Kopie-e1776872568244.jpg",
-      slug: "10001843",
-      time: "20:30",
-      title: "Vier minus drei",
-    },
-    {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-18",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/aD7cCVfghY9PqsPswbU9lFYnbiqEnTjPuukHdvOK9lo~",
-      end_time: "23:10",
-      id: 287840936,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "aD7cCVfghY9PqsPswbU9lFYnbiqEnTjPuukHdvOK9lo~",
-      subtitle: "2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/aD7cCVfghY9PqsPswbU9lFYnbiqEnTjPuukHdvOK9lo~",
-      time: "20:45",
-      title: "Der Teufel trägt Prada 2",
-    },
-    {
-      cinema_slug: "malsehn",
-      date: "2026-05-18",
-      description:
-        "Dokumentarfilm von Miri Ian Gossing und Lina Sieckmann, Deutschland / Niederlande 2025, 121 Min. mehr",
-      detail_url: "https://malsehnkino.de/index.php?section=week&movieID=106624&date=2026-05-18&time=22:00",
-      id: 3617158100,
-      slug: "106624-2026-05-18-2200",
-      time: "22:00",
-      title: "SIRENS CALL",
-    },
-    {
-      cinema_slug: "cinema-frankfurt",
       date: "2026-05-19",
       detail_url: "https://www.arthouse-kinos.de/filme/der-verlorene-mann-49631/",
       id: 2152973704,
@@ -462,7 +65,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-astronaut-project-hail-mary/0/0/3ZImi7CJkcwiExfZ3QaKrXAhYmefMSH1kPHR9cm53qE~",
       end_time: "19:05",
       id: 2079406866,
-      image_url: "https://frankfurt.premiumkino.de/movie/1796/717d6e16693949ff93da3fbbe048ffdb",
       slug: "3ZImi7CJkcwiExfZ3QaKrXAhYmefMSH1kPHR9cm53qE~",
       subtitle: "2026 · 157 min",
       ticket_url:
@@ -499,7 +101,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/93c500gwAeE9AE8bloTlz8Y-yuJW5miFwCbowefL0S4~",
       end_time: "19:05",
       id: 757184208,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "93c500gwAeE9AE8bloTlz8Y-yuJW5miFwCbowefL0S4~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -528,7 +129,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/CZ1iCU_OsLAFRpz1BFXJD26IKLEntatLrUK1X-hM8jE~",
       end_time: "19:20",
       id: 4160997296,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "CZ1iCU_OsLAFRpz1BFXJD26IKLEntatLrUK1X-hM8jE~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -543,7 +143,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/xD9GCmR6darP3_9Ti3nFAftIOpqeZnxTeQnpKfH-hMw~",
       end_time: "19:25",
       id: 2162434510,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "xD9GCmR6darP3_9Ti3nFAftIOpqeZnxTeQnpKfH-hMw~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -592,7 +191,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/vfuY-R_sZyCV2QcMkIKD5uEvqG65nKCtZH_Stz3fs1E~",
       end_time: "20:00",
       id: 330560910,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "vfuY-R_sZyCV2QcMkIKD5uEvqG65nKCtZH_Stz3fs1E~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -668,7 +266,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/dxs-bEk2puWMs6_SNxf28MrPMyvsxpAaajF5szgMc64~",
       end_time: "22:25",
       id: 1331473976,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "dxs-bEk2puWMs6_SNxf28MrPMyvsxpAaajF5szgMc64~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -760,7 +357,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/oqYYpAtkSqBhGY-pc3Uq5QuccTQb3zbDcnmQYZ6E7l0~",
       end_time: "22:20",
       id: 1601537796,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "oqYYpAtkSqBhGY-pc3Uq5QuccTQb3zbDcnmQYZ6E7l0~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -789,7 +385,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/wWkSXZxVw30QWP7Z03m50dHGvlb0azjuFq2eWM1dVRc~",
       end_time: "22:25",
       id: 2224722918,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "wWkSXZxVw30QWP7Z03m50dHGvlb0azjuFq2eWM1dVRc~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -816,7 +411,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/WSr8xSkTHtW8UepSXJRT7jrbQ1lrOH4pnAcubUU_hlk~",
       end_time: "22:50",
       id: 981613868,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "WSr8xSkTHtW8UepSXJRT7jrbQ1lrOH4pnAcubUU_hlk~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -855,7 +449,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/hsRonQM6DbZT8PsiFDVG8IqoIXqhkJ9u7OW2AjmcZwM~",
       end_time: "23:10",
       id: 2503261592,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "hsRonQM6DbZT8PsiFDVG8IqoIXqhkJ9u7OW2AjmcZwM~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -931,7 +524,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/9tFQ19eZVjMtZ3Cart2bGRZPEDoy6BVSmybrifHP5EM~",
       end_time: "16:00",
       id: 1063570984,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "9tFQ19eZVjMtZ3Cart2bGRZPEDoy6BVSmybrifHP5EM~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -946,7 +538,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/3FS243ZIaw9WG9vuL33aruqdFa9S0vZKu86Y17mC-9Y~",
       end_time: "16:20",
       id: 691839056,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "3FS243ZIaw9WG9vuL33aruqdFa9S0vZKu86Y17mC-9Y~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -962,7 +553,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/kSgmeIwgEUFGOj9yUzfRry6TeNDer9wD8MDDYAqxdWc~",
       end_time: "16:25",
       id: 574079904,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "kSgmeIwgEUFGOj9yUzfRry6TeNDer9wD8MDDYAqxdWc~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -978,7 +568,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/zvZPbbGUCR0--5hwd7c2LNhtnhyR1FyQRtf3pgGv6cw~",
       end_time: "16:55",
       id: 1092442156,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "zvZPbbGUCR0--5hwd7c2LNhtnhyR1FyQRtf3pgGv6cw~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1067,7 +656,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/IQ_aUJLXn03f8QA4YsNJk2UcIAXAk9nNe5gmxZl5Qwg~",
       end_time: "19:00",
       id: 467173096,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "IQ_aUJLXn03f8QA4YsNJk2UcIAXAk9nNe5gmxZl5Qwg~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -1107,7 +695,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/ktld6s3wfR2BoFPkH5MIjrcZLhfioe9joidJPsKtQz0~",
       end_time: "19:40",
       id: 3145329216,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "ktld6s3wfR2BoFPkH5MIjrcZLhfioe9joidJPsKtQz0~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1145,7 +732,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/eTr6x-x7ldervVw9iMXBeXjAzVh8BjRSwyYWVlonTZs~",
       end_time: "19:55",
       id: 1741770248,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "eTr6x-x7ldervVw9iMXBeXjAzVh8BjRSwyYWVlonTZs~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1212,7 +798,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/LYFeWFMJaG4ru9_lTulSc1jiGp81qIO7NmaqaTFkPNg~",
       end_time: "22:00",
       id: 4003679416,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "LYFeWFMJaG4ru9_lTulSc1jiGp81qIO7NmaqaTFkPNg~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -1227,7 +812,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/iFTniBXqY4txirIvuiaPEDrnX1GFYB_ZLcRMmIUe9jE~",
       end_time: "22:15",
       id: 1708828896,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "iFTniBXqY4txirIvuiaPEDrnX1GFYB_ZLcRMmIUe9jE~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -1265,7 +849,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/uAu1v-aPmY79xabf5c4xI8wQVc8E5vC_-wte5ef27oU~",
       end_time: "22:35",
       id: 3958334008,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "uAu1v-aPmY79xabf5c4xI8wQVc8E5vC_-wte5ef27oU~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -1330,7 +913,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/xNv30Lsv5g9CqL7rwp0vqNM69xVRrBVaP3BGK2SfWjs~",
       end_time: "22:55",
       id: 4158081512,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "xNv30Lsv5g9CqL7rwp0vqNM69xVRrBVaP3BGK2SfWjs~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -1387,7 +969,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/iQRfhO0E2dncmvAt-eog_HNlBeiHCO2WuAsBtH5Uswo~",
       end_time: "23:25",
       id: 2437922532,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "iQRfhO0E2dncmvAt-eog_HNlBeiHCO2WuAsBtH5Uswo~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1476,7 +1057,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/B1hXGjWyF3aWUBJQJF6jduE8Irrw4qPkh_GvKq9AHvw~",
       end_time: "16:05",
       id: 1339840884,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "B1hXGjWyF3aWUBJQJF6jduE8Irrw4qPkh_GvKq9AHvw~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -1491,7 +1071,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/cXZY_4wZ-CZ5m4OjxN9iGgIQKOtP4tjhktaekGw4iB4~",
       end_time: "16:15",
       id: 4126262904,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "cXZY_4wZ-CZ5m4OjxN9iGgIQKOtP4tjhktaekGw4iB4~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -1506,7 +1085,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/v0iRI-paCJVqyqLqA6Ey1i4hdi0cTZhXDFKWn-LaqeE~",
       end_time: "16:40",
       id: 591496736,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "v0iRI-paCJVqyqLqA6Ey1i4hdi0cTZhXDFKWn-LaqeE~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -1532,7 +1110,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/SRurOgRvXOXH-_rM6XRISlnMiTBIgpgF9D9WEzQh1ig~",
       end_time: "16:45",
       id: 1987495396,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "SRurOgRvXOXH-_rM6XRISlnMiTBIgpgF9D9WEzQh1ig~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -1548,7 +1125,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/0v_yTO46S6mBxqWHzFYZu3AR_aetMnMcVKUh3A0tcV0~",
       end_time: "17:10",
       id: 720653680,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "0v_yTO46S6mBxqWHzFYZu3AR_aetMnMcVKUh3A0tcV0~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1585,7 +1161,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/bh2-9fkiD9uxpXFTLlWH0v7U5-ekTb1BNyzP3RhtmKg~",
       end_time: "19:05",
       id: 1858757764,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "bh2-9fkiD9uxpXFTLlWH0v7U5-ekTb1BNyzP3RhtmKg~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -1600,7 +1175,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/lFypH-RI-uVlQea5YmwDN-9SypdEBqHzw1Q1NLk53aA~",
       end_time: "19:15",
       id: 1919880411,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "lFypH-RI-uVlQea5YmwDN-9SypdEBqHzw1Q1NLk53aA~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -1615,7 +1189,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/HUzmOd-5AWg1phT8SpIwBRL0ec78Voy7zwz3eXLtsiA~",
       end_time: "19:40",
       id: 3229851432,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "HUzmOd-5AWg1phT8SpIwBRL0ec78Voy7zwz3eXLtsiA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1653,7 +1226,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/hvSSr_9FZX5TZlWmCna1Zg8qCAWxt85vlqLTPRzxE_k~",
       end_time: "19:55",
       id: 1255957558,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "hvSSr_9FZX5TZlWmCna1Zg8qCAWxt85vlqLTPRzxE_k~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -1680,7 +1252,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/nsqQebyqmLaiFJfRKKU2n5jjIQrETj5bTKx2C9Gvb1U~",
       end_time: "20:10",
       id: 4127565338,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "nsqQebyqmLaiFJfRKKU2n5jjIQrETj5bTKx2C9Gvb1U~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -1757,7 +1328,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/f8cjF-O9OgeWE7iWJIFNQ_e1ijIIBAUa6ozHXLYHUAA~",
       end_time: "22:00",
       id: 2610383554,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "f8cjF-O9OgeWE7iWJIFNQ_e1ijIIBAUa6ozHXLYHUAA~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -1825,7 +1395,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/WwjpW_wZ_xnzaQawjPRkdNgCcgymeUi0fEvGATki_VU~",
       end_time: "22:25",
       id: 2474049279,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "WwjpW_wZ_xnzaQawjPRkdNgCcgymeUi0fEvGATki_VU~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -1870,7 +1439,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/FA9g3wGXXJQkcF35u8Pv5ENZMyHFtcU4ABx6DoNo_Jg~",
       end_time: "22:55",
       id: 2489481670,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "FA9g3wGXXJQkcF35u8Pv5ENZMyHFtcU4ABx6DoNo_Jg~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -1899,7 +1467,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/VeAZgdUzCvD1N1mob487R_lbm-O-LpIL1v7tctPhjf0~",
       end_time: "23:05",
       id: 2394355280,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "VeAZgdUzCvD1N1mob487R_lbm-O-LpIL1v7tctPhjf0~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -1949,7 +1516,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/IJVp8DP638ofhnESX_UO9ByjPpXXd12PZXBL2YSzkHo~",
       end_time: "23:25",
       id: 3807592784,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "IJVp8DP638ofhnESX_UO9ByjPpXXd12PZXBL2YSzkHo~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2026,7 +1592,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/lGLSTEfDs6-yQsA95AXVleALKAm9_Bbs5bvpYSee6Ak~",
       end_time: "16:00",
       id: 3152250144,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "lGLSTEfDs6-yQsA95AXVleALKAm9_Bbs5bvpYSee6Ak~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2041,7 +1606,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/DDX7DQCwaZQlv_dyvYBmjdxnZox-J5zJ9yIObC_U4Z4~",
       end_time: "16:40",
       id: 2251666264,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "DDX7DQCwaZQlv_dyvYBmjdxnZox-J5zJ9yIObC_U4Z4~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -2067,7 +1631,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/zELZT_N2a-8Ws4v3YKK4FvYaqbvZbGYsffxEY8do9Yo~",
       end_time: "17:10",
       id: 846278800,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "zELZT_N2a-8Ws4v3YKK4FvYaqbvZbGYsffxEY8do9Yo~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2094,7 +1657,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/HvfAcCcwa8F9h07TNPO8Au1wmLgI74vohTXvv9GQdU8~",
       end_time: "17:50",
       id: 2162585672,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "HvfAcCcwa8F9h07TNPO8Au1wmLgI74vohTXvv9GQdU8~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -2109,7 +1671,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/NDTAk5zZLAhMYjN7yfpyF1G0-YRSObWOrnu1gYLbDGI~",
       end_time: "18:15",
       id: 710061236,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "NDTAk5zZLAhMYjN7yfpyF1G0-YRSObWOrnu1gYLbDGI~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2157,7 +1718,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/HNM6lvPSHvMGC519B56HCZKb74MwK2Bvsl3kiZAi3s8~",
       end_time: "19:05",
       id: 3065856340,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "HNM6lvPSHvMGC519B56HCZKb74MwK2Bvsl3kiZAi3s8~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -2202,7 +1762,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/4FAD3uNoiz86ekBs3dgU6Gs5pgIh_7tZi5h1VEkQ1aE~",
       end_time: "19:40",
       id: 1856078936,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "4FAD3uNoiz86ekBs3dgU6Gs5pgIh_7tZi5h1VEkQ1aE~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2264,7 +1823,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/5ER4TQu0ee9ejNrZkQ7VAv790KxtzGKCFJ26UOSpGnc~",
       end_time: "20:00",
       id: 3269708886,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "5ER4TQu0ee9ejNrZkQ7VAv790KxtzGKCFJ26UOSpGnc~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2328,7 +1886,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/H0USpdXb6uedtWRz2cwts8pttYpQ_d5ISqZ9ou5U7-0~",
       end_time: "20:55",
       id: 3215509472,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "H0USpdXb6uedtWRz2cwts8pttYpQ_d5ISqZ9ou5U7-0~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -2344,7 +1901,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/ECFWf3edq5Cyu37doV21S34YKGvK6Mi5gFcn9mP81uU~",
       end_time: "21:40",
       id: 4115657712,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "ECFWf3edq5Cyu37doV21S34YKGvK6Mi5gFcn9mP81uU~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -2360,7 +1916,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/uNgY2yN7RCw3qNtOKItauZiIBpxm6XTNttuCAGfufkM~",
       end_time: "22:05",
       id: 2324833916,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "uNgY2yN7RCw3qNtOKItauZiIBpxm6XTNttuCAGfufkM~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -2404,21 +1959,6 @@ export const SCRAPE_DATA: ScrapeData = {
       title: "Star Wars: The Mandalorian and Grogu",
     },
     {
-      cinema_slug: "astor-frankfurt",
-      date: "2026-05-22",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/v2i5KYUNG4cg36CBKonYdDVynAepiyKIeSKpxzQ9nBE~",
-      end_time: "22:25",
-      id: 1375442944,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
-      slug: "v2i5KYUNG4cg36CBKonYdDVynAepiyKIeSKpxzQ9nBE~",
-      subtitle: "2026 · 119 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/v2i5KYUNG4cg36CBKonYdDVynAepiyKIeSKpxzQ9nBE~",
-      time: "20:00",
-      title: "Der Teufel trägt Prada 2",
-    },
-    {
       cinema_slug: "dff-deutsches-filminstitut-filmmuseum",
       date: "2026-05-22",
       description:
@@ -2433,6 +1973,17 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://booking.cinetixx.de/frontend/index.html?cinemaId=2038440885&showId=3502995470&bgswitch=false&resize=false",
       time: "20:00",
       title: "URLAUB AUF EHRENWORT",
+    },
+    {
+      cinema_slug: "filmpalast-hofheim",
+      date: "2026-05-22",
+      detail_url: "https://www.filmpalast-hofheim.de/de/film/1314481m",
+      end_time: "21:53",
+      id: 1632942670,
+      slug: "43690180",
+      ticket_url: "https://kinotickets.express/hofheim-filmpalast/booking/14696",
+      time: "20:00",
+      title: "Der Teufel trägt Prada 2",
     },
     {
       cinema_slug: "orfeos-erben",
@@ -2515,7 +2066,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/wqVh3gW83q7iY2pLtTGmD2pF68OZUBXT-1hiseov5SE~",
       end_time: "23:25",
       id: 2938976176,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "wqVh3gW83q7iY2pLtTGmD2pF68OZUBXT-1hiseov5SE~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2541,7 +2091,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/nnRU8c29Nk7a9XXz_HOfRgtKurHTArzNXjRe7mNoHMc~",
       end_time: "00:30",
       id: 1896959274,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "nnRU8c29Nk7a9XXz_HOfRgtKurHTArzNXjRe7mNoHMc~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2568,7 +2117,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/bVBu1Sz4c4WDJpHD5HYZeU5hE1CT7RbAkz_nFgD-Yoc~",
       end_time: "00:55",
       id: 2237640264,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "bVBu1Sz4c4WDJpHD5HYZeU5hE1CT7RbAkz_nFgD-Yoc~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -2613,7 +2161,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/eZnur5SeHWcDlYmAHnFPoiHF4S1jinMW7CGEDQGcF8g~",
       end_time: "01:20",
       id: 598027800,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "eZnur5SeHWcDlYmAHnFPoiHF4S1jinMW7CGEDQGcF8g~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -2628,7 +2175,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/JGMAVCj1iud-YZIvWGr1gVU3n0xpGD-dPoagVHi4TGA~",
       end_time: "01:40",
       id: 4205894456,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "JGMAVCj1iud-YZIvWGr1gVU3n0xpGD-dPoagVHi4TGA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2698,7 +2244,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/DAr-LT5oNZq1vT-7nWBVHa1XrQ4Ey5eirxP2xnnvfMc~",
       end_time: "14:30",
       id: 2461725552,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "DAr-LT5oNZq1vT-7nWBVHa1XrQ4Ey5eirxP2xnnvfMc~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -2714,7 +2259,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/QRvURuwBUGmBttspfxEtAwpjZXSzr1-I-xL9EDg3iVM~",
       end_time: "15:25",
       id: 2288116042,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "QRvURuwBUGmBttspfxEtAwpjZXSzr1-I-xL9EDg3iVM~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2740,7 +2284,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/P6u69EU88fhs9SDQzSNIJGyHwZqU9-05qyT3H_-m8t4~",
       end_time: "15:40",
       id: 3593015190,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "P6u69EU88fhs9SDQzSNIJGyHwZqU9-05qyT3H_-m8t4~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2755,7 +2298,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/kSPTpmre9gwXierGHBqE_XcJ3rgDWgJxjkzm5DogpTM~",
       end_time: "16:10",
       id: 1918133760,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "kSPTpmre9gwXierGHBqE_XcJ3rgDWgJxjkzm5DogpTM~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -2781,7 +2323,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/mZPpxXpA2tpfYwuffaHsXsDZjy1yUhGHy-6iy-5qUXs~",
       end_time: "16:15",
       id: 2497426574,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "mZPpxXpA2tpfYwuffaHsXsDZjy1yUhGHy-6iy-5qUXs~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2862,7 +2403,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/_KquJJd27MksqxDbhuGFPGU4ZEj9Nxfj65YE7WPgvQk~",
       end_time: "17:45",
       id: 1696716074,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "_KquJJd27MksqxDbhuGFPGU4ZEj9Nxfj65YE7WPgvQk~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2888,7 +2428,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/XdG6GXYv21VdLm6Iv7c_HQFWbB6qobszngugnyllW_I~",
       end_time: "18:25",
       id: 249956112,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "XdG6GXYv21VdLm6Iv7c_HQFWbB6qobszngugnyllW_I~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -2937,7 +2476,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/8XVtuqZULwGgi8QDXIA-Lbs3Drs7_V3ptrQuEJrysms~",
       end_time: "18:50",
       id: 1029937272,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "8XVtuqZULwGgi8QDXIA-Lbs3Drs7_V3ptrQuEJrysms~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -2964,7 +2502,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/_bxpLoxuYQgnhPvElzUOsnjR1jLIegH0URRsDGCldvk~",
       end_time: "19:00",
       id: 894950950,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "_bxpLoxuYQgnhPvElzUOsnjR1jLIegH0URRsDGCldvk~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -2990,7 +2527,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/9FtXf5wZ5swT44Q26i2S_Dt4dZ3AQQfUxo53RPi-bdM~",
       end_time: "19:40",
       id: 922097998,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "9FtXf5wZ5swT44Q26i2S_Dt4dZ3AQQfUxo53RPi-bdM~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3106,7 +2642,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/m2DeA5ptssFjpcPoQGDo-gLYiW6jxkwXdLYEi0l5wn4~",
       end_time: "20:55",
       id: 2095148496,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "m2DeA5ptssFjpcPoQGDo-gLYiW6jxkwXdLYEi0l5wn4~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -3121,7 +2656,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/EszwD2U4XJfN4VhcUr0oIhV1AyBcaXE5dGumFLzFqXY~",
       end_time: "21:40",
       id: 4145489012,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "EszwD2U4XJfN4VhcUr0oIhV1AyBcaXE5dGumFLzFqXY~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -3152,7 +2686,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/gC64MNl9SLr6hiuWz4JFeZgtABmwxrOS9gCtJ5YCbO8~",
       end_time: "22:05",
       id: 4171982824,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "gC64MNl9SLr6hiuWz4JFeZgtABmwxrOS9gCtJ5YCbO8~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -3201,7 +2734,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/e2LsdiM9G0sORGQIjyXG01cPY2a1EZ7nMGuO6yfKfss~",
       end_time: "22:25",
       id: 1730475528,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "e2LsdiM9G0sORGQIjyXG01cPY2a1EZ7nMGuO6yfKfss~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -3274,7 +2806,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/8tgYbFLUXdBZNyDbjT4FLr2CaZsLG7R0YVBJIqucBlg~",
       end_time: "23:25",
       id: 3245155528,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "8tgYbFLUXdBZNyDbjT4FLr2CaZsLG7R0YVBJIqucBlg~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3300,7 +2831,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/7g7t30Iiix51ljwkX-vo4q_Zm3lSdau9Y6U2Zw-wZqY~",
       end_time: "00:30",
       id: 3447623312,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "7g7t30Iiix51ljwkX-vo4q_Zm3lSdau9Y6U2Zw-wZqY~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -3327,7 +2857,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/nwn73zwXTkdJbHPS2HoAc9PJelf42RTqrJSEvGCzdBc~",
       end_time: "00:55",
       id: 2198618806,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "nwn73zwXTkdJbHPS2HoAc9PJelf42RTqrJSEvGCzdBc~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -3343,7 +2872,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/SegHF-rm2Wwl_os1t4rwcNpTx-vlfCFdPsHa1hSF5cg~",
       end_time: "01:15",
       id: 3182378958,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "SegHF-rm2Wwl_os1t4rwcNpTx-vlfCFdPsHa1hSF5cg~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -3359,7 +2887,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/eKdusZktPmHNyVkCtltLH5572fpOSnz8mGCaEyixbOE~",
       end_time: "01:40",
       id: 3904142992,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "eKdusZktPmHNyVkCtltLH5572fpOSnz8mGCaEyixbOE~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3441,7 +2968,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/AmNo0iyu3FRIb_ML0N_1PpEeYfjo_3Zv7bFNrG4X20A~",
       end_time: "15:25",
       id: 897374224,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "AmNo0iyu3FRIb_ML0N_1PpEeYfjo_3Zv7bFNrG4X20A~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3456,7 +2982,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/X2_lF_fynq_X40ZOnMCVhpLnHz37ODMuCM5CvOCSJwY~",
       end_time: "15:40",
       id: 471441096,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "X2_lF_fynq_X40ZOnMCVhpLnHz37ODMuCM5CvOCSJwY~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -3482,7 +3007,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/lG4jTFiETyM1Tz2KTeys2loaVXLgJxvI7O-lfCY4tK0~",
       end_time: "16:10",
       id: 2232523184,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "lG4jTFiETyM1Tz2KTeys2loaVXLgJxvI7O-lfCY4tK0~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -3498,7 +3022,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/_UP1DoURgBjhKMQEuQQGU-Ea3CQRidNXq8DmpaZIo20~",
       end_time: "16:20",
       id: 3895629164,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "_UP1DoURgBjhKMQEuQQGU-Ea3CQRidNXq8DmpaZIo20~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -3556,7 +3079,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/IUgixGM2QQFOb1KgqID7cwz5Apj8N4l_yeoRGBy5MLI~",
       end_time: "16:55",
       id: 3685621376,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "IUgixGM2QQFOb1KgqID7cwz5Apj8N4l_yeoRGBy5MLI~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3676,7 +3198,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/54d78OJZ0Q8PLU4j1_dJ_dvC4o4GJY20NHWNEzOuzmQ~",
       end_time: "18:35",
       id: 3288853960,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "54d78OJZ0Q8PLU4j1_dJ_dvC4o4GJY20NHWNEzOuzmQ~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -3734,7 +3255,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/VliLvAJTl16jFAfQTW0UqED0LQadu0wm9UnBMzMjk5U~",
       end_time: "19:10",
       id: 3213190144,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "VliLvAJTl16jFAfQTW0UqED0LQadu0wm9UnBMzMjk5U~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -3750,7 +3270,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/QuFveCbfRzpIoENo-NtJr3ZgLbltDt-SCTyJ_8Z4bvI~",
       end_time: "19:15",
       id: 3485928286,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "QuFveCbfRzpIoENo-NtJr3ZgLbltDt-SCTyJ_8Z4bvI~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -3776,7 +3295,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/EojvMeQqKjmKo1wIw_qYWotzkuOgWDAHTEvRAiAmOdk~",
       end_time: "19:25",
       id: 845433824,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "EojvMeQqKjmKo1wIw_qYWotzkuOgWDAHTEvRAiAmOdk~",
       subtitle: "OmU · 2026 · 119 min",
       ticket_url:
@@ -3832,7 +3350,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/3hm-0bI6VAwGWIV_a8mDz89f_kPnA-mCcnp3T50XWBA~",
       end_time: "20:10",
       id: 1790533952,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "3hm-0bI6VAwGWIV_a8mDz89f_kPnA-mCcnp3T50XWBA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3896,7 +3413,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/c20iDN1jS5Ai_rd-rVyhhuB3pb6Tv3v-80YdcZ5IZio~",
       end_time: "21:30",
       id: 2155096068,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "c20iDN1jS5Ai_rd-rVyhhuB3pb6Tv3v-80YdcZ5IZio~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -3924,7 +3440,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/aOil4bzyti5i1v4KAhybxoSt1AsXCd_c2BY8KW9AzNI~",
       end_time: "22:10",
       id: 3732261136,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "aOil4bzyti5i1v4KAhybxoSt1AsXCd_c2BY8KW9AzNI~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -3962,7 +3477,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/Hgdu4PVku4wqJUJLMuCuVH_57ve0ySTVP3j2MjHT5d8~",
       end_time: "22:25",
       id: 2519676624,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "Hgdu4PVku4wqJUJLMuCuVH_57ve0ySTVP3j2MjHT5d8~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -4006,7 +3520,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/heAZpFZtrfFWHw34tGzeE5Q-Ydnuj5VyuM7rQ3gD-jc~",
       end_time: "22:50",
       id: 3919156656,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "heAZpFZtrfFWHw34tGzeE5Q-Ydnuj5VyuM7rQ3gD-jc~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4072,7 +3585,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/6KnSSWcy2VMkEFsPfd2Bokq6-QoOLNOxlxwFhb72cYI~",
       end_time: "23:25",
       id: 1006883054,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "6KnSSWcy2VMkEFsPfd2Bokq6-QoOLNOxlxwFhb72cYI~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -4194,7 +3706,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/DG8grStAh-NVDD_PKXIa-nrYh7r3saSdbNq3yMDwFks~",
       end_time: "14:40",
       id: 1612808320,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "DG8grStAh-NVDD_PKXIa-nrYh7r3saSdbNq3yMDwFks~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4209,7 +3720,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/twmYfA-i7if6-GiIfbqkzUF03BK1Rrd_LprC6qzpvjo~",
       end_time: "15:30",
       id: 1694465968,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "twmYfA-i7if6-GiIfbqkzUF03BK1Rrd_LprC6qzpvjo~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -4235,7 +3745,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/lY2tVraEY-xEnsAvaY_loF6Zl-je2PiEmiZ9SdEaxY0~",
       end_time: "16:10",
       id: 936433680,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "lY2tVraEY-xEnsAvaY_loF6Zl-je2PiEmiZ9SdEaxY0~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4250,7 +3759,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/th64JhQiBRta4BmxZgW9I0l8nQuDSqDsdVuji9ieHLI~",
       end_time: "16:15",
       id: 749846656,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "th64JhQiBRta4BmxZgW9I0l8nQuDSqDsdVuji9ieHLI~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -4299,7 +3807,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/50F1UMrcFKCLSxwLc9HuYxoEWf2bKrv_gcj13_6_5oA~",
       end_time: "16:50",
       id: 623371052,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "50F1UMrcFKCLSxwLc9HuYxoEWf2bKrv_gcj13_6_5oA~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4347,7 +3854,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/PaXJHIs5opu4HSVkT4yubg9Z7znLRDDlSFO5ZV3vDhA~",
       end_time: "17:40",
       id: 3571982632,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "PaXJHIs5opu4HSVkT4yubg9Z7znLRDDlSFO5ZV3vDhA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4395,7 +3901,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/SLCzbeQ2PBDNg54_6QjIBcJhS0VKjTNIKae45LgY2ak~",
       end_time: "18:40",
       id: 2981839638,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "SLCzbeQ2PBDNg54_6QjIBcJhS0VKjTNIKae45LgY2ak~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -4432,7 +3937,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/hRa1lYpHC0SZZ-LDuT_jRu1KKeRJbaOe_ClYR7ce3PQ~",
       end_time: "19:35",
       id: 3242104580,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "hRa1lYpHC0SZZ-LDuT_jRu1KKeRJbaOe_ClYR7ce3PQ~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4472,7 +3976,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/by4bKyEGoV6ZPmgPm0gRrWuoVoqZNMmun5tFL_fKyG8~",
       end_time: "19:55",
       id: 594170112,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "by4bKyEGoV6ZPmgPm0gRrWuoVoqZNMmun5tFL_fKyG8~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -4488,7 +3991,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/E04I3h6UP0H5zKtD3xaW1dyGgwp-nQgt6_jTT0fj7Fw~",
       end_time: "20:05",
       id: 2761975556,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "E04I3h6UP0H5zKtD3xaW1dyGgwp-nQgt6_jTT0fj7Fw~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -4515,7 +4017,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/HlW9oCYWZ6JqG1-uPy3UbeLTiP2dWMkNt3UrynW81QI~",
       end_time: "20:40",
       id: 583204664,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "HlW9oCYWZ6JqG1-uPy3UbeLTiP2dWMkNt3UrynW81QI~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4556,7 +4057,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/kDBcp7Nn2siw76ER-ZEkTk-ZQ0N2Jf2XZ-SvUtIkNk4~",
       end_time: "22:00",
       id: 3405365432,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "kDBcp7Nn2siw76ER-ZEkTk-ZQ0N2Jf2XZ-SvUtIkNk4~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -4605,7 +4105,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/dvhJDZmjd163qoABtSN5BXswc0y9BmlVB2726AG0waM~",
       end_time: "22:50",
       id: 3338760748,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "dvhJDZmjd163qoABtSN5BXswc0y9BmlVB2726AG0waM~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4633,7 +4132,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/Xn3QyEVnezavrLfypfshK7bTMv9my2B1Ek5hoTIFdZs~",
       end_time: "23:00",
       id: 2429705872,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "Xn3QyEVnezavrLfypfshK7bTMv9my2B1Ek5hoTIFdZs~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -4695,7 +4193,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/8T9FB9XmpDpEWIDn3mbhH1QM_lFtaRz3qvkrmDSjfFs~",
       end_time: "23:25",
       id: 4241494312,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "8T9FB9XmpDpEWIDn3mbhH1QM_lFtaRz3qvkrmDSjfFs~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4721,7 +4218,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/xSt9P031MnW33KB5m0IUsnHGhZJFJqAYab1qCshVBGE~",
       end_time: "23:35",
       id: 107259988,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "xSt9P031MnW33KB5m0IUsnHGhZJFJqAYab1qCshVBGE~",
       subtitle: "OmU · 2026 · 127 min",
       ticket_url:
@@ -4759,7 +4255,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/7db-EIuIxy4zoCupuybXo0m8AR6EJbO1HZ02JKBZTmw~",
       end_time: "16:05",
       id: 3573372552,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "7db-EIuIxy4zoCupuybXo0m8AR6EJbO1HZ02JKBZTmw~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4774,7 +4269,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/ZJaI2VYOfDubK9USo98n7j34wFtScSWQPHSzGr2pShg~",
       end_time: "16:10",
       id: 1227605248,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "ZJaI2VYOfDubK9USo98n7j34wFtScSWQPHSzGr2pShg~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4789,7 +4283,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/Do0PIDQFFrD7o_zQthgtKqoI03qoQ2__KFt9iCQf2dg~",
       end_time: "16:40",
       id: 904332068,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "Do0PIDQFFrD7o_zQthgtKqoI03qoQ2__KFt9iCQf2dg~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -4826,7 +4319,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/ivElwKqeNzpQwgShuUzt_Q0ST2ZnJQbXT1Uu0Gx_qOU~",
       end_time: "16:45",
       id: 409452142,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "ivElwKqeNzpQwgShuUzt_Q0ST2ZnJQbXT1Uu0Gx_qOU~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -4841,7 +4333,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/ZRavs-lFkzIIRMvFuxf973QqmViFaOX1xS20xXT0uLA~",
       end_time: "17:10",
       id: 1558840154,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "ZRavs-lFkzIIRMvFuxf973QqmViFaOX1xS20xXT0uLA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4889,7 +4380,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/8jyC4lRk9qvSNbWP1xVe2rdrCcuEi9Yywb49SIKyeTI~",
       end_time: "19:05",
       id: 2208392660,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "8jyC4lRk9qvSNbWP1xVe2rdrCcuEi9Yywb49SIKyeTI~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -4905,7 +4395,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/0uX9sGzFxpujrGYc2VL1XGT5DJGUjQL2lfaMmumc88Y~",
       end_time: "19:20",
       id: 3453318544,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "0uX9sGzFxpujrGYc2VL1XGT5DJGUjQL2lfaMmumc88Y~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -4932,7 +4421,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/qiGONOqVDq6wgNU5CBiciB693sIj5hHG9T4ZjseD86U~",
       end_time: "19:40",
       id: 1722272208,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "qiGONOqVDq6wgNU5CBiciB693sIj5hHG9T4ZjseD86U~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -4970,7 +4458,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/GeImrBQYHSLwYQbVqAnNu8zu_Ubx0xocONj7IP_WQh4~",
       end_time: "19:55",
       id: 1855618154,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "GeImrBQYHSLwYQbVqAnNu8zu_Ubx0xocONj7IP_WQh4~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -4997,7 +4484,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/QbFWWbXXWnZv4ErpixzDCoVRKODvI7-eXCuDSogyFJI~",
       end_time: "20:00",
       id: 4032734328,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "QbFWWbXXWnZv4ErpixzDCoVRKODvI7-eXCuDSogyFJI~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -5035,7 +4521,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/MOPINtEkAblg5Q_sXF1qoW3-6SUb-hsVGeYtsfQ6UbE~",
       end_time: "22:00",
       id: 2432688767,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "MOPINtEkAblg5Q_sXF1qoW3-6SUb-hsVGeYtsfQ6UbE~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -5104,7 +4589,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/_YGRlhBBaG5_NZcpuBw4IUTUeLUfgQ8IEiyjf8zWc7w~",
       end_time: "22:35",
       id: 199032020,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "_YGRlhBBaG5_NZcpuBw4IUTUeLUfgQ8IEiyjf8zWc7w~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -5119,7 +4603,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/perfect-blue/0/0/9xXr2x4zCmUh0AcmqeYE-uXWDmpvI3EPt2cq2BUPbTM~",
       end_time: "22:05",
       id: 3314477744,
-      image_url: "https://frankfurt.premiumkino.de/movie/7895/b8af443396976311a2a21ae46bd149ba",
       slug: "9xXr2x4zCmUh0AcmqeYE-uXWDmpvI3EPt2cq2BUPbTM~",
       subtitle: "OmU · 1997 · 81 min",
       ticket_url:
@@ -5163,7 +4646,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/BlgqE8sZm50Oe68Mvo0dPK8vWPFwFSL--BhOW-GxnEk~",
       end_time: "23:10",
       id: 4029221120,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "BlgqE8sZm50Oe68Mvo0dPK8vWPFwFSL--BhOW-GxnEk~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5213,7 +4695,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/WoY9lY57x_L65eoCKNsvCGlXvSjVOECIQP56cy3f4Sw~",
       end_time: "23:10",
       id: 1042952054,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "WoY9lY57x_L65eoCKNsvCGlXvSjVOECIQP56cy3f4Sw~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -5267,7 +4748,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/RE5bFUU6MXqG3Zy0Ww1R5JzaGzReBeyPyr48BcP-qso~",
       end_time: "16:05",
       id: 101110456,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "RE5bFUU6MXqG3Zy0Ww1R5JzaGzReBeyPyr48BcP-qso~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -5282,7 +4762,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/_8Aj7YmuKdksGmbPsrip6SGzhFhLUWoS-VSQPCXqRGQ~",
       end_time: "16:10",
       id: 1667587290,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "_8Aj7YmuKdksGmbPsrip6SGzhFhLUWoS-VSQPCXqRGQ~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5297,7 +4776,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/nuernberg/0/0/_Gcd90sZuRKUh-XxSUwYFZZepgIa0wjlebFiq0DjrXc~",
       end_time: "16:40",
       id: 205741744,
-      image_url: "https://frankfurt.premiumkino.de/movie/7921/de7aca4f34623f57f3759b2f96e4c2d5",
       slug: "_Gcd90sZuRKUh-XxSUwYFZZepgIa0wjlebFiq0DjrXc~",
       subtitle: "2025 · 149 min",
       ticket_url:
@@ -5323,7 +4801,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/6JNWTvKYtA1odVU33LfnHZ--seac4ltbF586NzOMBb4~",
       end_time: "16:45",
       id: 852586546,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "6JNWTvKYtA1odVU33LfnHZ--seac4ltbF586NzOMBb4~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -5338,7 +4815,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/plO2vVtiAt71AA-MToOzCy8-jas3M4u7lw9uV5gVio0~",
       end_time: "17:10",
       id: 1343462582,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "plO2vVtiAt71AA-MToOzCy8-jas3M4u7lw9uV5gVio0~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5390,7 +4866,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/7iQO-iPYzLwMhKjaWOFoqXt5ZELM2xPDiP3fG0tVt4A~",
       end_time: "19:05",
       id: 3769869740,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "7iQO-iPYzLwMhKjaWOFoqXt5ZELM2xPDiP3fG0tVt4A~",
       subtitle: "OV · 2026 · 127 min",
       ticket_url:
@@ -5400,17 +4875,13 @@ export const SCRAPE_DATA: ScrapeData = {
       version: "OV",
     },
     {
-      cinema_slug: "astor-frankfurt",
+      cinema_slug: "filmpalast-hofheim",
       date: "2026-05-27",
-      detail_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/6t3WxpMZtJJn4rk1otyhtuUNUBIL8mVWXFp4Lpm6Z1E~",
-      end_time: "19:20",
-      id: 478467288,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
-      slug: "6t3WxpMZtJJn4rk1otyhtuUNUBIL8mVWXFp4Lpm6Z1E~",
-      subtitle: "2026 · 127 min",
-      ticket_url:
-        "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/6t3WxpMZtJJn4rk1otyhtuUNUBIL8mVWXFp4Lpm6Z1E~",
+      detail_url: "https://www.filmpalast-hofheim.de/de/film/936075m",
+      end_time: "18:52",
+      id: 3604890036,
+      slug: "43690170",
+      ticket_url: "https://kinotickets.express/hofheim-filmpalast/booking/14760",
       time: "16:45",
       title: "Michael",
     },
@@ -5421,7 +4892,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/BDEASTxvTCH1DFngh8uizn_gOcHBrl6Dig1rt9PBNDA~",
       end_time: "19:40",
       id: 3752880640,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "BDEASTxvTCH1DFngh8uizn_gOcHBrl6Dig1rt9PBNDA~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5458,7 +4928,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/LwtI9b6r6tewn3x75qcZUtEqsTqYKMvmyEKzB2KbRb0~",
       end_time: "19:55",
       id: 1142434184,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "LwtI9b6r6tewn3x75qcZUtEqsTqYKMvmyEKzB2KbRb0~",
       subtitle: "OV · 2026 · 132 min",
       ticket_url:
@@ -5474,7 +4943,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/koM3--LVCbJMwXLVy5ie_YdwB4TpMnCcC-zKEunuGqs~",
       end_time: "20:00",
       id: 310730966,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "koM3--LVCbJMwXLVy5ie_YdwB4TpMnCcC-zKEunuGqs~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -5529,7 +4997,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/Yw_sRB6lKNP2-2c7M21iR9e86p6935xhuI7KFMslcpU~",
       end_time: "22:00",
       id: 101376016,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "Yw_sRB6lKNP2-2c7M21iR9e86p6935xhuI7KFMslcpU~",
       subtitle: "OV · 2026 · 119 min",
       ticket_url:
@@ -5591,7 +5058,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/michael/0/0/1gzQQBrUTOUE5eTWkw-1k53PL95Ei_H9oWgqVgrMP60~",
       end_time: "22:35",
       id: 2199863408,
-      image_url: "https://frankfurt.premiumkino.de/movie/8022/6728f9cfac9042b51e0035f2e4d18ba4",
       slug: "1gzQQBrUTOUE5eTWkw-1k53PL95Ei_H9oWgqVgrMP60~",
       subtitle: "2026 · 127 min",
       ticket_url:
@@ -5643,7 +5109,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/X_Ta6Ivwz25Eu3bsEONb-jczhPlZrO6BQK2GcQo5Y7I~",
       end_time: "22:55",
       id: 3645881656,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "X_Ta6Ivwz25Eu3bsEONb-jczhPlZrO6BQK2GcQo5Y7I~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5699,7 +5164,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/star-wars-the-mandalorian-und-grogu/0/0/IgVldYysuWSz-i71hcAd2ybkva_cpLfWHv1fvDNH8nw~",
       end_time: "23:10",
       id: 3715243816,
-      image_url: "https://frankfurt.premiumkino.de/movie/8746/0a054275deef320a1fb8f04af8014078",
       slug: "IgVldYysuWSz-i71hcAd2ybkva_cpLfWHv1fvDNH8nw~",
       subtitle: "2026 · 132 min",
       ticket_url:
@@ -5727,7 +5191,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/der-teufel-traegt-prada-2/0/0/YJA0SxEttUikdx56-QjrwEYYlDdYQnL3RKbsYLwSrgM~",
       end_time: "23:10",
       id: 798147238,
-      image_url: "https://frankfurt.premiumkino.de/movie/6177/6da8c4fcd87d2fdf2041bbebf628ad18",
       slug: "YJA0SxEttUikdx56-QjrwEYYlDdYQnL3RKbsYLwSrgM~",
       subtitle: "2026 · 119 min",
       ticket_url:
@@ -6040,7 +5503,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/el-ultimo-sueno-de-frida-y-diego-frank-met-2025-26/0/0/a9WUCpYDZHRX6OPJxgxS-s7WGt8QLH3zvS-iCbGpU3I~",
       end_time: "21:50",
       id: 3316890864,
-      image_url: "https://frankfurt.premiumkino.de/movie/5805/4474d032c9d52afb4f787ffac16f2ad9",
       slug: "a9WUCpYDZHRX6OPJxgxS-s7WGt8QLH3zvS-iCbGpU3I~",
       subtitle: "OmU · 2026 · 170 min",
       ticket_url:
@@ -6543,7 +6005,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/scary-movie/0/0/J8LkLpepdjFZ5h2evlrEAa4wu0MdnrbK6G7eVE7AWa8~",
       end_time: "21:30",
       id: 3962461332,
-      image_url: "https://frankfurt.premiumkino.de/movie/9746/c67b1152008f569335c0cd8a3631cbc4",
       slug: "J8LkLpepdjFZ5h2evlrEAa4wu0MdnrbK6G7eVE7AWa8~",
       subtitle: "2026 · 120 min",
       ticket_url:
@@ -6712,7 +6173,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/the-amazing-digital-circus-the-last-act/0/0/DmpjnVlHt6NzRu5iJEdyaq86tEuuErp1eyIbRSQb3m0~",
       end_time: "20:15",
       id: 2335862188,
-      image_url: "https://frankfurt.premiumkino.de/movie/6783/b06fb90d89681da06f841fb9f0ecb740",
       slug: "DmpjnVlHt6NzRu5iJEdyaq86tEuuErp1eyIbRSQb3m0~",
       subtitle: "OmU · 2026 · 93 min",
       ticket_url:
@@ -7027,7 +6487,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/the-amazing-digital-circus-the-last-act/0/0/rVkYpx72x8aBTKbmnaVnpLIgDm3ubwDomnba5NcMS0A~",
       end_time: "14:00",
       id: 2272631572,
-      image_url: "https://frankfurt.premiumkino.de/movie/6783/b06fb90d89681da06f841fb9f0ecb740",
       slug: "rVkYpx72x8aBTKbmnaVnpLIgDm3ubwDomnba5NcMS0A~",
       subtitle: "OmU · 2026 · 93 min",
       ticket_url:
@@ -8161,7 +7620,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/alpen-film-festival-2026-passion/0/0/pWMiZg6OiFVpmZUhtkiCSRbsEKgawY-hU-kxtbZek2w~",
       end_time: "17:30",
       id: 3353595888,
-      image_url: "https://frankfurt.premiumkino.de/movie/5915/4f9ac4ba929cbe971ce1d70f98fb16c8",
       slug: "pWMiZg6OiFVpmZUhtkiCSRbsEKgawY-hU-kxtbZek2w~",
       subtitle: "2025 · 105 min",
       ticket_url:
@@ -8641,7 +8099,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/geburtstagsgala-20-jahre-met-live-im-kino-met-2026-27/0/0/NsEUpG3VNKCsmjLpD-GF2C5GG-jLHCDOaH_0SXzmnI0~",
       end_time: "21:30",
       id: 1766313576,
-      image_url: "https://frankfurt.premiumkino.de/movie/7424/8056ac2ba377524b2d6f3af14e9c1ac0",
       slug: "NsEUpG3VNKCsmjLpD-GF2C5GG-jLHCDOaH_0SXzmnI0~",
       subtitle: "2026 · 150 min",
       ticket_url:
@@ -8667,7 +8124,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/cosi-fan-tutte-mozart-met-2026-27/0/0/kQTHJUb36RC5PQnZ8r5KuDJ0AynDqMelF3nTO5tg3rM~",
       end_time: "23:00",
       id: 1601745865,
-      image_url: "https://frankfurt.premiumkino.de/movie/7443/f1d497b53b5278c09b2bfeda2414d7e9",
       slug: "kQTHJUb36RC5PQnZ8r5KuDJ0AynDqMelF3nTO5tg3rM~",
       subtitle: "OmU · 2026 · 240 min",
       ticket_url:
@@ -8740,7 +8196,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/macbeth-verdi-met-2026-27/0/0/A5VUGzRYbzJssepLgJgFV8Ea-X2hOliwxhpOk19ul2M~",
       end_time: "22:30",
       id: 3391972968,
-      image_url: "https://frankfurt.premiumkino.de/movie/4126/5222acb2442d15aedba2716087c41b8a",
       slug: "A5VUGzRYbzJssepLgJgFV8Ea-X2hOliwxhpOk19ul2M~",
       subtitle: "OmU · 2026 · 210 min",
       ticket_url:
@@ -8859,7 +8314,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/la-fanciulla-del-west-puccini-met-2026-27/0/0/Mjts4LXU_CBdRLc7Lai2AySGG2B6dksiy9qVmArhhlk~",
       end_time: "22:15",
       id: 2838438528,
-      image_url: "https://frankfurt.premiumkino.de/movie/7098/6bf4dc4d06a7b3c7b9d8cbf5680abc8f",
       slug: "Mjts4LXU_CBdRLc7Lai2AySGG2B6dksiy9qVmArhhlk~",
       subtitle: "OmU · 2027 · 195 min",
       ticket_url:
@@ -8875,7 +8329,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/manon-massenet-met-2026-27/0/0/Xy4cd9NCMtbo1c61nVfbLdoHH8S9ozTo93Sgp3Pdz8U~",
       end_time: "22:25",
       id: 975611752,
-      image_url: "https://frankfurt.premiumkino.de/movie/3967/11b7c65ad43337240702288955a16e94",
       slug: "Xy4cd9NCMtbo1c61nVfbLdoHH8S9ozTo93Sgp3Pdz8U~",
       subtitle: "OmU · 2027 · 265 min",
       ticket_url:
@@ -8891,7 +8344,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/otello-verdi-met-2026-27/0/0/vRR7R9-Focgqp1GLoxXasHkqjuGrIidNsFJpj9EoRLo~",
       end_time: "22:20",
       id: 2651240220,
-      image_url: "https://frankfurt.premiumkino.de/movie/4302/cfb0b6a079e01ec4fd2cde7247d08f12",
       slug: "vRR7R9-Focgqp1GLoxXasHkqjuGrIidNsFJpj9EoRLo~",
       subtitle: "OmU · 2027 · 200 min",
       ticket_url:
@@ -8907,7 +8359,6 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://frankfurt.premiumkino.de/vorstellung/parsifal-wagner-met-2026-27/0/0/CJ4swCKdFCJ240jc6YQDwe2jNohyylhIVTRhip6YDVQ~",
       end_time: "00:05",
       id: 1787272872,
-      image_url: "https://frankfurt.premiumkino.de/movie/6656/fe817208c6569edf99c7d8c62b6e8d6d",
       slug: "CJ4swCKdFCJ240jc6YQDwe2jNohyylhIVTRhip6YDVQ~",
       subtitle: "2027 · 365 min",
       ticket_url:

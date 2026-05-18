@@ -897,10 +897,14 @@ function SiblingStrap({ tr }: { tr: Translations }) {
   );
 }
 
+/** Drop screenings whose listed showtime has already passed. Cinemas
+ *  schedule ~10–20 min of trailers, so "you can still walk in" makes
+ *  less sense here than for concert / theatre. Strict cutoff at the
+ *  printed start time. */
 function filterPastForToday(date: string, screenings: DayScreening[]): DayScreening[] {
   if (date !== todayIso()) return screenings;
   const { hour, minute } = berlinHourMinute();
-  const nowMin = hour * 60 + minute - 30;
+  const nowMin = hour * 60 + minute;
   return screenings.filter((s) => {
     if (!s.time) return true;
     const [hh, mm] = s.time.split(":");

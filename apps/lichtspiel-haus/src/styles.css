@@ -466,10 +466,19 @@ body::before {
      dark = lights down, the screen IS the colour source. */
   transition: filter 300ms ease, transform 300ms cubic-bezier(0.2, 0.6, 0.2, 1);
 }
-:root.light .poster__img,
-:root:not(.dark) .poster__img {
+/* Light-mode only: duotone on a brass-base via grayscale + multiply.
+   Selector matches when html.light is set OR (in light-prefers OS) html has
+   neither class. Dark mode lets full colour through — the screen IS the
+   colour source, and multiply on near-black wipes the image. */
+:root.light .poster__img {
   filter: grayscale(1) sepia(0.2) saturate(0.85) contrast(1.05);
   mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) .poster__img {
+    filter: grayscale(1) sepia(0.2) saturate(0.85) contrast(1.05);
+    mix-blend-mode: multiply;
+  }
 }
 .prog-entry__poster-link:hover .poster__img {
   filter: none;
