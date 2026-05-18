@@ -310,11 +310,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url:
         "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-i-am-the-river-the-river-is-me/",
       id: 1536891118,
+      image_url: "https://image.tmdb.org/t/p/w500/jMcwG5yjNdi6UG8xOZa0WTYg07E.jpg",
       slug: "senckenberg-naturmuseum|event|https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-i-am-the-river-the-river-is-me/",
       ticket_url:
         "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-i-am-the-river-the-river-is-me/",
       time: "19:00",
       title: "Dokuabende Rhein-Main: I am the River – the River is Me",
+      tmdb_id: 1254246,
     },
     {
       cinema_slug: "astor-frankfurt",
@@ -543,11 +545,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-05-19",
       detail_url: "https://www.arthouse-kinos.de/filme/schamlos-harmlos-love-me-tender-49004/",
       id: 3791426092,
+      image_url: "https://image.tmdb.org/t/p/w500/vCSBni2IrsrzF9rkqeYPw6HffDu.jpg",
       slug: "21845",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=21845",
       time: "20:45",
       title: "Schamlos Harmlos: Love Me Tender",
+      tmdb_id: 1290450,
     },
     {
       cinema_slug: "malsehn",
@@ -886,6 +890,7 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://booking.cinetixx.de/frontend/index.html?cinemaId=2280429231&amp;showId=3432760023&amp;bgswitch=false&amp;resize=false#/show/2280429231/3501896081",
       time: "18:00",
       title: "ICH VERTRAUE DIR MEINE FRAU AN (DF)",
+      tmdb_id: 168250,
       version: "DF",
     },
     {
@@ -900,6 +905,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "9291",
       time: "18:30",
       title: "Jubiläumsfilmreihe: Trois Couleurs: Bleu | Drei Farben: Blau",
+      tmdb_id: 108,
       version: "OmU",
     },
     {
@@ -1470,6 +1476,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "10001801",
       time: "18:30",
       title: "Dokumentarfilm des Monats: Siri Hustvedt – Dance Around the Self",
+      tmdb_id: 1616153,
       version: "OmU",
     },
     {
@@ -1883,6 +1890,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "10001821",
       time: "14:30",
       title: "Woodwalkers 2",
+      tmdb_id: 1278853,
     },
     {
       cinema_slug: "astor-frankfurt",
@@ -2908,6 +2916,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "9321",
       time: "17:00",
       title: "Jubiläumsfilmreihe: 200 Motels",
+      tmdb_id: 27645,
       version: "OV",
     },
     {
@@ -3038,6 +3047,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "10001827",
       time: "19:00",
       title: "Jubiläumsfilmreihe: Kill Bill: The Whole Bloody Affair",
+      tmdb_id: 414419,
       version: "OmU",
     },
     {
@@ -3357,10 +3367,12 @@ export const SCRAPE_DATA: ScrapeData = {
       description: "Dokumentarfilm von Léna Karbe, Deutschland / Frankreich 2025, 93 Min. mehr",
       detail_url: "https://malsehnkino.de/index.php?section=week&movieID=107047&date=2026-05-24&time=12:00",
       id: 3142601160,
+      image_url: "https://image.tmdb.org/t/p/w500/kXEmJJVu5dr1vdOrX8L1Obb0ysk.jpg",
       slug: "107047-2026-05-24-1200",
       subtitle: "russische OmU",
       time: "12:00",
       title: "INNERE EMIGRANTEN",
+      tmdb_id: 1523539,
       version: "OmU",
     },
     {
@@ -3618,6 +3630,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "10001822",
       time: "15:00",
       title: "Woodwalkers 2",
+      tmdb_id: 1278853,
     },
     {
       cinema_slug: "harmonie-frankfurt",
@@ -3889,6 +3902,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "9324",
       time: "18:30",
       title: "Jubiläumsfilmreihe: Manhattan",
+      tmdb_id: 696,
       version: "OmU",
     },
     {
@@ -4860,11 +4874,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-05-26",
       detail_url: "https://www.arthouse-kinos.de/filme/kinderwagenkino-is-this-thing-on-49006/",
       id: 2440782662,
+      image_url: "https://image.tmdb.org/t/p/w500/9jf0S7oUPyaKcKRgq3hRJ1jTNd0.jpg",
       slug: "21846",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=21846",
       time: "11:30",
       title: "Kinderwagenkino: Is This Thing On?",
+      tmdb_id: 1140498,
     },
     {
       cinema_slug: "cinema-frankfurt",
@@ -4945,11 +4961,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-05-26",
       detail_url: "https://www.arthouse-mainz.de/filme/seniorenkino-thelma-rache-war-nie-suesser-48756/",
       id: 1354014680,
+      image_url: "https://image.tmdb.org/t/p/w500/fmO80FrcE0EgqRLoaYPOOmUkJtI.jpg",
       slug: "14168",
       ticket_url:
         "https://www.kinoheld.de/kino/mainz/capitol-mainz?mode=widget&target=self&rb=1&change=0&layout=movies&showId=14168",
       time: "14:00",
       title: "SENIORENKINO: Thelma - Rache war nie süßer",
+      tmdb_id: 1051891,
     },
     {
       cinema_slug: "astor-frankfurt",
@@ -6116,6 +6134,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "10001802",
       time: "20:30",
       title: "Dokumentarfilm des Monats: Siri Hustvedt – Dance Around the Self",
+      tmdb_id: 1616153,
       version: "OmU",
     },
     {
@@ -6375,11 +6394,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-05-31",
       detail_url: "https://www.arthouse-mainz.de/filme/strickkino-glennkill-ein-schafskrimi-49557/",
       id: 1400036324,
+      image_url: "https://image.tmdb.org/t/p/w500/qgEactbiTRQjTdwtFhPAddsnUjN.jpg",
       slug: "14426",
       ticket_url:
         "https://www.kinoheld.de/kino/mainz/capitol-mainz?mode=widget&target=self&rb=1&change=0&layout=movies&showId=14426",
       time: "10:00",
       title: "STRICKKINO: Glennkill: Ein Schafskrimi",
+      tmdb_id: 1301421,
     },
     {
       cinema_slug: "cinema-frankfurt",
@@ -6500,6 +6521,7 @@ export const SCRAPE_DATA: ScrapeData = {
       slug: "9304",
       time: "17:30",
       title: "Jubiläumsfilmreihe: Toni Erdmann",
+      tmdb_id: 374475,
     },
     {
       cinema_slug: "cinema-frankfurt",
@@ -6806,11 +6828,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url: "https://www.filmpalast-hofheim.de/de/film/1057265m",
       end_time: "23:25",
       id: 4114031688,
+      image_url: "https://image.tmdb.org/t/p/w500/tQkUqSEj0z7t7gMwkxVHanI7JfP.jpg",
       slug: "43677815",
       subtitle: "OV · OmU",
       ticket_url: "https://kinotickets.express/hofheim-filmpalast/booking/14678",
       time: "20:45",
       title: "PREMIERE: PEDDI (Telugu engl. UT)",
+      tmdb_id: 1057265,
       version: "OmU",
     },
     {
@@ -6834,11 +6858,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-06-03",
       detail_url: "https://pupille.org/screenings/959",
       id: 650328472,
+      image_url: "https://image.tmdb.org/t/p/w500/6GLaVtXuYDF7uueaC475vglh21C.jpg",
       series: { slug: "nippon-connection-exf-f", name: "Nippon Connection + Exf F." },
       slug: "959",
       subtitle: "R: Yuko Asano · 1983 · 4 min",
       time: "21:00",
       title: "Aus der Isolation – Feministische Experimentalfilme: Daughter of the Moon",
+      tmdb_id: 893869,
     },
     {
       cinema_slug: "nippon-connection",
@@ -6907,11 +6933,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url: "https://www.filmpalast-hofheim.de/de/film/1057265m",
       end_time: "17:10",
       id: 2882938508,
+      image_url: "https://image.tmdb.org/t/p/w500/tQkUqSEj0z7t7gMwkxVHanI7JfP.jpg",
       slug: "43677802",
       subtitle: "OV · OmU",
       ticket_url: "https://kinotickets.express/hofheim-filmpalast/booking/14719",
       time: "14:30",
       title: "PEDDI (Telugu engl. UT)",
+      tmdb_id: 1057265,
       version: "OmU",
     },
     {
@@ -7358,11 +7386,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url: "https://www.filmpalast-hofheim.de/de/film/1057265m",
       end_time: "16:40",
       id: 3550158614,
+      image_url: "https://image.tmdb.org/t/p/w500/tQkUqSEj0z7t7gMwkxVHanI7JfP.jpg",
       slug: "43677801",
       subtitle: "OV · OmU",
       ticket_url: "https://kinotickets.express/hofheim-filmpalast/booking/14720",
       time: "14:00",
       title: "PEDDI (Telugu engl. UT)",
+      tmdb_id: 1057265,
       version: "OmU",
     },
     {
@@ -7442,6 +7472,7 @@ export const SCRAPE_DATA: ScrapeData = {
       subtitle: "R: Yoshitoshi SHINOMIYA · OmeU",
       time: "19:30",
       title: "A New Dawn 花緑青が明ける日に",
+      tmdb_id: 1279865,
       venue_room: "Mousonturm Saal",
       version: "OmeU",
     },
@@ -7516,11 +7547,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url:
         "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-tomorrow-die-welt-ist-voller-loesungen/",
       id: 3507928960,
+      image_url: "https://image.tmdb.org/t/p/w500/lU5nuopStcmau6g9JrVdiQbQ2tD.jpg",
       slug: "senckenberg-naturmuseum|event|https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-tomorrow-die-welt-ist-voller-loesungen/",
       ticket_url:
         "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-tomorrow-die-welt-ist-voller-loesungen/",
       time: "15:00",
       title: "Dokuabende Rhein-Main: Tomorrow – Die Welt ist voller Lösungen",
+      tmdb_id: 371492,
     },
     {
       cinema_slug: "eschborn-k",
@@ -7798,6 +7831,7 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://booking.cinetixx.de/frontend/index.html?cinemaId=2038440885&showId=3484861145&bgswitch=false&resize=false",
       time: "14:30",
       title: "Kurz für Klein und Groß: Lotte Reiniger",
+      tmdb_id: 377033,
     },
     {
       cinema_slug: "murnau-filmtheater",
@@ -7839,6 +7873,7 @@ export const SCRAPE_DATA: ScrapeData = {
       subtitle: "R: Ang LEE · 2000 · 120 min",
       time: "19:00",
       title: "Rumble Night #5: Michelle-Yeoh-Doublefeature, Teil 2: Tiger and Dragon",
+      tmdb_id: 146,
     },
     {
       cinema_slug: "caligari-wiesbaden",
@@ -8016,6 +8051,7 @@ export const SCRAPE_DATA: ScrapeData = {
         "https://booking.cinetixx.de/frontend/index.html?cinemaId=2038440885&showId=3484861169&bgswitch=false&resize=false",
       time: "15:00",
       title: "Kurz für Klein und Groß: Lotte Reiniger",
+      tmdb_id: 377033,
     },
     {
       cinema_slug: "murnau-filmtheater",
@@ -8359,11 +8395,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-06-21",
       detail_url: "https://www.arthouse-kinos.de/filme/strickclub-thelma-louise-49002/",
       id: 71543219,
+      image_url: "https://image.tmdb.org/t/p/w500/fKA0fMW9dMyS0yQn8lDj6zh25fL.jpg",
       slug: "202292",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/eldorado-arthouse-kino?mode=widget&target=self&showId=202292",
       time: "11:00",
       title: "Strickclub: Thelma & Louise",
+      tmdb_id: 1541,
     },
     {
       cinema_slug: "capitol-mainz",
@@ -8393,11 +8431,13 @@ export const SCRAPE_DATA: ScrapeData = {
       detail_url:
         "https://www.arthouse-kinos.de/filme/filmgespraech-ingeborg-bachmann-jemand-der-einmal-ich-war-50176/",
       id: 1528180992,
+      image_url: "https://image.tmdb.org/t/p/w500/qKJV8zX23FcoNM3Vx3jtU8S58F8.jpg",
       slug: "38738",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/cinema-frankfurt?mode=widget&target=self&showId=38738",
       time: "14:00",
       title: "Filmgespräch: Ingeborg Bachmann - Jemand, der einmal ich war",
+      tmdb_id: 1477087,
     },
     {
       cinema_slug: "murnau-filmtheater",
@@ -8461,11 +8501,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-06-22",
       detail_url: "https://www.arthouse-kinos.de/filme/culinarico-the-north-49487/",
       id: 2869410700,
+      image_url: "https://image.tmdb.org/t/p/w500/bYQTN81j46nlolyNuxgFcGbCL4w.jpg",
       slug: "22142",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=22142",
       time: "20:30",
       title: "Culinarico: The North",
+      tmdb_id: 623511,
     },
     {
       cinema_slug: "murnau-filmtheater",
@@ -8741,22 +8783,26 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-06-30",
       detail_url: "https://www.arthouse-kinos.de/filme/kinderwagenkino-das-drama-noch-mal-auf-anfang-49491/",
       id: 1599983914,
+      image_url: "https://image.tmdb.org/t/p/w500/gCbtFTIBdwpOI5KRp8dSrK6hm6x.jpg",
       slug: "22145",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/harmonie-theater-frankfurt?mode=widget&target=self&showId=22145",
       time: "11:30",
       title: "Kinderwagenkino: Das Drama - Noch mal auf Anfang",
+      tmdb_id: 1325734,
     },
     {
       cinema_slug: "capitol-mainz",
       date: "2026-06-30",
       detail_url: "https://www.arthouse-mainz.de/filme/seniorenkino-casablanca-48765/",
       id: 1127265752,
+      image_url: "https://image.tmdb.org/t/p/w500/9qxNdrySV2fb0BBNSPIg0NVtjuf.jpg",
       slug: "14170",
       ticket_url:
         "https://www.kinoheld.de/kino/mainz/capitol-mainz?mode=widget&target=self&rb=1&change=0&layout=movies&showId=14170",
       time: "14:00",
       title: "SENIORENKINO: Casablanca",
+      tmdb_id: 289,
     },
     {
       cinema_slug: "pupille",
@@ -8917,11 +8963,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-07-19",
       detail_url: "https://www.arthouse-kinos.de/filme/strickclub-glennkill-ein-schafskrimi-49367/",
       id: 3536942992,
+      image_url: "https://image.tmdb.org/t/p/w500/qgEactbiTRQjTdwtFhPAddsnUjN.jpg",
       slug: "202346",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/eldorado-arthouse-kino?mode=widget&target=self&showId=202346",
       time: "11:00",
       title: "Strickclub: Glennkill: Ein Schafskrimi",
+      tmdb_id: 1301421,
     },
     {
       cinema_slug: "capitol-mainz",
@@ -9114,11 +9162,13 @@ export const SCRAPE_DATA: ScrapeData = {
       date: "2026-10-06",
       detail_url: "https://www.arthouse-kinos.de/filme/sinema-truly-naked-49499/",
       id: 4088947624,
+      image_url: "https://image.tmdb.org/t/p/w500/ljjB8Iuue325WhUqM8OmerL8ENx.jpg",
       slug: "38400",
       ticket_url:
         "https://www.kinoheld.de/kino-frankfurt-am-main/cinema-frankfurt?mode=widget&target=self&showId=38400",
       time: "20:45",
       title: "Sinema: Truly Naked",
+      tmdb_id: 1281195,
     },
     {
       cinema_slug: "murnau-filmtheater",
@@ -9233,10 +9283,12 @@ export const SCRAPE_DATA: ScrapeData = {
         "Plastik ist allgegenwärtig, sogar in der Luft und unseren Körpern. „Plastic Fantastic“ erkundet die Kunststoffkrise und zeigt mögliche Lösungswege auf. Im Anschluss sprechen Expert* innen über das Ziel, Frankfurt zu einer Zero Waste City zu machen. Was ist dafür notwendig? Die BMFTR-Forschungsinitiative zum Erhalt der Artenvielfalt (FEdA) hat die Dokuabende Rhein-Main gemeinsam mit der Senckenberg Gesellschaft für Naturforschung ins Leben gerufen und führt die Events in Kooperation mit…",
       detail_url: "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-plastic-fantastic/",
       id: 1794116480,
+      image_url: "https://image.tmdb.org/t/p/w500/eSoahHng8Fgm8cvfDV5C92XrJZB.jpg",
       slug: "senckenberg-naturmuseum|event|https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-plastic-fantastic/",
       ticket_url: "https://museumfrankfurt.senckenberg.de/de/kalender/dokuabende-rhein-main-plastic-fantastic/",
       time: "18:00",
       title: "Dokuabende Rhein-Main: Plastic Fantastic",
+      tmdb_id: 1470171,
     },
     {
       cinema_slug: "dfg-frankfurt",
