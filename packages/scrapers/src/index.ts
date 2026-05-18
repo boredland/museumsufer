@@ -40,6 +40,7 @@ import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDenkbar } from "./venues/denkbar";
+import { scrapeDfgFrankfurt } from "./venues/dfg-frankfurt";
 import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
@@ -52,6 +53,7 @@ import { scrapeEschbornK } from "./venues/eschborn-k";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
+import { scrapeFilmforumHoechst } from "./venues/filmforum-hoechst";
 import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
@@ -90,6 +92,7 @@ import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
+import { scrapeNipponConnection } from "./venues/nippon-connection";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOperFrankfurt } from "./venues/oper-frankfurt";
@@ -144,6 +147,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "caligari-wiesbaden", run: (_ctx: ScraperContext) => scrapeCaligariWiesbaden() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
+  { slug: "dfg-frankfurt", run: (_ctx: ScraperContext) => scrapeDfgFrankfurt() },
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
@@ -156,6 +160,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
+  { slug: "filmforum-hoechst", run: (_ctx: ScraperContext) => scrapeFilmforumHoechst() },
   { slug: "filmkreis-darmstadt", run: (_ctx: ScraperContext) => scrapeFilmkreisDarmstadt() },
   {
     slug: "forschungskolleg-humanwissenschaften",
@@ -202,6 +207,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
+  { slug: "nippon-connection", run: (_ctx: ScraperContext) => scrapeNipponConnection() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOperFrankfurt() },
@@ -250,6 +256,7 @@ export {
   scrapeCaligariWiesbaden,
   scrapeCrespoFoundation,
   scrapeDenkbar,
+  scrapeDfgFrankfurt,
   scrapeDieKaes,
   scrapeDieSchmiere,
   scrapeDigFrankfurt,
@@ -262,6 +269,7 @@ export {
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
+  scrapeFilmforumHoechst,
   scrapeFilmkreisDarmstadt,
   scrapeForschungskollegHumanwissenschaften,
   scrapeFrankfurterSparkasse,
@@ -301,6 +309,7 @@ export {
   scrapeMusikschuleFrankfurt,
   scrapeNaxos,
   scrapeNeuesTheaterHoechst,
+  scrapeNipponConnection,
   scrapeNormativeOrders,
   scrapeOpenBooks,
   scrapeOperFrankfurt,

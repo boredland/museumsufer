@@ -75,6 +75,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
 
   // ─── lehrhaus direct sources ─────────────────────────────────────
   buergeruniversitaet: [50.1284, 8.6679],
+  "dfg-frankfurt": [50.1109, 8.6736],
   "dig-frankfurt": [50.1109, 8.6821],
   "fes-hessen": [50.1075, 8.6655],
   "fgz-streitclub": [50.1108, 8.6622],
@@ -108,6 +109,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "cinema-frankfurt": [50.1132, 8.6786],
   "eldorado-frankfurt": [50.1138, 8.6843],
   "eschborn-k": [50.1457, 8.571],
+  "filmforum-hoechst": [50.1014, 8.5443],
   "filmkreis-darmstadt": [49.8746, 8.6557],
   "filmpalast-hofheim": [50.0861, 8.4483],
   "hafen-2-offenbach": [50.0972, 8.7449],
@@ -119,6 +121,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "lichtblick-moerfelden": [50.0001, 8.5709],
   malsehn: [50.1235, 8.6789],
   "murnau-filmtheater": [50.0857, 8.2456],
+  "nippon-connection": [50.1183, 8.7019],
   "orfeos-erben": [50.1149, 8.6452],
   "programmkino-rex": [49.8773, 8.6555],
   pupille: [50.1247, 8.6573],
