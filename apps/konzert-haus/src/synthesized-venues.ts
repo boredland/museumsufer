@@ -13,16 +13,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "crespo-foundation",
-    name: "Crespo Foundation",
-    address: "",
-    lat: 50.1095,
-    lon: 8.6774,
-    city: "frankfurt",
-    website_url: "https://www.crespo-foundation.de",
-    default_genre: "classical",
-  },
-  {
     slug: "deutsches-architekturmuseum",
     name: "Deutsches Architekturmuseum (DAM)",
     address: "",
@@ -111,16 +101,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "",
     default_genre: "world",
-  },
-  {
-    slug: "landungsbruecken",
-    name: "Landungsbrücken Frankfurt",
-    address: "",
-    lat: 50.0976,
-    lon: 8.6519,
-    city: "frankfurt",
-    website_url: "https://landungsbruecken.org",
-    default_genre: "chamber",
   },
   {
     slug: "mousonturm",
