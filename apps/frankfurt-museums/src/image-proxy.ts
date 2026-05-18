@@ -1,9 +1,36 @@
-import { getImageAllowedDomains, getProxyDomains } from "./museum-config";
+import { getProxyDomains } from "./museum-config";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
 const proxyDomains = getProxyDomains();
-const staticAllowedDomains = getImageAllowedDomains();
+
+// Surveyed from src/scrape-data.ts (`grep image_url`). Unknown hosts still
+// have a D1 fallback via isDomainInDb(); add new ones here as scrapers find them.
+const staticAllowedDomains = new Set<string>([
+  "caricatura-museum.de",
+  "cms.mmk.art",
+  "dam-online.de",
+  "dialogmuseum.de",
+  "dommuseum-frankfurt.de",
+  "historisches-museum-frankfurt.de",
+  "hsf-ffm.com",
+  "images.cinetixx.com",
+  "kunststiftungdzbank.de",
+  "upload.wikimedia.org",
+  "www.atelierfrankfurt.de",
+  "www.dff.film",
+  "www.experiminta.de",
+  "www.feldbahn-ffm.de",
+  "www.fkv.de",
+  "www.frankfurter-buergerstiftung.de",
+  "www.juedischesmuseum.de",
+  "www.ledermuseum.de",
+  "www.liebieghaus.de",
+  "www.mfk-frankfurt.de",
+  "www.museumsufer.de",
+  "www.stadtgeschichte-ffm.de",
+  "www.staedelmuseum.de",
+]);
 
 function shouldProxy(imageUrl: string): boolean {
   try {

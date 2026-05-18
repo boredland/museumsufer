@@ -535,33 +535,6 @@ export const WIKIPEDIA_IMAGE_URL_OVERRIDES: Record<string, string> = {
     "https://upload.wikimedia.org/wikipedia/commons/2/27/Frankfurt_am_Main_-_Stoltze-Museum_-_aussen.jpg",
 };
 
-export function getImageAllowedDomains(): Set<string> {
-  const domains = new Set<string>([
-    "museumsufer.de",
-    "www.museumsufer.de",
-    "images.cinetixx.com",
-    "upload.wikimedia.org",
-  ]);
-  const addHostname = (url: string | undefined): void => {
-    if (!url) return;
-    try {
-      const hostname = new URL(url).hostname;
-      domains.add(hostname);
-      if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
-      else domains.add(`www.${hostname}`);
-    } catch {}
-  };
-  for (const config of Object.values(MUSEUMS)) {
-    addHostname(config.website);
-    addHostname(config.image);
-    addHostname(config.exhibitionUrl);
-  }
-  for (const config of Object.values(SCRAPER_MUSEUMS)) {
-    addHostname(config.eventApi?.endpoint);
-  }
-  return domains;
-}
-
 export function getProxyDomains(): Set<string> {
   const domains = new Set<string>();
   for (const [slug, config] of Object.entries(MUSEUMS)) {
