@@ -118,6 +118,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "matthäuskirche landau|landau in der pfalz": [49.198283, 8.112344],
   "max-slevogt-gymnasium, hindenburgstraße 2, raum 040 a altbau|landau in der pfalz": [49.198283, 8.112344],
   "max-slevogt-gymnasium|landau/pfalz": [49.2014, 8.111135],
+  "mio landau|landau in der pfalz": [49.194717, 8.112677],
   "mittelmühle hainfeld|hainfeld": [49.256913, 8.088769],
   "museum unterm trifels|annweiler am trifels": [49.20361, 7.96366],
   "mörlheim|landau-mörlheim": [49.190661, 8.163801],
