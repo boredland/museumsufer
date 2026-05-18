@@ -1,5 +1,4 @@
 import { todayIso } from "@museumsufer/core/date";
-import { stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.kinokoeppern.de";
