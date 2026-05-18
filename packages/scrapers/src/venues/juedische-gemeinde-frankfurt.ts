@@ -53,7 +53,7 @@ export async function scrapeJuedischeGemeinde(): Promise<VenueScrapeResult> {
         classifier = "keyword:event";
         break;
       case "Film":
-        label = "museum:film";
+        label = "film:cinema";
         classifier = "keyword:event";
         break;
       case "Führung":

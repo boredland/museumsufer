@@ -70,7 +70,7 @@ const EVENT_TYPE_LABEL: Record<EventType, string> = {
   Workshop: "museum:workshop",
   Vernissage: "museum:vernissage",
   Familie: "museum:familie",
-  Film: "museum:film",
+  Film: "film:cinema",
 };
 
 export function eventTypeToLabel(t: EventType | null): string | null {
