@@ -79,6 +79,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "hohenstaufensaal|annweiler am trifels": [49.203384, 7.966311],
   "hotel-restaurant winzerhof|st. martin": [49.299556, 8.103121],
   "i-punkt|edenkoben": [49.281923, 8.127323],
+  "im hinterhof des jostwegs 8-10|landau in der pfalz": [49.198283, 8.112344],
   "joseph-meyer-str. 25|weyher": [49.26729, 8.084679],
   "jugendstil festhalle, großer saal|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil festhalle|landau in der pfalz": [49.195785, 8.120557],
