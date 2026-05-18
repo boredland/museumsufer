@@ -1,6 +1,7 @@
 import { classifyMusic, classifyTalk, detectTalkLanguage } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://hausamdom-frankfurt.de";
@@ -28,13 +29,13 @@ const TIME_RE = /(\d{1,2})[:.](\d{2})\s*Uhr/;
 const CATEGORY_RE = /<a[^>]*class="news-categories-item-link"[^>]*title="([^"]+)"/g;
 const LOAD_MORE_RE = /class="[^"]*loadMoreResults[^"]*"/;
 
-export async function scrapeHausAmDom(): Promise<VenueScrapeResult> {
+export async function scrapeHausAmDom(proxy: ProxyConfig | null = null): Promise<VenueScrapeResult> {
   const today = todayIso();
   const cards: Array<{ url: string; date: string }> = [];
   const seenUrls = new Set<string>();
 
   for (let page = 1; page <= 20; page++) {
-    const html = await fetchHtml(listingUrl(page, today));
+    const html = await fetchHtml(listingUrl(page, today), proxy);
     let foundNew = false;
 
     for (const m of html.matchAll(CARD_RE)) {
@@ -57,14 +58,18 @@ export async function scrapeHausAmDom(): Promise<VenueScrapeResult> {
     if (!foundNew) break;
   }
 
-  const results = await Promise.all(cards.map(({ url, date }) => fetchDetail(url, date)));
+  const results = await Promise.all(cards.map(({ url, date }) => fetchDetail(url, date, proxy)));
   const events = results.filter((e): e is CanonicalScrapedEvent => e !== null);
   return { source_slug: "haus-am-dom", display_name: "Haus am Dom – Kath. Akademie Rabanus Maurus", events };
 }
 
-async function fetchDetail(url: string, date: string): Promise<CanonicalScrapedEvent | null> {
+async function fetchDetail(
+  url: string,
+  date: string,
+  proxy: ProxyConfig | null,
+): Promise<CanonicalScrapedEvent | null> {
   try {
-    const html = await fetchHtml(url);
+    const html = await fetchHtml(url, proxy);
     return parseDetail(html, date, url);
   } catch {
     return null;
@@ -149,15 +154,16 @@ function labelsFromCategories(
   return labels;
 }
 
-async function fetchHtml(url: string): Promise<string> {
+async function fetchHtml(url: string, proxy: ProxyConfig | null): Promise<string> {
   // The Solr-backed listing endpoint frequently throttles GH Actions IPs
-  // with 503. Retry up to 3 times with exponential backoff before giving up.
-  const backoffs = [3000, 8000, 20000];
-  for (let attempt = 0; attempt <= backoffs.length; attempt++) {
-    const res = await fetch(url, { headers: HEADERS });
+  // with 503; routing through fetch-proxy (Cloudflare worker) gives us a
+  // different egress IP. Retry once with backoff in case the proxy itself
+  // returns a transient error.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await proxyFetch(url, proxy, { headers: HEADERS });
     if (res.ok) return res.text();
-    if (res.status >= 500 && res.status < 600 && attempt < backoffs.length) {
-      await new Promise((r) => setTimeout(r, backoffs[attempt]));
+    if (res.status >= 500 && res.status < 600 && attempt === 0) {
+      await new Promise((r) => setTimeout(r, 5000));
       continue;
     }
     throw new Error(`haus-am-dom fetch failed: ${res.status} ${url}`);

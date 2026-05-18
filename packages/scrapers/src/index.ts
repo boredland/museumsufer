@@ -172,7 +172,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
-  { slug: "haus-am-dom", run: (_ctx: ScraperContext) => scrapeHausAmDom() },
+  { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
