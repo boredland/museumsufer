@@ -1,0 +1,48 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lichtspiel-haus",
+  "main": "src/index.tsx",
+  "compatibility_date": "2025-04-01",
+  // Apex lichtspiel.haus → frankfurt.lichtspiel.haus 301 is handled in
+  // src/index.tsx. City is parsed from the subdomain so each new city
+  // needs an additional CF custom_domain.
+  "routes": [
+    { "pattern": "frankfurt.lichtspiel.haus", "custom_domain": true },
+    { "pattern": "lichtspiel.haus", "custom_domain": true }
+  ],
+  // Scraping happens in .github/workflows/scrape.yml — the GH Action
+  // regenerates src/scrape-data.ts and pushes; CF redeploys on push.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lichtspiel-haus-db",
+      "database_id": "PLACEHOLDER_RUN_WRANGLER_D1_CREATE"
+    }
+  ],
+  "triggers": {
+    "crons": ["0 5,6 * * *", "0 15,16 * * *", "0 7,8 * * SUN"]
+  },
+  "send_email": [
+    {
+      "name": "FEEDBACK_EMAIL",
+      "destination_address": "feedback@lichtspiel.haus"
+    }
+  ],
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAADNxRIr9duIRP8ag"
+  },
+  "assets": {
+    "directory": "./public",
+    "html_handling": "none",
+    "not_found_handling": "none"
+  },
+  "observability": {
+    "enabled": false,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    }
+  }
+}
