@@ -123,7 +123,7 @@ function labelsFromCategories(
       classifier: "upstream-category",
     });
   }
-  if (set.has("film")) labels.push({ label: "museum:film", confidence: 1.0, classifier: "upstream-category" });
+  if (set.has("film")) labels.push({ label: "film:cinema", confidence: 1.0, classifier: "upstream-category" });
   if (set.has("ausstellung")) {
     labels.push({ label: "museum:vernissage", confidence: 0.9, classifier: "upstream-category" });
   }
