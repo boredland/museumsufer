@@ -150,16 +150,17 @@ function labelsFromCategories(
 }
 
 async function fetchHtml(url: string): Promise<string> {
-  // The Solr-backed listing endpoint sometimes returns 503 under burst load;
-  // a single 5s-backoff retry is enough to clear it in practice.
-  for (let attempt = 0; attempt < 2; attempt++) {
+  // The Solr-backed listing endpoint frequently throttles GH Actions IPs
+  // with 503. Retry up to 3 times with exponential backoff before giving up.
+  const backoffs = [3000, 8000, 20000];
+  for (let attempt = 0; attempt <= backoffs.length; attempt++) {
     const res = await fetch(url, { headers: HEADERS });
     if (res.ok) return res.text();
-    if (res.status >= 500 && res.status < 600 && attempt === 0) {
-      await new Promise((r) => setTimeout(r, 5000));
+    if (res.status >= 500 && res.status < 600 && attempt < backoffs.length) {
+      await new Promise((r) => setTimeout(r, backoffs[attempt]));
       continue;
     }
     throw new Error(`haus-am-dom fetch failed: ${res.status} ${url}`);
   }
-  throw new Error(`haus-am-dom fetch failed after retry: ${url}`);
+  throw new Error(`haus-am-dom fetch exhausted retries: ${url}`);
 }
