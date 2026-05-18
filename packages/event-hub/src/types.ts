@@ -33,10 +33,19 @@ export interface CanonicalEvent {
   lon: number;
   raw_category?: string;
   /** Set by the post-scrape TMDb enrichment pass for film:cinema events.
-   *  Front-ends use it to link out to themoviedb.org/movie/{id} from the
-   *  screening card. Image_url is also auto-populated from TMDb posters
-   *  when the scraper didn't carry one. */
+   *  Front-ends use it to link out to themoviedb.org/{kind}/{id} from the
+   *  screening card. Image_url and description are also auto-populated
+   *  from TMDb when the scraper didn't carry them (or when TMDb has
+   *  better copy). */
   tmdb_id?: number;
+  /** "movie" by default; "tv" when a TV-search fallback caught e.g.
+   *  Metropolitan Opera HD broadcasts. Determines the deep-link path
+   *  prefix (/movie vs /tv) on themoviedb.org. */
+  tmdb_kind?: "movie" | "tv";
+  /** English-language synopsis, when TMDb has one. Apps with multi-locale
+   *  rendering pick this for en visitors and fall back to `description`
+   *  (the German overview) otherwise. */
+  description_en?: string;
   labels: Label[];
   first_seen_at: string;
   last_seen_at: string;

@@ -29,7 +29,7 @@ async function main(): Promise<void> {
   if (proxy) log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
 
   const tmdbCache: Record<string, TmdbCacheEntry | null> = { ...TMDB_POSTER_CACHE };
-  const beforeCacheSize = Object.keys(tmdbCache).length;
+  const beforeCacheJson = JSON.stringify(tmdbCache);
 
   const next = await runHub(previous, {
     log,
@@ -42,9 +42,12 @@ async function main(): Promise<void> {
   await writeFile(resolve(root, "data/venue-names.ts"), generateNamesModule(next.venueNames ?? {}), "utf8");
   log(`wrote data/venue-names.ts — ${Object.keys(next.venueNames ?? {}).length} venues`);
 
-  if (Object.keys(tmdbCache).length !== beforeCacheSize) {
+  // Persist when anything changed — new entries (size diff) OR back-fills
+  // that mutated existing entries in place (overview / overview_en /
+  // kind). The JSON snapshot diff catches both.
+  if (JSON.stringify(tmdbCache) !== beforeCacheJson) {
     await writeFile(resolve(root, "data/tmdb-cache.ts"), generateTmdbCacheModule(tmdbCache), "utf8");
-    log(`wrote data/tmdb-cache.ts — ${Object.keys(tmdbCache).length} entries (+${Object.keys(tmdbCache).length - beforeCacheSize})`);
+    log(`wrote data/tmdb-cache.ts — ${Object.keys(tmdbCache).length} entries`);
   }
   summariseLabels(next);
 }
@@ -71,6 +74,9 @@ function generateTmdbCacheModule(cache: Record<string, TmdbCacheEntry | null>): 
 export interface TmdbCacheEntry {
   id: number;
   poster: string | null;
+  overview?: string;
+  overview_en?: string;
+  kind?: "movie" | "tv";
 }
 
 export const TMDB_POSTER_CACHE: Record<string, TmdbCacheEntry | null> = {

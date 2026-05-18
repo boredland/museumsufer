@@ -20,6 +20,10 @@ app.get("/film/:id{[0-9]+}", (c) => {
   const tr = getTranslations(locale);
   const currentPath = `/film/${id}`;
   const dateLabel = formatLocalisedDateLong(screening.date, locale === "en" ? "en-US" : "de-DE");
+  // English visitors get the TMDb English overview when available; falls
+  // back to the cinema's (German) description so we never render an empty
+  // synopsis just because TMDb missed.
+  const synopsis = locale === "en" ? (screening.description_en ?? screening.description) : screening.description;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -144,7 +148,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                     {screening.tmdb_id ? (
                       <a
                         class="film-detail__source"
-                        href={`https://www.themoviedb.org/movie/${screening.tmdb_id}`}
+                        href={`https://www.themoviedb.org/${screening.tmdb_kind ?? "movie"}/${screening.tmdb_id}`}
                         target="_blank"
                         rel="noopener"
                       >
@@ -155,7 +159,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                 </div>
               </div>
 
-              {screening.description ? <div class="film-detail__description">{screening.description}</div> : null}
+              {synopsis ? <div class="film-detail__description">{synopsis}</div> : null}
             </article>
           </main>
           <Footer tr={tr} locale={locale} />

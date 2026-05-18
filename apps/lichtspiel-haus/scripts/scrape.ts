@@ -52,6 +52,7 @@ async function main(): Promise<void> {
       title: ev.title,
       subtitle: ev.subtitle,
       description: ev.description,
+      description_en: ev.description_en,
       date: ev.date,
       time: ev.time,
       end_time: ev.end_time,
@@ -67,6 +68,7 @@ async function main(): Promise<void> {
       format,
       series,
       tmdb_id: ev.tmdb_id,
+      tmdb_kind: ev.tmdb_kind,
     });
     counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
     if (!curatedBySlug.has(ev.source_slug)) {
