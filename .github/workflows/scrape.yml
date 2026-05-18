@@ -35,6 +35,7 @@ jobs:
           FETCH_PROXY_URL: ${{ secrets.FETCH_PROXY_URL }}
           FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          DEEPL_API_KEYS: ${{ secrets.DEEPL_API_KEYS }}
         run: bun scripts/scrape.ts
 
       - name: Derive lehrhaus

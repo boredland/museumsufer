@@ -19,6 +19,7 @@
  */
 import PQueue from "p-queue";
 import type { TmdbCacheEntry } from "../data/tmdb-cache";
+import { translateBatch } from "./deepl";
 import type { CanonicalEvent } from "./types";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -59,6 +60,10 @@ export interface EnrichOptions {
   /** Concurrent in-flight TMDb requests. TMDb's published limit is ~50
    *  req/s; we keep well below that to be polite. */
   concurrency?: number;
+  /** DeepL API keys (comma-separated) for German→English fallback when
+   *  TMDb has a German overview but no English one. Multiple keys allow
+   *  free-tier quota failover. */
+  deeplApiKeys?: string;
 }
 
 const YEAR_RE = /\b(19\d{2}|20\d{2})\b/;
@@ -287,6 +292,35 @@ export async function enrichFilmPosters(
     });
   }
   await queue.onIdle();
+
+  // Pass 2b: DeepL DE→EN fallback for cache entries that have a German
+  // overview but no English one. Typical for older European arthouse
+  // titles and operas. Batched so a handful of films cost a single API
+  // call rather than one per row.
+  let translated = 0;
+  if (opts.deeplApiKeys?.trim()) {
+    const needsTranslation: Array<{ key: string; text: string }> = [];
+    for (const [key, entry] of Object.entries(opts.cache)) {
+      if (!entry) continue;
+      if (entry.overview && !entry.overview_en) needsTranslation.push({ key, text: entry.overview });
+    }
+    if (needsTranslation.length > 0) {
+      const results = await translateBatch(
+        needsTranslation.map((x) => x.text),
+        { apiKeys: opts.deeplApiKeys, log },
+      );
+      for (let i = 0; i < needsTranslation.length; i++) {
+        const t = results[i];
+        if (!t) continue;
+        const entry = opts.cache[needsTranslation[i].key];
+        if (entry) {
+          entry.overview_en = t;
+          translated++;
+        }
+      }
+      log(`tmdb: deepl filled overview_en for ${translated}/${needsTranslation.length} entries`);
+    }
+  }
 
   // Pass 3: project the (now-complete) cache back onto events.
   let matched = 0;
