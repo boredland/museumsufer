@@ -32,6 +32,11 @@ export interface CanonicalEvent {
   lat: number;
   lon: number;
   raw_category?: string;
+  /** Set by the post-scrape TMDb enrichment pass for film:cinema events.
+   *  Front-ends use it to link out to themoviedb.org/movie/{id} from the
+   *  screening card. Image_url is also auto-populated from TMDb posters
+   *  when the scraper didn't carry one. */
+  tmdb_id?: number;
   labels: Label[];
   first_seen_at: string;
   last_seen_at: string;

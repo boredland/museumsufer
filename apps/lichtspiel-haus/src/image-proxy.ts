@@ -30,6 +30,9 @@ const ALLOWED_HOSTS = new Set([
   "www.filmkreis.tu-darmstadt.de",
   "tickets.cinetixx.de",
   "www.kinoheld.de",
+  // TMDb CDN — used by the hub's poster-enrichment pass for events where
+  // the venue scraper didn't carry an image_url.
+  "image.tmdb.org",
 ]);
 
 export async function handleImageProxy(req: Request): Promise<Response | null> {
