@@ -85,6 +85,7 @@ import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOperFrankfurt } from "./venues/oper-frankfurt";
 import { scrapeOperFrankfurtKonzerte } from "./venues/oper-frankfurt-konzerte";
+import { scrapeOrfeosErben } from "./venues/orfeos-erben";
 import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
 import { scrapePolytechnische } from "./venues/polytechnische";
@@ -186,6 +187,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOperFrankfurt() },
   { slug: "oper-frankfurt-konzerte", run: (_ctx: ScraperContext) => scrapeOperFrankfurtKonzerte() },
+  { slug: "orfeos-erben", run: (_ctx: ScraperContext) => scrapeOrfeosErben() },
   { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
   { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
@@ -276,6 +278,7 @@ export {
   scrapeOpenBooks,
   scrapeOperFrankfurt,
   scrapeOperFrankfurtKonzerte,
+  scrapeOrfeosErben,
   scrapePapagenoMusiktheater,
   scrapePfalzDe,
   scrapePolytechnische,

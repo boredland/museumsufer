@@ -59,6 +59,7 @@
     "./venues/openbooks-frankfurt": "./src/venues/openbooks-frankfurt.ts",
     "./venues/oper-frankfurt": "./src/venues/oper-frankfurt.ts",
     "./venues/oper-frankfurt-konzerte": "./src/venues/oper-frankfurt-konzerte.ts",
+    "./venues/orfeos-erben": "./src/venues/orfeos-erben.ts",
     "./venues/papageno-musiktheater": "./src/venues/papageno-musiktheater.ts",
     "./venues/pfalz-de": "./src/venues/pfalz-de.ts",
     "./venues/polytechnische": "./src/venues/polytechnische.ts",
