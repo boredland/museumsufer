@@ -12,6 +12,7 @@
     "./venues/alte-oper": "./src/venues/alte-oper.ts",
     "./venues/andreas-koehs": "./src/venues/andreas-koehs.ts",
     "./venues/arthouse-kinos": "./src/venues/arthouse-kinos.ts",
+    "./venues/astor-frankfurt": "./src/venues/astor-frankfurt.ts",
     "./venues/bad-homburg-schloss": "./src/venues/bad-homburg-schloss.ts",
     "./venues/bad-soden": "./src/venues/bad-soden.ts",
     "./venues/brotfabrik": "./src/venues/brotfabrik.ts",

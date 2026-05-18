@@ -102,6 +102,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "stadtbuecherei-frankfurt": [50.1116, 8.6831],
 
   // ─── arthouse cinemas ────────────────────────────────────────────
+  "astor-frankfurt": [50.1136, 8.6856],
   "cinema-frankfurt": [50.1132, 8.6786],
   "eldorado-frankfurt": [50.1138, 8.6843],
   "harmonie-frankfurt": [50.0976, 8.6818],
