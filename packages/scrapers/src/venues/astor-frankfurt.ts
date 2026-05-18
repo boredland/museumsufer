@@ -84,7 +84,13 @@ export async function scrapeAstorFrankfurt(): Promise<VenueScrapeResult> {
       end_time: endTime && endTime !== time ? endTime : null,
       detail_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
       ticket_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
-      image_url: movie.poster?.src ? `${SITE_BASE}${movie.poster.src}` : null,
+      // Astor's poster.src paths (e.g. /movie/5915/<hash>) resolve to HTML
+      // detail pages on every premiumkino host we've probed (frontend,
+      // backend, cdn). The actual image origin is constructed by the
+      // Angular SPA at runtime — we don't know the recipe yet. Until we
+      // do, omit the field so the lichtspiel-haus Caligari intertitle
+      // fallback renders instead of a broken velvet rectangle.
+      image_url: null,
       labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }

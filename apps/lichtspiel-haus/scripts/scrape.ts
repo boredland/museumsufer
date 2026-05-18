@@ -55,7 +55,7 @@ async function main(): Promise<void> {
       date: ev.date,
       time: ev.time,
       end_time: ev.end_time,
-      image_url: ev.image_url,
+      image_url: scrubImageUrl(ev.image_url),
       detail_url: ev.detail_url,
       ticket_url: ev.ticket_url,
       price_min: ev.price_min,
@@ -93,6 +93,22 @@ async function main(): Promise<void> {
   const seenCount = [...counts.entries()].sort((a, b) => b[1] - a[1]);
   for (const [slug, n] of seenCount) log(`  ${slug.padEnd(36, " ")} ${n}`);
   log(`wrote ${deduped.length} screenings from ${counts.size} cinemas (${synthesized.length} synthesised)`);
+}
+
+/** Drop image_url values that aren't actually images. Astor's poster.src
+ *  paths resolve to HTML pages on every premiumkino host we've probed —
+ *  the SPA constructs the true CDN URL at runtime and we don't have the
+ *  recipe yet. Letting these through renders a broken velvet rectangle;
+ *  dropping them lets the Caligari intertitle fallback render. */
+function scrubImageUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const host = new URL(url).hostname;
+    if (host === "frankfurt.premiumkino.de") return undefined;
+  } catch {
+    return undefined;
+  }
+  return url;
 }
 
 function hasFilmCinemaLabel(ev: CanonicalEvent): boolean {
