@@ -1,36 +1,26 @@
 import { getProxyDomains } from "./museum-config";
+import { SCRAPE_DATA } from "./scrape-data";
 import { USER_AGENT } from "./shared";
 import type { Env } from "./types";
 
 const proxyDomains = getProxyDomains();
 
-// Surveyed from src/scrape-data.ts (`grep image_url`). Unknown hosts still
-// have a D1 fallback via isDomainInDb(); add new ones here as scrapers find them.
-const staticAllowedDomains = new Set<string>([
-  "caricatura-museum.de",
-  "cms.mmk.art",
-  "dam-online.de",
-  "dialogmuseum.de",
-  "dommuseum-frankfurt.de",
-  "historisches-museum-frankfurt.de",
-  "hsf-ffm.com",
-  "images.cinetixx.com",
-  "kunststiftungdzbank.de",
-  "upload.wikimedia.org",
-  "www.atelierfrankfurt.de",
-  "www.dff.film",
-  "www.experiminta.de",
-  "www.feldbahn-ffm.de",
-  "www.fkv.de",
-  "www.frankfurter-buergerstiftung.de",
-  "www.juedischesmuseum.de",
-  "www.ledermuseum.de",
-  "www.liebieghaus.de",
-  "www.mfk-frankfurt.de",
-  "www.museumsufer.de",
-  "www.stadtgeschichte-ffm.de",
-  "www.staedelmuseum.de",
-]);
+// Derived from every image_url in the bundled scrape data, so the allowlist
+// stays in sync with whatever the scrapers actually produce. Hosts D1 adds
+// after the last deploy fall through to the runtime check in handleImageProxy.
+const staticAllowedDomains = ((): ReadonlySet<string> => {
+  const hosts = new Set<string>();
+  const collect = (url: string | null | undefined): void => {
+    if (!url) return;
+    try {
+      hosts.add(new URL(url).hostname);
+    } catch {}
+  };
+  for (const m of SCRAPE_DATA.museums) collect(m.image_url);
+  for (const e of SCRAPE_DATA.exhibitions) collect(e.image_url);
+  for (const e of SCRAPE_DATA.events) collect(e.image_url);
+  return hosts;
+})();
 
 function shouldProxy(imageUrl: string): boolean {
   try {
