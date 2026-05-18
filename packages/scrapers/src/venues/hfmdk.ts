@@ -5,6 +5,8 @@ import {
   normalizeUrl,
   nullIfMidnight,
   stripHtml,
+  toBerlinDate,
+  toBerlinTime,
   todayIso,
   truncate,
 } from "@museumsufer/core";
@@ -23,8 +25,10 @@ const MAX_PAGES = 10;
  * through `entityQuery` against the `NodeVeranstaltung` content type, sorted
  * by `field_datum` ascending, and stop once results pass the 120-day horizon.
  *
- * `fieldDatum` is an ISO local datetime ("YYYY-MM-DDTHH:MM:SS") in Europe/Berlin —
- * no timezone suffix — matching our wire format directly.
+ * `fieldDatum` comes from a Drupal datetime field, stored in UTC and
+ * serialised without a `Z` suffix (e.g. "2026-05-19T08:00:00" for a
+ * 10:00 Europe/Berlin show during CEST). We convert to Berlin-local
+ * date+time via core's toBerlinDate / toBerlinTime.
  */
 
 interface HfmdkEvent {
@@ -110,7 +114,9 @@ export async function scrapeHfmdk(): Promise<VenueScrapeResult> {
     for (const raw of items) {
       const datum = raw.fieldDatum?.value;
       if (!datum) continue;
-      const date = datum.slice(0, 10);
+      const start = parseHfmdkDatum(datum);
+      if (!start) continue;
+      const date = toBerlinDate(start);
       if (date < today) continue;
       if (date > horizon) {
         pastHorizon = true;
@@ -118,7 +124,7 @@ export async function scrapeHfmdk(): Promise<VenueScrapeResult> {
       }
       if (raw.fieldEntfaellt) continue;
 
-      const event = transform(raw, date, datum);
+      const event = transform(raw, date, start);
       if (!event) continue;
       const dedup = `${event.source_event_id}|${event.date}|${event.time ?? ""}`;
       if (seen.has(dedup)) continue;
@@ -156,12 +162,14 @@ async function fetchPage(from: string, offset: number, limit: number): Promise<H
   return json.data?.entityQuery?.items ?? [];
 }
 
-function transform(raw: HfmdkEvent, date: string, datum: string): CanonicalScrapedEvent | null {
+function transform(raw: HfmdkEvent, date: string, start: Date): CanonicalScrapedEvent | null {
   const title = stripHtml(decodeEntities(raw.title)).trim();
   if (!title) return null;
 
-  const time = nullIfMidnight(datum.slice(11, 16));
-  const endTime = nullIfMidnight(raw.fieldDatum?.endValue?.slice(11, 16));
+  const time = nullIfMidnight(toBerlinTime(start));
+  const endRaw = raw.fieldDatum?.endValue;
+  const endParsed = endRaw ? parseHfmdkDatum(endRaw) : null;
+  const endTime = endParsed ? nullIfMidnight(toBerlinTime(endParsed)) : null;
 
   const alias = raw.path?.alias ?? null;
   const slug = alias ? alias.replace(/^\/+/, "").replace(/^veranstaltung\//, "") : `hfmdk-${raw.nid}`;
@@ -177,7 +185,13 @@ function transform(raw: HfmdkEvent, date: string, datum: string): CanonicalScrap
   const priceMin = raw.fieldEintrittFrei ? 0 : null;
   const reihe = raw.fieldReihe?.label?.trim() || raw.fieldReihe?.name?.trim() || null;
   const finalSubtitle = subtitle || reihe;
+  const isSchauspiel = /schauspiel|theater|theatre|inszenierung/i.test(
+    `${title} ${finalSubtitle ?? ""} ${description ?? ""}`,
+  );
   const genre = classifyMusic(title, finalSubtitle, description, "classical");
+  const labels = isSchauspiel
+    ? [{ label: "stage:theater" as const, confidence: 0.9, classifier: "keyword:event" as const }]
+    : [{ label: `music:${genre}` as const, confidence: 0.9, classifier: "scraper-hardcoded" as const }];
 
   return {
     source_event_id: slug,
@@ -194,8 +208,18 @@ function transform(raw: HfmdkEvent, date: string, datum: string): CanonicalScrap
     price_max: priceMin,
     performers,
     venue_room: venueRoom,
-    labels: [{ label: `music:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" }],
+    labels,
   };
+}
+
+/** HfMDK's Drupal datetime fields are stored in UTC but the GraphQL layer
+ *  drops the timezone marker, so a "2026-05-19T08:00:00" value really means
+ *  08:00 UTC (= 10:00 Europe/Berlin in summer). We force UTC interpretation. */
+function parseHfmdkDatum(value: string): Date | null {
+  const hasTz = /Z|[+-]\d{2}:?\d{2}$/.test(value);
+  const iso = hasTz ? value : `${value}Z`;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
 }
 
 /**
