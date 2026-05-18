@@ -32,7 +32,7 @@ export function ChipRow({ active, date, counts, tr, locale }: ChipRowProps) {
   // src/index.tsx /partial/content. Falls back to a normal full-nav
   // if htmx isn't loaded (or for shift/cmd-clicks, which htmx
   // forwards to the browser).
-  const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
+  const hxBase = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true" };
   const lang = langSuffix(locale, "&");
   return (
     <nav class="strip" aria-label={tr.ariaCategory}>
@@ -41,7 +41,8 @@ export function ChipRow({ active, date, counts, tr, locale }: ChipRowProps) {
           class={`chip ${active ? "" : "active"}`}
           href={`/?date=${date}${lang}`}
           hx-get={`/partial/content?date=${date}`}
-          {...hxAttrs}
+          hx-push-url={`/?date=${date}${lang}`}
+          {...hxBase}
         >
           <span class="t-label">{tr.chipAll}</span>
           {total > 0 ? <span class="count">{total}</span> : null}
@@ -55,7 +56,8 @@ export function ChipRow({ active, date, counts, tr, locale }: ChipRowProps) {
               class={`chip m-${cat.mood} ${active === cat.slug ? "active" : ""}`}
               href={`/c/${cat.slug}?date=${date}${lang}`}
               hx-get={`/partial/content?category=${cat.slug}&date=${date}`}
-              {...hxAttrs}
+              hx-push-url={`/c/${cat.slug}?date=${date}${lang}`}
+              {...hxBase}
             >
               <span class="glyph" aria-hidden="true">
                 {cat.glyph}
@@ -88,7 +90,7 @@ export function DateStrip({ current, category, counts, daysAhead = 21, tr, local
     d.setUTCDate(d.getUTCDate() + i);
     days.push(d.toISOString().slice(0, 10));
   }
-  const hxAttrs = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true", "hx-push-url": "true" };
+  const hxBase = { "hx-target": "#content-body", "hx-swap": "innerHTML transition:true" };
   const lang = langSuffix(locale, "&");
   return (
     <nav class="dates" aria-label={tr.ariaDate}>
@@ -106,7 +108,8 @@ export function DateStrip({ current, category, counts, daysAhead = 21, tr, local
               }`}
               href={href}
               hx-get={partial}
-              {...hxAttrs}
+              hx-push-url={href}
+              {...hxBase}
               aria-current={iso === current ? "date" : undefined}
             >
               <span class="day-name">{weekdayShort(iso, locale)}</span>
