@@ -23,7 +23,8 @@ const CARD_RE =
   /<div[^>]*class="[^"]*event-list[^"]*"[^>]*data-document-url="(https:\/\/hausamdom-frankfurt\.de\/programm\/[^"]+)"[^>]*>([\s\S]*?)(?=<div[^>]*class="[^"]*event-list[^"]*"|$)/g;
 const DATE_RE = /<time\s+datetime="(\d{4}-\d{2}-\d{2})"/;
 const TITLE_RE = /<h3\s+class="event-title">([\s\S]*?)<\/h3>/i;
-const TIME_RE = /(\d{1,2}):(\d{2})\s*Uhr/;
+// Haus am Dom prints times in both "19:30 Uhr" and German "19.30 Uhr" form.
+const TIME_RE = /(\d{1,2})[:.](\d{2})\s*Uhr/;
 const CATEGORY_RE = /<a[^>]*class="news-categories-item-link"[^>]*title="([^"]+)"/g;
 const LOAD_MORE_RE = /class="[^"]*loadMoreResults[^"]*"/;
 
