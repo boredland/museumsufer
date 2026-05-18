@@ -1,30 +1,4 @@
-export type EventApiType =
-  | "tribe-events"
-  | "historisches"
-  | "juedisches"
-  | "staedel"
-  | "senckenberg"
-  | "my-calendar"
-  | "liebieghaus"
-  | "mak"
-  | "stadtgeschichte-html"
-  | "dommuseum"
-  | "ledermuseum"
-  | "bibelhaus"
-  | "fkv"
-  | "fdh"
-  | "dff-kino"
-  | "archaeologisches"
-  | "fritz-bauer-wollheim"
-  | "experiminta"
-  | "caricatura"
-  | "weltkulturen"
-  | "eventon"
-  | "buergerstiftung"
-  | "schirn"
-  | "mmk"
-  | "giersch"
-  | "fff";
+import { MUSEUMS as SCRAPER_MUSEUMS } from "@museumsufer/scrapers";
 
 export type ExhibitionApiType =
   | "mmk-cms"
@@ -67,10 +41,6 @@ export interface MuseumConfig {
   hidden?: true;
   skipEvents?: true;
   exhibitionUrl?: string;
-  eventApi?: {
-    type: EventApiType;
-    endpoint: string;
-  };
   exhibitionApi?: {
     type: ExhibitionApiType;
     endpoint: string;
@@ -83,10 +53,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6832,
     rmvStopLid: "A=1@O=Frankfurt (Main) Elisabethenstraße@X=8688119@Y=50105882@U=80@L=3000905@",
     exhibitionUrl: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen/",
-    eventApi: {
-      type: "archaeologisches",
-      endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/kalender",
-    },
     exhibitionApi: {
       type: "archaeologisches",
       endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen",
@@ -98,7 +64,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Affentorplatz@X=8689854@Y=50104668@U=80@L=3000926@",
     proxy: true,
     exhibitionUrl: "https://www.bibelhaus-frankfurt.de/de/ausstellungen",
-    eventApi: { type: "bibelhaus", endpoint: "https://www.bibelhaus-frankfurt.de/de/programm" },
   },
   "caricatura-museum-frankfurt": {
     abbreviation: "Caricatura",
@@ -106,7 +71,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6845,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://caricatura-museum.de/ausstellungen/sonderausstellung/",
-    eventApi: { type: "caricatura", endpoint: "https://caricatura-museum.de/veranstaltungen" },
     exhibitionApi: { type: "caricatura", endpoint: "https://caricatura-museum.de/ausstellungen/" },
   },
   "deutsches-architekturmuseum": {
@@ -115,7 +79,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6715,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dam-online.de/programm/ausstellungen/",
-    eventApi: { type: "tribe-events", endpoint: "https://dam-online.de/wp-json/tribe/events/v1/events" },
     // The /programm/ausstellungen/ page renders the same Tribe entries with
     // JSON-LD Event blocks; exhibitions vs single-day workshops are
     // distinguished by duration (>=7 days).
@@ -126,7 +89,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.7587,
     rmvStopLid: "A=1@O=Offenbach (Main)-Zentrum Hauptbahnhof@X=8760662@Y=50099643@U=80@L=3002501@",
     exhibitionUrl: "https://www.ledermuseum.de/ausstellungen",
-    eventApi: { type: "ledermuseum", endpoint: "https://www.ledermuseum.de/programm" },
     exhibitionApi: { type: "ledermuseum", endpoint: "https://www.ledermuseum.de/ausstellungen" },
   },
   "deutsches-romantik-museum": {
@@ -134,7 +96,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6776,
     rmvStopLid: "A=1@O=Frankfurt (Main) Roßmarkt@X=8676029@Y=50112525@U=80@L=3000013@",
     exhibitionUrl: "https://deutsches-romantik-museum.de/ausstellungen/",
-    eventApi: { type: "fdh", endpoint: "https://deutsches-romantik-museum.de/programm/" },
     exhibitionApi: { type: "fdh", endpoint: "https://deutsches-romantik-museum.de/ausstellungen/" },
   },
   "dff-deutsches-filminstitut-filmmuseum": {
@@ -143,7 +104,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6728,
     rmvStopLid: "A=1@O=Frankfurt (Main) Weser-/Münchener Straße@X=8670285@Y=50107958@U=80@L=3000007@",
     exhibitionUrl: "https://www.dff.film/besuch/ausstellungen/",
-    eventApi: { type: "dff-kino", endpoint: "https://booking.cinetixx.de/api/cinemas/events/cinema/2038440885" },
     exhibitionApi: { type: "dff", endpoint: "https://www.dff.film/besuch/ausstellungen/" },
   },
   "dommuseum-frankfurt": {
@@ -151,7 +111,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6855,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://dommuseum-frankfurt.de/",
-    eventApi: { type: "dommuseum", endpoint: "https://dommuseum-frankfurt.de/besuchen/kalender" },
   },
   "eintracht-frankfurt-museum": {
     lat: 50.0685,
@@ -165,7 +124,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6907,
     rmvStopLid: "A=1@O=Frankfurt (Main) Börneplatz/Stoltzestraße@X=8688874@Y=50112606@U=80@L=3060775@",
     exhibitionUrl: "https://www.fffrankfurt.org/aktuell/",
-    eventApi: { type: "fff", endpoint: "https://www.fffrankfurt.org/aktuell/" },
     exhibitionApi: { type: "fff", endpoint: "https://www.fffrankfurt.org/aktuell/" },
   },
   "frankfurter-goethe-haus": {
@@ -174,7 +132,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Karmeliterkloster@X=8678186@Y=50110125@U=80@L=3060835@",
     hidden: true,
     exhibitionUrl: "https://frankfurter-goethe-haus.de/ausstellung/",
-    eventApi: { type: "fdh", endpoint: "https://www.goethehaus-frankfurt.de/programm/" },
     exhibitionApi: { type: "fdh", endpoint: "https://frankfurter-goethe-haus.de/ausstellung/" },
   },
   "frankfurter-kunstverein": {
@@ -183,7 +140,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6907,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hospital Zum Heiligen Geist@X=8692722@Y=50110637@U=80@L=3000524@",
     exhibitionUrl: "https://www.fkv.de/exhibitions-current-preview/",
-    eventApi: { type: "fkv", endpoint: "https://www.fkv.de/current-events/" },
     exhibitionApi: { type: "fkv", endpoint: "https://www.fkv.de/exhibitions-current-preview/" },
   },
   "geldmuseum-der-deutschen-bundesbank": {
@@ -215,7 +171,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6819,
     rmvStopLid: "A=1@O=Frankfurt (Main) Römer/Paulskirche@X=8682007@Y=50110934@U=80@L=3000002@",
     exhibitionUrl: "https://historisches-museum-frankfurt.de/de/",
-    eventApi: { type: "historisches", endpoint: "https://historisches-museum-frankfurt.de/api/calendar" },
     exhibitionApi: {
       type: "historisches",
       endpoint: "https://historisches-museum-frankfurt.de/api/calendar?type=specialExhibition",
@@ -233,10 +188,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.673,
     rmvStopLid: "A=1@O=Frankfurt (Main) Willy-Brandt-Platz@X=8673898@Y=50108992@U=80@L=3000004@",
     exhibitionUrl: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/ausstellungen",
-    eventApi: {
-      type: "stadtgeschichte-html",
-      endpoint: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/kalender",
-    },
   },
   "juedisches-museum-frankfurt": {
     abbreviation: "JMF",
@@ -245,10 +196,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6649,
     rmvStopLid: "A=1@O=Frankfurt (Main) Baseler Platz@X=8664792@Y=50104507@U=80@L=3000025@",
     exhibitionUrl: "https://www.juedischesmuseum.de/besuch/ausstellungen",
-    eventApi: {
-      type: "juedisches",
-      endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records%5BL%5D=0&records%5Buid%5D=329",
-    },
     exhibitionApi: { type: "juedisches", endpoint: "https://www.juedischesmuseum.de/besuch/ausstellungen" },
   },
   "juedisches-museum-museum-judengasse-frankfurt": {
@@ -282,7 +229,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.66,
     rmvStopLid: "A=1@O=Frankfurt (Main) Zanderstraße@X=8658976@Y=50099922@U=80@L=3001978@",
     exhibitionUrl: "https://www.liebieghaus.de/de/ausstellungen/",
-    eventApi: { type: "liebieghaus", endpoint: "https://www.liebieghaus.de/de/kalender" },
     exhibitionApi: { type: "liebieghaus", endpoint: "https://www.liebieghaus.de/de/ausstellungen/" },
   },
   "momem-museum-of-modern-electronic-music": {
@@ -300,7 +246,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.68,
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
     exhibitionUrl: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/",
-    eventApi: { type: "mak", endpoint: "https://www.museumangewandtekunst.de/de/kalender/" },
     exhibitionApi: { type: "mak", endpoint: "https://www.museumangewandtekunst.de/de/besuch/ausstellungen/" },
   },
   "museum-fuer-kommunikation-frankfurt": {
@@ -309,7 +254,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6702,
     rmvStopLid: "A=1@O=Frankfurt (Main) Baseler Platz@X=8664792@Y=50104507@U=80@L=3000025@",
     exhibitionUrl: "https://www.mfk-frankfurt.de/ausstellungen/",
-    eventApi: { type: "my-calendar", endpoint: "https://www.mfk-frankfurt.de/wp-json/my-calendar/v1/events" },
     exhibitionApi: { type: "mfk", endpoint: "https://www.mfk-frankfurt.de/ausstellungen/" },
   },
   "museum-giersch-der-goethe-universitaet": {
@@ -317,7 +261,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6545,
     rmvStopLid: "A=1@O=Frankfurt (Main) Gutleut-/Heilbronner Straße@X=8654212@Y=50099751@U=80@L=3000016@",
     exhibitionUrl: "https://www.mggu.de/ausstellungen/",
-    eventApi: { type: "giersch", endpoint: "https://www.mggu.de/veranstaltungen/" },
     exhibitionApi: { type: "giersch", endpoint: "https://www.mggu.de/ausstellungen/" },
   },
   "museum-mmk-museum-mmk-fuer-moderne-kunst": {
@@ -332,7 +275,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     // venues; fetchMmk routes them to zollamt-mmk / tower-mmk via
     // related_venues + museum_slug_override. The /exhibitions/ feed is
     // structurally identical for upcoming exhibitions.
-    eventApi: { type: "mmk", endpoint: "https://cms.mmk.art/whats-on/" },
     exhibitionApi: { type: "mmk-cms", endpoint: "https://cms.mmk.art/exhibitions/" },
   },
   "museum-sinclair-haus-bad-homburg": {
@@ -363,7 +305,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.659,
     rmvStopLid: "A=1@O=Frankfurt (Main) Hohenstaufenstraße@X=8657655@Y=50110826@U=80@L=3001938@",
     exhibitionUrl: "https://www.schirn.de/ausstellung/",
-    eventApi: { type: "schirn", endpoint: "https://www.schirn.de/de/veranstaltungen/" },
     exhibitionApi: { type: "schirn", endpoint: "https://www.schirn.de/programm/" },
   },
   "schirn-in-bockenheim": {
@@ -381,10 +322,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6522,
     rmvStopLid: "A=1@O=Frankfurt (Main) Senckenbergmuseum@X=8652720@Y=50117047@U=80@L=3000211@",
     exhibitionUrl: "https://museumfrankfurt.senckenberg.de/de/ausstellungen/sonderausstellungen/",
-    eventApi: {
-      type: "senckenberg",
-      endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/events?per_page=100",
-    },
     exhibitionApi: {
       type: "senckenberg",
       endpoint: "https://museumfrankfurt.senckenberg.de/wp-json/wp/v2/exhibition?per_page=100",
@@ -396,7 +333,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6721,
     rmvStopLid: "A=1@O=Frankfurt (Main) Otto-Hahn-Platz@X=8675678@Y=50101864@U=80@L=3000922@",
     exhibitionUrl: "https://www.staedelmuseum.de/de/ausstellungen-programm",
-    eventApi: { type: "staedel", endpoint: "https://www.staedelmuseum.de/de/api/finder" },
     exhibitionApi: { type: "staedel", endpoint: "https://www.staedelmuseum.de/de/api/finder" },
   },
   "stoltze-museum": {
@@ -430,7 +366,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6779,
     rmvStopLid: "A=1@O=Frankfurt (Main) Schweizer-/Gartenstraße@X=8679553@Y=50103338@U=80@L=3000914@",
     exhibitionUrl: "https://weltkulturenmuseum.de/de/ausstellungen/",
-    eventApi: { type: "weltkulturen", endpoint: "https://weltkulturenmuseum.de/de/veranstaltungen" },
     exhibitionApi: { type: "weltkulturen", endpoint: "https://weltkulturenmuseum.de/de/ausstellungen/" },
   },
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": {
@@ -479,7 +414,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.5816,
     rmvStopLid: "A=1@O=Frankfurt (Main) Rheinlandstraße@X=8581112@Y=50082492@U=80@L=3001905@",
     exhibitionUrl: "https://hsf-ffm.com/de/termine/",
-    eventApi: { type: "eventon", endpoint: "https://hsf-ffm.com/de/termine/" },
   },
   dialogmuseum: {
     name: "Dialogmuseum",
@@ -502,7 +436,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6478,
     rmvStopLid: "A=1@O=Frankfurt (Main) Varrentrappstraße@X=8647443@Y=50115312@U=80@L=3001207@",
     exhibitionUrl: "https://www.experiminta.de/ausstellungen/sonderausstellungen/",
-    eventApi: { type: "experiminta", endpoint: "https://www.experiminta.de/event-sitemap.xml" },
   },
   atelierfrankfurt: {
     name: "Atelierfrankfurt",
@@ -526,7 +459,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6792,
     rmvStopLid: "A=1@O=Frankfurt (Main) Holzhausen-Park@X=8676910@Y=50127141@U=80@L=3001945@",
     exhibitionUrl: "https://www.frankfurter-buergerstiftung.de/programm/ausstellungen",
-    eventApi: { type: "buergerstiftung", endpoint: "https://www.frankfurter-buergerstiftung.de/programm/" },
   },
   "wollheim-memorial-frankfurt": {
     name: "Wollheim Memorial",
@@ -536,7 +468,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1244,
     lng: 8.6671,
     rmvStopLid: "A=1@O=Frankfurt (Main) Bockenheimer Warte@X=8649789@Y=50125353@U=80@L=3000111@",
-    eventApi: { type: "fritz-bauer-wollheim", endpoint: "https://www.fritz-bauer-institut.de/veranstaltungen" },
   },
 };
 
@@ -611,32 +542,39 @@ export function getImageAllowedDomains(): Set<string> {
     "images.cinetixx.com",
     "upload.wikimedia.org",
   ]);
+  const addHostname = (url: string | undefined): void => {
+    if (!url) return;
+    try {
+      const hostname = new URL(url).hostname;
+      domains.add(hostname);
+      if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
+      else domains.add(`www.${hostname}`);
+    } catch {}
+  };
   for (const config of Object.values(MUSEUMS)) {
-    const urls = [config.website, config.image, config.exhibitionUrl, config.eventApi?.endpoint].filter(Boolean);
-    for (const url of urls) {
-      try {
-        const hostname = new URL(url!).hostname;
-        domains.add(hostname);
-        if (hostname.startsWith("www.")) domains.add(hostname.slice(4));
-        else domains.add(`www.${hostname}`);
-      } catch {}
-    }
+    addHostname(config.website);
+    addHostname(config.image);
+    addHostname(config.exhibitionUrl);
+  }
+  for (const config of Object.values(SCRAPER_MUSEUMS)) {
+    addHostname(config.eventApi?.endpoint);
   }
   return domains;
 }
 
 export function getProxyDomains(): Set<string> {
   const domains = new Set<string>();
-  for (const config of Object.values(MUSEUMS)) {
+  for (const [slug, config] of Object.entries(MUSEUMS)) {
     if (!config.proxy) continue;
     if (config.exhibitionUrl) {
       try {
         domains.add(new URL(config.exhibitionUrl).hostname);
       } catch {}
     }
-    if (config.eventApi) {
+    const eventEndpoint = SCRAPER_MUSEUMS[slug]?.eventApi?.endpoint;
+    if (eventEndpoint) {
       try {
-        domains.add(new URL(config.eventApi.endpoint).hostname);
+        domains.add(new URL(eventEndpoint).hostname);
       } catch {}
     }
   }

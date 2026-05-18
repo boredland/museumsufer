@@ -23,6 +23,7 @@
     "@hono/zod-validator": "^0.7.6",
     "@museumsufer/core": "*",
     "@museumsufer/event-hub": "*",
+    "@museumsufer/scrapers": "*",
     "@scalar/hono-api-reference": "^0.10.14",
     "dayjs": "^1.11.20",
     "fuse.js": "^7.3.0",
