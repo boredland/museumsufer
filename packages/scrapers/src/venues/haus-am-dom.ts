@@ -150,7 +150,16 @@ function labelsFromCategories(
 }
 
 async function fetchHtml(url: string): Promise<string> {
-  const res = await fetch(url, { headers: HEADERS });
-  if (!res.ok) throw new Error(`haus-am-dom fetch failed: ${res.status} ${url}`);
-  return res.text();
+  // The Solr-backed listing endpoint sometimes returns 503 under burst load;
+  // a single 5s-backoff retry is enough to clear it in practice.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(url, { headers: HEADERS });
+    if (res.ok) return res.text();
+    if (res.status >= 500 && res.status < 600 && attempt === 0) {
+      await new Promise((r) => setTimeout(r, 5000));
+      continue;
+    }
+    throw new Error(`haus-am-dom fetch failed: ${res.status} ${url}`);
+  }
+  throw new Error(`haus-am-dom fetch failed after retry: ${url}`);
 }
