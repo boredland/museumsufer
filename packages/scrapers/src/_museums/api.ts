@@ -161,8 +161,8 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
       return fetchLiebieghaus(config.endpoint);
     case "mak":
       return fetchMak(config.endpoint);
-    case "stadtgeschichte-rss":
-      return fetchStadtgeschichteRss(config.endpoint);
+    case "stadtgeschichte-html":
+      return fetchStadtgeschichteHtml(config.endpoint);
     case "dommuseum":
       return fetchDommuseum(config.endpoint);
     case "ledermuseum":
@@ -877,43 +877,47 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
-  const res = await fetch(endpoint);
+// Scrapes the ISG calendar HTML page instead of the upstream isg_rss.php
+// feed: the RSS lags weeks behind and silently drops events (e.g. the
+// 8.6.2026 Lutz-Kleinhans concert appeared on the calendar but never in the feed).
+async function fetchStadtgeschichteHtml(endpoint: string): Promise<ApiEvent[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
-  const xml = await res.text();
+  const html = await res.text();
 
   const events: ApiEvent[] = [];
-  const itemRe = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+  // Split on tile-opening markers — non-greedy `</div></div>` boundaries are
+  // unreliable because each tile contains nested `<div>`s of its own.
+  const tiles = html.split(/<div class="tile tile-text[^"]*"[^>]*>/).slice(1);
 
-  while ((match = itemRe.exec(xml)) !== null) {
-    const item = match[1];
+  for (const tile of tiles) {
+    const dateBlockMatch = tile.match(/<p class="tile-date">([\s\S]*?)<\/p>/);
+    const titleMatch = tile.match(/<h2 class="tile-title">([\s\S]*?)<\/h2>/);
+    const subtitleMatch = tile.match(/<strong class="tile-sub-title">([^<]+)<\/strong>/);
+    const linkMatch = tile.match(/href="(\/de\/veranstaltungen\/kalender\/\d+\/[^"]+)"[^>]*class="link-more/);
+    const imgMatch = tile.match(/<noscript><img[^>]+src="([^"]+)"/);
+    const summaryMatch = tile.match(/<\/h2>\s*<p>([\s\S]*?)<\/p>/);
+    if (!dateBlockMatch || !titleMatch) continue;
 
-    const titleMatch = item.match(/<title>([^<]+)/);
-    const linkMatch = item.match(/<link>([^<]+)/);
-    const descMatch = item.match(/<description><!\[CDATA\[([\s\S]*?)\]\]>/);
-    if (!titleMatch || !descMatch) continue;
-
-    const desc = descMatch[1];
-    const title = titleMatch[1].trim();
-
-    const dateMatch = desc.match(/(\d{1,2})\.\s*(\w+)\s*(\d{4})/);
+    const dateText = stripHtml(dateBlockMatch[1]);
+    const dateMatch = dateText.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
     if (!dateMatch) continue;
-    const [, day, monthName, year] = dateMatch;
-    const monthNum = GERMAN_MONTHS[monthName.toLowerCase()];
-    if (!monthNum) continue;
-    const date = `${year}-${monthNum}-${day.padStart(2, "0")}`;
+    const [, day, month, year] = dateMatch;
+    const date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
-    const timeMatch = desc.match(/(\d{1,2}:\d{2})\s*Uhr/i);
-    const endTimeMatch = desc.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/i);
-    const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/);
-    const priceMatch = desc.match(/(\d+\s*€[^<,]*(?:,\s*ermäßigt\s*\d+\s*€)?)/i);
+    const timeMatch = dateText.match(/(\d{1,2}:\d{2})\s*Uhr/i);
+    const endTimeMatch = dateText.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/i);
 
-    let image_url: string | null = null;
-    if (imgMatch) {
-      image_url = imgMatch[1].startsWith("http") ? imgMatch[1] : `https://www.stadtgeschichte-ffm.de${imgMatch[1]}`;
-    }
+    const titleParts = stripHtml(titleMatch[1]).split(/\s+/).filter(Boolean).join(" ");
+    const subtitle = subtitleMatch ? subtitleMatch[1].trim() : null;
+    const title = subtitle ? `${subtitle}: ${titleParts}` : titleParts;
+
+    const summary = summaryMatch ? stripHtml(summaryMatch[1]) : "";
+    const description = truncateHtml(`${dateText} ${summary}`.trim());
+
+    const image_url = imgMatch ? normalizeUrl(imgMatch[1], "https://www.stadtgeschichte-ffm.de") : null;
+    const detail_url = linkMatch ? normalizeUrl(linkMatch[1], "https://www.stadtgeschichte-ffm.de") : null;
 
     events.push({
       title,
@@ -921,10 +925,11 @@ async function fetchStadtgeschichteRss(endpoint: string): Promise<ApiEvent[]> {
       time: nullIfMidnight(timeMatch ? timeMatch[1] : null),
       end_time: nullIfMidnight(endTimeMatch ? endTimeMatch[1] : null),
       end_date: null,
-      description: truncateHtml(desc),
-      detail_url: linkMatch ? linkMatch[1].trim() : null,
+      description,
+      detail_url,
       image_url,
-      price: priceMatch ? priceMatch[1].trim() : null,
+      price: null,
+      category: subtitle,
     });
   }
 

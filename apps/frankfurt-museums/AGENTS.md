@@ -36,7 +36,7 @@ A Cloudflare Worker that aggregates museum exhibitions and events from Frankfurt
 | `apps/frankfurt-museums/src/api.ts` | JSON API with SWR caching, past-event filtering, per-event ICS download, translation. |
 | `apps/frankfurt-museums/src/scraper.ts` | **Pure-function** scrape of museumsufer.de — no D1, returns ParsedMuseum/ParsedExhibition arrays. |
 | `apps/frankfurt-museums/src/museum-config.ts` | Museum coordinates, RMV stops, API endpoints, scraping config. |
-| `apps/frankfurt-museums/src/api-scrapers.ts` | 16 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-rss`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`, `dff-kino`. Each returns `ApiEvent[]`. |
+| `apps/frankfurt-museums/src/api-scrapers.ts` | 16 typed parsers: `tribe-events`, `historisches`, `juedisches`, `staedel`, `senckenberg`, `my-calendar`, `liebieghaus`, `mak`, `stadtgeschichte-html`, `dommuseum`, `ledermuseum`, `bibelhaus`, `fkv`, `fdh`, `dff-kino`. Each returns `ApiEvent[]`. |
 | `apps/frankfurt-museums/src/event-scraper.ts` | **Pure-function** event orchestrator: API-only (AI fallback removed), 7-day detail-page enrichment. |
 | `apps/frankfurt-museums/src/translate.ts` | Two faces: `translateFields()` (worker, reads SCRAPE_DATA) + `translateEvents()` (script, calls DeepL). |
 | `apps/frankfurt-museums/src/image-proxy.ts` | Edge-cached image proxy with dynamic domain allowlist. 7-day TTL. |
@@ -58,7 +58,7 @@ Configured in `apps/frankfurt-museums/src/museum-config.ts`. When the event scra
 | MFK | `museum-fuer-kommunikation-frankfurt` | `my-calendar` | My Calendar WP plugin, fallback time extraction from event_desc |
 | Liebieghaus | `liebieghaus-skulpturensammlung` | `liebieghaus` | schema.org Event HTML with duration |
 | MAK | `museum-angewandte-kunst` | `mak` | mak-event-item elements, time ranges in headings |
-| IfS | `institut-fuer-stadtgeschichte` | `stadtgeschichte-rss` | RSS feed with German dates/prices in description |
+| IfS | `institut-fuer-stadtgeschichte` | `stadtgeschichte-html` | Calendar HTML page — `tile-date`/`tile-title`/`tile-sub-title` per event. RSS feed (`isg_rss.php`) silently drops events; do not use it. |
 | Dommuseum | `dommuseum-frankfurt` | `dommuseum` | TYPO3 Calendarize per-event ICS files, needs browser UA |
 | Ledermuseum | `deutsches-ledermuseum-of` | `ledermuseum` | Kirby CMS li.quarter + div.date |
 | Bibelhaus | `bibelhaus-erlebnismuseum` | `bibelhaus` | BEM-style bmBase--eventsItem elements |
@@ -208,7 +208,7 @@ These issues exist in the current codebase. When fixing or refactoring scrapers,
 |---|---|---|---|
 | **tribe-events** (DAM) | No `nullIfMidnight()` on start/end times (lines 86-87) | Midnight times render as "00:00" instead of all-day events | Wrap both lines with `nullIfMidnight()` |
 | **mak** (MAK) | No `nullIfMidnight()` on time/end_time (lines 667-668) | Times extracted via regex could theoretically be "00:00" | Use `nullIfMidnight()` for both; low risk since regex-matched |
-| **stadtgeschichte-rss** (IfS) | No `nullIfMidnight()` on time/end_time (lines 721-722) | Times extracted via regex not filtered for "00:00" | Use `nullIfMidnight()` for both |
+| **stadtgeschichte-html** (IfS) | Times extracted from calendar HTML via regex | `nullIfMidnight()` already applied — keep that when refactoring | Already wrapped |
 | All parsers | Inconsistent midnight handling | Some use utility, some manual checks, some skip | Always use `nullIfMidnight()` from shared.ts |
 
 **Pattern to avoid:** Using `.slice(11, 16)` on ISO datetime without wrapping in `nullIfMidnight()`:
