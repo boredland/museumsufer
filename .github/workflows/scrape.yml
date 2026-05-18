@@ -60,6 +60,10 @@ jobs:
           FETCH_PROXY_TOKEN: ${{ secrets.FETCH_PROXY_TOKEN }}
         run: bun scripts/scrape.ts
 
+      - name: Derive lichtspiel-haus
+        working-directory: apps/lichtspiel-haus
+        run: bun scripts/scrape.ts
+
       - name: Commit if changed
         run: |
           git config user.name "scrape-bot"
@@ -74,7 +78,9 @@ jobs:
             apps/frankfurt-theaters/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
-            apps/frankfurt-museums/src/scrape-data.ts
+            apps/frankfurt-museums/src/scrape-data.ts \
+            apps/lichtspiel-haus/src/scrape-data.ts \
+            apps/lichtspiel-haus/src/synthesized-cinemas.ts
           if git diff --cached --quiet; then
             echo "no diff, skipping commit"
             exit 0
@@ -90,4 +96,6 @@ jobs:
             apps/frankfurt-theaters/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
-            apps/frankfurt-museums/src/scrape-data.ts
+            apps/frankfurt-museums/src/scrape-data.ts \
+            apps/lichtspiel-haus/src/scrape-data.ts \
+            apps/lichtspiel-haus/src/synthesized-cinemas.ts

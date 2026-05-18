@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="konzert.haus">
+  <rect width="1200" height="630" fill="#F7F0E7"/>
+  <rect x="0" y="0" width="1200" height="14" fill="#9E7A38"/>
+  <rect x="0" y="616" width="1200" height="14" fill="#9E7A38"/>
+
+  <text x="600" y="80" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="18" font-weight="500" fill="#9E7A38" letter-spacing="6">FRANKFURT · RHEIN-MAIN</text>
+
+  <text x="600" y="320" text-anchor="middle" font-family="'Cormorant Garamond','EB Garamond','Garamond','Liberation Serif',Georgia,serif" font-size="190" font-weight="500" fill="#1A1210" letter-spacing="-6">konzert<tspan fill="#9E7A38">.</tspan>haus</text>
+
+  <line x1="380" y1="372" x2="820" y2="372" stroke="#9E7A38" stroke-width="1" opacity="0.55"/>
+
+  <text x="600" y="430" text-anchor="middle" font-family="'Cormorant Garamond','EB Garamond','Garamond','Liberation Serif',Georgia,serif" font-style="italic" font-size="38" font-weight="400" fill="#1A1210">Frankfurt hört zu.</text>
+
+  <text x="600" y="490" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="16" font-weight="400" fill="rgba(26,18,16,0.58)" letter-spacing="4">KLASSIK · JAZZ · KAMMER · KIRCHE · WELT · NEUE MUSIK</text>
+
+  <text x="600" y="560" text-anchor="middle" font-family="'IBM Plex Mono','DM Mono','Liberation Mono','Courier New',monospace" font-size="14" font-weight="400" fill="#9E7A38" letter-spacing="4">07 · 17 · So 09</text>
+</svg>
