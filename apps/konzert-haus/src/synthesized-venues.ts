@@ -33,6 +33,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "eschborn-k",
+    name: "Eschborn K",
+    address: "",
+    lat: 50.1457,
+    lon: 8.571,
+    city: "frankfurt",
+    website_url: "https://eschborn-k.de",
+    default_genre: "classical",
+  },
+  {
     slug: "frankfurter-buergerstiftung",
     name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
     address: "",
@@ -61,6 +71,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.gallustheater.de",
     default_genre: "world",
+  },
+  {
+    slug: "hafen-2-offenbach",
+    name: "Hafen 2 Offenbach",
+    address: "",
+    lat: 50.0972,
+    lon: 8.7449,
+    city: "frankfurt",
+    website_url: "https://loveyourartist.com",
+    default_genre: "experimental",
   },
   {
     slug: "haus-am-dom",
