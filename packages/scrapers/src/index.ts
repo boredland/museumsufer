@@ -21,6 +21,7 @@ export {
 } from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
+import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
@@ -184,6 +185,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
+  { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
