@@ -106,8 +106,11 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "capitol-mainz": [50.0046, 8.2693],
   "cinema-frankfurt": [50.1132, 8.6786],
   "eldorado-frankfurt": [50.1138, 8.6843],
+  "filmkreis-darmstadt": [49.8746, 8.6557],
   "harmonie-frankfurt": [50.0976, 8.6818],
+  "kino-koeppern": [50.2554, 8.6453],
   malsehn: [50.1235, 8.6789],
+  "murnau-filmtheater": [50.0857, 8.2456],
   "orfeos-erben": [50.1149, 8.6452],
   pupille: [50.1247, 8.6573],
 

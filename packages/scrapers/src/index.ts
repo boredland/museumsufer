@@ -48,6 +48,7 @@ import { scrapeEnsembleModern } from "./venues/ensemble-modern";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
+import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
@@ -69,6 +70,7 @@ import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
+import { scrapeKinoKoeppern } from "./venues/kino-koeppern";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
@@ -79,6 +81,7 @@ import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMousonturm } from "./venues/mousonturm";
+import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
@@ -145,6 +148,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
+  { slug: "filmkreis-darmstadt", run: (_ctx: ScraperContext) => scrapeFilmkreisDarmstadt() },
   {
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
@@ -169,6 +173,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "karl-marx-buchhandlung", run: (_ctx: ScraperContext) => scrapeKarlMarxBuchhandlung() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
+  { slug: "kino-koeppern", run: (_ctx: ScraperContext) => scrapeKinoKoeppern() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "komoedie-frankfurt", run: (_ctx: ScraperContext) => scrapeKomoedieFrankfurt() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
@@ -182,6 +187,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
+  { slug: "murnau-filmtheater", run: (_ctx: ScraperContext) => scrapeMurnauFilmtheater() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
@@ -242,6 +248,7 @@ export {
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
   scrapeFgzStreitclub,
+  scrapeFilmkreisDarmstadt,
   scrapeForschungskollegHumanwissenschaften,
   scrapeFrankfurterSparkasse,
   scrapeFrankfurtUas,
@@ -263,6 +270,7 @@ export {
   scrapeJuedischeGemeinde,
   scrapeKarlMarxBuchhandlung,
   scrapeKellertheaterFrankfurt,
+  scrapeKinoKoeppern,
   scrapeKirchenmusikDreikoenig,
   scrapeKomoedieFrankfurt,
   scrapeKronbergAcademy,
@@ -273,6 +281,7 @@ export {
   scrapeLiteraturhaus,
   scrapeMalsehn,
   scrapeMousonturm,
+  scrapeMurnauFilmtheater,
   scrapeMuseumsFrankfurt,
   scrapeMusikschuleFrankfurt,
   scrapeNaxos,
