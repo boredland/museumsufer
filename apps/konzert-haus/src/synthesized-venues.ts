@@ -23,6 +23,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "dfg-frankfurt",
+    name: "Deutsch-Französische Gesellschaft Frankfurt",
+    address: "",
+    lat: 50.1109,
+    lon: 8.6736,
+    city: "frankfurt",
+    website_url: "https://www.dfg-frankfurt.de",
+    default_genre: "classical",
+  },
+  {
     slug: "dramatische-buehne",
     name: "Die Dramatische Bühne",
     address: "",
