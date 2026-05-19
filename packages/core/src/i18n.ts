@@ -115,12 +115,15 @@ export function buildHreflangAlternates<L extends Locale>(opts: {
   fallback: L;
 }): HreflangAlternate[] {
   const { currentPath, appUrl, supported, fallback } = opts;
-  const out: HreflangAlternate[] = supported
-    .filter((l) => l !== fallback)
-    .map((l) => ({
-      hreflang: l,
-      href: `${appUrl}${localisedPath(currentPath, l, fallback)}`,
-    }));
+  // Google requires a self-referencing hreflang for *every* declared
+  // locale, including the fallback. Previously we dropped the fallback
+  // language alternate on the assumption that x-default covered it --
+  // but Google's validators treat that as an incomplete cluster, so
+  // emit one per supported locale plus the x-default pointer.
+  const out: HreflangAlternate[] = supported.map((l) => ({
+    hreflang: l,
+    href: `${appUrl}${localisedPath(currentPath, l, fallback)}`,
+  }));
   out.push({ hreflang: "x-default", href: `${appUrl}${stripLangParam(currentPath) || "/"}` });
   return out;
 }

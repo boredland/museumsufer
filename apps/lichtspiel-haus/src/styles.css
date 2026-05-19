@@ -1487,6 +1487,86 @@ a.ext-score:hover {
   max-width: 64ch;
   white-space: pre-line;
 }
+.film-detail__lead {
+  margin: 1rem 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--celluloid-soft);
+  max-width: 64ch;
+}
+.film-detail__lang-note {
+  margin: 0 0 0.6rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--brass);
+  opacity: 0.8;
+}
+.film-detail__attribution {
+  margin: 0.75rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--celluloid-soft);
+  opacity: 0.65;
+}
+
+/* ── /reihe lead paragraph ───────────────────────────────────────── */
+.venue-hero__lead {
+  margin: 0.85rem 0 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--celluloid-soft);
+  max-width: 56ch;
+}
+
+/* ── /kinos directory ────────────────────────────────────────────── */
+.cinemas-index {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--brass-soft);
+}
+.cinemas-index__row {
+  display: grid;
+  gap: 0.35rem 1rem;
+  grid-template-columns: 1fr auto;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--brass-soft);
+}
+.cinemas-index__link {
+  display: contents;
+  text-decoration: none;
+  color: inherit;
+}
+.cinemas-index__name {
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 1.25rem;
+  color: var(--celluloid);
+}
+.cinemas-index__count {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--brass);
+  align-self: center;
+}
+.cinemas-index__addr {
+  grid-column: 1 / -1;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--celluloid-soft);
+}
+.cinemas-index__link:hover .cinemas-index__name { color: var(--brass-bright); }
 
 /* ── Footer ────────────────────────────────────────────────────────── */
 

@@ -1,7 +1,7 @@
 import { buildApiCatalog, buildManifest, buildRobotsTxt, dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CINEMAS } from "../cinema-config";
-import { getAllSeries } from "../db";
+import { getAllSeries, getScreeningsInRange } from "../db";
 import type { Env } from "../types";
 
 const APP_URL = "https://frankfurt.lichtspiel.haus";
@@ -27,7 +27,15 @@ const MANIFEST = buildManifest({
   ],
 });
 
-const LLMS_TXT = `# lichtspiel.haus
+function buildLlmsTxt(): string {
+  const today = todayIso();
+  const series = getAllSeries(today);
+  const cinemaLines = CINEMAS.slice()
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .map((c) => `- ${c.slug}: ${c.name}`)
+    .join("\n");
+  const seriesLines = series.map((s) => `- ${s.slug}: ${s.name}`).join("\n");
+  return `# lichtspiel.haus
 
 > Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${CINEMAS.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.
 
@@ -69,12 +77,21 @@ GET /kino/{slug}/feed.ics — single cinema
 GET /reihe/{slug}/feed.ics — single film series
 GET /film/{id}/feed.ics — single screening
 
+## Cinemas
+
+${cinemaLines}
+
+## Current film series
+
+${seriesLines || "(none active)"}
+
 ## Notes
 
 - Content is in German (English available via ?lang=en). Dates: ISO 8601 (YYYY-MM-DD); times: HH:MM Europe/Berlin.
 - Versions: OmU = original w/ German subtitles, OmeU = original w/ English subtitles, DF = German-dubbed, OV = original, stumm = silent.
 - Data refreshes multiple times daily via a GitHub Action.
 `;
+}
 
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
 const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
@@ -89,38 +106,35 @@ app.get("/.well-known/api-catalog", (c) =>
 
 app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
 
+// Window for date pages -- 14 days, matching the rolling window most
+// upstream cinema schedules publish. Beyond that the /tag/:date pages
+// risk being empty templates; the sitemap audit flagged this as
+// thin-content if we stamped 60 days unconditionally.
+const SITEMAP_DATE_DAYS = 14;
+
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
   const cinemaUrls = CINEMAS.slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
-    .map(
-      (v) => `  <url>
-    <loc>${APP_URL}/kino/${v.slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>`,
-    )
+    .map((v) => `  <url>\n    <loc>${APP_URL}/kino/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const seriesUrls = getAllSeries(today)
-    .map(
-      (s) => `  <url>
-    <loc>${APP_URL}/reihe/${s.slug}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>`,
-    )
+    .map((s) => `  <url>\n    <loc>${APP_URL}/reihe/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
-  const dateUrls = Array.from({ length: 60 }, (_, i) => dateOffset(i))
-    .map(
-      (d) => `  <url>
-    <loc>${APP_URL}/tag/${d}</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>`,
-    )
+  const dateUrls = Array.from({ length: SITEMAP_DATE_DAYS }, (_, i) => dateOffset(i))
+    // Each /tag/:date page's lastmod IS the date itself -- by the time
+    // the day arrives the data is settled, before then the page may
+    // still be backfilled. Stamping `today` everywhere would be the
+    // mass-stamping antipattern Google ignores.
+    .map((d) => `  <url>\n    <loc>${APP_URL}/tag/${d}</loc>\n    <lastmod>${d}</lastmod>\n  </url>`)
+    .join("\n");
+
+  // /film/:id pages -- highest-intent landing pages. Cap to the same
+  // 14-day window so the sitemap stays bounded; older screenings have
+  // already happened and don't need indexing.
+  const horizon = dateOffset(SITEMAP_DATE_DAYS);
+  const filmUrls = getScreeningsInRange(today, horizon)
+    .map((s) => `  <url>\n    <loc>${APP_URL}/film/${s.id}</loc>\n    <lastmod>${s.date}</lastmod>\n  </url>`)
     .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -128,24 +142,23 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${APP_URL}/</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
   </url>
   <url>
-    <loc>${APP_URL}/api/docs</loc>
+    <loc>${APP_URL}/kinos</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>${APP_URL}/reihe</loc>
+    <lastmod>${today}</lastmod>
   </url>
   <url>
     <loc>${APP_URL}/impressum</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
 ${dateUrls}
 ${cinemaUrls}
 ${seriesUrls}
+${filmUrls}
 </urlset>`;
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
 });
@@ -157,13 +170,13 @@ app.get("/manifest.json", (c) =>
 );
 
 app.get("/llms.txt", (c) =>
-  c.body(LLMS_TXT, {
+  c.body(buildLlmsTxt(), {
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
   }),
 );
 
 app.get("/.well-known/llms.txt", (c) =>
-  c.body(LLMS_TXT, {
+  c.body(buildLlmsTxt(), {
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
   }),
 );

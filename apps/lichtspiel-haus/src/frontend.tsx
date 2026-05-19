@@ -1556,19 +1556,42 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   const { date, today, screenings, dateStrip, locale, tr, turnstileSiteKey, range = null } = props;
   const niceDate = niceDateFor(date, locale);
   const currentPath = range ? `/tag/${date}?range=${range}` : `/tag/${date}`;
+  // Title needs "Frankfurt" + "Kino"/cinema for the dominant SERP
+  // queries -- the previous "lichtspiel.haus · 19. Mai 2026" form
+  // omitted both. homeTitle in i18n carries the localised brand line.
+  // The home (/) and /tag/<today> render identical content; collapse
+  // both to the / canonical so duplicate-content signals don't split.
+  // Non-today dates remain self-canonical at /tag/<date>.
+  const isToday = date === today;
+  const title = isToday ? tr.homeTitle : `${tr.homeTitle} — ${niceDate}`;
+  const canonical = isToday ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
+    url: APP_URL,
+    name: "lichtspiel.haus",
+    inLanguage: ["de", "en"],
+    publisher: { "@type": "Organization", name: "lichtspiel.haus" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${APP_URL}/?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  };
   return (
     <>
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
           <Head
-            title={`lichtspiel.haus · ${niceDate}`}
+            title={title}
             description={tr.homeDescription}
-            canonical={`${APP_URL}/tag/${date}${langSuffix(locale)}`}
+            canonical={canonical}
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
           />
         </head>
         <body>
