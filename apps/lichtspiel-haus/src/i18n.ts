@@ -93,6 +93,16 @@ export interface Translations {
   cinemaDescription: (cinema: string, count: number) => string;
   seriesDescription: (series: string, count: number) => string;
   filmKicker: string;
+  // Search bar (above the date strip)
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchEmpty: string;
+  // Mark-seen / hide
+  markSeen: string;
+  unmarkSeen: string;
+  seenHiddenLead: (n: number) => string;
+  seenReveal: string;
+  seenHide: string;
   /** "← Zum Programm" — top-of-page link on every detail view back to
    *  the day programme. /film/:id deep-links to the screening's row. */
   backToProgramme: string;
@@ -201,6 +211,14 @@ const de: Translations = {
   seriesDescription: (series, count) =>
     `Filmreihe »${series}« — ${count} Vorstellung${count === 1 ? "" : "en"} in den nächsten 60 Tagen.`,
   filmKicker: "Vorstellung",
+  searchLabel: "Suchen",
+  searchPlaceholder: "Filme, Regisseur:innen, Kinos suchen …",
+  searchEmpty: "Keine Treffer",
+  markSeen: "Als gesehen markieren",
+  unmarkSeen: "Markierung entfernen",
+  seenHiddenLead: (n) => `${n} bereits gesehene${n === 1 ? "r Film" : " Filme"} ausgeblendet`,
+  seenReveal: "Einblenden",
+  seenHide: "Wieder ausblenden",
   backToProgramme: "Zum Programm",
   backToSeriesIndex: "Alle Filmreihen",
   langSwitchAria: "Sprache",
@@ -327,6 +345,14 @@ const en: Translations = {
   seriesDescription: (series, count) =>
     `Film series "${series}" — ${count} ${count === 1 ? "screening" : "screenings"} in the next 60 days.`,
   filmKicker: "Screening",
+  searchLabel: "Search",
+  searchPlaceholder: "Search films, directors, cinemas …",
+  searchEmpty: "No results",
+  markSeen: "Mark as seen",
+  unmarkSeen: "Unmark",
+  seenHiddenLead: (n) => `${n} already-seen film${n === 1 ? "" : "s"} hidden`,
+  seenReveal: "Show",
+  seenHide: "Hide again",
   backToProgramme: "Back to programme",
   backToSeriesIndex: "All film series",
   langSwitchAria: "Language",

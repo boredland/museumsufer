@@ -76,6 +76,11 @@ export interface Screening {
   format?: Format;
   /** Series this screening belongs to (Nippon Connection, Udo Kier, …). */
   series?: SeriesRef;
+  /** Stable per-film identifier the "mark seen" feature uses. Prefer the
+   *  TMDb id (`tmdb:1234`) so a film hides across every date + cinema in
+   *  one click; falls back to a slug of the normalised title for screenings
+   *  without a TMDb match (those at least hide per repeated venue listing). */
+  seen_key?: string;
   /** TMDb id (when the hub enrichment found a match). Front-end uses it
    *  to deep-link to themoviedb.org/{tmdb_kind}/{tmdb_id} from the
    *  screening card. */
