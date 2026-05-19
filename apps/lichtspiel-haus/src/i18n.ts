@@ -268,7 +268,7 @@ const de: Translations = {
 const en: Translations = {
   tagline: "Tonight's play of light across Frankfurt's screens.",
   dateStripLabel: "Showing days",
-  todayProgrammeTitle: "Tonight's screenings",
+  todayProgrammeTitle: "Today's screenings",
   emptyTitle: "No screenings announced today.",
   emptyTodayAfterPast: "No more upcoming screenings today.",
   emptyHint: "Check back tomorrow or change the date above.",
