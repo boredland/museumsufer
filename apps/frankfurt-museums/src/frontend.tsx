@@ -545,6 +545,27 @@ export function renderPage(
   const webAppSchemaJson = JSON.stringify(webAppSchema);
   const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr, locale)));
 
+  // ItemList of every museum in the directory. Signals the hub-and-
+  // spoke relationship to Google + AI assistants; supports site-links
+  // rich results for navigational queries like "Museumsufer Frankfurt
+  // Museen". Built from the same `museums` prop the page renders.
+  const itemListSchema = museums
+    ? JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "@id": "https://museumsufer.app/#museums",
+        name:
+          locale === "fr" ? "Musées du Museumsufer" : locale === "en" ? "Museumsufer museums" : "Museumsufer-Museen",
+        numberOfItems: Object.keys(museums).length,
+        itemListElement: Object.entries(museums).map(([slug, m], i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          url: `https://museumsufer.app/museum/${slug}`,
+          name: m.name,
+        })),
+      })
+    : null;
+
   const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
   const jsonSchemas = [
     { name: "website", json: websiteSchema },
@@ -552,6 +573,7 @@ export function renderPage(
     { name: "org", json: orgSchemaJson },
     { name: "webapp", json: webAppSchemaJson },
     { name: "faq", json: faqSchema },
+    ...(itemListSchema ? [{ name: "museums", json: itemListSchema }] : []),
   ];
 
   return (
