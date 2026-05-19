@@ -2,7 +2,6 @@ import {
   berlinHourMinute,
   buildFaqPageSchema,
   buildHreflangAlternates,
-  buildLangParam,
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
@@ -64,7 +63,9 @@ export function genreLabel(g: Genre, tr: Translations): string {
   }
 }
 
-const langSuffix = (locale: Locale, separator: "?" | "&" = "?") => buildLangParam(locale, DEFAULT_LOCALE, separator);
+// Always emit `?lang=<locale>` so an explicit user choice survives
+// sub-page navigation -- see lichtspiel-haus for the full rationale.
+const langSuffix = (locale: Locale, separator: "?" | "&" = "?") => `${separator}lang=${locale}`;
 
 const GENRE_ORDER: Genre[] = ["classical", "jazz", "chamber", "sacred", "world", "experimental"];
 

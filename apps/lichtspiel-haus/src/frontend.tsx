@@ -2,7 +2,6 @@ import {
   berlinHourMinute,
   buildFaqPageSchema,
   buildHreflangAlternates,
-  buildLangParam,
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
@@ -47,7 +46,15 @@ export const REPO_URL = "https://github.com/boredland/museumsufer";
 
 const utm = buildUtm("frankfurt.lichtspiel.haus");
 
-const langSuffix = (locale: Locale, separator: "?" | "&" = "?") => buildLangParam(locale, DEFAULT_LOCALE, separator);
+// Always emit `?lang=<locale>` on internal links so an explicit user
+// choice survives sub-page navigation. The fallback-omitting variant
+// (`buildLangParam`) silently dropped `?lang=de` for German visitors,
+// which broke the flow for anyone on an English browser who manually
+// switched to DE: the next sub-page would re-detect via Accept-Language
+// and render in English. Canonical URLs use the same suffix so the
+// `?lang=de` parameter is part of the indexed URL -- minor cosmetic
+// trade-off, and search engines handle parameterised canonicals.
+const langSuffix = (locale: Locale, separator: "?" | "&" = "?") => `${separator}lang=${locale}`;
 
 interface PageProps {
   date: string;

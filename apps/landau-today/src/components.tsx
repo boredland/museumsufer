@@ -1,7 +1,7 @@
 import { Fragment } from "hono/jsx";
 import { CATEGORIES, CATEGORY_BY_SLUG, type CategoryDef } from "./categories";
 import { todayIso } from "./date";
-import { categoryLabel, DEFAULT_LOCALE, type Locale, type Translations } from "./i18n";
+import { categoryLabel, type Locale, type Translations } from "./i18n";
 import { imageProxyUrl } from "./image-proxy";
 import {
   dayOfMonth,
@@ -14,8 +14,10 @@ import {
 } from "./shared";
 import type { Event } from "./types";
 
+// Always emit `?lang=<locale>` so an explicit user choice survives
+// sub-page navigation -- see lichtspiel-haus for the full rationale.
 function langSuffix(locale: Locale, sep: "?" | "&" = "?"): string {
-  return locale === DEFAULT_LOCALE ? "" : `${sep}lang=${locale}`;
+  return `${sep}lang=${locale}`;
 }
 
 interface ChipRowProps {
