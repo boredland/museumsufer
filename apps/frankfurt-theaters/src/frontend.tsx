@@ -1315,7 +1315,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   const isToday = date === today;
   const title = isToday
     ? "Frankfurt Theater — Vorstellungen heute in Frankfurt am Main"
-    : `Frankfurt Theater · ${niceDate}`;
+    : `Frankfurt Theater — Vorstellungen am ${niceDate} in Frankfurt am Main`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
