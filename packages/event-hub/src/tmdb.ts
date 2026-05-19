@@ -20,6 +20,7 @@
 import PQueue from "p-queue";
 import type { TmdbCacheEntry } from "../data/tmdb-cache";
 import { translateBatch } from "./deepl";
+import { fetchOmdb } from "./omdb";
 import type { CanonicalEvent } from "./types";
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
@@ -70,6 +71,9 @@ export interface EnrichOptions {
    *  TMDb has a German overview but no English one. Multiple keys allow
    *  free-tier quota failover. */
   deeplApiKeys?: string;
+  /** OMDb API key (free tier, 1000 req/day) for Rotten Tomatoes critic
+   *  % + IMDb rating + IMDb vote count. Skipped silently when unset. */
+  omdbApiKey?: string;
 }
 
 const YEAR_RE = /\b(19\d{2}|20\d{2})\b/;
@@ -214,16 +218,33 @@ function hitTitle(hit: TmdbMovieResult | TmdbTvResult): string | undefined {
   return tv?.trim() || undefined;
 }
 
+/** Fetch IMDb id from /{kind}/{id}/external_ids — needed for the OMDb
+ *  pivot (RT critic + IMDb rating). Returns undefined on any error so
+ *  the en-US detail call still wins the rest of the entry. */
+async function fetchImdbId(kind: "movie" | "tv", id: number, apiKey: string): Promise<string | undefined> {
+  const params = new URLSearchParams({ api_key: apiKey });
+  const res = await fetch(`${TMDB_BASE}/${kind}/${id}/external_ids?${params}`, {
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) return undefined;
+  const data = (await res.json()) as { imdb_id?: string | null };
+  const v = data.imdb_id?.trim();
+  return v && /^tt\d{6,}$/.test(v) ? v : undefined;
+}
+
 async function toEntry(
   hit: TmdbMovieResult | TmdbTvResult | null,
   kind: "movie" | "tv",
   apiKey: string,
 ): Promise<TmdbCacheEntry | null> {
   if (!hit) return null;
-  // One en-US detail call gives us both the English title and the
-  // English overview. Failures don't sink the whole match — the en
-  // fields just stay undefined and apps fall back to the German ones.
-  const en: { title?: string; overview?: string } = await fetchEnglishDetails(kind, hit.id, apiKey).catch(() => ({}));
+  // Run the en-US detail call + the external_ids call in parallel —
+  // they're independent and we want both. Either may fail without
+  // sinking the entry.
+  const [en, imdb_id] = await Promise.all([
+    fetchEnglishDetails(kind, hit.id, apiKey).catch((): { title?: string; overview?: string } => ({})),
+    fetchImdbId(kind, hit.id, apiKey).catch(() => undefined),
+  ]);
   return {
     id: hit.id,
     poster: hit.poster_path ?? null,
@@ -235,6 +256,7 @@ async function toEntry(
     genre_ids: hit.genre_ids?.length ? hit.genre_ids : undefined,
     vote_average: typeof hit.vote_average === "number" ? hit.vote_average : undefined,
     vote_count: typeof hit.vote_count === "number" ? hit.vote_count : undefined,
+    imdb_id,
   };
 }
 
@@ -307,7 +329,8 @@ export async function enrichFilmPosters(
         cached.overview === undefined ||
         cached.overview_en === undefined ||
         cached.genre_ids === undefined ||
-        cached.vote_count === undefined);
+        cached.vote_count === undefined ||
+        cached.imdb_id === undefined);
 
     if ((!hadHit || needsRefresh) && !pendingByKey.has(key) && pendingByKey.size < maxLookups) {
       pendingByKey.set(key, { key, title, year, refresh: needsRefresh });
@@ -365,6 +388,51 @@ export async function enrichFilmPosters(
     }
   }
 
+  // Pass 2c: OMDb pivot for the ratings TMDb doesn't carry — Rotten
+  // Tomatoes critic % + IMDb rating. Keyed on imdb_id which TMDb's
+  // external_ids endpoint already populated in pass 2. Fanned out
+  // through the same PQueue as the TMDb lookups; one OMDb call per
+  // cache entry that has imdb_id but is missing the ratings.
+  let omdbMatched = 0;
+  let omdbFailed = 0;
+  const omdbKey = opts.omdbApiKey?.trim();
+  if (omdbKey) {
+    const pendingOmdb: Array<{ cacheKey: string; imdb_id: string }> = [];
+    for (const [cacheKey, entry] of Object.entries(opts.cache)) {
+      if (!entry?.imdb_id) continue;
+      // Skip when we've already tried — rt_critic + imdb_rating cleared
+      // means there's nothing to fetch. We use a sentinel-less check:
+      // if neither has been populated AND the entry has an imdb_id, the
+      // entry hasn't been queried yet (or was queried before this
+      // schema). Re-query is cheap and free-tier-safe.
+      if (entry.rt_critic === undefined && entry.imdb_rating === undefined) {
+        pendingOmdb.push({ cacheKey, imdb_id: entry.imdb_id });
+      }
+    }
+    if (pendingOmdb.length > 0) {
+      const omdbQueue = new PQueue({ concurrency: opts.concurrency ?? 8 });
+      for (const p of pendingOmdb) {
+        omdbQueue.add(async () => {
+          try {
+            const extras = await fetchOmdb(p.imdb_id, omdbKey);
+            const entry = opts.cache[p.cacheKey];
+            if (!entry) return;
+            if (typeof extras.rt_critic === "number") entry.rt_critic = extras.rt_critic;
+            if (typeof extras.imdb_rating === "number") entry.imdb_rating = extras.imdb_rating;
+            if (typeof extras.imdb_votes === "number") entry.imdb_votes = extras.imdb_votes;
+            if (extras.rt_critic !== undefined || extras.imdb_rating !== undefined) omdbMatched++;
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            log(`omdb: lookup failed for ${p.imdb_id} — ${msg}`);
+            omdbFailed++;
+          }
+        });
+      }
+      await omdbQueue.onIdle();
+      log(`omdb: matched=${omdbMatched}/${pendingOmdb.length} (failed=${omdbFailed})`);
+    }
+  }
+
   // Pass 3: project the (now-complete) cache back onto events.
   let matched = 0;
   let cachedHits = 0;
@@ -387,6 +455,10 @@ export async function enrichFilmPosters(
     if (entry.genre_ids?.length) ev.tmdb_genre_ids = entry.genre_ids;
     if (typeof entry.vote_average === "number") ev.tmdb_vote_average = entry.vote_average;
     if (typeof entry.vote_count === "number") ev.tmdb_vote_count = entry.vote_count;
+    if (entry.imdb_id) ev.imdb_id = entry.imdb_id;
+    if (typeof entry.rt_critic === "number") ev.rt_critic = entry.rt_critic;
+    if (typeof entry.imdb_rating === "number") ev.imdb_rating = entry.imdb_rating;
+    if (typeof entry.imdb_votes === "number") ev.imdb_votes = entry.imdb_votes;
     if (!ev.tmdb_id) ev.tmdb_id = entry.id;
     if (entry.kind && !ev.tmdb_kind) ev.tmdb_kind = entry.kind;
     matched++;

@@ -68,6 +68,14 @@ export interface Screening {
    *  as a percentage when the count clears a confidence threshold. */
   tmdb_vote_average?: number;
   tmdb_vote_count?: number;
+  /** IMDb id (tt…). Used for the "open on IMDb" deep link + as the OMDb
+   *  pivot the hub already resolved at scrape time. */
+  imdb_id?: string;
+  /** Rotten Tomatoes critic % (0–100). From OMDb. */
+  rt_critic?: number;
+  /** IMDb user rating 0–10 + vote count. From OMDb. */
+  imdb_rating?: number;
+  imdb_votes?: number;
   /** Audience-facing version markers parsed from title/description. */
   version?: Version;
   /** Original language of the print. */

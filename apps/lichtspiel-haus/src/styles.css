@@ -907,6 +907,41 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   .rating-meter__bulb { width: 5px; height: 5px; }
 }
 
+/* RT + IMDb badges sit immediately after the marquee meter — same
+ * restraint as OmU / DCP, brass-on-auditorium with 1px brass-tinted
+ * borders. The TMDb meter is still the primary signal; these are
+ * secondary informational pivots. */
+.ext-scores {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: 0.55rem;
+  vertical-align: middle;
+}
+.ext-score {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brass);
+  border: 1px solid color-mix(in oklab, var(--brass) 35%, transparent);
+  padding: 0.1rem 0.4rem 0.05rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color 220ms, border-color 220ms, background 220ms;
+  font-variant-numeric: tabular-nums;
+}
+a.ext-score:hover {
+  color: var(--brass-bright);
+  border-color: var(--brass-bright);
+  background: var(--brass-soft);
+}
+@media (max-width: 560px) {
+  .ext-scores { gap: 0.3rem; margin-left: 0.4rem; }
+  .ext-score { font-size: 0.56rem; padding: 0.08rem 0.35rem 0.04rem; }
+}
+
 /* TMDb genre pills below the description — typography matches the
  * format/version badges row but with a softer dust tone, so the
  * billing block is still the dominant signal. */
