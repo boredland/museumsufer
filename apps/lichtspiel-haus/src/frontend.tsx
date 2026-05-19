@@ -717,9 +717,28 @@ if ('serviceWorker' in navigator) {
   });
   window.addEventListener('popstate', syncDateStrip);
 
-  function onReady(){ syncDateStrip(); }
+  /** Honour the #screening-{id} hash that detail pages link back to.
+   *  Native hash-jump fires before our CSS + variable-font load settles
+   *  layout, so the target sits at the wrong scroll position. Re-scroll
+   *  on next frame with block:center so the row is comfortably in view,
+   *  and toggle a :target-like flash class for a moment so the visitor
+   *  registers the right row. */
+  function scrollToHashTarget(){
+    if (!location.hash || location.hash.length < 2) return;
+    var el;
+    try { el = document.querySelector(location.hash); } catch (_) { return; }
+    if (!el) return;
+    requestAnimationFrame(function(){
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el.classList.add('prog-entry--flash');
+      setTimeout(function(){ el.classList.remove('prog-entry--flash'); }, 1800);
+    });
+  }
+
+  function onReady(){ syncDateStrip(); scrollToHashTarget(); }
   if (document.readyState !== 'loading') onReady();
   else document.addEventListener('DOMContentLoaded', onReady);
+  window.addEventListener('hashchange', scrollToHashTarget);
 
   (function(){
     var dlg = document.getElementById('contact-dialog');
