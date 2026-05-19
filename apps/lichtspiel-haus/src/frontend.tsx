@@ -858,11 +858,23 @@ if ('serviceWorker' in navigator) {
     }
   });
 
+  /** Reflect ?range=7 in the day/week pill row. HTMX swaps the
+   *  programme content but leaves the pills untouched, so after a
+   *  toggle the URL points at the new mode while the active class
+   *  still tags the old pill. Re-sync on htmx:afterSwap + popstate. */
+  function syncRangePills(){
+    var range = new URLSearchParams(location.search).get('range') || '0';
+    document.querySelectorAll('.range-pill').forEach(function(p){
+      var match = (p.getAttribute('data-range') || '0') === range;
+      p.classList.toggle('range-pill--active', match);
+    });
+  }
+
   document.body.addEventListener('htmx:afterSwap', function(e){
     if (!e.detail || !e.detail.target || e.detail.target.id !== 'programme-content') return;
-    syncDateStrip();
+    syncDateStrip(); syncRangePills();
   });
-  window.addEventListener('popstate', syncDateStrip);
+  window.addEventListener('popstate', function(){ syncDateStrip(); syncRangePills(); });
 
   /** Honour the #screening-{id} hash that detail pages link back to.
    *  Native hash-jump fires before our CSS + variable-font load settles
@@ -882,7 +894,7 @@ if ('serviceWorker' in navigator) {
     });
   }
 
-  function onReady(){ syncDateStrip(); scrollToHashTarget(); }
+  function onReady(){ syncDateStrip(); syncRangePills(); scrollToHashTarget(); }
   if (document.readyState !== 'loading') onReady();
   else document.addEventListener('DOMContentLoaded', onReady);
   window.addEventListener('hashchange', scrollToHashTarget);
@@ -1437,6 +1449,7 @@ function RangeToggle({
     <div class="range-row">
       <a
         class={`range-pill${range == null ? " range-pill--active" : ""}`}
+        data-range="0"
         href={`/tag/${date}${lang}`}
         hx-get={`/partial/content?date=${date}`}
         hx-target="#programme-content"
@@ -1446,6 +1459,7 @@ function RangeToggle({
       </a>
       <a
         class={`range-pill${range === 7 ? " range-pill--active" : ""}`}
+        data-range="7"
         href={`/tag/${date}?range=7${langAmp}`}
         hx-get={`/partial/content?date=${date}&range=7`}
         hx-target="#programme-content"
