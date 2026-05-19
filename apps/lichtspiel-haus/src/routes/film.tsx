@@ -20,6 +20,13 @@ app.get("/film/:id{[0-9]+}", (c) => {
   const tr = getTranslations(locale);
   const currentPath = `/film/${id}`;
   const dateLabel = formatLocalisedDateLong(screening.date, locale === "en" ? "en-US" : "de-DE");
+  // Prefer TMDb's canonical localised title over the cinema's listing
+  // title (which usually carries series chrome). Fall back through the
+  // German TMDb title, then the venue's title.
+  const displayTitle =
+    locale === "en"
+      ? (screening.title_en ?? screening.title_de ?? screening.title)
+      : (screening.title_de ?? screening.title);
   // English visitors get the TMDb English overview when available; falls
   // back to the cinema's (German) description so we never render an empty
   // synopsis just because TMDb missed.
@@ -29,12 +36,12 @@ app.get("/film/:id{[0-9]+}", (c) => {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
     "@id": `${APP_URL}/film/${id}#screening`,
-    name: screening.title,
+    name: displayTitle,
     description: screening.description ?? screening.subtitle ?? undefined,
     startDate: screening.time ? `${screening.date}T${screening.time}:00+02:00` : screening.date,
     endDate: screening.end_time ? `${screening.date}T${screening.end_time}:00+02:00` : undefined,
     image: screening.image_url ?? undefined,
-    workPresented: { "@type": "Movie", name: screening.title, inLanguage: screening.language },
+    workPresented: { "@type": "Movie", name: displayTitle, inLanguage: screening.language },
     videoFormat: screening.format,
     location: {
       "@type": "MovieTheater",
@@ -62,10 +69,8 @@ app.get("/film/:id{[0-9]+}", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${screening.title} — ${screening.cinema.name} — lichtspiel.haus`}
-            description={
-              screening.description ?? screening.subtitle ?? `${screening.title} im ${screening.cinema.name}`
-            }
+            title={`${displayTitle} — ${screening.cinema.name} — lichtspiel.haus`}
+            description={screening.description ?? screening.subtitle ?? `${displayTitle} im ${screening.cinema.name}`}
             canonical={`${APP_URL}/film/${id}`}
             locale={locale}
             currentPath={currentPath}
@@ -76,7 +81,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                 rel: "alternate",
                 type: "text/calendar",
                 href: `/film/${id}/feed.ics`,
-                title: `${screening.title} – iCal`,
+                title: `${displayTitle} – iCal`,
               },
             ]}
           />
@@ -86,12 +91,12 @@ app.get("/film/:id{[0-9]+}", (c) => {
           <main class="film-detail">
             <article class="film-detail__article">
               <p class="film-detail__kicker">{tr.filmKicker}</p>
-              <h1 class="film-detail__title">{screening.title}</h1>
+              <h1 class="film-detail__title">{displayTitle}</h1>
               {screening.subtitle ? <p class="film-detail__subtitle">{screening.subtitle}</p> : null}
 
               <div class="film-detail__grid">
                 <div class="film-detail__poster">
-                  <PosterCard title={screening.title} imageUrl={screening.image_url} />
+                  <PosterCard title={displayTitle} imageUrl={screening.image_url} />
                 </div>
                 <div class="film-detail__meta">
                   <p class="film-detail__when">

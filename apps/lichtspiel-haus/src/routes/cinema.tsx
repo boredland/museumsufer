@@ -112,7 +112,7 @@ app.get("/kino/:slug", (c) => {
             ) : (
               <ol class="screenings">
                 {screenings.map((s, i) => (
-                  <Screening key={s.id} s={s} opts={{ index: i, hideCinema: true }} tr={tr} />
+                  <Screening key={s.id} s={s} opts={{ index: i, hideCinema: true, locale }} tr={tr} />
                 ))}
               </ol>
             )}

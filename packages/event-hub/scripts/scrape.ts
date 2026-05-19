@@ -75,9 +75,14 @@ function generateTmdbCacheModule(cache: Record<string, TmdbCacheEntry | null>): 
 export interface TmdbCacheEntry {
   id: number;
   poster: string | null;
+  title?: string;
+  title_en?: string;
   overview?: string;
   overview_en?: string;
   kind?: "movie" | "tv";
+  genre_ids?: number[];
+  vote_average?: number;
+  vote_count?: number;
 }
 
 export const TMDB_POSTER_CACHE: Record<string, TmdbCacheEntry | null> = {

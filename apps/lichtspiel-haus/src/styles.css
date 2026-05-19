@@ -568,6 +568,73 @@ body::before {
   text-wrap: pretty;
 }
 
+/* Row synopsis — TMDb overview when matched, cinema description otherwise.
+ * Three-line clamp so a 4-paragraph TMDb dump doesn't dominate the row;
+ * the /film/:id detail page shows the full text. */
+.prog-entry__description {
+  margin: 0 0 0.55rem;
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--celluloid-soft);
+  max-width: 64ch;
+  text-wrap: pretty;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* TMDb user-score, rendered as a percentage badge inline next to the
+ * showtime hero. Brass numeral, monospace "%" half-size to evoke the
+ * Bass-style proportion play. Hidden for low-confidence scores
+ * (<25 votes) in the component logic. */
+.prog-entry__score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.05em;
+  margin-left: 0.85rem;
+  font-family: var(--display);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  font-weight: 500;
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  line-height: 1;
+  color: var(--absinthe);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.prog-entry__score-value { line-height: 1; }
+.prog-entry__score-pct {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 0.55em;
+  letter-spacing: 0.04em;
+  color: var(--dust);
+  margin-left: 0.05em;
+}
+
+/* TMDb genre pills below the description — typography matches the
+ * format/version badges row but with a softer dust tone, so the
+ * billing block is still the dominant signal. */
+.prog-entry__genres {
+  list-style: none;
+  margin: 0 0 0.55rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.4rem;
+}
+.prog-entry__genre {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dust);
+  border: 1px solid color-mix(in oklab, var(--dust) 45%, transparent);
+  padding: 0.05rem 0.45rem;
+}
+
 .prog-entry__house {
   margin: 0 0 0.4rem;
   font-family: var(--mono);
@@ -1167,6 +1234,27 @@ body::before {
 }
 .footer__links a:hover { color: var(--brass); border-color: var(--brass); }
 .footer__sep { color: var(--celluloid-quiet); }
+
+/* TMDb attribution — required by their API terms. Sits just below the
+ * main footer block, set quieter than the editorial description above
+ * it. The TMDb link is the only emphatic element. */
+.footer__attribution {
+  max-width: var(--maxw);
+  margin: -1.5rem auto 0;
+  padding: 0 var(--gut) 2.5rem;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  color: var(--celluloid-quiet);
+}
+.footer__attribution a {
+  color: var(--brass);
+  border-bottom: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
+  padding-bottom: 1px;
+  transition: color 200ms, border-color 200ms;
+}
+.footer__attribution a:hover { color: var(--brass-bright); border-color: var(--brass-bright); }
 .footer__actions {
   display: flex;
   flex-wrap: wrap;

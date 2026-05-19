@@ -38,6 +38,7 @@ import { DEFAULT_LOCALE, getTranslations, type Locale, SUPPORTED_LOCALES, type T
 import { imageProxyUrl } from "./image-proxy";
 import { SCRAPE_DATA } from "./scrape-data";
 import { INLINE_CSS } from "./styles-inline";
+import { genreNames } from "./tmdb-genres";
 
 export type { DayScreening } from "./db";
 
@@ -280,6 +281,9 @@ function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
 export interface ScreeningRowOptions {
   index: number;
   hideCinema?: boolean;
+  /** Locale of the surrounding page — drives whether the row shows the
+   *  English TMDb overview (when present) or the German cinema description. */
+  locale: Locale;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -338,6 +342,16 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   const isFree =
     (s.price_min === 0 && (s.price_max == null || s.price_max === 0)) || (s.price_min == null && s.price_max === 0);
   const subtitle = s.subtitle ?? null;
+  // Display title: prefer TMDb's canonical title (locale-aware) over the
+  // cinema's listing title, which often carries series chrome like
+  // "Kino4Kids „Zirkuskind"" or "Schamlos Harmlos: Love Me Tender". The
+  // venue's title remains available as `s.title` for the report dialog.
+  const displayTitle = opts.locale === "en" ? (s.title_en ?? s.title_de ?? s.title) : (s.title_de ?? s.title);
+  // English visitors prefer the TMDb English overview when present, with
+  // a soft fallback to the German cinema description so we never render
+  // a row with no synopsis just because TMDb missed.
+  const description = opts.locale === "en" ? (s.description_en ?? s.description) : s.description;
+  const showDescription = description && description !== s.subtitle;
   const showCredits = s.credits && s.credits !== s.subtitle;
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
   const reportContext = `${APP_URL}/film/${s.id}`;
@@ -359,6 +373,17 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   const badges: string[] = [];
   if (s.version) badges.push(s.version);
   if (s.format) badges.push(s.format);
+  const genres = s.tmdb_genre_ids?.length ? genreNames(s.tmdb_genre_ids, opts.locale) : [];
+  // Hide low-confidence scores: TMDb returns vote_average even for films
+  // with two votes from cinephiles, which isn't statistically meaningful.
+  // 25 is the rough threshold where the average stabilises in their data.
+  const scorePct =
+    typeof s.tmdb_vote_average === "number" &&
+    typeof s.tmdb_vote_count === "number" &&
+    s.tmdb_vote_count >= 25 &&
+    s.tmdb_vote_average > 0
+      ? Math.round(s.tmdb_vote_average * 10)
+      : null;
 
   return (
     <li class="prog-entry" id={`screening-${s.id}`} style={`--i:${opts.index}`}>
@@ -367,21 +392,42 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         data-id={String(s.id)}
         dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s)) }}
       />
-      <a class="prog-entry__poster-link" href={filmHref} aria-label={s.title}>
-        <PosterCard title={s.title} imageUrl={s.image_url} />
+      <a class="prog-entry__poster-link" href={filmHref} aria-label={displayTitle}>
+        <PosterCard title={displayTitle} imageUrl={s.image_url} />
       </a>
       <header class="prog-entry__head">
         <span class="prog-entry__time-hero">{time}</span>
+        {scorePct !== null ? (
+          <span
+            class="prog-entry__score"
+            title={`TMDb: ${s.tmdb_vote_average?.toFixed(1)} / 10 (${s.tmdb_vote_count} votes)`}
+          >
+            <span class="prog-entry__score-value">{scorePct}</span>
+            <span class="prog-entry__score-pct" aria-hidden="true">
+              %
+            </span>
+          </span>
+        ) : null}
         <h3 class="prog-entry__work">
           {titleHref ? (
             <a href={titleHref} target="_blank" rel="noopener">
-              {s.title}
+              {displayTitle}
             </a>
           ) : (
-            <a href={filmHref}>{s.title}</a>
+            <a href={filmHref}>{displayTitle}</a>
           )}
         </h3>
         {subtitle ? <p class="prog-entry__subtitle">{subtitle}</p> : null}
+        {showDescription ? <p class="prog-entry__description">{description}</p> : null}
+        {genres.length > 0 ? (
+          <ul class="prog-entry__genres" aria-label="Genres">
+            {genres.map((g) => (
+              <li key={g} class="prog-entry__genre">
+                {g}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {!opts.hideCinema || venueRoom ? (
           <p class="prog-entry__house">
             {!opts.hideCinema ? (
@@ -856,34 +902,53 @@ function ClientBehaviors({ tr }: { tr: Translations }) {
   );
 }
 
+/** TMDb terms of use require attribution when an app consumes their API
+ *  data. Rendered as a sibling of SharedFooter so every page (home,
+ *  cinema, series, film, imprint) carries it; matches the typography
+ *  scale of the existing footer__links row. */
+function TmdbAttribution({ tr }: { tr: Translations }) {
+  return (
+    <p class="footer__attribution">
+      {tr.tmdbAttributionLead}
+      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">
+        TMDB
+      </a>
+      {tr.tmdbAttributionTail}
+    </p>
+  );
+}
+
 export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
   const lang = langSuffix(locale);
   return (
-    <SharedFooter
-      description={tr.homeDescription}
-      actions={[
-        { label: tr.digestSubscribe, openAttr: "data-digest-open", kind: "digest" },
-        { label: tr.reportProblem, openAttr: "data-contact-open", kind: "report" },
-      ]}
-      links={[
-        { href: "/feed.ics", label: "iCal" },
-        { href: "/feed.rss", label: "RSS" },
-        { href: "/api/docs", label: "API" },
-        { href: "/reihe", label: tr.seriesAll },
-        { href: `/impressum${lang}`, label: tr.imprint },
-        {
-          href: REPO_URL,
-          label: "GitHub",
-          external: true,
-          ariaLabel: "GitHub",
-          icon: (
-            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
-              <path d="M8 .2a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.3-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4A8 8 0 0 0 8 .2Z" />
-            </svg>
-          ),
-        },
-      ]}
-    />
+    <>
+      <SharedFooter
+        description={tr.homeDescription}
+        actions={[
+          { label: tr.digestSubscribe, openAttr: "data-digest-open", kind: "digest" },
+          { label: tr.reportProblem, openAttr: "data-contact-open", kind: "report" },
+        ]}
+        links={[
+          { href: "/feed.ics", label: "iCal" },
+          { href: "/feed.rss", label: "RSS" },
+          { href: "/api/docs", label: "API" },
+          { href: "/reihe", label: tr.seriesAll },
+          { href: `/impressum${lang}`, label: tr.imprint },
+          {
+            href: REPO_URL,
+            label: "GitHub",
+            external: true,
+            ariaLabel: "GitHub",
+            icon: (
+              <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor">
+                <path d="M8 .2a8 8 0 0 0-2.5 15.6c.4.1.5-.2.5-.4v-1.5c-2.2.5-2.7-1-2.7-1-.3-.9-.9-1.2-.9-1.2-.7-.5.1-.5.1-.5.8.1 1.2.8 1.2.8.7 1.2 1.9.9 2.4.7.1-.5.3-.9.5-1.1-1.8-.2-3.6-.9-3.6-3.9 0-.9.3-1.6.8-2.1-.1-.2-.4-1 .1-2.1 0 0 .7-.2 2.2.8a7.6 7.6 0 0 1 4 0c1.5-1 2.2-.8 2.2-.8.4 1.1.2 1.9.1 2.1.5.5.8 1.2.8 2.1 0 3-1.8 3.7-3.6 3.9.3.2.5.7.5 1.4v2.1c0 .2.1.5.6.4A8 8 0 0 0 8 .2Z" />
+              </svg>
+            ),
+          },
+        ]}
+      />
+      <TmdbAttribution tr={tr} />
+    </>
   );
 }
 
@@ -969,7 +1034,7 @@ export function ProgrammePartial({
         <>
           <ol class="screenings" id="screenings">
             {visible.map((s, i) => (
-              <Screening key={s.id} s={s} opts={{ index: i }} tr={tr} />
+              <Screening key={s.id} s={s} opts={{ index: i, locale }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}

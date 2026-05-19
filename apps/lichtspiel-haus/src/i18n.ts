@@ -107,6 +107,11 @@ export interface Translations {
   // FAQ
   faqKicker: string;
   faqItems: { q: string; a: string }[];
+  // TMDb attribution — required by their API terms when an app uses the
+  // /search endpoints + poster CDN. Rendered as a small line below the
+  // main footer block.
+  tmdbAttributionLead: string;
+  tmdbAttributionTail: string;
 }
 
 const de: Translations = {
@@ -230,6 +235,8 @@ const de: Translations = {
       a: "Über die »Push-Digest«-Schaltfläche oder den Footer-Link. Drei Zeitfenster: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Kinos einschränken. Anonym, jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
     },
   ],
+  tmdbAttributionLead: "Filmplakate & -beschreibungen via ",
+  tmdbAttributionTail: ". Dieses Produkt nutzt die TMDB-API, ist aber weder von TMDB unterstützt noch zertifiziert.",
 };
 
 const en: Translations = {
@@ -352,6 +359,8 @@ const en: Translations = {
       a: 'Subscribe via the "Push Digest" button or the footer link. Three time slots are available: morning (07:00), afternoon (17:00) and a weekly Sunday overview (09:00). Notifications can optionally be restricted to specific cinemas. Sign-up is anonymous — no account, no email — and can be cancelled at any time. On iOS, the site must first be added to the home screen as a web app.',
     },
   ],
+  tmdbAttributionLead: "Posters & synopses via ",
+  tmdbAttributionTail: ". This product uses the TMDB API but is not endorsed or certified by TMDB.",
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = { de, en };

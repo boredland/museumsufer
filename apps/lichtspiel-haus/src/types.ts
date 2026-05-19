@@ -56,6 +56,18 @@ export interface Screening {
   /** English-language synopsis from TMDb. Picked by the front-end when the
    *  visitor's locale is `en`; otherwise the German `description` wins. */
   description_en?: string;
+  /** TMDb-canonical German title — preferred over `title` for display
+   *  when present, since the cinema's listing often carries series
+   *  chrome ("Kino4Kids „Zirkuskind"" → just "Zirkuskind"). */
+  title_de?: string;
+  /** TMDb-canonical English title. Used when locale === en. */
+  title_en?: string;
+  /** TMDb genre ids — front-end resolves to localised pills via tmdb-genres.ts. */
+  tmdb_genre_ids?: number[];
+  /** TMDb user-score (0–10) + vote count — front-end renders the average
+   *  as a percentage when the count clears a confidence threshold. */
+  tmdb_vote_average?: number;
+  tmdb_vote_count?: number;
   /** Audience-facing version markers parsed from title/description. */
   version?: Version;
   /** Original language of the print. */
