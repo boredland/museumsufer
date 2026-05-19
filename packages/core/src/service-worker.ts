@@ -1,121 +1,120 @@
 /**
- * Build a small offline-first service worker as a string.
+ * Build the service-worker source as a string. Served verbatim at /sw.js
+ * — no separate build step needed.
  *
- * Cache vocabulary:
- *   - SHELL_URLS get pre-cached on install (shell + manifest + styles).
- *   - `/api/*` paths → network-first (fresh data online, cached fallback offline).
- *   - `/img/*` paths → cache-first (the proxy already long-caches; SW makes
- *     it offline-survivable).
- *   - everything else navigations → network-first against the same
- *     CACHE_NAME so the home / category routes work offline.
+ * Strategy:
+ *  - Pre-cache `staticAssets` on install (icons, OG image, manifest).
+ *  - Navigations + Accept:text/html + /api/* → network-first against
+ *    the single cache, with a cached fallback when offline.
+ *  - Everything else same-origin → stale-while-revalidate (fonts,
+ *    icons, /img/*, /client.js, etc.). The image proxy already sets
+ *    immutable cache headers, so SWR is a thin wrapper there.
+ *  - Cross-origin or non-GET → SW does not intercept.
+ *
+ * Plus full push-notification support (push, notificationclick,
+ * pushsubscriptionchange with re-subscription against /api/push/key).
  */
+
 export interface ServiceWorkerOptions {
-  /** Bumps the cache key when shipping breaking SW changes. */
-  cacheName: string;
-  /** Separate API cache so we can purge it without nuking the shell. */
-  apiCacheName: string;
-  /** URLs pre-cached on install. */
-  shellUrls?: string[];
-  /** Path prefixes treated as "navigation" (network-first against cacheName). */
-  navigationPrefixes?: string[];
-  /** Path prefixes treated like /api/ — network-first against apiCacheName.
-   *  Defaults to ["/api/"]. Add e.g. "/partial/" to also cache htmx swaps. */
-  apiPrefixes?: string[];
+  /** CacheStorage key. Bump the suffix (e.g. v1 → v2) when shipping a
+   *  breaking SW change so the `activate` step evicts stale caches.
+   *  Keep the app-prefix unique across the org so two installed apps
+   *  on the same browser don't accidentally collide. */
+  cacheKey: string;
+  /** URLs pre-cached on install. Typical: icons, OG image, manifest.
+   *  Anything in this list survives offline from the first load. */
+  staticAssets?: string[];
+  /** Fallback title used in `showNotification` when the push payload
+   *  omits one. Defaults to "Update". */
+  defaultPushTitle?: string;
 }
 
 export function buildServiceWorkerJs(opts: ServiceWorkerOptions): string {
-  const shell = JSON.stringify(opts.shellUrls ?? ["/", "/manifest.json", "/styles.css"]);
-  const navPrefixes = JSON.stringify(opts.navigationPrefixes ?? ["/"]);
-  const apiPrefixes = JSON.stringify(opts.apiPrefixes ?? ["/api/"]);
+  const cacheKey = JSON.stringify(opts.cacheKey);
+  const staticAssets = JSON.stringify(opts.staticAssets ?? ["/manifest.json"]);
+  const pushTitle = JSON.stringify(opts.defaultPushTitle ?? "Update");
   return `
-const CACHE_NAME = ${JSON.stringify(opts.cacheName)};
-const API_CACHE = ${JSON.stringify(opts.apiCacheName)};
-const SHELL_URLS = ${shell};
-const NAV_PREFIXES = ${navPrefixes};
-const API_PREFIXES = ${apiPrefixes};
+const CACHE = ${cacheKey};
+const STATIC_ASSETS = ${staticAssets};
 
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL_URLS)));
+self.addEventListener('install', function(event){
+  event.waitUntil(
+    caches.open(CACHE).then(function(cache){ return cache.addAll(STATIC_ASSETS).catch(function(){}); })
+  );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME && k !== API_CACHE).map((k) => caches.delete(k)))
-    )
+self.addEventListener('activate', function(event){
+  event.waitUntil(
+    caches.keys().then(function(keys){
+      return Promise.all(keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); }));
+    })
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (e) => {
-  const url = new URL(e.request.url);
-  if (API_PREFIXES.some((p) => url.pathname.startsWith(p))) {
-    e.respondWith(networkFirst(e.request, API_CACHE));
+function networkFirst(req){
+  return fetch(req).then(function(res){
+    if (res && res.ok) {
+      var copy = res.clone();
+      caches.open(CACHE).then(function(c){ c.put(req, copy); }).catch(function(){});
+    }
+    return res;
+  }).catch(function(){ return caches.match(req); });
+}
+
+function staleWhileRevalidate(req){
+  return caches.match(req).then(function(cached){
+    var fresh = fetch(req).then(function(res){
+      if (res && res.ok) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function(c){ c.put(req, copy); }).catch(function(){});
+      }
+      return res;
+    }).catch(function(){ return cached; });
+    return cached || fresh;
+  });
+}
+
+self.addEventListener('fetch', function(event){
+  var req = event.request;
+  if (req.method !== 'GET') return;
+  var url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+
+  var accept = req.headers.get('accept') || '';
+  var isDoc = req.mode === 'navigate' || accept.includes('text/html') || url.pathname.startsWith('/api/');
+  if (isDoc) {
+    event.respondWith(networkFirst(req));
     return;
   }
-  if (url.pathname.startsWith('/img/')) {
-    e.respondWith(cacheFirst(e.request, CACHE_NAME));
-    return;
-  }
-  if (e.request.mode === 'navigate' || NAV_PREFIXES.some((p) => url.pathname.startsWith(p))) {
-    e.respondWith(networkFirst(e.request, CACHE_NAME));
-    return;
-  }
+  event.respondWith(staleWhileRevalidate(req));
 });
 
-async function networkFirst(request, cacheName) {
-  try {
-    const res = await fetch(request);
-    if (res.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, res.clone());
-    }
-    return res;
-  } catch {
-    const cached = await caches.match(request);
-    return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
-  }
-}
-
-async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  try {
-    const res = await fetch(request);
-    if (res.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, res.clone());
-    }
-    return res;
-  } catch {
-    return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
-  }
-}
-
-self.addEventListener('push', (e) => {
-  let data = {};
-  try { data = e.data ? e.data.json() : {}; } catch (_) {}
-  const title = data.title || 'Update';
-  const options = {
+self.addEventListener('push', function(event){
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) {}
+  var title = data.title || ${pushTitle};
+  var options = {
     body: data.body || '',
     icon: data.icon || '/icon-192.png',
     badge: data.badge || '/icon-192.png',
     tag: data.tag || 'digest',
     renotify: true,
-    data: { url: data.url || '/' },
+    data: { url: data.url || '/' }
   };
-  e.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(self.registration.showNotification(title, options));
 });
 
-self.addEventListener('notificationclick', (e) => {
-  e.notification.close();
-  const target = (e.notification.data && e.notification.data.url) || '/';
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
-      for (const c of clients) {
+self.addEventListener('notificationclick', function(event){
+  event.notification.close();
+  var target = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clients){
+      for (var i = 0; i < clients.length; i++) {
+        var c = clients[i];
         if (new URL(c.url).origin === self.location.origin && 'focus' in c) {
-          c.navigate(target).catch(() => {});
+          c.navigate(target).catch(function(){});
           return c.focus();
         }
       }
@@ -124,46 +123,47 @@ self.addEventListener('notificationclick', (e) => {
   );
 });
 
-self.addEventListener('pushsubscriptionchange', (e) => {
-  e.waitUntil((async () => {
+self.addEventListener('pushsubscriptionchange', function(event){
+  event.waitUntil((async function(){
     try {
-      const keyRes = await fetch('/api/push/key');
+      var reg = self.registration;
+      var keyRes = await fetch('/api/push/key');
       if (!keyRes.ok) return;
-      const key = (await keyRes.json()).publicKey;
-      const newSub = await self.registration.pushManager.subscribe({
+      var key = (await keyRes.json()).publicKey;
+      var newSub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(key),
+        applicationServerKey: urlBase64ToUint8Array(key)
       });
-      let schedules = ['morning'];
-      if (e.oldSubscription) {
-        const meRes = await fetch('/api/push/me?endpoint=' + encodeURIComponent(e.oldSubscription.endpoint));
+      var schedules = ['morning'];
+      if (event.oldSubscription) {
+        var meRes = await fetch('/api/push/me?endpoint=' + encodeURIComponent(event.oldSubscription.endpoint));
         if (meRes.ok) {
-          const me = await meRes.json();
+          var me = await meRes.json();
           if (me.schedules && me.schedules.length) schedules = me.schedules;
         }
         await fetch('/api/push/unsubscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: e.oldSubscription.endpoint }),
+          body: JSON.stringify({ endpoint: event.oldSubscription.endpoint })
         });
       }
-      const json = newSub.toJSON();
+      var json = newSub.toJSON();
       await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules }),
+        body: JSON.stringify({ endpoint: json.endpoint, keys: json.keys, schedules: schedules })
       });
     } catch (_) {}
   })());
 });
 
-function urlBase64ToUint8Array(s) {
-  const pad = '='.repeat((4 - s.length % 4) % 4);
-  const b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+function urlBase64ToUint8Array(s){
+  var pad = '='.repeat((4 - s.length % 4) % 4);
+  var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+  var bin = atob(b64);
+  var out = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
-`;
+`.trimStart();
 }
