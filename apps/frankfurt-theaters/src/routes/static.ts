@@ -82,7 +82,10 @@ GET /event/{id}/feed.ics — single performance
 `;
 
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const ROBOTS_TXT = buildRobotsTxt({
+  siteUrl: APP_URL,
+  disallow: ["/api/day", "/api/events", "/api/theaters"],
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -114,9 +117,6 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${APP_URL}/</loc>
     <lastmod>${today}</lastmod>
-  </url>
-  <url>
-    <loc>${APP_URL}/api/docs</loc>
   </url>
   <url>
     <loc>${APP_URL}/impressum</loc>

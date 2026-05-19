@@ -71,7 +71,10 @@ GET /format/{slug}/feed.ics — single format (Vortrag / Diskussion / Lesung)
 `;
 
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const ROBOTS_TXT = buildRobotsTxt({
+  siteUrl: APP_URL,
+  disallow: ["/api/day", "/api/events", "/api/sources", "/api/formats"],
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -83,40 +86,29 @@ app.get("/.well-known/api-catalog", (c) =>
 
 app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
 
+// Most upstream lecture programmes publish a rolling ~2-week
+// schedule. Stamping 60 days risks thin-content empty future pages.
+const SITEMAP_DATE_DAYS = 14;
+
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
   const sourceUrls = SOURCES.slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
-    .map(
-      (s) => `  <url>
-    <loc>${APP_URL}/quelle/${s.slug}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
-    )
+    .map((s) => `  <url>\n    <loc>${APP_URL}/quelle/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const formatUrls = CATEGORIES.map(
-    (c) => `  <url>
-    <loc>${APP_URL}/format/${c}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
+    (c) => `  <url>\n    <loc>${APP_URL}/format/${c}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`,
   ).join("\n");
-  const dateUrls = Array.from({ length: 60 }, (_, i) => dateOffset(i))
-    .map(
-      (d) => `  <url>
-    <loc>${APP_URL}/tag/${d}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
-    )
+  // Per-URL lastmod = the date itself, not mass-stamped today.
+  const dateUrls = Array.from({ length: SITEMAP_DATE_DAYS }, (_, i) => dateOffset(i))
+    .map((d) => `  <url>\n    <loc>${APP_URL}/tag/${d}</loc>\n    <lastmod>${d}</lastmod>\n  </url>`)
     .join("\n");
 
+  // /api/docs dropped (developer reference, no organic intent).
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${APP_URL}/</loc>
-    <lastmod>${today}</lastmod>
-  </url>
-  <url>
-    <loc>${APP_URL}/api/docs</loc>
     <lastmod>${today}</lastmod>
   </url>
   <url>
