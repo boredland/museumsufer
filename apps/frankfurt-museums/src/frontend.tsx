@@ -121,6 +121,14 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
         "https://www.museumsufer.de",
         "https://www.staedelmuseum.de",
       ]}
+      preloadFonts={[
+        // DM Sans is the body face; Fraunces drives display titles.
+        // The audit measured /museum/:slug LCP at 5.3s because the
+        // h1 font discovered late via the CSS parser. Preloading
+        // discovers both on the critical path.
+        "/fonts/dm-sans-latin-wght-normal.woff2",
+        "/fonts/fraunces-latin-standard-normal.woff2",
+      ]}
       deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js"]}
       jsonLd={jsonSchemas.map((s) => s.json)}
     />

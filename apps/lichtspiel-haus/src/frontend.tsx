@@ -114,6 +114,13 @@ export function Head(opts: HeadOptions) {
       ]}
       inlineCss={INLINE_CSS}
       fontsHref={null}
+      preloadFonts={[
+        // Display + body fonts that drive the LCP element (wordmark
+        // + first programme rows). Preloading discovers them before
+        // the inline CSS parser would, shaving 200-400ms off LCP.
+        "/fonts/fraunces-latin-full-normal.woff2",
+        "/fonts/eb-garamond-latin-400-normal.woff2",
+      ]}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
     />
