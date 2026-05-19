@@ -164,9 +164,14 @@ async function main() {
     throw new Error(`unknown app(s): ${missing.join(", ")}. valid: ${APPS.map((a) => a.slug).join(", ")}`);
   }
 
-  for (const app of targets) {
-    if (prod) await captureProd(app);
-    else await captureLocal(app);
+  // Prod mode fans out — each capture is an HTTPS GET against a
+  // different custom domain, fully independent. Local mode stays
+  // sequential because each app spawns its own wrangler dev and the
+  // bundlers fight over Bun's CSS build lock if they boot together.
+  if (prod) {
+    await Promise.all(targets.map((app) => captureProd(app)));
+  } else {
+    for (const app of targets) await captureLocal(app);
   }
   console.log(`\n✓ done — ${targets.length} app${targets.length === 1 ? "" : "s"} (${prod ? "prod" : "local"})`);
 }
