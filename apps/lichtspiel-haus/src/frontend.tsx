@@ -238,32 +238,34 @@ function DateStrip({
   return (
     <nav class="datestrip" aria-label={tr.dateStripLabel}>
       <div class="datestrip__inner" id="datestrip">
-        {strip.map((d) => {
-          const p = dateParts(d.date);
-          const dateObj = new Date(`${d.date}T12:00:00Z`);
-          const isActive = d.date === active;
-          const isToday = d.date === today;
-          const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
-            .filter(Boolean)
-            .join(" ");
-          const href = `/tag/${d.date}${lang}`;
-          return (
-            <a
-              key={d.date}
-              class={cls}
-              href={href}
-              aria-current={isActive ? "true" : "false"}
-              hx-get={`/partial/content?date=${d.date}`}
-              hx-target="#programme-content"
-              hx-push-url={href}
-            >
-              <span class="datetile__weekday">{weekdayFmt.format(dateObj)}</span>
-              <span class="datetile__day">{p.day}</span>
-              <span class="datetile__month">{monthFmt.format(dateObj)}</span>
-              <span class="datetile__count">{d.n}</span>
-            </a>
-          );
-        })}
+        <div class="datestrip__film">
+          {strip.map((d) => {
+            const p = dateParts(d.date);
+            const dateObj = new Date(`${d.date}T12:00:00Z`);
+            const isActive = d.date === active;
+            const isToday = d.date === today;
+            const cls = ["datetile", isActive ? "datetile--active" : "", isToday ? "datetile--today" : ""]
+              .filter(Boolean)
+              .join(" ");
+            const href = `/tag/${d.date}${lang}`;
+            return (
+              <a
+                key={d.date}
+                class={cls}
+                href={href}
+                aria-current={isActive ? "true" : "false"}
+                hx-get={`/partial/content?date=${d.date}`}
+                hx-target="#programme-content"
+                hx-push-url={href}
+              >
+                <span class="datetile__weekday">{weekdayFmt.format(dateObj)}</span>
+                <span class="datetile__day">{p.day}</span>
+                <span class="datetile__month">{monthFmt.format(dateObj)}</span>
+                <span class="datetile__count">{d.n}</span>
+              </a>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
