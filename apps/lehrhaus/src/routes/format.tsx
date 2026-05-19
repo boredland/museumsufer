@@ -1,13 +1,37 @@
 import { dateOffset, todayIso } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange } from "../db";
 import { categoryLabel, Event, Footer, Foxing, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
-import { type Env, parseCategory } from "../types";
+import { type Category, type Env, parseCategory } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env }>();
+
+/** Per-category editorial lead, surfaced both as the hero copy and as
+ *  the schema.org `description`. Audit flagged the format pages as
+ *  thin (heading + iCal link only). DE only; EN visitors get the
+ *  cinemaDescription template fallback. */
+function categoryLead(c: Category): { de: string; en: string } {
+  if (c === "Vortrag") {
+    return {
+      de: "Wissenschaftsvorträge, Buchvorstellungen und Sachvorträge der Frankfurter Akademien, Stiftungen, Forschungseinrichtungen und Bürgerhäuser.",
+      en: "Academic lectures, book launches and informational talks from Frankfurt's academies, foundations, research institutes and civic houses.",
+    };
+  }
+  if (c === "Lesung") {
+    return {
+      de: "Lesungen, Autoren-Auftritte und Werkstattgespräche in den Frankfurter Literaturhäusern, Buchhandlungen und Akademien.",
+      en: "Readings, author appearances and editorial conversations in Frankfurt's literature houses, bookshops and academies.",
+    };
+  }
+  return {
+    de: "Diskussionen, Streitgespräche und Podien zu Gesellschaft, Politik und Wissenschaft in Frankfurt.",
+    en: "Panel debates, conversations and forums on society, politics and scholarship in Frankfurt.",
+  };
+}
 
 app.get("/format/:slug", (c) => {
   const category = parseCategory(c.req.param("slug"));
@@ -18,6 +42,43 @@ app.get("/format/:slug", (c) => {
   const tr = getTranslations(locale);
   const label = categoryLabel(category, tr);
   const currentPath = `/format/${slug}`;
+  const lead = categoryLead(category)[locale === "en" ? "en" : "de"];
+  // Vortrag = LectureEvent, Lesung = LiteraryEvent, Diskussion =
+  // generic Event (no exact subtype exists in schema.org).
+  const eventType = category === "Vortrag" ? "EducationEvent" : category === "Lesung" ? "LiteraryEvent" : "Event";
+
+  const collectionLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${APP_URL}${currentPath}#collection`,
+    name: `${label} in Frankfurt am Main`,
+    description: lead,
+    url: `${APP_URL}${currentPath}`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: events.length,
+      itemListElement: events.slice(0, 30).map((e, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${APP_URL}/tag/${e.date}#event-${e.id}`,
+        name: e.title,
+        item: {
+          "@type": eventType,
+          name: e.title,
+          startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
+        },
+      })),
+    },
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "lehr.salon", item: APP_URL },
+      { "@type": "ListItem", position: 2, name: tr.categoryKicker, item: `${APP_URL}/format` },
+      { "@type": "ListItem", position: 3, name: label },
+    ],
+  };
 
   return c.html(
     <>
@@ -25,11 +86,12 @@ app.get("/format/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${label} — lehr.salon`}
-            description={tr.categoryDescription(label, events.length)}
-            canonical={`${APP_URL}/format/${slug}`}
+            title={`${label} in Frankfurt am Main · lehr.salon`}
+            description={lead}
+            canonical={`${APP_URL}/format/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
+            jsonLd={[collectionLd, breadcrumbLd]}
             extraLinks={[
               { rel: "alternate", type: "text/calendar", href: `/format/${slug}/feed.ics`, title: `${label} – iCal` },
             ]}
@@ -42,10 +104,17 @@ app.get("/format/:slug", (c) => {
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.categoryKicker}</p>
               <h2 class="venue-hero__name">{label}</h2>
+              <p class="venue-hero__lead">{lead}</p>
               <p class="venue-hero__meta">
                 <a href={`/format/${slug}/feed.ics`}>{tr.icalSubscribe}</a>
               </p>
             </section>
+
+            <SharedAskAi
+              label="Frag eine KI"
+              aria={`Frag eine KI nach ${label}-Terminen in Frankfurt`}
+              prompt={`Welche ${label}-Termine stehen in Frankfurt am Main in den nächsten Wochen an? Quelle: ${APP_URL}${currentPath}`}
+            />
 
             {events.length === 0 ? (
               <div class="empty">

@@ -156,8 +156,38 @@ function Page(props: PageProps) {
   const description = cat ? `${cat.label} — ${formatDateLong(date)}. ${tr.homeDescription}` : tr.homeDescription;
   const lang = langSuffix(locale);
   const langAmp = langSuffix(locale, "&");
-  const canonical = cat ? `${APP_URL}/c/${cat.slug}?date=${date}${langAmp}` : `${APP_URL}/?date=${date}${langAmp}`;
-  const currentPath = cat ? `/c/${cat.slug}?date=${date}` : `/?date=${date}`;
+  // Canonicals MUST be evergreen -- ?date= was baking today's date
+  // into every canonical URL, so tomorrow Google sees the same page
+  // self-canonicalising to a stale URL. Category pages canonicalise
+  // to the category root; the home canonicalises to /.
+  const canonical = cat ? `${APP_URL}/c/${cat.slug}${lang}` : `${APP_URL}/${lang}`;
+  // currentPath drives hreflang generation -- also drop ?date= here
+  // so the hreflang alternates point at evergreen URLs.
+  const currentPath = cat ? `/c/${cat.slug}` : `/`;
+  const websiteLd = jsonLdSafe({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
+    url: APP_URL,
+    name: "landau.today",
+    inLanguage: ["de", "fr"],
+    publisher: { "@type": "Person", name: "Jonas Strassel", email: "feedback@landau.today" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${APP_URL}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  });
+  const breadcrumbLd = jsonLdSafe({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: cat
+      ? [
+          { "@type": "ListItem", position: 1, name: "landau.today", item: APP_URL },
+          { "@type": "ListItem", position: 2, name: cat.label, item: `${APP_URL}/c/${cat.slug}` },
+        ]
+      : [{ "@type": "ListItem", position: 1, name: "landau.today", item: APP_URL }],
+  });
   const jsonLd = buildJsonLd(events.slice(0, 50));
   const faqLd = jsonLdSafe(buildFaqPageSchema(tr.faq));
 
@@ -186,7 +216,7 @@ function Page(props: PageProps) {
             ]}
             stylesheetHref="/styles.css"
             deferScripts={["/htmx.min.js"]}
-            jsonLd={[jsonLd, faqLd]}
+            jsonLd={[websiteLd, breadcrumbLd, jsonLd, faqLd]}
           />
         </head>
         <body>
@@ -315,25 +345,74 @@ export function renderPartial(props: PageProps): HtmlEscapedString {
   return (<PartialBody {...props} />) as unknown as HtmlEscapedString;
 }
 
+/** Map our internal category slug to a schema.org Event subtype.
+ *  Generic Event forfeits subtype-specific rich-result treatment;
+ *  Google + AI assistants prefer MusicEvent / TheaterEvent / etc.
+ *  Each category column carries a string title in `ev.category`. */
+function categoryToEventType(category: string | undefined): string {
+  if (!category) return "Event";
+  const c = category.toLowerCase();
+  if (c.includes("konzert")) return "MusicEvent";
+  if (c.includes("theater") || c.includes("kabarett") || c.includes("comedy")) return "TheaterEvent";
+  if (c.includes("tanz")) return "DanceEvent";
+  if (c.includes("lesung")) return "LiteraryEvent";
+  if (c.includes("ausstellung")) return "VisualArtsEvent";
+  if (c.includes("weinfest") || c.includes("fest")) return "FoodEvent";
+  if (c.includes("stadtführung") || c.includes("stadtfuehrung") || c.includes("führung")) return "SocialEvent";
+  return "Event";
+}
+
 function buildJsonLd(events: Event[]): string {
-  const items = events.map((ev) => ({
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: ev.title,
-    startDate: ev.time ? `${ev.date}T${ev.time}:00+02:00` : ev.date,
-    endDate: ev.end_date ? (ev.end_time ? `${ev.end_date}T${ev.end_time}:00+02:00` : ev.end_date) : undefined,
-    location: ev.venue
-      ? {
-          "@type": "Place",
-          name: ev.venue,
-          address: { "@type": "PostalAddress", addressLocality: "Landau in der Pfalz", addressCountry: "DE" },
-        }
-      : undefined,
-    image: ev.image_url || undefined,
-    description: ev.description || undefined,
-    organizer: ev.organizer ? { "@type": "Organization", name: ev.organizer } : undefined,
-    url: `${APP_URL}/event/${ev.id}`,
-    offers: ev.price ? { "@type": "Offer", price: ev.price } : undefined,
-  }));
+  const items = events.map((ev) => {
+    // Use the actual venue city when known so events in Maikammer /
+    // Edenkoben / Bad Bergzabern don't get stamped with
+    // "Landau in der Pfalz" -- the schema audit caught us doing that.
+    const venueLocality = ev.city && ev.city.trim() ? ev.city : "Landau in der Pfalz";
+    return {
+      "@context": "https://schema.org",
+      "@type": categoryToEventType(ev.category),
+      "@id": `${APP_URL}/event/${ev.id}#event`,
+      name: ev.title,
+      startDate: ev.time ? `${ev.date}T${ev.time}:00+02:00` : ev.date,
+      endDate: ev.end_date ? (ev.end_time ? `${ev.end_date}T${ev.end_time}:00+02:00` : ev.end_date) : undefined,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      location: ev.venue
+        ? {
+            "@type": "Place",
+            name: ev.venue,
+            address: {
+              "@type": "PostalAddress",
+              addressLocality: venueLocality,
+              addressCountry: "DE",
+            },
+            ...(ev.lat != null &&
+              ev.lng != null && {
+                geo: { "@type": "GeoCoordinates", latitude: ev.lat, longitude: ev.lng },
+              }),
+            containedInPlace: {
+              "@type": "City",
+              // Wikidata Q4191 = Landau in der Pfalz; only attach
+              // when the venue is actually IN Landau, otherwise the
+              // sameAs would be a lie for outlying SÜW villages.
+              name: venueLocality,
+              ...(venueLocality === "Landau in der Pfalz" && {
+                sameAs: "https://www.wikidata.org/wiki/Q4191",
+              }),
+            },
+          }
+        : undefined,
+      image: ev.image_url || undefined,
+      description: ev.description || undefined,
+      organizer: ev.organizer ? { "@type": "Organization", name: ev.organizer } : undefined,
+      url: `${APP_URL}/event/${ev.id}`,
+      offers: {
+        "@type": "Offer",
+        url: `${APP_URL}/event/${ev.id}`,
+        availability: "https://schema.org/InStock",
+        ...(ev.price && { price: ev.price, priceCurrency: "EUR" }),
+      },
+    };
+  });
   return jsonLdSafe({ "@context": "https://schema.org", "@graph": items });
 }

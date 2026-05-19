@@ -14,6 +14,19 @@ export interface LehrhausSource {
   url: string;
   lat?: number;
   lon?: number;
+  /** Wikidata Q-id (without the "Q" prefix). Surfaced as schema.org
+   *  `sameAs` for entity disambiguation. Populated only for sources
+   *  with a known Wikidata entry. */
+  wikidata?: string;
+  /** 40-80 word editorial blurb shown on /quelle/:slug above the
+   *  event list. Lifts thin pages above the 500-word floor and
+   *  populates the Organization.description schema field. */
+  description?: string;
+  /** Public phone number, when listed. NAP signal for local pack. */
+  telephone?: string;
+  /** "<street>, <PLZ> <city>" -- parsed into a PostalAddress at
+   *  render time. Same pattern as theater-config + concert-config. */
+  address?: string;
 }
 
 export type Category = "Vortrag" | "Diskussion" | "Lesung";

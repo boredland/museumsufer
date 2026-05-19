@@ -8,6 +8,11 @@ export const SOURCES: LehrhausSource[] = [
     url: "https://polytechnische.de",
     lat: 50.1136,
     lon: 8.6833,
+    wikidata: "Q875645",
+    address: "Untermainanlage 5, 60329 Frankfurt am Main",
+    telephone: "+49 69 7895807-0",
+    description:
+      "1816 gegründete Bürgerstiftung in Frankfurt, getragen von rund 1.000 Mitgliedern. Veranstaltet Vorträge zu Wissenschaft, Bildung und Stadtgesellschaft im Stiftungshaus an der Untermainanlage und in Kooperation mit Frankfurter Hochschulen.",
   },
   {
     slug: "haus-am-dom",
@@ -16,6 +21,10 @@ export const SOURCES: LehrhausSource[] = [
     url: "https://hausamdom-frankfurt.de",
     lat: 50.1107,
     lon: 8.6826,
+    address: "Domplatz 3, 60311 Frankfurt am Main",
+    telephone: "+49 69 8008718-400",
+    description:
+      "Katholisches Bildungs- und Begegnungszentrum am Frankfurter Domplatz. Programmschwerpunkte: Theologie, Ethik, Gesellschaft, Migration und Kultur. Räumlich an die Katholische Akademie Rabanus Maurus angeschlossen.",
   },
   {
     slug: "juedische-gemeinde-frankfurt",
@@ -24,6 +33,11 @@ export const SOURCES: LehrhausSource[] = [
     url: "https://jg-ffm.de",
     lat: 50.1167,
     lon: 8.6712,
+    wikidata: "Q1719876",
+    address: "Westendstraße 43, 60325 Frankfurt am Main",
+    telephone: "+49 69 7680360",
+    description:
+      "Mit rund 6.000 Mitgliedern eine der größten jüdischen Gemeinden Deutschlands. Veranstaltet Lesungen, Vorträge und Gespräche zu jüdischer Geschichte, Religion, Literatur und aktuellem Diskurs im Ignatz-Bubis-Gemeindezentrum im Westend.",
   },
   {
     slug: "fgz-streitclub",
@@ -40,6 +54,11 @@ export const SOURCES: LehrhausSource[] = [
     url: "https://www.literaturhaus-frankfurt.de",
     lat: 50.1173,
     lon: 8.6814,
+    wikidata: "Q1825833",
+    address: "Schöne Aussicht 2, 60311 Frankfurt am Main",
+    telephone: "+49 69 75618400",
+    description:
+      "Veranstaltungshaus für deutschsprachige und internationale Literatur. Lesungen, Werkstattgespräche, Übersetzerabende und Literaturkritik im historischen Salzhaus am Mainufer. Träger des Literaturhaus-Preises.",
   },
   {
     slug: "buergeruniversitaet",
@@ -56,6 +75,11 @@ export const SOURCES: LehrhausSource[] = [
     url: "https://www.ifs.uni-frankfurt.de",
     lat: 50.1217,
     lon: 8.6558,
+    wikidata: "Q322935",
+    address: "Senckenberganlage 26, 60325 Frankfurt am Main",
+    telephone: "+49 69 7561830",
+    description:
+      "1923 gegründetes Forschungsinstitut, Heimat der Frankfurter Schule. Vorträge und Werkstattgespräche zu Kritischer Theorie, Gesellschaftsanalyse und politischer Philosophie an der Senckenberganlage.",
   },
   {
     slug: "evangelische-akademie-frankfurt",
