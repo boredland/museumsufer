@@ -113,6 +113,7 @@ export function Head(opts: HeadOptions) {
         ...(opts.extraLinks ?? []),
       ]}
       inlineCss={INLINE_CSS}
+      fontsHref={null}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
     />
@@ -457,14 +458,41 @@ export function ScoreBadges({ s }: { s: DayScreening }) {
   );
 }
 
-export function PosterCard({ title, imageUrl }: { title: string; imageUrl?: string | null }) {
-  const proxied = imageUrl ? imageProxyUrl(imageUrl) : undefined;
-  if (proxied) {
-    return (
-      <div class="poster">
-        <img class="poster__img" src={proxied} alt="" loading="lazy" decoding="async" />
-      </div>
-    );
+export function PosterCard({
+  title,
+  imageUrl,
+  priority,
+}: {
+  title: string;
+  imageUrl?: string | null;
+  /** Set on the LCP poster (film detail page) -- swaps lazy-loading
+   *  out for eager + high fetchpriority so it paints early. */
+  priority?: boolean;
+}) {
+  if (imageUrl) {
+    // Route through the image proxy with width-keyed resize so we serve
+    // WebP at the size the layout actually consumes. Hero/detail width
+    // is ~400px, list-row width is ~150px; srcset covers retina at each.
+    const w1 = priority ? 400 : 200;
+    const w2 = priority ? 800 : 400;
+    const src1 = imageProxyUrl(imageUrl, w1);
+    const src2 = imageProxyUrl(imageUrl, w2);
+    if (src1 && src2) {
+      return (
+        <div class="poster">
+          <img
+            class="poster__img"
+            src={src2}
+            srcset={`${src1} ${w1}w, ${src2} ${w2}w`}
+            sizes={priority ? "(max-width: 640px) 60vw, 400px" : "(max-width: 640px) 32vw, 150px"}
+            alt=""
+            loading={priority ? "eager" : "lazy"}
+            fetchpriority={priority ? "high" : undefined}
+            decoding="async"
+          />
+        </div>
+      );
+    }
   }
   return (
     <div class="poster poster--fallback" aria-hidden="true">
