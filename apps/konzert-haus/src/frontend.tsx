@@ -132,6 +132,13 @@ export function Head(opts: HeadOptions) {
       ]}
       inlineCss={INLINE_CSS}
       fontsHref={null}
+      preloadFonts={[
+        // Cormorant Garamond drives the wordmark + headings (the LCP
+        // text element). Preload the 400 weight so the browser fetches
+        // it on the critical path instead of waiting for the inline
+        // CSS parser to discover @font-face.
+        "/fonts/cormorant-garamond-latin-400-normal.woff2",
+      ]}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
     />

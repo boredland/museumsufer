@@ -92,6 +92,11 @@ export function Head(opts: HeadOptions) {
       ]}
       inlineCss={INLINE_CSS}
       fontsHref={null}
+      preloadFonts={[
+        // Fraunces drives the wordmark; preload the variable file so
+        // the LCP text doesn't FOUT-swap.
+        "/fonts/fraunces-latin-full-normal.woff2",
+      ]}
       deferScripts={["/htmx.min.js", "/uFuzzy.iife.min.js"]}
       jsonLd={jsonLdArr}
     />

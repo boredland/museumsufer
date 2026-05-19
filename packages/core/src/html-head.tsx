@@ -73,6 +73,12 @@ export interface HtmlHeadProps {
    *  as `<link rel="preconnect" href="..." crossorigin>` with a
    *  matching `dns-prefetch` fallback for older browsers. */
   preconnect?: string[];
+  /** Same-origin woff2 paths to preload. Discovers fonts earlier than
+   *  the CSS parser does, which is the single biggest LCP win for
+   *  display-text LCP elements (Fraunces / Cormorant headings, etc.).
+   *  Keep it tight -- preloading every variant blocks the network on
+   *  fonts that don't paint above the fold. */
+  preloadFonts?: string[];
 }
 
 function ldString(j: Record<string, unknown> | string): string {
@@ -101,6 +107,7 @@ export function HtmlHead(props: HtmlHeadProps) {
     fontsHref = "/fonts.css",
     manifestHref = "/manifest.json",
     preconnect,
+    preloadFonts,
   } = props;
 
   const themeColors: HtmlHeadThemeColor[] = !themeColor
@@ -149,6 +156,9 @@ export function HtmlHead(props: HtmlHeadProps) {
           <link key={`pc-${origin}`} rel="preconnect" href={origin} crossorigin="" />
           <link key={`dns-${origin}`} rel="dns-prefetch" href={origin} />
         </>
+      ))}
+      {preloadFonts?.map((path) => (
+        <link key={`pf-${path}`} rel="preload" href={path} as="font" type="font/woff2" crossorigin="" />
       ))}
       {alternates?.map((a) => (
         <link key={`${a.rel}-${a.href}`} rel={a.rel} href={a.href} type={a.type} title={a.title} />
