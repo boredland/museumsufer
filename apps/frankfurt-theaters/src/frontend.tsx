@@ -1314,8 +1314,8 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   // heute" queries. Non-today views suffix the date.
   const isToday = date === today;
   const title = isToday
-    ? "Frankfurt Theater — Vorstellungen heute in Frankfurt am Main"
-    : `Frankfurt Theater — Vorstellungen am ${niceDate} in Frankfurt am Main`;
+    ? "frankfurt.ins.theater — Vorstellungen heute in Frankfurt am Main"
+    : `frankfurt.ins.theater — Vorstellungen am ${niceDate} in Frankfurt am Main`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
