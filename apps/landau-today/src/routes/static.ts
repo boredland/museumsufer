@@ -124,13 +124,9 @@ app.get("/.well-known/llms.txt", (c) =>
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
   const urls = [
-    { loc: `${APP_URL}/`, priority: "1.0", changefreq: "daily" },
-    ...CATEGORIES.map((cat) => ({
-      loc: `${APP_URL}/c/${cat.slug}`,
-      priority: "0.8",
-      changefreq: "daily",
-    })),
-    { loc: `${APP_URL}/impressum`, priority: "0.3", changefreq: "yearly" },
+    { loc: `${APP_URL}/` },
+    ...CATEGORIES.map((cat) => ({ loc: `${APP_URL}/c/${cat.slug}` })),
+    { loc: `${APP_URL}/impressum` },
   ];
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -139,8 +135,6 @@ ${urls
     (u) => `<url>
   <loc>${u.loc}</loc>
   <lastmod>${today}</lastmod>
-  <changefreq>${u.changefreq}</changefreq>
-  <priority>${u.priority}</priority>
 </url>`,
   )
   .join("\n")}

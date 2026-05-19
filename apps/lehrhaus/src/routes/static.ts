@@ -91,8 +91,6 @@ app.get("/sitemap.xml", (c) => {
       (s) => `  <url>
     <loc>${APP_URL}/quelle/${s.slug}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>`,
     )
     .join("\n");
@@ -100,8 +98,6 @@ app.get("/sitemap.xml", (c) => {
     (c) => `  <url>
     <loc>${APP_URL}/format/${c}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
   </url>`,
   ).join("\n");
   const dateUrls = Array.from({ length: 60 }, (_, i) => dateOffset(i))
@@ -109,8 +105,6 @@ app.get("/sitemap.xml", (c) => {
       (d) => `  <url>
     <loc>${APP_URL}/tag/${d}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
   </url>`,
     )
     .join("\n");
@@ -120,20 +114,14 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${APP_URL}/</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>${APP_URL}/api/docs</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>${APP_URL}/impressum</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
 ${dateUrls}
 ${sourceUrls}
