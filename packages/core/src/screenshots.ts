@@ -9,6 +9,7 @@
  */
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
 export const SCREENSHOT_FORMATS = {
@@ -55,7 +56,11 @@ export async function captureManifestScreenshots(opts: CaptureOpts): Promise<str
         locale,
       });
       const page = await ctx.newPage();
-      await page.goto(baseUrl, { waitUntil: "networkidle" });
+      // `networkidle` deadlocks on pages with continuous lazy-image
+      // loading (lichtspiel-haus screening cards trickle in posters as
+      // you scroll), so wait for DOM + the app's own readiness selector
+      // instead — that's what actually tells us the page is paintable.
+      await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: readyTimeoutMs });
       if (readySelector) await page.waitForSelector(readySelector, { timeout: readyTimeoutMs });
       await page.evaluate(() => document.fonts.ready);
       if (postReadyDelayMs > 0) await page.waitForTimeout(postReadyDelayMs);
@@ -70,4 +75,46 @@ export async function captureManifestScreenshots(opts: CaptureOpts): Promise<str
   }
 
   return written;
+}
+
+export interface RasterizeOpts {
+  /** Absolute path to the SVG file on disk. */
+  svgPath: string;
+  /** Absolute path to write the PNG output. */
+  pngPath: string;
+  /** Pixel dimensions of the output raster. Defaults to 1200×630
+   *  (the canonical Open Graph card size). */
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Rasterise an SVG file to a PNG at a fixed viewport size by loading
+ * it in headless Chromium. Used by `scripts/regen-og-images.ts` to
+ * keep `og-image.png` in sync with the hand-authored `og-image.svg`
+ * source of truth.
+ */
+export async function rasterizeSvgToPng(opts: RasterizeOpts): Promise<string> {
+  const { svgPath, pngPath, width = 1200, height = 630 } = opts;
+  const browser = await chromium.launch();
+  try {
+    const ctx = await browser.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: 1,
+    });
+    const page = await ctx.newPage();
+    // Wrap the SVG in zero-margin HTML so Chromium renders at the
+    // exact viewport with no UA-stylesheet padding or scrollbars.
+    const html = `<!doctype html><html><head><style>
+      html,body{margin:0;padding:0;background:transparent;}
+      img{display:block;width:${width}px;height:${height}px;}
+    </style></head><body><img src="${pathToFileURL(svgPath).href}"/></body></html>`;
+    await page.setContent(html, { waitUntil: "networkidle" });
+    await page.evaluate(() => document.fonts.ready);
+    await page.screenshot({ path: pngPath, type: "png", fullPage: false });
+    await ctx.close();
+  } finally {
+    await browser.close();
+  }
+  return pngPath;
 }

@@ -7,21 +7,6 @@ import type { Env } from "../types";
 
 const SITE_URL = "https://museumsufer.app";
 
-const OG_IMAGE = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#f5f0eb"/>
-  <g transform="translate(180, 175)">
-    <circle cx="40" cy="14" r="14" fill="#b45309"/>
-    <path d="M 40 42 L 100 110 L -20 110 Z" fill="#1f3a52"/>
-    <rect x="-32" y="124" width="144" height="22" fill="#1f3a52"/>
-  </g>
-  <text x="380" y="265" font-family="system-ui,sans-serif" font-size="84" font-weight="700" fill="#1c1917" letter-spacing="-3">Museumsufer</text>
-  <text x="380" y="340" font-family="system-ui,sans-serif" font-size="84" font-weight="300" fill="#1f3a52" letter-spacing="-3">Frankfurt</text>
-  <rect x="380" y="380" width="120" height="6" fill="#b45309"/>
-  <text x="380" y="430" font-family="system-ui,sans-serif" font-size="28" fill="#57534e">Ausstellungen und Veranstaltungen</text>
-  <text x="380" y="468" font-family="system-ui,sans-serif" font-size="28" fill="#57534e">am Frankfurter Museumsufer</text>
-  <text x="380" y="555" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#b45309" letter-spacing="2">MUSEUMSUFER.APP</text>
-</svg>`;
-
 const MANIFEST = buildManifest({
   name: "Museumsufer Frankfurt",
   shortName: "Museumsufer",
@@ -107,10 +92,6 @@ app.get("/.well-known/api-catalog", (c) =>
       "Cache-Control": "public, max-age=86400",
     },
   }),
-);
-
-app.get("/og-image.svg", (c) =>
-  c.body(OG_IMAGE, { headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=604800" } }),
 );
 
 app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
