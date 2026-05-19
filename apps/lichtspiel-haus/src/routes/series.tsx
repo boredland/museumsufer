@@ -19,17 +19,67 @@ app.get("/reihe/:slug", (c) => {
   const tr = getTranslations(locale);
   const currentPath = `/reihe/${slug}`;
 
+  // Auto-derived series description -- date span + screening count +
+  // host cinemas. Lifts the page from a bare event list to something
+  // with at least one self-contained sentence Google + AI assistants
+  // can excerpt.
+  const cinemaNames = Array.from(new Set(screenings.map((s) => s.cinema.name))).slice(0, 3);
+  const firstDate = screenings[0].date;
+  const lastDate = screenings[screenings.length - 1].date;
+  const lead = tr.seriesLead({
+    name,
+    count: screenings.length,
+    firstDate,
+    lastDate,
+    cinemas: cinemaNames,
+  });
+  const description = `${lead} ${tr.seriesDescription(name, screenings.length)}`;
+
+  const eventSeriesLd = {
+    "@context": "https://schema.org",
+    "@type": "EventSeries",
+    "@id": `${APP_URL}${currentPath}#series`,
+    name,
+    description: lead,
+    url: `${APP_URL}${currentPath}`,
+    startDate: firstDate,
+    endDate: lastDate,
+    location: {
+      "@type": "Place",
+      name: cinemaNames.join(", "),
+      address: { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" },
+    },
+    subEvent: screenings.slice(0, 20).map((s) => ({
+      "@type": "ScreeningEvent",
+      "@id": `${APP_URL}/film/${s.id}#screening`,
+      name: s.title,
+      startDate: s.time ? `${s.date}T${s.time}:00+02:00` : s.date,
+      url: `${APP_URL}/film/${s.id}`,
+      location: { "@type": "MovieTheater", name: s.cinema.name },
+    })),
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: APP_URL },
+      { "@type": "ListItem", position: 2, name: tr.seriesAll, item: `${APP_URL}/reihe` },
+      { "@type": "ListItem", position: 3, name },
+    ],
+  };
+
   return c.html(
     <>
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
           <Head
-            title={`${name} — lichtspiel.haus`}
-            description={tr.seriesDescription(name, screenings.length)}
-            canonical={`${APP_URL}/reihe/${slug}`}
+            title={`${name} — Filmreihe Frankfurt — lichtspiel.haus`}
+            description={description}
+            canonical={`${APP_URL}/reihe/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
+            jsonLd={[eventSeriesLd, breadcrumbLd]}
             extraLinks={[
               { rel: "alternate", type: "text/calendar", href: `/reihe/${slug}/feed.ics`, title: `${name} – iCal` },
               { rel: "alternate", type: "application/json", href: `/api/series/${slug}`, title: `${name} – JSON` },
@@ -56,6 +106,7 @@ app.get("/reihe/:slug", (c) => {
               </div>
               <p class="venue-hero__kicker">{tr.seriesKicker}</p>
               <h2 class="venue-hero__name">{name}</h2>
+              <p class="venue-hero__lead">{lead}</p>
               <p class="venue-hero__meta">
                 <a href={`/reihe/${slug}/feed.ics`}>{tr.icalSubscribe}</a>
                 <a href={`/api/series/${slug}`}>{tr.jsonLink}</a>
@@ -90,7 +141,7 @@ app.get("/reihe", (c) => {
           <Head
             title={`${tr.seriesAll} — lichtspiel.haus`}
             description={tr.seriesAll}
-            canonical={`${APP_URL}/reihe`}
+            canonical={`${APP_URL}/reihe?lang=${locale}`}
             locale={locale}
             currentPath="/reihe"
           />
@@ -99,7 +150,7 @@ app.get("/reihe", (c) => {
           <Masthead tr={tr} locale={locale} currentPath="/reihe" />
           <main class="programme">
             <p class="back-link">
-              <a href="/">← {tr.backToProgramme}</a>
+              <a href={`/?lang=${locale}`}>← {tr.backToProgramme}</a>
             </p>
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.seriesKicker}</p>

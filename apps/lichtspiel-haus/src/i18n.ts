@@ -92,6 +92,16 @@ export interface Translations {
   websiteLink: string;
   cinemaDescription: (cinema: string, count: number) => string;
   seriesDescription: (series: string, count: number) => string;
+  /** Lead sentence above the screening list on /reihe/:slug.
+   *  Lifts the page from a bare event grid to something with real
+   *  text to excerpt -- date span, screening count, host cinemas. */
+  seriesLead: (opts: { name: string; count: number; firstDate: string; lastDate: string; cinemas: string[] }) => string;
+  /** Strings for the /kinos venue-directory page. */
+  cinemasIndexKicker: string;
+  cinemasIndexTitle: string;
+  cinemasIndexLead: string;
+  backToCinemasIndex: string;
+  upcomingShows: (count: number) => string;
   filmKicker: string;
   // Search bar (above the date strip)
   searchLabel: string;
@@ -128,6 +138,14 @@ export interface Translations {
   // main footer block.
   tmdbAttributionLead: string;
   tmdbAttributionTail: string;
+  /** Shown above the synopsis on /film/:id when the visitor's locale
+   *  is `en` but TMDb has no English overview, so the German cinema
+   *  description is rendered as fallback. */
+  synopsisFallbackNotice: string;
+  /** One-line "Synopsis: TMDb" attribution rendered adjacent to the
+   *  description text on /film/:id, satisfying TMDb's API terms at
+   *  the point of use (the global footer attribution stays as well). */
+  synopsisAttribution: string;
 }
 
 const de: Translations = {
@@ -210,6 +228,23 @@ const de: Translations = {
     `Vorstellungen im ${cinema}. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
   seriesDescription: (series, count) =>
     `Filmreihe »${series}« — ${count} Vorstellung${count === 1 ? "" : "en"} in den nächsten 60 Tagen.`,
+  seriesLead: ({ name, count, firstDate, lastDate, cinemas }) => {
+    const fmt = (d: string) => {
+      const dt = new Date(`${d}T12:00:00Z`);
+      return dt.toLocaleDateString("de-DE", { day: "numeric", month: "long", timeZone: "UTC" });
+    };
+    const at =
+      cinemas.length === 1
+        ? `im ${cinemas[0]}`
+        : `in ${cinemas.slice(0, -1).join(", ")} und ${cinemas[cinemas.length - 1]}`;
+    return `Die Filmreihe »${name}« läuft vom ${fmt(firstDate)} bis ${fmt(lastDate)} ${at} mit ${count} ${count === 1 ? "Vorstellung" : "Vorstellungen"}.`;
+  },
+  cinemasIndexKicker: "Verzeichnis",
+  cinemasIndexTitle: "Kinos in Frankfurt und Umgebung",
+  cinemasIndexLead:
+    "Arthouse, Programmkino, Repertoire — alle Spielstätten der Rhein-Main-Region mit aktuellem Vorstellungs-Programm.",
+  backToCinemasIndex: "Zum Kino-Verzeichnis",
+  upcomingShows: (count) => `${count} Vorstellung${count === 1 ? "" : "en"} in 14 Tagen`,
   filmKicker: "Vorstellung",
   searchLabel: "Suchen",
   searchPlaceholder: "Filme, Regisseur:innen, Kinos suchen …",
@@ -263,6 +298,8 @@ const de: Translations = {
   ],
   tmdbAttributionLead: "Filmplakate & -beschreibungen via ",
   tmdbAttributionTail: ". Dieses Produkt nutzt die TMDB-API, ist aber weder von TMDB unterstützt noch zertifiziert.",
+  synopsisFallbackNotice: "Synopsis auf Deutsch — keine englische Übersetzung verfügbar.",
+  synopsisAttribution: "Synopsis: TMDb.",
 };
 
 const en: Translations = {
@@ -344,6 +381,23 @@ const en: Translations = {
     `Screenings at ${cinema}. ${count} ${count === 1 ? "show" : "shows"} in the next 60 days.`,
   seriesDescription: (series, count) =>
     `Film series "${series}" — ${count} ${count === 1 ? "screening" : "screenings"} in the next 60 days.`,
+  seriesLead: ({ name, count, firstDate, lastDate, cinemas }) => {
+    const fmt = (d: string) => {
+      const dt = new Date(`${d}T12:00:00Z`);
+      return dt.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
+    };
+    const at =
+      cinemas.length === 1
+        ? `at ${cinemas[0]}`
+        : `at ${cinemas.slice(0, -1).join(", ")} and ${cinemas[cinemas.length - 1]}`;
+    return `The film series "${name}" runs from ${fmt(firstDate)} to ${fmt(lastDate)} ${at} with ${count} ${count === 1 ? "screening" : "screenings"}.`;
+  },
+  cinemasIndexKicker: "Directory",
+  cinemasIndexTitle: "Cinemas in Frankfurt & Rhine-Main",
+  cinemasIndexLead:
+    "Arthouse, Programmkino, repertory — every cinema in the region with its current programme of upcoming screenings.",
+  backToCinemasIndex: "Back to the cinema directory",
+  upcomingShows: (count) => `${count} ${count === 1 ? "show" : "shows"} in 14 days`,
   filmKicker: "Screening",
   searchLabel: "Search",
   searchPlaceholder: "Search films, directors, cinemas …",
@@ -397,6 +451,8 @@ const en: Translations = {
   ],
   tmdbAttributionLead: "Posters & synopses via ",
   tmdbAttributionTail: ". This product uses the TMDB API but is not endorsed or certified by TMDB.",
+  synopsisFallbackNotice: "Synopsis in German — no English translation available.",
+  synopsisAttribution: "Synopsis: TMDb.",
 };
 
 const TRANSLATIONS: Record<Locale, Translations> = { de, en };
