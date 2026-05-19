@@ -133,16 +133,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "world",
   },
   {
-    slug: "mousonturm",
-    name: "Künstler*innenhaus Mousonturm",
-    address: "",
-    lat: 50.1183,
-    lon: 8.7019,
-    city: "frankfurt",
-    website_url: "https://www.mousonturm.de",
-    default_genre: "experimental",
-  },
-  {
     slug: "schauspiel-frankfurt",
     name: "Schauspiel Frankfurt",
     address: "",
