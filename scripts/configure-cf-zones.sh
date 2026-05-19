@@ -15,9 +15,9 @@
 # What it sets per zone:
 #   1. SSL/TLS -> Edge Certificates -> Always Use HTTPS = on
 #      Maps to `always_use_https` zone setting. Stable, documented.
-#   2. Security -> Bots -> AI Audit "Managed robots.txt" block = off
-#      Best effort -- this feature's API surface is newer; if the PATCH
-#      fails the script logs a dashboard URL for manual follow-up.
+#   2. Security -> Bots -> AI Audit "Managed robots.txt" block
+#      Dashboard-only on Free tier (no public API path). The script
+#      prints the per-zone dashboard URL so you can flip it by hand.
 
 set -euo pipefail
 
@@ -109,30 +109,18 @@ apply_always_use_https() {
     || echo "    always_use_https: FAILED (check token scope: Zone Settings:Edit)"
 }
 
-# Cloudflare's "Block AI Scrapers and Crawlers" toggle lives under
-# Security -> Bots. The zone-setting id is `block_ai_bots`. If your
-# zone isn't on a plan that exposes the API for this feature, the
-# PATCH returns 4xx and we link to the dashboard.
-apply_ai_bots_unblock() {
-  local zone_id="$1" zone_name="$2"
-  if [[ $DRY_RUN -eq 1 ]]; then
-    echo "    [dry-run] PATCH /zones/$zone_id/settings/block_ai_bots <- off"
-    return 0
-  fi
-  local resp http_code
-  resp=$(curl -sS -o /tmp/cf-ai-resp.$$ -w "%{http_code}" -X PATCH \
-    -H "Authorization: Bearer $CF_API_TOKEN" \
-    -H "Content-Type: application/json" \
-    --data '{"value":"off"}' \
-    "$API/zones/$zone_id/settings/block_ai_bots" || echo "000")
-  http_code="$resp"
-  if [[ "$http_code" == "200" ]]; then
-    echo "    block_ai_bots: off (was on)"
-  else
-    echo "    block_ai_bots: API not available on this plan (HTTP $http_code)"
-    echo "      -> dashboard: https://dash.cloudflare.com/?to=/:account/$zone_name/security/bots"
-  fi
-  rm -f /tmp/cf-ai-resp.$$
+# Cloudflare's AI-Audit "Managed robots.txt" toggle (the thing that
+# prepends GPTBot/ClaudeBot/Google-Extended Disallow rules to every
+# robots.txt response) is dashboard-only on Free tier zones. Every
+# REST surface I tried returns 70001 not_found or 1003 undefined
+# setting: /zones/<id>/ai-audit, /zones/<id>/ai-audit/settings,
+# /zones/<id>/settings/{ai_bots_block,block_ai_bots,block_ai_scrapers}.
+# So just print the dashboard URL for each zone. If Cloudflare publishes
+# a stable API later, replace this stub with a real PATCH.
+print_ai_audit_hint() {
+  local zone_name="$1"
+  echo "    ai-audit: no public API on Free tier"
+  echo "      -> https://dash.cloudflare.com/?to=/:account/$zone_name/security/bots"
 }
 
 # Verify token has the needed scopes by listing zones once.
@@ -155,7 +143,7 @@ for host in "${ZONES[@]}"; do
   SEEN_ZONES[$zone_id]=1
   echo "    zone: $zone_name ($zone_id)"
   apply_always_use_https "$zone_id" "$zone_name"
-  apply_ai_bots_unblock "$zone_id" "$zone_name"
+  print_ai_audit_hint "$zone_name"
 done
 
 echo
