@@ -1,0 +1,72 @@
+name: regen-assets
+
+# Re-generates the static social-card raster (og-image.png) and PWA
+# manifest screenshots (ss-wide.png + ss-mobile.png) for every app,
+# screenshotting the live custom domains so the committed assets
+# always reflect what real visitors see.
+#
+# Runs daily at 05:30 UTC (07:30 CEST / 06:30 CET) -- after the
+# scheduled scrape's first 07:00 UTC pass has had time to land on
+# the live workers -- and on manual workflow_dispatch.
+
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regen-assets
+  cancel-in-progress: false
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # Playwright's Chromium bundle isn't pulled in by bun install;
+      # fetch it + the system libs Chromium needs on ubuntu-latest.
+      - name: Install Chromium for Playwright
+        run: bunx --bun playwright install --with-deps chromium
+
+      - name: Refresh manifest screenshots against prod
+        run: bun scripts/regen-screenshots.ts --prod
+
+      - name: Re-rasterise OG images
+        run: bun scripts/regen-og-images.ts
+
+      - name: Commit if changed
+        run: |
+          git config user.name "regen-assets-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            apps/*/public/ss-wide.png \
+            apps/*/public/ss-mobile.png \
+            apps/*/public/og-image.png
+          if git diff --cached --quiet; then
+            echo "no asset changes, skipping commit"
+            exit 0
+          fi
+          git commit -m "assets: scheduled refresh $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Same rebase-tolerant push as scrape.yml -- the scrape job
+          # may have moved main between checkout and push, and our
+          # PNG paths never conflict with its data paths.
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main && git push; then
+              exit 0
+            fi
+            echo "push attempt $attempt failed, retrying"
+            sleep $((attempt * 5))
+          done
+          echo "push failed after 3 attempts" >&2
+          exit 1
