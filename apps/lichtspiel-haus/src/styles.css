@@ -459,6 +459,23 @@ body::before {
   position: relative;
   animation: rise 700ms calc(380ms + var(--i, 0) * 50ms) both;
   transition: background-color 200ms;
+  /* Anchor scroll: leave room above so the row lands clear of the date
+   * strip when arrived at via /tag/{date}#screening-{id}. */
+  scroll-margin-top: 6rem;
+}
+
+/* :target-style flash after a back-link jump — brass glow that fades
+ * over the same ~1.8s window the scroll handler holds the class. */
+.prog-entry--flash {
+  animation: flashTarget 1.8s ease-out both;
+}
+@keyframes flashTarget {
+  0%   { background-color: var(--brass-soft); }
+  25%  { background-color: var(--brass-soft); }
+  100% { background-color: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prog-entry--flash { animation: none; background-color: var(--brass-soft); }
 }
 .prog-entry:hover { background-color: var(--brass-glow); }
 
