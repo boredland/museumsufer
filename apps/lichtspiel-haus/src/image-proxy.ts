@@ -15,23 +15,39 @@ const ALLOWED_HOSTS = new Set([
   "www.orfeos.de",
   "www.dff.film",
   "dff.film",
+  // Filmforum Höchst scraper produces .com (not .de) hostnames for
+  // its wp-content uploads; keep both registered so historical scrape
+  // data stays proxiable.
+  "filmforum-hoechst.com",
+  "www.filmforum-hoechst.com",
   "www.filmforum-hoechst.de",
+  "filmforum-hoechst.de",
   "www.pupille.org",
+  "pupille.org",
   "www.nipponconnection.com",
+  // Nippon Connection runs a separate DB subdomain for poster art.
+  "db.nipponconnection.com",
   "murnau-stiftung.de",
+  "www.murnau-stiftung.de",
   "www.wiesbaden.de",
   "www.filmpalast-hofheim.de",
   "www.kino-kelkheim.de",
   "www.kronberger-lichtspiele.de",
   "www.kino-alte-muehle.de",
   "www.kino-koeppern.de",
+  // The scraper sometimes records the same venue under the
+  // hyphenless variant; keep both so the proxy doesn't drop them.
+  "www.kinokoeppern.de",
   "www.kino-lichtblick.de",
   "www.rex-kino-darmstadt.de",
   "www.filmkreis.tu-darmstadt.de",
+  "www.dfg-frankfurt.de",
   "tickets.cinetixx.de",
+  // Cinetixx serves its CDN images from a separate hostname.
+  "images.cinetixx.com",
   "www.kinoheld.de",
-  // TMDb CDN — used by the hub's poster-enrichment pass for events where
-  // the venue scraper didn't carry an image_url.
+  // TMDb CDN — used by the hub's poster-enrichment pass for events
+  // where the venue scraper didn't carry an image_url.
   "image.tmdb.org",
 ]);
 
@@ -92,7 +108,11 @@ export function imageProxyUrl(originalUrl: string | undefined | null, width?: nu
   if (!originalUrl) return undefined;
   try {
     const u = new URL(originalUrl);
-    if (!ALLOWED_HOSTS.has(u.hostname)) return originalUrl;
+    // Unknown host → return undefined so callers (PosterCard) render
+    // the styled fallback instead of emitting a cross-origin <img>
+    // that our CSP img-src would block anyway. Previously we passed
+    // the raw URL through, which left a broken poster in the DOM.
+    if (!ALLOWED_HOSTS.has(u.hostname)) return undefined;
     const base = `/img/${encodeURIComponent(originalUrl)}`;
     return width ? `${base}?w=${width}` : base;
   } catch {
