@@ -48,10 +48,13 @@
   --celluloid-soft: rgba(26, 27, 20, 0.72);
   --celluloid-quiet: rgba(26, 27, 20, 0.42);
   --celluloid-faint: rgba(26, 27, 20, 0.18);
-  --brass:        #B8893A;
-  --brass-bright: #966F22;
-  --brass-soft:   rgba(184, 137, 58, 0.12);
-  --brass-glow:   rgba(184, 137, 58, 0.06);
+  /* Darkened to clear WCAG AA 4.5:1 contrast on paper. Was #B8893A
+   * (2.6 ratio), which Lighthouse a11y flagged on the FRANKFURT
+   * eyebrow + the "haus" wordmark. */
+  --brass:        #7A5A1F;
+  --brass-bright: #5D4216;
+  --brass-soft:   rgba(122, 90, 31, 0.12);
+  --brass-glow:   rgba(122, 90, 31, 0.06);
   --absinthe:     #3B5F58;
   --absinthe-soft: rgba(59, 95, 88, 0.12);
   --oxblood:      #6B1A1A;
@@ -896,7 +899,15 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   text-transform: uppercase;
   color: var(--brass);
   border: 1px solid color-mix(in oklab, var(--brass) 35%, transparent);
-  padding: 0.1rem 0.4rem 0.05rem;
+  /* min-height 24px clears Lighthouse + WCAG 2.5.8 target-size. The
+   * actual visual chrome stays compact via padding; the inline-flex
+   * + line-height: 1 keeps the text vertically centred without
+   * making the badge taller-looking. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  line-height: 1;
+  padding: 0.1rem 0.5rem;
   white-space: nowrap;
   text-decoration: none;
   transition: color 220ms, border-color 220ms, background 220ms;

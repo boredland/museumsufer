@@ -28,19 +28,20 @@ app.onError((err, c) => {
 });
 
 // 'unsafe-inline' is unavoidable while theme FOUC + HTMX lifecycle
-// + inline behaviour scripts ship in <head>/<body>. Remaining
-// directives still close eval, object-src, and lock the frame
-// allow-list to Turnstile.
+// + inline behaviour scripts ship in <head>/<body>. Cloudflare auto-
+// injects its Web Analytics beacon from static.cloudflareinsights.com,
+// so that origin needs to be in script-src + connect-src or the CSP
+// blocks it and Lighthouse best-practices drops to 0.93.
 app.use(
   "*",
   securityHeaders({
     csp: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data:",
       "font-src 'self'",
-      "connect-src 'self' https://challenges.cloudflare.com",
+      "connect-src 'self' https://challenges.cloudflare.com https://cloudflareinsights.com",
       "frame-src https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
