@@ -24,6 +24,13 @@ concurrency:
 jobs:
   regen:
     runs-on: ubuntu-latest
+    # Microsoft's official Playwright image ships Chromium, Firefox,
+    # WebKit, every required system lib, and matching browser revisions
+    # baked into /ms-playwright. Pinning the image tag to the same
+    # version as packages/core's `playwright` dep keeps the bundled
+    # browser binaries and the JS client in lockstep with one bump.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
@@ -33,16 +40,6 @@ jobs:
           bun-version: latest
 
       - run: bun install --frozen-lockfile
-
-      # Playwright's Chromium bundle isn't pulled in by bun install;
-      # fetch it + the system libs Chromium needs on ubuntu-latest.
-      # Run from packages/core so the bundled playwright version drives
-      # the install (avoids mismatched revision paths). Pull both the
-      # headless-shell (what chromium.launch() picks by default) and
-      # the full Chromium so either entrypoint works.
-      - name: Install Chromium for Playwright
-        working-directory: packages/core
-        run: bunx playwright install --with-deps chromium chromium-headless-shell
 
       - name: Refresh manifest screenshots against prod
         run: bun scripts/regen-screenshots.ts --prod
