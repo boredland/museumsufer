@@ -39,6 +39,8 @@ const APPS: readonly AppTarget[] = [
   { slug: "frankfurt-theaters", dir: "apps/frankfurt-theaters", port: 8802, path: "/", readySelector: ".programme" },
   { slug: "konzert-haus", dir: "apps/konzert-haus", port: 8803, path: "/", readySelector: ".programme" },
   { slug: "landau-today", dir: "apps/landau-today", port: 8804, path: "/", readySelector: "main" },
+  { slug: "lehrhaus", dir: "apps/lehrhaus", port: 8805, path: "/", readySelector: ".programme" },
+  { slug: "lichtspiel-haus", dir: "apps/lichtspiel-haus", port: 8806, path: "/", readySelector: ".programme" },
 ];
 
 async function waitForPort(url: string, timeoutMs = 30_000): Promise<void> {
