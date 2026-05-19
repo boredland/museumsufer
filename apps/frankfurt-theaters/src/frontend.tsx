@@ -93,9 +93,12 @@ export function Head(opts: HeadOptions) {
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preloadFonts={[
-        // Fraunces drives the wordmark; preload the variable file so
-        // the LCP text doesn't FOUT-swap.
+        // Fraunces drives the wordmark + headings. CWV audit flagged
+        // the italic variant (150 KB) as discovered late by the CSS
+        // parser and gating LCP at 3.0-3.4s -- preload both faces
+        // since the date headings + production titles use italic.
         "/fonts/fraunces-latin-full-normal.woff2",
+        "/fonts/fraunces-latin-full-italic.woff2",
       ]}
       deferScripts={["/htmx.min.js", "/uFuzzy.iife.min.js"]}
       jsonLd={jsonLdArr}
@@ -1427,51 +1430,51 @@ export function buildHomeJsonLd(date: string, performances: DayPerformance[]): R
       item: buildPerformanceJsonLd(p),
     })),
   };
-  const website = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": `${APP_URL}/#website`,
-    name: "Frankfurt Theater",
-    url: APP_URL,
-    inLanguage: "de",
-    publisher: { "@type": "Organization", name: "Frankfurt Theater", url: APP_URL },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: { "@type": "EntryPoint", urlTemplate: `${APP_URL}/?date={date}` },
-      "query-input": "required name=date",
-    },
-  };
-  return [website, itemList, buildFaqPageSchema(FAQ_ITEMS)];
+  // renderPage adds its own canonical WebSite + SearchAction block;
+  // this helper no longer emits a second one (the previous duplicate
+  // had a conflicting `?date=` EntryPoint that broke Sitelinks
+  // Searchbox eligibility per the schema audit).
+  return [itemList, buildFaqPageSchema(FAQ_ITEMS)];
 }
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {
   const startDate = p.time ? `${p.date}T${p.time}:00+02:00` : p.date;
   const endDate = p.end_time ? `${p.end_date ?? p.date}T${p.end_time}:00+02:00` : undefined;
+  // Offer is only emitted when complete (priceCurrency without price
+  // is invalid per schema.org). priceValidUntil = the performance
+  // date itself; tickets stop being relevant once the show plays.
   const offer =
     p.status === "cancelled"
       ? undefined
       : {
           "@type": "Offer",
           url: p.ticket_url ?? p.show.detail_url ?? undefined,
-          price: p.price_min ?? undefined,
-          priceCurrency: "EUR",
+          ...(p.price_min != null && { price: p.price_min, priceCurrency: "EUR" }),
           availability: p.status === "sold_out" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+          priceValidUntil: p.date,
         };
+  // location references the @id minted by /theater/:slug so Google
+  // resolves the full PerformingArtsTheater block (address, geo,
+  // sameAs) from there instead of treating each event as a detached
+  // node. Falls back to inline name when slug isn't known.
+  const location = p.theater.slug
+    ? { "@id": `${APP_URL}/theater/${p.theater.slug}#theater` }
+    : { "@type": "PerformingArtsTheater", name: p.theater.name, url: p.theater.website_url ?? undefined };
   return {
     "@type": "TheaterEvent",
+    "@id": `${APP_URL}/#performance/${p.id}`,
     name: p.show.title,
     description: p.show.subtitle ?? p.show.description ?? undefined,
     startDate,
     endDate,
     eventStatus: p.status === "cancelled" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-    location: {
-      "@type": "PerformingArtsTheater",
-      name: p.theater.name,
-      url: p.theater.website_url ?? undefined,
-    },
+    location,
     image: absImageUrl(p.show.image_url),
-    url: `${APP_URL}/api/performance/${p.id}`,
+    // url points at the canonical /theater/<slug> page (where the
+    // performance is listed), not the JSON-only /api/performance/<id>
+    // endpoint Googlebot would otherwise try to index as a page.
+    url: p.theater.slug ? `${APP_URL}/theater/${p.theater.slug}` : APP_URL,
     offers: offer,
   };
 }
