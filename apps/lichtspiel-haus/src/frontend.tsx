@@ -358,6 +358,28 @@ function PriceRange({ min, max }: { min?: number | null; max?: number | null }) 
   );
 }
 
+/** TMDb user-score rendered as a 10-bulb marquee meter — brass-lit bulbs
+ *  on the left for each whole point of the average, 1px stroked empty
+ *  sockets on the right. Hidden under the ≥25-vote confidence threshold.
+ *  The exact value lives in `title=` + aria-label so hover + screen
+ *  readers still get the precise number. */
+function RatingMeter({ avg, count }: { avg: number | undefined; count: number | undefined }) {
+  if (typeof avg !== "number" || typeof count !== "number" || count < 25 || avg <= 0) return null;
+  const lit = Math.min(10, Math.max(0, Math.round(avg)));
+  return (
+    <span
+      class="rating-meter"
+      role="img"
+      aria-label={`${avg.toFixed(1)} of 10`}
+      title={`TMDb · ${avg.toFixed(1)} / 10 (${count.toLocaleString()} votes)`}
+    >
+      {Array.from({ length: 10 }, (_, i) => (
+        <span key={i} class={`rating-meter__bulb${i < lit ? " is-lit" : ""}`} />
+      ))}
+    </span>
+  );
+}
+
 export function PosterCard({ title, imageUrl }: { title: string; imageUrl?: string | null }) {
   const proxied = imageUrl ? imageProxyUrl(imageUrl) : undefined;
   if (proxied) {
@@ -426,16 +448,6 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   if (s.version) badges.push(s.version);
   if (s.format) badges.push(s.format);
   const genres = s.tmdb_genre_ids?.length ? genreNames(s.tmdb_genre_ids, opts.locale) : [];
-  // Hide low-confidence scores: TMDb returns vote_average even for films
-  // with two votes from cinephiles, which isn't statistically meaningful.
-  // 25 is the rough threshold where the average stabilises in their data.
-  const scorePct =
-    typeof s.tmdb_vote_average === "number" &&
-    typeof s.tmdb_vote_count === "number" &&
-    s.tmdb_vote_count >= 25 &&
-    s.tmdb_vote_average > 0
-      ? Math.round(s.tmdb_vote_average * 10)
-      : null;
 
   // Searchable haystack — title (display + original, since the venue
   // chrome version is what regulars remember), cinema, credits, series,
@@ -476,17 +488,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         <time class="prog-entry__time-hero" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
           {time}
         </time>
-        {scorePct !== null ? (
-          <span
-            class="prog-entry__score"
-            title={`TMDb: ${s.tmdb_vote_average?.toFixed(1)} / 10 (${s.tmdb_vote_count} votes)`}
-          >
-            <span class="prog-entry__score-value">{scorePct}</span>
-            <span class="prog-entry__score-pct" aria-hidden="true">
-              %
-            </span>
-          </span>
-        ) : null}
+        <RatingMeter avg={s.tmdb_vote_average} count={s.tmdb_vote_count} />
         <h3 class="prog-entry__work">
           {titleHref ? (
             <a href={titleHref} target="_blank" rel="noopener">

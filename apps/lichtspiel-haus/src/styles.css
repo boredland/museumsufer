@@ -810,32 +810,48 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   overflow: hidden;
 }
 
-/* TMDb user-score, rendered as a percentage badge inline next to the
- * showtime hero. Brass numeral, monospace "%" half-size to evoke the
- * Bass-style proportion play. Hidden for low-confidence scores
- * (<25 votes) in the component logic. */
-.prog-entry__score {
+/* TMDb user-score, rendered as a 10-bulb marquee meter inline next to
+ * the showtime hero. Brass-lit bulbs for whole points, 1px stroked
+ * empty sockets for the rest. Echoes the Wiener square-rhythm frieze
+ * on the masthead — circular cousin of the same ornament family,
+ * cinema-facade marquee bulbs as the metaphor. Hover/title surfaces the
+ * precise number + vote count. Hidden under <25 votes in the component. */
+.rating-meter {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.05em;
-  margin-left: 0.85rem;
-  font-family: var(--display);
-  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
-  font-weight: 500;
-  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
-  line-height: 1;
-  color: var(--absinthe);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  gap: 3px;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 0.95rem;
+  /* Subtle drop-fade so the meter sits one register quieter than the
+   * showtime hero next to it. Hover restores full opacity. */
+  opacity: 0.92;
+  transition: opacity 220ms;
 }
-.prog-entry__score-value { line-height: 1; }
-.prog-entry__score-pct {
-  font-family: var(--mono);
-  font-weight: 400;
-  font-size: 0.55em;
-  letter-spacing: 0.04em;
-  color: var(--dust);
-  margin-left: 0.05em;
+.rating-meter:hover { opacity: 1; }
+.rating-meter__bulb {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: transparent;
+  transition: background 220ms, border-color 220ms, box-shadow 220ms;
+}
+.rating-meter__bulb.is-lit {
+  background: var(--brass-bright);
+  border-color: var(--brass-bright);
+  /* Quiet warm glow — what an incandescent marquee bulb actually throws.
+   * Kept low-intensity so a row of seven doesn't bloom into a blob. */
+  box-shadow: 0 0 3px color-mix(in oklab, var(--brass-bright) 55%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rating-meter,
+  .rating-meter__bulb { transition: none; }
+}
+/* Tablet down: bulbs shrink a touch so a 7/10 + a "20:30" hero share
+ * a 320-wide screen without the meter wrapping under the time. */
+@media (max-width: 560px) {
+  .rating-meter { gap: 2px; margin-left: 0.6rem; }
+  .rating-meter__bulb { width: 5px; height: 5px; }
 }
 
 /* TMDb genre pills below the description — typography matches the
