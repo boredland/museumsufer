@@ -171,7 +171,7 @@ const de: Translations = {
   contactSending: "Wird gesendet…",
   contactSent: "Vielen Dank — wir sehen es uns an.",
   contactErr: "Senden fehlgeschlagen.",
-  homeTitle: "lehr.salon — Vorträge und Diskussionen heute in Frankfurt am Main",
+  homeTitle: "frankfurt.lehr.salon — Vorträge und Diskussionen heute in Frankfurt am Main",
   homeDescription:
     "Öffentliche Vorträge, Lesungen und Diskussionen in Frankfurt — täglich aktualisiert aus Universität, Akademien, Stiftungen und Salons.",
   endTimePrefix: "bis",
@@ -293,7 +293,7 @@ const en: Translations = {
   contactSending: "Sending…",
   contactSent: "Thank you — we'll take a look.",
   contactErr: "Sending failed.",
-  homeTitle: "lehr.salon — Today's lectures and discussions in Frankfurt am Main",
+  homeTitle: "frankfurt.lehr.salon — Today's lectures and discussions in Frankfurt am Main",
   homeDescription:
     "Public lectures, readings and discussions in Frankfurt — daily updates from the university, academies, foundations and salons.",
   endTimePrefix: "until",

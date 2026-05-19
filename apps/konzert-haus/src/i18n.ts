@@ -188,7 +188,7 @@ const de: Translations = {
   contactSending: "Wird gesendet…",
   contactSent: "Vielen Dank — wir sehen es uns an.",
   contactErr: "Senden fehlgeschlagen.",
-  homeTitle: "konzert.haus — Konzerte heute in Frankfurt am Main",
+  homeTitle: "frankfurt.konzert.haus — Konzerte heute in Frankfurt am Main",
   homeDescription:
     "Klassik, Jazz, Kammermusik, Kirchenmusik und Neue Musik — täglich aktualisiertes Programm aus Frankfurt und der Rhein-Main-Region.",
   endTimePrefix: "bis",
@@ -320,7 +320,7 @@ const en: Translations = {
   contactSending: "Sending…",
   contactSent: "Thank you — we'll take a look.",
   contactErr: "Sending failed.",
-  homeTitle: "konzert.haus — Today's concerts in Frankfurt am Main",
+  homeTitle: "frankfurt.konzert.haus — Today's concerts in Frankfurt am Main",
   homeDescription:
     "Classical, jazz, chamber, sacred and new music — daily programme from Frankfurt and the Rhine-Main region.",
   endTimePrefix: "until",
@@ -454,7 +454,7 @@ const fr: Translations = {
   contactSending: "Envoi…",
   contactSent: "Merci — nous allons regarder cela.",
   contactErr: "Échec de l'envoi.",
-  homeTitle: "konzert.haus — Concerts aujourd'hui à Francfort-sur-le-Main",
+  homeTitle: "frankfurt.konzert.haus — Concerts aujourd'hui à Francfort-sur-le-Main",
   homeDescription:
     "Classique, jazz, musique de chambre, musique sacrée et contemporaine — programme actualisé quotidiennement de Francfort et de la région Rhin-Main.",
   endTimePrefix: "jusqu'à",
