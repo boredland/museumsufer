@@ -1039,7 +1039,35 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   const { date, today, events, dateStrip, category, range, locale, tr, turnstileSiteKey } = props;
   const niceDate = niceDateFor(date, locale);
   const currentPath = range ? "/" : category ? `/tag/${date}?format=${encodeURIComponent(category)}` : `/tag/${date}`;
-  const pageTitle = range ? `lehr.salon · ${tr.rangeUpcomingHeading(range)}` : `lehr.salon · ${niceDate}`;
+  // Title now leads with the localised homeTitle ("lehr.salon –
+  // Vorträge und Diskussionen heute in Frankfurt") instead of
+  // brand-only + date. Non-today views suffix the date.
+  const isToday = !range && date === today;
+  const pageTitle = range
+    ? `${tr.homeTitle} · ${tr.rangeUpcomingHeading(range)}`
+    : isToday
+      ? tr.homeTitle
+      : `${tr.homeTitle} — ${niceDate}`;
+  // Today's /tag/<today> collapses to /, otherwise self-canonical.
+  const canonical = range
+    ? `${APP_URL}/${langSuffix(locale)}`
+    : isToday
+      ? `${APP_URL}/${langSuffix(locale)}`
+      : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
+    url: APP_URL,
+    name: "lehr.salon",
+    inLanguage: ["de", "en"],
+    publisher: { "@type": "Organization", name: "lehr.salon" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${APP_URL}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
   return (
     <>
       {raw("<!DOCTYPE html>")}
@@ -1048,11 +1076,11 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <Head
             title={pageTitle}
             description={tr.homeDescription}
-            canonical={range ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`}
+            canonical={canonical}
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
           />
         </head>
         <body>
