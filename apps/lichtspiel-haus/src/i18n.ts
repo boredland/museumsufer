@@ -216,7 +216,7 @@ const de: Translations = {
   contactSending: "Wird gesendet…",
   contactSent: "Vielen Dank — wir sehen es uns an.",
   contactErr: "Senden fehlgeschlagen.",
-  homeTitle: "lichtspiel.haus — Heute im Kino in Frankfurt",
+  homeTitle: "lichtspiel.haus — Kinoprogramm heute in Frankfurt am Main",
   homeDescription:
     "Programmkino, Arthouse, Repertoire, Filmreihen und Festivals — täglich aktualisiertes Kinoprogramm aus Frankfurt und der Rhein-Main-Region.",
   endTimePrefix: "bis",
@@ -373,7 +373,7 @@ const en: Translations = {
   contactSending: "Sending…",
   contactSent: "Thank you — we'll take a look.",
   contactErr: "Sending failed.",
-  homeTitle: "lichtspiel.haus — Tonight at the cinema in Frankfurt",
+  homeTitle: "lichtspiel.haus — Today's cinema programme in Frankfurt am Main",
   homeDescription:
     "Arthouse, repertory, programmkino, festivals and film series — daily cinema programme from Frankfurt and the Rhine-Main region.",
   endTimePrefix: "until",

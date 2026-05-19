@@ -282,7 +282,7 @@ const de: Translations = {
 
 const fr: Translations = {
   subtitle: "Le journal des événements de la Route du Vin du Sud",
-  homeTitle: "landau.today — événements aujourd'hui à Landau in der Pfalz",
+  homeTitle: "landau.today — Événements aujourd'hui à Landau in der Pfalz",
   homeDescription:
     "Événements à Landau in der Pfalz et sur la Route du Vin du Sud — concert, théâtre, danse, lecture, fête du vin, exposition, visite guidée.",
   footerLine: "Landau aujourd'hui · journal local des événements",
