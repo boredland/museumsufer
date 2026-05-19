@@ -37,6 +37,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "biolandweingut stefan kuntz|landau-mörzheim": [49.167496, 8.077444],
   "bistro leporello - alte druckerei|bad bergzabern": [49.102808, 7.999127],
   "brennofen gbr|ilbesheim": [49.690821, 8.076285],
+  "buchhandlung bücherknecht|landau in der pfalz": [49.198283, 8.112344],
   "buchhandlung lesezeit|bad bergzabern": [49.102808, 7.999127],
   "burgruine meistersel|ramberg in der pfalz": [0, 0],
   "café cosmo|landau in der pfalz": [49.198013, 8.11949],
