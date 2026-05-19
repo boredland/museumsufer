@@ -62,7 +62,10 @@ export interface HtmlHeadProps {
   /** JSON-LD blobs. Pass objects or pre-stringified JSON. */
   jsonLd?: Array<Record<string, unknown> | string>;
   /** Self-hosted fonts entrypoint. Defaults to "/fonts.css". */
-  fontsHref?: string;
+  /** Path to the fonts stylesheet, or `null` to skip emitting the link
+   *  entirely. Set to `null` when the app inlines @font-face into its
+   *  main stylesheet (kills the render-blocking round-trip). */
+  fontsHref?: string | null;
   /** Web manifest path. Defaults to "/manifest.json". */
   manifestHref?: string;
 }
@@ -138,7 +141,7 @@ export function HtmlHead(props: HtmlHeadProps) {
       {alternates?.map((a) => (
         <link key={`${a.rel}-${a.href}`} rel={a.rel} href={a.href} type={a.type} title={a.title} />
       ))}
-      <link rel="stylesheet" href={fontsHref} />
+      {fontsHref ? <link rel="stylesheet" href={fontsHref} /> : null}
       {stylesheetHref ? <link rel="stylesheet" href={stylesheetHref} /> : null}
       {inlineCss ? <style dangerouslySetInnerHTML={{ __html: inlineCss }} /> : null}
       {deferScripts?.map((src) => (

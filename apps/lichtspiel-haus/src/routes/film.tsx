@@ -232,7 +232,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
 
               <div class="film-detail__grid">
                 <div class="film-detail__poster">
-                  <PosterCard title={displayTitle} imageUrl={screening.image_url} />
+                  <PosterCard title={displayTitle} imageUrl={screening.image_url} priority />
                 </div>
                 <div class="film-detail__meta">
                   <p class="film-detail__when">
