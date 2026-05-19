@@ -28,7 +28,7 @@ function buildSvg(title: string, venueName: string, date: string, time: string |
     fonts: FONTS,
     ariaLabel: title,
     rows: [
-      { text: "KONZERT.HAUS", y: 160, font: "mono", size: 20, letterSpacing: 6, color: PALETTE.accent },
+      { text: "FRANKFURT · KONZERT.HAUS", y: 160, font: "mono", size: 20, letterSpacing: 6, color: PALETTE.accent },
       { text: title, y: 300 + titleSize / 4, font: "display", size: titleSize, weight: 500, tracking: -1 },
       { text: venueName, y: 450, font: "display", size: 30, italic: true, opacity: 0.62 },
       {

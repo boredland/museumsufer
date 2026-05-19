@@ -35,7 +35,7 @@ function buildSvg(title: string, venueName: string, date: string, time: string |
     fonts: FONTS,
     ariaLabel: title,
     rows: [
-      { text: "LICHTSPIEL·HAUS", y: 150, font: "mono", size: 20, letterSpacing: 8, color: PALETTE.accent },
+      { text: "FRANKFURT · LICHTSPIEL·HAUS", y: 150, font: "mono", size: 20, letterSpacing: 8, color: PALETTE.accent },
       { text: title, y: 310 + titleSize / 4, font: "display", size: titleSize, weight: 600, tracking: -1 },
       { text: venueName, y: 460, font: "display", size: 30, italic: true, opacity: 0.7 },
       {
