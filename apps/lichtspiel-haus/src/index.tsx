@@ -28,7 +28,29 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-app.use("*", securityHeaders());
+// 'unsafe-inline' is unavoidable while the theme FOUC + HTMX lifecycle
+// + seen-banner handlers are inlined into <head>/<body>; the other
+// directives still provide defence-in-depth (locked-down object-src,
+// no eval, explicit allow-list for the Turnstile challenge iframe).
+app.use(
+  "*",
+  securityHeaders({
+    csp: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://image.tmdb.org",
+      "font-src 'self'",
+      "connect-src 'self' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; "),
+    permissionsPolicy: "geolocation=(), camera=(), microphone=(), payment=()",
+  }),
+);
 
 app.use("*", async (c, next) => {
   const url = new URL(c.req.url);

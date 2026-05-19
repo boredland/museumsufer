@@ -1,4 +1,5 @@
 import { dateOffset, todayIso } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { CINEMAS } from "../cinema-config";
@@ -134,6 +135,7 @@ app.get("/kino/:slug", (c) => {
               </p>
             </section>
 
+            <SharedAskAi label={tr.askAiLabel} aria={tr.askAiAria} prompt={tr.askAiPromptCinema(cinema.name)} />
             {screenings.length === 0 ? (
               <div class="empty">
                 <p class="empty__mark">∅</p>
