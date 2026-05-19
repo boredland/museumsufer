@@ -567,15 +567,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
 }
 (function(){
-  var btn = document.querySelector('[data-theme-toggle]');
-  if (btn) btn.addEventListener('click', function(){
-    var html = document.documentElement;
-    var isDark = html.classList.contains('dark');
-    html.classList.toggle('dark', !isDark);
-    html.classList.toggle('light', isDark);
-    try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
-  });
-
   // URL state: either /tag/YYYY-MM-DD (single day) or / (which means the
   // rolling next-7-days view). The range pill toggles between the two.
   function currentDate(){

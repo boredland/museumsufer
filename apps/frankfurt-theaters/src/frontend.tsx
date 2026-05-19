@@ -1137,18 +1137,6 @@ function buildClientScript(): string {
   if (document.readyState !== 'loading') onReady();
   else document.addEventListener('DOMContentLoaded', onReady);
 
-  (function(){
-    var btn = document.querySelector('[data-theme-toggle]');
-    if (!btn) return;
-    btn.addEventListener('click', function(){
-      var html = document.documentElement;
-      var isDark = html.classList.contains('dark');
-      html.classList.toggle('dark', !isDark);
-      html.classList.toggle('light', isDark);
-      try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
-    });
-  })();
-
   // Digest dialog — Web Push subscription management
   (function(){
     var dlg = document.getElementById('digest-dialog');
