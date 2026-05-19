@@ -281,6 +281,18 @@ function DateStrip({
               </a>
             );
           })}
+          {/* Decorative key-number marquee printed along the film's
+              lower edge, like real Kodak motion-picture stock. The text
+              is duplicated so the marching line never shows a gap as
+              it loops. aria-hidden: pure ornament. */}
+          <div class="datestrip__edge-code" aria-hidden="true">
+            <span>
+              {"KODAK 5219 VISION3 500T · GATE OPEN · 35mm · "}
+              {strip.length} {"FRAMES · "}
+              {"KODAK 5219 VISION3 500T · GATE OPEN · 35mm · "}
+              {strip.length} {"FRAMES · "}
+            </span>
+          </div>
         </div>
       </div>
     </nav>

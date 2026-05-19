@@ -300,36 +300,89 @@ body::before {
 .datestrip__inner::-webkit-scrollbar { display: none; }
 
 /* The film strip itself — velvet base with a hint of brass warmth so it
- * reads as amber celluloid rather than a flat dark band. Sprocket
- * pseudo-elements ride on top + bottom. Lateral padding mirrors the old
- * scroll-padding so the first frame can centre. */
+ * reads as amber celluloid rather than a flat dark band. Fine grain
+ * overlay (SVG fractal noise blended at low opacity) lifts it from
+ * "dark band" to "silver-halide emulsion." Sprocket pseudo-elements
+ * ride on top + bottom. Lateral padding mirrors the old scroll-padding
+ * so the first frame can centre. */
 .datestrip__film {
   position: relative;
   display: inline-flex;
-  padding: 14px max(var(--gut), 50%);
-  background: color-mix(in oklab, var(--velvet) 80%, var(--brass) 20%);
+  /* Asymmetric bottom padding (26px vs 16px top) carves out a thin
+   * band between the picture area and the lower sprocket row for the
+   * edge-code marquee to live in. */
+  padding: 16px max(var(--gut), 50%) 26px;
+  background-color: color-mix(in oklab, var(--velvet) 80%, var(--brass) 20%);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' seed='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.62  0 0 0 0 0.32  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  background-repeat: repeat;
+  background-blend-mode: overlay;
   border-top: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
   border-bottom: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
 }
-/* Sprocket bands — velvet film material with auditorium-coloured
- * rectangular punches every 22px. Pure CSS gradient, no DOM. */
+/* Sprocket bands — Bell & Howell perforation geometry (rounded
+ * rectangles, not bars) punched through the film material with a
+ * mask-image. The film-coloured rectangle stays opaque except where
+ * the SVG paints black, which lets the auditorium colour show through
+ * as a hole. Rounded corners are the single biggest "this is 35mm"
+ * cue — square punches read as ribbon, not film. */
 .datestrip__film::before,
 .datestrip__film::after {
   content: "";
   position: absolute;
   left: 0; right: 0;
-  height: 14px;
+  height: 16px;
   background-color: color-mix(in oklab, var(--velvet) 80%, var(--brass) 20%);
-  background-image: repeating-linear-gradient(
-    to right,
-    transparent 0 6px,
-    var(--auditorium) 6px 14px,
-    transparent 14px 22px
-  );
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='16' preserveAspectRatio='none'><rect width='22' height='16' fill='white'/><rect x='5' y='4' width='12' height='8' rx='1.6' ry='1.6' fill='black'/></svg>");
+          mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='22' height='16' preserveAspectRatio='none'><rect width='22' height='16' fill='white'/><rect x='5' y='4' width='12' height='8' rx='1.6' ry='1.6' fill='black'/></svg>");
+  -webkit-mask-mode: luminance;
+          mask-mode: luminance;
+  -webkit-mask-repeat: repeat;
+          mask-repeat: repeat;
   pointer-events: none;
 }
 .datestrip__film::before { top: 0; }
 .datestrip__film::after  { bottom: 0; }
+
+/* Edge code — the tiny brass key-number text printed along the bottom
+ * edge of motion-picture stock (real Kodak edge codes look like
+ * "KODAK 5219 VISION3 500T" with a marching frame counter). Hairline
+ * brass on the lower border; aria-hidden because it's decorative.
+ * The marquee shifts left over 40s so the strip feels alive without
+ * stealing attention from the date tiles. */
+.datestrip__edge-code {
+  position: absolute;
+  left: 0; right: 0;
+  /* Sits in the 10px gap between the picture area and the lower
+   * sprocket band (height 16px starting at bottom: 0). Real film
+   * edge codes print exactly here, between the image and the
+   * perforation strip. */
+  bottom: 17px;
+  height: 8px;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 6.5px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  color: color-mix(in oklab, var(--brass) 70%, transparent);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.datestrip__edge-code > span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: edgecode 40s linear infinite;
+  will-change: transform;
+}
+@keyframes edgecode {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .datestrip__edge-code > span { animation: none; padding-left: 0.6rem; }
+}
 
 .datetile {
   flex: 0 0 auto;
@@ -348,14 +401,19 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--celluloid-quiet);
-  transition: color 200ms;
+  transition: color 200ms, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   cursor: pointer;
   user-select: none;
   text-decoration: none;
 }
 .datetile:first-child { border-left: 0.5px solid color-mix(in oklab, var(--brass) 22%, transparent); }
-.datetile:hover { color: var(--celluloid); }
+.datetile:hover {
+  color: var(--celluloid);
+  /* Tiny upward lift on hover — the tactile click of an editing
+   * bench as a frame advances one position. */
+  transform: translateY(-1px);
+}
 .datetile__weekday {
   font-family: var(--serif);
   font-style: italic;
@@ -401,17 +459,61 @@ body::before {
 .datetile--active .datetile__day {
   font-weight: 700;
   color: var(--brass);
+  /* Halation — the soft brass glow real film accretes around very
+   * bright letterforms when exposed by a hot projector lamp. */
+  text-shadow: 0 0 14px color-mix(in oklab, var(--brass) 60%, transparent);
 }
 /* Active frame "in the projector gate" — brass aperture-plate verticals
- * extend through both sprocket bands. Replaces the old underline. */
+ * extend through both sprocket bands AND a warm light spill pours from
+ * behind the tile, like the lamp is pushing through the open gate.
+ * The radial glow sits on `::after` so the brass plate verticals on
+ * `::before` keep their hard mechanical edge. Subtle 4-second lamp
+ * flicker on the glow makes the projector feel alive. */
 .datetile--active::before {
   content: "";
   position: absolute;
   left: -1px; right: -1px;
-  top: -14px; bottom: -14px;
+  /* Span the full height of the film band so the aperture verticals
+   * cut through both perforation bands (top 16px, bottom 26px after
+   * the edge-code reservation). */
+  top: -16px; bottom: -26px;
   border-left: 2px solid var(--brass);
   border-right: 2px solid var(--brass);
   pointer-events: none;
+  z-index: 1;
+}
+.datetile--active::after {
+  content: "";
+  position: absolute;
+  left: -8px; right: -8px;
+  top: -16px; bottom: -26px;
+  background: radial-gradient(
+    ellipse 90% 60% at center,
+    color-mix(in oklab, var(--brass) 32%, transparent) 0%,
+    color-mix(in oklab, var(--brass) 14%, transparent) 35%,
+    transparent 75%
+  );
+  pointer-events: none;
+  z-index: 0;
+  animation: lampFlicker 4.2s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+.datetile--active > * { position: relative; z-index: 2; }
+
+/* A hot lamp through a worn condenser never burns perfectly steady —
+ * tiny dips at irregular intervals. Stays under 8% of the cycle so the
+ * page never reads as "flickering UI." */
+@keyframes lampFlicker {
+  0%, 36%, 60%, 100% { opacity: 1; }
+  38%   { opacity: 0.86; }
+  40%   { opacity: 1;    }
+  62%   { opacity: 0.92; }
+  64%   { opacity: 1;    }
+  82%   { opacity: 0.88; }
+  84%   { opacity: 1;    }
+}
+@media (prefers-reduced-motion: reduce) {
+  .datetile--active::after { animation: none; }
 }
 /* Edge-of-strip fades: subtle indication that more frames continue
  * beyond the visible area. Sits above the film via z-index. */

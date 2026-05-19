@@ -11,16 +11,21 @@
   --paper-edge:   #D5C6A8;
   /* iron-gall ink — slightly browner than felt, manuscript not curtain */
   --ink:          #1C1812;
-  --ink-soft:     rgba(28, 18, 12, 0.74);
-  --ink-quiet:    rgba(28, 18, 12, 0.32);
+  /* Alpha tokens tuned for WCAG AA against #F2E9D5: ink-soft at 0.82
+     and ink-quiet at 0.62 both clear 4.5:1. Previously 0.74 / 0.32
+     landed at 4.43 / 2.03 and the axe audit flagged it. */
+  --ink-soft:     rgba(28, 18, 12, 0.82);
+  --ink-quiet:    rgba(28, 18, 12, 0.62);
   --ink-faint:    rgba(28, 18, 12, 0.12);
   --rule:         rgba(28, 18, 12, 0.14);
   --hairline:     rgba(28, 18, 12, 0.07);
 
   /* cinnabar / rubric red — the editor's mark, used for pilcrows, the
-     wordmark italic, the manicule, the asterism. ~6.1:1 on paper. */
+     wordmark italic, the manicule, the asterism. ~6.1:1 on paper.
+     --rubric-bright darkened from #C84829 (3.89:1) to #A53217 (5.4:1)
+     so the manicule + dialog error text clear AA. */
   --rubric:        #A33222;
-  --rubric-bright: #C84829;
+  --rubric-bright: #A53217;
   --rubric-soft:   rgba(163, 50, 34, 0.10);
   --rubric-glow:   rgba(200, 72, 41, 0.06);
 
@@ -610,7 +615,11 @@ body::before {
   padding: clamp(1.4rem, 2.4vw, 2rem) 0;
   border-bottom: 0.5px solid var(--rule);
   position: relative;
-  animation: rise 700ms calc(380ms + var(--i, 0) * 60ms) both;
+  /* `glide` (transform-only) instead of `rise` (transform + opacity)
+     because axe-core snapshots contrast mid-animation; partial opacity
+     on inherited text colour was producing 2-4:1 failures on the long
+     list of staggered rows. The slide-up alone keeps the entrance. */
+  animation: glide 700ms calc(380ms + var(--i, 0) * 60ms) both;
   transition: background-color 200ms;
 }
 .prog-entry:hover { background-color: var(--rubric-glow); }
@@ -1088,6 +1097,12 @@ body::before {
 @keyframes rise {
   from { opacity: 0; transform: translateY(0.5rem); }
   to   { opacity: 1; transform: translateY(0); }
+}
+/* Same shape as `rise`, no opacity. For elements like `.prog-entry`
+   where mid-animation ancestor-opacity confuses axe contrast checks. */
+@keyframes glide {
+  from { transform: translateY(0.5rem); }
+  to   { transform: translateY(0); }
 }
 @keyframes fade {
   from { opacity: 0; }
