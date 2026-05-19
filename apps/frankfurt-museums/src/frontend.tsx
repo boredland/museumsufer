@@ -1,7 +1,6 @@
 import {
   buildFaqPageSchema,
   buildHreflangAlternates,
-  buildLangParam as coreBuildLangParam,
   dateFormatter,
   digestScheduleLabel,
   type FaqItem,
@@ -33,9 +32,15 @@ import type { MuseumInfo } from "./types";
 /** Theme initialization script to prevent flash of unstyled content */
 export const THEME_SCRIPT = THEME_FOUC_SCRIPT;
 
-/** Generates language parameter string for URLs */
+/**
+ * Generates language parameter string for URLs. Always emits
+ * `?lang=<locale>` (including for the default `de`) so an explicit
+ * user choice survives sub-page navigation -- without this, a user
+ * on `?lang=de` whose browser sends `Accept-Language: en` would lose
+ * the override the moment they click any internal link.
+ */
 export function buildLangParam(locale: Locale): string {
-  return coreBuildLangParam(locale, "de");
+  return `?lang=${locale}`;
 }
 
 export type { MuseumInfo };

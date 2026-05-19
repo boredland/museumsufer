@@ -1,10 +1,4 @@
-import {
-  buildFaqPageSchema,
-  buildHreflangAlternates,
-  buildLangParam,
-  digestScheduleLabel,
-  langSwitchItems,
-} from "@museumsufer/core";
+import { buildFaqPageSchema, buildHreflangAlternates, digestScheduleLabel, langSwitchItems } from "@museumsufer/core";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
@@ -21,7 +15,9 @@ import { DEFAULT_LOCALE, type FaqEntry, type Locale, SUPPORTED_LOCALES, type Tra
 import { APP_URL, formatDateLong, jsonLdSafe } from "./shared";
 import type { Event } from "./types";
 
-const langSuffix = (locale: Locale, sep: "?" | "&" = "?") => buildLangParam(locale, DEFAULT_LOCALE, sep);
+// Always emit `?lang=<locale>` so an explicit user choice survives
+// sub-page navigation -- see lichtspiel-haus for the full rationale.
+const langSuffix = (locale: Locale, sep: "?" | "&" = "?") => `${sep}lang=${locale}`;
 
 interface PageProps {
   date: string;
