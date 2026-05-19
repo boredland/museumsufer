@@ -255,18 +255,20 @@ body::before {
    Marquee-fang numerals. The day numbers ARE the design. Selected day
    gets a thick brass underline — no pill, no rounded background. */
 
+/* The strip reads as a piece of 35mm film stock: a velvet-tinted band
+ * with rectangular sprocket holes punched along the top and bottom edges,
+ * frames flowing left-to-right between them. The active date is "in the
+ * projector gate" — brass aperture-plate verticals extend through both
+ * sprocket bands. Scroll-snap is unchanged; the metaphor doesn't touch
+ * the interaction. */
 .datestrip {
   position: relative;
   z-index: 3;
-  border-bottom: 0.5px solid var(--rule);
   margin-top: 1rem;
   overflow: hidden;
   animation: fade 700ms 220ms both;
 }
 .datestrip__inner {
-  display: flex;
-  gap: 0;
-  padding: 0.75rem max(var(--gut), 50%);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-padding: 50%;
@@ -274,6 +276,39 @@ body::before {
   scroll-behavior: smooth;
 }
 .datestrip__inner::-webkit-scrollbar { display: none; }
+
+/* The film strip itself — velvet base with a hint of brass warmth so it
+ * reads as amber celluloid rather than a flat dark band. Sprocket
+ * pseudo-elements ride on top + bottom. Lateral padding mirrors the old
+ * scroll-padding so the first frame can centre. */
+.datestrip__film {
+  position: relative;
+  display: inline-flex;
+  padding: 14px max(var(--gut), 50%);
+  background: color-mix(in oklab, var(--velvet) 80%, var(--brass) 20%);
+  border-top: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
+  border-bottom: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
+}
+/* Sprocket bands — velvet film material with auditorium-coloured
+ * rectangular punches every 22px. Pure CSS gradient, no DOM. */
+.datestrip__film::before,
+.datestrip__film::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 14px;
+  background-color: color-mix(in oklab, var(--velvet) 80%, var(--brass) 20%);
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0 6px,
+    var(--auditorium) 6px 14px,
+    transparent 14px 22px
+  );
+  pointer-events: none;
+}
+.datestrip__film::before { top: 0; }
+.datestrip__film::after  { bottom: 0; }
+
 .datetile {
   flex: 0 0 auto;
   scroll-snap-align: center;
@@ -282,7 +317,9 @@ body::before {
   gap: 0.05rem;
   text-align: center;
   padding: 0.7rem 0.95rem 0.85rem;
-  border-right: 0.5px solid var(--hairline);
+  /* Frame-divider hairline between consecutive frames, brass at very
+   * low opacity — the etched dividers between film frames. */
+  border-right: 0.5px solid color-mix(in oklab, var(--brass) 22%, transparent);
   font-family: var(--mono);
   font-size: 0.62rem;
   font-weight: 400;
@@ -295,7 +332,7 @@ body::before {
   user-select: none;
   text-decoration: none;
 }
-.datetile:first-child { border-left: 0.5px solid var(--hairline); }
+.datetile:first-child { border-left: 0.5px solid color-mix(in oklab, var(--brass) 22%, transparent); }
 .datetile:hover { color: var(--celluloid); }
 .datetile__weekday {
   font-family: var(--serif);
@@ -343,23 +380,39 @@ body::before {
   font-weight: 700;
   color: var(--brass);
 }
-.datetile--active::after {
+/* Active frame "in the projector gate" — brass aperture-plate verticals
+ * extend through both sprocket bands. Replaces the old underline. */
+.datetile--active::before {
   content: "";
   position: absolute;
-  left: 50%; bottom: 0.25rem;
-  width: 2rem; height: 3px;
-  background: var(--brass);
-  transform: translateX(-50%);
+  left: -1px; right: -1px;
+  top: -14px; bottom: -14px;
+  border-left: 2px solid var(--brass);
+  border-right: 2px solid var(--brass);
+  pointer-events: none;
 }
+/* Edge-of-strip fades: subtle indication that more frames continue
+ * beyond the visible area. Sits above the film via z-index. */
+.datestrip::before,
 .datestrip::after {
   content: "";
-  position: absolute; top: 0; right: 0; bottom: 0;
-  width: 3rem;
+  position: absolute; top: 0; bottom: 0;
+  width: 3.5rem;
   pointer-events: none;
-  background: linear-gradient(to right, transparent, var(--auditorium));
-  z-index: 1;
+  z-index: 2;
 }
-@media (min-width: 1024px) { .datestrip::after { display: none; } }
+.datestrip::before {
+  left: 0;
+  background: linear-gradient(to right, var(--auditorium), transparent);
+}
+.datestrip::after {
+  right: 0;
+  background: linear-gradient(to left, var(--auditorium), transparent);
+}
+@media (min-width: 1024px) {
+  .datestrip::before,
+  .datestrip::after { width: 5rem; }
+}
 
 /* ── Programme block ───────────────────────────────────────────────── */
 
