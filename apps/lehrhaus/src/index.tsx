@@ -27,7 +27,30 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-app.use("*", securityHeaders());
+// 'unsafe-inline' is unavoidable while theme FOUC + HTMX lifecycle
+// + inline behaviour scripts ship in <head>/<body>. Remaining
+// directives still close eval, object-src, and lock the frame
+// allow-list to Turnstile.
+app.use(
+  "*",
+  securityHeaders({
+    csp: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data:",
+      "font-src 'self'",
+      "connect-src 'self' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "upgrade-insecure-requests",
+    ].join("; "),
+    permissionsPolicy: "geolocation=(), camera=(), microphone=(), payment=()",
+  }),
+);
 
 app.use("*", async (c, next) => {
   // Apex → frankfurt subdomain redirect, mirroring konzert.haus's pattern.
