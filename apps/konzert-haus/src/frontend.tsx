@@ -340,6 +340,9 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
 export interface EventRowOptions {
   index: number;
   hideVenue?: boolean;
+  /** Locale of the surrounding page -- threads through to internal
+   *  link hrefs so an explicit `?lang=` survives every click. */
+  locale: Locale;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -409,7 +412,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
       <header class="prog-entry__head">
         {!opts.hideVenue ? (
           <p class="prog-entry__house">
-            <a href={`/spielort/${e.venue.slug}`}>{e.venue.short_name ?? e.venue.name}</a>
+            <a href={`/spielort/${e.venue.slug}${langSuffix(opts.locale)}`}>{e.venue.short_name ?? e.venue.name}</a>
             {venueRoom ? (
               <>
                 <span class="prog-entry__house-sep" aria-hidden="true">
@@ -1008,7 +1011,7 @@ export function ProgrammePartial({
         <>
           <ol class="concerts" id="concerts">
             {visible.map((e, i) => (
-              <Event key={e.id} e={e} opts={{ index: i }} tr={tr} />
+              <Event key={e.id} e={e} opts={{ index: i, locale }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}

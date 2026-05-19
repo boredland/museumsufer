@@ -311,6 +311,9 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
 export interface EventRowOptions {
   index: number;
   hideSource?: boolean;
+  /** Locale of the surrounding page -- threads through to internal
+   *  link hrefs so an explicit `?lang=` survives every click. */
+  locale: Locale;
 }
 
 export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr: Translations }) {
@@ -358,7 +361,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
             {/* For cross-imports (aggregators), the per-event source_name carries
                 the actual host museum / theater. Prefer it over the aggregator's
                 short_name; the link still points to the aggregator's page. */}
-            <a href={`/quelle/${e.source.slug}`}>
+            <a href={`/quelle/${e.source.slug}${langSuffix(opts.locale)}`}>
               {e.source_name !== e.source.name ? e.source_name : (e.source.short_name ?? e.source.name)}
             </a>
             {isForeignLang ? (
@@ -880,7 +883,7 @@ function DayGroup({
       </header>
       <ol class="concerts">
         {events.map((e, i) => (
-          <Event key={e.id} e={e} opts={{ index: startIndex + i }} tr={tr} />
+          <Event key={e.id} e={e} opts={{ index: startIndex + i, locale }} tr={tr} />
         ))}
       </ol>
     </section>
@@ -974,7 +977,7 @@ export function ProgrammePartial({
         <>
           <ol class="concerts" id="concerts">
             {visible.map((e, i) => (
-              <Event key={e.id} e={e} opts={{ index: i }} tr={tr} />
+              <Event key={e.id} e={e} opts={{ index: i, locale }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}

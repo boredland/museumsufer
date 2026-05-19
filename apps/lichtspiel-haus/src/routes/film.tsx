@@ -90,7 +90,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="film-detail">
             <p class="back-link">
-              <a href={`/tag/${screening.date}#screening-${id}`}>← {tr.backToProgramme}</a>
+              <a href={`/tag/${screening.date}?lang=${locale}#screening-${id}`}>← {tr.backToProgramme}</a>
             </p>
             <article class="film-detail__article">
               <p class="film-detail__kicker">{tr.filmKicker}</p>
@@ -107,7 +107,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                     <span class="film-detail__date">{dateLabel}</span>
                   </p>
                   <p class="film-detail__where">
-                    <a href={`/kino/${screening.cinema_slug}`}>{screening.cinema.name}</a>
+                    <a href={`/kino/${screening.cinema_slug}?lang=${locale}`}>{screening.cinema.name}</a>
                     {screening.venue_room ? <span class="film-detail__room"> · {screening.venue_room}</span> : null}
                   </p>
                   {badges.length > 0 ? (
@@ -129,7 +129,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                   {screening.series ? (
                     <p class="film-detail__series">
                       <span class="film-detail__series-kicker">{tr.seriesKicker}: </span>
-                      <a href={`/reihe/${screening.series.slug}`}>{screening.series.name}</a>
+                      <a href={`/reihe/${screening.series.slug}?lang=${locale}`}>{screening.series.name}</a>
                     </p>
                   ) : null}
                   <div class="film-detail__actions">
