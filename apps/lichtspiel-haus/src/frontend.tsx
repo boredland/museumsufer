@@ -365,35 +365,49 @@ function PriceRange({ min, max }: { min?: number | null; max?: number | null }) 
  *  sockets on the right. Hidden under the ≥25-vote confidence threshold.
  *  The exact value lives in `title=` + aria-label so hover + screen
  *  readers still get the precise number. */
-function RatingMeter({ avg, count }: { avg: number | undefined; count: number | undefined }) {
-  if (typeof avg !== "number" || typeof count !== "number" || count < 25 || avg <= 0) return null;
-  const lit = Math.min(10, Math.max(0, Math.round(avg)));
-  return (
-    <span
-      class="rating-meter"
-      role="img"
-      aria-label={`${avg.toFixed(1)} of 10`}
-      title={`TMDb · ${avg.toFixed(1)} / 10 (${count.toLocaleString()} votes)`}
-    >
-      {Array.from({ length: 10 }, (_, i) => (
-        <span key={i} class={`rating-meter__bulb${i < lit ? " is-lit" : ""}`} />
-      ))}
-    </span>
-  );
-}
-
-/** Compact RT critic + IMDb rating badges. Sit immediately after the
- *  marquee meter — same restraint as the OmU / DCP badges, brass-on-
- *  auditorium with a 1px brass-tinted border. Each links out to the
- *  canonical page on the respective service; tooltips carry the
- *  precise number + vote count. */
-function ExternalScores({ s }: { s: DayScreening }) {
+/** Three-source score badges — TMDb, Rotten Tomatoes, IMDb — rendered in
+ *  the same brass-bordered mono-caps register as the OmU / DCP badges.
+ *  Each one links to the canonical page on its respective service when
+ *  we have a stable identifier; tooltips carry the precise number +
+ *  vote count. The TMDb badge subsumes the role of the old toolbar pill
+ *  + the marquee meter, so both are gone. ≥25 votes confidence gate on
+ *  TMDb matches what the meter used. */
+function ScoreBadges({ s }: { s: DayScreening }) {
+  const tmdb =
+    typeof s.tmdb_vote_average === "number" &&
+    typeof s.tmdb_vote_count === "number" &&
+    s.tmdb_vote_count >= 25 &&
+    s.tmdb_vote_average > 0
+      ? { avg: s.tmdb_vote_average, count: s.tmdb_vote_count, pct: Math.round(s.tmdb_vote_average * 10) }
+      : null;
   const rt = typeof s.rt_critic === "number" ? s.rt_critic : null;
   const imdb =
     typeof s.imdb_rating === "number" && s.imdb_rating > 0 ? { rating: s.imdb_rating, votes: s.imdb_votes ?? 0 } : null;
-  if (!rt && !imdb) return null;
+  if (!tmdb && !rt && !imdb) return null;
+
+  const tmdbHref = s.tmdb_id ? `https://www.themoviedb.org/${s.tmdb_kind ?? "movie"}/${s.tmdb_id}` : null;
   return (
     <span class="ext-scores">
+      {tmdb !== null ? (
+        tmdbHref ? (
+          <a
+            class="ext-score ext-score--tmdb"
+            href={tmdbHref}
+            target="_blank"
+            rel="noopener"
+            title={`TMDb · ${tmdb.avg.toFixed(1)} / 10 (${tmdb.count.toLocaleString()} votes)`}
+          >
+            TMDB {tmdb.pct}
+          </a>
+        ) : (
+          <span
+            class="ext-score ext-score--tmdb"
+            title={`TMDb · ${tmdb.avg.toFixed(1)} / 10 (${tmdb.count.toLocaleString()} votes)`}
+          >
+            TMDB {tmdb.pct}
+          </span>
+        )
+      ) : null}
       {rt !== null ? (
         s.imdb_id ? (
           <a
@@ -543,8 +557,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         <time class="prog-entry__time-hero" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
           {time}
         </time>
-        <RatingMeter avg={s.tmdb_vote_average} count={s.tmdb_vote_count} />
-        <ExternalScores s={s} />
+        <ScoreBadges s={s} />
         <h3 class="prog-entry__work">
           {titleHref ? (
             <a href={titleHref} target="_blank" rel="noopener">
@@ -693,20 +706,6 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
                 <path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </button>
-          ) : null}
-          {s.tmdb_id ? (
-            <a
-              class="icon-btn icon-btn--tmdb"
-              href={`https://www.themoviedb.org/${s.tmdb_kind ?? "movie"}/${s.tmdb_id}`}
-              target="_blank"
-              rel="noopener"
-              aria-label="TMDb"
-              title="TMDb"
-            >
-              <span class="icon-btn__text" aria-hidden="true">
-                TMDb
-              </span>
-            </a>
           ) : null}
           {s.ticket_url && !isFree ? (
             <a class="action" href={utm(s.ticket_url, "karten")} target="_blank" rel="noopener">

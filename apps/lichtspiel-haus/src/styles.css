@@ -863,54 +863,12 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   overflow: hidden;
 }
 
-/* TMDb user-score, rendered as a 10-bulb marquee meter inline next to
- * the showtime hero. Brass-lit bulbs for whole points, 1px stroked
- * empty sockets for the rest. Echoes the Wiener square-rhythm frieze
- * on the masthead — circular cousin of the same ornament family,
- * cinema-facade marquee bulbs as the metaphor. Hover/title surfaces the
- * precise number + vote count. Hidden under <25 votes in the component. */
-.rating-meter {
-  display: inline-flex;
-  gap: 3px;
-  align-items: center;
-  vertical-align: middle;
-  margin-left: 0.95rem;
-  /* Subtle drop-fade so the meter sits one register quieter than the
-   * showtime hero next to it. Hover restores full opacity. */
-  opacity: 0.92;
-  transition: opacity 220ms;
-}
-.rating-meter:hover { opacity: 1; }
-.rating-meter__bulb {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  border: 1px solid var(--rule);
-  background: transparent;
-  transition: background 220ms, border-color 220ms, box-shadow 220ms;
-}
-.rating-meter__bulb.is-lit {
-  background: var(--brass-bright);
-  border-color: var(--brass-bright);
-  /* Quiet warm glow — what an incandescent marquee bulb actually throws.
-   * Kept low-intensity so a row of seven doesn't bloom into a blob. */
-  box-shadow: 0 0 3px color-mix(in oklab, var(--brass-bright) 55%, transparent);
-}
-@media (prefers-reduced-motion: reduce) {
-  .rating-meter,
-  .rating-meter__bulb { transition: none; }
-}
-/* Tablet down: bulbs shrink a touch so a 7/10 + a "20:30" hero share
- * a 320-wide screen without the meter wrapping under the time. */
-@media (max-width: 560px) {
-  .rating-meter { gap: 2px; margin-left: 0.6rem; }
-  .rating-meter__bulb { width: 5px; height: 5px; }
-}
-
-/* RT + IMDb badges sit immediately after the marquee meter — same
- * restraint as OmU / DCP, brass-on-auditorium with 1px brass-tinted
- * borders. The TMDb meter is still the primary signal; these are
- * secondary informational pivots. */
+/* Score badges (TMDb / RT / IMDb) sit immediately after the showtime
+ * hero. All three share the same brass-bordered mono-caps register as
+ * the OmU / DCP badges below — one visual language for film-quality
+ * pivots. The TMDb badge subsumes the role of the old marquee meter
+ * AND the toolbar TMDb pill; the badge is the link to themoviedb.org.
+ * Tooltips carry the precise decimal + vote count for each. */
 .ext-scores {
   display: inline-flex;
   align-items: center;
@@ -1167,18 +1125,6 @@ a.ext-score:hover {
   text-decoration: none;
 }
 .icon-btn:hover { color: var(--brass); border-color: var(--brass); background: var(--brass-soft); }
-/* TMDb pill — wider than the round icon-btn buttons to fit the 4-char
-   wordmark. Same hover treatment so the row reads as one toolbar. */
-.icon-btn--tmdb {
-  width: auto;
-  padding: 0 0.55rem;
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.icon-btn__text { line-height: 1; }
 
 .nav-wrap { position: relative; display: inline-block; }
 
