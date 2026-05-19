@@ -40,7 +40,7 @@ app.get("/reihe/:slug", (c) => {
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
             <p class="back-link">
-              <a href="/reihe">← {tr.backToSeriesIndex}</a>
+              <a href={`/reihe?lang=${locale}`}>← {tr.backToSeriesIndex}</a>
             </p>
             <section class="venue-hero">
               <div class="venue-hero__corner" aria-hidden="true">
@@ -113,7 +113,7 @@ app.get("/reihe", (c) => {
               <ul class="series-index">
                 {all.map((s) => (
                   <li class="series-index__row" key={s.slug}>
-                    <a class="series-index__link" href={`/reihe/${s.slug}`}>
+                    <a class="series-index__link" href={`/reihe/${s.slug}?lang=${locale}`}>
                       <span class="series-index__name">{s.name}</span>
                       <span class="series-index__count">{s.count}</span>
                     </a>

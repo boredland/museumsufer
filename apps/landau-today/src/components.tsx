@@ -229,7 +229,7 @@ export function Ledger({ ev, tr, locale }: LedgerProps) {
       </div>
       <div class="body">
         <div class="title-line">
-          <a class="t-title-link t-shift" href={`/event/${ev.id}`}>
+          <a class="t-title-link t-shift" href={`/event/${ev.id}${langSuffix(locale)}`}>
             {ev.featured ? (
               <span class="ornament" aria-hidden="true">
                 ❦
@@ -295,7 +295,7 @@ export function Broadside({ ev, tr, locale }: BroadsideProps) {
       ? { "data-lat": String(ev.lat), "data-lng": String(ev.lng) }
       : {};
   return (
-    <a class="broadside t-shift" href={`/event/${ev.id}`} {...geoAttrs}>
+    <a class="broadside t-shift" href={`/event/${ev.id}${langSuffix(locale)}`} {...geoAttrs}>
       {img ? (
         // CSS background-image can't be lazy-loaded; render an <img>
         // and place it absolutely so it still fills the broadside

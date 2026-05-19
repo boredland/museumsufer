@@ -506,7 +506,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   const showCredits = s.credits && s.credits !== s.subtitle;
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
   const reportContext = `${APP_URL}/film/${s.id}`;
-  const filmHref = `/film/${s.id}`;
+  const filmHref = `/film/${s.id}${langSuffix(opts.locale)}`;
   const calendarEvent: CalendarEvent = {
     date: s.date,
     time: s.time ?? null,
@@ -589,7 +589,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         {!opts.hideCinema || venueRoom ? (
           <p class="prog-entry__house">
             {!opts.hideCinema ? (
-              <a class="prog-entry__cinema" href={`/kino/${s.cinema_slug}`}>
+              <a class="prog-entry__cinema" href={`/kino/${s.cinema_slug}${langSuffix(opts.locale)}`}>
                 {s.cinema.short_name ?? s.cinema.name}
               </a>
             ) : null}
@@ -639,7 +639,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
       ) : null}
       {s.series ? (
         <p class="prog-entry__series">
-          <a href={`/reihe/${s.series.slug}`}>{s.series.name}</a>
+          <a href={`/reihe/${s.series.slug}${langSuffix(opts.locale)}`}>{s.series.name}</a>
         </p>
       ) : null}
       <div class="prog-entry__meta">

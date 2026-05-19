@@ -96,7 +96,7 @@ app.get("/quelle/:slug", (c) => {
             ) : (
               <ol class="concerts">
                 {events.map((e, i) => (
-                  <Event key={e.id} e={e} opts={{ index: i, hideSource: true }} tr={tr} />
+                  <Event key={e.id} e={e} opts={{ index: i, hideSource: true, locale }} tr={tr} />
                 ))}
               </ol>
             )}

@@ -639,7 +639,7 @@ export function renderPage(
 
             <PassPromo locale={locale} tr={tr} />
 
-            <MuseumsSection museums={museums || {}} tr={tr} />
+            <MuseumsSection museums={museums || {}} tr={tr} locale={locale} />
 
             <AboutSection tr={tr} />
             <FaqSection tr={tr} locale={locale} />

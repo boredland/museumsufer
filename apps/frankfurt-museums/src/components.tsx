@@ -339,7 +339,7 @@ function ExhibitionCard({
           </p>
           <p class="card-venue">
             {ex.museum_slug ? (
-              <a href={`/museum/${ex.museum_slug}`} class="museum-link">
+              <a href={`/museum/${ex.museum_slug}?lang=${locale}`} class="museum-link">
                 {ex.museum_name || ""}
               </a>
             ) : (
@@ -450,11 +450,13 @@ function EventCard({
   ev,
   idx,
   tr,
+  locale,
   hero: heroProp,
 }: {
   ev: Event;
   idx: number;
   tr: Record<string, string>;
+  locale: Locale;
   hero?: boolean;
 }) {
   const timeStr = ev.time ? (ev.end_time ? `${ev.time}–${ev.end_time}` : ev.time) : "";
@@ -495,7 +497,7 @@ function EventCard({
           </p>
           <p class="card-venue">
             {ev.museum_slug ? (
-              <a href={`/museum/${ev.museum_slug}`} class="museum-link">
+              <a href={`/museum/${ev.museum_slug}?lang=${locale}`} class="museum-link">
                 {ev.museum_name || ""}
               </a>
             ) : (
@@ -581,7 +583,17 @@ function Section({
   );
 }
 
-function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr: Record<string, string> }) {
+function MuseumRow({
+  slug,
+  museum,
+  tr,
+  locale,
+}: {
+  slug: string;
+  museum: MuseumInfo;
+  tr: Record<string, string>;
+  locale: Locale;
+}) {
   return (
     <li class="museum-cell" data-search={searchHaystack(museum.name, slug)}>
       <div class="museum-tile" data-museum-slug={slug} data-share-key={`museum-${slug}`}>
@@ -610,7 +622,7 @@ function MuseumRow({ slug, museum, tr }: { slug: string; museum: MuseumInfo; tr:
         </div>
         <div class="museum-tile__body">
           <p class="museum-tile__title">
-            <a href={`/museum/${slug}`} class="museum-tile__title-link">
+            <a href={`/museum/${slug}?lang=${locale}`} class="museum-tile__title-link">
               {museum.name}
             </a>
           </p>
@@ -709,7 +721,7 @@ export function ContentBody({
         ) : (
           <ul class="card-list">
             {sortedEvents.map((ev, i) => (
-              <EventCard ev={ev} idx={i} tr={tr} />
+              <EventCard ev={ev} idx={i} tr={tr} locale={locale} />
             ))}
           </ul>
         )}
@@ -749,7 +761,15 @@ export function ContentBody({
 }
 
 /** Museums grid section — displays all museums as cards with images and navigation buttons */
-export function MuseumsSection({ museums, tr }: { museums: Record<string, MuseumInfo>; tr: Record<string, string> }) {
+export function MuseumsSection({
+  museums,
+  tr,
+  locale,
+}: {
+  museums: Record<string, MuseumInfo>;
+  tr: Record<string, string>;
+  locale: Locale;
+}) {
   return (
     <Section
       sectionKey="museums"
@@ -763,7 +783,7 @@ export function MuseumsSection({ museums, tr }: { museums: Record<string, Museum
         {Object.entries(museums)
           .sort(([, a], [, b]) => a.name.localeCompare(b.name))
           .map(([slug, m]) => (
-            <MuseumRow slug={slug} museum={m} tr={tr} />
+            <MuseumRow slug={slug} museum={m} tr={tr} locale={locale} />
           ))}
       </ul>
     </Section>
@@ -817,7 +837,7 @@ function GroupedEventList({ events, locale, tr }: { events: Event[]; locale: Loc
             <ul class="card-list">
               {groups[date].map((ev, i) => {
                 const globalIdx = cardIdx++;
-                return <EventCard ev={ev} idx={globalIdx} hero={i === 0} tr={tr} />;
+                return <EventCard ev={ev} idx={globalIdx} hero={i === 0} tr={tr} locale={locale} />;
               })}
             </ul>
           </section>
