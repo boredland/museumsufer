@@ -2,13 +2,17 @@
  * Regenerate manifest screenshots (ss-wide.png + ss-mobile.png) for
  * every app in the monorepo.
  *
- * Boots each app's `wrangler dev` on a unique port, waits for the
- * server to answer, drives Playwright via `@museumsufer/core/screenshots`,
- * then tears the server down. Apps are processed sequentially so
- * wrangler instances don't fight over Bun's CSS build lock.
+ * Two modes:
+ *  - Default (local): boot each app's `wrangler dev` on a unique port,
+ *    capture, tear down. Use this during front-end work before deploy.
+ *  - `--prod`: skip wrangler entirely and screenshot the live custom
+ *    domain. Use this from CI (.github/workflows/regen-assets.yml) so
+ *    the committed PNGs always reflect what visitors actually see.
  *
- *   bun scripts/regen-screenshots.ts               # all apps
- *   bun scripts/regen-screenshots.ts museums theaters
+ *   bun scripts/regen-screenshots.ts                       # all, local
+ *   bun scripts/regen-screenshots.ts --prod                # all, prod
+ *   bun scripts/regen-screenshots.ts lichtspiel-haus       # one, local
+ *   bun scripts/regen-screenshots.ts --prod lichtspiel-haus
  */
 import { spawn } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
@@ -21,6 +25,8 @@ interface AppTarget {
   slug: string;
   dir: string;
   port: number;
+  /** Production custom-domain origin; used by --prod mode. */
+  prodOrigin: string;
   /**
    * The route to capture. Each app's home is locale-dependent; we keep
    * the default `?lang=de` for consistent screenshots.
@@ -35,12 +41,54 @@ interface AppTarget {
 }
 
 const APPS: readonly AppTarget[] = [
-  { slug: "frankfurt-museums", dir: "apps/frankfurt-museums", port: 8801, path: "/", readySelector: ".section" },
-  { slug: "frankfurt-theaters", dir: "apps/frankfurt-theaters", port: 8802, path: "/", readySelector: ".programme" },
-  { slug: "konzert-haus", dir: "apps/konzert-haus", port: 8803, path: "/", readySelector: ".programme" },
-  { slug: "landau-today", dir: "apps/landau-today", port: 8804, path: "/", readySelector: "main" },
-  { slug: "lehrhaus", dir: "apps/lehrhaus", port: 8805, path: "/", readySelector: ".programme" },
-  { slug: "lichtspiel-haus", dir: "apps/lichtspiel-haus", port: 8806, path: "/", readySelector: ".programme" },
+  {
+    slug: "frankfurt-museums",
+    dir: "apps/frankfurt-museums",
+    port: 8801,
+    prodOrigin: "https://museumsufer.app",
+    path: "/",
+    readySelector: ".section",
+  },
+  {
+    slug: "frankfurt-theaters",
+    dir: "apps/frankfurt-theaters",
+    port: 8802,
+    prodOrigin: "https://frankfurt.ins.theater",
+    path: "/",
+    readySelector: ".programme",
+  },
+  {
+    slug: "konzert-haus",
+    dir: "apps/konzert-haus",
+    port: 8803,
+    prodOrigin: "https://frankfurt.konzert.haus",
+    path: "/",
+    readySelector: ".programme",
+  },
+  {
+    slug: "landau-today",
+    dir: "apps/landau-today",
+    port: 8804,
+    prodOrigin: "https://landau.today",
+    path: "/",
+    readySelector: "main",
+  },
+  {
+    slug: "lehrhaus",
+    dir: "apps/lehrhaus",
+    port: 8805,
+    prodOrigin: "https://frankfurt.lehr.salon",
+    path: "/",
+    readySelector: ".programme",
+  },
+  {
+    slug: "lichtspiel-haus",
+    dir: "apps/lichtspiel-haus",
+    port: 8806,
+    prodOrigin: "https://frankfurt.lichtspiel.haus",
+    path: "/",
+    readySelector: ".programme",
+  },
 ];
 
 async function waitForPort(url: string, timeoutMs = 30_000): Promise<void> {
@@ -58,10 +106,10 @@ async function waitForPort(url: string, timeoutMs = 30_000): Promise<void> {
   throw new Error(`timeout waiting for ${url}: ${String(lastErr)}`);
 }
 
-async function captureForApp(app: AppTarget): Promise<void> {
+async function captureLocal(app: AppTarget): Promise<void> {
   const cwd = join(REPO_ROOT, app.dir);
   const baseUrl = `http://localhost:${app.port}${app.path}`;
-  console.log(`\n→ ${app.slug} (port ${app.port})`);
+  console.log(`\n→ ${app.slug} (local port ${app.port})`);
 
   const proc = spawn("bun", ["run", "dev", "--port", String(app.port)], {
     cwd,
@@ -94,8 +142,22 @@ async function captureForApp(app: AppTarget): Promise<void> {
   }
 }
 
+async function captureProd(app: AppTarget): Promise<void> {
+  const cwd = join(REPO_ROOT, app.dir);
+  const baseUrl = `${app.prodOrigin}${app.path}`;
+  console.log(`\n→ ${app.slug} (${baseUrl})`);
+  const written = await captureManifestScreenshots({
+    baseUrl,
+    outDir: join(cwd, "public"),
+    readySelector: app.readySelector,
+  });
+  for (const path of written) console.log(`  wrote ${path}`);
+}
+
 async function main() {
-  const wanted = process.argv.slice(2);
+  const argv = process.argv.slice(2);
+  const prod = argv.includes("--prod");
+  const wanted = argv.filter((a) => a !== "--prod");
   const targets = wanted.length ? APPS.filter((a) => wanted.includes(a.slug)) : APPS;
   if (wanted.length && targets.length !== wanted.length) {
     const missing = wanted.filter((w) => !APPS.some((a) => a.slug === w));
@@ -103,9 +165,10 @@ async function main() {
   }
 
   for (const app of targets) {
-    await captureForApp(app);
+    if (prod) await captureProd(app);
+    else await captureLocal(app);
   }
-  console.log(`\n✓ done — ${targets.length} app${targets.length === 1 ? "" : "s"}`);
+  console.log(`\n✓ done — ${targets.length} app${targets.length === 1 ? "" : "s"} (${prod ? "prod" : "local"})`);
 }
 
 main().catch((e) => {
