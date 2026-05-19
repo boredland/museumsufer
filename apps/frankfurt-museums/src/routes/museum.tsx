@@ -5,7 +5,7 @@ import { dateOffset, todayIso } from "../date";
 import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
 import { detectLocale, getTranslations, type Locale } from "../i18n";
 import { IconSprite } from "../icons";
-import { type getMuseumConfig, MUSEUMS } from "../museum-config";
+import { type getMuseumConfig, MUSEUMS, WIKIPEDIA_TITLE_OVERRIDES } from "../museum-config";
 import { getEventsForMuseum, getExhibitionsForMuseum, getMuseumBySlug } from "../queries";
 import { generateScriptInit } from "../script-init";
 import { translateFields } from "../translate";
@@ -18,6 +18,87 @@ type EventRow = Event;
 function truncate(text: string | null, length = 160): string {
   if (!text) return "";
   return text.length > length ? `${text.substring(0, length).trim()}…` : text;
+}
+
+/** Strip srcset / multi-value garbage from a scraped image URL. Some
+ *  museum sites store `<img src="...">` with a srcset-style payload
+ *  (e.g. `"foo.jpg 1x,@images/bar.jpg 2x"`) which is invalid in
+ *  schema.org `image` fields and fails Google's Rich Results
+ *  validator. Take the first URL token. */
+function cleanImageUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  const first = url.split(/[\s,]/)[0].trim();
+  if (!first || first.startsWith("@")) return undefined;
+  if (!first.startsWith("http://") && !first.startsWith("https://")) return undefined;
+  return first;
+}
+
+/** German Wikipedia article URL for a museum slug, if WIKIPEDIA_TITLE_OVERRIDES
+ *  has a match. Used to populate Museum.sameAs as an entity-disambiguation
+ *  signal alongside the museum's own website. */
+function wikipediaUrl(slug: string): string | undefined {
+  const title = WIKIPEDIA_TITLE_OVERRIDES[slug];
+  if (!title) return undefined;
+  return `https://de.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+}
+
+/** Best-effort parser for the free-text `opening_hours` string into a
+ *  schema.org OpeningHoursSpecification array. Handles the common
+ *  German museum patterns (`Di-So 10-18 Uhr`, `Mi 10-20`, `Mo
+ *  geschlossen`); returns an empty array when the format deviates
+ *  rather than emitting garbage. */
+const DAY_MAP: Record<string, string> = {
+  mo: "Monday",
+  di: "Tuesday",
+  mi: "Wednesday",
+  do: "Thursday",
+  fr: "Friday",
+  sa: "Saturday",
+  so: "Sunday",
+};
+function parseOpeningHours(text: string | null | undefined): Array<Record<string, unknown>> {
+  if (!text) return [];
+  const out: Array<Record<string, unknown>> = [];
+  // Split on common separators -- newlines, semicolons, commas (but
+  // not commas inside a Tag-range like "Di-So").
+  const segments = text.split(/[\n;]+|,(?!\s*[A-Z][a-z])/);
+  for (const raw of segments) {
+    const seg = raw.trim();
+    if (!seg) continue;
+    // Match patterns like "Di-So 10-18", "Mo 14-20", "Sa, So 11:00-18:00",
+    // "Di & Do 10-18". Capture the days + the time range.
+    const m = seg.match(
+      /^([A-Za-z]{2}(?:\s*[-–&]\s*[A-Za-z]{2})*)\s+(\d{1,2})(?::(\d{2}))?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?/,
+    );
+    if (!m) continue;
+    const daysPart = m[1].toLowerCase().replace(/\s+/g, "");
+    const opensH = m[2].padStart(2, "0");
+    const opensM = m[3] ?? "00";
+    const closesH = m[4].padStart(2, "0");
+    const closesM = m[5] ?? "00";
+    const days: string[] = [];
+    if (daysPart.includes("-") || daysPart.includes("–")) {
+      const [from, to] = daysPart.split(/[-–]/);
+      const order = ["mo", "di", "mi", "do", "fr", "sa", "so"];
+      const fi = order.indexOf(from);
+      const ti = order.indexOf(to);
+      if (fi >= 0 && ti >= 0 && fi <= ti) {
+        for (let i = fi; i <= ti; i++) days.push(order[i]);
+      }
+    } else if (daysPart.includes("&")) {
+      for (const d of daysPart.split("&")) if (DAY_MAP[d]) days.push(d);
+    } else if (DAY_MAP[daysPart]) {
+      days.push(daysPart);
+    }
+    if (days.length === 0) continue;
+    out.push({
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: days.map((d) => DAY_MAP[d]),
+      opens: `${opensH}:${opensM}`,
+      closes: `${closesH}:${closesM}`,
+    });
+  }
+  return out;
 }
 
 interface MuseumPageProps {
@@ -37,9 +118,18 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
   const museumName = primaryMuseum.name;
   const abbreviation = config?.abbreviation;
   const description = primaryMuseum.description ?? null;
-  const metaDescription = truncate(description);
-  const canonicalUrl = `https://museumsufer.app/museum/${slug}`;
+  const metaDescription = description
+    ? truncate(description)
+    : `${museumName} — aktuelle Ausstellungen & Veranstaltungen · Museumsufer Frankfurt am Main`;
+  // Self-canonical per-locale: each locale points at the URL the user
+  // actually visits. Hreflang already declares the cross-locale
+  // relationships in renderHtmlHead/buildHreflangsForCanonical.
+  const canonicalUrl =
+    locale === "de"
+      ? `https://museumsufer.app/museum/${slug}`
+      : `https://museumsufer.app/museum/${slug}?lang=${locale}`;
   const langParam = buildLangParam(locale);
+  const museumIri = `https://museumsufer.app/#museum/${slug}`;
 
   // Build JSON-LD schemas
   const breadcrumb = {
@@ -61,27 +151,42 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
     ],
   };
 
-  const museumSchemas = museums.map((m) => ({
-    "@context": "https://schema.org",
-    "@type": "Museum",
-    "@id": `https://museumsufer.app/#museum/${m.slug}`,
-    name: m.name,
-    ...(abbreviation && { alternateName: abbreviation }),
-    ...(m.description && { description: m.description }),
-    ...(m.website_url && { url: m.website_url }),
-    ...(m.image_url && { image: m.image_url }),
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Frankfurt am Main",
-      addressCountry: "DE",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: MUSEUMS[m.slug]?.lat ?? 50,
-      longitude: MUSEUMS[m.slug]?.lng ?? 8,
-    },
-    ...(m.website_url && { sameAs: [m.website_url] }),
-  }));
+  const museumSchemas = museums.map((m) => {
+    const cfg = MUSEUMS[m.slug];
+    const lat = cfg?.lat ?? 50;
+    const lng = cfg?.lng ?? 8;
+    const sameAs: string[] = [];
+    if (m.website_url) sameAs.push(m.website_url);
+    const wiki = wikipediaUrl(m.slug);
+    if (wiki) sameAs.push(wiki);
+    const cleanedImage = cleanImageUrl(m.image_url);
+    return {
+      "@context": "https://schema.org",
+      "@type": "Museum",
+      "@id": `https://museumsufer.app/#museum/${m.slug}`,
+      name: m.name,
+      ...(abbreviation && { alternateName: abbreviation }),
+      ...(m.description && { description: m.description }),
+      ...(m.website_url && { url: m.website_url }),
+      ...(cleanedImage && { image: cleanedImage }),
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Frankfurt am Main",
+        addressCountry: "DE",
+      },
+      geo: { "@type": "GeoCoordinates", latitude: lat, longitude: lng },
+      hasMap: `https://www.google.com/maps?q=${lat},${lng}`,
+      containedInPlace: {
+        "@type": "City",
+        name: "Frankfurt am Main",
+        sameAs: "https://www.wikidata.org/wiki/Q1794",
+      },
+      ...(parseOpeningHours(m.opening_hours).length > 0 && {
+        openingHoursSpecification: parseOpeningHours(m.opening_hours),
+      }),
+      ...(sameAs.length > 0 && { sameAs }),
+    };
+  });
 
   const eventSchemas = events.slice(0, 20).map((ev) => ({
     "@context": "https://schema.org",
@@ -90,16 +195,17 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
     description: ev.description ?? undefined,
     startDate: ev.date,
     endDate: ev.end_date ?? ev.date,
-    ...(ev.image_url && { image: ev.image_url }),
-    location: {
-      "@type": "Place",
-      name: primaryMuseum.name,
-    },
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    ...(cleanImageUrl(ev.image_url) && { image: cleanImageUrl(ev.image_url) }),
+    location: { "@id": museumIri },
     ...(ev.price !== null &&
       ev.price !== undefined && {
         offers: {
           "@type": "Offer",
           price: ev.price,
+          priceCurrency: "EUR",
+          availability: "https://schema.org/InStock",
         },
       }),
   }));
@@ -111,11 +217,10 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
     description: ex.description ?? undefined,
     startDate: ex.start_date ?? undefined,
     endDate: ex.end_date ?? undefined,
-    ...(ex.image_url && { image: ex.image_url }),
-    location: {
-      "@type": "Place",
-      name: primaryMuseum.name,
-    },
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    ...(cleanImageUrl(ex.image_url) && { image: cleanImageUrl(ex.image_url) }),
+    location: { "@id": museumIri },
   }));
 
   return (
@@ -125,10 +230,10 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
         <head>
           {renderHtmlHead({
             locale,
-            title: `${museumName} – Museumsufer Frankfurt`,
-            description: metaDescription || museumName,
+            title: `${museumName} – Ausstellungen & Events | Museumsufer Frankfurt am Main`,
+            description: metaDescription,
             canonicalUrl,
-            ogImage: primaryMuseum.image_url || "https://museumsufer.app/og-image.png",
+            ogImage: cleanImageUrl(primaryMuseum.image_url) || "https://museumsufer.app/og-image.png",
             jsonSchemas: [
               { name: "breadcrumb", json: JSON.stringify(breadcrumb) },
               ...museumSchemas.map((schema, i) => ({ name: `museum-${i}`, json: JSON.stringify(schema) })),
@@ -149,11 +254,23 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
               </a>
             </p>
 
-            {primaryMuseum.image_url && (
+            {cleanImageUrl(primaryMuseum.image_url) && (
+              // Hero image is the LCP element -- drop lazy + set
+              // fetchpriority so the browser pulls it on the critical
+              // path. Alt text is locale-aware so EN/FR visitors don't
+              // see German alt copy.
               <img
-                src={primaryMuseum.image_url}
-                alt={`${museumName} Fassade in Frankfurt`}
-                loading="lazy"
+                src={cleanImageUrl(primaryMuseum.image_url)}
+                alt={
+                  locale === "fr"
+                    ? `Façade de ${museumName} à Francfort-sur-le-Main`
+                    : locale === "en"
+                      ? `${museumName} facade in Frankfurt am Main`
+                      : `${museumName} Fassade in Frankfurt am Main`
+                }
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
                 class="museum-detail__hero"
               />
             )}

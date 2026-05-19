@@ -68,6 +68,11 @@ export interface HtmlHeadProps {
   fontsHref?: string | null;
   /** Web manifest path. Defaults to "/manifest.json". */
   manifestHref?: string;
+  /** Cross-origin hostnames to preconnect to. Use for the LCP image
+   *  origin and any other third-party that gates first paint. Emitted
+   *  as `<link rel="preconnect" href="..." crossorigin>` with a
+   *  matching `dns-prefetch` fallback for older browsers. */
+  preconnect?: string[];
 }
 
 function ldString(j: Record<string, unknown> | string): string {
@@ -95,6 +100,7 @@ export function HtmlHead(props: HtmlHeadProps) {
     jsonLd,
     fontsHref = "/fonts.css",
     manifestHref = "/manifest.json",
+    preconnect,
   } = props;
 
   const themeColors: HtmlHeadThemeColor[] = !themeColor
@@ -138,6 +144,12 @@ export function HtmlHead(props: HtmlHeadProps) {
       {icons?.png192 ? <link rel="icon" href={icons.png192} type="image/png" sizes="192x192" /> : null}
       {icons?.appleTouch ? <link rel="apple-touch-icon" href={icons.appleTouch} /> : null}
       <link rel="manifest" href={manifestHref} />
+      {preconnect?.map((origin) => (
+        <>
+          <link key={`pc-${origin}`} rel="preconnect" href={origin} crossorigin="" />
+          <link key={`dns-${origin}`} rel="dns-prefetch" href={origin} />
+        </>
+      ))}
       {alternates?.map((a) => (
         <link key={`${a.rel}-${a.href}`} rel={a.rel} href={a.href} type={a.type} title={a.title} />
       ))}
