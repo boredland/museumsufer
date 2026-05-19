@@ -1,3 +1,4 @@
+import { Footer } from "@museumsufer/core/footer";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { NavButton, ReportButton, ShareButton } from "../components";
@@ -117,7 +118,11 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
   const primaryMuseum = museums[0];
   const museumName = primaryMuseum.name;
   const abbreviation = config?.abbreviation;
-  const description = primaryMuseum.description ?? null;
+  // Fallback chain: DB-scraped description first, then the curated
+  // copy in museum-config.ts. Without the fallback, ~20 museums
+  // bottom out at "title + opening hours + empty state" content,
+  // which the audit flagged as thin per-page.
+  const description = primaryMuseum.description ?? config?.description ?? null;
   const metaDescription = description
     ? truncate(description)
     : `${museumName} — aktuelle Ausstellungen & Veranstaltungen · Museumsufer Frankfurt am Main`;
@@ -378,6 +383,19 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
                 Source
               </a>
             </p>
+
+            <Footer
+              description={tr.metaShort ?? tr.subtitle}
+              actions={[{ label: tr.contact, openAttr: "data-contact-open", kind: "report" }]}
+              links={[
+                { href: "/feed.ics", label: "iCal" },
+                { href: "/feed.xml", label: tr.rssFeed },
+                {
+                  href: locale === "de" ? "/impressum" : `/impressum?lang=${locale}`,
+                  label: tr.imprint,
+                },
+              ]}
+            />
           </div>
 
           <ContactDialog tr={tr} />
