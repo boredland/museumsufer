@@ -84,7 +84,11 @@ GET /event/{id}/feed.ics — single performance
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
 const ROBOTS_TXT = buildRobotsTxt({
   siteUrl: APP_URL,
-  disallow: ["/api/day", "/api/events", "/api/theaters"],
+  // /api/performance/<id> is referenced from TheaterEvent.url ONLY for
+  // historical compatibility -- the schema now points at the
+  // canonical /theater/<slug> page. Keep the JSON endpoint disallowed
+  // so Googlebot doesn't follow + index raw JSON.
+  disallow: ["/api/day", "/api/events", "/api/theaters", "/api/performance"],
 });
 
 const app = new Hono<{ Bindings: Env }>();
@@ -117,9 +121,6 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${APP_URL}/</loc>
     <lastmod>${today}</lastmod>
-  </url>
-  <url>
-    <loc>${APP_URL}/impressum</loc>
   </url>
 ${theaterUrls}
 </urlset>`;

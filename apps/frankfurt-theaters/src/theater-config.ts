@@ -9,6 +9,18 @@ export interface TheaterConfig {
   lon: number;
   website_url: string;
   ticketing_provider: TicketingProvider;
+  /** Wikidata Q-id (without the "Q" prefix). Major Frankfurt
+   *  theaters have Wikidata entries; populated only where known.
+   *  Surfaced as schema.org `sameAs` for entity disambiguation. */
+  wikidata?: string;
+  /** Short editorial blurb shown on /theater/:slug above the
+   *  performance list + as the schema.org `description`. Lifts the
+   *  page above thin-content threshold for venues with quiet
+   *  programming weeks. */
+  description?: string;
+  /** Public phone number, when listed. Surfaced in the
+   *  PerformingArtsTheater schema -- key NAP signal for local pack. */
+  telephone?: string;
 }
 
 /** Hand-curated theater list. Combined with auto-generated
@@ -23,6 +35,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6745,
     website_url: "https://www.schauspielfrankfurt.de",
     ticketing_provider: "eventim_inhouse",
+    wikidata: "Q183842",
+    telephone: "+49 69 21237333",
+    description:
+      "Städtisches Sprechtheater in den Doppelanlagen am Willy-Brandt-Platz. Spielstätten: Schauspielhaus, Kammerspiele, Box. Programmatisch breit aufgestellt zwischen Klassikerpflege und zeitgenössischen Stoffen.",
   },
   {
     slug: "oper-frankfurt",
@@ -32,6 +48,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6726,
     website_url: "https://oper-frankfurt.de",
     ticketing_provider: "eventim_inhouse",
+    wikidata: "Q570869",
+    telephone: "+49 69 21249494",
+    description:
+      "Vom Magazin Opernwelt mehrfach zum „Opernhaus des Jahres“ gekürtes Repertoire-Theater am Willy-Brandt-Platz. Drei Bühnen: Großes Haus, Bockenheimer Depot, Holzfoyer. Heimat des Frankfurter Opern- und Museumsorchesters.",
   },
   {
     slug: "english-theatre-frankfurt",
@@ -41,6 +61,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6712,
     website_url: "https://english-theatre.de",
     ticketing_provider: "eventim_inhouse",
+    wikidata: "Q1346554",
+    telephone: "+49 69 24231620",
+    description:
+      "Größte englischsprachige Bühne auf dem europäischen Festland. Spielt Klassiker und zeitgenössische Stücke im Block-Rotation-Modell in den Galluspassagen über dem Hauptbahnhof.",
   },
   {
     slug: "komoedie-frankfurt",
@@ -50,6 +74,9 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6739,
     website_url: "https://diekomoedie.de",
     ticketing_provider: "custom",
+    telephone: "+49 69 28448580",
+    description:
+      "Boulevard- und Unterhaltungstheater im Zentrum, direkt gegenüber Schauspiel Frankfurt. Schwerpunkt auf Komödien, Musicals, Soloabenden und Gastspielen aus dem Volkstheater-Repertoire.",
   },
   {
     slug: "mousonturm",
@@ -59,6 +86,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.7019,
     website_url: "https://www.mousonturm.de",
     ticketing_provider: "reservix",
+    wikidata: "Q1655234",
+    telephone: "+49 69 405895-20",
+    description:
+      "Festes Haus für freie Künste im Frankfurter Ostend, untergebracht in einer ehemaligen Tabakfabrik. Zeitgenössischer Tanz, Performance, Neue Musik; Gastgeber der Cresc-Biennale und vieler internationaler Gastspiele.",
   },
   {
     slug: "neues-theater-hoechst",
@@ -95,6 +126,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6836,
     website_url: "https://www.tigerpalast.de",
     ticketing_provider: "reservix",
+    wikidata: "Q2419946",
+    telephone: "+49 69 9200220",
+    description:
+      "Traditionsreiches Varieté-Haus in der Frankfurter Altstadt mit jährlich wechselndem Programm aus Akrobatik, Magie und Musik. Programmblöcke laufen über mehrere Monate, ergänzt durch Soiree- und Gastspielreihen.",
   },
   {
     slug: "die-schmiere",
@@ -224,4 +259,10 @@ export const CURATED_THEATERS: TheaterConfig[] = [
   },
 ];
 
-export const THEATERS: TheaterConfig[] = [...CURATED_THEATERS, ...SYNTHESIZED_THEATERS];
+// Curated entries win over any synthesised duplicates (the scraper
+// produces address-empty stubs that the curated list overrides).
+const CURATED_SLUGS = new Set(CURATED_THEATERS.map((t) => t.slug));
+export const THEATERS: TheaterConfig[] = [
+  ...CURATED_THEATERS,
+  ...SYNTHESIZED_THEATERS.filter((t) => !CURATED_SLUGS.has(t.slug)),
+];
