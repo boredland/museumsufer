@@ -1,6 +1,6 @@
 # Frankfurt culture monorepo
 
-Two Cloudflare Workers that aggregate Frankfurt cultural programming into single-page apps. Both run on the same shape: a daily/hourly GitHub Action regenerates a typed JSON bundle (`src/scrape-data.ts`) committed to the repo; Cloudflare's git integration redeploys the worker on each push; the worker reads from the bundled data with no D1 hot-path.
+Six Cloudflare Workers that aggregate Frankfurt (plus Landau in der Pfalz) cultural programming into single-page apps. All run on the same shape: a daily/hourly GitHub Action runs the hub scrape into `packages/event-hub` and per-app derive steps regenerate typed bundles (`src/scrape-data.ts`) committed to the repo; Cloudflare's git integration redeploys each worker on push; the workers read from the bundled data with no D1 hot-path.
 
 ## Apps
 
@@ -29,8 +29,22 @@ Hourly concert schedule for classical, jazz, sacred, world, experimental, and ch
 
 Daily index of public lectures, readings, and discussions in Frankfurt — Polytechnische Gesellschaft, Haus am Dom, Jüdische Gemeinde, Literaturhaus, Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, and more. Three formats (Vortrag / Lesung / Diskussion), with a rolling next-7-days view and cross-imports of Vortrag-class events from the museums and theaters apps. Editorial "annotated quarto" identity — foxed paper, iron-gall ink, rubric red, pilcrow anchors.
 
-- Scrape: daily 08:30 CEST via `.github/workflows/scrape.yml` (lehrhaus job)
+- Scrape: hourly via the shared `scrape.yml` (derives from `packages/event-hub`)
 - D1: `push_subscriptions` (Web Push digest opt-ins)
+
+### [`apps/lichtspiel-haus`](apps/lichtspiel-haus) → [frankfurt.lichtspiel.haus](https://frankfurt.lichtspiel.haus)
+
+Daily film-screening programme for the Frankfurt arthouse + repertory cinemas — DFF Deutsches Filminstitut, Astor, Cinéma / Eldorado / Harmonie, Pupille, Mal seh'n, Murnau Filmtheater, Caligari, Filmforum Höchst, plus the long-tail Rhein-Main houses. TMDb-enriched posters and synopses (DeepL EN fallback), OMDb-backed Rotten Tomatoes + IMDb ratings with canonical deep links, mark-as-seen state across films, film-strip date slider in a Jugendstil / Saul-Bass register.
+
+- Scrape: hourly via the shared `scrape.yml` (derives from `packages/event-hub`)
+- D1: `feedback`
+
+### [`apps/landau-today`](apps/landau-today) → [landau.today](https://landau.today)
+
+Daily events for Landau in der Pfalz and the Südliche Weinstraße. Six public sources stitched into a single SSR page with URL-bound category + date filters. The only non-Frankfurt app in the monorepo, shipping a different display font + linked stylesheet pipeline.
+
+- Scrape: hourly via the shared `scrape.yml`
+- D1: none
 
 ### [`apps/fetch-proxy`](apps/fetch-proxy)
 
@@ -38,17 +52,21 @@ Generic upstream-fetch proxy used by museums when a museum API blocks edge fetch
 
 ## Packages
 
-- `packages/core` — shared utilities: hash, calendar URLs, German formatting, theme FOUC bootstrap, manifest/robots/api-catalog builders, security headers, UTM, scrape logging, bundle writer, null-last comparator
+- `packages/core` — shared utilities: hash, calendar URLs, German formatting, theme FOUC bootstrap, manifest/robots/api-catalog builders, security headers, UTM, scrape logging, bundle writer, null-last comparator, hreflang + locale detection, HtmlHead with preload / preconnect hooks
+- `packages/event-hub` — central scrape orchestrator that fans out to the per-venue scrapers in `packages/scrapers`, classifies events via `packages/classify`, and runs the TMDb/OMDb/DeepL enrichment passes. Each app reads from the resulting `EVENTS` array via its own `scripts/scrape.ts` derive step.
+- `packages/scrapers` — per-venue scraper modules (Reservix HTML, Tribe Events REST, schema.org microdata, WP REST + ACF, RSS, Kirby CMS, …) consumed by event-hub.
+- `packages/classify` — label-based event classifier (`film:cinema`, `music:classical`, `talk:lecture`, …) driving which app picks up which event.
 - `packages/config` — shared `tsconfig` and `biome` presets
 
 ## Stack
 
 - Cloudflare Workers (TypeScript)
-- [Hono](https://hono.dev) v4 + JSX SSR; theaters uses htmx for the date-strip swap
-- Tailwind v4 (museums) / hand-rolled lightningcss (theaters)
+- [Hono](https://hono.dev) v4 + JSX SSR; htmx for the partial-swap routes
+- Tailwind v4 (museums) / hand-rolled lightningcss (everyone else)
 - [Bun](https://bun.sh) for tooling — installs, scripts, the scrape pipeline (`bun:sqlite`-free, pure-function)
 - Turborepo workspaces
-- GitHub Actions for scrape; Cloudflare git integration for deploys
+- GitHub Actions: hub scrape (`scrape.yml`), nightly Lighthouse + SEO budget enforcement (`lighthouse.yml`), daily manifest-screenshot + OG-image regen against prod (`regen-assets.yml`)
+- Cloudflare git integration for deploys
 
 ## Common commands
 
@@ -58,9 +76,11 @@ bun install                                             # from repo root
 bun run dev                                             # all apps
 bun run typecheck
 bun run lint
-bun run -F @museumsufer/frankfurt-theaters scrape       # one-shot local scrape
-bun run -F @museumsufer/frankfurt-museums scrape
-gh workflow run scrape.yml -f app=all                   # trigger CI scrape
+bun scripts/regen-screenshots.ts --prod                 # manifest screenshots
+bun scripts/regen-og-images.ts                          # OG raster from public/og-image.svg
+gh workflow run scrape.yml                              # trigger hub scrape + per-app derives
+gh workflow run regen-assets.yml                        # screenshots + OG
+gh workflow run lighthouse.yml                          # CWV / a11y / SEO budgets
 ```
 
-Per-app docs live next to the app (`apps/frankfurt-museums/README.md`, `apps/frankfurt-theaters/README.md`).
+Per-app docs live next to the app (`apps/<slug>/README.md`).
