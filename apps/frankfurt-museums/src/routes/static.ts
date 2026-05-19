@@ -81,7 +81,13 @@ Returns: name, slug, museumsufer_url, website_url
 `;
 
 const API_CATALOG = buildApiCatalog({ apiBase: SITE_URL });
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: SITE_URL });
+const ROBOTS_TXT = buildRobotsTxt({
+  siteUrl: SITE_URL,
+  // Block JSON endpoints from organic indexing. Googlebot will follow
+  // the API for crawl-budget reasons otherwise; the spec lives at
+  // /api/docs which IS user-facing and stays crawlable.
+  disallow: ["/api/day", "/api/events", "/api/exhibitions", "/api/museums", "/api/transit"],
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -135,6 +141,12 @@ app.get("/sitemap.xml", (c) => {
     )
     .join("\n");
 
+  // Promoting /?lang=en + /?lang=fr to their own <url> blocks was an
+  // anti-pattern -- the hreflang relationship is already expressed
+  // inside the / entry, so the locale-variant URLs were competing
+  // duplicates per the audit. /impressum is dropped from the sitemap
+  // and now ships <meta name="robots" content="noindex"> in its
+  // template; it's a legal-boilerplate page with no organic intent.
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
@@ -144,25 +156,6 @@ app.get("/sitemap.xml", (c) => {
     <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
-  </url>
-  <url>
-    <loc>https://museumsufer.app/?lang=en</loc>
-    <lastmod>${today}</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
-  </url>
-  <url>
-    <loc>https://museumsufer.app/?lang=fr</loc>
-    <lastmod>${today}</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://museumsufer.app/"/>
-  </url>
-  <url>
-    <loc>https://museumsufer.app/impressum</loc>
   </url>
 ${museumUrls}
 </urlset>`;

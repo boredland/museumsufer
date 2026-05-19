@@ -115,6 +115,12 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       ]}
       inlineCss={INLINE_CSS}
       fontsHref={null}
+      preconnect={[
+        // Hero / card images come from museum-own domains. Preconnect
+        // shaves the DNS+TLS hop off the LCP critical path.
+        "https://www.museumsufer.de",
+        "https://www.staedelmuseum.de",
+      ]}
       deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js"]}
       jsonLd={jsonSchemas.map((s) => s.json)}
     />
@@ -525,12 +531,12 @@ export function renderPage(
     dateModified: todayIso(),
     inLanguage: ["de", "en", "fr"],
     publisher: { "@id": "https://museumsufer.app/#org" },
+    // Google's current SearchAction spec wants `target` as a bare
+    // URL-template string. The legacy `{ @type: "EntryPoint" }`
+    // wrapper still parses but is no longer documented as preferred.
     potentialAction: {
       "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://museumsufer.app/?q={search_term_string}",
-      },
+      target: "https://museumsufer.app/?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   });

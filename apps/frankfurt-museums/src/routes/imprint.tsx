@@ -31,7 +31,7 @@ function ImprintPage({ locale }: { locale: Locale }) {
             icons={{ svg: "/favicon.svg", png192: "/icon-192.png", appleTouch: "/icon-192.png" }}
             stylesheetHref="/styles.css"
           />
-          <meta name="robots" content="index,follow" />
+          <meta name="robots" content="noindex,follow" />
         </head>
         <body>
           <div class="page page--narrow">
