@@ -45,8 +45,10 @@
   --auditorium:   #F2E9D8;
   --velvet:       #E8DDC7;
   --celluloid:    #1A1B14;
-  --celluloid-soft: rgba(26, 27, 20, 0.72);
-  --celluloid-quiet: rgba(26, 27, 20, 0.42);
+  --celluloid-soft: rgba(26, 27, 20, 0.78);
+  /* Bumped from 0.42 → 0.62 opacity so `.programme__year` and other
+   * "quiet" text clears WCAG AA on paper. */
+  --celluloid-quiet: rgba(26, 27, 20, 0.62);
   --celluloid-faint: rgba(26, 27, 20, 0.18);
   /* Darkened to clear WCAG AA 4.5:1 contrast on paper. Was #B8893A
    * (2.6 ratio), which Lighthouse a11y flagged on the FRANKFURT
@@ -60,7 +62,9 @@
   --oxblood:      #6B1A1A;
   --oxblood-bright: #8B2424;
   --carbon-arc:   #FFF6E2;
-  --dust:         #8C8270;
+  /* Darkened from #8C8270 → #5B5347 for WCAG AA on paper. Used by
+   * `.prog-entry__genre` and similar muted "metadata" labels. */
+  --dust:         #5B5347;
   --rule:         rgba(26, 27, 20, 0.16);
   --hairline:     rgba(26, 27, 20, 0.08);
   --vermilion:    #C43820;
@@ -71,8 +75,8 @@
     --auditorium:   #F2E9D8;
     --velvet:       #E8DDC7;
     --celluloid:    #1A1B14;
-    --celluloid-soft: rgba(26, 27, 20, 0.72);
-    --celluloid-quiet: rgba(26, 27, 20, 0.42);
+    --celluloid-soft: rgba(26, 27, 20, 0.78);
+    --celluloid-quiet: rgba(26, 27, 20, 0.62);
     --celluloid-faint: rgba(26, 27, 20, 0.18);
     /* Same WCAG-clear value as the prefers-color-scheme: light
      * branch above. The class-based `.dark` toggle inherits the
@@ -85,7 +89,7 @@
     --absinthe-soft: rgba(59, 95, 88, 0.12);
     --oxblood:      #6B1A1A;
     --oxblood-bright: #8B2424;
-    --dust:         #8C8270;
+    --dust:         #5B5347;
     --rule:         rgba(26, 27, 20, 0.16);
     --hairline:     rgba(26, 27, 20, 0.08);
     --vermilion:    #C43820;
