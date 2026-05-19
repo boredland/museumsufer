@@ -17,6 +17,7 @@ const OMDB_URL = "https://www.omdbapi.com/";
 
 export interface OmdbExtras {
   rt_critic?: number; // 0–100
+  rt_url?: string; // canonical rottentomatoes.com/m/<slug> page
   imdb_rating?: number; // 0.0–10.0
   imdb_votes?: number;
 }
@@ -26,6 +27,7 @@ interface OmdbResponse {
   imdbRating?: string | null;
   imdbVotes?: string | null;
   Ratings?: Array<{ Source: string; Value: string }>;
+  tomatoURL?: string | null;
 }
 
 /** Fetch RT + IMDb numbers for one IMDb id. Returns an empty object when
@@ -57,6 +59,11 @@ export async function fetchOmdb(imdbId: string, apiKey: string): Promise<OmdbExt
   if (data.imdbVotes && data.imdbVotes !== "N/A") {
     const n = Number(data.imdbVotes.replace(/,/g, ""));
     if (Number.isFinite(n) && n > 0) out.imdb_votes = n;
+  }
+  // tomatoURL: most of the other tomato* fields are deprecated to "N/A",
+  // but the URL still resolves to the canonical RT film page.
+  if (data.tomatoURL && data.tomatoURL !== "N/A" && data.tomatoURL.startsWith("https://www.rottentomatoes.com/")) {
+    out.rt_url = data.tomatoURL;
   }
   return out;
 }

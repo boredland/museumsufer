@@ -1400,6 +1400,19 @@ a.ext-score:hover {
   border: 1px solid color-mix(in oklab, var(--absinthe) 50%, transparent);
   padding: 0.25rem 0.6rem;
 }
+
+/* Score badges on the detail page — let the existing .ext-score
+ * styling do the work, just reset the inherited paragraph margin
+ * and bump the size up a touch since the detail page reads at a
+ * larger typographic scale than the row. */
+.film-detail__scores {
+  margin: 0 0 0.85rem;
+}
+.film-detail__scores .ext-scores { margin-left: 0; }
+.film-detail__scores .ext-score {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem 0.2rem;
+}
 .film-detail__credits, .film-detail__series {
   margin: 0 0 0.55rem;
   font-family: var(--serif);

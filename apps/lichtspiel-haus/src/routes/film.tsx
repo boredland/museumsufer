@@ -2,7 +2,7 @@ import { buildUtm, formatLocalisedDateLong } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getScreeningById } from "../db";
-import { Footer, Head, Masthead, PosterCard } from "../frontend";
+import { Footer, Head, Masthead, PosterCard, ScoreBadges } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
@@ -117,6 +117,9 @@ app.get("/film/:id{[0-9]+}", (c) => {
                       ))}
                     </ul>
                   ) : null}
+                  <p class="film-detail__scores">
+                    <ScoreBadges s={screening} />
+                  </p>
                   {screening.credits ? (
                     <p class="film-detail__credits">
                       <span class="film-detail__credits-label">{tr.creditsLabel}: </span>
@@ -151,16 +154,6 @@ app.get("/film/:id{[0-9]+}", (c) => {
                         rel="noopener"
                       >
                         {tr.websiteLink} ↗
-                      </a>
-                    ) : null}
-                    {screening.tmdb_id ? (
-                      <a
-                        class="film-detail__source"
-                        href={`https://www.themoviedb.org/${screening.tmdb_kind ?? "movie"}/${screening.tmdb_id}`}
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        TMDb ↗
                       </a>
                     ) : null}
                   </div>

@@ -372,7 +372,7 @@ function PriceRange({ min, max }: { min?: number | null; max?: number | null }) 
  *  vote count. The TMDb badge subsumes the role of the old toolbar pill
  *  + the marquee meter, so both are gone. ≥25 votes confidence gate on
  *  TMDb matches what the meter used. */
-function ScoreBadges({ s }: { s: DayScreening }) {
+export function ScoreBadges({ s }: { s: DayScreening }) {
   const tmdb =
     typeof s.tmdb_vote_average === "number" &&
     typeof s.tmdb_vote_count === "number" &&
@@ -409,10 +409,10 @@ function ScoreBadges({ s }: { s: DayScreening }) {
         )
       ) : null}
       {rt !== null ? (
-        s.imdb_id ? (
+        s.rt_url ? (
           <a
             class="ext-score ext-score--rt"
-            href={`https://www.rottentomatoes.com/`}
+            href={s.rt_url}
             target="_blank"
             rel="noopener"
             title={`Rotten Tomatoes critic score: ${rt}%`}
