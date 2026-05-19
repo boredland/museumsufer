@@ -36,8 +36,13 @@ jobs:
 
       # Playwright's Chromium bundle isn't pulled in by bun install;
       # fetch it + the system libs Chromium needs on ubuntu-latest.
+      # Run from packages/core so the bundled playwright version drives
+      # the install (avoids mismatched revision paths). Pull both the
+      # headless-shell (what chromium.launch() picks by default) and
+      # the full Chromium so either entrypoint works.
       - name: Install Chromium for Playwright
-        run: bunx --bun playwright install --with-deps chromium
+        working-directory: packages/core
+        run: bunx playwright install --with-deps chromium chromium-headless-shell
 
       - name: Refresh manifest screenshots against prod
         run: bun scripts/regen-screenshots.ts --prod
