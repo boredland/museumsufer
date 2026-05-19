@@ -1,6 +1,6 @@
 name: lighthouse
 
-# Runs Lighthouse against the four live production sites and asserts the
+# Runs Lighthouse against every live production site and asserts the
 # scores defined in .github/lighthouse/lighthouserc.json. Fails the job
 # when a budget (perf, a11y, SEO, CWV) regresses. Three runs per URL,
 # median-smoothed.
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      # Only the four app workspaces + shared core can affect Lighthouse
+      # Only the app workspaces + shared core can affect Lighthouse
       # output. Skip the workflow on changes that can't move the needle
       # (docs, top-level config, the scrape workflow itself).
       - "apps/**"
@@ -38,13 +38,15 @@ jobs:
     name: ${{ matrix.site.name }}
     runs-on: ubuntu-latest
     strategy:
-      # One app regressing shouldn't mask the other three.
+      # One app regressing shouldn't mask the others.
       fail-fast: false
       matrix:
         site:
           - { name: museums, url: "https://museumsufer.app/" }
           - { name: theaters, url: "https://frankfurt.ins.theater/" }
           - { name: konzert-haus, url: "https://frankfurt.konzert.haus/" }
+          - { name: lehrhaus, url: "https://frankfurt.lehr.salon/" }
+          - { name: lichtspiel-haus, url: "https://frankfurt.lichtspiel.haus/" }
           - { name: landau, url: "https://landau.today/" }
     steps:
       - uses: actions/checkout@v5
