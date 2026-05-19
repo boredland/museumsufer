@@ -114,6 +114,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
         { rel: "alternate", type: "application/rss+xml", title: "Museumsufer Frankfurt", href: "/feed.xml" },
       ]}
       inlineCss={INLINE_CSS}
+      fontsHref={null}
       deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js"]}
       jsonLd={jsonSchemas.map((s) => s.json)}
     />

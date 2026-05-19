@@ -133,6 +133,7 @@ export function Head(opts: HeadOptions) {
         ...(opts.extraLinks ?? []),
       ]}
       inlineCss={INLINE_CSS}
+      fontsHref={null}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
     />
