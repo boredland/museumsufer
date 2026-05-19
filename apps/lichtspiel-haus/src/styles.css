@@ -74,10 +74,13 @@
     --celluloid-soft: rgba(26, 27, 20, 0.72);
     --celluloid-quiet: rgba(26, 27, 20, 0.42);
     --celluloid-faint: rgba(26, 27, 20, 0.18);
-    --brass:        #B8893A;
-    --brass-bright: #966F22;
-    --brass-soft:   rgba(184, 137, 58, 0.12);
-    --brass-glow:   rgba(184, 137, 58, 0.06);
+    /* Same WCAG-clear value as the prefers-color-scheme: light
+     * branch above. The class-based `.dark` toggle inherits the
+     * dark value from :root. */
+    --brass:        #7A5A1F;
+    --brass-bright: #5D4216;
+    --brass-soft:   rgba(122, 90, 31, 0.12);
+    --brass-glow:   rgba(122, 90, 31, 0.06);
     --absinthe:     #3B5F58;
     --absinthe-soft: rgba(59, 95, 88, 0.12);
     --oxblood:      #6B1A1A;
