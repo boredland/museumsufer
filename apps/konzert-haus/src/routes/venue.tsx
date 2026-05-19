@@ -1,4 +1,5 @@
 import { dateOffset, todayIso } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange, getVenueBySlug } from "../db";
@@ -9,6 +10,39 @@ import type { Env } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env }>();
+
+// Parse the bundled "<street>, <PLZ> <city>" string into a structured
+// PostalAddress. Skips streetAddress entirely when the input has no
+// street component (synthesised stubs, media-outlet aggregators) so
+// Google's validator doesn't reject "Frankfurt am Main" in the
+// streetAddress slot.
+function parsePostalAddress(addr: string): {
+  "@type": "PostalAddress";
+  streetAddress?: string;
+  postalCode?: string;
+  addressLocality: string;
+  addressCountry: "DE";
+} {
+  const trimmed = (addr ?? "").trim();
+  const fallback = {
+    "@type": "PostalAddress" as const,
+    addressLocality: "Frankfurt am Main",
+    addressCountry: "DE" as const,
+  };
+  if (!trimmed) return fallback;
+  const m = trimmed.match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
+  if (!m) return fallback;
+  // Sanity check: a real street has a number in it. "Frankfurt am
+  // Main" without a number is the city, not a street -- drop it.
+  if (!/\d/.test(m[1])) return fallback;
+  return {
+    "@type": "PostalAddress",
+    streetAddress: m[1].trim(),
+    postalCode: m[2],
+    addressLocality: m[3].trim(),
+    addressCountry: "DE",
+  };
+}
 
 app.get("/spielort/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -29,22 +63,49 @@ app.get("/spielort/:slug", (c) => {
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const currentPath = `/spielort/${slug}`;
-  const addressLocality = venue.city.length ? venue.city[0].toUpperCase() + venue.city.slice(1) : venue.city;
-  const jsonLd = {
+  const venueIri = `${APP_URL}/spielort/${slug}#venue`;
+  const address = parsePostalAddress(venue.address);
+  const sameAs: string[] = [];
+  if (venue.website_url) sameAs.push(venue.website_url);
+  if (venue.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${venue.wikidata}`);
+
+  const venueLd = {
     "@context": "https://schema.org",
     "@type": "MusicVenue",
-    "@id": `${APP_URL}/spielort/${slug}#venue`,
+    "@id": venueIri,
     name: venue.name,
     url: `${APP_URL}/spielort/${slug}`,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: venue.address,
-      addressLocality,
-      addressCountry: "DE",
-    },
+    ...(venue.description && { description: venue.description }),
+    address,
     geo: { "@type": "GeoCoordinates", latitude: venue.lat, longitude: venue.lon },
-    sameAs: venue.website_url,
+    hasMap: `https://www.google.com/maps?q=${venue.lat},${venue.lon}`,
+    containedInPlace: {
+      "@type": "City",
+      name: "Frankfurt am Main",
+      sameAs: "https://www.wikidata.org/wiki/Q1794",
+    },
+    ...(sameAs.length > 0 && { sameAs }),
+    // Surface upcoming concerts as ItemList-style `event` entries so
+    // the venue page is rich-result eligible even when the visitor
+    // doesn't scroll into the list.
+    event: events.slice(0, 20).map((e) => ({
+      "@type": "MusicEvent",
+      "@id": `${APP_URL}/#event/${e.id}`,
+      name: e.title,
+      startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
+      location: { "@id": venueIri },
+    })),
   };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "konzert.haus", item: APP_URL },
+      { "@type": "ListItem", position: 2, name: tr.spielortIndexTitle, item: `${APP_URL}/spielort` },
+      { "@type": "ListItem", position: 3, name: venue.name },
+    ],
+  };
+  const jsonLd = [venueLd, breadcrumbLd];
 
   return c.html(
     <>
@@ -52,9 +113,9 @@ app.get("/spielort/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${venue.name} — konzert.haus`}
-            description={tr.venueDescription(venue.name, events.length)}
-            canonical={`${APP_URL}/spielort/${slug}`}
+            title={`${venue.name} — Konzerte in Frankfurt am Main | konzert.haus`}
+            description={venue.description ?? tr.venueDescription(venue.name, events.length)}
+            canonical={`${APP_URL}/spielort/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={jsonLd}
@@ -81,7 +142,8 @@ app.get("/spielort/:slug", (c) => {
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.venueKicker}</p>
               <h2 class="venue-hero__name">{venue.name}</h2>
-              <p class="venue-hero__address">{venue.address}</p>
+              {venue.address ? <p class="venue-hero__address">{venue.address}</p> : null}
+              {venue.description ? <p class="venue-hero__lead">{venue.description}</p> : null}
               <p class="venue-hero__meta">
                 <a href={venue.website_url} target="_blank" rel="noopener">
                   {tr.websiteLink} ↗
@@ -90,6 +152,8 @@ app.get("/spielort/:slug", (c) => {
                 <a href={`/api/venues/${venue.slug}`}>{tr.jsonLink}</a>
               </p>
             </section>
+
+            <SharedAskAi label={tr.askAiLabel} aria={tr.askAiAria} prompt={tr.askAiPromptVenue(venue.name)} />
 
             {events.length === 0 ? (
               <div class="empty">

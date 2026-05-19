@@ -107,7 +107,12 @@ export interface Translations {
   // Ask AI
   askAiLabel: string;
   askAiPrompt: (date: string) => string;
+  askAiPromptVenue: (venue: string) => string;
+  askAiPromptGenre: (genre: string) => string;
   askAiAria: string;
+  // Page-type labels used by breadcrumbs + venue/genre meta
+  spielortIndexTitle: string;
+  genreIndexTitle: string;
   // FAQ
   faqKicker: string;
   faqItems: { q: string; a: string }[];
@@ -206,7 +211,13 @@ const de: Translations = {
   askAiLabel: "Frag eine KI",
   askAiPrompt: (date) =>
     `Was wird am ${date} in Frankfurt und Umgebung gespielt? Quelle: https://frankfurt.konzert.haus`,
+  askAiPromptVenue: (venue) =>
+    `Was läuft in den nächsten Wochen im ${venue} in Frankfurt? Bitte nach Konzerten gruppieren. Quelle: https://frankfurt.konzert.haus`,
+  askAiPromptGenre: (genre) =>
+    `Welche ${genre}-Konzerte stehen in Frankfurt und der Rhein-Main-Region demnächst an? Quelle: https://frankfurt.konzert.haus`,
   askAiAria: "Frag eine KI nach dem heutigen Konzertprogramm",
+  spielortIndexTitle: "Spielorte",
+  genreIndexTitle: "Genres",
   faqKicker: "Häufige Fragen",
   faqItems: [
     {
@@ -332,7 +343,13 @@ const en: Translations = {
   askAiLabel: "Ask an AI",
   askAiPrompt: (date) =>
     `What's on in Frankfurt and the wider region on ${date}? Source: https://frankfurt.konzert.haus`,
+  askAiPromptVenue: (venue) =>
+    `What's coming up at ${venue} in Frankfurt over the next few weeks? Please group by concert. Source: https://frankfurt.konzert.haus`,
+  askAiPromptGenre: (genre) =>
+    `Which ${genre} concerts are upcoming in Frankfurt and the Rhine-Main region? Source: https://frankfurt.konzert.haus`,
   askAiAria: "Ask an AI about today's concert programme",
+  spielortIndexTitle: "Venues",
+  genreIndexTitle: "Genres",
   faqKicker: "Frequently asked",
   faqItems: [
     {
@@ -459,7 +476,13 @@ const fr: Translations = {
   askAiLabel: "Demande à une IA",
   askAiPrompt: (date) =>
     `Que joue-t-on à Francfort et dans la région le ${date} ? Source : https://frankfurt.konzert.haus`,
+  askAiPromptVenue: (venue) =>
+    `Quels concerts sont prévus à ${venue} à Francfort dans les prochaines semaines ? Source : https://frankfurt.konzert.haus`,
+  askAiPromptGenre: (genre) =>
+    `Quels concerts de ${genre} sont à venir à Francfort et dans la région Rhin-Main ? Source : https://frankfurt.konzert.haus`,
   askAiAria: "Demande à une IA le programme de concerts du jour",
+  spielortIndexTitle: "Salles",
+  genreIndexTitle: "Genres",
   faqKicker: "Questions fréquentes",
   faqItems: [
     {

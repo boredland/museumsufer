@@ -11,6 +11,14 @@ export interface VenueConfig {
   city: string;
   website_url: string;
   default_genre: Genre;
+  /** Wikidata Q-id (without the "Q" prefix) — emitted as schema.org
+   *  `sameAs` for entity disambiguation. Major Frankfurt venues have
+   *  Wikidata entries; smaller ones stay null. */
+  wikidata?: string;
+  /** Short editorial blurb shown on the venue page above the event
+   *  list. Lifts pages with quiet programming above the thin-content
+   *  threshold the audit flagged. */
+  description?: string;
 }
 
 /** Hand-curated venue list. Combined with auto-generated SYNTHESIZED_VENUES
@@ -26,6 +34,9 @@ export const CURATED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.alteoper.de",
     default_genre: "classical",
+    wikidata: "Q679177",
+    description:
+      "Frankfurts Konzerthaus im historischen Opernhaus von 1880, 1981 am Opernplatz wieder eröffnet. Großer Saal mit ~2.400 Plätzen für Orchester, Liederabende und Klavierrezitals; der Mozart Saal bietet Kammermusikprogramme. Gastgeber der wichtigsten Klassik-Gastspiele der Rhein-Main-Region.",
   },
   {
     slug: "oper-frankfurt-konzerte",
@@ -37,6 +48,9 @@ export const CURATED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://oper-frankfurt.de",
     default_genre: "classical",
+    wikidata: "Q570869",
+    description:
+      "Vom Magazin Opernwelt mehrfach zum „Opernhaus des Jahres“ gekürtes Repertoire-Theater am Willy-Brandt-Platz. Neben Opern programmiert das Haus regelmäßig Sinfoniekonzerte, Liederabende und Kammermusik des Frankfurter Opern- und Museumsorchesters.",
   },
   {
     slug: "dr-hochs-konservatorium",
@@ -92,6 +106,9 @@ export const CURATED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.hr-bigband.de",
     default_genre: "jazz",
+    wikidata: "Q588884",
+    description:
+      "Die Bigband des Hessischen Rundfunks am Funkhaus Bertramstraße. Konzerte in Eigenproduktionen wie der Reihe „hr-Bigband Open“ und als Gastband bei Festivals im Sendesaal.",
   },
   {
     slug: "holzhausenschloesschen",
@@ -105,15 +122,20 @@ export const CURATED_VENUES: VenueConfig[] = [
     default_genre: "chamber",
   },
   {
+    // Aggregator listing (media outlet, not a single physical venue),
+    // so address is intentionally empty -- the schema generator skips
+    // streetAddress for entries with no real street component.
     slug: "jazz-frankfurt",
     name: "Jazz in Frankfurt",
     short_name: "jazz-frankfurt.de",
-    address: "Frankfurt am Main",
+    address: "",
     lat: 50.1109,
     lon: 8.6821,
     city: "frankfurt",
     website_url: "https://www.jazz-frankfurt.de",
     default_genre: "jazz",
+    description:
+      "Redaktioneller Jazz-Kalender für Frankfurt und Rhein-Main. Die Programminformationen verteilen sich über Häuser wie Mousonturm, hr-Sendesaal und kleinere Clubs in der Stadt.",
   },
   {
     slug: "jazz-palmengarten",
@@ -280,6 +302,28 @@ export const CURATED_VENUES: VenueConfig[] = [
     website_url: "https://www.musikschule-frankfurt.de",
     default_genre: "classical",
   },
+  {
+    slug: "mousonturm",
+    name: "Künstler*innenhaus Mousonturm",
+    short_name: "Mousonturm",
+    address: "Waldschmidtstraße 4, 60316 Frankfurt am Main",
+    lat: 50.1183,
+    lon: 8.7019,
+    city: "frankfurt",
+    website_url: "https://www.mousonturm.de",
+    default_genre: "experimental",
+    wikidata: "Q1655234",
+    description:
+      "Festes Haus für freie Künste im Frankfurter Ostend, untergebracht in einer ehemaligen Tabakfabrik. Programmatisch nah an zeitgenössischem Tanz, Performance und Neuer Musik; Gastgeber von Ensemble-Modern-Reihen und Cresc Biennale.",
+  },
 ];
 
-export const VENUES: VenueConfig[] = [...CURATED_VENUES, ...SYNTHESIZED_VENUES];
+// Curated entries win over synthesised duplicates -- the scraper
+// records auto-generated stubs (empty address etc.); the curated
+// CURATED_VENUES list above contains the hand-verified data and must
+// take precedence.
+const CURATED_SLUGS = new Set(CURATED_VENUES.map((v) => v.slug));
+export const VENUES: VenueConfig[] = [
+  ...CURATED_VENUES,
+  ...SYNTHESIZED_VENUES.filter((v) => !CURATED_SLUGS.has(v.slug)),
+];

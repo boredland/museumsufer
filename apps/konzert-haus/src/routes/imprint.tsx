@@ -40,7 +40,7 @@ app.get("/impressum", (c) => {
             locale={locale}
             currentPath={currentPath}
           />
-          <meta name="robots" content="index,follow" />
+          <meta name="robots" content="noindex,follow" />
         </head>
         <body>
           <Grain />

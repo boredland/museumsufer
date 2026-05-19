@@ -67,7 +67,12 @@ GET /genre/{slug}/feed.ics — single genre
 `;
 
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const ROBOTS_TXT = buildRobotsTxt({
+  siteUrl: APP_URL,
+  // Block JSON endpoints from organic indexing -- developers reach
+  // them via /api/docs, but Googlebot shouldn't index raw JSON.
+  disallow: ["/api/day", "/api/events", "/api/venues", "/api/genres"],
+});
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -79,40 +84,32 @@ app.get("/.well-known/api-catalog", (c) =>
 
 app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
 
+// Match the rolling window most upstream venue feeds publish. 60 days
+// risked thin-content pages on empty future dates; 14 matches the
+// realistic schedule horizon for most Frankfurt concert houses.
+const SITEMAP_DATE_DAYS = 14;
+
 app.get("/sitemap.xml", (c) => {
   const today = todayIso();
   const venueUrls = VENUES.slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
-    .map(
-      (v) => `  <url>
-    <loc>${APP_URL}/spielort/${v.slug}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
-    )
+    .map((v) => `  <url>\n    <loc>${APP_URL}/spielort/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const genreUrls = GENRES.map(
-    (g) => `  <url>
-    <loc>${APP_URL}/genre/${g}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
+    (g) => `  <url>\n    <loc>${APP_URL}/genre/${g}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`,
   ).join("\n");
-  const dateUrls = Array.from({ length: 60 }, (_, i) => dateOffset(i))
-    .map(
-      (d) => `  <url>
-    <loc>${APP_URL}/tag/${d}</loc>
-    <lastmod>${today}</lastmod>
-  </url>`,
-    )
+  // Per-URL lastmod = the date itself; mass-stamping `today` is the
+  // antipattern Google ignores.
+  const dateUrls = Array.from({ length: SITEMAP_DATE_DAYS }, (_, i) => dateOffset(i))
+    .map((d) => `  <url>\n    <loc>${APP_URL}/tag/${d}</loc>\n    <lastmod>${d}</lastmod>\n  </url>`)
     .join("\n");
 
+  // /api/docs is the developer reference UI -- intentionally excluded
+  // (no organic intent; would waste crawl budget).
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${APP_URL}/</loc>
-    <lastmod>${today}</lastmod>
-  </url>
-  <url>
-    <loc>${APP_URL}/api/docs</loc>
     <lastmod>${today}</lastmod>
   </url>
   <url>
