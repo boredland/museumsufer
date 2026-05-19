@@ -28,7 +28,7 @@ function buildSvg(title: string, sourceName: string, date: string, time: string 
     fonts: FONTS,
     ariaLabel: title,
     rows: [
-      { text: "¶ LEHRHAUS", y: 160, font: "mono", size: 20, letterSpacing: 6, color: PALETTE.accent },
+      { text: "¶ FRANKFURT · LEHRHAUS", y: 160, font: "mono", size: 20, letterSpacing: 6, color: PALETTE.accent },
       { text: title, y: 300 + titleSize / 4, font: "display", size: titleSize, weight: 500, tracking: -1 },
       { text: sourceName, y: 450, font: "display", size: 30, italic: true, opacity: 0.62 },
       {

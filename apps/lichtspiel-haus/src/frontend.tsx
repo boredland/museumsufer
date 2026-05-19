@@ -129,6 +129,7 @@ export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale
   return (
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
+        <p class="masthead__locality">Frankfurt</p>
         <h1 class="wordmark">
           <span class="wordmark__lichtspiel">lichtspiel</span>
           <span class="wordmark__iris" aria-hidden="true">
