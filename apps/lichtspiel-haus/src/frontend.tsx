@@ -165,6 +165,55 @@ function FriezeDivider() {
   );
 }
 
+/** Search bar — token-AND match against each row's `data-search`
+ *  haystack. Client behaviour lives in buildClientScript. */
+function SearchBar({ tr }: { tr: Translations }) {
+  return (
+    <div class="search-bar">
+      <label for="lh-search" class="sr-only">
+        {tr.searchLabel}
+      </label>
+      <input
+        id="lh-search"
+        type="search"
+        class="search-input js-search"
+        placeholder={tr.searchPlaceholder}
+        autocomplete="off"
+        aria-label={tr.searchLabel}
+      />
+      <kbd class="search-kbd">⌘K</kbd>
+      <span class="search-empty" hidden>
+        {tr.searchEmpty}
+      </span>
+    </div>
+  );
+}
+
+/** Hidden by default; the client script reveals it (with a count) when
+ *  any row on the current view is marked seen. Clicking the "Einblenden"
+ *  button toggles a body class that brings the hidden rows back in a
+ *  dimmed style. */
+function SeenBanner({ tr }: { tr: Translations }) {
+  return (
+    <aside class="seen-banner" id="seen-banner" hidden>
+      <span class="seen-banner__lead">
+        <span id="seen-banner-count">0</span>
+        <span id="seen-banner-label" />
+      </span>
+      <button type="button" class="seen-banner__btn" data-seen-reveal>
+        <span data-seen-reveal-label>{tr.seenReveal}</span>
+      </button>
+      <span
+        hidden
+        data-seen-label-show={tr.seenReveal}
+        data-seen-label-hide={tr.seenHide}
+        data-seen-label-singular={tr.seenHiddenLead(1).replace("1 ", "")}
+        data-seen-label-plural={tr.seenHiddenLead(2).replace("2 ", "")}
+      />
+    </aside>
+  );
+}
+
 function DateStrip({
   strip,
   active,
@@ -385,8 +434,33 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
       ? Math.round(s.tmdb_vote_average * 10)
       : null;
 
+  // Searchable haystack — title (display + original, since the venue
+  // chrome version is what regulars remember), cinema, credits, series,
+  // and resolved genre names. All lower-cased + diacritic-folded by the
+  // client-side search helper.
+  const searchHay = [
+    displayTitle,
+    s.title,
+    s.title_en,
+    s.subtitle,
+    s.cinema.name,
+    s.cinema.short_name,
+    s.credits,
+    s.series?.name,
+    ...genres,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
   return (
-    <li class="prog-entry" id={`screening-${s.id}`} style={`--i:${opts.index}`}>
+    <li
+      class="prog-entry"
+      id={`screening-${s.id}`}
+      style={`--i:${opts.index}`}
+      data-search={searchHay}
+      data-seen-key={s.seen_key ?? ""}
+    >
       <script
         type="application/ld+json"
         data-id={String(s.id)}
@@ -533,6 +607,29 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
               <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
             </svg>
           </button>
+          {s.seen_key ? (
+            <button
+              type="button"
+              class="icon-btn icon-btn--seen"
+              data-seen-toggle
+              aria-pressed="false"
+              aria-label={tr.markSeen}
+              title={tr.markSeen}
+            >
+              <svg
+                viewBox="0 0 16 16"
+                width="13"
+                height="13"
+                aria-hidden="true"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+              >
+                <title>{tr.markSeen}</title>
+                <path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          ) : null}
           {s.tmdb_id ? (
             <a
               class="icon-btn icon-btn--tmdb"
@@ -661,6 +758,10 @@ interface ClientScriptLabels {
   contactSending: string;
   contactSent: string;
   contactErr: string;
+  markSeen: string;
+  unmarkSeen: string;
+  seenReveal: string;
+  seenHide: string;
 }
 
 function buildClientScript(L: ClientScriptLabels): string {
@@ -825,6 +926,118 @@ if ('serviceWorker' in navigator) {
   })();
 
   ${digestScript}
+
+  // ─── search ─────────────────────────────────────────────────────────
+  // Token-AND match against each row's data-search. Ignores diacritics
+  // and punctuation. Cmd/Ctrl+K focuses the input; Esc clears it.
+  (function(){
+    function fold(s){
+      try { return s.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9\\s]+/g, ' ').replace(/\\s+/g, ' ').trim(); }
+      catch(_){ return (s||'').toLowerCase(); }
+    }
+    function applySearch(){
+      var input = document.querySelector('.js-search');
+      if (!input) return;
+      var q = fold(input.value).split(' ').filter(Boolean);
+      var rows = document.querySelectorAll('.prog-entry');
+      var anyVisible = false;
+      rows.forEach(function(r){
+        var hay = fold(r.getAttribute('data-search') || '');
+        var match = q.length === 0 || q.every(function(t){ return hay.indexOf(t) !== -1; });
+        if (match) { r.removeAttribute('data-search-hidden'); anyVisible = true; }
+        else r.setAttribute('data-search-hidden', '');
+      });
+      var empty = document.querySelector('.search-empty');
+      if (empty) empty.hidden = !(q.length > 0 && !anyVisible);
+      updateSeenBanner();
+    }
+    window.__lhApplySearch = applySearch;
+    document.addEventListener('input', function(e){
+      if (e.target && e.target.classList && e.target.classList.contains('js-search')) applySearch();
+    });
+    document.addEventListener('keydown', function(e){
+      var t = e.target;
+      if (e.key === 'Escape' && t && t.classList && t.classList.contains('js-search')) {
+        t.value = ''; applySearch(); t.blur();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key && e.key.toLowerCase() === 'k') {
+        var input = document.querySelector('.js-search');
+        if (input) { e.preventDefault(); input.focus(); input.select(); }
+      }
+    });
+  })();
+
+  // ─── mark-seen ──────────────────────────────────────────────────────
+  // Toggles localStorage entry, updates aria + checkmark fill, and lets
+  // CSS hide the row. The reveal banner at the bottom counts hidden rows
+  // on the current view and toggles body.lh-show-seen to bring them back.
+  (function(){
+    var KEY = 'lh-seen';
+    function load(){ try { return new Set(JSON.parse(localStorage.getItem(KEY) || '[]')); } catch(_) { return new Set(); } }
+    function save(set){ try { localStorage.setItem(KEY, JSON.stringify(Array.from(set))); } catch(_) {} }
+    var seen = load();
+
+    function applyRow(row){
+      var key = row.getAttribute('data-seen-key');
+      if (!key) return;
+      var isSeen = seen.has(key);
+      row.classList.toggle('prog-entry--seen', isSeen);
+      var btn = row.querySelector('[data-seen-toggle]');
+      if (btn) {
+        btn.classList.toggle('is-on', isSeen);
+        btn.setAttribute('aria-pressed', isSeen ? 'true' : 'false');
+        btn.setAttribute('aria-label', isSeen ? ${j(L.unmarkSeen)} : ${j(L.markSeen)});
+        btn.setAttribute('title', isSeen ? ${j(L.unmarkSeen)} : ${j(L.markSeen)});
+      }
+    }
+    function applyAll(){
+      document.querySelectorAll('.prog-entry').forEach(applyRow);
+      updateSeenBanner();
+    }
+    window.__lhApplySeen = applyAll;
+
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('[data-seen-toggle]');
+      if (btn) {
+        e.preventDefault();
+        var row = btn.closest('.prog-entry'); if (!row) return;
+        var key = row.getAttribute('data-seen-key'); if (!key) return;
+        if (seen.has(key)) seen.delete(key); else seen.add(key);
+        save(seen);
+        // Apply to every row sharing that seen_key (same film, multiple
+        // dates/cinemas) so one click hides the lot.
+        document.querySelectorAll('[data-seen-key="' + CSS.escape(key) + '"]').forEach(applyRow);
+        updateSeenBanner();
+        return;
+      }
+      var reveal = e.target.closest && e.target.closest('[data-seen-reveal]');
+      if (reveal) {
+        e.preventDefault();
+        document.body.classList.toggle('lh-show-seen');
+        var on = document.body.classList.contains('lh-show-seen');
+        var label = reveal.querySelector('[data-seen-reveal-label]');
+        if (label) label.textContent = on ? ${j(L.seenHide)} : ${j(L.seenReveal)};
+      }
+    });
+
+    applyAll();
+    document.body.addEventListener('htmx:afterSwap', applyAll);
+  })();
+
+  function updateSeenBanner(){
+    var banner = document.getElementById('seen-banner'); if (!banner) return;
+    var rows = document.querySelectorAll('.prog-entry.prog-entry--seen:not([data-search-hidden])');
+    var n = rows.length;
+    var count = document.getElementById('seen-banner-count');
+    var label = document.getElementById('seen-banner-label');
+    var tpl = banner.querySelector('[data-seen-label-show]');
+    if (count) count.textContent = String(n);
+    if (label && tpl) {
+      var noun = n === 1 ? tpl.getAttribute('data-seen-label-singular') : tpl.getAttribute('data-seen-label-plural');
+      label.textContent = ' ' + (noun || '');
+    }
+    banner.hidden = n === 0;
+  }
 })();
 `;
 }
@@ -911,6 +1124,10 @@ function ClientBehaviors({ tr }: { tr: Translations }) {
     contactSending: tr.contactSending,
     contactSent: tr.contactSent,
     contactErr: tr.contactErr,
+    markSeen: tr.markSeen,
+    unmarkSeen: tr.unmarkSeen,
+    seenReveal: tr.seenReveal,
+    seenHide: tr.seenHide,
   });
   return (
     <script
@@ -1132,6 +1349,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         </head>
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <SearchBar tr={tr} />
           <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
@@ -1139,6 +1357,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             <div id="programme-content">
               <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} />
             </div>
+            <SeenBanner tr={tr} />
           </main>
           <Faq tr={tr} locale={locale} />
           <Footer tr={tr} locale={locale} />

@@ -74,6 +74,9 @@ async function main(): Promise<void> {
       tmdb_genre_ids: ev.tmdb_genre_ids,
       tmdb_vote_average: ev.tmdb_vote_average,
       tmdb_vote_count: ev.tmdb_vote_count,
+      seen_key: ev.tmdb_id
+        ? `tmdb:${ev.tmdb_id}`
+        : `title:${fnv1aInt(ev.title.toLowerCase().replace(/[^a-z0-9]+/g, ""))}`,
     });
     counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
     if (!curatedBySlug.has(ev.source_slug)) {

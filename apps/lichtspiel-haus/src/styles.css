@@ -371,6 +371,126 @@ body::before {
   padding: clamp(2.5rem, 6vw, 4.5rem) var(--gut) 4rem;
 }
 
+/* ─── Search bar ──────────────────────────────────────────────────
+ * Sits between the masthead and the date strip. Mono-typeset, brass-
+ * cursor, ⌘K hint pill on the right. */
+.search-bar {
+  position: relative;
+  z-index: 3;
+  max-width: var(--maxw);
+  margin: 0.5rem auto 0;
+  padding: 0 var(--gut);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+.search-input {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--rule);
+  background: var(--velvet);
+  color: var(--celluloid);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  caret-color: var(--brass);
+  border-radius: 0;
+  transition: border-color 220ms;
+}
+.search-input::placeholder {
+  color: var(--celluloid-quiet);
+  font-style: italic;
+  font-family: var(--serif);
+  letter-spacing: 0.005em;
+  text-transform: none;
+  font-size: 0.85rem;
+}
+.search-input:focus { outline: none; border-color: var(--brass); }
+.search-kbd {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: var(--celluloid-quiet);
+  border: 1px solid var(--rule);
+  padding: 0.2rem 0.45rem;
+  white-space: nowrap;
+}
+@media (hover: none) { .search-kbd { display: none; } }
+.search-empty {
+  grid-column: 1 / -1;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--celluloid-soft);
+  padding: 0.4rem 0.1rem 0;
+}
+.prog-entry[data-search-hidden] { display: none !important; }
+
+/* ─── Seen / hide ─────────────────────────────────────────────────
+ * Checkmark icon button + reveal banner at the bottom of the
+ * programme. Seen rows are display:none by default; body.lh-show-seen
+ * brings them back at half opacity with the checkmark filled in. */
+.icon-btn--seen.is-on {
+  color: var(--brass);
+  border-color: var(--brass);
+  background: var(--brass-soft);
+}
+.prog-entry--seen { display: none; }
+body.lh-show-seen .prog-entry--seen {
+  display: grid;
+  opacity: 0.5;
+}
+body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-through; }
+
+.seen-banner {
+  max-width: var(--maxw);
+  margin: 1.5rem auto 0;
+  padding: 0.75rem var(--gut);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border-top: 0.5px solid var(--rule);
+  border-bottom: 0.5px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--celluloid-soft);
+}
+.seen-banner__lead { font-variant-numeric: tabular-nums; }
+.seen-banner__btn {
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: var(--brass);
+  background: transparent;
+  border: 1px solid var(--rule);
+  padding: 0.4rem 0.95rem;
+  cursor: pointer;
+  transition: color 220ms, border-color 220ms, background 220ms;
+}
+.seen-banner__btn:hover {
+  color: var(--brass-bright);
+  border-color: var(--brass);
+  background: var(--brass-soft);
+}
+
+/* sr-only utility — used by the search label */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Detail-page back link — quiet brass row above the venue/film hero.
  * Same target on every page (the home programme); /film/:id deep-links
  * back to the originating screening row via #screening-{id}. */
