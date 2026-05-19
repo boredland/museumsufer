@@ -48,7 +48,7 @@ function ImprintPage({ locale, tr }: { locale: Locale; tr: Translations }) {
           <title>{`${tr.imprintTitle} · landau.today`}</title>
           <meta name="description" content={tr.imprintTitle} />
           <meta name="theme-color" content="#f2ead3" />
-          <meta name="robots" content="index,follow" />
+          <meta name="robots" content="noindex,follow" />
           <link rel="canonical" href={`${APP_URL}/impressum`} />
           <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
           <link rel="stylesheet" href="/fonts.css" />

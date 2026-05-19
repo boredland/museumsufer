@@ -37,7 +37,7 @@ app.get("/impressum", (c) => {
             canonical={`${APP_URL}/impressum`}
             turnstileSiteKey={turnstileSiteKey}
           />
-          <meta name="robots" content="index,follow" />
+          <meta name="robots" content="noindex,follow" />
         </head>
         <body>
           <Grain />

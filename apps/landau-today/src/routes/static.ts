@@ -25,7 +25,10 @@ const MANIFEST = buildManifest({
   ],
 });
 
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const ROBOTS_TXT = buildRobotsTxt({
+  siteUrl: APP_URL,
+  disallow: ["/api/day", "/api/events"],
+});
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
 
 /** OG card — masthead set in Bodoni-style geometry, hand-drawn so we don't
