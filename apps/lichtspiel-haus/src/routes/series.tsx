@@ -61,7 +61,7 @@ app.get("/reihe/:slug", (c) => {
 
             <ol class="screenings">
               {screenings.map((s, i) => (
-                <Screening key={s.id} s={s} opts={{ index: i }} tr={tr} />
+                <Screening key={s.id} s={s} opts={{ index: i, locale }} tr={tr} />
               ))}
             </ol>
           </main>

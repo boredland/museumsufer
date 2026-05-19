@@ -32,6 +32,9 @@ interface TmdbMovieResult {
   release_date?: string | null;
   original_title?: string;
   title?: string;
+  genre_ids?: number[];
+  vote_average?: number;
+  vote_count?: number;
 }
 
 interface TmdbTvResult {
@@ -41,6 +44,9 @@ interface TmdbTvResult {
   first_air_date?: string | null;
   original_name?: string;
   name?: string;
+  genre_ids?: number[];
+  vote_average?: number;
+  vote_count?: number;
 }
 
 interface TmdbSearchResponse<T> {
@@ -175,13 +181,31 @@ async function searchTmdbTv(title: string, year: number | undefined, apiKey: str
   return data.results?.[0] ?? null;
 }
 
-async function fetchEnglishOverview(kind: "movie" | "tv", id: number, apiKey: string): Promise<string | undefined> {
+async function fetchEnglishDetails(
+  kind: "movie" | "tv",
+  id: number,
+  apiKey: string,
+): Promise<{ title?: string; overview?: string }> {
   const params = new URLSearchParams({ api_key: apiKey, language: "en-US" });
   const res = await fetch(`${TMDB_BASE}/${kind}/${id}?${params}`, { headers: { Accept: "application/json" } });
-  if (!res.ok) return undefined;
-  const data = (await res.json()) as { overview?: string | null };
+  if (!res.ok) return {};
+  const data = (await res.json()) as { title?: string | null; name?: string | null; overview?: string | null };
+  const title = (data.title ?? data.name)?.trim();
   const overview = data.overview?.trim();
-  return overview && overview.length > 0 ? overview : undefined;
+  return {
+    title: title && title.length > 0 ? title : undefined,
+    overview: overview && overview.length > 0 ? overview : undefined,
+  };
+}
+
+function hitTitle(hit: TmdbMovieResult | TmdbTvResult): string | undefined {
+  // `title` is on movie results; `name` is on TV results. The de-DE search
+  // populates the localised value when TMDb has a translation, otherwise
+  // returns the canonical (usually English) string.
+  const movie = (hit as TmdbMovieResult).title;
+  if (movie) return movie.trim() || undefined;
+  const tv = (hit as TmdbTvResult).name;
+  return tv?.trim() || undefined;
 }
 
 async function toEntry(
@@ -190,16 +214,21 @@ async function toEntry(
   apiKey: string,
 ): Promise<TmdbCacheEntry | null> {
   if (!hit) return null;
-  // Fire the English overview lookup alongside the implicit-await caller;
-  // failures here don't sink the whole match, they just leave overview_en
-  // undefined and apps fall back to the German one.
-  const overview_en = await fetchEnglishOverview(kind, hit.id, apiKey).catch(() => undefined);
+  // One en-US detail call gives us both the English title and the
+  // English overview. Failures don't sink the whole match — the en
+  // fields just stay undefined and apps fall back to the German ones.
+  const en: { title?: string; overview?: string } = await fetchEnglishDetails(kind, hit.id, apiKey).catch(() => ({}));
   return {
     id: hit.id,
     poster: hit.poster_path ?? null,
+    title: hitTitle(hit),
+    title_en: en.title,
     overview: hit.overview?.trim() || undefined,
-    overview_en,
+    overview_en: en.overview,
     kind,
+    genre_ids: hit.genre_ids?.length ? hit.genre_ids : undefined,
+    vote_average: typeof hit.vote_average === "number" ? hit.vote_average : undefined,
+    vote_count: typeof hit.vote_count === "number" ? hit.vote_count : undefined,
   };
 }
 
@@ -258,13 +287,21 @@ export async function enrichFilmPosters(
 
     const cached = opts.cache[key];
     const hadHit = key in opts.cache;
-    // Refresh existing positive entries that pre-date a schema growth —
-    // missing `kind`, missing German overview, or missing English overview.
-    // One refetch back-fills all three at once.
+    // Refresh existing positive entries that pre-date a schema growth.
+    // Any missing field triggers a single refetch that back-fills all of
+    // them. `vote_count` doubles as a sentinel for the score pair since
+    // 0 is a legitimate average but a missing count means we never
+    // recorded one.
     const needsRefresh =
       cached !== null &&
       cached !== undefined &&
-      (cached.kind === undefined || cached.overview === undefined || cached.overview_en === undefined);
+      (cached.kind === undefined ||
+        cached.title === undefined ||
+        cached.title_en === undefined ||
+        cached.overview === undefined ||
+        cached.overview_en === undefined ||
+        cached.genre_ids === undefined ||
+        cached.vote_count === undefined);
 
     if ((!hadHit || needsRefresh) && !pendingByKey.has(key) && pendingByKey.size < maxLookups) {
       pendingByKey.set(key, { key, title, year, refresh: needsRefresh });
@@ -339,6 +376,11 @@ export async function enrichFilmPosters(
     if (entry.poster && !ev.image_url) ev.image_url = `${POSTER_BASE}${entry.poster}`;
     if (entry.overview) ev.description = entry.overview;
     if (entry.overview_en) ev.description_en = entry.overview_en;
+    if (entry.title) ev.title_de = entry.title;
+    if (entry.title_en) ev.title_en = entry.title_en;
+    if (entry.genre_ids?.length) ev.tmdb_genre_ids = entry.genre_ids;
+    if (typeof entry.vote_average === "number") ev.tmdb_vote_average = entry.vote_average;
+    if (typeof entry.vote_count === "number") ev.tmdb_vote_count = entry.vote_count;
     if (!ev.tmdb_id) ev.tmdb_id = entry.id;
     if (entry.kind && !ev.tmdb_kind) ev.tmdb_kind = entry.kind;
     matched++;

@@ -42,10 +42,25 @@ export interface CanonicalEvent {
    *  Metropolitan Opera HD broadcasts. Determines the deep-link path
    *  prefix (/movie vs /tv) on themoviedb.org. */
   tmdb_kind?: "movie" | "tv";
+  /** TMDb-canonical title in German. Front-ends use this in place of the
+   *  cinema's listing-field title (which often carries series chrome like
+   *  "Kino4Kids „Zirkuskind"" or "Spotlight: Milestones #12"). */
+  title_de?: string;
+  /** TMDb-canonical title in English. Picked when the visitor's locale
+   *  is `en`; falls back to title_de, then to the cinema's title. */
+  title_en?: string;
   /** English-language synopsis, when TMDb has one. Apps with multi-locale
    *  rendering pick this for en visitors and fall back to `description`
    *  (the German overview) otherwise. */
   description_en?: string;
+  /** TMDb genre ids — fixed namespace shared across movies and TV. Front-
+   *  ends own the id-to-localised-name mapping so the canonical record
+   *  stays small (~3 ints per event vs ~30 chars). */
+  tmdb_genre_ids?: number[];
+  /** TMDb user-score, 0–10. Front-ends typically render as a percentage. */
+  tmdb_vote_average?: number;
+  /** TMDb vote count — used to hide low-confidence scores. */
+  tmdb_vote_count?: number;
   labels: Label[];
   first_seen_at: string;
   last_seen_at: string;

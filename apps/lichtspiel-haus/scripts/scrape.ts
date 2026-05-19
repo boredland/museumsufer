@@ -69,6 +69,11 @@ async function main(): Promise<void> {
       series,
       tmdb_id: ev.tmdb_id,
       tmdb_kind: ev.tmdb_kind,
+      title_de: ev.title_de,
+      title_en: ev.title_en,
+      tmdb_genre_ids: ev.tmdb_genre_ids,
+      tmdb_vote_average: ev.tmdb_vote_average,
+      tmdb_vote_count: ev.tmdb_vote_count,
     });
     counts.set(ev.source_slug, (counts.get(ev.source_slug) ?? 0) + 1);
     if (!curatedBySlug.has(ev.source_slug)) {
