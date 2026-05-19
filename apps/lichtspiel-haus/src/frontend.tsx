@@ -1068,9 +1068,25 @@ if ('serviceWorker' in navigator) {
       updateSeenBanner();
     }
     window.__lhApplySearch = applySearch;
+    // When the user starts typing while still on the day view, jump to
+    // the 7-day view so the search has more rows to match. We click
+    // the inactive week pill -- which is just an htmx-wired anchor --
+    // and the existing afterSwap handler re-runs applySearch() once
+    // the new rows are in the DOM.
+    function maybePromoteToWeekView(){
+      var input = document.querySelector('.js-search');
+      if (!input || !input.value.trim()) return;
+      var weekPill = document.querySelector('.range-pill[data-range="7"]');
+      if (!weekPill || weekPill.classList.contains('range-pill--active')) return;
+      weekPill.click();
+    }
     document.addEventListener('input', function(e){
-      if (e.target && e.target.classList && e.target.classList.contains('js-search')) applySearch();
+      if (e.target && e.target.classList && e.target.classList.contains('js-search')) {
+        maybePromoteToWeekView();
+        applySearch();
+      }
     });
+    document.body.addEventListener('htmx:afterSwap', applySearch);
     document.addEventListener('keydown', function(e){
       var t = e.target;
       if (e.key === 'Escape' && t && t.classList && t.classList.contains('js-search')) {
@@ -1550,11 +1566,11 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         </head>
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
-          <SearchBar tr={tr} />
           <DateStrip strip={dateStrip} active={range ? "" : date} today={today} tr={tr} locale={locale} />
           <RangeToggle date={date} range={range} locale={locale} tr={tr} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
+          <SearchBar tr={tr} />
           <main class="programme" id="programme">
             <div id="programme-content">
               <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} range={range} />
