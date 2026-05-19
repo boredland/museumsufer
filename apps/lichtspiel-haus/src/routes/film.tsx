@@ -89,6 +89,9 @@ app.get("/film/:id{[0-9]+}", (c) => {
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="film-detail">
+            <p class="back-link">
+              <a href={`/tag/${screening.date}#screening-${id}`}>← {tr.backToProgramme}</a>
+            </p>
             <article class="film-detail__article">
               <p class="film-detail__kicker">{tr.filmKicker}</p>
               <h1 class="film-detail__title">{displayTitle}</h1>

@@ -77,6 +77,9 @@ app.get("/kino/:slug", (c) => {
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
+            <p class="back-link">
+              <a href="/">← {tr.backToProgramme}</a>
+            </p>
             <section class="venue-hero">
               <div class="venue-hero__corner" aria-hidden="true">
                 <svg viewBox="0 0 80 80" width="80" height="80" role="presentation">
