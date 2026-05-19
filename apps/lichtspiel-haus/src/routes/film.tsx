@@ -1,4 +1,4 @@
-import { buildUtm, formatLocalisedDateLong } from "@museumsufer/core";
+import { buildUtm, formatLocalisedDateLong, parsePostalAddress } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -10,31 +10,6 @@ import { APP_URL } from "./static";
 
 const utm = buildUtm("frankfurt.lichtspiel.haus");
 const app = new Hono<{ Bindings: Env }>();
-
-// Cinema addresses ship as a single "<street>, <PLZ> <city>" string.
-// Split into a PostalAddress object so the ScreeningEvent.location
-// passes Google's Rich Results validator. Falls back gracefully when
-// the format deviates (e.g. synthesised cinemas with empty address).
-function parsePostalAddress(addr: string): {
-  "@type": "PostalAddress";
-  streetAddress?: string;
-  postalCode?: string;
-  addressLocality?: string;
-  addressCountry: "DE";
-} {
-  const trimmed = (addr ?? "").trim();
-  if (!trimmed) return { "@type": "PostalAddress", addressCountry: "DE" };
-  const [streetPart, cityPart] = trimmed.split(",").map((s) => s.trim());
-  if (!cityPart) return { "@type": "PostalAddress", streetAddress: streetPart, addressCountry: "DE" };
-  const plzMatch = cityPart.match(/^(\d{4,5})\s+(.+)$/);
-  return {
-    "@type": "PostalAddress",
-    streetAddress: streetPart || undefined,
-    postalCode: plzMatch?.[1],
-    addressLocality: plzMatch?.[2] ?? cityPart,
-    addressCountry: "DE",
-  };
-}
 
 // One self-contained sentence pulling every important signal into a
 // continuous prose passage. AI citation models extract continuous
@@ -115,7 +90,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
   // Cinema addresses are stored as combined "<street>, <PLZ> <city>"
   // strings -- split them into a proper PostalAddress object so the
   // ScreeningEvent.location passes Google's Rich Results validator.
-  const address = parsePostalAddress(screening.cinema.address);
+  const address = parsePostalAddress(screening.cinema.address, { fallback: "permissive" });
   const cinemaIri = `${APP_URL}/kino/${screening.cinema_slug}#cinema`;
 
   // The Movie entity gets aggregateRating from TMDb when there are

@@ -1,4 +1,4 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -10,39 +10,6 @@ import type { Env } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env }>();
-
-// Parse the bundled "<street>, <PLZ> <city>" string into a structured
-// PostalAddress. Skips streetAddress entirely when the input has no
-// street component (synthesised stubs, media-outlet aggregators) so
-// Google's validator doesn't reject "Frankfurt am Main" in the
-// streetAddress slot.
-function parsePostalAddress(addr: string): {
-  "@type": "PostalAddress";
-  streetAddress?: string;
-  postalCode?: string;
-  addressLocality: string;
-  addressCountry: "DE";
-} {
-  const trimmed = (addr ?? "").trim();
-  const fallback = {
-    "@type": "PostalAddress" as const,
-    addressLocality: "Frankfurt am Main",
-    addressCountry: "DE" as const,
-  };
-  if (!trimmed) return fallback;
-  const m = trimmed.match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
-  if (!m) return fallback;
-  // Sanity check: a real street has a number in it. "Frankfurt am
-  // Main" without a number is the city, not a street -- drop it.
-  if (!/\d/.test(m[1])) return fallback;
-  return {
-    "@type": "PostalAddress",
-    streetAddress: m[1].trim(),
-    postalCode: m[2],
-    addressLocality: m[3].trim(),
-    addressCountry: "DE",
-  };
-}
 
 app.get("/spielort/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -64,7 +31,9 @@ app.get("/spielort/:slug", (c) => {
   const tr = getTranslations(locale);
   const currentPath = `/spielort/${slug}`;
   const venueIri = `${APP_URL}/spielort/${slug}#venue`;
-  const address = parsePostalAddress(venue.address);
+  const address = parsePostalAddress(venue.address, {
+    fallback: { addressLocality: "Frankfurt am Main" },
+  });
   const sameAs: string[] = [];
   if (venue.website_url) sameAs.push(venue.website_url);
   if (venue.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${venue.wikidata}`);
