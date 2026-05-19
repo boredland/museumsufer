@@ -405,7 +405,13 @@ export async function enrichFilmPosters(
       // if neither has been populated AND the entry has an imdb_id, the
       // entry hasn't been queried yet (or was queried before this
       // schema). Re-query is cheap and free-tier-safe.
-      if (entry.rt_critic === undefined && entry.imdb_rating === undefined) {
+      // Re-query when rt_url is missing too — existing positive entries
+      // pre-date the field, and OMDb's tomatoURL is the only RT deep
+      // link we have. Free-tier-safe (~250 calls total).
+      if (
+        (entry.rt_critic === undefined && entry.imdb_rating === undefined) ||
+        (entry.rt_critic !== undefined && entry.rt_url === undefined)
+      ) {
         pendingOmdb.push({ cacheKey, imdb_id: entry.imdb_id });
       }
     }
@@ -418,6 +424,7 @@ export async function enrichFilmPosters(
             const entry = opts.cache[p.cacheKey];
             if (!entry) return;
             if (typeof extras.rt_critic === "number") entry.rt_critic = extras.rt_critic;
+            if (extras.rt_url) entry.rt_url = extras.rt_url;
             if (typeof extras.imdb_rating === "number") entry.imdb_rating = extras.imdb_rating;
             if (typeof extras.imdb_votes === "number") entry.imdb_votes = extras.imdb_votes;
             if (extras.rt_critic !== undefined || extras.imdb_rating !== undefined) omdbMatched++;
@@ -457,6 +464,7 @@ export async function enrichFilmPosters(
     if (typeof entry.vote_count === "number") ev.tmdb_vote_count = entry.vote_count;
     if (entry.imdb_id) ev.imdb_id = entry.imdb_id;
     if (typeof entry.rt_critic === "number") ev.rt_critic = entry.rt_critic;
+    if (entry.rt_url) ev.rt_url = entry.rt_url;
     if (typeof entry.imdb_rating === "number") ev.imdb_rating = entry.imdb_rating;
     if (typeof entry.imdb_votes === "number") ev.imdb_votes = entry.imdb_votes;
     if (!ev.tmdb_id) ev.tmdb_id = entry.id;

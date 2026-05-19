@@ -86,6 +86,7 @@ export interface TmdbCacheEntry {
   vote_count?: number;
   imdb_id?: string;
   rt_critic?: number;
+  rt_url?: string;
   imdb_rating?: number;
   imdb_votes?: number;
 }

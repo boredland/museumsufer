@@ -73,6 +73,8 @@ export interface Screening {
   imdb_id?: string;
   /** Rotten Tomatoes critic % (0–100). From OMDb. */
   rt_critic?: number;
+  /** Canonical rottentomatoes.com URL for the deep-link, when present. */
+  rt_url?: string;
   /** IMDb user rating 0–10 + vote count. From OMDb. */
   imdb_rating?: number;
   imdb_votes?: number;

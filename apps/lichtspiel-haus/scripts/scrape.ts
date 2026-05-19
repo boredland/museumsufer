@@ -76,6 +76,7 @@ async function main(): Promise<void> {
       tmdb_vote_count: ev.tmdb_vote_count,
       imdb_id: ev.imdb_id,
       rt_critic: ev.rt_critic,
+      rt_url: ev.rt_url,
       imdb_rating: ev.imdb_rating,
       imdb_votes: ev.imdb_votes,
       seen_key: ev.tmdb_id
