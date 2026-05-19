@@ -1,4 +1,4 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -10,34 +10,6 @@ import type { Env } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env }>();
-
-/** Split the bundled "<street>, <PLZ> <city>" string into a real
- *  PostalAddress. Returns undefined when the input is empty or
- *  doesn't look like a real street. */
-function parsePostalAddress(addr: string | undefined):
-  | {
-      "@type": "PostalAddress";
-      streetAddress?: string;
-      postalCode?: string;
-      addressLocality: string;
-      addressRegion?: string;
-      addressCountry: "DE";
-    }
-  | undefined {
-  const trimmed = (addr ?? "").trim();
-  if (!trimmed) return undefined;
-  const m = trimmed.match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
-  if (!m) return undefined;
-  if (!/\d/.test(m[1])) return undefined;
-  return {
-    "@type": "PostalAddress",
-    streetAddress: m[1].trim(),
-    postalCode: m[2],
-    addressLocality: m[3].trim(),
-    addressRegion: "Hessen",
-    addressCountry: "DE",
-  };
-}
 
 app.get("/quelle/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -62,7 +34,7 @@ app.get("/quelle/:slug", (c) => {
   const sameAs: string[] = [];
   if (source.url) sameAs.push(source.url);
   if (source.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${source.wikidata}`);
-  const address = parsePostalAddress(source.address);
+  const address = parsePostalAddress(source.address, { region: "Hessen" });
 
   const orgLd: Record<string, unknown> = {
     "@context": "https://schema.org",

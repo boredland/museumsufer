@@ -1,4 +1,4 @@
-import { buildUtm, dateOffset, todayIso } from "@museumsufer/core";
+import { buildUtm, dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -8,38 +8,6 @@ import { renderTheaterMarkdown, wantsMarkdown } from "../markdown";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
-
-/** Split the bundled "<street>, <PLZ> <city>" string into a real
- *  PostalAddress. Returns undefined when no real street component is
- *  present (synthesised stubs with empty `address`, or strings that
- *  only carry the city), so the schema generator can drop the address
- *  entirely instead of emitting an invalid block. */
-function parsePostalAddress(addr: string | undefined):
-  | {
-      "@type": "PostalAddress";
-      streetAddress?: string;
-      postalCode?: string;
-      addressLocality: string;
-      addressRegion?: string;
-      addressCountry: "DE";
-    }
-  | undefined {
-  const trimmed = (addr ?? "").trim();
-  if (!trimmed) return undefined;
-  const m = trimmed.match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
-  if (!m) return undefined;
-  // A real street has a number in it. Bare "Frankfurt am Main"
-  // would otherwise pass through and end up in the wrong slot.
-  if (!/\d/.test(m[1])) return undefined;
-  return {
-    "@type": "PostalAddress",
-    streetAddress: m[1].trim(),
-    postalCode: m[2],
-    addressLocality: m[3].trim(),
-    addressRegion: "Hessen",
-    addressCountry: "DE",
-  };
-}
 
 const utm = buildUtm("frankfurt.ins.theater");
 
@@ -129,7 +97,7 @@ app.get("/theater/:slug", async (c) => {
       name: config.name,
       url: `${APP_URL}/theater/${slug}`,
       ...(config.description && { description: config.description }),
-      address: parsePostalAddress(config.address),
+      address: parsePostalAddress(config.address, { region: "Hessen" }),
       geo:
         config.lat && config.lon
           ? { "@type": "GeoCoordinates", latitude: config.lat, longitude: config.lon }
