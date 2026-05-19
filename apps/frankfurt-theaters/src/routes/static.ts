@@ -105,8 +105,6 @@ app.get("/sitemap.xml", (c) => {
       (t) => `  <url>
     <loc>${APP_URL}/theater/${t.slug}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
   </url>`,
     )
     .join("\n");
@@ -116,18 +114,12 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${APP_URL}/</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
   </url>
   <url>
     <loc>${APP_URL}/api/docs</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
   </url>
   <url>
     <loc>${APP_URL}/impressum</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
 ${theaterUrls}
 </urlset>`;

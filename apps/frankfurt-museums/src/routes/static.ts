@@ -127,8 +127,6 @@ app.get("/sitemap.xml", (c) => {
       (slug) => `  <url>
     <loc>https://museumsufer.app/museum/${slug}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/museum/${slug}"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/museum/${slug}?lang=en"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/museum/${slug}?lang=fr"/>
@@ -142,8 +140,6 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>https://museumsufer.app/</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
@@ -152,7 +148,6 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>https://museumsufer.app/?lang=en</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
     <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
@@ -161,7 +156,6 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>https://museumsufer.app/?lang=fr</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>daily</changefreq>
     <xhtml:link rel="alternate" hreflang="de" href="https://museumsufer.app/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://museumsufer.app/?lang=en"/>
     <xhtml:link rel="alternate" hreflang="fr" href="https://museumsufer.app/?lang=fr"/>
@@ -169,8 +163,6 @@ app.get("/sitemap.xml", (c) => {
   </url>
   <url>
     <loc>https://museumsufer.app/impressum</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
   </url>
 ${museumUrls}
 </urlset>`;
