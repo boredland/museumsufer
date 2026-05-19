@@ -227,8 +227,8 @@ const de: Translations = {
       a: "Nein — die Karten-Schaltfläche an jeder Vorstellung führt direkt auf die Buchungsseite des Kinos. Diese Seite verkauft selbst keine Tickets und nimmt keine Provision.",
     },
     {
-      q: "Was bedeuten OmU, OmeU, DF, OV?",
-      a: "OmU = Originalfassung mit deutschen Untertiteln. OmeU = Originalfassung mit englischen Untertiteln. DF = deutsche Fassung (synchronisiert). OV = Originalfassung ohne Untertitel.",
+      q: "Was bedeuten OmU, OmeU, DF, OV, DCP, 35mm?",
+      a: "Sprachfassung: OmU = Originalfassung mit deutschen Untertiteln, OmeU = Originalfassung mit englischen Untertiteln, DF = deutsche Fassung (synchronisiert), OV = Originalfassung ohne Untertitel, stumm = Stummfilm (oft mit Live-Begleitung). Vorführformat: DCP = Digital Cinema Package, der digitale Standard heutiger Kinos; 35mm / 16mm / 70mm = analoge Filmkopie auf physischem Filmmaterial.",
     },
     {
       q: "Was passiert mit Vorstellungen, die schon angefangen haben?",
@@ -353,8 +353,8 @@ const en: Translations = {
       a: "No — the Tickets button on each screening links directly to the cinema's own booking page. This site doesn't sell tickets and takes no commission.",
     },
     {
-      q: "What do OmU, OmeU, DF, OV mean?",
-      a: "OmU = original audio with German subtitles. OmeU = original with English subtitles. DF = German-dubbed version. OV = original version, no subtitles.",
+      q: "What do OmU, OmeU, DF, OV, DCP, 35mm mean?",
+      a: "Language version: OmU = original audio with German subtitles, OmeU = original with English subtitles, DF = German-dubbed version, OV = original version with no subtitles, stumm = silent film (often with live accompaniment). Projection format: DCP = Digital Cinema Package, the digital standard in modern cinemas; 35mm / 16mm / 70mm = analogue film prints on physical stock.",
     },
     {
       q: "What happens to screenings that have already started?",
