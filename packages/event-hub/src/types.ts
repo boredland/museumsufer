@@ -61,6 +61,14 @@ export interface CanonicalEvent {
   tmdb_vote_average?: number;
   /** TMDb vote count — used to hide low-confidence scores. */
   tmdb_vote_count?: number;
+  /** IMDb id (tt…). Useful as a stable third-party pivot + for the
+   *  "open on IMDb" deep-link some front-ends offer. */
+  imdb_id?: string;
+  /** Rotten Tomatoes critic % (0–100). From OMDb. */
+  rt_critic?: number;
+  /** IMDb user rating 0–10 + vote count. From OMDb. */
+  imdb_rating?: number;
+  imdb_votes?: number;
   labels: Label[];
   first_seen_at: string;
   last_seen_at: string;

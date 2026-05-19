@@ -382,6 +382,59 @@ function RatingMeter({ avg, count }: { avg: number | undefined; count: number | 
   );
 }
 
+/** Compact RT critic + IMDb rating badges. Sit immediately after the
+ *  marquee meter — same restraint as the OmU / DCP badges, brass-on-
+ *  auditorium with a 1px brass-tinted border. Each links out to the
+ *  canonical page on the respective service; tooltips carry the
+ *  precise number + vote count. */
+function ExternalScores({ s }: { s: DayScreening }) {
+  const rt = typeof s.rt_critic === "number" ? s.rt_critic : null;
+  const imdb =
+    typeof s.imdb_rating === "number" && s.imdb_rating > 0 ? { rating: s.imdb_rating, votes: s.imdb_votes ?? 0 } : null;
+  if (!rt && !imdb) return null;
+  return (
+    <span class="ext-scores">
+      {rt !== null ? (
+        s.imdb_id ? (
+          <a
+            class="ext-score ext-score--rt"
+            href={`https://www.rottentomatoes.com/`}
+            target="_blank"
+            rel="noopener"
+            title={`Rotten Tomatoes critic score: ${rt}%`}
+          >
+            RT {rt}
+          </a>
+        ) : (
+          <span class="ext-score ext-score--rt" title={`Rotten Tomatoes critic score: ${rt}%`}>
+            RT {rt}
+          </span>
+        )
+      ) : null}
+      {imdb !== null ? (
+        s.imdb_id ? (
+          <a
+            class="ext-score ext-score--imdb"
+            href={`https://www.imdb.com/title/${s.imdb_id}/`}
+            target="_blank"
+            rel="noopener"
+            title={`IMDb · ${imdb.rating.toFixed(1)} / 10 (${imdb.votes.toLocaleString()} votes)`}
+          >
+            IMDb {imdb.rating.toFixed(1)}
+          </a>
+        ) : (
+          <span
+            class="ext-score ext-score--imdb"
+            title={`IMDb · ${imdb.rating.toFixed(1)} / 10 (${imdb.votes.toLocaleString()} votes)`}
+          >
+            IMDb {imdb.rating.toFixed(1)}
+          </span>
+        )
+      ) : null}
+    </span>
+  );
+}
+
 export function PosterCard({ title, imageUrl }: { title: string; imageUrl?: string | null }) {
   const proxied = imageUrl ? imageProxyUrl(imageUrl) : undefined;
   if (proxied) {
@@ -491,6 +544,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
           {time}
         </time>
         <RatingMeter avg={s.tmdb_vote_average} count={s.tmdb_vote_count} />
+        <ExternalScores s={s} />
         <h3 class="prog-entry__work">
           {titleHref ? (
             <a href={titleHref} target="_blank" rel="noopener">

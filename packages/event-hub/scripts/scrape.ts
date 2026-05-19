@@ -37,6 +37,7 @@ async function main(): Promise<void> {
     tmdbApiKey: process.env.TMDB_API_KEY,
     tmdbCache,
     deeplApiKeys: process.env.DEEPL_API_KEYS,
+    omdbApiKey: process.env.OMDB_API_KEY,
   });
   await writeFile(resolve(root, "data/events.ts"), generateModule(next), "utf8");
   log(`wrote data/events.ts — ${next.events.length} events`);
@@ -83,6 +84,10 @@ export interface TmdbCacheEntry {
   genre_ids?: number[];
   vote_average?: number;
   vote_count?: number;
+  imdb_id?: string;
+  rt_critic?: number;
+  imdb_rating?: number;
+  imdb_votes?: number;
 }
 
 export const TMDB_POSTER_CACHE: Record<string, TmdbCacheEntry | null> = {

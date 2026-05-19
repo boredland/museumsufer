@@ -74,6 +74,10 @@ async function main(): Promise<void> {
       tmdb_genre_ids: ev.tmdb_genre_ids,
       tmdb_vote_average: ev.tmdb_vote_average,
       tmdb_vote_count: ev.tmdb_vote_count,
+      imdb_id: ev.imdb_id,
+      rt_critic: ev.rt_critic,
+      imdb_rating: ev.imdb_rating,
+      imdb_votes: ev.imdb_votes,
       seen_key: ev.tmdb_id
         ? `tmdb:${ev.tmdb_id}`
         : `title:${fnv1aInt(ev.title.toLowerCase().replace(/[^a-z0-9]+/g, ""))}`,

@@ -25,6 +25,10 @@ export interface RunOptions {
    *  DE→EN as a fallback so apps still have bilingual descriptions for
    *  older European arthouse titles TMDb hasn't translated. */
   deeplApiKeys?: string;
+  /** Optional OMDb API key (free tier). When set, the runner does a
+   *  follow-up OMDb lookup for every cached TMDb match that has an
+   *  imdb_id, attaching Rotten Tomatoes critic % + IMDb rating. */
+  omdbApiKey?: string;
 }
 
 const DEFAULT_CONCURRENCY = 8;
@@ -103,6 +107,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
       apiKey: opts.tmdbApiKey,
       cache: opts.tmdbCache,
       deeplApiKeys: opts.deeplApiKeys,
+      omdbApiKey: opts.omdbApiKey,
       log,
     });
   }
