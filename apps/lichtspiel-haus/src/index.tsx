@@ -1,6 +1,6 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
 import { type Context, Hono } from "hono";
-import { getDatesWithScreenings, getScreeningsForDate } from "./db";
+import { getDatesWithScreenings, getScreeningsForDate, getScreeningsInRange } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
 import { detectLocale, getTranslations } from "./i18n";
@@ -63,13 +63,36 @@ app.get("/healthz", (c) => c.json({ ok: true }));
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 
+/** Clamp the optional `?range=` to the allowed slate (7 or 14). Any other
+ *  value (negative, absurd, non-numeric) yields null so the caller falls
+ *  back to single-day rendering. */
+function parseRange(raw: string | undefined): number | null {
+  if (!raw) return null;
+  const n = parseInt(raw, 10);
+  return n === 7 || n === 14 ? n : null;
+}
+
+/** Add `days - 1` to the start date so a 7-day range from 2026-05-19 ends
+ *  on 2026-05-25 inclusive. Core's dateOffset is today-anchored, so we
+ *  roll our own date arithmetic. */
+function endOfRange(start: string, days: number): string {
+  const d = new Date(`${start}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days - 1);
+  return d.toISOString().slice(0, 10);
+}
+
 function renderHome(c: Context<AppEnv>, date: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const today = todayIso();
   const cinema = c.req.query("kino") || c.req.query("cinema") || null;
   const series = c.req.query("reihe") || c.req.query("series") || null;
+  const range = parseRange(c.req.query("range") ?? undefined);
   const city = c.get("city") ?? "frankfurt";
-  const screenings = getScreeningsForDate(date, { city, cinema, series });
+  // Range anchors on the day in the URL so /tag/2026-06-01?range=7 shows
+  // that week, not always "today + 7"; default home stays today-anchored.
+  const screenings = range
+    ? getScreeningsInRange(date, endOfRange(date, range), { city, cinema, series })
+    : getScreeningsForDate(date, { city, cinema, series });
   const dateStrip = getDatesWithScreenings(today, dateOffset(60), { city, cinema, series });
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderDayMarkdown(date, screenings), {
@@ -90,6 +113,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
       city,
       cinema,
       series,
+      range,
       locale,
       tr,
       turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
@@ -112,11 +136,14 @@ app.get("/partial/content", (c) => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const cinema = c.req.query("kino") || c.req.query("cinema") || null;
   const series = c.req.query("reihe") || c.req.query("series") || null;
+  const range = parseRange(c.req.query("range") ?? undefined);
   const city = c.get("city") ?? "frankfurt";
-  const screenings = getScreeningsForDate(date, { city, cinema, series });
+  const screenings = range
+    ? getScreeningsInRange(date, endOfRange(date, range), { city, cinema, series })
+    : getScreeningsForDate(date, { city, cinema, series });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, screenings, tr, locale), {
+  return c.html(renderProgrammePartial(date, screenings, tr, locale, range), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

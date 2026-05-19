@@ -57,6 +57,9 @@ interface PageProps {
   city: string;
   cinema?: string | null;
   series?: string | null;
+  /** When set (7 or 14), render a multi-day grouped view starting on
+   *  `date` instead of the single-day programme. */
+  range?: number | null;
   locale: Locale;
   tr: Translations;
   turnstileSiteKey?: string;
@@ -1276,17 +1279,59 @@ export function ProgrammePartial({
   screenings,
   tr,
   locale = DEFAULT_LOCALE,
+  range = null,
 }: {
   date: string;
   screenings: DayScreening[];
   tr: Translations;
   locale?: Locale;
+  range?: number | null;
 }) {
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
   const dl = dateLocale(locale);
   const weekdayLong = dateFormatter(dl, { weekday: "long", timeZone: "UTC" }).format(dateObj);
   const monthLong = dateFormatter(dl, { month: "long", timeZone: "UTC" }).format(dateObj);
+  // Range mode: skip past-filter (multi-day list shouldn't lose today's
+  // earlier screenings — they're still future from tomorrow onward) and
+  // render via the shared date-grouped helper.
+  if (range) {
+    const endIso = (() => {
+      const d = new Date(`${date}T00:00:00Z`);
+      d.setUTCDate(d.getUTCDate() + range - 1);
+      return d.toISOString().slice(0, 10);
+    })();
+    const fromLabel = dateFormatter(dl, { day: "numeric", month: "short", timeZone: "UTC" }).format(dateObj);
+    const toLabel = dateFormatter(dl, { day: "numeric", month: "short", timeZone: "UTC" }).format(
+      new Date(`${endIso}T12:00:00Z`),
+    );
+    return (
+      <>
+        <header class="programme__header">
+          <p class="programme__line" />
+          <p class="programme__weekday">{tr.weekOverview}</p>
+          <h2 class="programme__date">
+            <span class="programme__range">
+              {fromLabel} – {toLabel}
+            </span>
+          </h2>
+        </header>
+        {screenings.length === 0 ? (
+          <div class="empty empty--blackout">
+            <p class="empty__mark" aria-hidden="true">
+              ‖
+            </p>
+            <p class="empty__direction">Saal dunkel</p>
+            <p class="empty__line">{tr.emptyTitle}</p>
+            <p class="empty__hint">{tr.emptyHint}</p>
+          </div>
+        ) : (
+          <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} />
+        )}
+        <SiblingStrap tr={tr} />
+      </>
+    );
+  }
   const visible = filterPastForToday(date, screenings);
   const hidden = screenings.length - visible.length;
   return (
@@ -1365,16 +1410,57 @@ export function renderProgrammePartial(
   screenings: DayScreening[],
   tr: Translations = DEFAULT_TR,
   locale: Locale = DEFAULT_LOCALE,
+  range: number | null = null,
 ): HtmlEscapedString {
   return (
-    <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} />
+    <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} range={range} />
   ) as unknown as HtmlEscapedString;
 }
 
+/** Day / week toggle near the date strip. Mirrors frankfurt-museums'
+ *  range-pill row, lichtspiel.haus-styled. URL pattern:
+ *  /tag/{date}?range=7 — HTMX swaps the programme-content. */
+function RangeToggle({
+  date,
+  range,
+  locale,
+  tr,
+}: {
+  date: string;
+  range: number | null;
+  locale: Locale;
+  tr: Translations;
+}) {
+  const lang = langSuffix(locale, "?");
+  const langAmp = langSuffix(locale, "&");
+  return (
+    <div class="range-row">
+      <a
+        class={`range-pill${range == null ? " range-pill--active" : ""}`}
+        href={`/tag/${date}${lang}`}
+        hx-get={`/partial/content?date=${date}`}
+        hx-target="#programme-content"
+        hx-push-url={`/tag/${date}${lang}`}
+      >
+        {tr.todayProgrammeTitle}
+      </a>
+      <a
+        class={`range-pill${range === 7 ? " range-pill--active" : ""}`}
+        href={`/tag/${date}?range=7${langAmp}`}
+        hx-get={`/partial/content?date=${date}&range=7`}
+        hx-target="#programme-content"
+        hx-push-url={`/tag/${date}?range=7${langAmp}`}
+      >
+        {tr.weekOverview}
+      </a>
+    </div>
+  );
+}
+
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, screenings, dateStrip, locale, tr, turnstileSiteKey } = props;
+  const { date, today, screenings, dateStrip, locale, tr, turnstileSiteKey, range = null } = props;
   const niceDate = niceDateFor(date, locale);
-  const currentPath = `/tag/${date}`;
+  const currentPath = range ? `/tag/${date}?range=${range}` : `/tag/${date}`;
   return (
     <>
       {raw("<!DOCTYPE html>")}
@@ -1393,12 +1479,13 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <SearchBar tr={tr} />
-          <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
+          <DateStrip strip={dateStrip} active={range ? "" : date} today={today} tr={tr} locale={locale} />
+          <RangeToggle date={date} range={range} locale={locale} tr={tr} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} />
+              <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} range={range} />
             </div>
             <SeenBanner tr={tr} />
           </main>
