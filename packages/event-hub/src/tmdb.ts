@@ -110,6 +110,12 @@ function normaliseTitle(title: string): string {
   if (quoted) t = quoted[1];
   // Trailing year duplicating the structured field: " (2026)", ", 2026"
   t = t.replace(/\s*[,(]\s*(19|20)\d{2}\s*\)?\s*$/g, "");
+  // Trailing single-word parenthetical genre/category label the cinema
+  // appended for the audience: "Die reichste Frau der Welt ( Komödie )",
+  // "Foo (Drama)", "Bar ( Thriller)". Bounded length + letters-only
+  // keeps longer parentheticals (original-language titles, "(Director's
+  // Cut)") in place.
+  t = t.replace(/\s*\(\s*[A-Za-zÄÖÜäöüß]{3,18}\s*\)\s*$/g, "");
   // Trailing asterisks ("Casablanca *") flagging a special screening
   t = t.replace(/\s*\*+\s*$/g, "");
   t = t.replace(/\s+/g, " ").trim();

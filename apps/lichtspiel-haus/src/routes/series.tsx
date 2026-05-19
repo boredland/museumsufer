@@ -2,7 +2,7 @@ import { todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getAllSeries, getSeriesScreenings } from "../db";
-import { Footer, Head, Masthead, Screening } from "../frontend";
+import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import type { Env } from "../types";
 import { APP_URL } from "./static";
@@ -62,11 +62,7 @@ app.get("/reihe/:slug", (c) => {
               </p>
             </section>
 
-            <ol class="screenings">
-              {screenings.map((s, i) => (
-                <Screening key={s.id} s={s} opts={{ index: i, locale }} tr={tr} />
-              ))}
-            </ol>
+            <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} />
           </main>
           <Footer tr={tr} locale={locale} />
         </body>

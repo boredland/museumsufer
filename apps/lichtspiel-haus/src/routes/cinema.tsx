@@ -2,7 +2,7 @@ import { dateOffset, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getCinemaBySlug, getScreeningsInRange } from "../db";
-import { Footer, Head, Masthead, Screening } from "../frontend";
+import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import { renderCinemaMarkdown, wantsMarkdown } from "../markdown";
 import type { Env } from "../types";
@@ -113,11 +113,7 @@ app.get("/kino/:slug", (c) => {
                 <p>{tr.emptyCinema}</p>
               </div>
             ) : (
-              <ol class="screenings">
-                {screenings.map((s, i) => (
-                  <Screening key={s.id} s={s} opts={{ index: i, hideCinema: true, locale }} tr={tr} />
-                ))}
-              </ol>
+              <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} hideCinema />
             )}
           </main>
           <Footer tr={tr} locale={locale} />
