@@ -588,6 +588,52 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
 .day-header:first-child { margin-top: 0.25rem; }
 .day-header time { font-variant-numeric: oldstyle-nums; }
 
+/* Day / week toggle — sits between date strip and the digest cue.
+ * Two mono pills, brass underline on the active one. */
+.range-row {
+  position: relative;
+  z-index: 3;
+  max-width: var(--maxw);
+  margin: 0.75rem auto 0;
+  padding: 0 var(--gut);
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.range-pill {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--celluloid-soft);
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.95rem;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 220ms, border-color 220ms, background 220ms;
+}
+.range-pill:hover { color: var(--celluloid); border-color: var(--celluloid-quiet); }
+.range-pill--active {
+  color: var(--auditorium);
+  background: var(--brass);
+  border-color: var(--brass);
+}
+.range-pill--active:hover {
+  color: var(--auditorium);
+  background: var(--brass-bright);
+  border-color: var(--brass-bright);
+}
+
+/* Week-view header line — single-line range label in place of the big
+ * day-of-month numeral the day view uses. */
+.programme__range {
+  font-family: var(--display);
+  font-variation-settings: "opsz" 144, "SOFT" 50, "WONK" 1;
+  font-style: italic;
+  color: var(--brass);
+}
+
 .prog-entry {
   display: grid;
   grid-template-columns: clamp(7rem, 14vw, 11rem) minmax(0, 1fr);
