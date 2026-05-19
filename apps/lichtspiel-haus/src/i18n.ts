@@ -129,6 +129,8 @@ export interface Translations {
   // Ask AI
   askAiLabel: string;
   askAiPrompt: (date: string) => string;
+  askAiPromptFilm: (title: string, cinema: string, date: string) => string;
+  askAiPromptCinema: (cinema: string) => string;
   askAiAria: string;
   // FAQ
   faqKicker: string;
@@ -261,6 +263,10 @@ const de: Translations = {
   siblingTheaterLabel: "ein Theaterstück",
   siblingMuseumLabel: "ein Museumsbesuch",
   siblingKonzertLabel: "ein Konzert",
+  askAiPromptFilm: (title, cinema, date) =>
+    `Erzähl mir mehr über »${title}«, gezeigt im ${cinema} am ${date}. Worum geht der Film, wie wurde er aufgenommen, und was sollte ich vor dem Kinobesuch wissen? Quelle: https://frankfurt.lichtspiel.haus`,
+  askAiPromptCinema: (cinema) =>
+    `Was läuft in den nächsten Wochen im ${cinema} in Frankfurt? Bitte gruppiere nach Filmreihen oder besonderen Vorstellungen. Quelle: https://frankfurt.lichtspiel.haus`,
   askAiLabel: "Frag eine KI",
   askAiPrompt: (date) =>
     `Welche Filme laufen am ${date} in Frankfurt und Umgebung? Quelle: https://frankfurt.lichtspiel.haus`,
@@ -414,6 +420,10 @@ const en: Translations = {
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",
   siblingKonzertLabel: "a concert",
+  askAiPromptFilm: (title, cinema, date) =>
+    `Tell me about "${title}", screening at ${cinema} on ${date}. What's the film about, how was it received, and what should I know before going? Source: https://frankfurt.lichtspiel.haus`,
+  askAiPromptCinema: (cinema) =>
+    `What's coming up at ${cinema} in Frankfurt in the next few weeks? Please group by film series or notable screenings. Source: https://frankfurt.lichtspiel.haus`,
   askAiLabel: "Ask an AI",
   askAiPrompt: (date) =>
     `What's playing in Frankfurt and the wider region on ${date}? Source: https://frankfurt.lichtspiel.haus`,

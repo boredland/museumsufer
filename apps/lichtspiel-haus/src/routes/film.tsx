@@ -1,4 +1,5 @@
 import { buildUtm, formatLocalisedDateLong } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getScreeningById } from "../db";
@@ -300,6 +301,11 @@ app.get("/film/:id{[0-9]+}", (c) => {
                   {synopsisFromTmdb ? <p class="film-detail__attribution">{tr.synopsisAttribution}</p> : null}
                 </div>
               ) : null}
+              <SharedAskAi
+                label={tr.askAiLabel}
+                aria={tr.askAiAria}
+                prompt={tr.askAiPromptFilm(displayTitle, screening.cinema.name, dateLabel)}
+              />
             </article>
           </main>
           <Footer tr={tr} locale={locale} />
