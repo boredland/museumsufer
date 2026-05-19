@@ -300,21 +300,20 @@ function capitalize(s: string): string {
 function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
   const offset = berlinOffsetFor(e.date);
   const startTime = e.time ?? "00:00";
+  const venueIri = `${APP_URL}/spielort/${e.venue.slug}#venue`;
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "MusicEvent",
+    "@id": `${APP_URL}/#event/${e.id}`,
     name: e.title,
     startDate: `${e.date}T${startTime}:00${offset}`,
-    location: {
-      "@type": "MusicVenue",
-      name: e.venue.name,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: e.venue.address,
-        addressLocality: capitalize(e.venue.city),
-        addressCountry: "DE",
-      },
-    },
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    // Cross-link to the venue entity (defined on /spielort/:slug) so
+    // Google can resolve the @id and reuse the full Place/Address
+    // block from there instead of treating each event as a detached
+    // node in the graph.
+    location: { "@id": venueIri },
     url: `${APP_URL}/tag/${e.date}#event-${e.id}`,
   };
   const description = e.description ?? e.subtitle ?? e.performers;
@@ -322,13 +321,19 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
   if (e.end_time && e.time) jsonLd.endDate = `${e.date}T${e.end_time}:00${offset}`;
   if (e.performers) jsonLd.performer = [{ "@type": "PerformingGroup", name: e.performers }];
   if (e.ticket_url) {
+    // Only emit a complete Offer -- priceCurrency without price is
+    // invalid per schema.org. availability is required for Google's
+    // Event rich-result eligibility.
     const offer: Record<string, unknown> = {
       "@type": "Offer",
       url: e.ticket_url,
-      priceCurrency: "EUR",
+      availability: "https://schema.org/InStock",
       validFrom: todayIso(),
     };
-    if (e.price_min != null) offer.price = String(e.price_min);
+    if (e.price_min != null) {
+      offer.price = String(e.price_min);
+      offer.priceCurrency = "EUR";
+    }
     jsonLd.offers = offer;
   }
   if (e.image_url) {
@@ -1065,19 +1070,40 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   const { date, today, events, dateStrip, genre, locale, tr, turnstileSiteKey } = props;
   const niceDate = niceDateFor(date, locale);
   const currentPath = genre ? `/tag/${date}?genre=${genre}` : `/tag/${date}`;
+  // Title carries the geo + intent keywords for "Konzert Frankfurt heute"
+  // queries. Non-today views append the date for disambiguation.
+  const isToday = date === today;
+  const title = isToday ? tr.homeTitle : `${tr.homeTitle} — ${niceDate}`;
+  // Self-canonical: today's view collapses /tag/<today> → / so the
+  // ephemeral date URL doesn't compete with the home for link equity.
+  const canonical = isToday ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
+    url: APP_URL,
+    name: "konzert.haus",
+    inLanguage: ["de", "en", "fr"],
+    publisher: { "@type": "Organization", name: "konzert.haus" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${APP_URL}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
   return (
     <>
       {raw("<!DOCTYPE html>")}
       <html lang={locale}>
         <head>
           <Head
-            title={`konzert.haus · ${niceDate}`}
+            title={title}
             description={tr.homeDescription}
-            canonical={`${APP_URL}/tag/${date}${langSuffix(locale)}`}
+            canonical={canonical}
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
           />
         </head>
         <body>
