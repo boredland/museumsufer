@@ -46,8 +46,8 @@ app.get("/impressum", (c) => {
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
-            <p>
-              <a href="/">← Zum Programm</a>
+            <p class="back-link">
+              <a href="/">← {tr.backToProgramme}</a>
             </p>
             <h2>Impressum</h2>
             {SECTIONS.map((s) => (

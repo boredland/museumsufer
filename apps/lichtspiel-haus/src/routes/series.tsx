@@ -39,6 +39,9 @@ app.get("/reihe/:slug", (c) => {
         <body>
           <Masthead tr={tr} locale={locale} currentPath={currentPath} />
           <main class="programme">
+            <p class="back-link">
+              <a href="/reihe">← {tr.backToSeriesIndex}</a>
+            </p>
             <section class="venue-hero">
               <div class="venue-hero__corner" aria-hidden="true">
                 <svg viewBox="0 0 80 80" width="80" height="80" role="presentation">
@@ -99,6 +102,9 @@ app.get("/reihe", (c) => {
         <body>
           <Masthead tr={tr} locale={locale} currentPath="/reihe" />
           <main class="programme">
+            <p class="back-link">
+              <a href="/">← {tr.backToProgramme}</a>
+            </p>
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.seriesKicker}</p>
               <h2 class="venue-hero__name">{tr.seriesAll}</h2>

@@ -93,6 +93,12 @@ export interface Translations {
   cinemaDescription: (cinema: string, count: number) => string;
   seriesDescription: (series: string, count: number) => string;
   filmKicker: string;
+  /** "← Zum Programm" — top-of-page link on every detail view back to
+   *  the day programme. /film/:id deep-links to the screening's row. */
+  backToProgramme: string;
+  /** "← Alle Reihen" — back link from a single film series page to the
+   *  series index. */
+  backToSeriesIndex: string;
   // a11y
   langSwitchAria: string;
   // Cross-app strap
@@ -195,6 +201,8 @@ const de: Translations = {
   seriesDescription: (series, count) =>
     `Filmreihe »${series}« — ${count} Vorstellung${count === 1 ? "" : "en"} in den nächsten 60 Tagen.`,
   filmKicker: "Vorstellung",
+  backToProgramme: "Zum Programm",
+  backToSeriesIndex: "Alle Filmreihen",
   langSwitchAria: "Sprache",
   siblingTemplate: "Nichts dabei? Vielleicht stattdessen {first}, {second} oder {third}?",
   siblingTheaterLabel: "ein Theaterstück",
@@ -319,6 +327,8 @@ const en: Translations = {
   seriesDescription: (series, count) =>
     `Film series "${series}" — ${count} ${count === 1 ? "screening" : "screenings"} in the next 60 days.`,
   filmKicker: "Screening",
+  backToProgramme: "Back to programme",
+  backToSeriesIndex: "All film series",
   langSwitchAria: "Language",
   siblingTemplate: "Nothing for you? How about {first}, {second}, or {third} instead?",
   siblingTheaterLabel: "a play",
