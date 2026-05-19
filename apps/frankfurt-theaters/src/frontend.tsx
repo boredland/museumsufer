@@ -1310,16 +1310,36 @@ export function ClientScript() {
 export function renderPage(props: PageProps): HtmlEscapedString {
   const { date, today, performances, dateStrip, turnstileSiteKey } = props;
   const niceDate = fullGerman(date);
+  // Title carries the geo + intent keywords for "Theater Frankfurt
+  // heute" queries. Non-today views suffix the date.
+  const isToday = date === today;
+  const title = isToday
+    ? "Frankfurt Theater — Vorstellungen heute in Frankfurt am Main"
+    : `Frankfurt Theater · ${niceDate}`;
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${APP_URL}/#website`,
+    url: APP_URL,
+    name: "Frankfurt Theater",
+    inLanguage: "de",
+    publisher: { "@type": "Organization", name: "Frankfurt Theater" },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${APP_URL}/?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
   return (
     <>
       {raw("<!DOCTYPE html>")}
       <html lang="de">
         <head>
           <Head
-            title={`Frankfurt Theater · ${niceDate}`}
+            title={title}
             description={`Vorstellungen und Karten der Frankfurter Bühnen am ${niceDate} — kuratiert nach Tag.`}
             canonical={`${APP_URL}/`}
-            jsonLd={buildHomeJsonLd(date, performances)}
+            jsonLd={[websiteLd, ...buildHomeJsonLd(date, performances)]}
             turnstileSiteKey={turnstileSiteKey}
           />
         </head>
