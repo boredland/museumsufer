@@ -27,7 +27,10 @@ const MANIFEST = buildManifest({
 
 const ROBOTS_TXT = buildRobotsTxt({
   siteUrl: APP_URL,
-  disallow: ["/api/day", "/api/events"],
+  // /partial/ serves HTMX fragments -- full-page HTML the schema
+  // audit flagged as crawl-trappable. Disallow so Googlebot doesn't
+  // index the fragment URLs as duplicate content.
+  disallow: ["/api/day", "/api/events", "/partial/"],
 });
 const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
 

@@ -1,4 +1,5 @@
 import { dateOffset, todayIso } from "@museumsufer/core";
+import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange, getSourceBySlug } from "../db";
@@ -9,6 +10,34 @@ import type { Env } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env }>();
+
+/** Split the bundled "<street>, <PLZ> <city>" string into a real
+ *  PostalAddress. Returns undefined when the input is empty or
+ *  doesn't look like a real street. */
+function parsePostalAddress(addr: string | undefined):
+  | {
+      "@type": "PostalAddress";
+      streetAddress?: string;
+      postalCode?: string;
+      addressLocality: string;
+      addressRegion?: string;
+      addressCountry: "DE";
+    }
+  | undefined {
+  const trimmed = (addr ?? "").trim();
+  if (!trimmed) return undefined;
+  const m = trimmed.match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
+  if (!m) return undefined;
+  if (!/\d/.test(m[1])) return undefined;
+  return {
+    "@type": "PostalAddress",
+    streetAddress: m[1].trim(),
+    postalCode: m[2],
+    addressLocality: m[3].trim(),
+    addressRegion: "Hessen",
+    addressCountry: "DE",
+  };
+}
 
 app.get("/quelle/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -29,20 +58,56 @@ app.get("/quelle/:slug", (c) => {
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const currentPath = `/quelle/${slug}`;
-  const jsonLd: Record<string, unknown> = {
+  const sourceIri = `${APP_URL}/quelle/${slug}#source`;
+  const sameAs: string[] = [];
+  if (source.url) sameAs.push(source.url);
+  if (source.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${source.wikidata}`);
+  const address = parsePostalAddress(source.address);
+
+  const orgLd: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${APP_URL}/quelle/${slug}#source`,
+    "@type": "EducationalOrganization",
+    "@id": sourceIri,
     name: source.name,
     url: source.url,
-    sameAs: source.url,
-  };
-  if (source.lat != null && source.lon != null) {
-    jsonLd.location = {
+    ...(source.description && { description: source.description }),
+    ...(sameAs.length > 0 && { sameAs }),
+    ...(source.telephone && { telephone: source.telephone }),
+    location: {
       "@type": "Place",
-      geo: { "@type": "GeoCoordinates", latitude: source.lat, longitude: source.lon },
-    };
-  }
+      name: source.name,
+      ...(address && { address }),
+      ...(source.lat != null &&
+        source.lon != null && {
+          geo: { "@type": "GeoCoordinates", latitude: source.lat, longitude: source.lon },
+          hasMap: `https://www.google.com/maps?q=${source.lat},${source.lon}`,
+        }),
+      containedInPlace: {
+        "@type": "City",
+        name: "Frankfurt am Main",
+        sameAs: "https://www.wikidata.org/wiki/Q1794",
+      },
+    },
+    // Surface upcoming events so the page is rich-result eligible
+    // even before the visitor scrolls.
+    event: events.slice(0, 20).map((e) => ({
+      "@type": "Event",
+      "@id": `${APP_URL}/#event/${e.id}`,
+      name: e.title,
+      startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
+      organizer: { "@id": sourceIri },
+    })),
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "lehr.salon", item: APP_URL },
+      { "@type": "ListItem", position: 2, name: tr.sourceKicker, item: `${APP_URL}/quelle` },
+      { "@type": "ListItem", position: 3, name: source.name },
+    ],
+  };
+  const jsonLd = [orgLd, breadcrumbLd];
 
   return c.html(
     <>
@@ -50,9 +115,9 @@ app.get("/quelle/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${source.name} — lehr.salon`}
-            description={tr.sourceDescription(source.name, events.length)}
-            canonical={`${APP_URL}/quelle/${slug}`}
+            title={`${source.name} — Vorträge & Lesungen in Frankfurt am Main · lehr.salon`}
+            description={source.description ?? tr.sourceDescription(source.name, events.length)}
+            canonical={`${APP_URL}/quelle/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={jsonLd}
@@ -79,6 +144,7 @@ app.get("/quelle/:slug", (c) => {
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.sourceKicker}</p>
               <h2 class="venue-hero__name">{source.name}</h2>
+              {source.description ? <p class="venue-hero__lead">{source.description}</p> : null}
               <p class="venue-hero__meta">
                 <a href={source.url} target="_blank" rel="noopener">
                   {tr.websiteLink} ↗
@@ -87,6 +153,12 @@ app.get("/quelle/:slug", (c) => {
                 <a href={`/api/sources/${source.slug}`}>{tr.jsonLink}</a>
               </p>
             </section>
+
+            <SharedAskAi
+              label="Frag eine KI"
+              aria={`Frag eine KI nach dem Programm der ${source.name}`}
+              prompt={`Welche Vorträge, Lesungen oder Diskussionen veranstaltet die ${source.name} in Frankfurt in den nächsten Wochen? Quelle: ${APP_URL}/quelle/${slug}`}
+            />
 
             {events.length === 0 ? (
               <div class="empty">
