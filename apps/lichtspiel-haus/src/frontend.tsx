@@ -470,7 +470,9 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         <PosterCard title={displayTitle} imageUrl={s.image_url} />
       </a>
       <header class="prog-entry__head">
-        <span class="prog-entry__time-hero">{time}</span>
+        <time class="prog-entry__time-hero" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
+          {time}
+        </time>
         {scorePct !== null ? (
           <span
             class="prog-entry__score"
@@ -559,10 +561,11 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         </p>
       ) : null}
       <div class="prog-entry__meta">
-        <span class="prog-entry__time">
-          <time>{time}</time>
-          {endTime ? <span class="prog-entry__time-end">{endTime}</span> : null}
-        </span>
+        {endTime ? (
+          <span class="prog-entry__time">
+            <span class="prog-entry__time-end">{endTime}</span>
+          </span>
+        ) : null}
         {hasPrice ? (
           <>
             <span class="prog-entry__bar" aria-hidden="true">
@@ -655,6 +658,46 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         </span>
       </div>
     </li>
+  );
+}
+
+/** Multi-day screening list with a date separator above each new day.
+ *  Used on /kino/:slug and /reihe/:slug, both of which span up to 60
+ *  days — without the separator the rows blur into one stack of times
+ *  with no clue which day is which. ProgrammePartial doesn't need this
+ *  because the page header already names the single day in view. */
+export function DateGroupedScreenings({
+  screenings,
+  locale,
+  tr,
+  hideCinema,
+}: {
+  screenings: DayScreening[];
+  locale: Locale;
+  tr: Translations;
+  hideCinema?: boolean;
+}) {
+  if (screenings.length === 0) return null;
+  const dl = dateLocale(locale);
+  const dayHeader = dateFormatter(dl, { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+
+  return (
+    <ol class="screenings">
+      {screenings.map((s, i) => {
+        const prev = i > 0 ? screenings[i - 1].date : null;
+        const isNewDay = s.date !== prev;
+        return (
+          <>
+            {isNewDay ? (
+              <li class="day-header" key={`day-${s.date}`} aria-hidden="false">
+                <time dateTime={s.date}>{dayHeader.format(new Date(`${s.date}T12:00:00Z`))}</time>
+              </li>
+            ) : null}
+            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale }} tr={tr} />
+          </>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -1095,7 +1138,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
         if (!q || text.indexOf(q) !== -1) {
           var title = el.querySelector('.prog-entry__work');
           var cinema = el.querySelector('.prog-entry__cinema');
-          var time = el.querySelector('.prog-entry__time time');
+          var time = el.querySelector('.prog-entry__time-hero');
           results.push({
             title: title ? title.textContent.trim() : '',
             cinema: cinema ? cinema.textContent.trim() : '',

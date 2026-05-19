@@ -569,6 +569,25 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   border-top: 1px solid var(--rule);
 }
 
+/* Day header inside a multi-day screening list — typeset like a
+ * masthead kicker so the eye registers the date jump without it
+ * feeling like a section break. Brass underline tapering to the
+ * right pulls focus toward the films below. */
+.day-header {
+  list-style: none;
+  margin: 1.75rem 0 0.25rem;
+  padding: 0.4rem 0 0.35rem;
+  font-family: var(--display);
+  font-variation-settings: "opsz" 96, "SOFT" 50, "WONK" 1;
+  font-weight: 500;
+  font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+  letter-spacing: -0.01em;
+  color: var(--brass);
+  border-bottom: 0.5px solid color-mix(in oklab, var(--brass) 35%, transparent);
+}
+.day-header:first-child { margin-top: 0.25rem; }
+.day-header time { font-variant-numeric: oldstyle-nums; }
+
 .prog-entry {
   display: grid;
   grid-template-columns: clamp(7rem, 14vw, 11rem) minmax(0, 1fr);
