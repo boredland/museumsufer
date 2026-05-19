@@ -934,15 +934,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
 }
 (function(){
-  var btn = document.querySelector('[data-theme-toggle]');
-  if (btn) btn.addEventListener('click', function(){
-    var html = document.documentElement;
-    var isDark = html.classList.contains('dark') || (!html.classList.contains('light') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    html.classList.toggle('dark', !isDark);
-    html.classList.toggle('light', isDark);
-    try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
-  });
-
   function currentDate(){
     var m = location.pathname.match(/^\\/tag\\/(\\d{4}-\\d{2}-\\d{2})/);
     return m ? m[1] : null;

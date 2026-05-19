@@ -638,15 +638,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function(){ navigator.serviceWorker.register('/sw.js').catch(function(){}); });
 }
 (function(){
-  var btn = document.querySelector('[data-theme-toggle]');
-  if (btn) btn.addEventListener('click', function(){
-    var html = document.documentElement;
-    var isDark = html.classList.contains('dark');
-    html.classList.toggle('dark', !isDark);
-    html.classList.toggle('light', isDark);
-    try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch(e){}
-  });
-
   // After HTMX swaps in a new programme, re-sync date strip + genre pills to
   // match the URL the swap pushed. Without this, the user clicks a date and
   // sees the highlighted tile stay on yesterday — looks broken even though
