@@ -85,6 +85,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "i-punkt|edenkoben": [49.281923, 8.127323],
   "im hinterhof des jostwegs 8-10|landau in der pfalz": [49.198283, 8.112344],
   "joseph-meyer-str. 25|weyher": [49.26729, 8.084679],
+  "jugendstil festhalle, großer saal|": [49.198283, 8.112344],
   "jugendstil festhalle, großer saal|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil festhalle|landau in der pfalz": [49.195785, 8.120557],
   "jugendstil-festhalle landau (großer saal)|landau in der pfalz": [49.198283, 8.112344],
