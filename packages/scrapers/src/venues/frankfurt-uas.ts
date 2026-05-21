@@ -16,8 +16,7 @@ const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
 const ARTICLE_RE = /<article\s+class="news-simple-list__item[^>]*>([\s\S]*?)<\/article>/g;
 const DATE_RE = /<time\s+datetime="(\d{4}-\d{2}-\d{2})"/;
-const TIME_RE = /<\/time>\s*<\/span>[\s\S]*?(\d{1,2}):(\d{2})\s*(?:bis\s*(\d{1,2}):(\d{2}))?/;
-const VENUE_ROOM_RE = /\|\s*<\/[a-z]+>\s*([\s\S]*?)\s*<\/span>/;
+const SCHEDULE_RE = /\|\s*(\d{1,2}):(\d{2})\s*(?:bis\s*(\d{1,2}):(\d{2}))?\s*\|\s*([\s\S]*?)\s*<\/span>/;
 const TITLE_LINK_RE = /<a\s+class="news-article-header__link"\s+href="([^"]+)"[^>]*>\s*<h3[^>]*>\s*([\s\S]*?)\s*<\/h3>/;
 const DESC_RE = /<div\s+itemprop="description">\s*<p>\s*([\s\S]*?)\s*<\/p>/;
 
@@ -54,11 +53,10 @@ export async function scrapeFrankfurtUas(): Promise<VenueScrapeResult> {
     if (seen.has(sourceEventId)) continue;
     seen.add(sourceEventId);
 
-    const timeMatch = block.match(TIME_RE);
-    const time = timeMatch ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}` : null;
-    const endTime = timeMatch?.[3] && timeMatch?.[4] ? `${timeMatch[3].padStart(2, "0")}:${timeMatch[4]}` : null;
-
-    const venueRoom = stripHtml(decodeEntities(block.match(VENUE_ROOM_RE)?.[1] ?? "")).trim() || null;
+    const schedMatch = block.match(SCHEDULE_RE);
+    const time = schedMatch ? `${schedMatch[1].padStart(2, "0")}:${schedMatch[2]}` : null;
+    const endTime = schedMatch?.[3] && schedMatch?.[4] ? `${schedMatch[3].padStart(2, "0")}:${schedMatch[4]}` : null;
+    const venueRoom = stripHtml(decodeEntities(schedMatch?.[5] ?? "")).trim() || null;
     const description = stripHtml(decodeEntities(block.match(DESC_RE)?.[1] ?? "")).trim() || null;
 
     events.push({
