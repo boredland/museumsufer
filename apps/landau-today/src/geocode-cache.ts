@@ -54,6 +54,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "edesheimer straße|rhodt unter rietburg": [49.269163, 8.110081],
   "eiswerkstatt|schweigen-rechtenbach": [49.054561, 7.956034],
   "elmar-weiller-festhalle|herxheim": [49.144613, 8.216157],
+  "evangelische martinskirche leinsweiler|leinsweiler": [49.182507, 8.020491],
   "evangelische studierendengemeinde, husarengasse 5|landau in der pfalz": [49.198283, 8.112344],
   "fatal - die unikneipe|landau in der pfalz": [49.198283, 8.112344],
   "foyer des ewl, georg-friedrich-denzel-straße 1|": [49.198283, 8.112344],
