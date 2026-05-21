@@ -36,6 +36,7 @@
     "./og-svg": "./src/og-svg.ts",
     "./postal-address": "./src/postal-address.ts",
     "./push": "./src/push.ts",
+    "./retry-fetch": "./src/retry-fetch.ts",
     "./robots": "./src/robots.ts",
     "./scrape-log": "./src/scrape-log.ts",
     "./screenshots": "./src/screenshots.ts",
@@ -54,7 +55,8 @@
   "dependencies": {
     "@museumsufer/classify": "*",
     "dayjs": "^1.11.20",
-    "hono": "^4.12.18"
+    "hono": "^4.12.18",
+    "p-retry": "^8.0.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260509.1",

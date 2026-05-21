@@ -17,6 +17,7 @@
  *
  * Skipped silently when TMDB_API_KEY is unset.
  */
+import { retryFetch } from "@museumsufer/core/retry-fetch";
 import PQueue from "p-queue";
 import type { TmdbCacheEntry } from "../data/tmdb-cache";
 import { translateBatch } from "./deepl";
@@ -171,7 +172,11 @@ async function searchTmdbMovie(
     include_adult: "false",
   });
   if (year) params.set("year", String(year));
-  const res = await fetch(`${TMDB_BASE}/search/movie?${params}`, { headers: { Accept: "application/json" } });
+  const res = await retryFetch(
+    `${TMDB_BASE}/search/movie?${params}`,
+    { headers: { Accept: "application/json" } },
+    { label: `tmdb movie "${title}"` },
+  );
   if (!res.ok) throw new Error(`tmdb movie ${res.status} for "${title}"`);
   const data = (await res.json()) as TmdbSearchResponse<TmdbMovieResult>;
   return data.results?.[0] ?? null;
@@ -185,7 +190,11 @@ async function searchTmdbTv(title: string, year: number | undefined, apiKey: str
     include_adult: "false",
   });
   if (year) params.set("first_air_date_year", String(year));
-  const res = await fetch(`${TMDB_BASE}/search/tv?${params}`, { headers: { Accept: "application/json" } });
+  const res = await retryFetch(
+    `${TMDB_BASE}/search/tv?${params}`,
+    { headers: { Accept: "application/json" } },
+    { label: `tmdb tv "${title}"` },
+  );
   if (!res.ok) throw new Error(`tmdb tv ${res.status} for "${title}"`);
   const data = (await res.json()) as TmdbSearchResponse<TmdbTvResult>;
   return data.results?.[0] ?? null;
@@ -197,7 +206,11 @@ async function fetchEnglishDetails(
   apiKey: string,
 ): Promise<{ title?: string; overview?: string }> {
   const params = new URLSearchParams({ api_key: apiKey, language: "en-US" });
-  const res = await fetch(`${TMDB_BASE}/${kind}/${id}?${params}`, { headers: { Accept: "application/json" } });
+  const res = await retryFetch(
+    `${TMDB_BASE}/${kind}/${id}?${params}`,
+    { headers: { Accept: "application/json" } },
+    { label: `tmdb ${kind} ${id} details` },
+  );
   if (!res.ok) return {};
   const data = (await res.json()) as { title?: string | null; name?: string | null; overview?: string | null };
   const title = (data.title ?? data.name)?.trim();
@@ -223,9 +236,11 @@ function hitTitle(hit: TmdbMovieResult | TmdbTvResult): string | undefined {
  *  the en-US detail call still wins the rest of the entry. */
 async function fetchImdbId(kind: "movie" | "tv", id: number, apiKey: string): Promise<string | undefined> {
   const params = new URLSearchParams({ api_key: apiKey });
-  const res = await fetch(`${TMDB_BASE}/${kind}/${id}/external_ids?${params}`, {
-    headers: { Accept: "application/json" },
-  });
+  const res = await retryFetch(
+    `${TMDB_BASE}/${kind}/${id}/external_ids?${params}`,
+    { headers: { Accept: "application/json" } },
+    { label: `tmdb ${kind} ${id} external_ids` },
+  );
   if (!res.ok) return undefined;
   const data = (await res.json()) as { imdb_id?: string | null };
   const v = data.imdb_id?.trim();

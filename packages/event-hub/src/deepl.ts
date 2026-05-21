@@ -8,6 +8,8 @@
  * limits faster than we'd like) and same 50-string batch size.
  */
 
+import { retryFetch } from "@museumsufer/core/retry-fetch";
+
 const DEEPL_FREE_URL = "https://api-free.deepl.com/v2/translate";
 const BATCH_SIZE = 50;
 
@@ -16,10 +18,7 @@ export interface DeeplOptions {
   log?: (msg: string) => void;
 }
 
-export async function translateBatch(
-  texts: string[],
-  opts: DeeplOptions,
-): Promise<Array<string | undefined>> {
+export async function translateBatch(texts: string[], opts: DeeplOptions): Promise<Array<string | undefined>> {
   const log = opts.log ?? (() => undefined);
   const out: Array<string | undefined> = new Array(texts.length).fill(undefined);
   if (texts.length === 0) return out;
@@ -61,14 +60,18 @@ async function callDeepL(apiKeys: string, texts: string[]): Promise<string[]> {
   const body = params.toString();
 
   for (const key of keys) {
-    const res = await fetch(DEEPL_FREE_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `DeepL-Auth-Key ${key}`,
-        "Content-Type": "application/x-www-form-urlencoded",
+    const res = await retryFetch(
+      DEEPL_FREE_URL,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `DeepL-Auth-Key ${key}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
       },
-      body,
-    });
+      { label: "deepl" },
+    );
     if (res.ok) {
       const data = (await res.json()) as { translations: Array<{ text: string }> };
       return data.translations.map((t) => t.text);
