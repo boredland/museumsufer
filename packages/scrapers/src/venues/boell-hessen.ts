@@ -6,8 +6,8 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
  * Heinrich-Böll-Stiftung Hessen — civic-educational programme covering
  * Vorträge, Stadtteilrundgänge, Bachwanderungen, panel discussions.
  * Events listed on the WordPress homepage with date + city in a meta
- * span; full time/venue on each detail page (not fetched here to keep
- * the scrape cheap).
+ * span; the start time lives only on each detail page, in a
+ * `box__details` block — fetched here for Frankfurt-area events.
  *
  * Programme spans Hessen — Fulda, Gießen, Darmstadt events filter out
  * via the city allowlist (they're outside FRANKFURT_BBOX anyway).
@@ -15,12 +15,14 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
 const BASE = "https://www.boell-hessen.de";
 const LIST_URL = `${BASE}/`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
+const DETAIL_THROTTLE_MS = 200;
 
 const BLOCK_RE =
   /<a\s+href=(https?:\/\/www\.boell-hessen\.de\/[^"\s>]+)\s+class="block__inner[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
 const TITLE_RE = /<h2[^>]*>\s*([\s\S]*?)\s*<\/h2>/;
 const SUB_RE = /<h3\s+class="sub[^"]*">\s*([\s\S]*?)\s*<\/h3>/;
 const META_RE = /<span\s+class=meta>\s*<span>\s*(\d{2})\.(\d{2})\.(\d{4}),\s*([^<]+?)\s*<\/span>/;
+const DETAIL_TIME_RE = /class="box__details[^"]*"[\s\S]{0,400}?(\d{1,2}):(\d{2})\s*Uhr/;
 
 const FRANKFURT_AREA_CITIES = new Set(["frankfurt", "offenbach", "bad homburg", "bad homburg vor der höhe", "hanau"]);
 
@@ -56,13 +58,16 @@ export async function scrapeBoellHessen(): Promise<VenueScrapeResult> {
 
     const subtitle = stripHtml(decodeEntities(block.match(SUB_RE)?.[1] ?? "")).trim() || null;
 
+    if (events.length > 0) await sleep(DETAIL_THROTTLE_MS);
+    const time = await fetchDetailTime(detailUrl);
+
     events.push({
       source_event_id: sourceEventId,
       title,
       subtitle,
       description: subtitle,
       date,
-      time: null,
+      time,
       end_date: null,
       end_time: null,
       detail_url: detailUrl,
@@ -75,6 +80,25 @@ export async function scrapeBoellHessen(): Promise<VenueScrapeResult> {
   }
 
   return { source_slug: "boell-hessen", display_name: "Heinrich-Böll-Stiftung Hessen", events };
+}
+
+async function fetchDetailTime(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const m = html.match(DETAIL_TIME_RE);
+    if (!m) return null;
+    return `${m[1].padStart(2, "0")}:${m[2]}`;
+  } catch {
+    return null;
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 function labelFor(title: string, subtitle: string | null): ScrapedLabel {
