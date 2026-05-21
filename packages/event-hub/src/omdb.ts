@@ -13,6 +13,8 @@
  * worst case.
  */
 
+import { retryFetch } from "@museumsufer/core/retry-fetch";
+
 const OMDB_URL = "https://www.omdbapi.com/";
 
 export interface OmdbExtras {
@@ -36,7 +38,11 @@ interface OmdbResponse {
  *  run because the imdb_id is still cached). */
 export async function fetchOmdb(imdbId: string, apiKey: string): Promise<OmdbExtras> {
   const params = new URLSearchParams({ i: imdbId, apikey: apiKey, tomatoes: "true" });
-  const res = await fetch(`${OMDB_URL}?${params}`, { headers: { Accept: "application/json" } });
+  const res = await retryFetch(
+    `${OMDB_URL}?${params}`,
+    { headers: { Accept: "application/json" } },
+    { label: `omdb ${imdbId}` },
+  );
   if (!res.ok) throw new Error(`omdb ${res.status} for ${imdbId}`);
   const data = (await res.json()) as OmdbResponse;
   if (data.Response !== "True") return {};

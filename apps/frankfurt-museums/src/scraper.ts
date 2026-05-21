@@ -9,6 +9,7 @@
  */
 
 import { logInfo } from "@museumsufer/core";
+import { retryFetch } from "@museumsufer/core/retry-fetch";
 import { getManualMuseums, WIKIPEDIA_IMAGE_URL_OVERRIDES, WIKIPEDIA_TITLE_OVERRIDES } from "./museum-config";
 import { GERMAN_MONTHS, MUSEUMSUFER_DE } from "./shared";
 
@@ -83,33 +84,9 @@ interface MuseumMapEntry {
   tags: string;
 }
 
-// museumsufer.de sits behind Cloudflare and occasionally returns 5xx/429
-// for a few seconds. One transient blip would otherwise nuke the whole
-// hourly scrape, so retry with exponential backoff before giving up.
-async function fetchUpstream(url: string, label: string): Promise<Response> {
-  const maxAttempts = 3;
-  let lastErr: unknown;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return res;
-      await res.body?.cancel();
-      const transient = res.status >= 500 || res.status === 408 || res.status === 429;
-      const err = new Error(`${label}: ${res.status}`);
-      if (!transient) throw err;
-      lastErr = err;
-    } catch (err) {
-      lastErr = err;
-    }
-    if (attempt < maxAttempts) {
-      await new Promise((r) => setTimeout(r, 1000 * 3 ** (attempt - 1)));
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error(`${label}: unknown error`);
-}
-
 async function scrapeMuseums(): Promise<ParsedMuseum[]> {
-  const res = await fetchUpstream(MUSEUMS_URL, "Failed to fetch museums");
+  const res = await retryFetch(MUSEUMS_URL, undefined, { label: "museums" });
+  if (!res.ok) throw new Error(`Failed to fetch museums: ${res.status}`);
   const html = await res.text();
 
   const startMarker = "museumMapConfig = ";
@@ -222,7 +199,8 @@ async function refreshWikipediaImages(museums: Map<string, ParsedMuseum>, previo
 // ─── exhibitions ──────────────────────────────────────────────────────
 
 async function scrapeExhibitions(museums: Map<string, ParsedMuseum>): Promise<ParsedExhibition[]> {
-  const res = await fetchUpstream(EXHIBITIONS_URL, "Failed to fetch exhibitions");
+  const res = await retryFetch(EXHIBITIONS_URL, undefined, { label: "exhibitions" });
+  if (!res.ok) throw new Error(`Failed to fetch exhibitions: ${res.status}`);
   const html = await res.text();
 
   const parsed = parseExhibitions(html);
