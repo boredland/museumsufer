@@ -19,6 +19,7 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
 const BASE = "https://www.krankenhaus-nordwest.de";
 const LIST_URL = `${BASE}/veranstaltungen`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
+const DETAIL_THROTTLE_MS = 200;
 
 const ARTICLE_RE =
   /<a\s+class="article\s+articletype-\d+"\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>(?=\s*(?:<a\s+class="article"|<\/div>|<!--))/g;
@@ -26,6 +27,13 @@ const KATID_RE = /data-katid="(\d+)"/g;
 const DATE_RE = /<time\s+datetime="(\d{2})\|(\d{4})"[^>]*>\s*(\d{1,2})\.(\d{1,2})\.\d{4}/;
 const TITLE_RE = /<h3>\s*([\s\S]*?)\s*<\/h3>/;
 const DESC_RE = /<p>\s*([\s\S]*?)\s*<\/p>/;
+
+/** Detail-page time formats seen in the wild:
+ *   - Structured: 'Uhrzeit:</strong> 17:30 – 19:00 Uhr'
+ *   - Prose:      'Mittwoch, 15. Juni 2026, 18.30 – 20.30 Uhr' (German . separator)
+ *   - Hour range: 'donnerstags von 16-17 Uhr'                  (no minutes) */
+const TIME_HHMM_RE = /(\d{1,2})[:.](\d{2})\s*(?:[–-]\s*(\d{1,2})[:.](\d{2}))?\s*Uhr/;
+const TIME_HOUR_RANGE_RE = /\b(\d{1,2})\s*[-–]\s*(\d{1,2})\s*Uhr/;
 
 /** Lecture-style events use 'Medizin im Fokus' as a prefix; everything
  *  else (Trauergruppe, Trauercafé, Familientage, Schwangerschaftskurse, …)
@@ -43,6 +51,7 @@ export async function scrapeStiftungHg(): Promise<VenueScrapeResult[]> {
   const today = todayIso();
   const nordwestEvents: CanonicalScrapedEvent[] = [];
   const hgEvents: CanonicalScrapedEvent[] = [];
+  let pushed = 0;
 
   for (const m of html.matchAll(ARTICLE_RE)) {
     const href = m[1];
@@ -63,6 +72,11 @@ export async function scrapeStiftungHg(): Promise<VenueScrapeResult[]> {
 
     const katids = new Set<string>();
     for (const k of block.matchAll(KATID_RE)) katids.add(k[1]);
+    if (!katids.has("6") && !katids.has("7")) continue;
+
+    if (pushed > 0) await sleep(DETAIL_THROTTLE_MS);
+    pushed++;
+    const { time, endTime } = await fetchDetailTime(detailUrl);
 
     if (katids.has("6")) {
       nordwestEvents.push({
@@ -70,9 +84,9 @@ export async function scrapeStiftungHg(): Promise<VenueScrapeResult[]> {
         title,
         description,
         date,
-        time: null,
+        time,
         end_date: null,
-        end_time: null,
+        end_time: endTime,
         detail_url: detailUrl,
         ticket_url: null,
         image_url: null,
@@ -86,9 +100,9 @@ export async function scrapeStiftungHg(): Promise<VenueScrapeResult[]> {
         title,
         description,
         date,
-        time: null,
+        time,
         end_date: null,
-        end_time: null,
+        end_time: endTime,
         detail_url: detailUrl.replace("krankenhaus-nordwest.de", "hospital-zum-heiligen-geist.de"),
         ticket_url: null,
         image_url: null,
@@ -102,6 +116,35 @@ export async function scrapeStiftungHg(): Promise<VenueScrapeResult[]> {
     { source_slug: "krankenhaus-nordwest", display_name: "Krankenhaus Nordwest", events: nordwestEvents },
     { source_slug: "hospital-zum-heiligen-geist", display_name: "Hospital zum Heiligen Geist", events: hgEvents },
   ];
+}
+
+async function fetchDetailTime(url: string): Promise<{ time: string | null; endTime: string | null }> {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" } });
+    if (!res.ok) return { time: null, endTime: null };
+    const text = stripHtml(await res.text());
+    const hhmm = text.match(TIME_HHMM_RE);
+    if (hhmm) {
+      return {
+        time: `${hhmm[1].padStart(2, "0")}:${hhmm[2]}`,
+        endTime: hhmm[3] && hhmm[4] ? `${hhmm[3].padStart(2, "0")}:${hhmm[4]}` : null,
+      };
+    }
+    const hourRange = text.match(TIME_HOUR_RANGE_RE);
+    if (hourRange) {
+      return {
+        time: `${hourRange[1].padStart(2, "0")}:00`,
+        endTime: `${hourRange[2].padStart(2, "0")}:00`,
+      };
+    }
+    return { time: null, endTime: null };
+  } catch {
+    return { time: null, endTime: null };
+  }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 function labelsFor(title: string, description: string | null): ScrapedLabel {
