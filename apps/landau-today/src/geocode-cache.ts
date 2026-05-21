@@ -185,6 +185,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "stadtbibliothek|landau in der pfalz": [49.198932, 8.122404],
   "stadtgebiet landau|": [49.198283, 8.112344],
   "stadtleben landau in der pfalz gmbh|landau in der pfalz": [49.198283, 8.112344],
+  "stiftkirche|landau in der pfalz": [49.198283, 8.112344],
   "stiftskirchenplatz|landau in der pfalz": [49.198283, 8.112344],
   "stiftskirche|landau in der pfalz": [49.196331, 8.112702],
   "stiftsplatz landau|": [49.196502, 8.11255],
