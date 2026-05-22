@@ -423,23 +423,28 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
       />
       <span class="prog-entry__numeral" aria-hidden="true" />
       <header class="prog-entry__head">
-        {!opts.hideVenue ? (
-          <p class="prog-entry__house">
-            <a href={`/spielort/${e.venue.slug}${langSuffix(opts.locale)}`}>{e.venue.short_name ?? e.venue.name}</a>
-            {venueRoom ? (
-              <>
-                <span class="prog-entry__house-sep" aria-hidden="true">
-                  ·
-                </span>
-                <span>{venueRoom}</span>
-              </>
-            ) : null}
-          </p>
-        ) : venueRoom ? (
-          <p class="prog-entry__house">
-            <span>{venueRoom}</span>
-          </p>
-        ) : null}
+        <p class="prog-entry__house">
+          <span class="prog-entry__genre">
+            <span class="prog-entry__genre-dot" aria-hidden="true" />
+            {genreLabel(e.genre, tr)}
+          </span>
+          {!opts.hideVenue ? (
+            <>
+              <span class="prog-entry__house-sep" aria-hidden="true">
+                ·
+              </span>
+              <a href={`/spielort/${e.venue.slug}${langSuffix(opts.locale)}`}>{e.venue.short_name ?? e.venue.name}</a>
+            </>
+          ) : null}
+          {venueRoom ? (
+            <>
+              <span class="prog-entry__house-sep" aria-hidden="true">
+                ·
+              </span>
+              <span>{venueRoom}</span>
+            </>
+          ) : null}
+        </p>
         <h3 class="prog-entry__work">
           {composerLine ? <span class="prog-entry__composer">{composerLine}</span> : null}
           <span class="prog-entry__title">

@@ -533,6 +533,20 @@ body::before {
   gap: 0.5ch;
 }
 .prog-entry__house-sep { color: var(--felt-quiet); }
+.prog-entry__genre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--genre-color, var(--brass));
+}
+.prog-entry__genre-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--genre-color, var(--brass));
+  flex-shrink: 0;
+}
 .prog-entry__house a {
   border-bottom: 0.5px solid color-mix(in oklab, var(--genre-color, var(--brass)) 35%, transparent);
   padding-bottom: 1px;
