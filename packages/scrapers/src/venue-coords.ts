@@ -25,6 +25,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "bnai-brith-frankfurt": [50.1182, 8.6611],
   "boell-hessen": [50.1056, 8.6517],
   brotfabrik: [50.1303, 8.6071],
+  "club-voltaire": [50.1151, 8.674],
   "crespo-foundation": [50.1095, 8.6774],
   "denkbar-frankfurt": [50.1189, 8.6601],
   "dr-hochs-konservatorium": [50.1115, 8.7016],

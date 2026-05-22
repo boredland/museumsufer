@@ -38,6 +38,7 @@ import { scrapeBoellHessen } from "./venues/boell-hessen";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
+import { scrapeClubVoltaire } from "./venues/club-voltaire";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDfgFrankfurt } from "./venues/dfg-frankfurt";
@@ -147,6 +148,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
   { slug: "caligari-wiesbaden", run: (_ctx: ScraperContext) => scrapeCaligariWiesbaden() },
+  { slug: "club-voltaire", run: (_ctx: ScraperContext) => scrapeClubVoltaire() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "dfg-frankfurt", run: (_ctx: ScraperContext) => scrapeDfgFrankfurt() },
@@ -258,6 +260,7 @@ export {
   scrapeBrotfabrik,
   scrapeBuergeruniversitaet,
   scrapeCaligariWiesbaden,
+  scrapeClubVoltaire,
   scrapeCrespoFoundation,
   scrapeDenkbar,
   scrapeDfgFrankfurt,

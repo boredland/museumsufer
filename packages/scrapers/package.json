@@ -18,6 +18,7 @@
     "./venues/brotfabrik": "./src/venues/brotfabrik.ts",
     "./venues/buergeruniversitaet": "./src/venues/buergeruniversitaet.ts",
     "./venues/caligari-wiesbaden": "./src/venues/caligari-wiesbaden.ts",
+    "./venues/club-voltaire": "./src/venues/club-voltaire.ts",
     "./venues/denkbar": "./src/venues/denkbar.ts",
     "./venues/dfg-frankfurt": "./src/venues/dfg-frankfurt.ts",
     "./venues/die-kaes": "./src/venues/die-kaes.ts",
