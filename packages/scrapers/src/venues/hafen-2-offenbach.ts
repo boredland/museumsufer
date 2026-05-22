@@ -40,7 +40,7 @@ export async function scrapeHafen2(): Promise<VenueScrapeResult> {
     if (date < today) continue;
     const time = `${hh.padStart(2, "0")}:${mi}`;
 
-    const price = priceTail.replace(/^,\s*/, "").trim() || null;
+    const prices = parsePrices(priceTail);
     const ticketMatch = (tail.match(TICKET_RE) ?? [])[1] ?? null;
 
     const labels: ScrapedLabel[] = labelsForCategory(category, title);
@@ -51,12 +51,13 @@ export async function scrapeHafen2(): Promise<VenueScrapeResult> {
     events.push({
       source_event_id: sourceId,
       title,
-      subtitle: price,
       raw_category: category || null,
       date,
       time,
       detail_url: ticketMatch ?? LISTING_URL,
       ticket_url: ticketMatch,
+      price_min: prices.min,
+      price_max: prices.max,
       labels,
     });
     void dayNum;
@@ -69,6 +70,22 @@ function inferYear(month: number, today: string): number {
   const currentYear = parseInt(today.slice(0, 4), 10);
   const currentMonth = parseInt(today.slice(5, 7), 10);
   return month < currentMonth ? currentYear + 1 : currentYear;
+}
+
+const PRICE_RE = /(\d{1,3})(?:[.,](\d{1,2}))?\s*(?:€|,--|EUR\b|Euro\b)/gi;
+
+function parsePrices(text: string): { min: number | null; max: number | null } {
+  const values: number[] = [];
+  for (const m of text.matchAll(PRICE_RE)) {
+    const whole = parseInt(m[1], 10);
+    const frac = m[2] ? parseInt(m[2], 10) / 10 ** m[2].length : 0;
+    const value = whole + frac;
+    if (Number.isFinite(value) && value > 0 && value < 200) values.push(value);
+  }
+  if (!values.length) return { min: null, max: null };
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  return { min, max: max > min ? max : null };
 }
 
 function labelsForCategory(category: string, title: string): ScrapedLabel[] {
