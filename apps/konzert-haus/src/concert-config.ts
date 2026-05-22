@@ -149,6 +149,19 @@ export const CURATED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "club-voltaire",
+    name: "Club Voltaire",
+    short_name: "Club Voltaire",
+    address: "Kleine Hochstraße 5, 60313 Frankfurt am Main",
+    lat: 50.1151,
+    lon: 8.674,
+    city: "frankfurt",
+    website_url: "https://www.club-voltaire.de",
+    default_genre: "jazz",
+    description:
+      "Politisch-kulturelle Kneipe in der Frankfurter Innenstadt, seit 1962 als gemeinnütziger Verein geführt. Programmatischer Mix aus Diskussionsabenden und Konzertreihen; die monatlichen ClubJazz-Abende (meist letzter Freitag im Monat) bringen Kammer-Jazz auf die kleine Bühne. Kapazität ca. 60 Plätze, Reservierung empfohlen.",
+  },
+  {
     slug: "jazzkeller",
     name: "Jazzkeller Frankfurt",
     short_name: "Jazzkeller",
