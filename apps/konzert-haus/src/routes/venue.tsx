@@ -132,7 +132,7 @@ app.get("/spielort/:slug", (c) => {
             ) : (
               <ol class="concerts">
                 {events.map((e, i) => (
-                  <Event key={e.id} e={e} opts={{ index: i, hideVenue: true, locale }} tr={tr} />
+                  <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, hideVenue: true, locale }} tr={tr} />
                 ))}
               </ol>
             )}
