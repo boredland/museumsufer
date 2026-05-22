@@ -488,8 +488,17 @@ body::before {
   animation: rise 700ms calc(380ms + var(--i, 0) * 60ms) both;
   transition: background-color 200ms;
 }
+/* When an event carries an image, it replaces the roman numeral in the
+   left column rather than living on a right rail — the image becomes
+   the card's anchor and the typographic numeral steps aside. */
 .prog-entry--has-thumb {
-  grid-template-columns: clamp(2.5rem, 5vw, 3.6rem) minmax(0, 1fr) auto;
+  grid-template-columns: clamp(5.5rem, 11vw, 7rem) minmax(0, 1fr);
+}
+.prog-entry--has-thumb .prog-entry__numeral {
+  display: none;
+}
+.prog-entry--hero.prog-entry--has-thumb {
+  grid-template-columns: clamp(8rem, 16vw, 10.5rem) minmax(0, 1fr);
 }
 .prog-entry--hero {
   background: linear-gradient(180deg, var(--brass-glow) 0%, transparent 70%);
@@ -501,10 +510,10 @@ body::before {
 }
 .prog-entry__thumb {
   grid-row: 1 / span 3;
-  grid-column: 3;
-  align-self: center;
+  grid-column: 1;
+  align-self: start;
   margin: 0;
-  width: 88px;
+  width: 100%;
   aspect-ratio: 1 / 1;
   border: 0.5px solid var(--rule);
   background: var(--brass-glow);
@@ -518,7 +527,6 @@ body::before {
   object-position: 50% 35%;
 }
 .prog-entry--hero .prog-entry__thumb {
-  width: 144px;
   border-color: color-mix(in oklab, var(--genre-color, var(--brass)) 35%, transparent);
 }
 .prog-entry:hover { background-color: var(--brass-glow); }
@@ -714,15 +722,14 @@ body::before {
 
 @media (max-width: 520px) {
   .prog-entry { grid-template-columns: 2.4rem minmax(0, 1fr); column-gap: 0.7rem; }
-  .prog-entry--has-thumb { grid-template-columns: 2.4rem minmax(0, 1fr) auto; }
+  .prog-entry--has-thumb { grid-template-columns: 4.5rem minmax(0, 1fr); }
+  .prog-entry--hero.prog-entry--has-thumb { grid-template-columns: 6.5rem minmax(0, 1fr); }
   .prog-entry__numeral { font-size: 1.8rem; }
   .prog-entry__work { font-size: 1.15rem; }
   .prog-entry--hero .prog-entry__work { font-size: 1.35rem; }
   .prog-entry__meta { gap: 0.45rem; font-size: 0.7rem; }
   .prog-entry__time time { font-size: 1.05rem; }
   .prog-entry__actions { margin-left: 0; width: 100%; justify-content: flex-end; }
-  .prog-entry__thumb { width: 64px; }
-  .prog-entry--hero .prog-entry__thumb { width: 96px; }
 }
 
 /* Ticket call-to-action — concert-programme idiom rather than torn
