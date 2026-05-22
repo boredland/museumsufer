@@ -48,6 +48,7 @@
     "./venues/internationales-theater": "./src/venues/internationales-theater.ts",
     "./venues/jazz-frankfurt": "./src/venues/jazz-frankfurt.ts",
     "./venues/jazz-palmengarten": "./src/venues/jazz-palmengarten.ts",
+    "./venues/jazzkeller": "./src/venues/jazzkeller.ts",
     "./venues/juedische-gemeinde-frankfurt": "./src/venues/juedische-gemeinde-frankfurt.ts",
     "./venues/kellertheater-frankfurt": "./src/venues/kellertheater-frankfurt.ts",
     "./venues/kino-koeppern": "./src/venues/kino-koeppern.ts",

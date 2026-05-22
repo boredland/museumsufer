@@ -74,6 +74,7 @@ import { scrapeInstitutoCervantesFrankfurt } from "./venues/instituto-cervantes-
 import { scrapeInternationalesTheater } from "./venues/internationales-theater";
 import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
+import { scrapeJazzkeller } from "./venues/jazzkeller";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
@@ -185,6 +186,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "internationales-theater", run: (_ctx: ScraperContext) => scrapeInternationalesTheater() },
   { slug: "jazz-frankfurt", run: (_ctx: ScraperContext) => scrapeJazzFrankfurt() },
   { slug: "jazz-palmengarten", run: (_ctx: ScraperContext) => scrapeJazzPalmengarten() },
+  { slug: "jazzkeller", run: (_ctx: ScraperContext) => scrapeJazzkeller() },
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "karl-marx-buchhandlung", run: (_ctx: ScraperContext) => scrapeKarlMarxBuchhandlung() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
@@ -291,6 +293,7 @@ export {
   scrapeInstitutoCervantesFrankfurt,
   scrapeInternationalesTheater,
   scrapeJazzFrankfurt,
+  scrapeJazzkeller,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
   scrapeKarlMarxBuchhandlung,

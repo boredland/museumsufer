@@ -149,6 +149,20 @@ export const CURATED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "jazzkeller",
+    name: "Jazzkeller Frankfurt",
+    short_name: "Jazzkeller",
+    address: "Kleine Bockenheimer Straße 18a, 60313 Frankfurt am Main",
+    lat: 50.1144,
+    lon: 8.6737,
+    city: "frankfurt",
+    website_url: "https://jazzkeller.com",
+    default_genre: "jazz",
+    wikidata: "Q1685091",
+    description:
+      "1952 in einem ehemaligen Luftschutzkeller in der Fressgass eröffneter Jazzclub, einer der ältesten Europas. Bühne für internationale Gastspiele (u. a. Louis Armstrong, Dizzy Gillespie, Ella Fitzgerald), heute Programm zwischen Bebop, Modern Jazz und Hausband-Sets mit Jam Sessions jeden Mittwoch.",
+  },
+  {
     slug: "mampf",
     name: "Jazzlokal Mampf",
     short_name: "Mampf",
