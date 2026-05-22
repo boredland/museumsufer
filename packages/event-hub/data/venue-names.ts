@@ -17,6 +17,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "capitol-mainz": "Capitol Arthouse Kino Mainz",
   "caricatura-museum-frankfurt": "Caricatura Museum Frankfurt – Museum für Komische Kunst",
   "cinema-frankfurt": "Cinéma Frankfurt",
+  "club-voltaire": "Club Voltaire Frankfurt",
   "crespo-foundation": "Crespo Foundation",
   "denkbar-frankfurt": "Denkbar Frankfurt",
   "deutsches-architekturmuseum": "Deutsches Architekturmuseum (DAM)",
