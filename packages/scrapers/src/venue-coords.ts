@@ -38,6 +38,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "jazz-palmengarten": [50.1241, 8.6584],
   "kirchenmusik-dreikoenig": [50.1051, 8.6863],
   "kronberg-academy": [50.1828, 8.5202],
+  mampf: [50.1199, 8.699],
   "musikschule-frankfurt": [50.1107, 8.6809],
   "naxos-hallenkonzerte": [50.1198, 8.7027],
   "oper-frankfurt-konzerte": [50.1077, 8.6726],

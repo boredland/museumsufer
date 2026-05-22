@@ -59,6 +59,7 @@
     "./venues/landungsbruecken": "./src/venues/landungsbruecken.ts",
     "./venues/literaturhaus-frankfurt": "./src/venues/literaturhaus-frankfurt.ts",
     "./venues/malsehn": "./src/venues/malsehn.ts",
+    "./venues/mampf": "./src/venues/mampf.ts",
     "./venues/mousonturm": "./src/venues/mousonturm.ts",
     "./venues/murnau-filmtheater": "./src/venues/murnau-filmtheater.ts",
     "./venues/musikschule-frankfurt": "./src/venues/musikschule-frankfurt.ts",
