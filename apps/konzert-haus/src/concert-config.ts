@@ -149,6 +149,19 @@ export const CURATED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "mampf",
+    name: "Jazzlokal Mampf",
+    short_name: "Mampf",
+    address: "Sandweg 64, 60316 Frankfurt am Main",
+    lat: 50.1199,
+    lon: 8.699,
+    city: "frankfurt",
+    website_url: "https://www.mampf-jazz.com",
+    default_genre: "jazz",
+    description:
+      "Kleinste Live-Jazz-Bar Frankfurts an der Ecke Sandweg/Habsburgerallee im Nordend, mit Live-Konzerten drei Mal die Woche ab 20:30 Uhr und mediterraner Küche bis spät in die Nacht.",
+  },
+  {
     slug: "brotfabrik",
     name: "Brotfabrik",
     short_name: "Brotfabrik",

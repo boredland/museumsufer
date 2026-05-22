@@ -87,6 +87,7 @@ import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
 import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMalsehn } from "./venues/malsehn";
+import { scrapeMampf } from "./venues/mampf";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
@@ -197,6 +198,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
+  { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "cineamo-frankfurt-region", run: (_ctx: ScraperContext) => scrapeCineamo() },
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
@@ -303,6 +305,7 @@ export {
   scrapeLandungsbruecken,
   scrapeLiteraturhaus,
   scrapeMalsehn,
+  scrapeMampf,
   scrapeMousonturm,
   scrapeMurnauFilmtheater,
   scrapeMuseumsFrankfurt,
