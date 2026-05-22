@@ -353,6 +353,9 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
 export interface EventRowOptions {
   index: number;
   hideVenue?: boolean;
+  /** First-of-list gets richer typography + a larger image slot, mirroring
+   *  the frankfurt-museums hero-card pattern. Pass `index === 0`. */
+  hero?: boolean;
   /** Locale of the surrounding page -- threads through to internal
    *  link hrefs so an explicit `?lang=` survives every click. */
   locale: Locale;
@@ -410,9 +413,13 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
     })(),
   };
 
+  const thumbSrc = imageProxyUrl(e.image_url);
+  const thumbSrc2x = imageProxyUrl(e.image_url, opts.hero ? 288 : 176);
+  const thumbSrc1x = imageProxyUrl(e.image_url, opts.hero ? 144 : 88);
+
   return (
     <li
-      class={`prog-entry prog-entry--${e.genre}`}
+      class={`prog-entry prog-entry--${e.genre}${opts.hero ? " prog-entry--hero" : ""}${thumbSrc ? " prog-entry--has-thumb" : ""}`}
       id={`event-${e.id}`}
       style={`--i:${opts.index}; --genre-color:${GENRE_COLOR_VAR[e.genre]}`}
     >
@@ -516,6 +523,19 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
           ) : null}
         </span>
       </div>
+      {thumbSrc ? (
+        <figure class="prog-entry__thumb" aria-hidden="true">
+          <img
+            src={thumbSrc1x ?? thumbSrc}
+            srcset={thumbSrc1x && thumbSrc2x ? `${thumbSrc1x} 1x, ${thumbSrc2x} 2x` : undefined}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            width={opts.hero ? 144 : 88}
+            height={opts.hero ? 144 : 88}
+          />
+        </figure>
+      ) : null}
     </li>
   );
 }
@@ -1020,7 +1040,7 @@ export function ProgrammePartial({
         <>
           <ol class="concerts" id="concerts">
             {visible.map((e, i) => (
-              <Event key={e.id} e={e} opts={{ index: i, locale }} tr={tr} />
+              <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, locale }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
