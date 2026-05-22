@@ -7,9 +7,8 @@
  * Designed to run from a build script after `wrangler dev` is already
  * listening — this module does NOT boot the dev server itself.
  */
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
 
 export const SCREENSHOT_FORMATS = {
@@ -96,6 +95,11 @@ export interface RasterizeOpts {
  */
 export async function rasterizeSvgToPng(opts: RasterizeOpts): Promise<string> {
   const { svgPath, pngPath, width = 1200, height = 630 } = opts;
+  // Inline the SVG body into the HTML. Loading it via <img src="file://…">
+  // is blocked by Chromium when the host document has an opaque origin
+  // (setContent's about:blank), which silently rendered the broken-image
+  // glyph instead of the artwork.
+  const svgSource = await readFile(svgPath, "utf8");
   const browser = await chromium.launch();
   try {
     const ctx = await browser.newContext({
@@ -103,12 +107,10 @@ export async function rasterizeSvgToPng(opts: RasterizeOpts): Promise<string> {
       deviceScaleFactor: 1,
     });
     const page = await ctx.newPage();
-    // Wrap the SVG in zero-margin HTML so Chromium renders at the
-    // exact viewport with no UA-stylesheet padding or scrollbars.
     const html = `<!doctype html><html><head><style>
       html,body{margin:0;padding:0;background:transparent;}
-      img{display:block;width:${width}px;height:${height}px;}
-    </style></head><body><img src="${pathToFileURL(svgPath).href}"/></body></html>`;
+      svg{display:block;width:${width}px;height:${height}px;}
+    </style></head><body>${svgSource}</body></html>`;
     await page.setContent(html, { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: pngPath, type: "png", fullPage: false });
