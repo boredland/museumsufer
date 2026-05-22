@@ -36,6 +36,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hr-sinfonieorchester": [50.1314, 8.6634],
   "jazz-frankfurt": [50.1109, 8.6821],
   "jazz-palmengarten": [50.1241, 8.6584],
+  jazzkeller: [50.1144, 8.6737],
   "kirchenmusik-dreikoenig": [50.1051, 8.6863],
   "kronberg-academy": [50.1828, 8.5202],
   mampf: [50.1199, 8.699],
