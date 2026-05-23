@@ -140,7 +140,7 @@ ${entries}
 }
 
 function hasStageLabel(ev: CanonicalEvent): boolean {
-  return ev.labels.some((l) => l.label.startsWith("stage:"));
+  return ev.labels.some((l) => l.label.startsWith("stage:") || l.label.startsWith("dance:"));
 }
 
 function pickStatus(ev: CanonicalEvent): AvailabilityStatus {
