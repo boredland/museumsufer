@@ -195,6 +195,17 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     ticketing_provider: "custom",
   },
   {
+    slug: "hessisches-staatsballett",
+    name: "Hessisches Staatsballett",
+    address: "Hessisches Staatstheater Wiesbaden, Christian-Zais-Straße 3, 65189 Wiesbaden",
+    lat: 50.0823,
+    lon: 8.2417,
+    website_url: "https://www.hessisches-staatsballett.de",
+    ticketing_provider: "custom",
+    description:
+      "Gemeinsame Tanzkompanie der Staatstheater Wiesbaden und Darmstadt. Zeitgenössisches Ballett, neoklassische Wiederaufnahmen, Festivals wie Tanzfestival Rhein-Main und Fokus Neuer Zirkus — Vorstellungen abwechselnd in beiden Häusern.",
+  },
+  {
     slug: "internationales-theater",
     name: "Internationales Theater Frankfurt",
     address: "Hanauer Landstraße 5-7, 60314 Frankfurt am Main",
