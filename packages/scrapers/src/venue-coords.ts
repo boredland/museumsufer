@@ -57,6 +57,9 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "english-theatre-frankfurt": [50.1083, 8.6712],
   "galli-theater": [50.1116, 8.6841],
   "gallus-theater": [50.101, 8.6334],
+  // Default to Hessisches Staatstheater Wiesbaden — the scraper emits per-event
+  // coords (Wiesbaden vs Darmstadt) so this only fires if an event omits both.
+  "hessisches-staatsballett": [50.0823, 8.2417],
   "internationales-theater": [50.1135, 8.6976],
   "kellertheater-frankfurt": [50.1108, 8.6852],
   "komoedie-frankfurt": [50.1086, 8.6739],

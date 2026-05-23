@@ -10,6 +10,7 @@ export const THEATER_SLUGS: ReadonlySet<string> = new Set([
   "english-theatre-frankfurt",
   "galli-theater",
   "gallus-theater",
+  "hessisches-staatsballett",
   "internationales-theater",
   "kellertheater-frankfurt",
   "komoedie-frankfurt",

@@ -64,6 +64,7 @@ import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
+import { scrapeHessischesStaatsballett } from "./venues/hessisches-staatsballett";
 import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
@@ -177,6 +178,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
   { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
+  { slug: "hessisches-staatsballett", run: (_ctx: ScraperContext) => scrapeHessischesStaatsballett() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
@@ -286,6 +288,7 @@ export {
   scrapeHafen2,
   scrapeHambacherSchloss,
   scrapeHausAmDom,
+  scrapeHessischesStaatsballett,
   scrapeHfmdk,
   scrapeHolzhausenschloesschen,
   scrapeHrBigband,
