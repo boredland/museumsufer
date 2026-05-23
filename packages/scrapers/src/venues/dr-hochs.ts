@@ -1,9 +1,9 @@
-import { classifyMusic } from "@museumsufer/classify";
+import { classifyDance, classifyMusic } from "@museumsufer/classify";
 import { dateOffset, decodeEntities, normalizeUrl, stripHtml, todayIso, truncate } from "@museumsufer/core";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -69,7 +69,7 @@ export async function scrapeDrHochs(): Promise<VenueScrapeResult> {
     const title = stripHtml(decodeEntities(hit.title)).trim();
     const time = start.format("HH:mm");
     const endTime = end ? end.format("HH:mm") : null;
-    const genre = classifyMusic(title, details.subtitle, details.description, "classical");
+    const label = resolveLabel(title, hit.slug, details);
 
     events.push({
       source_event_id: hit.slug,
@@ -86,11 +86,31 @@ export async function scrapeDrHochs(): Promise<VenueScrapeResult> {
       price_max: null,
       performers: details.performers,
       venue_room: details.room,
-      labels: [{ label: `music:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" }],
+      labels: [label],
     });
   }
 
   return { source_slug: "dr-hochs-konservatorium", display_name: "Dr. Hoch's Konservatorium", events };
+}
+
+/**
+ * Most events at Dr. Hoch's are music (Klavierabend, Kammermusik, Jugend
+ * musiziert…), but the Ballettabteilung holds public performances too
+ * (Ballettaufführungen, pre-ballett showings). We gate on the explicit
+ * markers `ballett`/`tanz`/`choreogra` against title + subtitle + description
+ * + slug — repertoire-name-only hits (e.g. a Tchaikovsky concert featuring
+ * the Nussknacker suite) stay classified as music.
+ */
+const DANCE_GATE_RE = /\b(ballett|tanz|choreogra)/i;
+
+function resolveLabel(title: string, slug: string, details: DetailFields): ScrapedLabel {
+  const haystack = `${title} ${details.subtitle ?? ""} ${details.description ?? ""} ${slug}`;
+  if (DANCE_GATE_RE.test(haystack)) {
+    const genre = classifyDance(title, details.subtitle, details.description, "ballet");
+    return { label: `dance:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" };
+  }
+  const genre = classifyMusic(title, details.subtitle, details.description, "classical");
+  return { label: `music:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" };
 }
 
 function enumerateMonths(fromIso: string, toIso: string): string[] {
