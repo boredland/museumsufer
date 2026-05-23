@@ -1,4 +1,4 @@
-import { classifyMusic } from "@museumsufer/classify";
+import { classifyDance, classifyMusic } from "@museumsufer/classify";
 import {
   BROWSER_UA,
   dateOffset,
@@ -181,10 +181,11 @@ function pickLabels(
 }
 
 function matchStage(title: string, subtitle: string | null, eventTypes: readonly string[]): string | null {
-  if (eventTypes.some((t) => t.includes("tanz"))) return "stage:dance";
+  const danceLabel = () => `dance:${classifyDance(title, subtitle, null, "world")}`;
+  if (eventTypes.some((t) => t.includes("tanz"))) return danceLabel();
   if (eventTypes.some((t) => /theater|comedy|kabarett|improtheater|workshop/.test(t))) return "stage:theater";
   const haystack = `${title} ${subtitle ?? ""}`;
-  if (/\b(tanz(?:kurs|en|abend)?)\b/i.test(haystack)) return "stage:dance";
+  if (/\b(tanz(?:kurs|en|abend)?)\b/i.test(haystack)) return danceLabel();
   if (/\b(theater|comedy|kabarett|improtheater|workshop)\b/i.test(haystack)) return "stage:theater";
   return null;
 }

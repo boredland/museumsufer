@@ -1,4 +1,4 @@
-import { classifyMusic, classifyTalk, detectTalkLanguage, looksLikeMusic } from "@museumsufer/classify";
+import { classifyDance, classifyMusic, classifyTalk, detectTalkLanguage, looksLikeMusic } from "@museumsufer/classify";
 import { berlinNow, decodeEntities, normalizeUrl, nullIfMidnight, stripHtml, todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
@@ -146,7 +146,11 @@ function labelsFromTags(tags: readonly string[], title: string, subtitle: string
     });
   }
   if (/tanz|performance/.test(haystack)) {
-    labels.push({ label: "stage:dance", confidence: 0.9, classifier: "upstream-tag" });
+    labels.push({
+      label: `dance:${classifyDance(title, subtitle, null, "contemporary")}`,
+      confidence: 0.9,
+      classifier: "upstream-tag",
+    });
   }
   if (/theater|schauspiel/.test(haystack)) {
     labels.push({ label: "stage:theater", confidence: 0.9, classifier: "upstream-tag" });

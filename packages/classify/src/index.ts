@@ -1,3 +1,4 @@
+export { classifyDance, DANCE_GENRES, type DanceGenre, looksLikeDance } from "./dance";
 export { classifyEvent, type EventType, eventTypeToLabel } from "./event";
 export {
   classifyLandauByText,

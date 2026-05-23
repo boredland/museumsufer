@@ -1,3 +1,4 @@
+import { classifyDance } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -11,8 +12,9 @@ const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
  * which exposes the entire schedule as structured JSON. DFDC tours, so we
  * filter variants to `venueFrankfurt` and drop Bruges/Hellerau/etc.
  *
- * All performances are dance — the label is hardcoded to `stage:dance`
- * (scraper-hardcoded) instead of going through the keyword resolver.
+ * All performances are dance — the subgenre is resolved per evening title via
+ * `classifyDance` with a `contemporary` fallback, since DFDC's house style is
+ * contemporary but they occasionally revive classical/neoclassical work.
  */
 
 interface DfdcVenue {
@@ -83,6 +85,7 @@ function parse(data: DfdcSpielplan): VenueScrapeResult {
     const ticketUrl = evening.ticketInfo?.shopLink ?? null;
     const description = collectProductionsBlurb(evening.productions);
     const subtitle = subtitleFromProductions(evening.productions);
+    const genre = classifyDance(evening.title, subtitle, description, "contemporary");
 
     for (const variant of evening.variants) {
       if (variant.venue?._type !== "venueFrankfurt") continue;
@@ -109,7 +112,7 @@ function parse(data: DfdcSpielplan): VenueScrapeResult {
           image_url: null,
           language: "de",
           venue_room: variant.venue.name,
-          labels: [{ label: "stage:dance", confidence: 0.95, classifier: "scraper-hardcoded" }],
+          labels: [{ label: `dance:${genre}`, confidence: 0.95, classifier: "scraper-hardcoded" }],
         });
       }
     }

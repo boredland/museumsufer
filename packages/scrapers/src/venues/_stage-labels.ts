@@ -1,11 +1,11 @@
-import { classifyMusic, classifyTalk, looksLikeMusic } from "@museumsufer/classify";
+import { classifyDance, classifyMusic, classifyTalk, looksLikeMusic } from "@museumsufer/classify";
 import type { ScrapedLabel } from "../types";
 
 /**
  * Shared label resolver for stage venues (theaters, opera houses, performance
  * spaces). Most venues emit `stage:theater` — but the larger houses
  * (Schauspiel, Oper, Mousonturm, English Theatre) mix theatre with ballet
- * (`stage:dance`), opera/concerts (`music:*`), and talks (`talk:*`).
+ * (`dance:*`), opera/concerts (`music:*`), and talks (`talk:*`).
  *
  * The resolver runs cheap keyword probes against title + subtitle and emits
  * one label per matched namespace. When nothing matches the venue's
@@ -43,7 +43,8 @@ export function resolveStageLabels(opts: StageLabelOptions): ScrapedLabel[] {
     labels.push({ label: `talk:${cat}`, confidence, classifier });
   }
   if (/tanz|ballett|performance/.test(haystack)) {
-    labels.push({ label: "stage:dance", confidence, classifier });
+    const genre = classifyDance(opts.title, opts.subtitle, opts.hint, "contemporary");
+    labels.push({ label: `dance:${genre}`, confidence, classifier });
   }
   if (
     /theater|schauspiel|komödie|kabarett|comedy|variet[eé]|improvisations|figurentheater|puppentheater/.test(haystack)

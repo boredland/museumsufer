@@ -1,4 +1,4 @@
-import { classifyMusic, classifyTalk, detectTalkLanguage } from "@museumsufer/classify";
+import { classifyDance, classifyMusic, classifyTalk, detectTalkLanguage } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
 import { type ProxyConfig, proxyFetch } from "../proxy";
@@ -140,7 +140,13 @@ function labelsFromCategories(
     labels.push({ label: "museum:workshop", confidence: 1.0, classifier: "upstream-category" });
   }
   if (set.has("theater")) labels.push({ label: "stage:theater", confidence: 1.0, classifier: "upstream-category" });
-  if (set.has("performance")) labels.push({ label: "stage:dance", confidence: 0.85, classifier: "upstream-category" });
+  if (set.has("performance")) {
+    labels.push({
+      label: `dance:${classifyDance(title, null, description, "contemporary")}`,
+      confidence: 0.85,
+      classifier: "upstream-category",
+    });
+  }
   if (set.has("führung") || set.has("fuehrung")) {
     labels.push({ label: "museum:fuehrung", confidence: 1.0, classifier: "upstream-category" });
   }
