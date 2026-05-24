@@ -13,16 +13,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "deutsches-architekturmuseum",
-    name: "Deutsches Architekturmuseum (DAM)",
-    address: "",
-    lat: 50.1049,
-    lon: 8.6715,
-    city: "frankfurt",
-    website_url: "https://dam-online.de",
-    default_genre: "classical",
-  },
-  {
     slug: "dfg-frankfurt",
     name: "Deutsch-Französische Gesellschaft Frankfurt",
     address: "",
@@ -71,16 +61,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.frankfurter-sparkasse.de",
     default_genre: "classical",
-  },
-  {
-    slug: "gallus-theater",
-    name: "Gallus Theater",
-    address: "",
-    lat: 50.101,
-    lon: 8.6334,
-    city: "frankfurt",
-    website_url: "https://www.gallustheater.de",
-    default_genre: "world",
   },
   {
     slug: "hafen-2-offenbach",
