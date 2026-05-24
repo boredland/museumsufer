@@ -61,6 +61,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "harmonie-frankfurt": "Harmonie Theater Frankfurt",
   "haus-am-dom": "Haus am Dom – Kath. Akademie Rabanus Maurus",
   "haus-der-stadtgeschichte-of": "Haus der Stadtgeschichte Offenbach am Main",
+  "hessisches-staatsballett": "Hessisches Staatsballett",
   "hfmdk": "Hochschule für Musik und Darstellende Kunst Frankfurt",
   "hindemith-kabinett": "Hindemith Kabinett im Kuhhirtenturm",
   "historisches-museum-frankfurt": "Historisches Museum Frankfurt",
