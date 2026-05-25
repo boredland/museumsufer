@@ -92,10 +92,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
 const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
 
 export const CLIENT_SCRIPT = `
-    var htmxReady = false;
-    document.body.addEventListener('htmx:load', function() {
-      if (!htmxReady) { htmxReady = true; htmx.config.globalViewTransitions = true; }
-    });
+    if (typeof htmx !== 'undefined') { htmx.config.globalViewTransitions = true; }
 
     ${HTMX_LIFECYCLE_SCRIPT}
     ${TURNSTILE_LAZY_LOAD_SCRIPT}

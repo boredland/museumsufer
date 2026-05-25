@@ -1,4 +1,3 @@
-import { CLIENT_SCRIPT } from "./client-script";
 import { todayIso } from "./date";
 import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 
@@ -8,7 +7,11 @@ interface ScriptInitOptions {
   initialDate?: string | null;
 }
 
-/** Generates the global variables and CLIENT_SCRIPT as a unified string for inline <script> tags */
+/**
+ * Emits the per-request globals (T, DATE_LOCALE, etc.) that the deferred
+ * `/client-<hash>.js` bundle reads. `var` so they land on globalThis and
+ * the bundle picks them up as bare references.
+ */
 export function generateScriptInit(options: ScriptInitOptions): string {
   const { locale, initialDate = null } = options;
   const tr = getTranslations(locale);
@@ -16,11 +19,10 @@ export function generateScriptInit(options: ScriptInitOptions): string {
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);
 
-  return `const T = ${trJson};
-const DATE_LOCALE = ${dlJson};
-const LOCALES = ${localesJson};
-const CURRENT_LANG = '${locale}';
-const BERLIN_TODAY = '${todayIso()}';
-const __INITIAL_DATE__ = ${initialDate ? JSON.stringify(initialDate) : "null"};
-${CLIENT_SCRIPT}`;
+  return `var T = ${trJson};
+var DATE_LOCALE = ${dlJson};
+var LOCALES = ${localesJson};
+var CURRENT_LANG = '${locale}';
+var BERLIN_TODAY = '${todayIso()}';
+var __INITIAL_DATE__ = ${initialDate ? JSON.stringify(initialDate) : "null"};`;
 }

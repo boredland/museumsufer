@@ -469,6 +469,13 @@ dialog::backdrop {
   padding: 0;
   margin: 0;
 }
+/* Skip layout/paint for cards far below the fold. Keep first three eagerly
+ * rendered so the hero (LCP candidate) and its neighbours aren't gated on
+ * the browser's render-when-near-viewport heuristic. */
+.card-list > li:nth-child(n+4) {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 96px;
+}
 
 /* Hero card — first card in a section */
 .card.is-hero {

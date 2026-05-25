@@ -23,6 +23,7 @@ import { berlinNow, todayIso } from "./date";
 import { DEFAULT_LOCALE, dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
+import { CLIENT_BUNDLE_HREF } from "./routes/static";
 import { SCRAPE_DATA } from "./scrape-data";
 import { generateScriptInit } from "./script-init";
 import { formatDateFull } from "./shared";
@@ -129,7 +130,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
         "/fonts/dm-sans-latin-wght-normal.woff2",
         "/fonts/fraunces-latin-standard-normal.woff2",
       ]}
-      deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js"]}
+      deferScripts={["/uFuzzy.iife.min.js", "/htmx.min.js", CLIENT_BUNDLE_HREF]}
       jsonLd={jsonSchemas.map((s) => s.json)}
     />
   );
@@ -651,11 +652,6 @@ export function renderPage(
               </div>
             </div>
 
-            <style
-              dangerouslySetInnerHTML={{
-                __html: "#content>*{opacity:0}.hydrated #content>*{opacity:1;transition:opacity .1s}",
-              }}
-            />
             <main id="content">
               {initialData ? (
                 <ContentBody
@@ -755,7 +751,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
 
   const exhibitions = data.exhibitions as Array<Record<string, unknown>>;
   if (exhibitions) {
-    for (const ex of exhibitions.slice(0, 20)) {
+    for (const ex of exhibitions.slice(0, 6)) {
       const museum = (ex.museum_name as string) || "";
       const slug = (ex.museum_slug as string) || "";
       ensureMuseum(slug, museum);
@@ -788,7 +784,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
 
   const events = data.events as Array<Record<string, unknown>>;
   if (events) {
-    events.slice(0, 20).forEach((ev) => {
+    events.slice(0, 6).forEach((ev) => {
       const date = ev.date as string;
       const time = ev.time as string | null;
       const endTime = ev.end_time as string | null;
