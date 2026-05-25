@@ -219,11 +219,18 @@ function buildScrapeData(input: {
 }
 
 function normalizeForDedup(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[:.,;!?()[\]{}""„"''‚'«»‹›]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    title
+      .toLowerCase()
+      .replace(/[:.,;!?()[\]{}""„"''‚'«»‹›]/g, "")
+      // Collapse every dash variant to a space so en/em/hyphen don't keep
+      // sibling scrape sources apart. Caught: DAM listed "Suburbia. … – …"
+      // on dam-online (en dash) vs "Suburbia. … - …" on museumsufer.de
+      // (hyphen), getting two entries for one exhibition.
+      .replace(/[-–—‒‐]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 function deduplicateByTitle<T extends { museum_id: number; title: string; id: number }>(items: T[]): T[] {
