@@ -1890,7 +1890,10 @@ textarea:focus-visible,
 }
 .digest-cue:hover .digest-cue__rule { opacity: 1; }
 .digest-cue__text {
-  font-family: var(--serif);
+  /* Skip the Fraunces webfont here — Lighthouse flagged this span as the
+   * LCP candidate, gating LCP on the 150KB italic font swap. The system
+   * serif italic chain is good enough for a CTA paragraph. */
+  font-family: "Hoefler Text", "Times New Roman", ui-serif, Georgia, serif;
   font-style: italic;
   font-weight: 400;
   font-size: 1rem;
