@@ -135,10 +135,12 @@ export function Head(opts: HeadOptions) {
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preloadFonts={[
-        // "lehr" renders in 300 normal; "salon"/"haus" override to 600
-        // italic and that span is Lighthouse's LCP element. Preloading
-        // both keeps the wordmark off the LCP-blocking font path.
+        // The wordmark mixes weights: "lehr" → 300 normal, "salon"/"haus"
+        // → 600 italic. The first programme entry title (prog-entry__work)
+        // also enters the viewport and uses 400 normal. All three feed
+        // the LCP race; preloading them keeps it off the font path.
         "/fonts/cormorant-garamond-latin-300-normal.woff2",
+        "/fonts/cormorant-garamond-latin-400-normal.woff2",
         "/fonts/cormorant-garamond-latin-600-italic.woff2",
       ]}
       deferScripts={["/htmx.min.js"]}
