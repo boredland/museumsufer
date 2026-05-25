@@ -166,9 +166,12 @@ export async function getEventById(id: number): Promise<(Event & { museum_name: 
 export async function getExhibitionsForDate(date: string): Promise<Exhibition[]> {
   const out: Joined<Exhibition>[] = [];
   for (const ex of SCRAPE_DATA.exhibitions) {
-    if (!ex.start_date || !ex.end_date) continue;
-    if (ex.start_date > date) continue;
-    if (ex.end_date < date) continue;
+    // Permanent exhibitions arrive with no end_date (and a 1970-01-01
+    // placeholder start_date from the scraper); keep them visible on
+    // every queried date. Single-day events also have no end_date but
+    // we still want to match the day they happen on.
+    if (ex.start_date && ex.start_date > date) continue;
+    if (ex.end_date && ex.end_date < date) continue;
     const joined = joinMuseum(ex);
     if (joined) out.push(joined);
   }
