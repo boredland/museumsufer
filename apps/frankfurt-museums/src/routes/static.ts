@@ -1,9 +1,13 @@
-import { buildApiCatalog, buildManifest, buildRobotsTxt } from "@museumsufer/core";
+import { buildApiCatalog, buildManifest, buildRobotsTxt, fnv1a } from "@museumsufer/core";
 import { Hono } from "hono";
+import { CLIENT_SCRIPT } from "../client-script";
 import { todayIso } from "../date";
 import { MUSEUMS } from "../museum-config";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import type { Env } from "../types";
+
+const CLIENT_BUNDLE_VERSION = fnv1a(CLIENT_SCRIPT);
+export const CLIENT_BUNDLE_HREF = `/client-${CLIENT_BUNDLE_VERSION}.js`;
 
 const SITE_URL = "https://museumsufer.app";
 
@@ -165,6 +169,15 @@ ${museumUrls}
 app.get("/sw.js", (c) =>
   c.body(SERVICE_WORKER_JS, {
     headers: { "Content-Type": "application/javascript", "Cache-Control": "no-cache" },
+  }),
+);
+
+app.get(CLIENT_BUNDLE_HREF, (c) =>
+  c.body(CLIENT_SCRIPT, {
+    headers: {
+      "Content-Type": "application/javascript; charset=utf-8",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
   }),
 );
 
