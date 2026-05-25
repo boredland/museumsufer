@@ -136,6 +136,14 @@ export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Prom
       return fetchDamTribeExhibitions(config.endpoint);
     case "mfk":
       return fetchMfkExhibitions(config.endpoint);
+    case "offenbach-sitepark":
+      return fetchOffenbachSiteparkExhibitions(config.endpoint);
+    case "junges-museum-drupal":
+      return fetchJungesMuseumExhibitions(config.endpoint);
+    case "momem-wp":
+      return fetchMomemExhibitions(config.endpoint);
+    case "sinclair-kunst-natur":
+      return fetchSinclairExhibitions(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -3777,6 +3785,266 @@ async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       image_url: image ?? null,
     });
     m = slideRe.exec(html);
+  }
+  return out;
+}
+
+// ─── offenbach.de Sitepark CMS (klingspor, haus-der-stadtgeschichte) ───
+//
+// Both Offenbach city microsites render exhibition listings with the
+// Sitepark Information Enterprise Server. Two layouts coexist:
+//
+// 1. Klingspor card-grid: each card has a headline anchor whose text is
+//    "DD.MM. - DD.MM.YYYY: Title" (or with full years on both ends), and
+//    the date range is encoded inside the title text itself.
+// 2. Haus-der-Stadtgeschichte teaser-list: the headline anchor reads
+//    "ab DD. Monat: Title" (start month only), and a sibling
+//    `.SP-Teaser__abstract` carries "Laufzeit: DD. Monat bis DD. Monat YYYY".
+//
+// Both layouts ship a "Vergangene Ausstellungen" / "Ausstellungsarchiv"
+// section further down the page — we cut off at the first such marker so
+// past exhibitions don't leak in. Klingspor also has a "Kooperationen"
+// section (exhibitions at partner venues, not at the Klingspor itself),
+// which gets the same treatment.
+async function fetchOffenbachSiteparkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const fullHtml = await res.text();
+
+  const cutoffMarkers = [/Vergangene\s+Ausstellungen/i, /Ausstellungsarchiv/i, /Kooperationen/i];
+  let cutoff = fullHtml.length;
+  for (const re of cutoffMarkers) {
+    const m = fullHtml.search(re);
+    if (m !== -1 && m < cutoff) cutoff = m;
+  }
+  const html = fullHtml.slice(0, cutoff);
+  const origin = new URL(endpoint).origin;
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  // Layout 1 (card-grid, klingspor): h3 > a.SP-CardTeaser__link
+  // Layout 2 (teaser-list, haus-der-stadtgeschichte): h3 > a.SP-Teaser__headline__text
+  const anchorRe =
+    /<a\s+class="(?:SP-CardTeaser__link|SP-Teaser__headline(?:__text)?)"\s+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  for (const m of html.matchAll(anchorRe)) {
+    const href = m[1].startsWith("http") ? m[1] : `${origin}${m[1]}`;
+    if (seen.has(href)) continue;
+    seen.add(href);
+    const text = m[2]
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!text) continue;
+
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    let title = text;
+
+    // Numeric range up front: "DD.MM.YYYY - DD.MM.YYYY: Title" or
+    // "DD.MM. - DD.MM.YYYY: Title" (start year inferred from end).
+    const numRange = text.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})?\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{2,4}):\s*(.+)$/);
+    if (numRange) {
+      const [, sd, sm, syRaw, ed, em, eyRaw, rest] = numRange;
+      const endYear = eyRaw.length === 2 ? `20${eyRaw}` : eyRaw;
+      const startYear = syRaw ?? (parseInt(em, 10) >= parseInt(sm, 10) ? endYear : String(parseInt(endYear, 10) - 1));
+      start_date = `${startYear}-${sm.padStart(2, "0")}-${sd.padStart(2, "0")}`;
+      end_date = `${endYear}-${em.padStart(2, "0")}-${ed.padStart(2, "0")}`;
+      title = rest;
+    } else {
+      // "ab DD. Monat: Title" — start only.
+      const abMonth = text.match(/^ab\s+(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+):\s*(.+)$/);
+      if (abMonth) {
+        const m1 = GERMAN_MONTHS[abMonth[2].toLowerCase()];
+        if (m1) {
+          const yr = String(new Date().getFullYear());
+          start_date = `${yr}-${m1}-${abMonth[1].padStart(2, "0")}`;
+        }
+        title = abMonth[3];
+      }
+    }
+
+    // Pick up the abstract for the teaser-list layout. The teaser
+    // markup keeps the abstract sibling next to the anchor's grandparent.
+    const anchorIdx = m.index ?? -1;
+    if (anchorIdx >= 0) {
+      const after = html.slice(anchorIdx, anchorIdx + 4000);
+      const abstract = after.match(/<div class="SP-Teaser__abstract"[^>]*>([\s\S]*?)<\/div>/)?.[1];
+      if (abstract) {
+        const cleaned = abstract
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const laufzeit = cleaned.match(
+          /Laufzeit:\s*(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})?\s*bis\s*(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s*(\d{4})/i,
+        );
+        if (laufzeit) {
+          const sm = GERMAN_MONTHS[laufzeit[2].toLowerCase()];
+          const em = GERMAN_MONTHS[laufzeit[5].toLowerCase()];
+          if (sm && em) {
+            const sy = laufzeit[3] ?? laufzeit[6];
+            start_date = `${sy}-${sm}-${laufzeit[1].padStart(2, "0")}`;
+            end_date = `${laufzeit[6]}-${em}-${laufzeit[4].padStart(2, "0")}`;
+          }
+        }
+      }
+
+      // First image inside the same card (look ahead from the anchor).
+      const imgM = after.match(/<img[^>]+(?:src|data-src)="([^"]+\.(?:jpg|jpeg|png|webp))"/i);
+      const image_url = imgM ? (imgM[1].startsWith("http") ? imgM[1] : `${origin}${imgM[1]}`) : null;
+
+      if (end_date && end_date < today) continue;
+      out.push({ title, start_date, end_date, description: null, detail_url: href, image_url });
+    }
+  }
+  return out;
+}
+
+// ─── junges-museum-frankfurt.de (Drupal views) ───────────────────────
+//
+// Each exhibition row: <div class="views-row">…<h3>Title</h3><hr/>
+// <p><span>DD.M.YYYY bis DD.M.YYYY</span><br/>Description…</p>…</div>.
+// Some rows are evergreen / permanent and have no date span — we keep
+// them so visitors still see the always-on exhibitions.
+async function fetchJungesMuseumExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const origin = new URL(endpoint).origin;
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+
+  const rowRe = /<div class="views-row[^"]*"[\s\S]*?<a href="([^"]+)">[\s\S]*?<h3>([\s\S]*?)<\/h3>([\s\S]*?)<\/a>/g;
+  for (const m of html.matchAll(rowRe)) {
+    const detailPath = m[1];
+    const detail_url = detailPath.startsWith("http") ? detailPath : `${origin}${detailPath}`;
+    const title = m[2]
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) continue;
+    const body = m[3];
+
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    const dateSpan = body.match(
+      /<span>\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\s+bis\s+(\d{1,2})\.(\d{1,2})\.(\d{4})\s*<\/span>/,
+    );
+    if (dateSpan) {
+      start_date = `${dateSpan[3]}-${dateSpan[2].padStart(2, "0")}-${dateSpan[1].padStart(2, "0")}`;
+      end_date = `${dateSpan[6]}-${dateSpan[5].padStart(2, "0")}-${dateSpan[4].padStart(2, "0")}`;
+      if (end_date < today) continue;
+    }
+
+    const desc = body
+      .replace(/<span>[\s\S]*?<\/span>/g, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&[a-z]+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // The whole row is wrapped in an enclosing <a> so img.src precedes the h3.
+    // The page already pre-emitted the image URL via the .views-field-field-image
+    // block; capture it by looking back from the row's start.
+    const imgMatch = body.match(/<img[^>]+src="([^"]+)"/);
+    out.push({
+      title,
+      start_date,
+      end_date,
+      description: desc ? truncateHtml(desc) : null,
+      detail_url,
+      image_url: imgMatch ? (imgMatch[1].startsWith("http") ? imgMatch[1] : `${origin}${imgMatch[1]}`) : null,
+    });
+  }
+  return out;
+}
+
+// ─── momem.org (WordPress / Elementor) ───────────────────────────────
+//
+// Elementor renders each entry as: <h2>Title</h2> followed (after wrapper
+// divs) by <h1>DD.MM.YYYY - DD.MM.YYYY</h1>. We collect every heading in
+// order and pair (title, date) when the next heading after a title looks
+// like a range.
+async function fetchMomemExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seenTitles = new Set<string>();
+  const skipFirstWords =
+    /^(aktuelle|permanente|sonderausstellung|vergangene|archiv|über|impressum|kontakt|menu|cookie|warenkorb|momem|newsletter)/i;
+  const rangeRe = /^(\d{1,2})\.(\d{1,2})\.(\d{4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})$/;
+
+  const headings: string[] = [...html.matchAll(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi)].map((m) =>
+    m[1]
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim(),
+  );
+
+  for (let i = 0; i < headings.length - 1; i++) {
+    const title = headings[i];
+    if (!title || title.length < 3) continue;
+    if (skipFirstWords.test(title)) continue;
+    if (rangeRe.test(title)) continue;
+    const next = headings[i + 1];
+    const dm = next.match(rangeRe);
+    if (!dm) continue;
+    const start_date = `${dm[3]}-${dm[2].padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
+    const end_date = `${dm[6]}-${dm[5].padStart(2, "0")}-${dm[4].padStart(2, "0")}`;
+    if (end_date < today) continue;
+    if (seenTitles.has(title)) continue;
+    seenTitles.add(title);
+    out.push({ title, start_date, end_date, description: null, detail_url: null, image_url: null });
+  }
+  return out;
+}
+
+// ─── kunst-und-natur.de Sinclair-Haus ───────────────────────────────
+//
+// Each exhibition teaser is wrapped in <a class="m-teaser-exhibition">
+// with .m-teaser-exhibition__title and .m-teaser-exhibition__date as
+// siblings. Sections are "Aktuell", "Vorschau", and "Rückblick" — we
+// cut at "Rückblick" so past exhibitions don't bleed in.
+async function fetchSinclairExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const fullHtml = await res.text();
+  // The page sprinkles "Rückblick" both in a sidebar menu and as the
+  // header for the past-exhibitions block. Cut at the *last* one so
+  // the menu reference doesn't shadow current exhibitions.
+  const firstTeaser = fullHtml.indexOf("m-teaser-exhibition");
+  const rb = firstTeaser >= 0 ? fullHtml.indexOf("Rückblick", firstTeaser) : -1;
+  const html = rb !== -1 ? fullHtml.slice(0, rb) : fullHtml;
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+
+  const teaserRe = /<a\s+href="([^"]+)"[^>]*class="m-teaser-exhibition\b[^"]*"[^>]*>([\s\S]*?)<\/a>/g;
+  for (const m of html.matchAll(teaserRe)) {
+    const detail_url = m[1];
+    const block = m[2];
+    const title = block
+      .match(/<div class="m-teaser-exhibition__title">([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) continue;
+    const dateText = block
+      .match(/<div class="m-teaser-exhibition__date">([\s\S]*?)<\/div>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    const dm = dateText?.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s*[-–]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (dm) {
+      start_date = `${dm[3]}-${dm[2].padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
+      end_date = `${dm[6]}-${dm[5].padStart(2, "0")}-${dm[4].padStart(2, "0")}`;
+      if (end_date < today) continue;
+    }
+    const imgM = block.match(/data-srcset="[^"]*?(https?:\/\/[^"\s]+\.(?:jpg|jpeg|png|webp))/i);
+    out.push({ title, start_date, end_date, description: null, detail_url, image_url: imgM ? imgM[1] : null });
   }
   return out;
 }
