@@ -135,9 +135,11 @@ export function Head(opts: HeadOptions) {
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preloadFonts={[
-        // Wordmark + headings use weight 300, not 400 (audit caught
-        // this: preloading 400 was a no-op for the LCP element).
+        // "lehr" renders in 300 normal; "salon"/"haus" override to 600
+        // italic and that span is Lighthouse's LCP element. Preloading
+        // both keeps the wordmark off the LCP-blocking font path.
         "/fonts/cormorant-garamond-latin-300-normal.woff2",
+        "/fonts/cormorant-garamond-latin-600-italic.woff2",
       ]}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
