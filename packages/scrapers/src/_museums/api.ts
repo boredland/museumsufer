@@ -3073,9 +3073,17 @@ async function fetchSenckenbergExhibitions(endpoint: string): Promise<ApiExhibit
       .trim();
     if (!dateLine) continue;
 
-    const range = dateLine.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})\s*[—–-]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+    // Two layouts in the wild:
+    //   "9. 3. 2025 — 12. 8. 2026"  (year on both ends)
+    //   "27. 3 — 18. 10. 2026"      (year only on the end; start year inferred)
+    // The trailing-dot after the start month is optional too.
+    const range = dateLine.match(/(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{4})?\s*[—–-]\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
     if (!range) continue;
-    const start_date = `${range[3]}-${range[2].padStart(2, "0")}-${range[1].padStart(2, "0")}`;
+    const startMonth = parseInt(range[2], 10);
+    const endMonth = parseInt(range[5], 10);
+    const endYear = parseInt(range[6], 10);
+    const startYear = range[3] ? parseInt(range[3], 10) : startMonth <= endMonth ? endYear : endYear - 1;
+    const start_date = `${startYear}-${range[2].padStart(2, "0")}-${range[1].padStart(2, "0")}`;
     const end_date = `${range[6]}-${range[5].padStart(2, "0")}-${range[4].padStart(2, "0")}`;
     if (end_date < today) continue;
 
@@ -3600,12 +3608,19 @@ async function fetchArchaeologischesExhibitions(endpoint: string): Promise<ApiEx
     if (!entry) continue;
     const { url, html: detail } = entry;
 
-    // Headline carries the title; first paragraph carries "DD. Monat YYYY – DD. Monat YYYY".
-    const title = detail
-      .match(/<h1[^>]*itemprop="headline"[^>]*>([\s\S]*?)<\/h1>/)?.[1]
-      ?.replace(/<[^>]+>/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
+    // Most exhibition pages render the title in <h1 itemprop="headline">,
+    // but some (e.g. dagmar-schuldt-…) drop the h1 entirely and only keep
+    // <title>. Fall through to that.
+    const title =
+      detail
+        .match(/<h1[^>]*itemprop="headline"[^>]*>([\s\S]*?)<\/h1>/)?.[1]
+        ?.replace(/<[^>]+>/g, "")
+        .replace(/\s+/g, " ")
+        .trim() ||
+      detail
+        .match(/<title>([^<]+)<\/title>/)?.[1]
+        ?.replace(/\s+\|\s+Archäologisches Museum.*$/, "")
+        .trim();
     if (!title) continue;
 
     const bodyText = detail
@@ -3755,7 +3770,11 @@ async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       m = slideRe.exec(html);
       continue;
     }
-    if (/dauerausstellung|archiv|amateurfunkstation|nachrichten|kunstraeume/i.test(href)) {
+    // `nachrichten` used to be in the blocklist as a press-section guard,
+    // but it also matches the genuine "NACHRICHTEN – NEWS" exhibition
+    // slug (mfk-frankfurt.de/nachrichten-news/). Drop it — the MfK
+    // listing's slide block already includes only proper exhibitions.
+    if (/dauerausstellung|archiv|amateurfunkstation|kunstraeume/i.test(href)) {
       m = slideRe.exec(html);
       continue;
     }
