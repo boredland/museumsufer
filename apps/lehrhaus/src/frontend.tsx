@@ -135,13 +135,9 @@ export function Head(opts: HeadOptions) {
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preloadFonts={[
-        // Wordmark mixes weights: "lehr" → 300 normal, "salon"/"haus" →
-        // 600 italic. Preloading both keeps the masthead off the LCP
-        // font path. Tried also preloading 400-normal for the first
-        // programme title — net TBT regression from the extra critical
-        // request, so leave that to lazy discovery.
+        // Wordmark + headings use weight 300, not 400 (audit caught
+        // this: preloading 400 was a no-op for the LCP element).
         "/fonts/cormorant-garamond-latin-300-normal.woff2",
-        "/fonts/cormorant-garamond-latin-600-italic.woff2",
       ]}
       deferScripts={["/htmx.min.js"]}
       jsonLd={jsonLdArr}
