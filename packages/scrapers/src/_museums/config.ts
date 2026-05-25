@@ -45,7 +45,11 @@ export type ExhibitionApiType =
   | "dff"
   | "archaeologisches"
   | "dam-tribe"
-  | "mfk";
+  | "mfk"
+  | "offenbach-sitepark"
+  | "junges-museum-drupal"
+  | "momem-wp"
+  | "sinclair-kunst-natur";
 
 export interface ProxyConfig {
   url: string;
@@ -199,6 +203,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.7643,
     rmvStopLid: "A=1@O=Offenbach (Main)-Senefelderquartier Friedensstraße@X=8766622@Y=50097864@U=80@L=3008612@",
     exhibitionUrl: "https://www.offenbach.de/microsite/haus_der_stadtgeschichte/ausstellungen/index.php",
+    exhibitionApi: {
+      type: "offenbach-sitepark",
+      endpoint: "https://www.offenbach.de/microsite/haus_der_stadtgeschichte/ausstellungen/index.php",
+    },
     // Offenbach city microsite, no event listing.
     skipEvents: true,
   },
@@ -266,6 +274,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.683,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://junges-museum-frankfurt.de/ausstellung",
+    exhibitionApi: { type: "junges-museum-drupal", endpoint: "https://junges-museum-frankfurt.de/ausstellung" },
     skipEvents: true,
   },
   "klingspor-museum-of": {
@@ -273,6 +282,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.77,
     rmvStopLid: "A=1@O=Offenbach (Main)-Mathildenviertel Tempelseestraße@X=8771234@Y=50101019@U=80@L=3002661@",
     exhibitionUrl: "https://www.offenbach.de/microsite/klingspor_museum/ausstellungen/index.php",
+    exhibitionApi: {
+      type: "offenbach-sitepark",
+      endpoint: "https://www.offenbach.de/microsite/klingspor_museum/ausstellungen/index.php",
+    },
     // Offenbach city microsite, no event listing path.
     skipEvents: true,
   },
@@ -291,6 +304,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6727,
     rmvStopLid: "A=1@O=Frankfurt (Main) Freßgass@X=8672406@Y=50114377@U=80@L=3065052@",
     exhibitionUrl: "https://momem.org/ausstellungen/",
+    exhibitionApi: { type: "momem-wp", endpoint: "https://momem.org/ausstellungen/" },
     // SPA, no parseable event listing.
     skipEvents: true,
   },
@@ -340,6 +354,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6124,
     rmvStopLid: "A=1@O=Bad Homburg v.d.H. Markt@X=8612097@Y=50228890@U=80@L=3002349@",
     exhibitionUrl: "https://kunst-und-natur.de/museum-sinclair-haus/ausstellungen/",
+    exhibitionApi: {
+      type: "sinclair-kunst-natur",
+      endpoint: "https://kunst-und-natur.de/museum-sinclair-haus/ausstellungen/",
+    },
     // Site has no parseable event listing.
     skipEvents: true,
   },
