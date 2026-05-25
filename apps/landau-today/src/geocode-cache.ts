@@ -46,6 +46,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "buchhandlung lesezeit|bad bergzabern": [49.102808, 7.999127],
   "burgruine meistersel|ramberg in der pfalz": [0, 0],
   "böhämmerhaus|bad bergzabern": [49.097065, 7.984633],
+  "bücherknecht|landau in der pfalz": [49.199302, 8.113713],
   "bürgerhaus|schweigen-rechtenbach": [49.054042, 7.955499],
   "café cosmo|landau in der pfalz": [49.198013, 8.11949],
   "café zur krummbeere|landau/pfalz": [49.192464, 8.134193],
