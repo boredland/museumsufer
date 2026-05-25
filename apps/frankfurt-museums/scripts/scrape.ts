@@ -22,14 +22,7 @@ log(
 );
 
 const startMain = Date.now();
-const directory = await stage("scrape (museumsufer.de)", () =>
-  scrape({
-    previous: {
-      museums: previous.museums.map(toParsedMuseum),
-      exhibitions: previous.exhibitions.map(toParsedExhibition),
-    },
-  }),
-);
+const directory = await stage("directory (frozen meta)", () => scrape());
 const museumsBySlug = new Map<string, ParsedMuseum>(directory.museums.map((m) => [m.slug, m]));
 
 const hubEvents: CanonicalEvent[] = [];
@@ -294,29 +287,6 @@ async function loadPreviousBundle(path: string): Promise<ScrapeData> {
   } catch {
     return empty;
   }
-}
-
-function toParsedMuseum(m: Museum): ParsedMuseum {
-  return {
-    slug: m.slug,
-    name: m.name,
-    museumsufer_url: m.museumsufer_url,
-    description: m.description ?? null,
-    image_url: m.image_url ?? null,
-    website_url: m.website_url ?? null,
-  };
-}
-
-function toParsedExhibition(ex: Exhibition): ParsedExhibition {
-  return {
-    museum_slug: "",
-    title: ex.title,
-    start_date: ex.start_date ?? null,
-    end_date: ex.end_date ?? null,
-    description: ex.description ?? null,
-    image_url: ex.image_url ?? null,
-    detail_url: ex.detail_url ?? "",
-  };
 }
 
 function generateModule(data: ScrapeData): string {
