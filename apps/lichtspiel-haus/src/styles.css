@@ -578,7 +578,10 @@ body::before {
 .search-input::placeholder {
   color: var(--celluloid-quiet);
   font-style: italic;
-  font-family: var(--serif);
+  /* Skip the EB Garamond webfont here — Lighthouse was flagging the
+   * placeholder as the LCP element, stalling LCP on the font swap. The
+   * italic fallback chain is good enough for an input hint. */
+  font-family: Georgia, "Hoefler Text", ui-serif, serif;
   letter-spacing: 0.005em;
   text-transform: none;
   font-size: 0.85rem;
