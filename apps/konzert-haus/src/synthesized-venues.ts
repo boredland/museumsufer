@@ -103,16 +103,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "kellertheater-frankfurt",
-    name: "Kellertheater Frankfurt",
-    address: "",
-    lat: 50.1108,
-    lon: 8.6852,
-    city: "frankfurt",
-    website_url: "",
-    default_genre: "world",
-  },
-  {
     slug: "oper-frankfurt",
     name: "Oper Frankfurt",
     address: "",
