@@ -49,11 +49,22 @@ export type ExhibitionApiType =
   | "offenbach-sitepark"
   | "junges-museum-drupal"
   | "momem-wp"
-  | "sinclair-kunst-natur";
+  | "sinclair-kunst-natur"
+  | "stadtgeschichte-ffm-html"
+  | "ikonenmuseum-press";
 
 export interface ProxyConfig {
   url: string;
   token?: string;
+}
+
+export interface ManualExhibition {
+  title: string;
+  start_date?: string;
+  end_date?: string;
+  description?: string;
+  detail_url?: string;
+  image_url?: string;
 }
 
 export interface MuseumConfig {
@@ -79,6 +90,10 @@ export interface MuseumConfig {
     type: ExhibitionApiType;
     endpoint: string;
   };
+  /** Hard-coded exhibitions for venues whose own website has no machine-
+   *  parseable listing (geldmuseum, struwwelpeter). Maintained by hand —
+   *  small price for keeping their entries in the bundle. */
+  manualExhibitions?: ManualExhibition[];
 }
 
 export const MUSEUMS: Record<string, MuseumConfig> = {
@@ -195,8 +210,18 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6208,
     rmvStopLid: "A=1@O=Frankfurt (Main) Fischstein@X=8624952@Y=50129344@U=80@L=3001223@",
     exhibitionUrl: "https://www.bundesbank.de/de/bundesbank/geldmuseum/ausstellungen/",
-    // Bundesbank site has no machine-parseable event listing.
+    // Bundesbank's site has no machine-parseable exhibition listing —
+    // their /geldmuseum/ausstellungen/ page just describes the permanent
+    // "Mein Geld & Ich" experience. Pin it manually until that changes.
     skipEvents: true,
+    manualExhibitions: [
+      {
+        title: "Mein Geld & Ich",
+        description:
+          "Die Dauerausstellung des Geldmuseums vermittelt anhand von vier Themenwelten alles Wissenswerte rund um Bargeld, Buchgeld, Geldpolitik und das globale Finanzsystem.",
+        detail_url: "https://www.bundesbank.de/de/bundesbank/geldmuseum/ausstellungen/",
+      },
+    ],
   },
   "haus-der-stadtgeschichte-of": {
     lat: 50.0984,
@@ -235,6 +260,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     rmvStopLid: "A=1@O=Frankfurt (Main) Wasserweg@X=8694798@Y=50105432@U=80@L=3000028@",
     skipEvents: true,
     exhibitionUrl: "https://www.museumangewandtekunst.de/de/presse/ikonenmuseum/",
+    exhibitionApi: {
+      type: "ikonenmuseum-press",
+      endpoint: "https://www.museumangewandtekunst.de/de/presse/ikonenmuseum/",
+    },
   },
   "institut-fuer-stadtgeschichte": {
     lat: 50.1088,
@@ -244,6 +273,10 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     eventApi: {
       type: "stadtgeschichte-html",
       endpoint: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/kalender",
+    },
+    exhibitionApi: {
+      type: "stadtgeschichte-ffm-html",
+      endpoint: "https://www.stadtgeschichte-ffm.de/de/veranstaltungen/ausstellungen",
     },
   },
   "juedisches-museum-frankfurt": {
@@ -429,8 +462,18 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.684,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
     exhibitionUrl: "https://www.struwwelpeter-museum.de/sonderausstellungen/",
-    // No event listing, only special exhibitions.
+    // Sonderausstellungen page is JS-rendered and ships an empty body —
+    // pin the current Sonderausstellung by hand. Update whenever a new
+    // installation opens (see struwwelpeter-museum.de/sonderausstellungen).
     skipEvents: true,
+    manualExhibitions: [
+      {
+        title: "Struwwelpeter im Kubus des Lichts. Installationen von Thusjanthan Manoharan",
+        description:
+          "Lichtinstallationen, die Heinrich Hoffmanns Struwwelpeter-Bildwelt in eine zeitgenössische Lichtkunst übersetzen.",
+        detail_url: "https://www.struwwelpeter-museum.de/sonderausstellungen/",
+      },
+    ],
   },
   "tower-mmk-museum-mmk-fuer-moderne-kunst": {
     abbreviation: "MMK",
