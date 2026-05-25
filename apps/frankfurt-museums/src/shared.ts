@@ -11,7 +11,6 @@ import {
   truncate as coreTruncate,
 } from "@museumsufer/core";
 
-export const MUSEUMSUFER_DE = "https://www.museumsufer.de";
 export const APP_URL = "https://museumsufer.app";
 export const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
