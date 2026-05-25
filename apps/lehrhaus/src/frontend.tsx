@@ -135,12 +135,12 @@ export function Head(opts: HeadOptions) {
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preloadFonts={[
-        // The wordmark mixes weights: "lehr" → 300 normal, "salon"/"haus"
-        // → 600 italic. The first programme entry title (prog-entry__work)
-        // also enters the viewport and uses 400 normal. All three feed
-        // the LCP race; preloading them keeps it off the font path.
+        // Wordmark mixes weights: "lehr" → 300 normal, "salon"/"haus" →
+        // 600 italic. Preloading both keeps the masthead off the LCP
+        // font path. Tried also preloading 400-normal for the first
+        // programme title — net TBT regression from the extra critical
+        // request, so leave that to lazy discovery.
         "/fonts/cormorant-garamond-latin-300-normal.woff2",
-        "/fonts/cormorant-garamond-latin-400-normal.woff2",
         "/fonts/cormorant-garamond-latin-600-italic.woff2",
       ]}
       deferScripts={["/htmx.min.js"]}
