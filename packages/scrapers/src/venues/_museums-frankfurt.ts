@@ -111,17 +111,23 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
 }
 
 function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): CanonicalScrapedEvent | null {
-  if (!ex.title || !ex.start_date) return null;
+  if (!ex.title) return null;
   const title = cleanTitle(ex.title);
   const description = ex.description ? cleanTitle(ex.description) : null;
+  // Evergreen / Dauerausstellung entries arrive with no dates from the
+  // junges-museum-drupal and stadtgeschichte-ffm-html scrapers (and
+  // from manualExhibitions for the Bundesbank/Struwwelpeter pins). Pin
+  // the start at the unix epoch so they always count as "running" in
+  // downstream filters without polluting upcoming-window queries.
+  const startDate = ex.start_date ?? "1970-01-01";
 
   return {
-    source_event_id: `${scrapedSlug}|exhibition|${ex.detail_url ?? `${title}|${ex.start_date}`}`,
+    source_event_id: `${scrapedSlug}|exhibition|${ex.detail_url ?? `${title}|${startDate}`}`,
     title,
     description,
-    date: ex.start_date,
+    date: startDate,
     time: null,
-    end_date: ex.end_date && ex.end_date !== ex.start_date ? ex.end_date : null,
+    end_date: ex.end_date && ex.end_date !== startDate ? ex.end_date : null,
     end_time: null,
     detail_url: ex.detail_url,
     ticket_url: null,
