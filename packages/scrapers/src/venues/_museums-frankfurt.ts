@@ -51,6 +51,23 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
         }
       });
     }
+
+    if (config.manualExhibitions) {
+      for (const ex of config.manualExhibitions) {
+        const canonical = toCanonicalExhibition(
+          {
+            title: ex.title,
+            start_date: ex.start_date ?? null,
+            end_date: ex.end_date ?? null,
+            description: ex.description ?? null,
+            detail_url: ex.detail_url ?? null,
+            image_url: ex.image_url ?? null,
+          },
+          slug,
+        );
+        if (canonical) appendTo(byMuseum, slug, canonical);
+      }
+    }
   }
   await queue.onIdle();
 

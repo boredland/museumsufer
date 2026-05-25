@@ -144,6 +144,10 @@ export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Prom
       return fetchMomemExhibitions(config.endpoint);
     case "sinclair-kunst-natur":
       return fetchSinclairExhibitions(config.endpoint);
+    case "stadtgeschichte-ffm-html":
+      return fetchStadtgeschichteExhibitions(config.endpoint);
+    case "ikonenmuseum-press":
+      return fetchIkonenmuseumExhibitions(config.endpoint);
     default: {
       const _exhaustive: never = config.type;
       return [];
@@ -4045,6 +4049,131 @@ async function fetchSinclairExhibitions(endpoint: string): Promise<ApiExhibition
     }
     const imgM = block.match(/data-srcset="[^"]*?(https?:\/\/[^"\s]+\.(?:jpg|jpeg|png|webp))/i);
     out.push({ title, start_date, end_date, description: null, detail_url, image_url: imgM ? imgM[1] : null });
+  }
+  return out;
+}
+
+// ─── stadtgeschichte-ffm.de ──────────────────────────────────────────
+//
+// Each exhibition renders as `<div class="tile tile-text …">` containing
+// a tile-date paragraph ("DD.M.YYYY – DD.M.YYYY" or "Dauerangebot …"),
+// a sub-title ("Ausstellung" / "Dauerausstellung"), an h2.tile-title,
+// and an `<a class="link-more">` to the detail page. We accept both
+// dated and "Dauer-" tiles — visitors browsing exhibitions want to see
+// the permanent ones too.
+async function fetchStadtgeschichteExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const html = await res.text();
+  const origin = new URL(endpoint).origin;
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+
+  // Anchor the regex on the outer "tile tile-text" class — the inner
+  // `tile-img-div` / `tile-text-div` use overlapping class prefixes
+  // that would mis-split a naive `<div class="tile">` regex.
+  const tileRe =
+    /<div class="tile tile-text[^"]*">([\s\S]*?)(?=<div class="tile tile-text|<\/div>\s*<\/div>\s*<aside|<\/section>)/g;
+  for (const m of html.matchAll(tileRe)) {
+    const block = m[1];
+    const title = block
+      .match(/<h2 class="tile-title">([\s\S]*?)<\/h2>/)?.[1]
+      ?.replace(/<br\s*\/?>/gi, " ")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!title) continue;
+
+    const dateRaw = block
+      .match(/<p class="tile-date">([\s\S]*?)<\/p>/)?.[1]
+      ?.replace(/<[^>]+>/g, " ")
+      .replace(/&ndash;/g, "–")
+      .replace(/&[a-z]+;/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    const dm = dateRaw?.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s*[–-]\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (dm) {
+      start_date = `${dm[3]}-${dm[2].padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
+      end_date = `${dm[6]}-${dm[5].padStart(2, "0")}-${dm[4].padStart(2, "0")}`;
+      if (end_date < today) continue;
+    }
+
+    const hrefRaw = block.match(/<a href="([^"]+)"\s+class="link-more[^"]*"/)?.[1];
+    const detail_url = hrefRaw ? (hrefRaw.startsWith("http") ? hrefRaw : `${origin}${hrefRaw}`) : null;
+    const imgSrc = block.match(/<img[^>]+src="([^"]+)"/)?.[1];
+    const image_url = imgSrc ? (imgSrc.startsWith("http") ? imgSrc : `${origin}${imgSrc}`) : null;
+
+    out.push({ title, start_date, end_date, description: null, detail_url, image_url });
+  }
+  return out;
+}
+
+// ─── museumangewandtekunst.de/de/presse/ikonenmuseum/ ────────────────
+//
+// The press page is the only public exhibition listing for the
+// Ikonenmuseum since its 2024 reopening (the museum shares its CMS
+// with MAK). Each Sonderausstellung block: <h2><span class="kicker">
+// Sonderausstellung</span>Title<span class="subline">Subline</span></h2>
+// followed by <p class="text-inverse">DD. Monat – DD. Monat YYYY</p>.
+// Skip the "Kalender" section that lists single-day events.
+async function fetchIkonenmuseumExhibitions(endpoint: string): Promise<ApiExhibition[]> {
+  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+  if (!res.ok) return [];
+  const fullHtml = await res.text();
+  const origin = new URL(endpoint).origin;
+  const calendarIdx = fullHtml.search(/<h2[^>]*class="kicker"[^>]*>\s*Kalender/i);
+  const html = calendarIdx !== -1 ? fullHtml.slice(0, calendarIdx) : fullHtml;
+  const today = todayIso();
+  const out: ApiExhibition[] = [];
+  const seen = new Set<string>();
+
+  // <h2> containing a `class="kicker"` span. Title may have a subline
+  // span after it. The date paragraph is the next sibling.
+  const h2Re = /<h2>\s*<span class="kicker">([^<]+)<\/span>([\s\S]*?)<\/h2>\s*<p class="text-inverse">([^<]+)<\/p>/g;
+  for (const m of html.matchAll(h2Re)) {
+    const kicker = m[1].trim();
+    if (!/ausstellung/i.test(kicker)) continue;
+    const rest = m[2];
+    const subline = rest
+      .match(/<span class="subline">([\s\S]*?)<\/span>/)?.[1]
+      ?.replace(/<[^>]+>/g, "")
+      .trim();
+    const titleHead = rest
+      .replace(/<span class="subline">[\s\S]*?<\/span>/g, "")
+      .replace(/<[^>]+>/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const title = subline ? `${titleHead}. ${subline}` : titleHead;
+    if (!title || seen.has(title)) continue;
+    seen.add(title);
+
+    const dateText = m[3].trim();
+    const dr = dateText.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)?\s*[–-]\s*(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s+(\d{4})/);
+    let start_date: string | null = null;
+    let end_date: string | null = null;
+    if (dr) {
+      const sm = dr[2] ? GERMAN_MONTHS[dr[2].toLowerCase()] : GERMAN_MONTHS[dr[4].toLowerCase()];
+      const em = GERMAN_MONTHS[dr[4].toLowerCase()];
+      if (sm && em) {
+        start_date = `${dr[5]}-${sm}-${dr[1].padStart(2, "0")}`;
+        end_date = `${dr[5]}-${em}-${dr[3].padStart(2, "0")}`;
+        if (end_date < today) continue;
+      }
+    }
+
+    // The block's link is usually `Mehr erfahren` further down; the
+    // image is in a sibling figure. Both are optional.
+    const mIdx = m.index ?? 0;
+    const after = html.slice(mIdx, mIdx + 4000);
+    const hrefMatch = after.match(/<a href="(\/de\/besuch\/[^"]+)"[^>]*>\s*<i[^>]*class="icon icon-arrow-right3"/);
+    const detail_url = hrefMatch ? `${origin}${hrefMatch[1]}` : null;
+    const imgMatch = after.match(/<img[^>]+src="(\/images\/[^"]+)"/);
+    const image_url = imgMatch ? `${origin}${imgMatch[1]}` : null;
+
+    out.push({ title, start_date, end_date, description: null, detail_url, image_url });
   }
   return out;
 }
