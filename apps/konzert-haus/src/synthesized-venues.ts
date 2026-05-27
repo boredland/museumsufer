@@ -73,6 +73,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "experimental",
   },
   {
+    slug: "haus-am-dom",
+    name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
+    address: "",
+    lat: 50.1107,
+    lon: 8.6826,
+    city: "frankfurt",
+    website_url: "https://hausamdom-frankfurt.de",
+    default_genre: "classical",
+  },
+  {
     slug: "institut-fuer-stadtgeschichte",
     name: "Institut für Stadtgeschichte",
     address: "",
