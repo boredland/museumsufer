@@ -90,8 +90,19 @@ export function decodeEntities(text: string): string {
     .replace(/&([a-zA-Z]+);/g, (m, name) => NAMED_ENTITIES[name] ?? m);
 }
 
+/**
+ * WordPress page-builder shortcodes (vc_row, vc_column_text, et_pb_section, …)
+ * leak verbatim into REST/RSS descriptions when the builder's content isn't
+ * server-rendered. Their tag names always carry an underscore, which lets us
+ * drop them without touching prose brackets like "[OmU]", "[OV]" or
+ * "[USA, 2024]" that are common in cinema listings.
+ */
+export function stripShortcodes(text: string): string {
+  return text.replace(/\[\/?[a-zA-Z0-9]+(?:_[a-zA-Z0-9]+)+(?:\s[^\]]*)?\/?\]/g, " ");
+}
+
 export function stripHtml(html: string): string {
-  return decodeEntities(html.replace(/<[^>]+>/g, " "))
+  return decodeEntities(stripShortcodes(html).replace(/<[^>]+>/g, " "))
     .replace(/\s+/g, " ")
     .trim();
 }
