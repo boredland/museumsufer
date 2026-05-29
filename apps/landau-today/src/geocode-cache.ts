@@ -206,6 +206,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "rote kaserne|landau in der pfalz": [49.199258, 8.111136],
   "rptu campus landau (atrium)|landau in der pfalz": [49.198283, 8.112344],
   "rptu in landau|landau in der pfalz": [49.204067, 8.107269],
+  "rptu konferenzsaal|landau in der pfalz": [49.198283, 8.112344],
   "rptu landau|landau in der pfalz": [49.204067, 8.107269],
   "rptu rheinland-pfälzische technische universität kaiserslautern landau|landau in der pfalz": [49.198283, 8.112344],
   "ruderclub - coworking & event space|landau/pfalz": [49.192464, 8.134193],
