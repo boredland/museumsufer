@@ -95,6 +95,7 @@ import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeNaxos } from "./venues/naxos";
+import { scrapeNaxosKino } from "./venues/naxos-kino";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
 import { scrapeNipponConnection } from "./venues/nippon-connection";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
@@ -214,6 +215,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "murnau-filmtheater", run: (_ctx: ScraperContext) => scrapeMurnauFilmtheater() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
+  { slug: "naxos-kino", run: (_ctx: ScraperContext) => scrapeNaxosKino() },
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
   { slug: "nippon-connection", run: (_ctx: ScraperContext) => scrapeNipponConnection() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
@@ -320,6 +322,7 @@ export {
   scrapeMuseumsFrankfurt,
   scrapeMusikschuleFrankfurt,
   scrapeNaxos,
+  scrapeNaxosKino,
   scrapeNeuesTheaterHoechst,
   scrapeNipponConnection,
   scrapeNormativeOrders,

@@ -20,6 +20,9 @@ const ALLOWED_HOSTS = new Set([
   "www.nipponconnection.com",
   // Nippon Connection runs a separate DB subdomain for poster art.
   "db.nipponconnection.com",
+  // naxos.Kino serves film stills via the gk-download path of its CMS.
+  "naxos-kino.de",
+  "www.naxos-kino.de",
   "murnau-stiftung.de",
   "www.murnau-stiftung.de",
   "www.wiesbaden.de",

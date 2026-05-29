@@ -127,6 +127,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "lichtblick-moerfelden": [50.0001, 8.5709],
   malsehn: [50.1235, 8.6789],
   "murnau-filmtheater": [50.0857, 8.2456],
+  "naxos-kino": [50.1198, 8.7027],
   "nippon-connection": [50.1183, 8.7019],
   "orfeos-erben": [50.1149, 8.6452],
   "programmkino-rex": [49.8773, 8.6555],
