@@ -116,6 +116,17 @@ export const CURATED_CINEMAS: CinemaConfig[] = [
     tagline: "Festival des japanischen Films.",
   },
   {
+    slug: "naxos-kino",
+    name: "naxos.Kino",
+    short_name: "naxos.Kino",
+    address: "Naxoshalle, Waldschmidtstraße 19 HH, 60316 Frankfurt am Main",
+    lat: 50.1198,
+    lon: 8.7027,
+    city: "frankfurt",
+    website_url: "https://naxos-kino.de",
+    tagline: "Dienstag ist Kino-Tag – Dokumentarfilm mit Filmgespräch in der Naxoshalle.",
+  },
+  {
     slug: "murnau-filmtheater",
     name: "Murnau-Filmtheater",
     short_name: "Murnau-Filmtheater",
