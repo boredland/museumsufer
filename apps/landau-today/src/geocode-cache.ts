@@ -10,6 +10,7 @@
  */
 export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "60+ smart ins internet das projekt der digital-botschafter landau|landau in der pfalz": [49.198283, 8.112344],
+  "76887 bad bergzabern|bad bergzabern": [49.102065, 7.980236],
   "76889 kapellen-drusweiler|kapellen-drusweiler": [49.102762, 8.031239],
   "alm landau|landau": [49.198283, 8.112344],
   "alsterweiler kapelle|maikammer": [49.308511, 8.122563],
@@ -80,6 +81,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "frank-loebsches haus, kaufhausgasse 9, landau|landau in der pfalz": [49.199176, 8.112177],
   "frank-loebsches haus|landau in der pfalz": [49.199176, 8.112177],
   "frank-loebsches-haus|landau in der pfalz": [49.199176, 8.112177],
+  "franz josef kaffeehaus|landau in der pfalz": [49.198283, 8.112344],
   "freigeist-mosterei|schweigen-rechtenbach": [49.054561, 7.956034],
   "freiwillige feuerwehr annweiler am trifels|annweiler am trifels": [49.203815, 7.967896],
   "galerie neumühle|edenkoben": [49.283253, 8.111971],
@@ -174,6 +176,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "neustadt a.d. w.|neustadt a.d. w.": [54.103852, 10.807912],
   "obertorplatz, ecke reiterstr./xylanderstr.|landau in der pfalz": [49.198283, 8.112344],
   "online|": [49.198283, 8.112344],
+  "ortsgemeinde freimersheim|freimersheim": [49.2683, 8.223612],
   "ortsgemeinde hainfeld|hainfeld": [49.257501, 8.101102],
   "ortsgemeinde knöringen|knöringen": [49.237209, 8.144718],
   "ortsgemeinde rhodt u. rietburg|rhodt unter rietburg": [49.270878, 8.106712],
@@ -270,6 +273,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut am fürstweg|heuchelheim": [49.760758, 10.568498],
   "weingut bernhard koch|hainfeld": [49.254795, 8.099683],
   "weingut bernhart|schweigen-rechtenbach": [49.051024, 7.954504],
+  "weingut bus|insheim": [49.153931, 8.13828],
   "weingut doktores töpfer|annweiler am trifels": [49.202202, 7.963012],
   "weingut eck|ilbesheim": [49.183088, 8.051786],
   "weingut emil bauer|landau-nußdorf": [49.22529, 8.112232],

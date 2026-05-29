@@ -21,15 +21,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://eschborn-k.de",
   },
   {
-    slug: "juedisches-museum-frankfurt",
-    name: "Jüdisches Museum Frankfurt",
-    address: "",
-    lat: 50.104,
-    lon: 8.6649,
-    city: "frankfurt",
-    website_url: "https://www.juedischesmuseum.de",
-  },
-  {
     slug: "malsehn",
     name: "Mal seh'n Kino",
     address: "",
