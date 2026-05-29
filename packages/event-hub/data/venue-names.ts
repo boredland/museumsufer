@@ -134,6 +134,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "museum-sinclair-haus-bad-homburg": "Museum Sinclair-Haus Bad Homburg",
   "musikschule-frankfurt": "Städtische Musikschule Frankfurt",
   "naxos-hallenkonzerte": "Naxos Hallenkonzerte",
+  "naxos-kino": "naxos.Kino",
   "neues-theater-hoechst": "Neues Theater Höchst",
   "nippon-connection": "Nippon Connection",
   "normative-orders": "Forschungsverbund Normative Ordnungen",
