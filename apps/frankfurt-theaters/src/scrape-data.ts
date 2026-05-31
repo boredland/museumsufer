@@ -461,7 +461,7 @@ export const SCRAPE_DATA: ScrapeData = {
   ],
   performances: [
     {"date":"2026-05-31","id":1662585418,"provider_event_id":"maerchenkarussell-38|2026-05-31|11:00","show_id":942650688,"status":"available","ticket_url":"https://www.yesticket.org/event/de/maerchenkarussell-31-05-26","time":"11:00","venue_room":"Galli Theater"},
-    {"date":"2026-05-31","end_time":"18:50","id":3859232513,"price_max":68,"price_min":14,"provider_event_id":"buddenbrooks|2026-05-31|16:00|Schauspielhaus","show_id":2598901332,"status":"sold_out","time":"16:00","venue_room":"Schauspielhaus"},
+    {"date":"2026-05-31","end_time":"18:50","id":3859232513,"price_max":68,"price_min":14,"provider_event_id":"buddenbrooks|2026-05-31|16:00|Schauspielhaus","show_id":2598901332,"status":"unknown","time":"16:00","venue_room":"Schauspielhaus"},
     {"date":"2026-05-31","id":855357672,"provider_event_id":"moliere|2026-05-31|16:00|Grüneburgpark","show_id":2741645372,"status":"available","ticket_url":"https://www.diedramatischebuehne.de/veranstaltungen/das-leben-des-moliere-2/","time":"16:00","venue_room":"Grüneburgpark"},
     {"date":"2026-05-31","id":1253010312,"provider_event_id":"1434","show_id":1072590972,"status":"available","ticket_url":"https://www.internationales-theater.de/programm-ticketkauf/fische-weinen-nicht","time":"17:00","venue_room":"Theater, Deutsch"},
     {"date":"2026-05-31","id":1170014520,"provider_event_id":"16657","show_id":1420886724,"status":"unknown","time":"17:00","venue_room":"Junge Theaterwerkstatt am Zoo (Zoogesellschaftshaus)"},
