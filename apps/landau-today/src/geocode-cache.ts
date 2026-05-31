@@ -273,6 +273,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "waldstück queichwiesen (offenbach)|offenbach an der queich": [49.195993, 8.192833],
   "wein- und gästehaus spieß|kirrweiler": [49.301235, 8.162804],
   "wein- und gästehaus zöller|kirrweiler": [49.296496, 8.168844],
+  "wein- und sektgut wilhelmshof|siebeldingen": [49.209861, 8.050691],
   "wein- und sektgut wind-rabold|burrweiler": [49.2503, 8.076006],
   "wein- und sekthaus alois kiefer|st. martin": [49.299556, 8.103121],
   "wein- und sekthaus schreieck|maikammer": [49.30713, 8.127736],
