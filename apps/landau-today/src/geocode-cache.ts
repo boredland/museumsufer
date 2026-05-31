@@ -78,6 +78,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "evangelische studierendengemeinde, husarengasse 5|landau in der pfalz": [49.198283, 8.112344],
   "fatal - die unikneipe|landau in der pfalz": [49.198283, 8.112344],
   "festplatz vor der turnhalle|landau-queichheim": [49.190729, 8.141532],
+  "filmwelt landau|landau in der pfalz": [49.187855, 8.131842],
   "foyer des ewl, georg-friedrich-denzel-straße 1|": [49.198283, 8.112344],
   "frank-loebsches haus (innenhof)|landau in der pfalz": [49.198283, 8.112344],
   "frank-loebsches haus, kaufhausgasse 9, landau|landau in der pfalz": [49.199176, 8.112177],
