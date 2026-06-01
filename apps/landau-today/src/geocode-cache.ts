@@ -140,6 +140,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "kropsburg|st. martin": [49.293584, 8.09578],
   "kuk – kinder und kunst malwerkstatt|landau in der pfalz": [49.198283, 8.112344],
   "kultur-und weinbotschafterin|impflingen": [49.162154, 8.114798],
+  "kulturcantina|landau in der pfalz": [49.197928, 8.116473],
   "kulturzentrum altes kaufhaus|landau in der pfalz": [49.198978, 8.112625],
   "kulturzentrum offenbach|offenbach an der queich": [49.193013, 8.190407],
   "königstraße 50|landau in der pfalz": [49.196646, 8.11535],
