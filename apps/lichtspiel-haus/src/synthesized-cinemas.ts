@@ -30,6 +30,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://loveyourartist.com",
   },
   {
+    slug: "institut-francais-frankfurt",
+    name: "Institut français Frankfurt",
+    address: "",
+    lat: 50.1208,
+    lon: 8.6595,
+    city: "frankfurt",
+    website_url: "https://www.institutfrancais.de",
+  },
+  {
     slug: "malsehn",
     name: "Mal seh'n Kino",
     address: "",
