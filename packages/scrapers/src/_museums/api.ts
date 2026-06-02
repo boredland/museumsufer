@@ -423,7 +423,7 @@ async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
 
     return [
       {
-        title: ev.headline.trim(),
+        title: stripHtml(ev.headline),
         date,
         time: nullIfMidnight(time),
         end_time: endTime,
