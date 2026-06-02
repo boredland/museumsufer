@@ -74,6 +74,12 @@ function pickLatestInstallment(html: string): { n: number; url: string } | null 
   return best;
 }
 
+// The event date is announced with a venue and an "Uhr" time. The page also
+// carries an hr2-kultur radio-rebroadcast date ("Am Sonntag, 21. Juni 2026,
+// um 12:04 bringt hr2 kultur eine … Zusammenfassung") — those are flagged so a
+// future rephrasing can't be mistaken for the event itself.
+const REBROADCAST_RE = /hr2|zusammenfassung|wiederholung|sendung|mediathek|rundfunk|hinweis|podcast|newsletter/i;
+
 function extractDate(html: string): string | null {
   const re =
     /(?:Samstag|Sonntag|Freitag|Montag|Dienstag|Mittwoch|Donnerstag)?,?\s*(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)\.?\s*(20\d{2})/g;
@@ -86,6 +92,8 @@ function extractDate(html: string): string | null {
     const idx = m.index ?? 0;
     const after = html.slice(idx + m[0].length, idx + m[0].length + 160);
     if (!/\d{1,2}\s*Uhr/i.test(stripTags(after))) continue;
+    const context = stripTags(html.slice(Math.max(0, idx - 120), idx + m[0].length + 200));
+    if (REBROADCAST_RE.test(context)) continue;
     return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
   }
   return null;

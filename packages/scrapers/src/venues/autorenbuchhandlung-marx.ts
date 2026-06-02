@@ -18,6 +18,12 @@ const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 const ARTICLE_HEAD_RE = /^<article\s+id="post-(\d+)"[^>]*class="([^"]*)"/;
 const TITLE_RE = /class="czr-title"\s+href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/;
 const H1_RE = /<h1[^>]*>([\s\S]*?)<\/h1>/;
+// When the post's WordPress title is just a date ("Donnerstag, 20. November,
+// 20 Uhr"), the real title is the leading <h2> of the body, and the flyer is
+// the first inline image.
+const CONTENT_H2_RE = /czr-wp-the-content"[^>]*>\s*<h2[^>]*>([\s\S]*?)<\/h2>/;
+const CONTENT_IMG_RE =
+  /czr-wp-the-content"[\s\S]*?<figure[^>]*wp-block-image[^>]*>\s*<a[^>]+href="([^"]+\.(?:jpe?g|png))"/i;
 const DATE_FULL_RE = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
 const DATE_MONTH_YEAR_RE =
   /(\d{1,2})\.\s*(januar|februar|m[aä]rz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i;
@@ -67,6 +73,8 @@ export async function scrapeAutorenbuchhandlungMarx(): Promise<VenueScrapeResult
     const entryTitle = stripHtml(decodeEntities(titleMatch[2])).trim();
     const h1Match = article.match(H1_RE);
     const innerH1 = h1Match ? stripHtml(decodeEntities(h1Match[1])).trim() : "";
+    const contentH2 = article.match(CONTENT_H2_RE);
+    const bodyTitle = contentH2 ? stripHtml(decodeEntities(contentH2[1])).trim() : "";
 
     // Skip cancellation announcements and press releases. They're tagged
     // with the same category-veranstaltungen but aren't bookable events.
@@ -80,9 +88,20 @@ export async function scrapeAutorenbuchhandlungMarx(): Promise<VenueScrapeResult
     const timeMatch = entryTitle.match(TIME_RE);
     const time = timeMatch ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2] ?? "00"}` : null;
 
-    // Inner <h1> is usually the real title (Author/Title); fall back to the
-    // entry title when it's empty (some posts use only the outer title).
-    const title = innerH1 || entryTitle.replace(/^Einladung[,:]?\s*/i, "").replace(/,?\s*\d{1,2}.*$/, "");
+    // The body <h2> carries the real title when the post is titled by date;
+    // otherwise fall back to the inner <h1>, then the cleaned entry title
+    // (strip the "Einladung" prefix, the date tail, and any "| Weekday" tail).
+    const title =
+      bodyTitle ||
+      innerH1 ||
+      entryTitle
+        .replace(/^Einladung[,:]?\s*/i, "")
+        .replace(/,?\s*\d{1,2}.*$/, "")
+        .replace(/\s*\|.*$/, "")
+        .trim();
+
+    const imageMatch = article.match(CONTENT_IMG_RE);
+    const imageUrl = imageMatch ? imageMatch[1] : null;
 
     events.push({
       source_event_id: id,
@@ -94,7 +113,7 @@ export async function scrapeAutorenbuchhandlungMarx(): Promise<VenueScrapeResult
       end_time: null,
       detail_url: detailUrl,
       ticket_url: null,
-      image_url: null,
+      image_url: imageUrl,
       raw_category: null,
       labels: [
         { label: `talk:${classifyTalk(title, null).toLowerCase()}`, confidence: 0.85, classifier: "keyword:talk" },
