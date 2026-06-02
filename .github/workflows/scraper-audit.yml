@@ -1,0 +1,46 @@
+name: scraper-audit
+
+on:
+  schedule:
+    - cron: "30 6 * * *" # daily 08:30 CEST (06:30 UTC); audits the latest committed bundle
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: scraper-audit
+  cancel-in-progress: false
+
+# Audits the committed events bundle for scrapers that under-deliver (the
+# juedisches/fdh/caricatura failure mode), and — only when it finds any —
+# assigns the GitHub Copilot coding agent an issue to investigate and fix.
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Audit scrapers
+        id: audit
+        env:
+          AUDIT_REPORT_PATH: ${{ runner.temp }}/scraper-audit-report.md
+        run: bun packages/event-hub/scripts/audit-scrapers.ts
+
+      - name: Hand findings to Copilot
+        if: steps.audit.outputs.suspects != '0'
+        env:
+          # A user PAT with Copilot enabled — the default GITHUB_TOKEN cannot
+          # assign the coding agent. Fine-grained: read metadata, read/write
+          # issues + pull requests + contents + actions.
+          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+          AUDIT_REPORT_PATH: ${{ runner.temp }}/scraper-audit-report.md
+        run: bun packages/event-hub/scripts/assign-copilot.ts
