@@ -8,6 +8,5 @@
   "mampf": "aggregator — emits per-venue child slugs",
   "stiftung-hg": "aggregator — emits krankenhaus-nordwest + hospital-zum-heiligen-geist",
   "karl-marx-buchhandlung": "seasonal — bookshop often has no events booked beyond the next few weeks",
-  "openbooks-frankfurt": "seasonal — annual October festival; empty the rest of the year",
-  "roemerberggespraeche": "seasonal — lecture series runs ~twice a year; empty between editions"
+  "openbooks-frankfurt": "seasonal — annual October festival; empty the rest of the year"
 }
