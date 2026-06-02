@@ -32,6 +32,20 @@ Authorization: Bearer <AUTH_TOKEN>
 
 Returns the fetched page content with the original status code and content-type.
 
+The caller's HTTP method and request body are mirrored upstream, so form
+`POST`s work too (the target's `?url=` still goes in the query string):
+
+```
+POST /?url=https://example.com/search
+Authorization: Bearer <AUTH_TOKEN>
+Content-Type: application/x-www-form-urlencoded
+
+field=value&other=value
+```
+
+`Content-Type` is the only request header forwarded; the `User-Agent` is
+always replaced with a Chrome UA (the reason callers reach for the proxy).
+
 **Request flow:**
 
 1. Plain `fetch()` with a Chrome User-Agent — handles datacenter-IP blocks and broken TLS chains.
