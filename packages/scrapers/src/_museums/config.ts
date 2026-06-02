@@ -288,7 +288,7 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     exhibitionUrl: "https://www.juedischesmuseum.de/besuch/ausstellungen",
     eventApi: {
       type: "juedisches",
-      endpoint: "https://www.juedischesmuseum.de/besuch/feed.json?records%5BL%5D=0&records%5Buid%5D=329",
+      endpoint: "https://www.juedischesmuseum.de/besuch/kalender/feed.json?records%5BL%5D=0&records%5Buid%5D=76",
     },
     exhibitionApi: { type: "juedisches", endpoint: "https://www.juedischesmuseum.de/besuch/ausstellungen" },
   },
