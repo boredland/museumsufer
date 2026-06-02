@@ -32,13 +32,25 @@ http
       return;
     }
 
-    console.log(`-> ${url}`);
+    // Mirror the caller's method/body so form POSTs (not just GET fetches)
+    // can be proxied. Content-Type is the one request header we forward —
+    // the UA is always replaced with CHROME_UA, which is the whole point of
+    // the proxy.
+    const method = req.method || "GET";
+    const reqBody = method === "GET" || method === "HEAD" ? undefined : await readBody(req);
+    const contentType = req.headers["content-type"];
+
+    console.log(`-> ${method} ${url}`);
     try {
       // Step 1: plain fetch with a Chrome UA. Handles the common cases
       // (datacenter-IP blocks, broken TLS chains, anti-bot heuristics that
       // only check headers).
+      const upstreamHeaders = { "User-Agent": CHROME_UA };
+      if (reqBody && contentType) upstreamHeaders["content-type"] = contentType;
       const direct = await fetch(url, {
-        headers: { "User-Agent": CHROME_UA },
+        method,
+        headers: upstreamHeaders,
+        body: reqBody,
         redirect: "follow",
       });
       const directBody = Buffer.from(await direct.arrayBuffer());
@@ -48,8 +60,8 @@ http
       // 403 status + a small HTML page containing "Just a moment…" or the
       // cf-chl_ JS-init markers.
       if (FLARESOLVERR_URL && looksLikeCfChallenge(direct.status, directBody)) {
-        console.log(`?? CF challenge on ${url} — retrying via FlareSolverr`);
-        const solved = await solveWithFlareSolverr(url);
+        console.log(`?? CF challenge on ${method} ${url} — retrying via FlareSolverr`);
+        const solved = await solveWithFlareSolverr(url, method, reqBody);
         if (solved) {
           console.log(`<- ${solved.status} ${url} (flaresolverr)`);
           res.writeHead(solved.status, { "content-type": "text/html; charset=utf-8" });
@@ -75,6 +87,15 @@ http
     if (FLARESOLVERR_URL) console.log(`flaresolverr sidecar: ${FLARESOLVERR_URL}`);
   });
 
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => resolve(chunks.length ? Buffer.concat(chunks) : undefined));
+    req.on("error", reject);
+  });
+}
+
 /** Detect a Cloudflare interactive challenge so we know to fall back to
  *  FlareSolverr. Cheap heuristic: small 403 response containing the JS-init
  *  fingerprint. Bigger 403 pages (real "forbidden" responses from the origin)
@@ -86,12 +107,16 @@ function looksLikeCfChallenge(status, body) {
   return /Just a moment\.\.\./i.test(head) || /cf-chl_/i.test(head) || /__cf_chl_opt/i.test(head);
 }
 
-async function solveWithFlareSolverr(url) {
+async function solveWithFlareSolverr(url, method = "GET", body) {
   try {
+    const command =
+      method === "POST"
+        ? { cmd: "request.post", url, postData: body ? body.toString("utf8") : "", maxTimeout: FLARESOLVERR_TIMEOUT_MS }
+        : { cmd: "request.get", url, maxTimeout: FLARESOLVERR_TIMEOUT_MS };
     const res = await fetch(`${FLARESOLVERR_URL.replace(/\/$/, "")}/v1`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cmd: "request.get", url, maxTimeout: FLARESOLVERR_TIMEOUT_MS }),
+      body: JSON.stringify(command),
     });
     if (!res.ok) {
       console.warn(`!! flaresolverr http ${res.status}`);
