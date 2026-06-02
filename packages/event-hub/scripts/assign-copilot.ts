@@ -49,24 +49,43 @@ writeFileSync(
 const issueUrl = gh(["issue", "create", "--title", TITLE, "--label", LABEL, "--body-file", bodyFile]);
 const number = issueUrl.split("/").pop();
 
-// Assign the Copilot coding agent via REST using its literal handle — the same
-// path the Assignees menu uses. We deliberately don't gate on the GraphQL
-// suggestedActors query: it unreliably omits the bot for fine-grained PATs even
-// when assignment works.
-const assigned = JSON.parse(
-  gh([
-    "api",
-    "--method",
-    "POST",
-    "-H",
-    "Accept: application/vnd.github+json",
-    `/repos/${owner}/${repo}/issues/${number}/assignees`,
-    "-f",
-    `assignees[]=${COPILOT_ASSIGNEE}`,
-  ]),
-) as { assignees?: { login: string }[] };
+// Assign the Copilot coding agent via the documented REST agent-assignment
+// body. We deliberately don't gate on the GraphQL suggestedActors query: it
+// unreliably omits the bot for fine-grained PATs even when assignment works.
+// NOTE: GH_TOKEN must have Contents + Pull requests + Actions write (not just
+// Issues) — assigning the agent creates a branch/PR, so a token with only
+// Issues:write gets HTTP 403 here even though it can create the issue.
+const payloadFile = "/tmp/copilot-assign.json";
+writeFileSync(
+  payloadFile,
+  JSON.stringify({
+    assignees: [COPILOT_ASSIGNEE],
+    agent_assignment: { target_repo: `${owner}/${repo}`, base_branch: "main", custom_instructions: "", custom_agent: "", model: "" },
+  }),
+);
 
-if (assigned.assignees?.some((a) => /copilot/i.test(a.login))) {
+let assigned: { assignees?: { login: string }[] } | null = null;
+try {
+  assigned = JSON.parse(
+    gh([
+      "api",
+      "--method",
+      "POST",
+      "-H",
+      "Accept: application/vnd.github+json",
+      `/repos/${owner}/${repo}/issues/${number}/assignees`,
+      "--input",
+      payloadFile,
+    ]),
+  );
+} catch (e) {
+  console.error(
+    `Created ${issueUrl} but assigning the Copilot agent failed (likely the PAT lacks Contents/Pull-requests/Actions write):\n${(e as Error).message}`,
+  );
+  process.exit(0);
+}
+
+if (assigned?.assignees?.some((a) => /copilot/i.test(a.login))) {
   console.log(`Created ${issueUrl} and assigned the Copilot coding agent.`);
 } else {
   console.error(
