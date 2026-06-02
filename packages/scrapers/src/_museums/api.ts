@@ -1110,12 +1110,14 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
   const today = todayIso();
   const events: ApiEvent[] = [];
 
-  const linkRe = /<a[^>]+class="o-program-link"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
-  const detailUrls: string[] = [];
+  const linkRe = /<a\b([^>]*\bclass="o-program-link"[^>]*)>/g;
+  const detailUrls = new Set<string>();
   let linkMatch;
   while ((linkMatch = linkRe.exec(html)) !== null) {
-    const url = normalizeUrl(linkMatch[1], baseUrl);
-    if (url) detailUrls.push(url);
+    const hrefMatch = linkMatch[1].match(/\bhref="([^"]+)"/);
+    if (!hrefMatch) continue;
+    const url = normalizeUrl(hrefMatch[1], baseUrl);
+    if (url) detailUrls.add(url);
   }
 
   for (const url of detailUrls) {
@@ -1124,11 +1126,17 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
       if (!detailRes.ok) continue;
       const detailHtml = await detailRes.text();
 
+      const ogTitle = detailHtml.match(/<meta property="og:title" content="([^"]*)"/);
+      const teaserTitle = detailHtml.match(/o-event-teaser__title[^>]*>([\s\S]*?)</);
+      const title = stripHtml(ogTitle?.[1] || teaserTitle?.[1] || "");
+      const ogImage = detailHtml.match(/<meta property="og:image" content="([^"]*)"/);
+      const imageUrl = ogImage ? normalizeUrl(ogImage[1], baseUrl) : null;
+
       const eventRe = /c-event-item__date__title[^>]*>([^<]+)[\s\S]*?c-event-item__date__subtitle[^>]*>([^<]+)/g;
       let eventMatch;
       while ((eventMatch = eventRe.exec(detailHtml)) !== null) {
-        const dateStr = eventMatch[1].trim();
-        const timeStr = eventMatch[2].trim();
+        const dateStr = stripHtml(eventMatch[1]);
+        const timeStr = stripHtml(eventMatch[2]);
 
         const dm = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4})/);
         if (!dm) continue;
@@ -1142,18 +1150,15 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
           time = raw.includes(":") ? raw : `${raw}:00`;
         }
 
-        const titleMatch = detailHtml.match(/c-event-detail__title[^>]*>([^<]+)/);
-        const imgMatch = detailHtml.match(/c-event-detail__image[^>]*>[\s\S]*?<img[^>]+src="([^"]+)"/);
-
         events.push({
-          title: titleMatch ? titleMatch[1].trim() : "",
+          title,
           date,
           time: nullIfMidnight(time),
           end_time: null,
           end_date: null,
           description: null,
           detail_url: url,
-          image_url: imgMatch ? normalizeUrl(imgMatch[1], baseUrl) : null,
+          image_url: imageUrl,
           price: null,
         });
       }
@@ -1658,6 +1663,40 @@ async function fetchCaricatura(endpoint: string): Promise<ApiEvent[]> {
     });
     m = blockRe.exec(html);
   }
+
+  // The Veranstaltungskalender table holds the actual dated events; the
+  // teaser blocks above only carry exhibition runtimes (date ranges).
+  for (const chunk of html.split(/<div class="event_row columns">/).slice(1)) {
+    const row = chunk.split(/<div class="(?:event_row|columns) columns(?:-buttons)?"/)[0];
+    const dm = row.match(/<p class="event_date">\s*(\d{1,2})\.(\d{1,2})\./);
+    if (!dm) continue;
+    const date = `${inferYear(dm[2], dm[1])}-${dm[2].padStart(2, "0")}-${dm[1].padStart(2, "0")}`;
+    if (date < today) continue;
+
+    const link = row.match(/<p class="subheadline">\s*<a href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/);
+    const title = stripHtml((link?.[2] ?? "").replace(/<br\s*\/?>/gi, " "));
+    if (!title) continue;
+
+    const times = [
+      ...(row.match(/<p class="event_time">([^<]*)<\/p>/)?.[1] ?? "").matchAll(/(\d{1,2})[.:](\d{2})/g),
+    ].map((t) => `${t[1].padStart(2, "0")}:${t[2]}`);
+    const teaser = row.match(/<div class="teaser_text">\s*<p>([\s\S]*?)<\/p>/)?.[1]?.trim() || null;
+    const image = row.match(/<img[^>]+src="([^"]+)"/)?.[1];
+
+    events.push({
+      title,
+      date,
+      time: times[0] ?? null,
+      end_time: times[1] ?? null,
+      end_date: null,
+      description: teaser ? truncateHtml(teaser) : null,
+      detail_url: link?.[1] ? normalizeUrl(link[1], origin) : null,
+      image_url: image ? normalizeUrl(image, origin) : null,
+      price: null,
+      category: classifyEvent(title, teaser) || null,
+    });
+  }
+
   return events;
 }
 
