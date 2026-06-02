@@ -18,6 +18,23 @@ const POST_BLOCK_RE =
   /<a\s+class="wp-block-latest-posts__post-title"\s+href="(https:\/\/www\.landinsicht\.eu\/(\d{4})\/(\d{2})\/(\d{2})\/([^/"]+)\/)"[^>]*>([\s\S]*?)<\/a>([\s\S]*?)(?=<a\s+class="wp-block-latest-posts__post-title"|<footer|<\/div>\s*<\/div>\s*<\/article)/g;
 const TIME_RE = /(?:um\s+)?(\d{1,2})(?::(\d{2}))?\s*Uhr/i;
 const ORT_RE = /<strong>\s*Ort:\s*([\s\S]*?)\s*<\/strong>/i;
+const BODY_DATE_RE =
+  /(\d{1,2})\.\s*(januar|februar|m[aä]rz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i;
+const MONTHS_DE: Record<string, number> = {
+  januar: 1,
+  februar: 2,
+  märz: 3,
+  maerz: 3,
+  april: 4,
+  mai: 5,
+  juni: 6,
+  juli: 7,
+  august: 8,
+  september: 9,
+  oktober: 10,
+  november: 11,
+  dezember: 12,
+};
 
 export async function scrapeLandinsichtBuchladen(): Promise<VenueScrapeResult> {
   const res = await fetch(LIST_URL, { headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" } });
@@ -30,10 +47,19 @@ export async function scrapeLandinsichtBuchladen(): Promise<VenueScrapeResult> {
 
   for (const m of html.matchAll(POST_BLOCK_RE)) {
     const detailUrl = m[1];
-    const date = `${m[2]}-${m[3]}-${m[4]}`;
     const slug = m[5];
     const titleHtml = m[6];
     const body = m[7];
+
+    // The URL date is the post's publish date, not the event date — events
+    // are announced weeks ahead, so filtering on it drops upcoming events.
+    // Prefer the "Weekday, DD. Month YYYY" line in the body.
+    const bodyDate = body.match(BODY_DATE_RE);
+    const month = bodyDate ? MONTHS_DE[bodyDate[2].toLowerCase().normalize("NFC")] : undefined;
+    const date =
+      bodyDate && month
+        ? `${bodyDate[3]}-${String(month).padStart(2, "0")}-${bodyDate[1].padStart(2, "0")}`
+        : `${m[2]}-${m[3]}-${m[4]}`;
 
     if (date < today) continue;
     if (seen.has(slug)) continue;

@@ -15,8 +15,9 @@ const BASE = "https://autorenbuchhandlung-marx.de";
 const LIST_URL = `${BASE}/www/category/veranstaltungen/`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
-const ARTICLE_RE =
-  /<article\s+id="post-(\d+)"[^>]*class="([^"]*category-veranstaltungen[^"]*)"[\s\S]*?class="czr-title"\s+href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>[\s\S]*?<h1[^>]*>([\s\S]*?)<\/h1>/g;
+const ARTICLE_HEAD_RE = /^<article\s+id="post-(\d+)"[^>]*class="([^"]*)"/;
+const TITLE_RE = /class="czr-title"\s+href="([^"]+)"[^>]*>\s*([\s\S]*?)\s*<\/a>/;
+const H1_RE = /<h1[^>]*>([\s\S]*?)<\/h1>/;
 const DATE_FULL_RE = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
 const DATE_MONTH_YEAR_RE =
   /(\d{1,2})\.\s*(januar|februar|m[aä]rz|april|mai|juni|juli|august|september|oktober|november|dezember)\s+(\d{4})/i;
@@ -50,11 +51,22 @@ export async function scrapeAutorenbuchhandlungMarx(): Promise<VenueScrapeResult
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  for (const m of html.matchAll(ARTICLE_RE)) {
-    const id = m[1];
-    const detailUrl = m[3];
-    const entryTitle = stripHtml(decodeEntities(m[4])).trim();
-    const innerH1 = stripHtml(decodeEntities(m[5])).trim();
+  // Split into per-article blocks (cut at the closing tag) so the optional
+  // inner <h1> can't greedily span across articles — most listing cards have
+  // no <h1>, and a single combined regex would collapse them into one match.
+  for (const block of html.split(/(?=<article\s+id="post-)/)) {
+    const head = block.match(ARTICLE_HEAD_RE);
+    if (!head?.[2].includes("category-veranstaltungen")) continue;
+    const article = block.split("</article>")[0];
+
+    const titleMatch = article.match(TITLE_RE);
+    if (!titleMatch) continue;
+
+    const id = head[1];
+    const detailUrl = titleMatch[1];
+    const entryTitle = stripHtml(decodeEntities(titleMatch[2])).trim();
+    const h1Match = article.match(H1_RE);
+    const innerH1 = h1Match ? stripHtml(decodeEntities(h1Match[1])).trim() : "";
 
     // Skip cancellation announcements and press releases. They're tagged
     // with the same category-veranstaltungen but aren't bookable events.

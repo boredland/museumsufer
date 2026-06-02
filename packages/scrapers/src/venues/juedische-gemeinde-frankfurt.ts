@@ -38,7 +38,7 @@ export async function scrapeJuedischeGemeinde(): Promise<VenueScrapeResult> {
     const date = toBerlinDate(start);
     if (date < today) continue;
 
-    const catTitle = e.category?.title?.replace(/ /g, " ") ?? "";
+    const catTitle = e.category?.title?.replace(/\u00A0/g, " ") ?? "";
     if (catTitle !== "Kultur & Events" && catTitle !== "Museen und Bildung") continue;
 
     const timeRaw = toBerlinTime(start);
