@@ -380,6 +380,8 @@ const JUEDISCHES_CATEGORY_MAP: Record<string, string> = {
   familienprogramm: "Familie",
   familie: "Familie",
   kinder: "Familie",
+  kinderprogramm: "Familie",
+  stadtspaziergang: "Führung",
   film: "Film",
   kino: "Film",
 };
