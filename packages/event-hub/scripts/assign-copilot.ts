@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const LABEL = "scraper-audit";
 const TITLE = "Scraper audit: under-delivering scrapers need a look";
-const COPILOT_LOGIN = "copilot-swe-agent";
+const COPILOT_ASSIGNEE = "copilot-swe-agent[bot]";
 
 const [owner, repo] = (process.env.GITHUB_REPOSITORY ?? "").split("/");
 if (!owner || !repo) throw new Error("GITHUB_REPOSITORY (owner/repo) is not set");
@@ -48,38 +48,28 @@ writeFileSync(
 );
 const issueUrl = gh(["issue", "create", "--title", TITLE, "--label", LABEL, "--body-file", bodyFile]);
 const number = issueUrl.split("/").pop();
-const issueId = gh(["issue", "view", String(number), "--json", "id", "--jq", ".id"]);
 
-const actors = JSON.parse(
+// Assign the Copilot coding agent via REST using its literal handle — the same
+// path the Assignees menu uses. We deliberately don't gate on the GraphQL
+// suggestedActors query: it unreliably omits the bot for fine-grained PATs even
+// when assignment works.
+const assigned = JSON.parse(
   gh([
     "api",
-    "graphql",
+    "--method",
+    "POST",
+    "-H",
+    "Accept: application/vnd.github+json",
+    `/repos/${owner}/${repo}/issues/${number}/assignees`,
     "-f",
-    `query=query($owner:String!,$name:String!){repository(owner:$owner,name:$name){suggestedActors(capabilities:[CAN_BE_ASSIGNED],first:100){nodes{login __typename ... on Bot {id} ... on User {id}}}}}`,
-    "-F",
-    `owner=${owner}`,
-    "-F",
-    `name=${repo}`,
+    `assignees[]=${COPILOT_ASSIGNEE}`,
   ]),
-) as { data: { repository: { suggestedActors: { nodes: { login: string; id: string }[] } } } };
+) as { assignees?: { login: string }[] };
 
-const bot = actors.data.repository.suggestedActors.nodes.find((n) => n.login === COPILOT_LOGIN);
-if (!bot) {
+if (assigned.assignees?.some((a) => /copilot/i.test(a.login))) {
+  console.log(`Created ${issueUrl} and assigned the Copilot coding agent.`);
+} else {
   console.error(
-    `Copilot coding agent (${COPILOT_LOGIN}) is not assignable for ${owner}/${repo}. Issue ${issueUrl} was created but left unassigned. Check that the PAT's user has Copilot enabled and the repo allows the coding agent.`,
+    `Created ${issueUrl} but the Copilot coding agent did not stick as an assignee — assign it from the issue's Assignees menu, or confirm the agent is enabled for the repo. The issue remains as a tracker.`,
   );
-  process.exit(0);
 }
-
-gh([
-  "api",
-  "graphql",
-  "-f",
-  `query=mutation($assignableId:ID!,$actorIds:[ID!]!){replaceActorsForAssignable(input:{assignableId:$assignableId,actorIds:$actorIds}){assignable{... on Issue{assignees(first:10){nodes{login}}}}}}`,
-  "-F",
-  `assignableId=${issueId}`,
-  "-F",
-  `actorIds[]=${bot.id}`,
-]);
-
-console.log(`Created ${issueUrl} and assigned ${COPILOT_LOGIN}.`);
