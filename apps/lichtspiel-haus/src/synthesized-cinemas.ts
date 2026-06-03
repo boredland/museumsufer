@@ -30,6 +30,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://loveyourartist.com",
   },
   {
+    slug: "historisches-museum-frankfurt",
+    name: "Historisches Museum Frankfurt",
+    address: "",
+    lat: 50.1092,
+    lon: 8.6819,
+    city: "frankfurt",
+    website_url: "",
+  },
+  {
     slug: "institut-francais-frankfurt",
     name: "Institut français Frankfurt",
     address: "",
