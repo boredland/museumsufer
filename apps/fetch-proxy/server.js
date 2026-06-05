@@ -1,4 +1,5 @@
 const http = require("node:http");
+const { chromium } = require("playwright-core");
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -31,9 +32,31 @@ http
     // for JS-execution challenges that don't match the cheap CF fingerprint (e.g. a
     // large 403 page rendered inside the site's own shell, with no cf-chl_ markers).
     const forceSolve = params.get("solve") === "1";
+    // `&render=1` returns the page rendered by a STEALTH headless Chromium (masks the
+    // navigator.webdriver / window.chrome / plugins tells). For JS-rendered SPAs that
+    // serve a bot-fallback to anything headless-looking (e.g. staatsoper.de) — keeps
+    // the browser on the proxy's (residential) IP so callers need no browser of their
+    // own. `&wait=<ms>` lets the SPA's XHR content settle (default 6000).
+    const render = params.get("render") === "1";
     if (!url) {
       res.writeHead(400, { "content-type": "application/json" });
       res.end('{"error":"?url= parameter required"}');
+      return;
+    }
+
+    if (render) {
+      console.log(`-> RENDER ${url}`);
+      try {
+        const waitMs = Math.min(Number(params.get("wait")) || 6000, 30000);
+        const rendered = await renderStealth(url, waitMs);
+        console.log(`<- ${rendered.status} ${url} (render)`);
+        res.writeHead(rendered.status, { "content-type": "text/html; charset=utf-8" });
+        res.end(rendered.body);
+      } catch (e) {
+        console.error(`!! render ${url}: ${e.message}`);
+        res.writeHead(502, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: e.message }));
+      }
       return;
     }
 
@@ -93,6 +116,44 @@ http
     console.log(`fetch-proxy listening on :${PORT}`);
     if (FLARESOLVERR_URL) console.log(`flaresolverr sidecar: ${FLARESOLVERR_URL}`);
   });
+
+// ── Stealth render ───────────────────────────────────────────────────────────
+// A shared headless Chromium that masks the standard automation tells. Some sites
+// (e.g. staatsoper.de) serve a "maintenance" bot-fallback to anything that looks
+// headless; the init script below gets the real page. Verified against staatsoper.de.
+let _browser = null;
+async function getBrowser() {
+  if (_browser?.isConnected()) return _browser;
+  _browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-blink-features=AutomationControlled"],
+  });
+  return _browser;
+}
+
+async function renderStealth(url, waitMs) {
+  const browser = await getBrowser();
+  const ctx = await browser.newContext({
+    locale: "de-DE",
+    timezoneId: "Europe/Berlin",
+    viewport: { width: 1440, height: 900 },
+    userAgent: CHROME_UA,
+  });
+  await ctx.addInitScript(() => {
+    Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+    Object.defineProperty(navigator, "languages", { get: () => ["de-DE", "de", "en"] });
+    Object.defineProperty(navigator, "plugins", { get: () => [1, 2, 3, 4, 5] });
+    window.chrome = { runtime: {} };
+  });
+  const page = await ctx.newPage();
+  try {
+    const resp = await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 });
+    if (waitMs) await page.waitForTimeout(waitMs);
+    return { status: resp ? resp.status() : 200, body: await page.content() };
+  } finally {
+    await ctx.close();
+  }
+}
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
