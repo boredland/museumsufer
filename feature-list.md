@@ -229,15 +229,18 @@ Aggregated cultural events for Landau in der Pfalz and the Südliche Weinstraße
 
 ---
 
-## fetch-proxy — `apps/fetch-proxy` (internal)
+## fetch-proxy — external service
 
-Tiny Node service (Docker, node:22-alpine) that fetches HTML on behalf of the scrapers when an upstream blocks datacenter IPs or has a broken TLS chain.
+Scrapers route through an **external** fetch proxy (no longer an in-repo app)
+when an upstream blocks datacenter IPs, serves a broken TLS chain, or gates
+content behind a Cloudflare challenge / JS render.
 
-- `GET /?url=<target>` — proxies the URL, returns body with original status + content-type. Sends a Chrome User-Agent, follows redirects, disables TLS verification (`NODE_TLS_REJECT_UNAUTHORIZED=0`).
-- Bearer auth via `Authorization: Bearer <AUTH_TOKEN>` when `AUTH_TOKEN` env var is set (otherwise open).
-- 400 if `url` missing, 401 on bad/missing token.
-- No scheduled jobs; request-driven only.
-- Scrapers route through it by setting `proxy: true` on the upstream config and reading `FETCH_PROXY_URL` + `FETCH_PROXY_TOKEN` from the worker env.
+- Set `proxy: true` on the upstream config; the scrape job reads `FETCH_PROXY_URL`
+  + `FETCH_PROXY_TOKEN` from the env (`scrape.yml` injects them from GH Secrets in
+  CI; locally hydrate from the matching GH Actions variables).
+- The proxy escalates `plain fetch → FlareSolverr (Cloudflare) → stealth Chromium
+  render`. Useful params: `auto=1` (auto-escalate), `render=1` + `wait=<ms>`,
+  `format=md` (Readability → Markdown), `block=0`. Full spec at the proxy's `/docs`.
 
 ---
 
