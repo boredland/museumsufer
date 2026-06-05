@@ -26,6 +26,7 @@ import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
+import { scrapeWdc2026 } from "./venues/_wdc2026";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
@@ -128,7 +129,6 @@ import { scrapeUnimedizinFrankfurt } from "./venues/unimedizin-frankfurt";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
-import { scrapeWdc2026 } from "./venues/wdc2026";
 import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 
 /**
