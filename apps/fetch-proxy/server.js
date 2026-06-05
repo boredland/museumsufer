@@ -25,7 +25,12 @@ http
       }
     }
 
-    const url = new URL(req.url, `http://${req.headers.host}`).searchParams.get("url");
+    const params = new URL(req.url, `http://${req.headers.host}`).searchParams;
+    const url = params.get("url");
+    // `&solve=1` forces the FlareSolverr path even when the heuristic doesn't fire —
+    // for JS-execution challenges that don't match the cheap CF fingerprint (e.g. a
+    // large 403 page rendered inside the site's own shell, with no cf-chl_ markers).
+    const forceSolve = params.get("solve") === "1";
     if (!url) {
       res.writeHead(400, { "content-type": "application/json" });
       res.end('{"error":"?url= parameter required"}');
@@ -59,8 +64,10 @@ http
       // FlareSolverr is available, retry through it. CF challenge fingerprint:
       // 403 status + a small HTML page containing "Just a moment…" or the
       // cf-chl_ JS-init markers.
-      if (FLARESOLVERR_URL && looksLikeCfChallenge(direct.status, directBody)) {
-        console.log(`?? CF challenge on ${method} ${url} — retrying via FlareSolverr`);
+      if (FLARESOLVERR_URL && (forceSolve || looksLikeCfChallenge(direct.status, directBody))) {
+        console.log(
+          `?? ${forceSolve ? "forced solve" : "CF challenge"} on ${method} ${url} — via FlareSolverr`,
+        );
         const solved = await solveWithFlareSolverr(url, method, reqBody);
         if (solved) {
           console.log(`<- ${solved.status} ${url} (flaresolverr)`);
