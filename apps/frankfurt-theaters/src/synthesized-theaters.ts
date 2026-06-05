@@ -20,4 +20,13 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     website_url: "https://www.hfmdk-frankfurt.de",
     ticketing_provider: null,
   },
+  {
+    slug: "wdc2026",
+    name: "World Design Capital Frankfurt RheinMain 2026",
+    address: "",
+    lat: 50.2469295,
+    lon: 8.7146415,
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
 ];

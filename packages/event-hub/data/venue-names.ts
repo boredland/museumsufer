@@ -177,6 +177,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "verkehrsmuseum-frankfurt": "Verkehrsmuseum Frankfurt am Main",
   "volksbuehne-frankfurt": "Volksbühne im Großen Hirschgraben",
   "waggong": "Waggong e.V. — Kulturwerkstatt Germaniastraße",
+  "wdc2026": "World Design Capital Frankfurt RheinMain 2026",
   "weltkulturen-museum": "Weltkulturen Museum",
   "wollheim-memorial-frankfurt": "Wollheim Memorial",
   "ypsilon-buchladen": "Ypsilon Buchladen",
