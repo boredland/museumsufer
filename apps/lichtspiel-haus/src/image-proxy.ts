@@ -45,6 +45,9 @@ const ALLOWED_HOSTS = new Set([
   // TMDb CDN — used by the hub's poster-enrichment pass for events
   // where the venue scraper didn't carry an image_url.
   "image.tmdb.org",
+  // World Design Capital 2026 serves filmscreening stills from its
+  // Payload media endpoint on the apex host.
+  "wdc2026.org",
 ]);
 
 // Off-list hosts get `undefined` (not the raw URL) so PosterCard

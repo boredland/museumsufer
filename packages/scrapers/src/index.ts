@@ -128,6 +128,7 @@ import { scrapeUnimedizinFrankfurt } from "./venues/unimedizin-frankfurt";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
+import { scrapeWdc2026 } from "./venues/wdc2026";
 import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 
 /**
@@ -248,6 +249,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "union-club-frankfurt", run: (_ctx: ScraperContext) => scrapeUnionClubFrankfurt() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
+  { slug: "wdc2026", run: (ctx: ScraperContext) => scrapeWdc2026(ctx.proxy) },
   { slug: "ypsilon-buchladen", run: (_ctx: ScraperContext) => scrapeYpsilonBuchladen() },
 ];
 
@@ -355,5 +357,6 @@ export {
   scrapeUnionClubFrankfurt,
   scrapeVolksbuehneFrankfurt,
   scrapeWaggong,
+  scrapeWdc2026,
   scrapeYpsilonBuchladen,
 };

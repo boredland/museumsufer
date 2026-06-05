@@ -14,6 +14,7 @@ const ALLOWED_HOSTS = new Set([
   "www.literaturhaus-frankfurt.de",
   "www.openbooks-frankfurt.de",
   "www.romanfabrik.de",
+  "wdc2026.org",
 ]);
 
 export const { handleImageProxy, imageProxyUrl } = createImageProxy({

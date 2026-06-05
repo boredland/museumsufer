@@ -17,6 +17,7 @@ const ALLOWED_HOSTS = new Set([
   "www.theater-alte-bruecke.de",
   "www.theaterhaus-frankfurt.de",
   "www.kellertheater-frankfurt.de",
+  "wdc2026.org",
 ]);
 
 export const { handleImageProxy, imageProxyUrl } = createImageProxy({
