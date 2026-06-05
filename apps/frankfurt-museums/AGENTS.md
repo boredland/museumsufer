@@ -272,6 +272,24 @@ bun run -F @museumsufer/frankfurt-museums scrape
 GH Actions secrets used: `DEEPL_API_KEYS`, `FETCH_PROXY_URL`,
 `FETCH_PROXY_TOKEN`. The worker no longer reads any of them.
 
+### Fetch proxy (`FETCH_PROXY_URL` + `FETCH_PROXY_TOKEN`)
+
+Route a fetch through the proxy when a source blocks the runner's datacenter IP,
+serves a broken TLS chain, or gates content behind a Cloudflare challenge / JS
+render — a direct fetch returns a challenge or empty page. Mark the source
+`proxy: true` (the scraper appends `?url=`); the deployed proxy escalates
+`plain fetch → FlareSolverr (Cloudflare) → stealth Chromium render`. Useful query
+params: `auto=1` (auto-escalate, return first non-blocked tier), `render=1` +
+`wait=<ms>` (default 6000, max 30000) for SPAs, `format=md` (Readability →
+Markdown), `block=0` (disable the default ad/tracker blocking on rendered pages).
+Full spec at `$FETCH_PROXY_URL`docs.
+
+Both values live in GitHub **twice** — as **Actions secrets** (read in **CI**;
+`scrape.yml` injects `${{ secrets.* }}`) and as **Actions variables** (read in
+**development**). Locally, hydrate from the variables rather than pasting the
+bearer: `export FETCH_PROXY_URL=$(gh variable get FETCH_PROXY_URL)` and `export
+FETCH_PROXY_TOKEN=$(gh variable get FETCH_PROXY_TOKEN)`.
+
 ### Full re-scrape (wipe + rebuild)
 
 The bundled `src/scrape-data.ts` is wholly regenerated each run, so a
