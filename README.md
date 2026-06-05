@@ -46,10 +46,6 @@ Daily events for Landau in der Pfalz and the Südliche Weinstraße. Six public s
 - Scrape: hourly via the shared `scrape.yml`
 - D1: none
 
-### [`apps/fetch-proxy`](apps/fetch-proxy)
-
-Generic upstream-fetch proxy used by museums when a museum API blocks edge fetches by region or User-Agent.
-
 ## Packages
 
 - `packages/core` — shared utilities: hash, calendar URLs, German formatting, theme FOUC bootstrap, manifest/robots/api-catalog builders, security headers, UTM, scrape logging, bundle writer, null-last comparator, hreflang + locale detection, HtmlHead with preload / preconnect hooks
