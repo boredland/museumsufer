@@ -74,4 +74,13 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     city: "frankfurt",
     website_url: "https://museumfrankfurt.senckenberg.de",
   },
+  {
+    slug: "wdc2026",
+    name: "World Design Capital Frankfurt RheinMain 2026",
+    address: "",
+    lat: 50.1075465,
+    lon: 8.7647266,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+  },
 ];
