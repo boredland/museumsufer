@@ -2451,9 +2451,14 @@ a.ext-score:hover {
 
 /* ── Animations ────────────────────────────────────────────────────── */
 
+/* Slide only, never fade: the staggered delay means deep entries are still
+ * mid-animation when Lighthouse's axe pass snapshots the page. A partial
+ * opacity blends the theme text colours toward the cream background and
+ * trips color-contrast (flaky a11y score). transform stays invisible to
+ * contrast checks, so the cascade reads the same but always passes AA. */
 @keyframes rise {
-  from { opacity: 0; transform: translateY(0.5rem); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(0.5rem); }
+  to   { transform: translateY(0); }
 }
 @keyframes fade {
   from { opacity: 0; }
