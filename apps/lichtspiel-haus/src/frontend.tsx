@@ -38,6 +38,7 @@ import { imageProxyUrl } from "./image-proxy";
 import { SCRAPE_DATA } from "./scrape-data";
 import { INLINE_CSS } from "./styles-inline";
 import { genreNames } from "./tmdb-genres";
+import { stripVersionChrome } from "./types";
 
 export type { DayScreening } from "./db";
 
@@ -544,7 +545,10 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   // cinema's listing title, which often carries series chrome like
   // "Kino4Kids „Zirkuskind"" or "Schamlos Harmlos: Love Me Tender". The
   // venue's title remains available as `s.title` for the report dialog.
-  const displayTitle = opts.locale === "en" ? (s.title_en ?? s.title_de ?? s.title) : (s.title_de ?? s.title);
+  const displayTitle =
+    opts.locale === "en"
+      ? (s.title_en ?? s.title_de ?? stripVersionChrome(s.title))
+      : (s.title_de ?? stripVersionChrome(s.title));
   // English visitors prefer the TMDb English overview when present, with
   // a soft fallback to the German cinema description so we never render
   // a row with no synopsis just because TMDb missed.

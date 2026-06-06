@@ -5,7 +5,7 @@ import { raw } from "hono/html";
 import { getScreeningById } from "../db";
 import { Footer, Head, Masthead, PosterCard, ScoreBadges } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
-import type { Env } from "../types";
+import { type Env, stripVersionChrome } from "../types";
 import { APP_URL } from "./static";
 
 const utm = buildUtm("frankfurt.lichtspiel.haus");
@@ -57,8 +57,8 @@ app.get("/film/:id{[0-9]+}", (c) => {
   // German TMDb title, then the venue's title.
   const displayTitle =
     locale === "en"
-      ? (screening.title_en ?? screening.title_de ?? screening.title)
-      : (screening.title_de ?? screening.title);
+      ? (screening.title_en ?? screening.title_de ?? stripVersionChrome(screening.title))
+      : (screening.title_de ?? stripVersionChrome(screening.title));
   // English visitors get the TMDb English overview when available; falls
   // back to the cinema's (German) description so we never render an empty
   // synopsis just because TMDb missed.

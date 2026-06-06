@@ -20,6 +20,15 @@ export function parseVersion(value: string | undefined | null): Version | null {
   return (VERSIONS as readonly string[]).includes(value) ? (value as Version) : null;
 }
 
+/** Strip a trailing version marker the cinema baked into its listing title
+ *  ("KOKUHO (OmeU)", "EXTRAWURST (DF)"). That information lives in the
+ *  `version` badge already, so we only show it once. Only a known marker is
+ *  removed — never a title that merely ends in parentheses ("The Party (DF)"
+ *  loses the chrome but "(500) Days of Summer" is untouched). */
+export function stripVersionChrome(title: string): string {
+  return title.replace(/\s*\((?:Om[a-zäöü]*U|OV|DF|stumm)\)\s*$/i, "").trim();
+}
+
 /** Projection format. DCP is the modern default; 35mm/16mm/digital are the
  *  noteworthy departures we surface as badges. */
 export type Format = "DCP" | "35mm" | "16mm" | "digital" | "70mm";
