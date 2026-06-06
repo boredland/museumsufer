@@ -48,6 +48,7 @@ const SELECT_FIELDS = [
   "eventTypes",
   "location",
   "hero",
+  "frame",
 ] as const;
 
 interface WdcEventType {
@@ -71,6 +72,11 @@ interface WdcEvent {
   eventTypes?: WdcEventType[] | null;
   location?: WdcLocation | WdcLocation[] | null;
   hero?: { slide?: Array<{ media?: { url?: string | null } | null }> | null } | null;
+  /** Parent content this event belongs to (a film, exhibition, …). When set
+   *  it carries the canonical name; the event's own `title` is the occurrence
+   *  descriptor ("Weltpremiere mit Filmgespräch"). Populated at depth=1; comes
+   *  back as a bare id string when unpopulated. */
+  frame?: { title?: string | null } | string | null;
 }
 
 interface Venue {
@@ -146,9 +152,17 @@ export async function scrapeWdc2026(proxy: ProxyConfig | null): Promise<VenueScr
       venues.set(sourceSlug, venue);
     }
 
+    // A framed event names its occurrence ("Weltpremiere mit Filmgespräch")
+    // while the frame holds the work's actual title. Promote the frame title
+    // and demote the occurrence label to the subtitle.
+    const frameTitle = typeof doc.frame === "object" ? doc.frame?.title?.trim() || null : null;
+    const title = frameTitle ?? doc.title;
+    const subtitle = frameTitle && doc.title.trim() !== frameTitle ? doc.title.trim() : null;
+
     venue.events.push({
       source_event_id: doc.slug,
-      title: doc.title,
+      title,
+      subtitle,
       description: doc.description ?? null,
       date,
       time,
