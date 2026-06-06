@@ -94,6 +94,11 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
   const description = ev.description ? cleanTitle(ev.description) : null;
   const eventType = ev.category && isEventType(ev.category) ? ev.category : (classifyEvent(title, description) ?? null);
 
+  const labels = labelsForEvent(eventType, title, description);
+  if (ev.series) {
+    labels.push({ label: `film:reihe:${ev.series}`, confidence: 0.9, classifier: "scraper-hardcoded" });
+  }
+
   return {
     source_event_id: `${scrapedSlug}|event|${ev.detail_url ?? `${title}|${ev.date}|${ev.time ?? ""}`}`,
     title,
@@ -105,8 +110,10 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
     detail_url: ev.detail_url,
     ticket_url: ev.detail_url,
     image_url: ev.image_url,
+    language: ev.language ?? null,
     raw_category: ev.price ?? null,
-    labels: labelsForEvent(eventType, title, description),
+    availability: ev.availability ?? null,
+    labels,
   };
 }
 

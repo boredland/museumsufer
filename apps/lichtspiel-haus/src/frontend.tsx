@@ -612,6 +612,11 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         <time class="prog-entry__time-hero" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
           {time}
         </time>
+        {s.availability ? (
+          <span class={`prog-entry__avail prog-entry__avail--${s.availability.replace("_", "-")}`}>
+            {s.availability === "sold_out" ? tr.soldOut : tr.fewLeft}
+          </span>
+        ) : null}
         <ScoreBadges s={s} />
         <h3 class="prog-entry__work">
           {titleHref ? (

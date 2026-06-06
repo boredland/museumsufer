@@ -67,6 +67,7 @@ async function main(): Promise<void> {
       language,
       format,
       series,
+      availability: ev.availability,
       tmdb_id: ev.tmdb_id,
       tmdb_kind: ev.tmdb_kind,
       title_de: ev.title_de,

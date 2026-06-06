@@ -180,6 +180,7 @@ function mergeEvent(
     lat: coords[0],
     lon: coords[1],
     raw_category: scraped.raw_category ?? undefined,
+    availability: scraped.availability ?? undefined,
     labels: finalLabels,
     first_seen_at: base.first_seen_at,
     last_seen_at: nowIso,

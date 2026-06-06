@@ -86,6 +86,9 @@ export interface Screening {
   format?: Format;
   /** Series this screening belongs to (Nippon Connection, Udo Kier, …). */
   series?: SeriesRef;
+  /** Ticket availability when the cinema advertises it; absent means unknown
+   *  (the common case — most sources don't expose real-time availability). */
+  availability?: "sold_out" | "few_left";
   /** Stable per-film identifier the "mark seen" feature uses. Prefer the
    *  TMDb id (`tmdb:1234`) so a film hides across every date + cinema in
    *  one click; falls back to a slug of the normalised title for screenings

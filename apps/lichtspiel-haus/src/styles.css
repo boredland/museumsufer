@@ -1085,6 +1085,27 @@ a.ext-score:hover {
   font-size: 0.58rem;
 }
 
+.prog-entry__avail {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  vertical-align: 0.18em;
+}
+.prog-entry__avail--sold-out {
+  color: var(--carbon-arc);
+  background: var(--vermilion);
+}
+.prog-entry__avail--few-left {
+  color: var(--brass-bright);
+  border: 1px solid color-mix(in oklab, var(--brass) 55%, transparent);
+}
+
 .prog-entry__cast {
   margin: 0.1rem 0 0.6rem;
   font-family: var(--serif);

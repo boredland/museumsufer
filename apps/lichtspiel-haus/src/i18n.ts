@@ -35,6 +35,9 @@ export interface Translations {
   // Series UI
   seriesKicker: string;
   seriesAll: string;
+  // Ticket availability badges
+  soldOut: string;
+  fewLeft: string;
   // Digest dialog
   digestKicker: string;
   digestCueText: string;
@@ -172,6 +175,8 @@ const de: Translations = {
   versionLabel: "Fassung",
   seriesKicker: "Filmreihe",
   seriesAll: "Alle Reihen",
+  soldOut: "Ausverkauft",
+  fewLeft: "Nur noch Restkarten",
   digestKicker: "Push-Digest",
   digestCueText: "Erfahre morgens, welche Filme heute laufen.",
   digestTitle: "Vorstellungen abonnieren",
@@ -330,6 +335,8 @@ const en: Translations = {
   versionLabel: "Version",
   seriesKicker: "Series",
   seriesAll: "All series",
+  soldOut: "Sold out",
+  fewLeft: "Only a few tickets left",
   digestKicker: "Push digest",
   digestCueText: "Wake up to what's screening tonight.",
   digestTitle: "Subscribe to screenings",
