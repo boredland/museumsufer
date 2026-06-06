@@ -1240,11 +1240,13 @@ function stripVersionSuffix(title: string): string {
  *  label, or null when the film belongs to no series. */
 function parseFilmSeries(text: string | undefined): string | null {
   if (!text) return null;
-  if (/nippon\s+connection/i.test(text)) return "nippon connection";
+  if (/nippon\s+connection/i.test(text)) return "Nippon Connection";
 
   // Match on the raw HTML so the `<br>` after the series name bounds the
   // capture — stripping tags first would let `[^<\n]+` swallow the synopsis
-  // when the "Filmreihe:" line leads the description.
+  // when the "Filmreihe:" line leads the description. Source casing is kept
+  // verbatim ("CCAJ", "Frauen helfen Frauen"); the front-end only title-cases
+  // names that arrive all-lowercase, so the venue's editorial casing survives.
   const m = text.match(/Filmreihe:\s*([^<\n]+)/i);
   if (!m) return null;
   const cleaned = m[1]
@@ -1253,7 +1255,7 @@ function parseFilmSeries(text: string | undefined): string | null {
     .trim()
     .replace(/^\d+\.\s*/, "") // drop a leading festival-edition ordinal ("26. …")
     .trim();
-  return cleaned ? cleaned.toLowerCase() : null;
+  return cleaned || null;
 }
 
 /** DFF records sold-out / few-tickets-left notes as free text inside the
