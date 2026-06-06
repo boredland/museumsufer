@@ -214,6 +214,11 @@ app.get("/film/:id{[0-9]+}", (c) => {
                   <p class="film-detail__when">
                     <span class="film-detail__time">{screening.time ?? "–"}</span>
                     <span class="film-detail__date">{dateLabel}</span>
+                    {screening.availability ? (
+                      <span class={`prog-entry__avail prog-entry__avail--${screening.availability.replace("_", "-")}`}>
+                        {screening.availability === "sold_out" ? tr.soldOut : tr.fewLeft}
+                      </span>
+                    ) : null}
                   </p>
                   <p class="film-detail__where">
                     <a href={`/kino/${screening.cinema_slug}?lang=${locale}`}>{screening.cinema.name}</a>

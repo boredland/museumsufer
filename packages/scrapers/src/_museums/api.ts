@@ -74,6 +74,12 @@ export interface ApiEvent {
   price: string | null;
   museum_slug_override?: string;
   category?: string | null;
+  /** ISO 639-1 print language, when the source exposes it (e.g. DFF cinema). */
+  language?: string | null;
+  /** Lower-cased film-series name; the hub turns it into a `film:reihe:*` label. */
+  series?: string | null;
+  /** Ticket availability when the source advertises it; absent means unknown. */
+  availability?: "sold_out" | "few_left" | null;
 }
 
 export interface EventApiConfig {
@@ -1187,7 +1193,82 @@ interface CinetixxEvent {
   director?: string;
   genre?: string;
   duration?: number;
+  /** Production country/-ies, comma-joined ISO codes (e.g. "JP", "JP,FR"). */
+  country?: string;
   shows: CinetixxShow[];
+}
+
+/** ISO 3166 country → ISO 639-1 language. The DFF program is festival-heavy
+ *  and lists original-version prints, so the production country is a reliable
+ *  proxy for the spoken language we surface as the print's language tag. */
+const COUNTRY_TO_LANGUAGE: Record<string, string> = {
+  DE: "de",
+  BRD: "de", // legacy West-Germany code the DFF still tags older prints with
+  AT: "de",
+  CH: "de",
+  US: "en",
+  GB: "en",
+  FR: "fr",
+  ES: "es",
+  IT: "it",
+  JP: "ja",
+  KR: "ko",
+  CN: "zh",
+  HK: "zh",
+  TW: "zh",
+  RU: "ru",
+};
+
+function languageFromCountry(country: string | undefined): string | null {
+  const first = (country ?? "").split(/[,/]/)[0]?.trim().toUpperCase();
+  return (first && COUNTRY_TO_LANGUAGE[first]) || null;
+}
+
+/** The DFF listing tags every screening's film series in a free-text
+ *  "Filmreihe: …" line; the annual Nippon Connection festival also shows up
+ *  as a bare mention in the synopsis ("Begleitend zum 26. Nippon Connection").
+ *  Returns a lower-cased series name the hub turns into a `film:reihe:*`
+ *  label, or null when the film belongs to no series. */
+function parseFilmSeries(text: string | undefined): string | null {
+  if (!text) return null;
+  if (/nippon\s+connection/i.test(text)) return "nippon connection";
+
+  // Match on the raw HTML so the `<br>` after the series name bounds the
+  // capture — stripping tags first would let `[^<\n]+` swallow the synopsis
+  // when the "Filmreihe:" line leads the description.
+  const m = text.match(/Filmreihe:\s*([^<\n]+)/i);
+  if (!m) return null;
+  const cleaned = m[1]
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/^\d+\.\s*/, "") // drop a leading festival-edition ordinal ("26. …")
+    .trim();
+  return cleaned ? cleaned.toLowerCase() : null;
+}
+
+/** DFF records sold-out / few-tickets-left notes as free text inside the
+ *  film synopsis, each anchored to a German "am D.M." date because a film
+ *  usually has several screenings of which only one is gone (e.g. "Vorführung
+ *  am 7.6. ausverkauft, … zweite Vorführung am 28.6."). We key each note to
+ *  its nearest preceding date so the status lands on the right screening only. */
+function parseAvailabilityByDate(text: string | undefined): Map<string, "sold_out" | "few_left"> {
+  const out = new Map<string, "sold_out" | "few_left">();
+  if (!text) return out;
+  const plain = text.replace(/<[^>]+>/g, " ");
+  const keyword = /(ausverkauft|ausgebucht|restkart\w*)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = keyword.exec(plain)) !== null) {
+    const before = plain.slice(Math.max(0, m.index - 80), m.index);
+    const dates = [...before.matchAll(/am\s*0?(\d{1,2})\.\s*0?(\d{1,2})\./gi)];
+    const nearest = dates[dates.length - 1];
+    if (!nearest) continue;
+    const key = `${parseInt(nearest[1], 10)}.${parseInt(nearest[2], 10)}`;
+    const status = /restkart/i.test(m[1]) ? "few_left" : "sold_out";
+    // A sold-out note wins over a few-left note for the same date.
+    if (status === "sold_out" || !out.has(key)) out.set(key, status);
+  }
+  return out;
 }
 
 async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
@@ -1220,12 +1301,22 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
 
         const description = truncateHtml(combinedDescription, 800);
 
+        // Join with a newline so the series regex's `[^<\n]+` capture stops at
+        // the short/long-description boundary instead of running into the plot.
+        const seriesText = [movie.shortDescription, movie.longDescription].filter(Boolean).join("\n");
+        const series = parseFilmSeries(seriesText);
+        const language = languageFromCountry(movie.country);
+        const availabilityByDate = parseAvailabilityByDate(seriesText);
+
         for (const show of movie.shows) {
           const start = new Date(show.displayDateTime);
           const date = toBerlinDate(start);
           const time = toBerlinTime(start);
 
           if (date < today) continue;
+
+          const availability =
+            availabilityByDate.get(`${parseInt(date.slice(8, 10), 10)}.${parseInt(date.slice(5, 7), 10)}`) ?? null;
 
           // Categorize: Default to "Film", but check for "Familie" or "Vortrag"
           let category = "Film";
@@ -1260,6 +1351,9 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
             image_url: movie.imageUrlArtwork || null,
             price: null,
             category,
+            language,
+            series,
+            availability,
           });
         }
       }

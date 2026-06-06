@@ -29,6 +29,8 @@ export interface CanonicalScrapedEvent {
   lon?: number | null;
   /** Upstream category tag verbatim, preserved so re-classification stays cheap. */
   raw_category?: string | null;
+  /** Ticket availability when the source advertises it; absent means unknown. */
+  availability?: "sold_out" | "few_left" | null;
   /** Labels the scraper can justify with high confidence (URL slug, upstream tag).
    *  The hub's classifier pass adds more from title/description heuristics. */
   labels: ScrapedLabel[];

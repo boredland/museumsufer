@@ -32,6 +32,9 @@ export interface CanonicalEvent {
   lat: number;
   lon: number;
   raw_category?: string;
+  /** Ticket availability when the source advertises it; absent means unknown.
+   *  Front-ends (lichtspiel.haus) surface this as a sold-out / few-left badge. */
+  availability?: "sold_out" | "few_left";
   /** Set by the post-scrape TMDb enrichment pass for film:cinema events.
    *  Front-ends use it to link out to themoviedb.org/{kind}/{id} from the
    *  screening card. Image_url and description are also auto-populated
