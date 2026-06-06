@@ -1,125 +1,109 @@
 import { todayIso } from "@museumsufer/core/date";
-import { stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const BASE = "https://db.nipponconnection.com";
+const WEBSITE = "https://nipponconnection.com";
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 const FESTIVAL_YEAR = new Date().getFullYear();
 
-const TILE_RE =
-  /<div data-key="(\d+)">\s*<div class="new-tile">\s*<a href="(\/de\/event\/\d+\/[^"]+)">([\s\S]+?)<\/a>\s*<\/div>\s*<\/div>/g;
-const DIRECTOR_RE = /<h4>\s*([\s\S]*?)\s*<\/h4>/;
-const TITLE_RE = /<h2>([\s\S]+?)<\/h2>/;
-const META_RE = /<p>\s*([\s\S]{0,200}?)\s*<\/p>/;
-const DATE_RE =
-  /<b>\s*([A-Za-z]+\.?,?\s*\d{1,2}\.\s*[A-Za-zäöü]+\s*\d{4}),\s*(\d{1,2}:\d{2})\s*Uhr\s*<\/b>(?:\s*<br\s*\/?>)?\s*([^<]*)/;
-const FLAG_RE = /<span class="small">([^<]+)<\/span>/;
-const IMG_RE = /<img[^>]+src="([^"]+)"/;
-
-const MONTHS_DE: Record<string, number> = {
-  januar: 1,
-  februar: 2,
-  märz: 3,
-  maerz: 3,
-  april: 4,
-  mai: 5,
-  juni: 6,
-  juli: 7,
-  august: 8,
-  september: 9,
-  oktober: 10,
-  november: 11,
-  dezember: 12,
-};
+const VEVENT_RE = /BEGIN:VEVENT([\s\S]*?)END:VEVENT/g;
 
 /**
- * Nippon Connection — Frankfurt's annual Japanese film festival. Its
- * public database (db.nipponconnection.com) renders every screening
- * + event as a `data-key` tile with a /de/event/{id}/{slug} URL, full
- * date in "Wo., DD. Monat YYYY, HH:MM Uhr" form, and a venue line.
+ * Nippon Connection — Frankfurt's annual Japanese film festival. Its public
+ * database (db.nipponconnection.com) renders a `timeboard` schedule that embeds
+ * an iCal VEVENT for every screening (an `<a href="data:text/calendar,…">` per
+ * entry), percent-encoded with `%0A` line breaks. Each VEVENT carries the
+ * Latin SUMMARY title, the Berlin DTSTART, the LOCATION (which is often a
+ * partner cinema — naxos, Mal Seh'n, Eldorado, DFF — not the festival's own
+ * Mousonturm), and a DESCRIPTION with the director + runtime.
+ *
+ * Parsing the timeboard gives the complete catalogue with venues, which the
+ * hub uses to cross-tag the same screenings scraped from the partner cinemas
+ * with a `film:reihe:Nippon Connection` label. The dedup pass then drops these
+ * aggregator copies wherever a partner cinema already lists the screening.
  */
 export async function scrapeNipponConnection(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const url = `${BASE}/de/${FESTIVAL_YEAR}/event/film`;
-  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  const res = await fetch(`${BASE}/de/${FESTIVAL_YEAR}/event/timeboard`, { headers: { "User-Agent": UA } });
   if (!res.ok) {
-    // Festival is annual; if this year's listing is missing fall back to next year.
-    const fallback = await fetch(`${BASE}/de/${FESTIVAL_YEAR + 1}/event/film`, { headers: { "User-Agent": UA } });
+    // Festival is annual; if this year's board is missing fall back to next year.
+    const fallback = await fetch(`${BASE}/de/${FESTIVAL_YEAR + 1}/event/timeboard`, { headers: { "User-Agent": UA } });
     if (!fallback.ok) throw new Error(`nippon-connection fetch failed: ${res.status} / ${fallback.status}`);
-    return parseEvents(await fallback.text(), today, FESTIVAL_YEAR + 1);
+    return parseTimeboard(await fallback.text(), today, FESTIVAL_YEAR + 1);
   }
-  return parseEvents(await res.text(), today, FESTIVAL_YEAR);
+  return parseTimeboard(await res.text(), today, FESTIVAL_YEAR);
 }
 
-function parseEvents(html: string, today: string, year: number): VenueScrapeResult {
+function parseTimeboard(html: string, today: string, year: number): VenueScrapeResult {
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  for (const m of html.matchAll(TILE_RE)) {
-    const [, dataKey, href, body] = m;
-    const titleMatch = body.match(TITLE_RE);
-    if (!titleMatch) continue;
-    const rawTitle = stripHtml(titleMatch[1])
-      .replace(/<br\s*\/?>(?:\s|&nbsp;)*/gi, " · ")
-      .replace(/\s+/g, " ")
-      .trim();
-    const title = rawTitle.split(" · ")[0] ?? rawTitle;
+  for (const m of html.matchAll(VEVENT_RE)) {
+    const block = m[1].replace(/%0A/g, "\n");
+
+    const dt = block.match(/DTSTART[^:\n]*:(\d{8})T(\d{6})/);
+    if (!dt) continue;
+    const date = `${dt[1].slice(0, 4)}-${dt[1].slice(4, 6)}-${dt[1].slice(6, 8)}`;
+    if (date < today) continue;
+    const time = `${dt[2].slice(0, 2)}:${dt[2].slice(2, 4)}`;
+
+    const title = field(block, "SUMMARY");
     if (!title) continue;
-    const originalTitle = rawTitle.includes(" · ") ? rawTitle.split(" · ").slice(1).join(" · ") : null;
 
-    const dateMatch = body.match(DATE_RE);
-    if (!dateMatch) continue;
-    const date = parseGermanDate(dateMatch[1], year);
-    if (!date || date < today) continue;
-    const time = dateMatch[2];
-    const venue =
-      dateMatch[3]
-        .trim()
-        .replace(/<br\s*\/?>$/, "")
-        .trim() || null;
+    // The DESCRIPTION holds "Director: …\nCountry YEAR, NN min., version\nURL"
+    // with literal `\n` / `\t` escapes. Films lead with a director credit;
+    // workshops, tastings, openings, talks and parties don't — skip those (a
+    // runtime alone isn't enough, since workshops list "approx. 90 minutes").
+    const description = field(block, "DESCRIPTION") ?? "";
+    if (!/\b(?:Director|Regie):/i.test(description)) continue;
+    const descLines = description
+      .replace(/\\[nt]/g, "\n")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("http"));
+    const director = descLines[0]?.replace(/^(?:Director|Regie):\s*/i, "").trim() || null;
+    const meta = descLines[1] || null; // "Japan 2026, 99 min., japan. und franz. OmeU"
 
-    const director = body.match(DIRECTOR_RE)?.[1]?.trim() ?? null;
-    const meta = body.match(META_RE)?.[1]
-      ? stripHtml(body.match(META_RE)?.[1] ?? "")
-          .replace(/\s+/g, " ")
-          .trim()
-      : null;
-    const flag = body.match(FLAG_RE)?.[1]?.trim() ?? null;
-    const img = body.match(IMG_RE)?.[1];
+    const location = field(block, "LOCATION");
+    const uid = field(block, "UID");
+    const sourceId = uid || `${date}-${time.replace(":", "")}-${kebab(title)}`;
+    if (seen.has(sourceId)) continue;
+    seen.add(sourceId);
 
-    const subtitleParts: string[] = [];
-    if (originalTitle) subtitleParts.push(originalTitle);
-    if (director) subtitleParts.push(`R: ${director}`);
-    if (flag) subtitleParts.push(flag);
-
-    if (seen.has(dataKey)) continue;
-    seen.add(dataKey);
+    const subtitleParts = [director ? `R: ${director}` : null, meta].filter(Boolean);
 
     events.push({
-      source_event_id: dataKey,
+      source_event_id: sourceId,
       title,
       subtitle: subtitleParts.length ? subtitleParts.join(" · ") : null,
-      description: meta,
+      description: null,
       date,
       time,
-      detail_url: href.startsWith("http") ? href : `${BASE}${href}`,
-      ticket_url: null,
-      image_url: img ? (img.startsWith("http") ? img : `${BASE}${img}`) : null,
-      venue_room: venue,
-      labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
+      detail_url: `${WEBSITE}/de/${year}/program/`,
+      venue_room: location || null,
+      performers: director,
+      labels: [
+        { label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" },
+        { label: "film:reihe:Nippon Connection", confidence: 0.95, classifier: "scraper-hardcoded" },
+      ],
     });
   }
 
   return { source_slug: "nippon-connection", display_name: "Nippon Connection", events };
 }
 
-function parseGermanDate(s: string, year: number): string | null {
-  // Sample: "Mi., 3. Juni 2026" — weekday optional, then day. month yr
-  const m = s.match(/(\d{1,2})\.\s*([A-Za-zäöü]+)\s*(\d{4})/);
-  if (!m) return null;
-  const day = parseInt(m[1], 10);
-  const month = MONTHS_DE[m[2].toLowerCase()];
-  const yr = parseInt(m[3], 10) || year;
-  if (!month) return null;
-  return `${yr}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+/** Read a single iCal property value (the text after `KEY:` or `KEY;params:`
+ *  up to the line break). */
+function field(block: string, key: string): string | null {
+  const m = block.match(new RegExp(`(?:^|\\n)${key}[^:\\n]*:(.*)`));
+  return m ? m[1].trim() || null : null;
+}
+
+function kebab(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }

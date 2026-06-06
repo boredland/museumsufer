@@ -2,9 +2,12 @@ import { fnv1aInt } from "@museumsufer/core";
 import type { Screening } from "./types";
 
 /** Aggregator slugs that re-list films screened at direct venues. Their copies
- *  lose to the venue's own listing when they collide. None known yet for the
- *  film vocabulary — left as an extension point. */
-const AGGREGATOR_CINEMA_SLUGS = new Set<string>([]);
+ *  lose to the venue's own listing when they collide. The Nippon Connection
+ *  festival schedule lists screenings hosted at partner cinemas (Mal Seh'n,
+ *  naxos, Eldorado, DFF), which scrape those same screenings directly; the
+ *  hub already cross-tags those with the festival's series label, so the
+ *  festival copy can lose the collision without losing the Nippon badge. */
+const AGGREGATOR_CINEMA_SLUGS = new Set<string>(["nippon-connection"]);
 
 const RICHNESS_FIELDS = [
   "description",
