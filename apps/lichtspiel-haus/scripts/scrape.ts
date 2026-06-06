@@ -140,7 +140,7 @@ function pickSeries(ev: CanonicalEvent): SeriesRef | undefined {
     if (!l.label.startsWith("film:reihe:")) continue;
     const name = l.label.slice("film:reihe:".length).trim();
     if (!name) continue;
-    return { slug: kebab(name), name: titleCase(name) };
+    return { slug: kebab(name), name: seriesName(name) };
   }
   return undefined;
 }
@@ -226,7 +226,12 @@ function kebab(s: string): string {
     .replace(/^-|-$/g, "");
 }
 
-function titleCase(s: string): string {
+/** Series labels carry the venue's editorial casing verbatim ("CCAJ",
+ *  "Frauen helfen Frauen"). Only labels that arrive entirely lower-case
+ *  (legacy sources like pupille) get title-cased for presentation; anything
+ *  with an existing capital is trusted as-is. */
+function seriesName(s: string): string {
+  if (/[A-ZÄÖÜ]/.test(s)) return s;
   return s
     .split(/\s+/)
     .map((w) => (w.length === 0 ? w : w[0].toUpperCase() + w.slice(1)))
