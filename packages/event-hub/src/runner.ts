@@ -102,6 +102,8 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     events.push(ev);
   }
 
+  tagNipponConnection(events);
+
   if (opts.tmdbCache) {
     await enrichFilmPosters(events, {
       apiKey: opts.tmdbApiKey,
@@ -127,6 +129,40 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
 
 function makeId(sourceSlug: string, sourceEventId: string): string {
   return fnv1a(`${sourceSlug}|${sourceEventId}`);
+}
+
+const NIPPON_REIHE = "film:reihe:Nippon Connection";
+
+/** Nippon Connection screens most of its films at partner cinemas (Mal Seh'n,
+ *  naxos, Eldorado, DFF) that scrape those same screenings under their own
+ *  source. The nippon-connection scraper carries the festival's authoritative
+ *  schedule, so we tag every other film:cinema event that matches one of its
+ *  screenings (by title + date) as belonging to the festival. Downstream dedup
+ *  then keeps the partner cinema's richer listing while preserving this label. */
+function tagNipponConnection(events: CanonicalEvent[]): void {
+  const norm = (t: string): string =>
+    t
+      .toLowerCase()
+      .replace(/\([^)]*\)/g, "")
+      .replace(/[^a-z0-9]+/g, "");
+
+  const festival = new Set<string>();
+  for (const ev of events) {
+    if (ev.source_slug !== "nippon-connection") continue;
+    const key = norm(ev.title);
+    if (key.length >= 3) festival.add(`${key}|${ev.date}`);
+  }
+  if (festival.size === 0) return;
+
+  for (const ev of events) {
+    if (ev.source_slug === "nippon-connection") continue;
+    if (!ev.labels.some((l) => l.label === "film:cinema")) continue;
+    if (ev.labels.some((l) => l.label === NIPPON_REIHE)) continue;
+    const key = norm(ev.title);
+    if (key.length >= 3 && festival.has(`${key}|${ev.date}`)) {
+      ev.labels.push({ label: NIPPON_REIHE, confidence: 0.85, classifier: "scraper-hardcoded" });
+    }
+  }
 }
 
 /** Resolve final per-event coordinates and apply the bbox geofence.
