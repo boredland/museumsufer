@@ -1224,6 +1224,15 @@ function languageFromCountry(country: string | undefined): string | null {
   return (first && COUNTRY_TO_LANGUAGE[first]) || null;
 }
 
+/** The DFF appends the audience-facing version to the listing title
+ *  ("KOKUHO (OmeU)"). We already parse that into its own `version` field
+ *  downstream, so strip the parenthetical chrome from the title — but only
+ *  when it's a known version marker, never a title that just ends in
+ *  parentheses (e.g. "(500) Days of Summer"). */
+function stripVersionSuffix(title: string): string {
+  return title.replace(/\s*\((?:Om[a-zäöü]*U|OV|DF|stumm)\)\s*$/i, "").trim();
+}
+
 /** The DFF listing tags every screening's film series in a free-text
  *  "Filmreihe: …" line; the annual Nippon Connection festival also shows up
  *  as a bare mention in the synopsis ("Begleitend zum 26. Nippon Connection").
@@ -1341,7 +1350,7 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
           }
 
           events.push({
-            title: movie.title || movie.movieName || "Unbenannter Film",
+            title: stripVersionSuffix(movie.title || movie.movieName || "Unbenannter Film"),
             date,
             time: nullIfMidnight(time),
             end_time: null,
