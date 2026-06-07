@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: scrape
@@ -107,3 +108,12 @@ jobs:
             apps/frankfurt-museums/src/scrape-data.ts \
             apps/lichtspiel-haus/src/scrape-data.ts \
             apps/lichtspiel-haus/src/synthesized-cinemas.ts
+
+      - name: Report failure to Copilot
+        if: failure()
+        env:
+          # A user PAT with Copilot enabled — the default GITHUB_TOKEN cannot
+          # assign the coding agent. Fine-grained: read metadata + actions,
+          # read/write issues + pull requests + contents.
+          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+        run: bun packages/event-hub/scripts/report-failure.ts
