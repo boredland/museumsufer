@@ -120,7 +120,11 @@ async function fetchCalendarCards(): Promise<CalendarCard[]> {
   const horizon = dateOffset(HORIZON_DAYS);
   const cards: CalendarCard[] = [];
   const queue = new PQueue({ concurrency: FETCH_CONCURRENCY });
-  for (const month of monthsInRange(horizon)) {
+  // Await the per-month task promises (not queue.onIdle) so a fetch
+  // rejection propagates to the caller — and through to the runner's
+  // per-venue catch — instead of leaking as an unhandled rejection that
+  // crashes the whole scrape at process exit.
+  const tasks = monthsInRange(horizon).map((month) =>
     queue.add(async () => {
       const html = await fetchMonthHtml(month);
       if (html === null) return;
@@ -128,9 +132,9 @@ async function fetchCalendarCards(): Promise<CalendarCard[]> {
         if (card.date < today || card.date > horizon) continue;
         cards.push(card);
       }
-    });
-  }
-  await queue.onIdle();
+    }),
+  );
+  await Promise.all(tasks);
   return cards;
 }
 
