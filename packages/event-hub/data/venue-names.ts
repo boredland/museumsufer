@@ -238,6 +238,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-g10-projektraum": "G10 Projektraum",
   "wdc2026-galerie-anita-beckers": "Galerie Anita Beckers",
   "wdc2026-galerie-goldene-nudel": "Galerie Goldene Nudel",
+  "wdc2026-galerie-hanna-bekker-vom-rath": "Galerie Hanna Bekker vom Rath",
   "wdc2026-gallus-garten": "Gallus-Garten",
   "wdc2026-gedenkstatte-grossmarkthalle-philipp-holzmann-weg": "Gedenkstätte Großmarkthalle, Philipp-Holzmann-Weg",
   "wdc2026-gemuseheldinnen-e-v-und-stadtfarm": "GemüseheldInnen e.V. und Stadtfarm",
