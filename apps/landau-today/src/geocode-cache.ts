@@ -137,6 +137,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "jugendstil-festhalle, kleiner saal|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil-festhalle|landau in der pfalz": [49.195785, 8.120557],
   "jugendstil-festhalle|landau/pfalz": [49.195785, 8.120557],
+  "kaiserbacher mühle|klingenmünster": [49.156755, 8.01016],
   "kalmithaus|maikammer": [49.318994, 8.082536],
   "katharinenkapelle, blumgasse 3, 76829 landau|landau in der pfalz": [49.198283, 8.112344],
   "katharinenkapelle|landau in der pfalz": [49.199235, 8.112627],
