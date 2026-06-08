@@ -31,6 +31,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "atelier 29|hainfeld": [49.257501, 8.101102],
   "atelier art|frankweiler": [49.227802, 8.058052],
   "atelier rothpauser|st. martin": [49.300187, 8.102256],
+  "atelier unsichtbar|landau in der pfalz": [49.198283, 8.112344],
   "atelier-salon|landau in der pfalz": [49.198283, 8.112344],
   "atelier29|hainfeld": [49.257501, 8.101102],
   "augustinerkirche landau|landau in der pfalz": [49.19856, 8.115539],
