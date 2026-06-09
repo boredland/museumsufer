@@ -5,28 +5,36 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 /**
  * Naxos Hallenkonzerte — Frankfurt concert series at the Naxos-Halle
  * (Waldschmidtstraße, Ostend), genre-wise mostly contemporary classical /
- * experimental / improvisation. WordPress + Oxygen-builder home page renders
- * each upcoming event as:
+ * experimental / improvisation.
  *
- *   <a class="ct-link future-event …" href="…/slug/">
- *     <span class="ct-span">Title</span>
- *     <h3>Sa13.Jun26</h3>          ← weekday + DD + MonthAbbr + YY
- *     <h3>20H00</h3>               ← HHHMM
- *     <h3>Chemie</h3><h3>Experimental</h3><h3>Fotografie</h3>  ← genre tags
- *   </a>
+ * The series moved from naxoshallenkonzerte.de (now a 301 redirect) to the
+ * merged Produktionshaus NAXOS site at produktionshausnaxos.de. The
+ * Hallenkonzerte landing page is:
+ *   https://produktionshausnaxos.de/gruppen/naxos-hallenkonzerte/
  *
- * Past events live in a separate `.slider-archiv` block which we skip via
- * the `future-event` class filter. The WP REST API has post bodies but no
- * event-date custom field, so the home-page card is the canonical source.
+ * The new site is still WordPress + Oxygen-builder. Each concert card is
+ * an Oxygen <a class="ct-link …" href="…/{lang}/event/{slug}/"> block
+ * containing title (ct-span) and h3 elements for date / time / genre tags.
+ * The date format kept the compact "Sa13.Jun26" style; time is "20H00".
+ * Past concerts appear in a separate archive section which does not carry
+ * the `future-event` class, so the class filter still applies.
  */
 
-const BASE = "https://naxoshallenkonzerte.de";
+const BASE = "https://produktionshausnaxos.de";
+const SPIELPLAN_URL = `${BASE}/gruppen/naxos-hallenkonzerte/`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
+// Compact date on event cards: "Sa13.Jun26" (old and new site style)
 const COMPACT_DATE_RE = /(?:Mo|Di|Mi|Do|Fr|Sa|So)\s*(\d{1,2})\.\s*([A-Za-zäöü]{2,4})\s*(\d{2})/;
+// Full German date as fallback: "13. Juni 2026" or "13.06.2026"
+const FULL_DATE_RE =
+  /(\d{1,2})\.\s*(Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\s+(\d{4})/i;
+const NUMERIC_DATE_RE = /\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/;
 const COMPACT_TIME_RE = /(\d{1,2})H(\d{2})/;
+const COLON_TIME_RE = /\b(\d{1,2})[.:](\d{2})\s*Uhr\b/i;
+// Event card: <a class="ct-link future-event …" href="…"> on the series page
 const FUTURE_EVENT_RE =
-  /<a[^>]*class="[^"]*future-event[^"]*"[^>]*href="(https?:\/\/naxoshallenkonzerte\.de\/[a-z0-9-]+\/?)"[^>]*>([\s\S]*?)<\/a>/g;
+  /<a[^>]*class="[^"]*future-event[^"]*"[^>]*href="(https?:\/\/produktionshausnaxos\.de\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
 const TITLE_SPAN_RE = /<span[^>]*class="[^"]*ct-span[^"]*"[^>]*>([\s\S]*?)<\/span>/;
 const H3_RE = /<h3[^>]*>([\s\S]*?)<\/h3>/g;
 const IMG_RE = /<img[^>]+(?:srcset|src)="([^"]+)"/;
@@ -49,7 +57,7 @@ const MONTH_ABBR: Record<string, number> = {
 };
 
 export async function scrapeNaxos(): Promise<VenueScrapeResult> {
-  const html = await fetchText(BASE);
+  const html = await fetchText(SPIELPLAN_URL);
   const today = todayIso();
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
@@ -70,6 +78,7 @@ export async function scrapeNaxos(): Promise<VenueScrapeResult> {
     const tags: string[] = [];
     for (const h of h3s) {
       if (!date) {
+        // Compact format: "Sa13.Jun26"
         const dm = h.match(COMPACT_DATE_RE);
         if (dm) {
           const day = dm[1].padStart(2, "0");
@@ -79,11 +88,34 @@ export async function scrapeNaxos(): Promise<VenueScrapeResult> {
           date = `${year}-${String(month).padStart(2, "0")}-${day}`;
           continue;
         }
+        // Full German date: "13. Juni 2026"
+        const fd = h.match(FULL_DATE_RE);
+        if (fd) {
+          const day = fd[1].padStart(2, "0");
+          const month = parseMonth(fd[2]);
+          if (month) {
+            date = `${fd[3]}-${String(month).padStart(2, "0")}-${day}`;
+            continue;
+          }
+        }
+        // Numeric date: "13.06.2026"
+        const nd = h.match(NUMERIC_DATE_RE);
+        if (nd) {
+          date = `${nd[3]}-${nd[2].padStart(2, "0")}-${nd[1].padStart(2, "0")}`;
+          continue;
+        }
       }
-      if (date && !time) {
+      if (!time) {
+        // Compact time: "20H00"
         const tm = h.match(COMPACT_TIME_RE);
         if (tm) {
           time = `${tm[1].padStart(2, "0")}:${tm[2]}`;
+          continue;
+        }
+        // Colon time: "20:00 Uhr" / "20.00 Uhr"
+        const ct = h.match(COLON_TIME_RE);
+        if (ct) {
+          time = `${ct[1].padStart(2, "0")}:${ct[2]}`;
           continue;
         }
       }
