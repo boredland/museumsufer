@@ -230,6 +230,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-familienakademie-kathinka-platzhoff-stiftung": "Familienakademie Kathinka-Platzhoff-Stiftung",
   "wdc2026-fein-frankfurt": "Fein Frankfurt",
   "wdc2026-fffriedrich": "fffriedrich",
+  "wdc2026-fischerhallen": "Fischerhallen",
   "wdc2026-fotostudio-9": "fotostudio 9",
   "wdc2026-four-frankfurt": "Four Frankfurt",
   "wdc2026-frankfurt-university-of-applied-sciences": "Frankfurt University of Applied Sciences",
