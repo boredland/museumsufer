@@ -123,6 +123,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "chamber",
   },
   {
+    slug: "staedel-museum",
+    name: "Städel Museum",
+    address: "",
+    lat: 50.1016,
+    lon: 8.6721,
+    city: "frankfurt",
+    website_url: "https://www.staedelmuseum.de",
+    default_genre: "classical",
+  },
+  {
     slug: "stalburg-theater",
     name: "Stalburg Theater",
     address: "",
