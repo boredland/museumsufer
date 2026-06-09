@@ -282,6 +282,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-kompass-frankfurt": "Kompass Frankfurt",
   "wdc2026-konzerthalle-bad-orb": "Konzerthalle Bad Orb",
   "wdc2026-kulturbunker-im-osthafen": "Kulturbunker im Osthafen",
+  "wdc2026-kulturcampus-frankfurt": "Kulturcampus Frankfurt",
   "wdc2026-kulturort-walhalla": "Kulturort Walhalla",
   "wdc2026-kulturpavillon-friedhof-fechenheim": "Kulturpavillon Friedhof Fechenheim",
   "wdc2026-kunstforum-der-tu-darmstadt": "Kunstforum der TU Darmstadt",
