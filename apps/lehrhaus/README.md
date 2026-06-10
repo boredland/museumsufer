@@ -1,6 +1,6 @@
 # lehr.salon
 
-Cloudflare Worker that aggregates public lectures, readings, and discussions across Frankfurt — Polytechnische Gesellschaft, Haus am Dom, Jüdische Gemeinde, FGZ StreitClub, Literaturhaus, Goethe-Uni Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, Romanfabrik, DIG Frankfurt, OPEN BOOKS, and cross-imports of Vortrag-class events from the museums and theaters sister apps.
+Cloudflare Worker that aggregates public lectures, readings, and discussions across Frankfurt — Polytechnische Gesellschaft, Haus am Dom, Jüdische Gemeinde, FGZ StreitClub, Literaturhaus, Goethe-Uni Bürgeruniversität, Institut für Sozialforschung, Evangelische Akademie, Sigmund-Freud-Institut, Denkbar, Romanfabrik, DIG Frankfurt, OPEN BOOKS, plus talk-shaped events from museum, theatre, and academic venues that the hub tags `talk:*`.
 
 **Live:** [frankfurt.lehr.salon](https://frankfurt.lehr.salon)
 
@@ -18,7 +18,7 @@ Worker
   ↓ imports SCRAPE_DATA, in-memory filters serve every read path
 ```
 
-Three formats — `Vortrag` (monologic lecture), `Lesung` (literary reading / book launch), `Diskussion` (panel / debate). Categorization is heuristic over title/description; see `src/scrapers/shared.ts`.
+Three formats — `Vortrag` (monologic lecture), `Lesung` (literary reading / book launch), `Diskussion` (panel / debate). The format comes from the hub's `talk:vortrag` / `talk:lesung` / `talk:diskussion` label (classified upstream in `@museumsufer/classify`, `talk.ts`).
 
 The default home view is a rolling next-7-days list grouped per date; `/tag/YYYY-MM-DD` is the single-day permalink.
 
@@ -65,12 +65,13 @@ Lehrhaus reads its events from the central event hub at
 3. Optionally curate a display name in
    `packages/event-hub/src/venue-names.ts`.
 
-## Museum / theater rollups
+## Talks from museum / theatre venues
 
-Museums and theaters that emit talks fold under the catch-all
-`frankfurt-museums` / `frankfurt-theaters` source slugs so
-`/quelle/frankfurt-museums` and `/quelle/frankfurt-theaters` keep
-working. The host venue's display name (e.g. "Senckenberg Naturmuseum",
-"Schauspiel Frankfurt") rides in `source_name`. The MUSEUM_SLUGS and
-THEATER_SLUGS sets in `scripts/scrape.ts` decide which hub source slugs
-roll up under each aggregator.
+Talks held at museums, theatres, and other venues surface here under
+their **own** hub `source_slug` (e.g. `senckenberg-naturmuseum`,
+`schauspiel-frankfurt`) — whatever scraper emitted the `talk:*` label.
+`scripts/scrape.ts` keeps every hub event with a `talk:*` label inside
+the Frankfurt bbox, regardless of which scraper produced it. Sources not
+curated in `src/source-config.ts` are auto-synthesized into the bundle's
+source list (display name via the hub's `venue-names.ts`), so
+`/quelle/<slug>` works for them too.

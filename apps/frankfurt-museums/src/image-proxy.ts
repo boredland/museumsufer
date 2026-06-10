@@ -6,8 +6,8 @@ import type { Env } from "./types";
 const proxyDomains = getProxyDomains();
 
 // Derived from every image_url in the bundled scrape data, so the allowlist
-// stays in sync with whatever the scrapers actually produce. Hosts D1 adds
-// after the last deploy fall through to the runtime check in handleImageProxy.
+// stays in sync with whatever the scrapers actually produce. A host that
+// isn't in the bundle isn't one of ours, so it's rejected.
 const staticAllowedDomains = ((): ReadonlySet<string> => {
   const hosts = new Set<string>();
   const collect = (url: string | null | undefined): void => {
@@ -31,23 +31,12 @@ function shouldProxy(imageUrl: string): boolean {
   }
 }
 
-const dynamicAllowed = new Set<string>();
-
 function isDomainAllowed(hostname: string): boolean {
-  if (staticAllowedDomains.has(hostname) || dynamicAllowed.has(hostname)) return true;
+  if (staticAllowedDomains.has(hostname)) return true;
   for (const d of staticAllowedDomains) {
     if (hostname.endsWith(`.${d}`)) return true;
   }
   return false;
-}
-
-async function isDomainInDb(env: Env, imageUrl: string): Promise<boolean> {
-  const row = await env.DB.prepare(
-    "SELECT 1 FROM events WHERE image_url = ? UNION SELECT 1 FROM exhibitions WHERE image_url = ? LIMIT 1",
-  )
-    .bind(imageUrl, imageUrl)
-    .first();
-  return !!row;
 }
 
 export async function handleImageProxy(request: Request, env: Env): Promise<Response | null> {
@@ -64,10 +53,7 @@ export async function handleImageProxy(request: Request, env: Env): Promise<Resp
 
     const origin = new URL(imageUrl).hostname;
     if (!isDomainAllowed(origin)) {
-      if (!(await isDomainInDb(env, imageUrl))) {
-        return new Response("Forbidden origin", { status: 403 });
-      }
-      dynamicAllowed.add(origin);
+      return new Response("Forbidden origin", { status: 403 });
     }
   } catch {
     return new Response("Bad URL", { status: 400 });

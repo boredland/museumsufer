@@ -41,7 +41,17 @@ curl http://localhost:8787/feed.ics
 
 ## Adding a new venue
 
-1. Add a `VenueConfig` entry in `src/concert-config.ts` (slug, name, address, lat/lon, city, default_genre, scraper key).
-2. Add a parser in `src/scrapers/<name>.ts` returning `ScrapeResult`.
-3. Wire the new scraper key in `src/scrape-runner.ts` — TypeScript errors if you forget.
-4. Trigger the workflow (`Actions → scrape → konzert-haus`) or wait for the next hourly run.
+The app reads from the central event hub (`@museumsufer/event-hub`); scraping
+lives in `packages/scrapers/`. `scripts/scrape.ts` here keeps hub `EVENTS`
+inside the Frankfurt bbox that carry a `music:<genre>` label, dedups across
+aggregator + direct sources, and writes `src/scrape-data.ts`.
+
+1. Add a canonical scraper under `packages/scrapers/src/venues/<name>.ts` that
+   emits a `music:<genre>` label, and register it in
+   `packages/scrapers/src/index.ts`'s `VENUE_SCRAPERS`.
+2. Optionally add a curated `VenueConfig` in `src/concert-config.ts` (slug,
+   name, address, lat/lon, city, default_genre, wikidata, description) whose
+   `slug` matches the hub `source_slug`. Uncurated sources are auto-synthesized
+   into `src/synthesized-venues.ts`.
+3. Optionally curate a display name in `packages/event-hub/src/venue-names.ts`.
+4. Trigger the workflow (`Actions → scrape`) or wait for the next hourly run.

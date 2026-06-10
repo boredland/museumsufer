@@ -9,11 +9,12 @@ URL-bound category and date filters.
 ## Architecture
 
 ```
-GitHub Action (.github/workflows/scrape.yml, landau job)
-  ↓ daily 06:30 UTC
-  ↓ runs `bun apps/landau-today/scripts/scrape.ts`
-  ↓ pulls all six sources in parallel (~7 s)
-  ↓ 3-pass dedup, classifier, past-event prune
+GitHub Action (.github/workflows/scrape.yml)
+  ↓ daily/hourly cron
+  ↓ runs the hub scrape (packages/event-hub) once, then
+  ↓ `bun apps/landau-today/scripts/scrape.ts` derives this app's slice:
+  ↓   keeps hub EVENTS in LANDAU_BBOX from the six Landau-region sources,
+  ↓   four-pass cross-source dedup, then Nominatim geocoding (cached)
   ↓ writes apps/landau-today/src/scrape-data.ts (typed module)
   ↓ commits + pushes if content actually changed
 Cloudflare git integration
@@ -22,8 +23,8 @@ Worker
   ↓ imports SCRAPE_DATA, in-memory filters serve every read path
 ```
 
-No database — the worker is stateless. All event reads run in-memory off
-the bundled module; deploy = data refresh.
+Event reads run in-memory off the bundled module; deploy = data refresh.
+D1 is used only for Web Push subscriptions (`migrations/0001`), not for content.
 
 ## Sources
 
@@ -36,12 +37,15 @@ the bundled module; deploy = data refresh.
 | Südliche Weinstraße | `www.suedlicheweinstrasse.de` | TYPO3 sfcontenthub paginated listing; date encoded in URL slug | regional wine-festival coverage; ~50 villages |
 | Pfalz.de | `www.pfalz.de` | sitemap-driven discovery → city-allowlist verification → per-occurrence expansion | bounded by city allowlist + 30-day occurrence horizon |
 
-Each scraper is a pure function in `src/scrapers/<name>.ts`. To add a new
-one:
-1. Implement `scrapeXyz(opts): Promise<Omit<Event, "id">[]>`.
-2. Add the source ID to `EventSource` in `src/types.ts` and to
+Each source is a canonical scraper in
+`packages/scrapers/src/venues/<name>.ts` (registered in
+`packages/scrapers/src/index.ts`) that emits a `landau:<category>` label.
+To add a new source:
+1. Implement the scraper in `packages/scrapers/` and register it.
+2. Add the hub `source_slug` to `EventSource` in `src/types.ts` and to
    `SOURCE_RANK` in `scripts/scrape.ts` (lower wins on dedup).
-3. Wire the call into `scripts/scrape.ts`.
+
+The derive step picks it up automatically on the next scrape.
 
 ## Category taxonomy (16 slugs)
 
@@ -51,26 +55,30 @@ exkursion · sport · sonstiges`
 
 Each category has a printer's-ornament glyph and one of five mood tones
 (`rotwein`, `ocker`, `reblaus`, `schiefer`, `ink`) — see `src/categories.ts`.
-A scraper either:
-- maps an upstream-category label onto a slug
-  (`KULTURNETZ_CATEGORY_MAP`, `LANDAU_DE_KATID_MAP`, the SÜW
-  `mapCategory()`), or
-- falls back to `classifyEventByText(title, description)` — keyword
-  cascade tuned for German cultural vocabulary + wine-region terms.
+Classification happens upstream in the hub (`@museumsufer/classify`,
+`landau.ts`): each scraper either maps an upstream-category label onto a
+slug (`KULTURNETZ_CATEGORY_MAP`, `LANDAU_DE_KATID_MAP`, the SÜW label map)
+or falls back to `classifyLandauByText(title, description)` — a keyword
+cascade tuned for German cultural vocabulary + wine-region terms. The
+event arrives here pre-tagged with a `landau:<slug>` label; `src/categories.ts`
+owns only the presentation (labels, glyphs, mood palette).
 
 `category` is non-optional on `Event`; the classifier returns
 `"sonstiges"` rather than null so the type system can rely on it.
 
 ## Cross-source dedup
 
-Three passes in `scripts/scrape.ts:mergeAndId`:
+Four passes in `scripts/scrape.ts:mergeAndId`:
 
 1. **Strict normalised title** — bit-identical cross-source duplicates.
 2. **Core title** — strips a leading `Venue:` / `Series —` prefix, so
    SÜW's `atelier29: Thalamus` collapses onto Kulturnetz's `Thalamus`.
-3. **Multi-day vs per-occurrence** — drops per-day SÜW Ausstellung
-   records when a landau.de multi-day record (with `end_date`) covers the
-   same dates. Fixed the Suchtbilder duplication.
+3. **Multi-day vs per-occurrence** (`collapseMultiDayDuplicates`) — drops
+   per-day SÜW Ausstellung records when a landau.de multi-day record (with
+   `end_date`) covers the same dates.
+4. **Title-prefix collapse** (`collapseTitlePrefixDuplicates`) — drops the
+   longer title when a shorter one is its word-boundary prefix at the same
+   date/time, merging any missing fields up.
 
 Source priority for tie-breaks: kulturnetz > landau-de > hambach > rptu
 > suew > pfalz-de.
@@ -84,8 +92,8 @@ Source priority for tie-breaks: kulturnetz > landau-de > hambach > rptu
 - [Bun](https://bun.sh) for installs, scripts, and the scrape pipeline
 - Turborepo workspace alongside `frankfurt-museums` and `frankfurt-theaters`
 
-No D1, no Workers AI, no DeepL, no `nodejs_compat` — the worker runtime
-path is tight (~73 KB gzipped, ~6 ms startup).
+D1 is used only for Web Push subscriptions; no Workers AI, no DeepL, no
+`nodejs_compat` — the worker runtime path stays tight.
 
 ## Routes
 
@@ -103,7 +111,9 @@ path is tight (~73 KB gzipped, ~6 ms startup).
 | `GET /sitemap.xml` | 24 h | All canonical routes |
 | `GET /robots.txt` | 24 h | + `User-agent: *` allow |
 | `GET /llms.txt` | 24 h | API description for LLM agents |
-| `GET /manifest.json` | 24 h | PWA manifest (no SW yet) |
+| `GET /manifest.json` | 24 h | PWA manifest |
+| `GET /sw.js` | — | Service worker (offline cache) |
+| `GET /api/push/*` | — | Web Push subscribe / unsubscribe / key / me |
 | `GET /og.svg` | 7 d | Open Graph card |
 | `GET /impressum` | 1 h | Imprint |
 
@@ -167,28 +177,37 @@ apps/landau-today/
 ├── scripts/
 │   └── scrape.ts                 # daily scrape orchestrator + dedup
 ├── src/
-│   ├── index.tsx                 # Hono app, security headers, CSP
+│   ├── index.tsx                 # Hono app, security headers, CSP, cron (push digests)
 │   ├── frontend.tsx              # full-page SSR, JSON-LD, masthead
 │   ├── components.tsx            # ChipRow, DateStrip, Ledger, Broadside
+│   ├── client-script.ts          # /client.js — search, In-der-Nähe, visited, share, theme
 │   ├── queries.ts                # in-memory filters over SCRAPE_DATA
-│   ├── categories.ts             # 16-slug taxonomy + classifier
-│   ├── shared.ts                 # German date/time formatters, escape
+│   ├── categories.ts             # 16-slug taxonomy: labels, glyphs, mood palette
+│   ├── digest.ts                 # Web Push digest builder + dispatch (D1)
+│   ├── i18n.ts                   # de/fr translation tables
+│   ├── markdown.ts               # Accept: text/markdown rendering
+│   ├── shared.ts                 # German date/time formatters, VRN + Maps links, escape
 │   ├── date.ts                   # re-exports from @museumsufer/core/date
 │   ├── image-proxy.ts            # /img/* with host allowlist
-│   ├── types.ts                  # Event, ScrapeData, EventSource
+│   ├── service-worker.ts         # /sw.js source
+│   ├── types.ts                  # Event, ScrapeData, EventSource, Env
 │   ├── scrape-data.ts            # AUTO-GENERATED bundle
-│   ├── routes/
-│   │   ├── event.tsx             # /event/:id (HTML + .ics)
-│   │   ├── feeds.ts              # /feed.xml + /feed.ics
-│   │   └── static.ts             # robots, sitemap, manifest, llms.txt, OG
-│   └── scrapers/
-│       ├── kulturnetz.ts
-│       ├── landau-de.ts
-│       ├── hambacher-schloss.ts
-│       ├── rptu.ts
-│       ├── suew.ts
-│       └── pfalz-de.ts
+│   ├── geocode-cache.ts          # AUTO-GENERATED venue→coords cache (Nominatim)
+│   └── routes/
+│       ├── event.tsx             # /event/:id (HTML + /event/:id/feed.ics)
+│       ├── api.ts                # /api/events, /api/events/:id, /api/categories
+│       ├── feeds.ts              # /feed.xml + /feed.ics
+│       ├── push.ts               # /api/push/{key,subscribe,unsubscribe,me}
+│       ├── og.ts                 # /og/:id/image.svg
+│       ├── docs.ts               # /api/docs (Scalar) + openapi.json
+│       ├── imprint.tsx           # /impressum
+│       └── static.ts             # robots, sitemap, manifest, llms.txt, sw, client.js
+├── migrations/                   # D1 (push_subscriptions)
 ├── package.json
 ├── tsconfig.json
 └── wrangler.jsonc
 ```
+
+The six Landau-region sources are scraped in `packages/scrapers/src/venues/`
+(`kulturnetz-landau`, `landau-de`, `hambacher-schloss`, `rptu-campuskultur`,
+`suew`, `pfalz-de`) — not in this app.
