@@ -12,12 +12,15 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  * Hallenkonzerte landing page is:
  *   https://produktionshausnaxos.de/gruppen/naxos-hallenkonzerte/
  *
- * The new site is still WordPress + Oxygen-builder. Each concert card is
- * an Oxygen <a class="ct-link …" href="…/{lang}/event/{slug}/"> block
- * containing title (ct-span) and h3 elements for date / time / genre tags.
- * The date format kept the compact "Sa13.Jun26" style; time is "20H00".
- * Past concerts appear in a separate archive section which does not carry
- * the `future-event` class, so the class filter still applies.
+ * The site is WordPress + Oxygen-builder. Each concert card is an Oxygen
+ * <a href="…/{lang}/event/{slug}/"> block containing title (ct-span) and
+ * h3 elements for date / time / genre tags. The date format is compact
+ * "Sa13.Jun26" style; time is "20H00" or "20:00 Uhr".
+ *
+ * Note: the old naxoshallenkonzerte.de site marked upcoming concerts with a
+ * `future-event` CSS class; the merged produktionshausnaxos.de site does NOT
+ * use that class. Event links are now identified by the /event/ path segment
+ * in the href. Past events are filtered out by the date >= today check.
  */
 
 const BASE = "https://produktionshausnaxos.de";
@@ -32,9 +35,12 @@ const FULL_DATE_RE =
 const NUMERIC_DATE_RE = /\b(\d{1,2})\.(\d{1,2})\.(\d{4})\b/;
 const COMPACT_TIME_RE = /(\d{1,2})H(\d{2})/;
 const COLON_TIME_RE = /\b(\d{1,2})[.:](\d{2})\s*Uhr\b/i;
-// Event card: <a class="ct-link future-event …" href="…"> on the series page
+// Event card: any <a> whose href points to an event detail page.
+// Accepts both absolute (https://produktionshausnaxos.de/…/event/…) and
+// root-relative (/de/event/…) hrefs; past events are excluded via the
+// date >= today check below rather than by CSS class.
 const FUTURE_EVENT_RE =
-  /<a[^>]*class="[^"]*future-event[^"]*"[^>]*href="(https?:\/\/produktionshausnaxos\.de\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+  /<a[^>]+href="((?:https?:\/\/produktionshausnaxos\.de)?\/[^"]*\/event\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
 const TITLE_SPAN_RE = /<span[^>]*class="[^"]*ct-span[^"]*"[^>]*>([\s\S]*?)<\/span>/;
 const H3_RE = /<h3[^>]*>([\s\S]*?)<\/h3>/g;
 const IMG_RE = /<img[^>]+(?:srcset|src)="([^"]+)"/;
@@ -63,7 +69,8 @@ export async function scrapeNaxos(): Promise<VenueScrapeResult> {
   const seen = new Set<string>();
 
   for (const m of html.matchAll(FUTURE_EVENT_RE)) {
-    const detailUrl = m[1];
+    const rawUrl = m[1];
+    const detailUrl = rawUrl.startsWith("http") ? rawUrl : `${BASE}${rawUrl}`;
     const card = m[2];
     if (seen.has(detailUrl)) continue;
     seen.add(detailUrl);
