@@ -63,7 +63,18 @@ no longer a `/scrape/*` HTTP endpoint or `SCRAPE_SECRET` to manage.
 
 ## Adding a new theater
 
-1. Add a `TheaterConfig` entry in `src/theater-config.ts` (slug, name, address, lat/lon, ticketing provider, scraper key).
-2. Add a parser in `src/scrapers/<slug>.ts` that returns `ScrapeResult`.
-3. Wire the new scraper key in `src/scrape-runner.ts`'s `runScraper` switch — TypeScript will error if you forget.
-4. Trigger the workflow manually (`Actions → scrape → Run workflow`) or wait for the next hourly run.
+The app reads from the central event hub (`@museumsufer/event-hub`); the
+actual scraping lives in `packages/scrapers/`. `scripts/scrape.ts` here keeps
+hub `EVENTS` inside the Frankfurt bbox that carry a `stage:*` or `dance:*`
+label, regroups them into shows + performances, and writes `src/scrape-data.ts`.
+
+1. Add a canonical scraper under `packages/scrapers/src/venues/<slug>.ts` that
+   emits `stage:theater` (and/or `dance:*` / `music:*` / `talk:*`) labels, and
+   register it in `packages/scrapers/src/index.ts`'s `VENUE_SCRAPERS`.
+2. Optionally add a curated `TheaterConfig` in `src/theater-config.ts` (slug,
+   name, address, lat/lon, ticketing provider, wikidata, description) whose
+   `slug` matches the hub `source_slug`. Sources with no curated entry are
+   auto-synthesized into `src/synthesized-theaters.ts` on the next scrape.
+3. Optionally curate a display name in `packages/event-hub/src/venue-names.ts`.
+4. Trigger the workflow manually (`Actions → scrape → Run workflow`) or wait
+   for the next hourly run.

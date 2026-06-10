@@ -37,15 +37,14 @@ follow-ups, not blockers.
 - [x] **FAQ accordion** — six Heimatzeitung-style Q&A entries on the
       home page; FAQPage JSON-LD via `@museumsufer/core/faq` for SEO.
 - [x] **Fuzzy search (⌘K)** — substring + AND-token match across every
-      `[data-search]` ledger row. Lighter than museums' Fuse.js — at
+      `[data-search]` ledger row. Lighter than museums' uFuzzy — at
       ~400 events, substring is plenty. Same UX shape (Cmd-K focus,
       Escape clear).
-- [x] **Partial swap** — shipped as View Transitions API rather than
-      htmx; cross-document `@view-transition: navigation: auto` plus
-      `view-transition-name: content` smooths every same-origin
-      navigation with a fade. Browsers without VT support fall back to
-      a normal full-nav. Far less code than htmx for the same end-user
-      effect.
+- [x] **Partial swap** — htmx swaps `#content-body` on chip/date
+      navigation (`hx-get` + `hx-push-url` + `hx-target`), with the View
+      Transitions API layered on (`view-transition-name: content-body`
+      plus fade keyframes in app.css) so the swap animates. Browsers
+      without VT support still get the htmx swap, just without the fade.
 
 ## Backlog
 
@@ -62,11 +61,6 @@ Speculative follow-ups; nothing here is on the critical path.
 - [ ] **Fuse.js upgrade** — current substring search is fine at ~400
       events; bring in Fuse.js if the corpus grows past ~5k or if users
       ask for typo-tolerance.
-- [ ] **htmx for in-page partial swap** — View Transitions covers the
-      common case. htmx would only be worth it if we need to swap a
-      sub-region without reloading the rest (e.g., live-updating the
-      date counts during a long browsing session). Not currently needed.
-
 ## Explicitly NOT porting
 
 These are Frankfurt-specific or out of scope:

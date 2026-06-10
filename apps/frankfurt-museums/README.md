@@ -7,10 +7,12 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 ## Architecture
 
 ```
-GitHub Action (.github/workflows/scrape.yml, museums job)
-  ↓ daily 06:00 UTC
-  ↓ runs `bun apps/frankfurt-museums/scripts/scrape.ts`
-  ↓ in-memory SQLite (bun:sqlite) + the existing 4-stage pipeline
+GitHub Action (.github/workflows/scrape.yml)
+  ↓ daily/hourly cron
+  ↓ runs the hub scrape (packages/event-hub) once, then
+  ↓ `bun apps/frankfurt-museums/scripts/scrape.ts` derives this app's slice:
+  ↓   keeps hub EVENTS in the Frankfurt bbox carrying a `museum:*` label,
+  ↓   merges the frozen museum directory, runs DeepL DE→EN/FR
   ↓ writes apps/frankfurt-museums/src/scrape-data.ts (typed module)
   ↓ commits + pushes if content actually changed
 Cloudflare git integration
@@ -19,14 +21,20 @@ Worker
   ↓ imports SCRAPE_DATA, in-memory filters serve every read path
 ```
 
+The museum **directory** is no longer scraped from museumsufer.de — it's a
+frozen snapshot (`src/frozen-museum-meta.ts`) plus manual additions in
+`src/museum-config.ts`. Events and exhibitions come from the central event
+hub (`packages/event-hub`), gated to museum sources.
+
 The worker has **no D1 path for scraped data** — `museums`, `events`,
 `exhibitions`, and `translations` were dropped in migration `0012`. The
 only remaining D1 table is `likes` (request-time user writes).
 
 ## Features
 
-- ~40 museums + ~700 events + 36+ exhibitions, refreshed daily
-- 4-stage scrape pipeline (museumsufer.de → exhibition APIs → event APIs → DeepL)
+- ~40 museums + events + exhibitions, refreshed daily
+- Events/exhibitions derived from the central event hub (`packages/event-hub`); museum directory from a frozen snapshot + manual config
+- DeepL DE→EN/FR translation runs in the derive step; the cache rides in the bundle
 - Frontend with i18n (DE/EN/FR), fuzzy search, distance sorting, calendar downloads
 - RSS (`/feed.xml`) and ICS (`/feed.ics`) feeds
 - Image proxy with edge caching
@@ -39,7 +47,7 @@ only remaining D1 table is `likes` (request-time user writes).
 - **Framework:** [Hono](https://hono.dev) with Zod validation
 - **Database:** Cloudflare D1 (only `likes` now — scraped data lives in `src/scrape-data.ts`)
 - **Translation:** DeepL via the GH-Action scrape; cache rides in the bundled module
-- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, Fuse.js
+- **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, uFuzzy (client-side fuzzy search)
 - **Tooling:** [Bun](https://bun.sh) (replaces npm/tsx)
 
 ## API
