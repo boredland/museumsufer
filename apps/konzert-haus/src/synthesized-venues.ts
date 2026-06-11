@@ -203,16 +203,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "wdc2026-pavillon-offenbach",
-    name: "Pavillon Offenbach",
-    address: "",
-    lat: 50.1043516,
-    lon: 8.761014,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
-  {
     slug: "wdc2026-pavillon-wiesbaden",
     name: "Pavillon Wiesbaden",
     address: "",
