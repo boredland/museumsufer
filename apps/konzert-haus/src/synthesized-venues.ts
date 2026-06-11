@@ -212,4 +212,14 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     website_url: "https://wdc2026.org",
     default_genre: "classical",
   },
+  {
+    slug: "wdc2026-quartiermanagement-senefelderquartier-offenbach",
+    name: "Quartiermanagement Senefelderquartier Offenbach",
+    address: "",
+    lat: 50.0971947,
+    lon: 8.7616567,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    default_genre: "classical",
+  },
 ];
