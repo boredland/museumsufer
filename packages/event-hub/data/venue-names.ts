@@ -203,6 +203,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-biber-e-v": "BiBEr* e.V.",
   "wdc2026-bildungspunkt-der-ihk-wiesbaden": "Bildungspunkt der IHK Wiesbaden",
   "wdc2026-bockenheimer-warte": "Bockenheimer Warte",
+  "wdc2026-bornheimer-hang": "Bornheimer Hang",
   "wdc2026-bregenzer-strasse": "Bregenzer Straße",
   "wdc2026-burgerhaus-mainhausen": "Bürgerhaus Mainhausen",
   "wdc2026-burgerzentrum-neue-schule": "Bürgerzentrum Neue Schule",
