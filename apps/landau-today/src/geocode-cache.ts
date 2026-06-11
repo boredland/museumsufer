@@ -341,6 +341,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut knöll & vogel|bad bergzabern": [49.105575, 8.013199],
   "weingut kranz|ilbesheim": [49.179713, 8.058175],
   "weingut leiling|schweigen-rechtenbach": [49.050889, 7.955201],
+  "weingut leiner|ilbesheim": [49.182331, 8.05454],
   "weingut möwes gdbr|weyher/pfalz": [49.26729, 8.084679],
   "weingut phillip heinz|kapellen-drusweiler": [49.10314, 8.031469],
   "weingut schmitzer-julier|eschbach": [49.173791, 8.021108],
