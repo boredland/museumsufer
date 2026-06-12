@@ -348,7 +348,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-scape-offenbach": "SCAPE° Offenbach",
   "wdc2026-schader-stiftung": "Schader Stiftung",
   "wdc2026-senckenberg-arthur-von-weinberg-haus": "Senckenberg Arthur-von-Weinberg-Haus",
-  "wdc2026-social-form": "Social Form",
+  "wdc2026-social-form": "social.form",
   "wdc2026-space-at-square": "SPACE AT SQUARE",
   "wdc2026-speckweg-33": "Speckweg 33",
   "wdc2026-st-wendelinus": "St. Wendelinus",
