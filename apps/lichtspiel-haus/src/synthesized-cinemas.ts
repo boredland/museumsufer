@@ -65,22 +65,4 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     city: "frankfurt",
     website_url: "https://museumfrankfurt.senckenberg.de",
   },
-  {
-    slug: "wdc2026",
-    name: "World Design Capital Frankfurt RheinMain 2026",
-    address: "",
-    lat: 50.11187839999999,
-    lon: 8.6852704,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-  },
-  {
-    slug: "wdc2026-caligari-filmbuhne",
-    name: "Caligari FilmBühne",
-    address: "",
-    lat: 50.082265,
-    lon: 8.243811899999999,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-  },
 ];

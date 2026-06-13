@@ -3,15 +3,6 @@ import type { TheaterConfig } from "./theater-config";
 
 export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
   {
-    slug: "brotfabrik",
-    name: "Brotfabrik",
-    address: "",
-    lat: 50.1303,
-    lon: 8.6071,
-    website_url: "https://www.brotfabrik.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "hfmdk",
     name: "Hochschule für Musik und Darstellende Kunst Frankfurt",
     address: "",
@@ -24,8 +15,8 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     slug: "wdc2026",
     name: "World Design Capital Frankfurt RheinMain 2026",
     address: "",
-    lat: 50.113,
-    lon: 8.6762169,
+    lat: 50.117821789048236,
+    lon: 8.690940346720396,
     website_url: "https://wdc2026.org",
     ticketing_provider: null,
   },
@@ -53,15 +44,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     address: "",
     lat: 50.10769452195157,
     lon: 8.75142541506358,
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
-    slug: "wdc2026-goetheplatz-frankfurt",
-    name: "Goetheplatz Frankfurt",
-    address: "",
-    lat: 50.113,
-    lon: 8.6762169,
     website_url: "https://wdc2026.org",
     ticketing_provider: null,
   },
