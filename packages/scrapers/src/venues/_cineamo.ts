@@ -16,10 +16,100 @@ interface CineamoCinema {
 
 const CINEMAS: CineamoCinema[] = [
   {
+    id: 562,
+    source_slug: "3001-kino",
+    name: "3001 Kino",
+    websiteBase: "https://www.3001-kino.de",
+  },
+  {
+    id: 563,
+    source_slug: "abaton-kino",
+    name: "Abaton",
+    websiteBase: "https://www.abaton.de",
+  },
+  {
+    id: 566,
+    source_slug: "passage-kino-hamburg",
+    name: "Passage Kino Hamburg",
+    websiteBase: "https://www.passagekino.de",
+  },
+  {
+    id: 567,
+    source_slug: "magazin-filmkunsttheater",
+    name: "Magazin Filmkunsttheater",
+    websiteBase: "https://www.magazinfilmkunsttheater.de",
+  },
+  {
+    id: 568,
+    source_slug: "metropolis-kino",
+    name: "Metropolis Kino",
+    websiteBase: "https://www.metropoliskino.de",
+  },
+  {
+    id: 569,
+    source_slug: "elbe-filmtheater",
+    name: "Elbe Filmtheater",
+    websiteBase: "https://www.elbe-filmtheater.de",
+  },
+  {
+    id: 570,
+    source_slug: "studio-kino",
+    name: "Studio Kino",
+    websiteBase: "https://www.studio-kino.de",
+  },
+  {
+    id: 571,
+    source_slug: "hansa-filmstudio",
+    name: "Hansa-Filmstudio",
+    websiteBase: "https://www.kino-bergedorf.de",
+  },
+  {
+    id: 572,
+    source_slug: "blankeneser-kino",
+    name: "Blankeneser Kino",
+    websiteBase: "https://www.blankeneser-kino.de",
+  },
+  {
+    id: 573,
+    source_slug: "zeise-kinos",
+    name: "Zeise Kinos",
+    websiteBase: "https://www.zeise.de",
+  },
+  {
+    id: 967,
+    source_slug: "koralle-lichtspiele",
+    name: "Koralle Lichtspiele",
+    websiteBase: "https://www.koralle-volksdorf.de",
+  },
+  {
     id: 1082,
     source_slug: "filmpalast-hofheim",
     name: "Filmpalast Hofheim",
     websiteBase: "https://www.filmpalast-hofheim.de",
+  },
+  {
+    id: 1191,
+    source_slug: "filmraum",
+    name: "Filmraum",
+    websiteBase: "https://www.filmraum.com",
+  },
+  {
+    id: 1211,
+    source_slug: "schanzenkino-73",
+    name: "SchanzenKino 73",
+    websiteBase: "https://schanzenkino73.de",
+  },
+  {
+    id: 1243,
+    source_slug: "astor-hafencity",
+    name: "Astor Film Lounge HafenCity",
+    websiteBase: "https://hafencity.premiumkino.de",
+  },
+  {
+    id: 1288,
+    source_slug: "savoy-filmtheater",
+    name: "Savoy Filmtheater",
+    websiteBase: "https://www.savoy-filmtheater.de",
   },
 ];
 

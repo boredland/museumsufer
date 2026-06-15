@@ -60,11 +60,14 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   // Default to Hessisches Staatstheater Wiesbaden — the scraper emits per-event
   // coords (Wiesbaden vs Darmstadt) so this only fires if an event omits both.
   "hessisches-staatsballett": [50.0823, 8.2417],
+  alleetheater: [53.5477, 9.9366],
+  "fundus-theater": [53.5496, 10.0396],
   "internationales-theater": [50.1135, 8.6976],
   "kellertheater-frankfurt": [50.1108, 8.6852],
   "komoedie-frankfurt": [50.1086, 8.6739],
   landungsbruecken: [50.0976, 8.6519],
   "lichthof-theater": [53.5647, 9.9248],
+  "monsun-theater": [53.5492, 9.9272],
   mousonturm: [50.1183, 8.7019],
   "neues-theater-hoechst": [50.1014, 8.5443],
   "ohnsorg-theater": [53.5528, 10.0075],
@@ -111,29 +114,45 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "stadtbuecherei-frankfurt": [50.1116, 8.6831],
 
   // ─── arthouse cinemas ────────────────────────────────────────────
+  "3001-kino": [53.5606, 9.9602],
+  "abaton-kino": [53.567, 9.985],
+  "alabama-kino": [53.5833, 10.0218],
   "astor-frankfurt": [50.1136, 8.6856],
+  "astor-hafencity": [53.543, 9.995],
+  "blankeneser-kino": [53.56, 9.812],
   "caligari-wiesbaden": [50.083, 8.2412],
   "capitol-mainz": [50.0046, 8.2693],
   "cinema-frankfurt": [50.1132, 8.6786],
+  "elbe-filmtheater": [53.581, 9.849],
   "eldorado-frankfurt": [50.1138, 8.6843],
   "eschborn-k": [50.1457, 8.571],
   "filmforum-hoechst": [50.1014, 8.5443],
   "filmkreis-darmstadt": [49.8746, 8.6557],
   "filmpalast-hofheim": [50.0861, 8.4483],
+  filmraum: [53.5798, 9.9426],
   "hafen-2-offenbach": [50.0972, 8.7449],
+  "hansa-filmstudio": [53.485, 10.218],
   "harmonie-frankfurt": [50.0976, 8.6818],
   "kino-alte-muehle-bad-vilbel": [50.1846, 8.7464],
   "kino-kelkheim": [50.1474, 8.4501],
   "kino-koeppern": [50.2554, 8.6453],
+  "koralle-lichtspiele": [53.663, 10.147],
   "kronberger-lichtspiele": [50.1795, 8.5102],
   "lichtblick-moerfelden": [50.0001, 8.5709],
+  "magazin-filmkunsttheater": [53.591, 9.99],
   malsehn: [50.1235, 8.6789],
+  "metropolis-kino": [53.5563, 9.9889],
   "murnau-filmtheater": [50.0857, 8.2456],
   "naxos-kino": [50.1198, 8.7027],
   "nippon-connection": [50.1183, 8.7019],
   "orfeos-erben": [50.1149, 8.6452],
+  "passage-kino-hamburg": [53.553, 9.991],
   "programmkino-rex": [49.8773, 8.6555],
   pupille: [50.1247, 8.6573],
+  "savoy-filmtheater": [53.5542, 10.0142],
+  "schanzenkino-73": [53.561, 9.963],
+  "studio-kino": [53.556, 9.957],
+  "zeise-kinos": [53.552, 9.933],
 
   // ─── Landau / Pfalz regional sources ─────────────────────────────
   "hambacher-schloss": [49.3236, 8.1153],
@@ -190,10 +209,18 @@ export const LANDAU_BBOX: Bbox = {
   maxLon: 8.3,
 };
 
+/** Hamburg city region bbox. */
+export const HAMBURG_BBOX: Bbox = {
+  minLat: 53.35,
+  maxLat: 53.75,
+  minLon: 9.7,
+  maxLon: 10.35,
+};
+
 export function inBbox(lat: number, lon: number, box: Bbox): boolean {
   return lat >= box.minLat && lat <= box.maxLat && lon >= box.minLon && lon <= box.maxLon;
 }
 
 export function withinGeofence(lat: number, lon: number): boolean {
-  return inBbox(lat, lon, GEOFENCE_BBOX);
+  return inBbox(lat, lon, GEOFENCE_BBOX) || inBbox(lat, lon, HAMBURG_BBOX);
 }
