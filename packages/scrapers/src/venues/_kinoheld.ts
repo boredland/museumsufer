@@ -46,6 +46,13 @@ const CINEMAS: KinoheldCinema[] = [
     source_slug: "kino-kelkheim",
     name: "Kino Kelkheim",
   },
+  {
+    id: "14",
+    citySlug: "hamburg",
+    urlSlug: "hansa-filmstudio-bergedorf-hamburg",
+    source_slug: "hansa-filmstudio-bergedorf",
+    name: "Hansa-Filmstudio Bergedorf",
+  },
   // Filmpalast Hofheim is also on kinoheld (id 3809) but doesn't publish
   // showtimes there — they use Cineamo for booking. Keep in mind for a
   // future Cineamo scraper.
