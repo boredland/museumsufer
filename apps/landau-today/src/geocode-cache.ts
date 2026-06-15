@@ -224,6 +224,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "ortsgemeinde siebeldingen|siebeldingen": [49.209861, 8.050691],
   "ortsgemeinde wernersberg|wernersberg": [49.190305, 7.929982],
   "ortsgemeinde weyher|weyher": [49.26729, 8.084679],
+  "ortsvorsteherbüro arzheim landau-arzheim|landau-arzheim": [49.19499, 8.05697],
   "ostpark, eingang an den holzterassen (ostbahnstraße)|landau in der pfalz": [49.198283, 8.112344],
   "palatina events abfahrt|landau": [49.198283, 8.112344],
   "palatina events|landau": [49.198283, 8.112344],
