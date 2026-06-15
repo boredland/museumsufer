@@ -60,6 +60,14 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "gallus-theater": [50.101, 8.6334],
   "hamburger-kammerspiele": [53.5684, 9.9842],
   "hamburger-puppentheater": [53.5855, 10.0435],
+  "hamburger-sprechwerk": [53.5513, 10.0818],
+  "hohe-luft-schiff": [53.5794, 9.9723],
+  "theaterschiff-hamburg": [53.5453, 9.9864],
+  "alma-hoppes-lustspielhaus": [53.5855, 9.9863],
+  "mut-theater": [53.5622, 9.9608],
+  "theater-das-zimmer": [53.5524, 10.0822],
+  centralkomitee: [53.5552, 10.0163],
+  "hansa-theater": [53.5558, 10.0122],
   "harburger-theater": [53.459, 9.9773],
   // Default to Hessisches Staatstheater Wiesbaden — the scraper emits per-event
   // coords (Wiesbaden vs Darmstadt) so this only fires if an event omits both.
