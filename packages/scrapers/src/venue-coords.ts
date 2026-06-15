@@ -64,6 +64,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "kellertheater-frankfurt": [50.1108, 8.6852],
   "komoedie-frankfurt": [50.1086, 8.6739],
   landungsbruecken: [50.0976, 8.6519],
+  "lichthof-theater": [53.5647, 9.9248],
   mousonturm: [50.1183, 8.7019],
   "neues-theater-hoechst": [50.1014, 8.5443],
   "ohnsorg-theater": [53.5528, 10.0075],

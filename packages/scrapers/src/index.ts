@@ -89,6 +89,7 @@ import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeLandauDe } from "./venues/landau-de";
 import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
 import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
+import { scrapeLichthofTheater } from "./venues/lichthof-theater";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
@@ -205,6 +206,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
   { slug: "landinsicht-buchladen", run: (_ctx: ScraperContext) => scrapeLandinsichtBuchladen() },
   { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
+  { slug: "lichthof-theater", run: (_ctx: ScraperContext) => scrapeLichthofTheater() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
