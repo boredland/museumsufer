@@ -64,6 +64,7 @@ import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeFilmforumHoechst } from "./venues/filmforum-hoechst";
 import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
+import { scrapeFirstStageTheater } from "./venues/first-stage-theater";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
@@ -199,6 +200,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
   { slug: "filmforum-hoechst", run: (_ctx: ScraperContext) => scrapeFilmforumHoechst() },
   { slug: "filmkreis-darmstadt", run: (_ctx: ScraperContext) => scrapeFilmkreisDarmstadt() },
+  { slug: "first-stage-theater", run: (_ctx: ScraperContext) => scrapeFirstStageTheater() },
   {
     slug: "forschungskolleg-humanwissenschaften",
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
@@ -337,6 +339,7 @@ export {
   scrapeFgzStreitclub,
   scrapeFilmforumHoechst,
   scrapeFilmkreisDarmstadt,
+  scrapeFirstStageTheater,
   scrapeForschungskollegHumanwissenschaften,
   scrapeFrankfurterSparkasse,
   scrapeFrankfurtUas,
