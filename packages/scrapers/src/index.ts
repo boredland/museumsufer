@@ -29,7 +29,6 @@ import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeWdc2026 } from "./venues/_wdc2026";
 import { scrapeAlabamaKino } from "./venues/alabama-kino";
-import { scrapeAlleeTheater } from "./venues/alleetheater";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAltonaerTheater } from "./venues/altonaer-theater";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
@@ -165,7 +164,6 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alabama-kino", run: (_ctx: ScraperContext) => scrapeAlabamaKino() },
-  { slug: "alleetheater", run: (_ctx: ScraperContext) => scrapeAlleeTheater() },
   { slug: "altonaer-theater", run: (_ctx: ScraperContext) => scrapeAltonaerTheater() },
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
@@ -304,7 +302,6 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 
 export {
   scrapeAlabamaKino,
-  scrapeAlleeTheater,
   scrapeAlteOper,
   scrapeAltonaerTheater,
   scrapeAndreasKoehs,
