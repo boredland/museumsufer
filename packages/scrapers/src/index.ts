@@ -35,6 +35,7 @@ import { scrapeAltonaerTheater } from "./venues/altonaer-theater";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
 import { scrapeAstorFrankfurt } from "./venues/astor-frankfurt";
+import { scrapeAstorHafencity } from "./venues/astor-hafencity";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
@@ -141,6 +142,7 @@ import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
+import { scrapeSavoyFilmtheater } from "./venues/savoy-filmtheater";
 import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStPauliTheater } from "./venues/st-pauli-theater";
@@ -178,6 +180,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
   { slug: "arthouse-kinos-frankfurt", run: (_ctx: ScraperContext) => scrapeArthouseKinos() },
   { slug: "astor-frankfurt", run: (_ctx: ScraperContext) => scrapeAstorFrankfurt() },
+  { slug: "astor-hafencity", run: (_ctx: ScraperContext) => scrapeAstorHafencity() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -292,6 +295,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "roemerberggespraeche", run: (_ctx: ScraperContext) => scrapeRoemerberggespraeche() },
   { slug: "romanfabrik", run: (_ctx: ScraperContext) => scrapeRomanfabrik() },
   { slug: "rptu-campuskultur", run: (_ctx: ScraperContext) => scrapeRptuCampuskultur() },
+  { slug: "savoy-filmtheater", run: (_ctx: ScraperContext) => scrapeSavoyFilmtheater() },
   { slug: "schauspiel-frankfurt", run: (_ctx: ScraperContext) => scrapeSchauspielFrankfurt() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-pauli-theater", run: (_ctx: ScraperContext) => scrapeStPauliTheater() },
@@ -324,6 +328,7 @@ export {
   scrapeAndreasKoehs,
   scrapeArthouseKinos,
   scrapeAstorFrankfurt,
+  scrapeAstorHafencity,
   scrapeAutorenbuchhandlungMarx,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
@@ -430,6 +435,7 @@ export {
   scrapeRoemerberggespraeche,
   scrapeRomanfabrik,
   scrapeRptuCampuskultur,
+  scrapeSavoyFilmtheater,
   scrapeSchauspielFrankfurt,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
