@@ -31,6 +31,7 @@ import { scrapeWdc2026 } from "./venues/_wdc2026";
 import { scrapeAlabamaKino } from "./venues/alabama-kino";
 import { scrapeAlleeTheater } from "./venues/alleetheater";
 import { scrapeAlteOper } from "./venues/alte-oper";
+import { scrapeAltonaerTheater } from "./venues/altonaer-theater";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
 import { scrapeAstorFrankfurt } from "./venues/astor-frankfurt";
@@ -53,6 +54,7 @@ import { scrapeDrHochs } from "./venues/dr-hochs";
 import { scrapeDramatischeBuehne } from "./venues/dramatische-buehne";
 import { scrapeDresdenFrankfurtDanceCompany } from "./venues/dresden-frankfurt-dance-company";
 import { scrapeEnglishTheatreFrankfurt } from "./venues/english-theatre-frankfurt";
+import { scrapeEnglishTheatreHamburg } from "./venues/english-theatre-hamburg";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
 import { scrapeEschbornK } from "./venues/eschborn-k";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
@@ -68,6 +70,9 @@ import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
+import { scrapeHamburgerKammerspiele } from "./venues/hamburger-kammerspiele";
+import { scrapeHamburgerPuppentheater } from "./venues/hamburger-puppentheater";
+import { scrapeHarburgerTheater } from "./venues/harburger-theater";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHessischesStaatsballett } from "./venues/hessisches-staatsballett";
 import { scrapeHfmdk } from "./venues/hfmdk";
@@ -88,6 +93,7 @@ import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKinoKoeppern } from "./venues/kino-koeppern";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
 import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
+import { scrapeKomoedieWinterhuderFaehrhaus } from "./venues/komoedie-winterhuder-faehrhaus";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeLandauDe } from "./venues/landau-de";
@@ -110,6 +116,7 @@ import { scrapeOhnsorgTheater } from "./venues/ohnsorg-theater";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOperFrankfurt } from "./venues/oper-frankfurt";
 import { scrapeOperFrankfurtKonzerte } from "./venues/oper-frankfurt-konzerte";
+import { scrapeOpernloft } from "./venues/opernloft";
 import { scrapeOrfeosErben } from "./venues/orfeos-erben";
 import { scrapePapagenoMusiktheater } from "./venues/papageno-musiktheater";
 import { scrapePfalzDe } from "./venues/pfalz-de";
@@ -148,6 +155,7 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "alabama-kino", run: (_ctx: ScraperContext) => scrapeAlabamaKino() },
   { slug: "alleetheater", run: (_ctx: ScraperContext) => scrapeAlleeTheater() },
+  { slug: "altonaer-theater", run: (_ctx: ScraperContext) => scrapeAltonaerTheater() },
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
   { slug: "arthouse-kinos-frankfurt", run: (_ctx: ScraperContext) => scrapeArthouseKinos() },
@@ -171,6 +179,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "dresden-frankfurt-dance-company", run: (_ctx: ScraperContext) => scrapeDresdenFrankfurtDanceCompany() },
   { slug: "dr-hochs-konservatorium", run: (_ctx: ScraperContext) => scrapeDrHochs() },
   { slug: "english-theatre-frankfurt", run: (_ctx: ScraperContext) => scrapeEnglishTheatreFrankfurt() },
+  { slug: "english-theatre-hamburg", run: (_ctx: ScraperContext) => scrapeEnglishTheatreHamburg() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
   { slug: "eschborn-k", run: (_ctx: ScraperContext) => scrapeEschbornK() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
@@ -189,6 +198,9 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
+  { slug: "hamburger-kammerspiele", run: (_ctx: ScraperContext) => scrapeHamburgerKammerspiele() },
+  { slug: "hamburger-puppentheater", run: (_ctx: ScraperContext) => scrapeHamburgerPuppentheater() },
+  { slug: "harburger-theater", run: (_ctx: ScraperContext) => scrapeHarburgerTheater() },
   { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
   { slug: "hessisches-staatsballett", run: (_ctx: ScraperContext) => scrapeHessischesStaatsballett() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
@@ -209,6 +221,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kino-koeppern", run: (_ctx: ScraperContext) => scrapeKinoKoeppern() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "komoedie-frankfurt", run: (_ctx: ScraperContext) => scrapeKomoedieFrankfurt() },
+  { slug: "komoedie-winterhuder-faehrhaus", run: (_ctx: ScraperContext) => scrapeKomoedieWinterhuderFaehrhaus() },
   { slug: "kronberg-academy", run: (_ctx: ScraperContext) => scrapeKronbergAcademy() },
   { slug: "kulturnetz-landau", run: (_ctx: ScraperContext) => scrapeKulturnetzLandau() },
   { slug: "landau-de", run: (_ctx: ScraperContext) => scrapeLandauDe() },
@@ -233,6 +246,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "nippon-connection", run: (_ctx: ScraperContext) => scrapeNipponConnection() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
+  { slug: "opernloft", run: (_ctx: ScraperContext) => scrapeOpernloft() },
   { slug: "ohnsorg-theater", run: (_ctx: ScraperContext) => scrapeOhnsorgTheater() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOperFrankfurt() },
   { slug: "oper-frankfurt-konzerte", run: (_ctx: ScraperContext) => scrapeOperFrankfurtKonzerte() },
@@ -270,6 +284,7 @@ export {
   scrapeAlabamaKino,
   scrapeAlleeTheater,
   scrapeAlteOper,
+  scrapeAltonaerTheater,
   scrapeAndreasKoehs,
   scrapeArthouseKinos,
   scrapeAstorFrankfurt,
@@ -292,6 +307,7 @@ export {
   scrapeDresdenFrankfurtDanceCompany,
   scrapeDrHochs,
   scrapeEnglishTheatreFrankfurt,
+  scrapeEnglishTheatreHamburg,
   scrapeEnsembleModern,
   scrapeEschbornK,
   scrapeEvangelischeAkademie,
@@ -307,6 +323,9 @@ export {
   scrapeGallusTheater,
   scrapeHafen2,
   scrapeHambacherSchloss,
+  scrapeHamburgerKammerspiele,
+  scrapeHamburgerPuppentheater,
+  scrapeHarburgerTheater,
   scrapeHausAmDom,
   scrapeHessischesStaatsballett,
   scrapeHfmdk,
@@ -327,6 +346,7 @@ export {
   scrapeKinoKoeppern,
   scrapeKirchenmusikDreikoenig,
   scrapeKomoedieFrankfurt,
+  scrapeKomoedieWinterhuderFaehrhaus,
   scrapeKronbergAcademy,
   scrapeKulturnetzLandau,
   scrapeLandauDe,
@@ -348,6 +368,7 @@ export {
   scrapeOpenBooks,
   scrapeOperFrankfurt,
   scrapeOperFrankfurtKonzerte,
+  scrapeOpernloft,
   scrapeOrfeosErben,
   scrapePapagenoMusiktheater,
   scrapePfalzDe,
