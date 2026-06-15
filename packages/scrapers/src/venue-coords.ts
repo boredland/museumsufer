@@ -66,6 +66,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   landungsbruecken: [50.0976, 8.6519],
   mousonturm: [50.1183, 8.7019],
   "neues-theater-hoechst": [50.1014, 8.5443],
+  "ohnsorg-theater": [53.5528, 10.0075],
   "oper-frankfurt": [50.1077, 8.6726],
   "papageno-musiktheater": [50.1228, 8.6533],
   "schauspiel-frankfurt": [50.1078, 8.6745],

@@ -100,6 +100,7 @@ import { scrapeNaxosKino } from "./venues/naxos-kino";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
 import { scrapeNipponConnection } from "./venues/nippon-connection";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
+import { scrapeOhnsorgTheater } from "./venues/ohnsorg-theater";
 import { scrapeOpenBooks } from "./venues/openbooks-frankfurt";
 import { scrapeOperFrankfurt } from "./venues/oper-frankfurt";
 import { scrapeOperFrankfurtKonzerte } from "./venues/oper-frankfurt-konzerte";
@@ -221,6 +222,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "nippon-connection", run: (_ctx: ScraperContext) => scrapeNipponConnection() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },
+  { slug: "ohnsorg-theater", run: (_ctx: ScraperContext) => scrapeOhnsorgTheater() },
   { slug: "oper-frankfurt", run: (_ctx: ScraperContext) => scrapeOperFrankfurt() },
   { slug: "oper-frankfurt-konzerte", run: (_ctx: ScraperContext) => scrapeOperFrankfurtKonzerte() },
   { slug: "orfeos-erben", run: (_ctx: ScraperContext) => scrapeOrfeosErben() },

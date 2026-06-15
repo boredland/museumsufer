@@ -70,6 +70,7 @@
     "./venues/nippon-connection": "./src/venues/nippon-connection.ts",
     "./venues/normative-orders": "./src/venues/normative-orders.ts",
     "./venues/openbooks-frankfurt": "./src/venues/openbooks-frankfurt.ts",
+    "./venues/ohnsorg-theater": "./src/venues/ohnsorg-theater.ts",
     "./venues/oper-frankfurt": "./src/venues/oper-frankfurt.ts",
     "./venues/oper-frankfurt-konzerte": "./src/venues/oper-frankfurt-konzerte.ts",
     "./venues/orfeos-erben": "./src/venues/orfeos-erben.ts",
