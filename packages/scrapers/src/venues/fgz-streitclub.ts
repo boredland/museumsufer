@@ -43,7 +43,7 @@ export async function scrapeFgzStreitclub(): Promise<VenueScrapeResult> {
     const item = m[1];
 
     const title = stripHtml(item.match(TITLE_RE)?.[1] ?? item.match(TITLE_RE)?.[2] ?? "").trim();
-    if (!title || !title.includes("StreitClub")) continue;
+    if (!title?.includes("StreitClub")) continue;
 
     const url = item.match(LINK_RE)?.[1]?.trim() ?? "";
     if (!url || seen.has(url)) continue;

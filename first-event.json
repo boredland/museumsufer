@@ -1,0 +1,772 @@
+{
+  "ID": 13553,
+  "event_id": 13553,
+  "event_start_unix": 1781803800,
+  "event_end_unix": 1781803800,
+  "event_title": "The 27 Club",
+  "event_color": "1",
+  "event_type": "rm",
+  "event_past": "no",
+  "event_repeat_interval": 0,
+  "ri": 0,
+  "unix_start": "1781803800",
+  "unix_end": "1781803800",
+  "etx_type": "n",
+  "event_pmv": {
+    "_dwls_first_image": [
+      "",
+      ""
+    ],
+    "evcal_srow": [
+      "1781811000"
+    ],
+    "evcal_erow": [
+      "1781811000"
+    ],
+    "event_year": [
+      "2023"
+    ],
+    "_edit_lock": [
+      "1781024664:4"
+    ],
+    "_edit_last": [
+      "4"
+    ],
+    "_thumbnail_id": [
+      "13556"
+    ],
+    "_uncode_featured_media_display": [
+      "carousel"
+    ],
+    "_uncode_specific_menu_opaque": [
+      "off"
+    ],
+    "_uncode_specific_menu_no_shadow": [
+      "off"
+    ],
+    "_uncode_blocks_list": [
+      "63"
+    ],
+    "_uncode_header_full_width": [
+      "on"
+    ],
+    "_uncode_header_height": [
+      "a:2:{i:0;s:2:\"50\";i:1;s:1:\"%\";}"
+    ],
+    "_uncode_header_title": [
+      "on"
+    ],
+    "_uncode_header_title_custom": [
+      "off"
+    ],
+    "_uncode_header_style": [
+      "dark"
+    ],
+    "_uncode_header_content_width": [
+      "off"
+    ],
+    "_uncode_header_custom_width": [
+      "100"
+    ],
+    "_uncode_header_align": [
+      "left"
+    ],
+    "_uncode_header_position": [
+      "header-center header-middle"
+    ],
+    "_uncode_header_title_size": [
+      "h1"
+    ],
+    "_uncode_header_title_italic": [
+      "off"
+    ],
+    "_uncode_header_featured": [
+      "on"
+    ],
+    "_uncode_header_background": [
+      "a:6:{s:16:\"background-color\";s:10:\"color-wayh\";s:17:\"background-repeat\";s:0:\"\";s:21:\"background-attachment\";s:0:\"\";s:19:\"background-position\";s:0:\"\";s:15:\"background-size\";s:0:\"\";s:16:\"background-image\";s:0:\"\";}"
+    ],
+    "_uncode_header_parallax": [
+      "off"
+    ],
+    "_uncode_header_overlay_color_alpha": [
+      "100"
+    ],
+    "_uncode_header_scroll_opacity": [
+      "off"
+    ],
+    "_uncode_header_scrolldown": [
+      "off"
+    ],
+    "_uncode_menu_no_padding": [
+      "off"
+    ],
+    "_uncode_menu_no_padding_mobile": [
+      "off"
+    ],
+    "_uncode_sidebar_position": [
+      "sidebar_right"
+    ],
+    "_uncode_sidebar_size": [
+      "4"
+    ],
+    "_uncode_sidebar_sticky": [
+      "off"
+    ],
+    "_uncode_sidebar_fill": [
+      "off"
+    ],
+    "_uncode_fullpage_type": [
+      "curtain"
+    ],
+    "_uncode_fullpage_opacity": [
+      "off"
+    ],
+    "_uncode_scroll_dots": [
+      "off"
+    ],
+    "_uncode_empty_dots": [
+      "off"
+    ],
+    "_uncode_scroll_history": [
+      "off"
+    ],
+    "_uncode_scroll_safe_padding": [
+      "on"
+    ],
+    "_uncode_fullpage_mobile": [
+      "off"
+    ],
+    "detail-home-date": [
+      "18. Juni bis 1. August 2026"
+    ],
+    "_evcal_ec_f1a1_cus": [
+      "https://tickets.st-pauli-theater.de/webshop/webticket/shop?production=578"
+    ],
+    "_edata": [
+      "a:8:{s:13:\"hide_progress\";s:2:\"no\";s:12:\"_health_mask\";s:2:\"no\";s:12:\"_health_temp\";s:2:\"no\";s:12:\"_health_pdis\";s:2:\"no\";s:11:\"_health_san\";s:2:\"no\";s:11:\"_health_out\";s:2:\"no\";s:11:\"_health_vac\";s:2:\"no\";s:13:\"_health_other\";s:0:\"\";}"
+    ],
+    "_event_month": [
+      "11"
+    ],
+    "_featured": [
+      "no"
+    ],
+    "_wpb_vc_js_status": [
+      "true"
+    ],
+    "_views_template": [
+      "0"
+    ],
+    "evo_exclude_ev": [
+      "no"
+    ],
+    "_completed": [
+      "no"
+    ],
+    "_onlyloggedin": [
+      "no"
+    ],
+    "detail-legal": [
+      ""
+    ],
+    "_wp_old_slug": [
+      "gala-zur-eroeffnung-der-spielzeit-2019-2020-copy"
+    ],
+    "_oembed_ff080bc77507c13efb869c05f0f4c54e": [
+      "{{unknown}}"
+    ],
+    "_oembed_e4e80cf51cb3c239cf1c51e8a3717081": [
+      "{{unknown}}"
+    ],
+    "_oembed_da7b77314d1506c5ac9f10d15b56f922": [
+      "{{unknown}}"
+    ],
+    "_oembed_0631f8454d0c499cdd347c858700df11": [
+      "{{unknown}}"
+    ],
+    "_oembed_5b2a5afa17f057f900064c97799045a1": [
+      "{{unknown}}"
+    ],
+    "_oembed_89e5acbbfa408a21d48f4291ebc316e5": [
+      "{{unknown}}"
+    ],
+    "_oembed_8f3d5daf27fabec47aeabc5e0297cc46": [
+      "{{unknown}}"
+    ],
+    "_oembed_3371444257d096de92ef75857805e6d7": [
+      "{{unknown}}"
+    ],
+    "_oembed_5071935adbb6f6021b526732ebdb8df3": [
+      "{{unknown}}"
+    ],
+    "_oembed_11e836625e85689b30e24d9616b42513": [
+      "{{unknown}}"
+    ],
+    "_oembed_979621c4fbfdae1314a3538894df1e16": [
+      "{{unknown}}"
+    ],
+    "_oembed_91268577175d36e49ada8d62270fd010": [
+      "{{unknown}}"
+    ],
+    "_oembed_a8aeabd85e214360e5c6cd0b7f5078f1": [
+      "{{unknown}}"
+    ],
+    "_oembed_0e60c68ad9ea1faafa227a2d341cc4c2": [
+      "{{unknown}}"
+    ],
+    "_oembed_9879a46c21ceb7eca901a318bacb2aa9": [
+      "{{unknown}}"
+    ],
+    "_oembed_0f439ba4b4e23d99710df1a7b962576c": [
+      "{{unknown}}"
+    ],
+    "_oembed_1faaca6116d1ab1a2a840df0da742289": [
+      "{{unknown}}"
+    ],
+    "_oembed_7e98cd9154d3404d3e618350104d83c1": [
+      "{{unknown}}"
+    ],
+    "evoau_disableEditing": [
+      "no"
+    ],
+    "_uncode_specific_main_width": [
+      "a:2:{i:0;s:4:\"1200\";i:1;s:2:\"px\";}"
+    ],
+    "_uncode_specific_menu_remove": [
+      "off"
+    ],
+    "_uncode_specific_layout_width_custom": [
+      "a:2:{i:0;s:0:\"\";i:1;s:2:\"px\";}"
+    ],
+    "_uncode_specific_copy_hide": [
+      "off"
+    ],
+    "_uncode_specific_footer_uparrow_hide": [
+      "off"
+    ],
+    "_wds_trimmed_excerpt": [
+      "Collien Konzert &amp; Theater GmbH präsentiert The 27 Club A Tribute to: Jimi Hendrix  Amy Winehouse  Janis Joplin  Kurt Cobain  Jim Morrison Brian Jones (R ..."
+    ],
+    "_wds_focus-keywords": [
+      ""
+    ],
+    "_oembed_d97f53a37a90e8f484f0ae4eeb5941c7": [
+      "{{unknown}}"
+    ],
+    "_oembed_71cece0be9e7e7fe94ccc495ea8751f3": [
+      "{{unknown}}"
+    ],
+    "_oembed_4683d69f87afcf2cf1ad601109742508": [
+      "{{unknown}}"
+    ],
+    "_oembed_adb6f5416ff892da4e90a0d3fc774f9c": [
+      "{{unknown}}"
+    ],
+    "_oembed_4530a7af1d996f6e8ec9458ea9a19eaf": [
+      "{{unknown}}"
+    ],
+    "_oembed_cf4a44780a8aa79bf8da438d66990c9f": [
+      "{{unknown}}"
+    ],
+    "_oembed_30b5d50ef13cdf61ef85071782d7fed1": [
+      "{{unknown}}"
+    ],
+    "_oembed_6080d7ac853e801a62b001b32daf45f0": [
+      "{{unknown}}"
+    ],
+    "_oembed_3f1d95b685e38f0f30a9638a30f22111": [
+      "{{unknown}}"
+    ],
+    "_oembed_b123621ea4d26268ad1bd7d13a614f0e": [
+      "{{unknown}}"
+    ],
+    "_oembed_2959650c008b97ba1f37202aa99e8547": [
+      "{{unknown}}"
+    ],
+    "_oembed_5595223a9191d5f2c8e51b92bf63ba05": [
+      "{{unknown}}"
+    ],
+    "_oembed_cb3a47081b6e9fcdf2f52b36a050f4c4": [
+      "{{unknown}}"
+    ],
+    "_oembed_027fe9de50ade7045ff628cb51313847": [
+      "{{unknown}}"
+    ],
+    "_oembed_ad812ddb1102ea7fe85f34fef2202adb": [
+      "{{unknown}}"
+    ],
+    "_oembed_4844bd1bae4d478c9fa9521ee2a3af87": [
+      "{{unknown}}"
+    ],
+    "_oembed_92b629a2d28964a3cd2d63d52dc8a23d": [
+      "{{unknown}}"
+    ],
+    "detail-home": [
+      "Legends Never Die"
+    ],
+    "_oembed_5dbab6d703679a0eb8b6c452948dd515": [
+      "{{unknown}}"
+    ],
+    "_uncode_featured_media": [
+      "13556"
+    ],
+    "_oembed_2726b16ddc29ed5f72270f1e1f10684e": [
+      "{{unknown}}"
+    ],
+    "_oembed_dfdc12a1624ef52ecdeb10fb0f92fe20": [
+      "{{unknown}}"
+    ],
+    "_oembed_54b7b4336e6ab7d9869936fcf1ec84e9": [
+      "{{unknown}}"
+    ],
+    "_oembed_fe6f5d4a7c5c012f6ef2d8c3ca2100cd": [
+      "{{unknown}}"
+    ],
+    "_oembed_c5e1e973e789c7e90ff0ec59e207f93a": [
+      "{{unknown}}"
+    ],
+    "_oembed_ae46ff6556379ac45a94d6375d7de8cd": [
+      "{{unknown}}"
+    ],
+    "_oembed_2e0af2efd65d1bac06f8b4d5d79025ba": [
+      "{{unknown}}"
+    ],
+    "_oembed_20f0a82fb2b011a2ead333451e8f9e0b": [
+      "{{unknown}}"
+    ],
+    "_evo_virtual_erow": [
+      "1753430400"
+    ],
+    "_wpnonce": [
+      "5ee0031329"
+    ],
+    "_wp_http_referer": [
+      "/wp-admin/post.php?post=13553&action=edit&message=1"
+    ],
+    "_ajax_nonce-add-event_type": [
+      "9e5e65f33e"
+    ],
+    "_ajax_nonce-add-event_type_2": [
+      "3224ab6fb9"
+    ],
+    "_ajax_nonce-add-category": [
+      "65070baca6"
+    ],
+    "_ajax_nonce-add-options": [
+      "03073d086c"
+    ],
+    "_ajax_nonce": [
+      "c98c2ff5f2"
+    ],
+    "_ajax_nonce-add-meta": [
+      "d474b89279"
+    ],
+    "_wds_nonce": [
+      "6ef041426d"
+    ],
+    "_status": [
+      "scheduled"
+    ],
+    "_attendance_mode": [
+      "offline"
+    ],
+    "_evo_date_format": [
+      "Y/m/d"
+    ],
+    "_evo_time_format": [
+      "24h"
+    ],
+    "_start_hour": [
+      "19"
+    ],
+    "_start_minute": [
+      "30"
+    ],
+    "_end_hour": [
+      "19"
+    ],
+    "_end_minute": [
+      "30"
+    ],
+    "_evo_tz": [
+      "Europe/Berlin"
+    ],
+    "_evo_rep_series": [
+      "no"
+    ],
+    "_new_repeat_start_hour": [
+      "19"
+    ],
+    "_new_repeat_start_minute": [
+      "30"
+    ],
+    "_new_repeat_end_hour": [
+      "19"
+    ],
+    "_new_repeat_end_minute": [
+      "30"
+    ],
+    "_virtual": [
+      "no"
+    ],
+    "_health": [
+      "no"
+    ],
+    "_evo_relevs_hide_img": [
+      "no"
+    ],
+    "_uncode_page_options_nonce": [
+      "b49ef788d9"
+    ],
+    "_uncode_specific_body_background": [
+      "a:6:{s:16:\"background-color\";s:0:\"\";s:17:\"background-repeat\";s:0:\"\";s:21:\"background-attachment\";s:0:\"\";s:19:\"background-position\";s:0:\"\";s:15:\"background-size\";s:0:\"\";s:16:\"background-image\";s:0:\"\";}"
+    ],
+    "_ajax_fetch_list_nonce": [
+      "01bde6be7c"
+    ],
+    "_cws_plt_nonce": [
+      "5b13c0033d"
+    ],
+    "_evo_lang": [
+      "L1"
+    ],
+    "_oembed_1a96306eb08e0945309198c0e98b99ff": [
+      "{{unknown}}"
+    ],
+    "evo_year_long": [
+      "no"
+    ],
+    "_evo_month_long": [
+      "no"
+    ],
+    "_oembed_5732b6eab87564dbfa1e098bdd5cb66e": [
+      "{{unknown}}"
+    ],
+    "_evo_event_grad_colors": [
+      "no"
+    ],
+    "_evo_event_grad_ang": [
+      "0°"
+    ],
+    "_evo_rep_no_nosort": [
+      "no"
+    ],
+    "evcal_allday": [
+      "no"
+    ],
+    "_unix_start_ev": [
+      "1781803800"
+    ],
+    "_unix_end_ev": [
+      "1781803800"
+    ],
+    "_unix_vend_ev": [
+      "1753423200"
+    ],
+    "_oembed_21e68534018236ee9bc4ae88d9b684ce": [
+      "{{unknown}}"
+    ],
+    "_oembed_ebfc7896bea9fe04dbae9416951eaad9": [
+      "{{unknown}}"
+    ],
+    "_oembed_cdf9ea8241cf52f072cd698297a1b8e9": [
+      "{{unknown}}"
+    ],
+    "_oembed_7be405c9f518c3a7c35b8eb6901ffaa6": [
+      "{{unknown}}"
+    ],
+    "_oembed_a59bba728fe4c00268300d922537e8f8": [
+      "{{unknown}}"
+    ],
+    "_oembed_7bc26d2757c110dc49666bbe17731d0b": [
+      "{{unknown}}"
+    ],
+    "_oembed_ffe45b34ab42bceab6caf754e9f84497": [
+      "{{unknown}}"
+    ],
+    "_oembed_94ef196774f6c66d61ed1b218c35c061": [
+      "{{unknown}}"
+    ],
+    "_oembed_ad8f76ff8c00a7f9892865befcc49529": [
+      "{{unknown}}"
+    ],
+    "_oembed_8083af9475af514629feba55be744f44": [
+      "{{unknown}}"
+    ],
+    "_oembed_cd6f01e32d059fb0b9fd2708ca1e8525": [
+      "{{unknown}}"
+    ],
+    "_oembed_8e0163e80ed610220728e99142d7dddb": [
+      "{{unknown}}"
+    ],
+    "_oembed_f57dc74c1d7f5c195870c9a006e131c8": [
+      "{{unknown}}"
+    ],
+    "_oembed_f76d3e585d77b4d8e942bdaa10f1b837": [
+      "{{unknown}}"
+    ],
+    "_oembed_6de8141d0e1e7cff46523bb4f7c91e4a": [
+      "{{unknown}}"
+    ],
+    "_oembed_b1c36bfe815b800a38cc06d0998cedb5": [
+      "{{unknown}}"
+    ],
+    "_oembed_ba07259b045b65ffc25fc62553cbd2e0": [
+      "{{unknown}}"
+    ],
+    "_oembed_e2b508eedd4b20beeddbfc4c1ee69543": [
+      "{{unknown}}"
+    ],
+    "_oembed_5c3837f7ecd407b7a2045c93ff788d06": [
+      "{{unknown}}"
+    ],
+    "_oembed_3e2dc7e257af2ccdcb87f699a3a3af06": [
+      "{{unknown}}"
+    ],
+    "_wpb_post_custom_layout": [
+      "default"
+    ],
+    "_oembed_6b27b6dcfe14c5e46d81ebe18cf057c8": [
+      "{{unknown}}"
+    ],
+    "_oembed_13236813753c474c9048041762ac44c1": [
+      "{{unknown}}"
+    ],
+    "_oembed_bac918ae86db8a58045f655c8f2ac18e": [
+      "{{unknown}}"
+    ],
+    "_wp_original_http_referer": [
+      "https://www.st-pauli-theater.de/wp-admin/post.php?post=13553&action=edit&wpb-backend-editor"
+    ],
+    "_future_action_nonce": [
+      "e10ce62447"
+    ],
+    "_oembed_4f076bc6662c0dc5c4c52e65f1b7cc61": [
+      "{{unknown}}"
+    ],
+    "_oembed_4d9779547b519366072a9cb3be476593": [
+      "{{unknown}}"
+    ],
+    "_oembed_f68b0f7c811f3bafbe939ac18330787c": [
+      "{{unknown}}"
+    ],
+    "_oembed_151ef2d7e4eb33aaf495fca185fcb4cd": [
+      "{{unknown}}"
+    ],
+    "_oembed_e79ccf706b4dbfadaa8e7b0fb2742ff5": [
+      "{{unknown}}"
+    ],
+    "_oembed_01eb0ab866f45f12249b7bc4f70725b2": [
+      "{{unknown}}"
+    ],
+    "_oembed_7334b0089a49ab404be6fada7ea31dc8": [
+      "{{unknown}}"
+    ],
+    "_oembed_2123bd03b3cbb523d2b08fd678cc1d4d": [
+      "{{unknown}}"
+    ],
+    "_oembed_e141d3f59554e8203d46b34dd08aa6d4": [
+      "{{unknown}}"
+    ],
+    "_oembed_f481d2a629281a9797f68bd431c39f9f": [
+      "<blockquote class=\"wp-embedded-content\" data-secret=\"cWrrKzAnbG\"><a href=\"https://theater-hamburg.org/theaternacht/ticket/\">Ticket</a></blockquote><iframe class=\"wp-embedded-content\" sandbox=\"allow-scripts\" security=\"restricted\" style=\"position: absolute; visibility: hidden;\" title=\"&#8222;Ticket&#8220; &#8212; Theater Hamburg\" src=\"https://theater-hamburg.org/theaternacht/ticket/embed/#?secret=nQdnLsNix3#?secret=cWrrKzAnbG\" data-secret=\"cWrrKzAnbG\" width=\"600\" height=\"338\" frameborder=\"0\" marginwidth=\"0\" marginheight=\"0\" scrolling=\"no\"></iframe>"
+    ],
+    "_oembed_time_f481d2a629281a9797f68bd431c39f9f": [
+      "1751073462"
+    ],
+    "_oembed_c50afc73a3c87dd80c6122a06e9cc20d": [
+      "{{unknown}}"
+    ],
+    "_oembed_3fd423adf134ebba0c50747ca828ed15": [
+      "{{unknown}}"
+    ],
+    "_oembed_78eca53194d9fc800690311deb962f77": [
+      "{{unknown}}"
+    ],
+    "_oembed_b1bbcee8a49808a8e4d790e07e782936": [
+      "{{unknown}}"
+    ],
+    "_oembed_66c56e497d38132659b1d00c084861bb": [
+      "{{unknown}}"
+    ],
+    "_oembed_be8ff25b9eb3d8bc29e7026ea6977142": [
+      "{{unknown}}"
+    ],
+    "_oembed_9dfc3c3f4dba3438539bdec6ebea71d1": [
+      "{{unknown}}"
+    ],
+    "_oembed_5674303854686b5d57059ccd5bf372d7": [
+      "{{unknown}}"
+    ],
+    "_oembed_cec9af19ab9be76fd5e1585cb9d57a5b": [
+      "{{unknown}}"
+    ],
+    "_oembed_3aed5a8905f04161cf0226167e67d25c": [
+      "{{unknown}}"
+    ],
+    "_oembed_2a181e89a126658a6578f1fed70821e1": [
+      "{{unknown}}"
+    ],
+    "_oembed_e78ccb32f22a62fba3edb364c0472b99": [
+      "{{unknown}}"
+    ],
+    "_oembed_ead98446854dbb732f23737c9d92d7d3": [
+      "{{unknown}}"
+    ],
+    "_oembed_e9cf3651f3b4525697045d52ef184b3e": [
+      "{{unknown}}"
+    ],
+    "_oembed_7ac740b310a23c889e95b1c2f9847411": [
+      "{{unknown}}"
+    ],
+    "_wpb_vc_editor_type": [
+      "backend"
+    ],
+    "evcal_event_color_n": [
+      "1"
+    ],
+    "evcal_event_color": [
+      "e32113"
+    ],
+    "evcal_event_color2": [
+      "e32113"
+    ],
+    "evcal_hide_locname": [
+      "no"
+    ],
+    "evcal_gmap_gen": [
+      "no"
+    ],
+    "evcal_name_over_img": [
+      "no"
+    ],
+    "evo_access_control_location": [
+      "no"
+    ],
+    "evcal_repeat": [
+      "yes"
+    ],
+    "_evcal_rep_series": [
+      "no"
+    ],
+    "_evcal_rep_endt": [
+      "no"
+    ],
+    "_evcal_rep_series_clickable": [
+      "no"
+    ],
+    "evcal_lmlink_target": [
+      "no"
+    ],
+    "_evcal_exlink_target": [
+      "no"
+    ],
+    "_evcal_exlink_option": [
+      "1"
+    ],
+    "evo_hide_endtime": [
+      "no"
+    ],
+    "evo_span_hidden_end": [
+      "no"
+    ],
+    "_time_ext_type": [
+      "n"
+    ],
+    "evo_evcrd_field_org": [
+      "no"
+    ],
+    "evo_event_org_as_perf": [
+      "no"
+    ],
+    "_evo_virtual_endtime": [
+      "no"
+    ],
+    "_expiration-date": [
+      "1768258800"
+    ],
+    "_expiration-date-status": [
+      "saved"
+    ],
+    "_expiration-date-type": [
+      "category-remove"
+    ],
+    "_expiration-date-post-status": [
+      "draft"
+    ],
+    "_expiration-date-taxonomy": [
+      "options"
+    ],
+    "_expiration-date-categories": [
+      "0"
+    ],
+    "_expiration-date-options": [
+      "a:10:{s:10:\"expireType\";s:15:\"category-remove\";s:9:\"newStatus\";s:5:\"draft\";s:8:\"category\";s:1:\"0\";s:16:\"categoryTaxonomy\";s:7:\"options\";s:4:\"date\";i:1768258800;s:11:\"actionLabel\";s:36:\"Ausgewählte eigenschaften entfernen\";s:9:\"postTitle\";s:17:\"Georg Ringsgwandl\";s:8:\"postType\";s:11:\"ajde_events\";s:8:\"postLink\";s:59:\"https://www.st-pauli-theater.de/programm/georg-ringsgwandl/\";s:13:\"postTypeLabel\";s:13:\"Veranstaltung\";}"
+    ],
+    "_pp_future_metadata_hash": [
+      "492a7dafda2e5c96876fa4fc5a193269"
+    ],
+    "_oembed_95ea42f75b709ead4dea7874cbe2f2f2": [
+      "{{unknown}}"
+    ],
+    "_oembed_14e582c58ec852981d59334fd83f3fb4": [
+      "{{unknown}}"
+    ],
+    "_oembed_2ed4bab0dc15d4d7f259cba83b070418": [
+      "{{unknown}}"
+    ],
+    "_oembed_67110cbb84b31b0ebf98dfadeaa47f8b": [
+      "{{unknown}}"
+    ],
+    "_oembed_d08a7a2389a4d966c8dde68b091e27a6": [
+      "{{unknown}}"
+    ],
+    "evo_rep_WK": [
+      "3"
+    ],
+    "evo_rep_WKwk": [
+      "3"
+    ],
+    "evcal_subtitle": [
+      "Legends Never Die"
+    ],
+    "evcal_rep_freq": [
+      "custom"
+    ],
+    "repeat_intervals": [
+      "a:46:{i:0;a:2:{i:0;s:10:\"1781811000\";i:1;s:10:\"1781811000\";}i:1;a:2:{i:0;s:10:\"1781897400\";i:1;s:10:\"1781897400\";}i:2;a:2:{i:0;s:10:\"1781967600\";i:1;s:10:\"1781967600\";}i:3;a:2:{i:0;s:10:\"1781985600\";i:1;s:10:\"1781985600\";}i:4;a:2:{i:0;s:10:\"1782054000\";i:1;s:10:\"1782054000\";}i:5;a:2:{i:0;s:10:\"1782243000\";i:1;s:10:\"1782243000\";}i:6;a:2:{i:0;s:10:\"1782329400\";i:1;s:10:\"1782329400\";}i:7;a:2:{i:0;s:10:\"1782415800\";i:1;s:10:\"1782415800\";}i:8;a:2:{i:0;s:10:\"1782502200\";i:1;s:10:\"1782502200\";}i:9;a:2:{i:0;s:10:\"1782572400\";i:1;s:10:\"1782572400\";}i:10;a:2:{i:0;s:10:\"1782590400\";i:1;s:10:\"1782590400\";}i:11;a:2:{i:0;s:10:\"1782658800\";i:1;s:10:\"1782658800\";}i:12;a:2:{i:0;s:10:\"1782847800\";i:1;s:10:\"1782847800\";}i:13;a:2:{i:0;s:10:\"1782934200\";i:1;s:10:\"1782934200\";}i:14;a:2:{i:0;s:10:\"1783020600\";i:1;s:10:\"1783020600\";}i:15;a:2:{i:0;s:10:\"1783107000\";i:1;s:10:\"1783107000\";}i:16;a:2:{i:0;s:10:\"1783177200\";i:1;s:10:\"1783177200\";}i:17;a:2:{i:0;s:10:\"1783195200\";i:1;s:10:\"1783195200\";}i:18;a:2:{i:0;s:10:\"1783263600\";i:1;s:10:\"1783263600\";}i:19;a:2:{i:0;s:10:\"1783452600\";i:1;s:10:\"1783452600\";}i:20;a:2:{i:0;s:10:\"1783539000\";i:1;s:10:\"1783539000\";}i:21;a:2:{i:0;s:10:\"1783625400\";i:1;s:10:\"1783625400\";}i:22;a:2:{i:0;s:10:\"1783711800\";i:1;s:10:\"1783711800\";}i:23;a:2:{i:0;s:10:\"1783782000\";i:1;s:10:\"1783782000\";}i:24;a:2:{i:0;s:10:\"1783800000\";i:1;s:10:\"1783800000\";}i:25;a:2:{i:0;s:10:\"1783868400\";i:1;s:10:\"1783868400\";}i:26;a:2:{i:0;s:10:\"1784057400\";i:1;s:10:\"1784057400\";}i:27;a:2:{i:0;s:10:\"1784143800\";i:1;s:10:\"1784143800\";}i:28;a:2:{i:0;s:10:\"1784230200\";i:1;s:10:\"1784230200\";}i:29;a:2:{i:0;s:10:\"1784316600\";i:1;s:10:\"1784316600\";}i:30;a:2:{i:0;s:10:\"1784386800\";i:1;s:10:\"1784386800\";}i:31;a:2:{i:0;s:10:\"1784404800\";i:1;s:10:\"1784404800\";}i:32;a:2:{i:0;s:10:\"1784473200\";i:1;s:10:\"1784473200\";}i:33;a:2:{i:0;s:10:\"1784662200\";i:1;s:10:\"1784662200\";}i:34;a:2:{i:0;s:10:\"1784748600\";i:1;s:10:\"1784748600\";}i:35;a:2:{i:0;s:10:\"1784835000\";i:1;s:10:\"1784835000\";}i:36;a:2:{i:0;s:10:\"1784921400\";i:1;s:10:\"1784921400\";}i:37;a:2:{i:0;s:10:\"1784991600\";i:1;s:10:\"1784991600\";}i:38;a:2:{i:0;s:10:\"1785009600\";i:1;s:10:\"1785009600\";}i:39;a:2:{i:0;s:10:\"1785078000\";i:1;s:10:\"1785078000\";}i:40;a:2:{i:0;s:10:\"1785267000\";i:1;s:10:\"1785267000\";}i:41;a:2:{i:0;s:10:\"1785353400\";i:1;s:10:\"1785353400\";}i:42;a:2:{i:0;s:10:\"1785439800\";i:1;s:10:\"1785439800\";}i:43;a:2:{i:0;s:10:\"1785526200\";i:1;s:10:\"1785526200\";}i:44;a:2:{i:0;s:10:\"1785596400\";i:1;s:10:\"1785596400\";}i:45;a:2:{i:0;s:10:\"1785614400\";i:1;s:10:\"1785614400\";}}"
+    ],
+    "evcal_rep_num": [
+      "52"
+    ],
+    "evcal_rep_gap": [
+      "1"
+    ],
+    "_oembed_073e20b34971c35bac84311ac2a30649": [
+      "{{unknown}}"
+    ],
+    "_pys_head_footer": [
+      "a:7:{s:14:\"disable_global\";b:0;s:8:\"head_any\";s:0:\"\";s:12:\"head_desktop\";s:0:\"\";s:11:\"head_mobile\";s:0:\"\";s:10:\"footer_any\";s:0:\"\";s:14:\"footer_desktop\";s:0:\"\";s:13:\"footer_mobile\";s:0:\"\";}"
+    ],
+    "_vir_hour": [
+      "08"
+    ],
+    "_vir_minute": [
+      "00"
+    ],
+    "_uncode_secondary_thumbnail_id": [
+      "0"
+    ],
+    "_wds_post_media_schema_cache": [
+      "a:1:{s:5:\"video\";a:1:{s:32:\"b2bfd111dd0ff2f4790fb6767bf57990\";a:14:{s:5:\"title\";s:32:\"The 27 Club im St. Pauli Theater\";s:11:\"author_name\";s:17:\"St. Pauli Theater\";s:10:\"author_url\";s:39:\"https://www.youtube.com/@StPauliTheater\";s:4:\"type\";s:5:\"video\";s:6:\"height\";i:473;s:5:\"width\";i:840;s:7:\"version\";s:3:\"1.0\";s:13:\"provider_name\";s:7:\"YouTube\";s:12:\"provider_url\";s:24:\"https://www.youtube.com/\";s:16:\"thumbnail_height\";i:360;s:15:\"thumbnail_width\";i:480;s:13:\"thumbnail_url\";s:48:\"https://i.ytimg.com/vi/rKIRPZDhRcs/hqdefault.jpg\";s:4:\"html\";s:335:\"<iframe width=\"840\" height=\"473\" src=\"https://www.youtube.com/embed/rKIRPZDhRcs?feature=oembed\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen title=\"The 27 Club im St. Pauli Theater\"></iframe>\";s:3:\"url\";s:28:\"https://youtu.be/rKIRPZDhRcs\";}}}"
+    ]
+  },
+  "year_long": false,
+  "month_long": false,
+  "featured": false,
+  "timezone_offset": -7200,
+  "gmt": "GMT+02:00",
+  "_ID": "13553_0",
+  "hex_color": "e32113"
+}

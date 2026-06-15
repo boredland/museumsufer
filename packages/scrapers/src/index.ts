@@ -46,6 +46,7 @@ import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDenkbar } from "./venues/denkbar";
+import { scrapeDeutschesSchauspielhaus } from "./venues/deutsches-schauspielhaus";
 import { scrapeDfgFrankfurt } from "./venues/dfg-frankfurt";
 import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
@@ -72,6 +73,7 @@ import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHamburgerKammerspiele } from "./venues/hamburger-kammerspiele";
 import { scrapeHamburgerPuppentheater } from "./venues/hamburger-puppentheater";
+import { scrapeHamburgischeStaatsoper } from "./venues/hamburgische-staatsoper";
 import { scrapeHarburgerTheater } from "./venues/harburger-theater";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHessischesStaatsballett } from "./venues/hessisches-staatsballett";
@@ -80,6 +82,7 @@ import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
 import { scrapeHsfkFrankfurt } from "./venues/hsfk-frankfurt";
+import { scrapeImperialTheater } from "./venues/imperial-theater";
 import { scrapeInstitutFrancaisFrankfurt } from "./venues/institut-francais-frankfurt";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
 import { scrapeInstitutoCervantesFrankfurt } from "./venues/instituto-cervantes-frankfurt";
@@ -88,6 +91,7 @@ import { scrapeJazzFrankfurt } from "./venues/jazz-frankfurt";
 import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJazzkeller } from "./venues/jazzkeller";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
+import { scrapeKampnagel } from "./venues/kampnagel";
 import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKinoKoeppern } from "./venues/kino-koeppern";
@@ -130,10 +134,12 @@ import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
 import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
+import { scrapeStPauliTheater } from "./venues/st-pauli-theater";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStalburgTheater } from "./venues/stalburg-theater";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
+import { scrapeThaliaTheater } from "./venues/thalia-theater";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
 import { scrapeTheaterLempenfieber } from "./venues/theater-lempenfieber";
 import { scrapeTheaterWillyPraml } from "./venues/theater-willy-praml";
@@ -171,6 +177,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "club-voltaire", run: (_ctx: ScraperContext) => scrapeClubVoltaire() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
+  { slug: "deutsches-schauspielhaus", run: (_ctx: ScraperContext) => scrapeDeutschesSchauspielhaus() },
   { slug: "dfg-frankfurt", run: (_ctx: ScraperContext) => scrapeDfgFrankfurt() },
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
@@ -198,9 +205,12 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
   { slug: "hambacher-schloss", run: (_ctx: ScraperContext) => scrapeHambacherSchloss() },
+  { slug: "hamburgische-staatsoper", run: (_ctx: ScraperContext) => scrapeHamburgischeStaatsoper() },
   { slug: "hamburger-kammerspiele", run: (_ctx: ScraperContext) => scrapeHamburgerKammerspiele() },
   { slug: "hamburger-puppentheater", run: (_ctx: ScraperContext) => scrapeHamburgerPuppentheater() },
   { slug: "harburger-theater", run: (_ctx: ScraperContext) => scrapeHarburgerTheater() },
+  { slug: "imperial-theater", run: (_ctx: ScraperContext) => scrapeImperialTheater() },
+  { slug: "kampnagel", run: (_ctx: ScraperContext) => scrapeKampnagel() },
   { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
   { slug: "hessisches-staatsballett", run: (_ctx: ScraperContext) => scrapeHessischesStaatsballett() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
@@ -263,10 +273,12 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "rptu-campuskultur", run: (_ctx: ScraperContext) => scrapeRptuCampuskultur() },
   { slug: "schauspiel-frankfurt", run: (_ctx: ScraperContext) => scrapeSchauspielFrankfurt() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
+  { slug: "st-pauli-theater", run: (_ctx: ScraperContext) => scrapeStPauliTheater() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
   { slug: "stalburg-theater", run: (_ctx: ScraperContext) => scrapeStalburgTheater() },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
+  { slug: "thalia-theater", run: (_ctx: ScraperContext) => scrapeThaliaTheater() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
   { slug: "theater-lempenfieber", run: (_ctx: ScraperContext) => scrapeTheaterLempenfieber() },
   { slug: "theater-willy-praml", run: (_ctx: ScraperContext) => scrapeTheaterWillyPraml() },
@@ -299,6 +311,7 @@ export {
   scrapeClubVoltaire,
   scrapeCrespoFoundation,
   scrapeDenkbar,
+  scrapeDeutschesSchauspielhaus,
   scrapeDfgFrankfurt,
   scrapeDieKaes,
   scrapeDieSchmiere,
@@ -325,6 +338,7 @@ export {
   scrapeHambacherSchloss,
   scrapeHamburgerKammerspiele,
   scrapeHamburgerPuppentheater,
+  scrapeHamburgischeStaatsoper,
   scrapeHarburgerTheater,
   scrapeHausAmDom,
   scrapeHessischesStaatsballett,
@@ -333,6 +347,7 @@ export {
   scrapeHrBigband,
   scrapeHrSinfonieorchester,
   scrapeHsfkFrankfurt,
+  scrapeImperialTheater,
   scrapeInstitutFrancaisFrankfurt,
   scrapeInstitutFuerSozialforschung,
   scrapeInstitutoCervantesFrankfurt,
@@ -341,6 +356,7 @@ export {
   scrapeJazzkeller,
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
+  scrapeKampnagel,
   scrapeKarlMarxBuchhandlung,
   scrapeKellertheaterFrankfurt,
   scrapeKinoKoeppern,
@@ -385,7 +401,9 @@ export {
   scrapeStadtbuechereiFrankfurt,
   scrapeStalburgTheater,
   scrapeStKatharinen,
+  scrapeStPauliTheater,
   scrapeSuew,
+  scrapeThaliaTheater,
   scrapeTheaterAlteBruecke,
   scrapeTheaterhausFrankfurt,
   scrapeTheaterLempenfieber,
