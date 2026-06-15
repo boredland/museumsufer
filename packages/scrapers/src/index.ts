@@ -14,6 +14,7 @@ export {
   coordinatesFor,
   FRANKFURT_BBOX,
   GEOFENCE_BBOX,
+  HAMBURG_BBOX,
   inBbox,
   LANDAU_BBOX,
   VENUE_COORDS,
@@ -27,6 +28,8 @@ import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeWdc2026 } from "./venues/_wdc2026";
+import { scrapeAlabamaKino } from "./venues/alabama-kino";
+import { scrapeAlleeTheater } from "./venues/alleetheater";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
 import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
@@ -60,6 +63,7 @@ import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
+import { scrapeFundusTheater } from "./venues/fundus-theater";
 import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
 import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
@@ -93,6 +97,7 @@ import { scrapeLichthofTheater } from "./venues/lichthof-theater";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
+import { scrapeMonsunTheater } from "./venues/monsun-theater";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
@@ -141,6 +146,8 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
  * individual venues migrate over.
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
+  { slug: "alabama-kino", run: (_ctx: ScraperContext) => scrapeAlabamaKino() },
+  { slug: "alleetheater", run: (_ctx: ScraperContext) => scrapeAlleeTheater() },
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
   { slug: "andreas-koehs", run: (_ctx: ScraperContext) => scrapeAndreasKoehs() },
   { slug: "arthouse-kinos-frankfurt", run: (_ctx: ScraperContext) => scrapeArthouseKinos() },
@@ -177,6 +184,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   },
   { slug: "frankfurt-uas", run: (_ctx: ScraperContext) => scrapeFrankfurtUas() },
   { slug: "frankfurter-sparkasse", run: (_ctx: ScraperContext) => scrapeFrankfurterSparkasse() },
+  { slug: "fundus-theater", run: (_ctx: ScraperContext) => scrapeFundusTheater() },
   { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
   { slug: "hafen-2-offenbach", run: (_ctx: ScraperContext) => scrapeHafen2() },
@@ -210,6 +218,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
+  { slug: "monsun-theater", run: (_ctx: ScraperContext) => scrapeMonsunTheater() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
   { slug: "cineamo-frankfurt-region", run: (_ctx: ScraperContext) => scrapeCineamo() },
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
@@ -258,6 +267,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 ];
 
 export {
+  scrapeAlabamaKino,
+  scrapeAlleeTheater,
   scrapeAlteOper,
   scrapeAndreasKoehs,
   scrapeArthouseKinos,
@@ -291,6 +302,7 @@ export {
   scrapeForschungskollegHumanwissenschaften,
   scrapeFrankfurterSparkasse,
   scrapeFrankfurtUas,
+  scrapeFundusTheater,
   scrapeGalliTheater,
   scrapeGallusTheater,
   scrapeHafen2,
@@ -323,6 +335,7 @@ export {
   scrapeLiteraturhaus,
   scrapeMalsehn,
   scrapeMampf,
+  scrapeMonsunTheater,
   scrapeMousonturm,
   scrapeMurnauFilmtheater,
   scrapeMuseumsFrankfurt,

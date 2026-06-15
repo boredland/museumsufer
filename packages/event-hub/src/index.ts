@@ -1,6 +1,7 @@
 export {
   type Bbox,
   FRANKFURT_BBOX,
+  HAMBURG_BBOX,
   inBbox,
   LANDAU_BBOX,
   MUSEUM_SLUGS,
