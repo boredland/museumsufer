@@ -57,6 +57,7 @@ import { scrapeDresdenFrankfurtDanceCompany } from "./venues/dresden-frankfurt-d
 import { scrapeEnglishTheatreFrankfurt } from "./venues/english-theatre-frankfurt";
 import { scrapeEnglishTheatreHamburg } from "./venues/english-theatre-hamburg";
 import { scrapeEnsembleModern } from "./venues/ensemble-modern";
+import { scrapeErnstDeutschTheater } from "./venues/ernst-deutsch-theater";
 import { scrapeEschbornK } from "./venues/eschborn-k";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
 import { scrapeFesHessen } from "./venues/fes-hessen";
@@ -141,6 +142,7 @@ import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
 import { scrapeThaliaTheater } from "./venues/thalia-theater";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
+import { scrapeTheaterFuerKinder } from "./venues/theater-fuer-kinder";
 import { scrapeTheaterLempenfieber } from "./venues/theater-lempenfieber";
 import { scrapeTheaterWillyPraml } from "./venues/theater-willy-praml";
 import { scrapeTheaterhausFrankfurt } from "./venues/theaterhaus-frankfurt";
@@ -188,6 +190,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "english-theatre-frankfurt", run: (_ctx: ScraperContext) => scrapeEnglishTheatreFrankfurt() },
   { slug: "english-theatre-hamburg", run: (_ctx: ScraperContext) => scrapeEnglishTheatreHamburg() },
   { slug: "ensemble-modern", run: (_ctx: ScraperContext) => scrapeEnsembleModern() },
+  { slug: "ernst-deutsch-theater", run: (_ctx: ScraperContext) => scrapeErnstDeutschTheater() },
   { slug: "eschborn-k", run: (_ctx: ScraperContext) => scrapeEschbornK() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
@@ -280,6 +283,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
   { slug: "thalia-theater", run: (_ctx: ScraperContext) => scrapeThaliaTheater() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
+  { slug: "theater-fuer-kinder", run: (_ctx: ScraperContext) => scrapeTheaterFuerKinder() },
   { slug: "theater-lempenfieber", run: (_ctx: ScraperContext) => scrapeTheaterLempenfieber() },
   { slug: "theater-willy-praml", run: (_ctx: ScraperContext) => scrapeTheaterWillyPraml() },
   { slug: "theaterhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeTheaterhausFrankfurt() },
@@ -322,6 +326,7 @@ export {
   scrapeEnglishTheatreFrankfurt,
   scrapeEnglishTheatreHamburg,
   scrapeEnsembleModern,
+  scrapeErnstDeutschTheater,
   scrapeEschbornK,
   scrapeEvangelischeAkademie,
   scrapeFesHessen,
@@ -405,6 +410,7 @@ export {
   scrapeSuew,
   scrapeThaliaTheater,
   scrapeTheaterAlteBruecke,
+  scrapeTheaterFuerKinder,
   scrapeTheaterhausFrankfurt,
   scrapeTheaterLempenfieber,
   scrapeTheaterWillyPraml,
