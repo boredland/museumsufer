@@ -59,6 +59,7 @@
     "./venues/kulturnetz-landau": "./src/venues/kulturnetz-landau.ts",
     "./venues/landau-de": "./src/venues/landau-de.ts",
     "./venues/landungsbruecken": "./src/venues/landungsbruecken.ts",
+    "./venues/lichthof-theater": "./src/venues/lichthof-theater.ts",
     "./venues/literaturhaus-frankfurt": "./src/venues/literaturhaus-frankfurt.ts",
     "./venues/malsehn": "./src/venues/malsehn.ts",
     "./venues/mampf": "./src/venues/mampf.ts",
