@@ -82,6 +82,7 @@ import { scrapeHamburgerKammerspiele } from "./venues/hamburger-kammerspiele";
 import { scrapeHamburgerKunsthalle } from "./venues/hamburger-kunsthalle";
 import { scrapeHamburgerPuppentheater } from "./venues/hamburger-puppentheater";
 import { scrapeHamburgerSprechwerk } from "./venues/hamburger-sprechwerk";
+import { scrapeHamburgerStudienbibliothek } from "./venues/hamburger-studienbibliothek";
 import { scrapeHamburgischeStaatsoper } from "./venues/hamburgische-staatsoper";
 import { scrapeHamburgMusik } from "./venues/hamburgmusik";
 import { scrapeHansaTheater } from "./venues/hansa-theater";
@@ -237,6 +238,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hamburger-kammeroper", run: (_ctx: ScraperContext) => scrapeHamburgerKammeroper() },
   { slug: "hamburger-kammerspiele", run: (_ctx: ScraperContext) => scrapeHamburgerKammerspiele() },
   { slug: "hamburger-kunsthalle", run: (_ctx: ScraperContext) => scrapeHamburgerKunsthalle() },
+  { slug: "hamburger-studienbibliothek", run: (_ctx: ScraperContext) => scrapeHamburgerStudienbibliothek() },
   { slug: "hamburgmusik", run: (_ctx: ScraperContext) => scrapeHamburgMusik() },
   { slug: "hauptkirche-st-michaelis", run: (_ctx: ScraperContext) => scrapeHauptkircheStMichaelis() },
   { slug: "hauptkirche-st-jacobi", run: (_ctx: ScraperContext) => scrapeHauptkircheStJacobi() },
@@ -395,6 +397,7 @@ export {
   scrapeHamburgerKunsthalle,
   scrapeHamburgerPuppentheater,
   scrapeHamburgerSprechwerk,
+  scrapeHamburgerStudienbibliothek,
   scrapeHamburgischeStaatsoper,
   scrapeHamburgMusik,
   scrapeHansaTheater,
