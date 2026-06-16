@@ -52,11 +52,26 @@ app.use(
   }),
 );
 
+function isCloserToHamburg(lat: number, lon: number): boolean {
+  const distToHamburg = (lat - 53.55) ** 2 + (lon - 9.99) ** 2;
+  const distToFrankfurt = (lat - 50.11) ** 2 + (lon - 8.68) ** 2;
+  return distToHamburg < distToFrankfurt;
+}
+
 app.use("*", async (c, next) => {
   const url = new URL(c.req.url);
   const host = (c.req.header("host") ?? "").toLowerCase();
   if (host === "lichtspiel.haus") {
-    return c.redirect(`https://frankfurt.lichtspiel.haus${url.pathname}${url.search}`, 301);
+    const cf = (c.req.raw as any).cf;
+    let city = "frankfurt";
+    if (cf?.latitude && cf?.longitude) {
+      if (isCloserToHamburg(Number(cf.latitude), Number(cf.longitude))) {
+        city = "hamburg";
+      }
+    } else if (cf?.city?.toLowerCase() === "hamburg") {
+      city = "hamburg";
+    }
+    return c.redirect(`https://${city}.lichtspiel.haus${url.pathname}${url.search}`, 301);
   }
   const city = host.endsWith(".lichtspiel.haus") ? host.slice(0, -".lichtspiel.haus".length) : "frankfurt";
   c.set("city", city);

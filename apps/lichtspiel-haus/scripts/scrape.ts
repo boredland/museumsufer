@@ -6,7 +6,7 @@ import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import type { CanonicalEvent } from "@museumsufer/event-hub";
-import { displayNameFor, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
+import { displayNameFor, EVENTS, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox } from "@museumsufer/event-hub";
 import { type CinemaConfig, CURATED_CINEMAS } from "../src/cinema-config";
 import { dedupScreenings } from "../src/dedup";
 import {
@@ -33,7 +33,7 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX) && !inBbox(ev.lat, ev.lon, HAMBURG_BBOX)) continue;
     if (!hasFilmCinemaLabel(ev)) continue;
 
     const canonicalTitleHash = fnv1aInt(ev.title.toLowerCase().replace(/[^a-z0-9]+/g, ""));
@@ -196,13 +196,14 @@ function synthesizeCinemas(orphanSlugs: Set<string>, orphanUrls: Map<string, str
   for (const slug of orphanSlugs) {
     const coords = coordsBySlug.get(slug);
     if (!coords) continue;
+    const city = inBbox(coords.lat, coords.lon, HAMBURG_BBOX) ? "hamburg" : "frankfurt";
     out.push({
       slug,
       name: displayNameFor(slug),
       address: "",
       lat: coords.lat,
       lon: coords.lon,
-      city: "frankfurt",
+      city,
       website_url: orphanUrls.get(slug) ?? "",
     });
   }
