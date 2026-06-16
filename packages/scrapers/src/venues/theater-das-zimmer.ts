@@ -3,6 +3,7 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 import { resolveStageLabels } from "./_stage-labels";
 
 const SPIELPLAN_URL = "https://www.theater-das-zimmer.de/termine/";
+
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 /**
@@ -34,55 +35,77 @@ function parseEvents(html: string): CanonicalScrapedEvent[] {
   const out: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  // ai1ec events typically render with classes like "ai1ec-event"
-  // Let's split the HTML by the event wrappers
-  const blocks = html.split(/class="[^"]*ai1ec-event[^"]*"/gi);
-  if (blocks.length <= 1) {
-    return [];
-  }
+  /**
+   * Theater das Zimmer uses the All-in-One Event Calendar (ai1ec) WordPress plugin.
+   * The calendar shows a monthly table. Each event produces:
+   *   - an `<a class="ai1ec-event-container ...">` anchor with the Veranstaltung href
+   *   - inside: `<span class="ai1ec-event-title">TITLE</span>`
+   *   - inside: `<span class="ai1ec-event-time">HH:MM</span>`
+   *   - a popup `<div class="ai1ec-popover ...">` that contains:
+   *     - `<a class="ai1ec-load-event" href="...">TITLE</a>` (HTML-entity-encoded)
+   *     - `<div class="ai1ec-event-time">MONTHNAME DAY um HH:MM</div>`
+   *     - `data-ticket-url="..."` on the inner ai1ec-event div
+   *
+   * We split on the popup's event-time text (which has full "MonName DAY um HH:MM")
+   * and walk backwards to get title and forward to get ticket URL.
+   */
 
-  const year = new Date(today).getFullYear();
+  // Split on ai1ec-event-container blocks
+  const blocks = html.split(/class="ai1ec-event-container/i);
+
+  const GERMAN_MONTHS: Record<string, string> = {
+    Januar: "01",
+    Februar: "02",
+    März: "03",
+    April: "04",
+    Mai: "05",
+    Juni: "06",
+    Juli: "07",
+    August: "08",
+    September: "09",
+    Oktober: "10",
+    November: "11",
+    Dezember: "12",
+  };
 
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i];
 
-    // Extract title & link
-    const linkMatch = block.match(/href="([^"]*\/Veranstaltung\/[^"]+)"[^>]*>(.*?)<\/a>/i);
-    if (!linkMatch) continue;
-
-    const detailUrl = decodeEntities(linkMatch[1]);
-    const title = cleanText(linkMatch[2]);
+    // Title from ai1ec-event-title span
+    const titleMatch = block.match(/<span\s+class="ai1ec-event-title"\s*>\s*([^<]+)\s*<\/span>/i);
+    const title = titleMatch ? cleanText(titleMatch[1]) : "";
     if (!title) continue;
 
-    // Extract time & date
-    const timeMatch = block.match(/(\d{2}:\d{2})/);
-    const time = timeMatch ? timeMatch[1] : "20:00";
+    // Full date+time from popup "MonName DAY um HH:MM"
+    const popupTimeMatch = block.match(/class="ai1ec-event-time">\s*(\w+)\s+(\d{1,2})\s+um\s+(\d{2}:\d{2})/i);
+    if (!popupTimeMatch) continue;
 
-    const dateMatch = block.match(/(\d{1,2})\.\s*(Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)/i);
-    let date = today;
-    if (dateMatch) {
-      const day = dateMatch[1].padStart(2, "0");
-      const monthStr = dateMatch[2].toLowerCase();
-      const monthMap: Record<string, string> = {
-        jan: "01",
-        feb: "02",
-        mär: "03",
-        apr: "04",
-        mai: "05",
-        jun: "06",
-        jul: "07",
-        aug: "08",
-        sep: "09",
-        okt: "10",
-        nov: "11",
-        dez: "12",
-      };
-      const month = monthMap[monthStr.slice(0, 3)] || "01";
-      date = `${year}-${month}-${day}`;
-      if (date < today) {
-        date = `${year + 1}-${month}-${day}`;
-      }
-    }
+    const monthName = popupTimeMatch[1];
+    const dayStr = popupTimeMatch[2].padStart(2, "0");
+    const time = popupTimeMatch[3];
+    const monthNum = GERMAN_MONTHS[monthName];
+    if (!monthNum) continue;
+
+    // Year: infer from today — if month+day < today assume next year
+    const year = new Date(today).getFullYear();
+    let date = `${year}-${monthNum}-${dayStr}`;
+    if (date < today) date = `${year + 1}-${monthNum}-${dayStr}`;
+
+    // Ticket URL from data-ticket-url attribute
+    const ticketMatch = block.match(/data-ticket-url="([^"]+)"/i);
+    const ticketUrl = ticketMatch ? decodeEntities(ticketMatch[1]) : null;
+
+    // Detail URL from first Veranstaltung href in this block (HTML-entity-encoded)
+    const hrefMatch = block.match(
+      /href="(https?(?:&#x3A;|:)(?:&#x2F;&#x2F;|\/\/)www\.theater-das-zimmer\.de(?:&#x2F;|\/)?Veranstaltung[^"]+)"/i,
+    );
+    const detailUrl = hrefMatch
+      ? decodeEntities(hrefMatch[1].replace(/&#x3A;/g, ":").replace(/&#x2F;/g, "/"))
+      : SPIELPLAN_URL;
+
+    // Image URL
+    const imgMatch = block.match(/src="([^"]+\.(?:jpg|jpeg|png|webp))"/i);
+    const imageUrl = imgMatch ? imgMatch[1] : null;
 
     const uid = `${slugify(title)}|${date}|${time}`;
     if (seen.has(uid)) continue;
@@ -96,8 +119,8 @@ function parseEvents(html: string): CanonicalScrapedEvent[] {
       date,
       time,
       detail_url: detailUrl,
-      ticket_url: detailUrl,
-      image_url: null,
+      ticket_url: ticketUrl || detailUrl,
+      image_url: imageUrl,
       price_min: null,
       price_max: null,
       performers: null,

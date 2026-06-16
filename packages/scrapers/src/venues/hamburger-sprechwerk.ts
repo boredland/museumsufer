@@ -69,30 +69,31 @@ export async function scrapeHamburgerSprechwerk(): Promise<VenueScrapeResult> {
   };
 }
 
-// Match each event block
-const _BLOCK_RE =
-  /<div\s+class="event\s+layout_full\s+block\s+upcoming"[^>]*itemscope[^>]*>([\s\S]*?)<\/div>\s*(?=<div\s+class="event|<\/div>|$)/g;
-
 function parseEventBlocks(html: string, today: string): CanonicalScrapedEvent[] {
   const out: CanonicalScrapedEvent[] = [];
 
-  // Extract event blocks using the itemprop="startDate" time elements
-  const START_DATE_RE = /<time[^>]+datetime="(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/g;
+  /**
+   * The spielplan page renders one `<div class="event layout_full block upcoming"
+   * itemscope …>` per performance. Inside each block:
+   *   - multiple `<time datetime="YYYY-MM-DDTHH:MM:SS+TZ" itemprop="startDate">` tags
+   *     (same ISO value repeated 3× for desktop/mobile/alt layouts)
+   *   - `<span itemprop="name">…</span>` for the show title
+   *   - `<a href="https://loveyourartist.com/…">` for the ticket link
+   *   - `<a … itemprop="url" href="…">` for the detail page link
+   *
+   * We split on the opening tag and process each resulting block.
+   */
   const NAME_RE = /itemprop="name"[^>]*>([^<]+)</;
   const TICKET_RE = /href="(https:\/\/loveyourartist\.com\/[^"]+)"/;
-  const URL_RE = /itemprop="url"[^>]*href="([^"]+)"/;
+  const URL_RE = /itemprop="url"[^>]*href="([^"]+)"|href="([^"]+)"[^>]*itemprop="url"/;
 
-  // Each event starts with class="event layout_full block upcoming"
-  const EVENT_BLOCK_RE =
-    /<div\s+class="event\s+layout_full\s+block\s+upcoming"[^>]*>([\s\S]*?)(?=<div\s+class="event\s+layout_full|<\/div>\s*<\/div>\s*<\/div>)/g;
+  // Split on event block openers; [0] is everything before the first event.
+  const parts = html.split(/<div\s+class="event\s+layout_full\s+block\s+upcoming"/i);
+  for (let i = 1; i < parts.length; i++) {
+    const block = parts[i];
 
-  let m: RegExpExecArray | null;
-  while ((m = EVENT_BLOCK_RE.exec(html)) !== null) {
-    const block = m[1];
-
-    // Extract startDate
-    START_DATE_RE.lastIndex = 0;
-    const dateMatch = START_DATE_RE.exec(block);
+    // Extract first ISO datetime from any <time datetime="…"> in this block
+    const dateMatch = block.match(/<time[^>]*datetime="(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})[^"]*"/);
     if (!dateMatch) continue;
     const rawDateTime = dateMatch[1]; // "YYYY-MM-DDTHH:MM"
     const date = rawDateTime.slice(0, 10);
@@ -110,7 +111,8 @@ function parseEventBlocks(html: string, today: string): CanonicalScrapedEvent[] 
 
     // Extract detail URL from itemprop="url"
     const urlMatch = block.match(URL_RE);
-    const detailUrl = urlMatch ? (urlMatch[1].startsWith("http") ? urlMatch[1] : `${BASE}/${urlMatch[1]}`) : null;
+    const rawDetailUrl = urlMatch ? (urlMatch[1] ?? urlMatch[2]) : null;
+    const detailUrl = rawDetailUrl ? (rawDetailUrl.startsWith("http") ? rawDetailUrl : `${BASE}${rawDetailUrl}`) : null;
 
     out.push({
       source_event_id: `${slugify(title)}|${date}|${time}`,
@@ -119,7 +121,7 @@ function parseEventBlocks(html: string, today: string): CanonicalScrapedEvent[] 
       description: null,
       date,
       time,
-      detail_url: detailUrl ?? `${SPIELPLAN_URL}`,
+      detail_url: detailUrl ?? SPIELPLAN_URL,
       ticket_url: ticketUrl,
       image_url: null,
       price_min: null,

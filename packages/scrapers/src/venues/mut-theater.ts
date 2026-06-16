@@ -35,85 +35,52 @@ function parseEvents(html: string): CanonicalScrapedEvent[] {
   const out: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  // Simple regex parser based on the observed HTML:
-  // Each block contains date details, title, and a link to tickets (eventim-light).
-  // E.g. dates are written in blocks like "19 Juni", "Freitag, 19:30"
-  // Let's use a robust matcher for the list items/blocks if possible.
-  // We can look for Tickets/Eventim-light links and walk backwards or structure it.
+  /**
+   * MUT! Theater uses the WooCommerce Bookings / Stacked Slider plugin.
+   * Each performance is a `<li class="wcs-class ...">` element containing:
+   *   - `<time datetime="2026-06-19 7:30 p.m." class="wcs-class__time">...</time>`
+   *   - `<h3 class="wcs-class__title">TITLE</h3>`
+   *   - An eventim-light ticket link: href="https://www.eventim-light.com/..."
+   *   - An image: `<div class="wcs-class__image" style="background-image: url(...)">`
+   */
 
-  // We can extract event sections by finding ticket links
-  const _TICKET_RE = /href="(https:\/\/www\.eventim-light\.com\/[^"]+)"[^>]*>Tickets<\/a>/g;
-  let _m: RegExpExecArray | null;
-
-  // As a fallback / simple parser, we search for blocks.
-  // In the markdown step 2251, each event has date, title, details, and [Tickets](url) link.
-  // We'll extract blocks using regex or parse simple patterns.
-  // Since we cannot rely on complex DOM parsing without libraries (we only have basic regex & helper functions),
-  // let's do a regex block matcher or look for list items.
-
-  // Each event is usually in an event-block or list item.
-  // Let's match `<div class="event...` or `<li>` elements, or simply partition by `<hr>` or ticket links.
-  const blocks = html.split(/<div\s+class="[^"]*event[^"]*"/gi);
-  if (blocks.length <= 1) {
-    return [];
-  }
-
-  const year = new Date(today).getFullYear();
+  // Split on wcs-class list items
+  const blocks = html.split(/class="wcs-class\s+wcs-class--filterable/i);
 
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i];
 
-    // Find ticket link
-    const ticketMatch = block.match(/href="(https:\/\/[^"]*eventim-light\.com[^"]+)"/i);
-    const ticketUrl = ticketMatch ? decodeEntities(ticketMatch[1]) : null;
-
-    // Find title
-    // Usually inside <h3> or <h4> or a class="event-title"
-    const titleMatch =
-      block.match(/<h[34][^>]*>(.*?)<\/h[34]>/i) || block.match(/class="[^"]*title[^"]*"[^>]*>(.*?)<\//i);
+    // Title from wcs-class__title h3
+    const titleMatch = block.match(/<h3\s+class="wcs-class__title[^"]*"\s*>\s*([^<]+)\s*<\/h3>/i);
     const title = titleMatch ? cleanText(titleMatch[1]) : "";
     if (!title) continue;
 
-    // Find date and time
-    // Look for patterns like "19. Juni" or "19.06." or similar
-    // And time like "19:30"
-    const timeMatch = block.match(/(\d{2}:\d{2})/);
-    const time = timeMatch ? timeMatch[1] : "19:30";
+    // Datetime from <time datetime="2026-06-19 7:30 p.m.">
+    const datetimeMatch = block.match(/datetime="(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})\s*(a\.m\.|p\.m\.)?"/i);
+    if (!datetimeMatch) continue;
 
-    const dateMatch = block.match(/(\d{1,2})\.\s*(Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)/i);
-    let date = today;
-    if (dateMatch) {
-      const day = dateMatch[1].padStart(2, "0");
-      const monthStr = dateMatch[2].toLowerCase();
-      const monthMap: Record<string, string> = {
-        jan: "01",
-        feb: "02",
-        mär: "03",
-        apr: "04",
-        mai: "05",
-        jun: "06",
-        jul: "07",
-        aug: "08",
-        sep: "09",
-        okt: "10",
-        nov: "11",
-        dez: "12",
-      };
-      const month = monthMap[monthStr.slice(0, 3)] || "01";
-      date = `${year}-${month}-${day}`;
-      if (date < today) {
-        // Assume next year
-        date = `${year + 1}-${month}-${day}`;
-      }
-    }
+    const date = datetimeMatch[1];
+    if (date < today) continue;
+
+    // Parse time (12h → 24h)
+    const rawTime = datetimeMatch[2];
+    const meridiem = datetimeMatch[3]?.toLowerCase() ?? "";
+    let [h, m] = rawTime.split(":").map(Number);
+    if (meridiem === "p.m." && h !== 12) h += 12;
+    if (meridiem === "a.m." && h === 12) h = 0;
+    const time = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+
+    // Ticket link from eventim-light href
+    const ticketMatch = block.match(/href='(https?:\/\/www\.eventim-light\.com\/[^']+)'/i);
+    const ticketUrl = ticketMatch ? decodeEntities(ticketMatch[1]) : null;
+
+    // Image URL from background-image style
+    const imgMatch = block.match(/background-image:\s*url\(([^)]+)\)/i);
+    const imageUrl = imgMatch ? imgMatch[1] : null;
 
     const uid = `${slugify(title)}|${date}|${time}`;
     if (seen.has(uid)) continue;
     seen.add(uid);
-
-    // Image URL
-    const imgMatch = block.match(/src="([^"]+\.(?:jpg|jpeg|png|webp))"/i);
-    const imageUrl = imgMatch ? imgMatch[1] : null;
 
     out.push({
       source_event_id: uid,
