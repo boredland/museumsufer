@@ -78,6 +78,7 @@ import { scrapeHafen2 } from "./venues/hafen-2-offenbach";
 import { scrapeHambacherSchloss } from "./venues/hambacher-schloss";
 import { scrapeHamburgerKammeroper } from "./venues/hamburger-kammeroper";
 import { scrapeHamburgerKammerspiele } from "./venues/hamburger-kammerspiele";
+import { scrapeHamburgerKunsthalle } from "./venues/hamburger-kunsthalle";
 import { scrapeHamburgerPuppentheater } from "./venues/hamburger-puppentheater";
 import { scrapeHamburgerSprechwerk } from "./venues/hamburger-sprechwerk";
 import { scrapeHamburgischeStaatsoper } from "./venues/hamburgische-staatsoper";
@@ -229,6 +230,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hamburgische-staatsoper", run: (_ctx: ScraperContext) => scrapeHamburgischeStaatsoper() },
   { slug: "hamburger-kammeroper", run: (_ctx: ScraperContext) => scrapeHamburgerKammeroper() },
   { slug: "hamburger-kammerspiele", run: (_ctx: ScraperContext) => scrapeHamburgerKammerspiele() },
+  { slug: "hamburger-kunsthalle", run: (_ctx: ScraperContext) => scrapeHamburgerKunsthalle() },
   { slug: "hamburger-puppentheater", run: (_ctx: ScraperContext) => scrapeHamburgerPuppentheater() },
   { slug: "hamburger-sprechwerk", run: (_ctx: ScraperContext) => scrapeHamburgerSprechwerk() },
   { slug: "hansa-theater", run: (_ctx: ScraperContext) => scrapeHansaTheater() },
@@ -377,6 +379,7 @@ export {
   scrapeHambacherSchloss,
   scrapeHamburgerKammeroper,
   scrapeHamburgerKammerspiele,
+  scrapeHamburgerKunsthalle,
   scrapeHamburgerPuppentheater,
   scrapeHamburgerSprechwerk,
   scrapeHamburgischeStaatsoper,
