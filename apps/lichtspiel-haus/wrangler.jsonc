@@ -8,6 +8,7 @@
   // needs an additional CF custom_domain.
   "routes": [
     { "pattern": "frankfurt.lichtspiel.haus", "custom_domain": true },
+    { "pattern": "hamburg.lichtspiel.haus", "custom_domain": true },
     { "pattern": "lichtspiel.haus", "custom_domain": true }
   ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action
