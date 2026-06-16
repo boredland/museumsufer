@@ -14,5 +14,10 @@
   "dresden-frankfurt-dance-company": "seasonal — dance company between seasons; Frankfurt shows ended June 2026, next season not yet scheduled on dfdc.de",
   "ypsilon-buchladen": "seasonal — bookshop reading programme between seasons; last events were May 2026, next programme expected late summer 2026",
   "fes-hessen": "seasonal — Landesbüro Hessen only occasionally hosts events in Frankfurt; current listing (Jun 2026) has events in Hanau, Steinbach, Wiesbaden etc. but none in Frankfurt",
-  "hansa-theater": "seasonal — Varieté season runs October to May; dark/empty during summer"
+  "hansa-theater": "seasonal — Varieté season runs October to May; dark/empty during summer",
+  "lichtwark-theater": "seasonal — theater between seasons/summer pause (May 5 to mid-August)",
+  "museums-hamburg": "aggregator — fans out to child slugs: altonaer-museum, jenisch-haus, speicherstadtmuseum, museum-der-arbeit, deutsches-hafenmuseum, museum-fuer-hamburgische-geschichte",
+  "hamburger-puppentheater": "seasonal — in Sommerpause (summer break); new season starts September 2026; website confirms next programme announced late summer",
+  "theater-fuer-kinder": "seasonal — TLS cert invalid on own site, Reservix subdomain returns generic page; venue between seasons as of June 2026",
+  "landinsicht-buchladen": "network-unreachable — domain does not respond to fetch; venue may be temporarily offline or network-blocked"
 }

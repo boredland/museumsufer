@@ -14,9 +14,9 @@ export const COMFORTTICKET_HEADERS: Record<string, string> = {
   "Upgrade-Insecure-Requests": "1",
 };
 
-const ITEM_RE = /<li\s+class="[^"]*ringlet-performance[^"]*"([\s\S]*?)<\/li>/g;
+const ITEM_RE = /<li\s+class="[^"]*(?:ringlet-performance|body performance)[^"]*"([\s\S]*?)<\/li>/g;
 const DATA_URL_RE = /\bdata-url="([^"]+)"/i;
-const TITLE_RE = /<div\s+class="attribute performance">[\s\S]*?<span>([\s\S]*?)<\/span>/i;
+const TITLE_RE = /<div\s+class="attribute (?:performance|name[^"]*)">[\s\S]*?<span>([\s\S]*?)<\/span>/i;
 const LOCATION_RE = /<div\s+class="attribute location">[\s\S]*?<span>([\s\S]*?)<\/span>/i;
 const DATE_RE = /<div\s+class="attribute date">[\s\S]*?<span>([\s\S]*?)<\/span>/i;
 const PRICE_RE = /<span\s+class="value">([\d,.]+)<\/span>/i;
@@ -42,6 +42,40 @@ export async function scrapeComfortTicketVenue(opts: ComfortTicketScrapeOptions)
   const seen = new Set<string>();
 
   const matches = [...html.matchAll(ITEM_RE)];
+
+  // If no direct performance matches, check for productions
+  if (matches.length === 0) {
+    const prodMatches = [...html.matchAll(/<li\s+class="[^"]*product[^"]*"([\s\S]*?)<\/li>/g)];
+    const prodUrls: string[] = [];
+    for (const pm of prodMatches) {
+      const block = pm[1];
+      const dataUrlMatch = block.match(DATA_URL_RE);
+      const dataUrl = dataUrlMatch ? dataUrlMatch[1] : null;
+      if (dataUrl?.includes("/produktion/")) {
+        prodUrls.push(`https://${opts.host}${dataUrl}`);
+      }
+    }
+
+    if (prodUrls.length > 0) {
+      const allProdHtmls = await Promise.all(
+        prodUrls.map(async (pUrl) => {
+          try {
+            const pRes = await fetch(pUrl, { headers: COMFORTTICKET_HEADERS });
+            if (!pRes.ok) return "";
+            return await pRes.text();
+          } catch {
+            return "";
+          }
+        }),
+      );
+
+      for (const prodHtml of allProdHtmls) {
+        const pMatches = [...prodHtml.matchAll(ITEM_RE)];
+        matches.push(...pMatches);
+      }
+    }
+  }
+
   for (const m of matches) {
     const block = m[1];
 

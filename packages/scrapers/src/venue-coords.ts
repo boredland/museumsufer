@@ -70,6 +70,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hansa-theater": [53.5558, 10.0122],
   "harburger-theater": [53.459, 9.9773],
   "ernst-deutsch-theater": [53.5695, 10.0266],
+  "first-stage-theater": [53.5523, 9.9488],
   "deutsches-schauspielhaus": [53.5543, 10.0089],
   "hamburgische-staatsoper": [53.5567, 9.9889],
   kampnagel: [53.5833, 10.0218],

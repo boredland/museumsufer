@@ -1,16 +1,16 @@
 import type { VenueScrapeResult } from "../types";
-import { scrapeReservixVenue } from "./_reservix";
+import { scrapeComfortTicketVenue } from "./_comfortticket";
 
 /**
  * Imperial Theater (Hamburgs Krimi-Theater) stages crime thrillers and
- * detective plays exclusively at St. Pauli. Their ticket shop is powered
- * by Reservix at `imperial-theater.reservix.de`.
+ * detective plays exclusively at St. Pauli. They migrated from Reservix
+ * to their own ComfortTicket shop at imperialtheater-webshop.comfortticket.de.
  */
 export async function scrapeImperialTheater(): Promise<VenueScrapeResult> {
-  return scrapeReservixVenue({
+  return scrapeComfortTicketVenue({
     sourceSlug: "imperial-theater",
     displayName: "Imperial Theater",
-    host: "imperial-theater.reservix.de",
+    host: "imperialtheater-webshop.comfortticket.de",
     defaultLabel: "stage:theater",
   });
 }
