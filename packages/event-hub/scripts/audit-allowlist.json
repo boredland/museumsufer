@@ -19,5 +19,6 @@
   "museums-hamburg": "aggregator — fans out to child slugs: altonaer-museum, jenisch-haus, speicherstadtmuseum, museum-der-arbeit, deutsches-hafenmuseum, museum-fuer-hamburgische-geschichte",
   "hamburger-puppentheater": "seasonal — in Sommerpause (summer break); new season starts September 2026; website confirms next programme announced late summer",
   "theater-fuer-kinder": "seasonal — TLS cert invalid on own site, Reservix subdomain returns generic page; venue between seasons as of June 2026",
-  "landinsicht-buchladen": "network-unreachable — domain does not respond to fetch; venue may be temporarily offline or network-blocked"
+  "landinsicht-buchladen": "network-unreachable — domain does not respond to fetch; venue may be temporarily offline or network-blocked",
+  "deichtorhallen": "aggregator — fans out to child slugs: deichtorhallen-phoxxi, deichtorhallen-halle-aktuelle-kunst, deichtorhallen-sammlung-falckenberg"
 }

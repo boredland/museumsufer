@@ -3,7 +3,7 @@ import { decodeEntities, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.landau.de";
-const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
+const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 /**
  * Stadt Landau's Advantic CMS exposes an ICS feed with full DTSTART/DTEND/
