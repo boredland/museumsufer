@@ -130,6 +130,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "volksbuehne-frankfurt": [50.1116, 8.6817],
 
   // ─── lehrhaus direct sources ─────────────────────────────────────
+  "hamburger-studienbibliothek": [53.5649, 9.9854],
   buergeruniversitaet: [50.1284, 8.6679],
   "dfg-frankfurt": [50.1109, 8.6736],
   "dig-frankfurt": [50.1109, 8.6821],

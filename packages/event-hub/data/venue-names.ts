@@ -86,6 +86,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "hamburger-kunsthalle": "Hamburger Kunsthalle",
   "hamburger-puppentheater": "Hamburger Puppentheater",
   "hamburger-sprechwerk": "Hamburger Sprechwerk",
+  "hamburger-studienbibliothek": "Stabi Hamburg",
   "hamburgische-staatsoper": "Hamburgische Staatsoper",
   "hansa-filmstudio": "Hansa-Filmstudio",
   "hansa-filmstudio-bergedorf": "Hansa-Filmstudio Bergedorf",
