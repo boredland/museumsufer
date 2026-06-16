@@ -176,6 +176,14 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "pfalz-de": [49.198, 8.1192],
   "rptu-campuskultur": [49.1898, 8.1144],
   suew: [49.198, 8.1192],
+
+  // ─── Hamburg Museums ─────────────────────────────────────────────
+  "altonaer-museum": [53.549, 9.9342],
+  "jenisch-haus": [53.5527, 9.8658],
+  speicherstadtmuseum: [53.5431, 9.9969],
+  "museum-der-arbeit": [53.586, 10.0475],
+  "deutsches-hafenmuseum": [53.528, 9.9978],
+  "museum-fuer-hamburgische-geschichte": [53.5511, 9.9733],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

@@ -144,6 +144,7 @@ import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
 import { scrapeSavoyFilmtheater } from "./venues/savoy-filmtheater";
 import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
+import { scrapeShmhMuseums } from "./venues/shmh-museums";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStPauliTheater } from "./venues/st-pauli-theater";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
@@ -271,6 +272,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
+  { slug: "museums-hamburg", run: (ctx: ScraperContext) => scrapeShmhMuseums(ctx) },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
   { slug: "murnau-filmtheater", run: (_ctx: ScraperContext) => scrapeMurnauFilmtheater() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
@@ -437,6 +439,7 @@ export {
   scrapeRptuCampuskultur,
   scrapeSavoyFilmtheater,
   scrapeSchauspielFrankfurt,
+  scrapeShmhMuseums,
   scrapeSigmundFreudInstitut,
   scrapeStadtbuechereiFrankfurt,
   scrapeStalburgTheater,
