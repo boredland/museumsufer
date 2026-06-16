@@ -81,6 +81,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "hambacher-schloss": "Hambacher Schloss",
   "hamburger-kammeroper": "Hamburger Kammeroper",
   "hamburger-kammerspiele": "Hamburger Kammerspiele",
+  "hamburger-kunsthalle": "Hamburger Kunsthalle",
   "hamburger-puppentheater": "Hamburger Puppentheater",
   "hamburger-sprechwerk": "Hamburger Sprechwerk",
   "hamburgische-staatsoper": "Hamburgische Staatsoper",

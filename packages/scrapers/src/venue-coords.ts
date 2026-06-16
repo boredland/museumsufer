@@ -78,6 +78,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   kampnagel: [53.5833, 10.0218],
   "st-pauli-theater": [53.5491, 9.963],
   "thalia-theater": [53.5521, 9.9986],
+  "hamburger-kunsthalle": [53.5538, 9.9982],
   deichtorhallen: [53.5471, 10.0068],
   "deichtorhallen-phoxxi": [53.5471, 10.0068],
   "deichtorhallen-halle-aktuelle-kunst": [53.5471, 10.0068],
