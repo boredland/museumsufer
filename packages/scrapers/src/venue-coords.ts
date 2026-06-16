@@ -69,6 +69,23 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   centralkomitee: [53.5552, 10.0163],
   "hansa-theater": [53.5558, 10.0122],
   "harburger-theater": [53.459, 9.9773],
+  "ernst-deutsch-theater": [53.5695, 10.0266],
+  "deutsches-schauspielhaus": [53.5543, 10.0089],
+  "hamburgische-staatsoper": [53.5567, 9.9889],
+  kampnagel: [53.5833, 10.0218],
+  "st-pauli-theater": [53.5491, 9.963],
+  "thalia-theater": [53.5521, 9.9986],
+  deichtorhallen: [53.5471, 10.0068],
+  "deichtorhallen-phoxxi": [53.5471, 10.0068],
+  "deichtorhallen-halle-aktuelle-kunst": [53.5471, 10.0068],
+  "deichtorhallen-sammlung-falckenberg": [53.4565, 9.9882],
+  "mkg-hamburg": [53.5511, 10.0094],
+  "altonaer-museum": [53.5489, 9.9344],
+  "jenisch-haus": [53.5525, 9.8656],
+  speicherstadtmuseum: [53.5452, 9.9918],
+  "museum-der-arbeit": [53.5828, 10.0385],
+  "deutsches-hafenmuseum": [53.533, 9.975],
+  "museum-fuer-hamburgische-geschichte": [53.5511, 9.9731],
   // Default to Hessisches Staatstheater Wiesbaden — the scraper emits per-event
   // coords (Wiesbaden vs Darmstadt) so this only fires if an event omits both.
   "hessisches-staatsballett": [50.0823, 8.2417],
@@ -176,18 +193,6 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "pfalz-de": [49.198, 8.1192],
   "rptu-campuskultur": [49.1898, 8.1144],
   suew: [49.198, 8.1192],
-
-  // ─── Hamburg Museums ─────────────────────────────────────────────
-  "altonaer-museum": [53.549, 9.9342],
-  "jenisch-haus": [53.5527, 9.8658],
-  speicherstadtmuseum: [53.5431, 9.9969],
-  "museum-der-arbeit": [53.586, 10.0475],
-  "deutsches-hafenmuseum": [53.528, 9.9978],
-  "museum-fuer-hamburgische-geschichte": [53.5511, 9.9733],
-  "deichtorhallen-phoxxi": [53.5472, 10.0067],
-  "deichtorhallen-halle-aktuelle-kunst": [53.5472, 10.0068],
-  "deichtorhallen-sammlung-falckenberg": [53.4552, 9.9875],
-  "mkg-hamburg": [53.5523, 10.0095],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
