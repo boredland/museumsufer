@@ -184,6 +184,10 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "museum-der-arbeit": [53.586, 10.0475],
   "deutsches-hafenmuseum": [53.528, 9.9978],
   "museum-fuer-hamburgische-geschichte": [53.5511, 9.9733],
+  "deichtorhallen-phoxxi": [53.5472, 10.0067],
+  "deichtorhallen-halle-aktuelle-kunst": [53.5472, 10.0068],
+  "deichtorhallen-sammlung-falckenberg": [53.4552, 9.9875],
+  "mkg-hamburg": [53.5523, 10.0095],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

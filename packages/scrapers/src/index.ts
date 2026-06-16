@@ -47,6 +47,7 @@ import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
+import { scrapeDeichtorhallen } from "./venues/deichtorhallen";
 import { scrapeDenkbar } from "./venues/denkbar";
 import { scrapeDeutschesSchauspielhaus } from "./venues/deutsches-schauspielhaus";
 import { scrapeDfgFrankfurt } from "./venues/dfg-frankfurt";
@@ -116,6 +117,7 @@ import { scrapeLichtwarkTheater } from "./venues/lichtwark-theater";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
+import { scrapeMkgHamburg } from "./venues/mkg-hamburg";
 import { scrapeMonsunTheater } from "./venues/monsun-theater";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
@@ -272,6 +274,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
   { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
+  { slug: "deichtorhallen", run: (ctx: ScraperContext) => scrapeDeichtorhallen(ctx) },
+  { slug: "mkg-hamburg", run: (ctx: ScraperContext) => scrapeMkgHamburg(ctx) },
   { slug: "museums-hamburg", run: (ctx: ScraperContext) => scrapeShmhMuseums(ctx) },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
   { slug: "murnau-filmtheater", run: (_ctx: ScraperContext) => scrapeMurnauFilmtheater() },
@@ -342,6 +346,7 @@ export {
   scrapeCentralkomitee,
   scrapeClubVoltaire,
   scrapeCrespoFoundation,
+  scrapeDeichtorhallen,
   scrapeDenkbar,
   scrapeDeutschesSchauspielhaus,
   scrapeDfgFrankfurt,
@@ -411,6 +416,7 @@ export {
   scrapeLiteraturhaus,
   scrapeMalsehn,
   scrapeMampf,
+  scrapeMkgHamburg,
   scrapeMonsunTheater,
   scrapeMousonturm,
   scrapeMurnauFilmtheater,
