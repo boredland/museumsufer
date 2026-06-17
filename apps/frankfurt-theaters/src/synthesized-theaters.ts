@@ -21,6 +21,15 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-begrabniskirche-st-michael",
+    name: "Begräbniskirche St. Michael",
+    address: "",
+    lat: 50.1312108,
+    lon: 8.6968388,
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-biber-e-v",
     name: "BiBEr* e.V.",
     address: "",
