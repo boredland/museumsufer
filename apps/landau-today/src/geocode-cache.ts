@@ -42,6 +42,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "bahnhof maikammer-kirrweiler|kirrweiler": [49.305082, 8.146833],
   "beginn am deutschen tor|landau in der pfalz": [49.198283, 8.112344],
   "berufsgenossenschaft bg rci|maikammer": [49.305216, 8.131629],
+  "bethesda landau|landau in der pfalz": [49.206863, 8.107198],
   "bethesda, bodelschwinghstr. 27, landau|landau in der pfalz": [49.198283, 8.112344],
   "bewegungsstudio pfalz|maikammer": [49.305216, 8.131629],
   "bio-weingut rummel|landau-nußdorf": [49.22205, 8.115768],
