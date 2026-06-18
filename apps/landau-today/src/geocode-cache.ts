@@ -319,6 +319,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "südstern-haus, weissenburger straße 30|landau in der pfalz": [49.198283, 8.112344],
   "taubensuhl|eußerthal": [49.248921, 7.96193],
   "toms näschtl|landau in der pfalz": [49.207634, 8.121735],
+  "tourist information bad bergzaberner land in der südpfalz therme|bad bergzabern": [49.102808, 7.999127],
   "tourist-info st. martin|st. martin": [49.00108, 11.262601],
   "tourist-information bad bergzaberner land|bad bergzabern": [49.102808, 7.999127],
   "tourist-information landau|landau": [49.198283, 8.112344],
