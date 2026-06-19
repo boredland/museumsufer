@@ -75,6 +75,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "first-stage-theater": [53.5523, 9.9488],
   "deutsches-schauspielhaus": [53.5543, 10.0089],
   "hamburgische-staatsoper": [53.5567, 9.9889],
+  "akademie-der-wissenschaften-hamburg": [53.5963, 10.0218],
   kahh: [53.5478, 9.9806],
   kampnagel: [53.5833, 10.0218],
   "st-pauli-theater": [53.5491, 9.963],

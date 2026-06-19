@@ -22,6 +22,7 @@ export {
 } from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
+import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
 import { scrapeCineamo } from "./venues/_cineamo";
 import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
@@ -186,6 +187,7 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
  * individual venues migrate over.
  */
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
+  { slug: "akademie-der-wissenschaften-hamburg", run: (_ctx: ScraperContext) => scrapeAkademieWissenschaftenHamburg() },
   { slug: "alabama-kino", run: (_ctx: ScraperContext) => scrapeAlabamaKino() },
   { slug: "alma-hoppes-lustspielhaus", run: (_ctx: ScraperContext) => scrapeAlmaHoppesLustspielhaus() },
   { slug: "altonaer-theater", run: (_ctx: ScraperContext) => scrapeAltonaerTheater() },
@@ -347,6 +349,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
 ];
 
 export {
+  scrapeAkademieWissenschaftenHamburg,
   scrapeAlabamaKino,
   scrapeAlmaHoppesLustspielhaus,
   scrapeAlteOper,
