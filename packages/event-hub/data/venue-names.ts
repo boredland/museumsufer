@@ -468,6 +468,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-westhafen-pier-1": "Westhafen Pier 1",
   "wdc2026-wetteraustrasse-7": "Wetteraustraße 7",
   "wdc2026-wilhelmsplatz": "Wilhelmsplatz",
+  "wdc2026-wilhelmstrasse": "Wilhelmstraße",
   "wdc2026-willy-brandt-platz": "Willy-Brandt-Platz",
   "weltkulturen-museum": "Weltkulturen Museum",
   "wollheim-memorial-frankfurt": "Wollheim Memorial",
