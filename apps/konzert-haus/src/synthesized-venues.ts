@@ -163,16 +163,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
-    slug: "wdc2026",
-    name: "World Design Capital Frankfurt RheinMain 2026",
-    address: "",
-    lat: 50.1032178,
-    lon: 8.6865351,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
-  {
     slug: "wdc2026-dornbuschkirche",
     name: "Dornbuschkirche",
     address: "",
