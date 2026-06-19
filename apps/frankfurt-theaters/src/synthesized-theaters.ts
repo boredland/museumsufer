@@ -12,15 +12,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026",
-    name: "World Design Capital Frankfurt RheinMain 2026",
-    address: "",
-    lat: 50.107786,
-    lon: 8.7611609,
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-begrabniskirche-st-michael",
     name: "Begräbniskirche St. Michael",
     address: "",
