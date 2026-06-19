@@ -131,6 +131,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
 
   // ─── lehrhaus direct sources ─────────────────────────────────────
   "hamburger-studienbibliothek": [53.5649, 9.9854],
+  "literaturhaus-hamburg": [53.5649, 10.0135],
   buergeruniversitaet: [50.1284, 8.6679],
   "dfg-frankfurt": [50.1109, 8.6736],
   "dig-frankfurt": [50.1109, 8.6821],
