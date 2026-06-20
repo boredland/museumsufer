@@ -11,6 +11,7 @@ const AGGREGATOR_CINEMA_SLUGS = new Set<string>(["nippon-connection"]);
 
 const RICHNESS_FIELDS = [
   "description",
+  "description_en",
   "image_url",
   "ticket_url",
   "credits",
@@ -19,10 +20,24 @@ const RICHNESS_FIELDS = [
   "version",
   "format",
   "series",
+  "subtitle",
+  "end_time",
+  // TMDb/IMDb enrichment marks the canonical listing; the bare re-list
+  // (e.g. "OV: Backrooms" with no metadata) should lose to it.
+  "tmdb_id",
+  "imdb_id",
 ] as const satisfies readonly (keyof Screening)[];
 
+/** Version chrome the source bakes into the title — as a leading prefix
+ *  ("OV: Backrooms", "OmU – …") or a trailing tag (" (OV)"). The version is
+ *  carried separately in `version`, so it must not split the match key: two
+ *  listings of one screening that differ only by this chrome are the same film. */
+const LEADING_VERSION_RE = /^\s*(?:om[a-zäöü]*u|omeu|ov|of|df|stumm)\s*[:·–-]\s*/i;
+const TRAILING_VERSION_RE = /\s*\((?:om[a-zäöü]*u|ov|df|stumm)\)\s*$/i;
+
 function canonicalTitleHash(title: string): number {
-  return fnv1aInt(title.toLowerCase().replace(/[^a-z0-9]+/g, ""));
+  const stripped = title.replace(LEADING_VERSION_RE, "").replace(TRAILING_VERSION_RE, "");
+  return fnv1aInt(stripped.toLowerCase().replace(/[^a-z0-9]+/g, ""));
 }
 
 function matchKey(s: Screening): string {
