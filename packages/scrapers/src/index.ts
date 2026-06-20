@@ -22,13 +22,13 @@ export {
 } from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
-import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
 import { scrapeCineamo } from "./venues/_cineamo";
 import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeWdc2026 } from "./venues/_wdc2026";
+import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
 import { scrapeAlabamaKino } from "./venues/alabama-kino";
 import { scrapeAlmaHoppesLustspielhaus } from "./venues/alma-hoppes-lustspielhaus";
 import { scrapeAlteOper } from "./venues/alte-oper";
@@ -44,6 +44,7 @@ import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
+import { scrapeCafeMutz } from "./venues/cafe-mutz";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
@@ -110,12 +111,12 @@ import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJazzkeller } from "./venues/jazzkeller";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKahh } from "./venues/kahh";
-import { scrapeKoerberStiftung } from "./venues/koerber-stiftung";
 import { scrapeKampnagel } from "./venues/kampnagel";
 import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKinoKoeppern } from "./venues/kino-koeppern";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
+import { scrapeKoerberStiftung } from "./venues/koerber-stiftung";
 import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKomoedieWinterhuderFaehrhaus } from "./venues/komoedie-winterhuder-faehrhaus";
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
@@ -204,6 +205,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "boell-hessen", run: (_ctx: ScraperContext) => scrapeBoellHessen() },
   { slug: "brotfabrik", run: (_ctx: ScraperContext) => scrapeBrotfabrik() },
   { slug: "buergeruniversitaet", run: (_ctx: ScraperContext) => scrapeBuergeruniversitaet() },
+  { slug: "cafe-mutz", run: (_ctx: ScraperContext) => scrapeCafeMutz() },
   { slug: "caligari-wiesbaden", run: (_ctx: ScraperContext) => scrapeCaligariWiesbaden() },
   { slug: "centralkomitee", run: (_ctx: ScraperContext) => scrapeCentralkomitee() },
   { slug: "club-voltaire", run: (_ctx: ScraperContext) => scrapeClubVoltaire() },
@@ -433,12 +435,12 @@ export {
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
   scrapeKahh,
-  scrapeKoerberStiftung,
   scrapeKampnagel,
   scrapeKarlMarxBuchhandlung,
   scrapeKellertheaterFrankfurt,
   scrapeKinoKoeppern,
   scrapeKirchenmusikDreikoenig,
+  scrapeKoerberStiftung,
   scrapeKomoedieFrankfurt,
   scrapeKomoedieWinterhuderFaehrhaus,
   scrapeKronbergAcademy,
