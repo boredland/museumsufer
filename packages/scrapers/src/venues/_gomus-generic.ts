@@ -3,11 +3,30 @@ import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeRe
 
 const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
+/** go~mus serves several rendition URLs per image; `detail` is the largest
+ *  card-sized variant, with progressively smaller fallbacks. */
+interface GomusPicture {
+  original?: string | null;
+  detail?: string | null;
+  detail_3x2?: string | null;
+  article?: string | null;
+  teaser?: string | null;
+  preview?: string | null;
+}
+
+/** Pick the best available rendition. `detail`/`article` are ~card-sized;
+ *  `original` can be very large but is a safe last resort. */
+function pickImage(picture: GomusPicture | null | undefined): string | null {
+  if (!picture) return null;
+  return picture.detail ?? picture.article ?? picture.detail_3x2 ?? picture.teaser ?? picture.original ?? null;
+}
+
 interface GomusExhibition {
   id: number;
   museum_id: number;
   title: string;
   description: string | null;
+  picture?: GomusPicture | null;
   time_frames?: Array<{ start_at?: string; end_at?: string }>;
   location?: {
     name: string;
@@ -18,9 +37,15 @@ interface GomusExhibition {
   };
 }
 
+interface GomusEvent {
+  id: number;
+  picture?: GomusPicture | null;
+}
+
 interface GomusDate {
   id: number;
   event_id: number;
+  exhibition_id?: number | null;
   museum_id: number;
   title: string;
   event_title: string;
@@ -50,6 +75,8 @@ export async function scrapeGomusMuseum(
   _ctx: ScraperContext,
 ): Promise<VenueScrapeResult[]> {
   const byMuseum = new Map<string, CanonicalScrapedEvent[]>();
+  // exhibition id → image, for event dates that reference a parent exhibition.
+  const exhibitionImageById = new Map<number, string>();
 
   if (config.locationMapping) {
     for (const info of Object.values(config.locationMapping)) {
@@ -67,6 +94,8 @@ export async function scrapeGomusMuseum(
       const data = (await res.json()) as { exhibitions?: GomusExhibition[] };
       const list = data.exhibitions ?? [];
       for (const ex of list) {
+        const exImage = pickImage(ex.picture);
+        if (exImage) exhibitionImageById.set(ex.id, exImage);
         let slug = config.slug;
         let _displayName = config.name;
 
@@ -97,7 +126,7 @@ export async function scrapeGomusMuseum(
           end_time: null,
           detail_url: `${config.ticketBase}/exhibitions/${ex.id}`,
           ticket_url: `${config.ticketBase}/exhibitions/${ex.id}`,
-          image_url: null,
+          image_url: exImage,
           labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
         };
 
@@ -117,7 +146,24 @@ export async function scrapeGomusMuseum(
     console.warn(`${config.slug} exhibitions scrape failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // 2. Fetch and process Event Dates
+  // 2a. Fetch the parent events to map event id → image (the /dates rows
+  //     carry no picture of their own, only an event_id / exhibition_id).
+  const eventImageById = new Map<number, string>();
+  try {
+    const eventsUrl = `${config.apiBase}/events?per_page=100`;
+    const res = await fetch(eventsUrl, { headers: { "User-Agent": USER_AGENT } });
+    if (res.ok) {
+      const data = (await res.json()) as { events?: GomusEvent[] };
+      for (const ev of data.events ?? []) {
+        const img = pickImage(ev.picture);
+        if (img) eventImageById.set(ev.id, img);
+      }
+    }
+  } catch (err) {
+    console.warn(`${config.slug} events-image scrape failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // 2b. Fetch and process Event Dates
   try {
     const datesUrl = `${config.apiBase}/dates?per_page=100`;
     const res = await fetch(datesUrl, { headers: { "User-Agent": USER_AGENT } });
@@ -165,7 +211,11 @@ export async function scrapeGomusMuseum(
           end_time: endTime,
           detail_url: `${config.ticketBase}/dates/${d.id}`,
           ticket_url: `${config.ticketBase}/dates/${d.id}`,
-          image_url: null,
+          // Dates inherit their parent event's image, falling back to the
+          // exhibition the date belongs to.
+          image_url:
+            eventImageById.get(d.event_id) ??
+            (d.exhibition_id != null ? (exhibitionImageById.get(d.exhibition_id) ?? null) : null),
           labels,
         };
 
