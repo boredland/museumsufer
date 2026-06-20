@@ -34,8 +34,14 @@ export function listTranslations(): Translation[] {
   return SCRAPE_DATA.translations;
 }
 
-export function getAllMuseums(): Museum[] {
-  return [...SCRAPE_DATA.museums].sort((a, b) => a.name.localeCompare(b.name));
+/** Whether a museum belongs to the requested city ("frankfurt" default). */
+function museumInCity(m: Museum | undefined, city: string | null | undefined): boolean {
+  if (!city) return true;
+  return (m?.city ?? "frankfurt") === city;
+}
+
+export function getAllMuseums(city?: string | null): Museum[] {
+  return [...SCRAPE_DATA.museums].filter((m) => museumInCity(m, city)).sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export function getMuseumById(id: number): Museum | null {
@@ -105,10 +111,11 @@ function joinMuseum<T extends { museum_id: number; image_url?: string | null }>(
   };
 }
 
-export async function getEventsForDate(date: string): Promise<Event[]> {
+export async function getEventsForDate(date: string, city?: string | null): Promise<Event[]> {
   const out: Joined<Event>[] = [];
   for (const ev of SCRAPE_DATA.events) {
     if (ev.date !== date) continue;
+    if (city && !museumInCity(MUSEUMS_BY_ID.get(ev.museum_id), city)) continue;
     const joined = joinMuseum(ev);
     if (joined) out.push(joined);
   }
@@ -122,17 +129,23 @@ export async function getEventsForDate(date: string): Promise<Event[]> {
  * Counts all events in the day (no past-time filtering) — the strip
  * is informational; the per-day view applies the time filter itself.
  */
-export function getEventCountsByDate(startDate: string, endDate: string): Array<{ date: string; count: number }> {
+export function getEventCountsByDate(
+  startDate: string,
+  endDate: string,
+  city?: string | null,
+): Array<{ date: string; count: number }> {
   const counts = new Map<string, number>();
   for (const ev of SCRAPE_DATA.events) {
     if (ev.date < startDate || ev.date > endDate) continue;
-    if (!MUSEUMS_BY_ID.has(ev.museum_id)) continue;
+    const m = MUSEUMS_BY_ID.get(ev.museum_id);
+    if (!m) continue;
+    if (city && !museumInCity(m, city)) continue;
     counts.set(ev.date, (counts.get(ev.date) ?? 0) + 1);
   }
   return [...counts.entries()].map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-export async function getEventsForRange(startDate: string, endDate: string): Promise<Event[]> {
+export async function getEventsForRange(startDate: string, endDate: string, city?: string | null): Promise<Event[]> {
   const today = todayIso();
   const todayInRange = startDate <= today && today <= endDate;
   // Single pass: collect into past/today/future buckets so the today
@@ -142,6 +155,7 @@ export async function getEventsForRange(startDate: string, endDate: string): Pro
   const future: Joined<Event>[] = [];
   for (const ev of SCRAPE_DATA.events) {
     if (ev.date < startDate || ev.date > endDate) continue;
+    if (city && !museumInCity(MUSEUMS_BY_ID.get(ev.museum_id), city)) continue;
     const joined = joinMuseum(ev);
     if (!joined) continue;
     if (!todayInRange) future.push(joined);
@@ -163,7 +177,7 @@ export async function getEventById(id: number): Promise<(Event & { museum_name: 
   return joinMuseum(ev);
 }
 
-export async function getExhibitionsForDate(date: string): Promise<Exhibition[]> {
+export async function getExhibitionsForDate(date: string, city?: string | null): Promise<Exhibition[]> {
   const out: Joined<Exhibition>[] = [];
   for (const ex of SCRAPE_DATA.exhibitions) {
     // Permanent exhibitions arrive with no end_date (and a 1970-01-01
@@ -172,6 +186,7 @@ export async function getExhibitionsForDate(date: string): Promise<Exhibition[]>
     // we still want to match the day they happen on.
     if (ex.start_date && ex.start_date > date) continue;
     if (ex.end_date && ex.end_date < date) continue;
+    if (city && !museumInCity(MUSEUMS_BY_ID.get(ex.museum_id), city)) continue;
     const joined = joinMuseum(ex);
     if (joined) out.push(joined);
   }

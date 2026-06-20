@@ -1,7 +1,15 @@
-import { buildOgSvg, fitOgTitleSize } from "@museumsufer/core";
+import { buildOgSvg, cityName, fitOgTitleSize } from "@museumsufer/core";
 import { type Context, Hono } from "hono";
-import { getEventById, getExhibitionById, getMuseumById } from "../queries";
+import { getEventById, getExhibitionById, getMuseumById, getMuseumBySlug } from "../queries";
 import type { Env } from "../types";
+
+/** Brand line for a museum's city (Frankfurt keeps the Museumsufer wordmark). */
+function brandFor(city: string | undefined): string {
+  return (city ?? "frankfurt") === "frankfurt" ? "Museumsufer Frankfurt" : `${city}.ins.museum`;
+}
+function cityOfSlug(slug: string | undefined): string {
+  return (slug ? getMuseumBySlug(slug)?.city : undefined) ?? "frankfurt";
+}
 
 const PALETTE = { paper: "#EFE7D8", ink: "#1C1410", accent: "#1F3A52" };
 const ACCENT_ALT = "#B45309";
@@ -22,7 +30,7 @@ app.get("/og/event/:id{[0-9]+}/image.svg", async (c) => {
   if (!Number.isFinite(id)) return c.notFound();
   const ev = await getEventById(id);
   if (!ev) return c.notFound();
-  return svg(c, "EVENT", ev.title, ev.museum_name, formatDate(ev.date, ev.time ?? null));
+  return svg(c, "EVENT", ev.title, ev.museum_name, formatDate(ev.date, ev.time ?? null), cityOfSlug(ev.museum_slug));
 });
 
 app.get("/og/exhibition/:id{[0-9]+}/image.svg", async (c) => {
@@ -30,7 +38,14 @@ app.get("/og/exhibition/:id{[0-9]+}/image.svg", async (c) => {
   if (!Number.isFinite(id)) return c.notFound();
   const ex = await getExhibitionById(id);
   if (!ex) return c.notFound();
-  return svg(c, "AUSSTELLUNG", ex.title, ex.museum_name, ex.start_date ? formatRange(ex.start_date, ex.end_date) : "");
+  return svg(
+    c,
+    "AUSSTELLUNG",
+    ex.title,
+    ex.museum_name,
+    ex.start_date ? formatRange(ex.start_date, ex.end_date) : "",
+    cityOfSlug(ex.museum_slug),
+  );
 });
 
 app.get("/og/museum/:id{[0-9]+}/image.svg", (c) => {
@@ -38,14 +53,21 @@ app.get("/og/museum/:id{[0-9]+}/image.svg", (c) => {
   if (!Number.isFinite(id)) return c.notFound();
   const m = getMuseumById(id);
   if (!m) return c.notFound();
-  return svg(c, "MUSEUM", m.name, "Frankfurt am Main", "");
+  return svg(c, "MUSEUM", m.name, cityName(m.city ?? "frankfurt", "de", "full"), "", m.city ?? "frankfurt");
 });
 
-function svg(c: Context<{ Bindings: Env }>, kicker: string, title: string, sub: string | undefined, date: string) {
-  return c.body(build(kicker, title, sub ?? "", date), { headers: SVG_HEADERS });
+function svg(
+  c: Context<{ Bindings: Env }>,
+  kicker: string,
+  title: string,
+  sub: string | undefined,
+  date: string,
+  city: string,
+) {
+  return c.body(build(kicker, title, sub ?? "", date, city), { headers: SVG_HEADERS });
 }
 
-function build(kicker: string, title: string, sub: string, date: string): string {
+function build(kicker: string, title: string, sub: string, date: string, city: string): string {
   const titleSize = fitOgTitleSize(title);
   return buildOgSvg({
     palette: PALETTE,
@@ -54,7 +76,7 @@ function build(kicker: string, title: string, sub: string, date: string): string
     rules: { thickness: 6, positions: ["top"] },
     decoration: `<rect x="0" y="624" width="1200" height="6" fill="${ACCENT_ALT}"/>`,
     rows: [
-      { text: "Museumsufer Frankfurt", y: 130, font: "display", size: 28, italic: true, color: PALETTE.accent },
+      { text: brandFor(city), y: 130, font: "display", size: 28, italic: true, color: PALETTE.accent },
       { text: kicker, y: 190, font: "mono", size: 18, letterSpacing: 6, color: ACCENT_ALT },
       { text: title, y: 320 + titleSize / 4, font: "display", size: titleSize, weight: 500, tracking: -1 },
       ...(sub ? [{ text: sub, y: 480, font: "display" as const, size: 30, italic: true, opacity: 0.62 }] : []),

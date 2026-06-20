@@ -21,6 +21,8 @@ export interface ParsedMuseum {
   description: string | null;
   image_url: string | null;
   website_url?: string | null;
+  /** City slug; absent ≡ "frankfurt". */
+  city?: string;
 }
 
 export interface ParsedExhibition {
@@ -80,5 +82,6 @@ function manualMuseumsAsParsed(): ParsedMuseum[] {
     description: m.description,
     image_url: m.image,
     website_url: m.website,
+    ...(m.city ? { city: m.city } : {}),
   }));
 }

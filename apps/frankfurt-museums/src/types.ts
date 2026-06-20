@@ -30,6 +30,9 @@ export interface Museum {
   id: number;
   name: string;
   slug: string;
+  /** City slug ("frankfurt" / "hamburg"). Absent ≡ "frankfurt" so existing
+   *  bundles and the Frankfurt directory need no change. */
+  city?: string;
   museumsufer_url: string;
   website_url?: string;
   opening_hours?: string;

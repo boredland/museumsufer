@@ -3,7 +3,14 @@ import { HtmlHead } from "@museumsufer/core/html-head";
 import { LangSwitch } from "@museumsufer/core/langswitch";
 import { Hono } from "hono";
 import { raw } from "hono/html";
-import { DEFAULT_LOCALE, detectLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "../i18n";
+import {
+  DEFAULT_LOCALE,
+  detectLocale,
+  getTranslations,
+  type Locale,
+  localizeTranslations,
+  SUPPORTED_LOCALES,
+} from "../i18n";
 import type { Env } from "../types";
 
 const OPERATOR = {
@@ -11,8 +18,10 @@ const OPERATOR = {
   email: "feedback@ins.museum",
 };
 
-function ImprintPage({ locale }: { locale: Locale }) {
-  const tr = getTranslations(locale);
+function ImprintPage({ locale, city }: { locale: Locale; city: string }) {
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+  const appUrl = city === "frankfurt" ? "https://museumsufer.app" : `https://${city}.ins.museum`;
+  const brand = city === "frankfurt" ? "Museumsufer Frankfurt" : `${city}.ins.museum`;
   return (
     <>
       {raw("<!DOCTYPE html>")}
@@ -21,9 +30,9 @@ function ImprintPage({ locale }: { locale: Locale }) {
           <HtmlHead
             title={tr.imprintTitle}
             description={tr.imprintTitle}
-            canonical="https://museumsufer.app/impressum"
-            ogImage="https://museumsufer.app/og-image.png"
-            ogSiteName="Museumsufer Frankfurt"
+            canonical={`${appUrl}/impressum`}
+            ogImage={`${appUrl}/og-image.png`}
+            ogSiteName={brand}
             themeColor={[
               { content: "#efe7d8", media: "(prefers-color-scheme: light)" },
               { content: "#14110e", media: "(prefers-color-scheme: dark)" },
@@ -108,12 +117,13 @@ function ImprintPage({ locale }: { locale: Locale }) {
   );
 }
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const handler = (path: string) =>
   app.get(path, (c) => {
     const locale = detectLocale(c.req.raw);
-    return c.html(ImprintPage({ locale }), {
+    const city = c.get("city") ?? "frankfurt";
+    return c.html(ImprintPage({ locale, city }), {
       headers: {
         "Content-Language": locale,
         Vary: "Accept-Language",

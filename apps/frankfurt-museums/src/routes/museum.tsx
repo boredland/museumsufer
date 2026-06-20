@@ -1,10 +1,11 @@
+import { cityMeta, cityName } from "@museumsufer/core";
 import { Footer } from "@museumsufer/core/footer";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { NavButton, ReportButton, ShareButton } from "../components";
 import { dateOffset, todayIso } from "../date";
 import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
-import { detectLocale, getTranslations, type Locale } from "../i18n";
+import { detectLocale, getTranslations, type Locale, localizeTranslations } from "../i18n";
 import { IconSprite } from "../icons";
 import { type getMuseumConfig, MUSEUMS, WIKIPEDIA_TITLE_OVERRIDES } from "../museum-config";
 import { getEventsForMuseum, getExhibitionsForMuseum, getMuseumBySlug } from "../queries";
@@ -113,9 +114,17 @@ interface MuseumPageProps {
 }
 
 function MuseumPage({ locale, museums, config, exhibitions, events, slug, currentPath }: MuseumPageProps) {
-  const tr = getTranslations(locale);
-
   const primaryMuseum = museums[0];
+  // The museum's own city drives host, brand and schema region — not the
+  // request host — so deep links resolve to the right canonical.
+  const city = primaryMuseum.city ?? "frankfurt";
+  const isFrankfurt = city === "frankfurt";
+  const appUrl = isFrankfurt ? "https://museumsufer.app" : `https://${city}.ins.museum`;
+  const brand = isFrankfurt ? "Museumsufer Frankfurt" : `${city}.ins.museum`;
+  const cityFull = cityName(city, locale, "full");
+  const meta = cityMeta(city);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+
   const museumName = primaryMuseum.name;
   const abbreviation = config?.abbreviation;
   // Fallback chain: DB-scraped description first, then the curated
@@ -125,16 +134,13 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
   const description = primaryMuseum.description ?? config?.description ?? null;
   const metaDescription = description
     ? truncate(description)
-    : `${museumName} — aktuelle Ausstellungen & Veranstaltungen · Museumsufer Frankfurt am Main`;
+    : `${museumName} — aktuelle Ausstellungen & Veranstaltungen · ${brand}`;
   // Self-canonical per-locale: each locale points at the URL the user
   // actually visits. Hreflang already declares the cross-locale
   // relationships in renderHtmlHead/buildHreflangsForCanonical.
-  const canonicalUrl =
-    locale === "de"
-      ? `https://museumsufer.app/museum/${slug}`
-      : `https://museumsufer.app/museum/${slug}?lang=${locale}`;
+  const canonicalUrl = locale === "de" ? `${appUrl}/museum/${slug}` : `${appUrl}/museum/${slug}?lang=${locale}`;
   const langParam = buildLangParam(locale);
-  const museumIri = `https://museumsufer.app/#museum/${slug}`;
+  const museumIri = `${appUrl}/#museum/${slug}`;
 
   // Build JSON-LD schemas
   const breadcrumb = {
@@ -144,8 +150,8 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
       {
         "@type": "ListItem",
         position: 1,
-        name: "Museumsufer Frankfurt",
-        item: "https://museumsufer.app/",
+        name: brand,
+        item: `${appUrl}/`,
       },
       {
         "@type": "ListItem",
@@ -168,7 +174,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
     return {
       "@context": "https://schema.org",
       "@type": "Museum",
-      "@id": `https://museumsufer.app/#museum/${m.slug}`,
+      "@id": `${appUrl}/#museum/${m.slug}`,
       name: m.name,
       ...(abbreviation && { alternateName: abbreviation }),
       ...(m.description && { description: m.description }),
@@ -176,15 +182,16 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
       ...(cleanedImage && { image: cleanedImage }),
       address: {
         "@type": "PostalAddress",
-        addressLocality: "Frankfurt am Main",
+        addressLocality: cityFull,
+        addressRegion: meta.region,
         addressCountry: "DE",
       },
       geo: { "@type": "GeoCoordinates", latitude: lat, longitude: lng },
       hasMap: `https://www.google.com/maps?q=${lat},${lng}`,
       containedInPlace: {
         "@type": "City",
-        name: "Frankfurt am Main",
-        sameAs: "https://www.wikidata.org/wiki/Q1794",
+        name: cityFull,
+        sameAs: `https://www.wikidata.org/wiki/${meta.wikidata}`,
       },
       ...(parseOpeningHours(m.opening_hours).length > 0 && {
         openingHoursSpecification: parseOpeningHours(m.opening_hours),
@@ -235,10 +242,11 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
         <head>
           {renderHtmlHead({
             locale,
-            title: `${museumName} – Ausstellungen & Events | Museumsufer Frankfurt am Main`,
+            title: `${museumName} – Ausstellungen & Events | ${brand}`,
             description: metaDescription,
             canonicalUrl,
-            ogImage: cleanImageUrl(primaryMuseum.image_url) || "https://museumsufer.app/og-image.png",
+            ogImage: cleanImageUrl(primaryMuseum.image_url) || `${appUrl}/og-image.png`,
+            ogSiteName: brand,
             jsonSchemas: [
               { name: "breadcrumb", json: JSON.stringify(breadcrumb) },
               ...museumSchemas.map((schema, i) => ({ name: `museum-${i}`, json: JSON.stringify(schema) })),
@@ -251,7 +259,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
         <body>
           <IconSprite />
           <div class="page">
-            <Masthead locale={locale} tr={tr} currentPath={currentPath} />
+            <Masthead locale={locale} tr={tr} currentPath={currentPath} city={city} />
 
             <p class="museum-detail__back">
               <a href={`/${langParam}`} class="museum-detail__back-link">
@@ -268,10 +276,10 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
                 src={cleanImageUrl(primaryMuseum.image_url)}
                 alt={
                   locale === "fr"
-                    ? `Façade de ${museumName} à Francfort-sur-le-Main`
+                    ? `Façade de ${museumName} à ${cityFull}`
                     : locale === "en"
-                      ? `${museumName} facade in Frankfurt am Main`
-                      : `${museumName} Fassade in Frankfurt am Main`
+                      ? `${museumName} facade in ${cityFull}`
+                      : `${museumName} Fassade in ${cityFull}`
                 }
                 loading="eager"
                 fetchpriority="high"

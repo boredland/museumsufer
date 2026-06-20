@@ -9,7 +9,7 @@ import {
   getEventsForRange,
   getExhibitionsForDate,
 } from "./queries";
-import { APP_URL, escHtml } from "./shared";
+import { escHtml } from "./shared";
 import { translateFields } from "./translate";
 import type { Env, Event, Exhibition, MuseumInfo } from "./types";
 
@@ -31,19 +31,19 @@ export function proxyImages<T extends { image_url?: string | null }>(items: T[])
   }));
 }
 
-export async function handleFeeds(request: Request): Promise<Response | null> {
+export async function handleFeeds(request: Request, city = "frankfurt"): Promise<Response | null> {
   const url = new URL(request.url);
 
   if (url.pathname === "/feed.xml" || url.pathname === "/rss.xml") {
-    const events = await getUpcomingEvents(7);
-    return new Response(buildRss(events), {
+    const events = await getUpcomingEvents(7, city);
+    return new Response(buildRss(events, city), {
       headers: { "Content-Type": "application/rss+xml; charset=utf-8", "Cache-Control": CACHE_FEEDS },
     });
   }
 
   if (url.pathname === "/feed.ics" || url.pathname === "/calendar.ics") {
-    const events = await getUpcomingEvents(7);
-    return new Response(buildIcs(events), {
+    const events = await getUpcomingEvents(7, city);
+    return new Response(buildIcs(events, city), {
       headers: { "Content-Type": "text/calendar; charset=utf-8", "Cache-Control": CACHE_FEEDS },
     });
   }
@@ -51,15 +51,24 @@ export async function handleFeeds(request: Request): Promise<Response | null> {
   return null;
 }
 
+/** Frankfurt keeps the SEO-primary host + Museumsufer brand. */
+function feedAppUrl(city: string): string {
+  return city === "frankfurt" ? "https://museumsufer.app" : `https://${city}.ins.museum`;
+}
+function feedBrand(city: string): string {
+  return city === "frankfurt" ? "Museumsufer Frankfurt" : `${city}.ins.museum`;
+}
+
 export async function fetchDayData(
   env: Env,
   date: string,
   locale: Locale,
   endDate?: string,
+  city?: string | null,
 ): Promise<{ date: string; exhibitions: Exhibition[]; events: Event[] }> {
   const [rawExhibitions, rawEvents] = await Promise.all([
-    getExhibitionsForDate(date),
-    endDate ? getEventsForRange(date, endDate) : getEventsForDate(date),
+    getExhibitionsForDate(date, city),
+    endDate ? getEventsForRange(date, endDate, city) : getEventsForDate(date, city),
   ]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
@@ -83,13 +92,15 @@ export async function fetchDayData(
   return { date, exhibitions: finalExh, events: finalEv };
 }
 
-let museumMapCache: { data: Record<string, MuseumInfo>; ts: number } | null = null;
+const museumMapCache = new Map<string, { data: Record<string, MuseumInfo>; ts: number }>();
 
-export async function getMuseumMap(): Promise<Record<string, MuseumInfo>> {
-  if (museumMapCache && Date.now() - museumMapCache.ts < 3600_000) return museumMapCache.data;
+export async function getMuseumMap(city?: string | null): Promise<Record<string, MuseumInfo>> {
+  const key = city ?? "all";
+  const cached = museumMapCache.get(key);
+  if (cached && Date.now() - cached.ts < 3600_000) return cached.data;
 
   const map: Record<string, MuseumInfo> = {};
-  for (const m of getAllMuseums()) {
+  for (const m of getAllMuseums(city)) {
     const config = MUSEUMS[m.slug];
     if (config?.hidden) continue;
     const info: MuseumInfo = {
@@ -98,29 +109,33 @@ export async function getMuseumMap(): Promise<Record<string, MuseumInfo>> {
       description: m.description ?? null,
       image_url: m.image_url ?? null,
     };
-    if (config?.name) info.museumsufer = false;
+    // The "not in the Museumsufercard" flag is a Frankfurt-only concept;
+    // Hamburg has no equivalent card, so the badge is never set there.
+    if (config?.name && (m.city ?? "frankfurt") === "frankfurt") info.museumsufer = false;
     map[m.slug] = info;
   }
-  museumMapCache = { data: map, ts: Date.now() };
+  museumMapCache.set(key, { data: map, ts: Date.now() });
   return map;
 }
 
-async function getUpcomingEvents(days: number): Promise<(Event & { museum_name: string })[]> {
+async function getUpcomingEvents(days: number, city = "frankfurt"): Promise<(Event & { museum_name: string })[]> {
   const today = todayIso();
   const end = dateOffset(days);
-  const events = await getEventsForRange(today, end);
+  const events = await getEventsForRange(today, end, city);
   return events.filter((ev): ev is Event & { museum_name: string } => Boolean(ev.museum_name));
 }
 
-function buildRss(events: (Event & { museum_name: string })[]): string {
+function buildRss(events: (Event & { museum_name: string })[], city = "frankfurt"): string {
+  const appUrl = feedAppUrl(city);
+  const brand = feedBrand(city);
   const items = events.map((ev) => {
     const timeStr = ev.time ? `, ${ev.time} Uhr` : "";
     const desc = ev.description ? escHtml(ev.description) : "";
-    const link = ev.detail_url || ev.url || APP_URL;
+    const link = ev.detail_url || ev.url || appUrl;
     return `    <item>
       <title>${escHtml(ev.title)} — ${escHtml(ev.museum_name)}</title>
       <link>${escHtml(link)}</link>
-      <guid isPermaLink="false">museumsufer-${ev.id}</guid>
+      <guid isPermaLink="false">museum-${ev.id}</guid>
       <pubDate>${new Date(`${ev.date}T${ev.time || "12:00"}:00`).toUTCString()}</pubDate>
       <description>${escHtml(`${ev.date + timeStr}. ${ev.museum_name}. ${desc}`)}</description>
     </item>`;
@@ -129,23 +144,24 @@ function buildRss(events: (Event & { museum_name: string })[]): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Museumsufer Frankfurt</title>
-    <link>${APP_URL}</link>
-    <description>Veranstaltungen am Frankfurter Museumsufer</description>
+    <title>${escHtml(brand)}</title>
+    <link>${appUrl}</link>
+    <description>${escHtml(`Veranstaltungen — ${brand}`)}</description>
     <language>de</language>
-    <atom:link href="${APP_URL}/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${appUrl}/feed.xml" rel="self" type="application/rss+xml"/>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items.join("\n")}
   </channel>
 </rss>`;
 }
 
-export function buildIcs(events: (Event & { museum_name: string })[]): string {
+export function buildIcs(events: (Event & { museum_name: string })[], city = "frankfurt"): string {
+  const host = city === "frankfurt" ? "museumsufer.app" : `${city}.ins.museum`;
   return buildIcsCalendar({
-    prodId: "-//Museumsufer Frankfurt//DE",
-    name: "Museumsufer Frankfurt",
+    prodId: `-//${feedBrand(city)}//DE`,
+    name: feedBrand(city),
     events: events.map((ev) => ({
-      uid: `museumsufer-${ev.id}@museumsufer.app`,
+      uid: `museum-${ev.id}@${host}`,
       date: ev.date,
       time: ev.time ?? null,
       end_date: ev.end_date ?? null,

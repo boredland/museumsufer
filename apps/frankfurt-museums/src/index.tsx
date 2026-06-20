@@ -18,7 +18,7 @@ import { ContentBody } from "./components";
 import { berlinNow, todayIso } from "./date";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { type InitialData, renderPage } from "./frontend";
-import { dateLocale, detectLocale, getTranslations, type Locale } from "./i18n";
+import { dateLocale, detectLocale, getTranslations, type Locale, localizeTranslations } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import { getAllMuseums } from "./queries";
 import docsRoute from "./routes/docs";
@@ -89,7 +89,13 @@ app.use(
 app.use(
   "/api/*",
   cors({
-    origin: ["https://museumsufer.app", "http://localhost:3000", "http://localhost:8787"],
+    origin: [
+      "https://museumsufer.app",
+      "https://frankfurt.ins.museum",
+      "https://hamburg.ins.museum",
+      "http://localhost:3000",
+      "http://localhost:8787",
+    ],
     allowMethods: ["GET", "POST", "OPTIONS"],
     maxAge: 600,
   }),
@@ -231,7 +237,8 @@ app.post("/api/contact", (c) =>
 app.get("/api/events", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const events = proxyImages(await getEventsForDate(date));
+  const city = c.get("city") ?? "frankfurt";
+  const events = proxyImages(await getEventsForDate(date, city));
   const translated = await translateFields(c.env, events, ["title", "description"] as (keyof Event)[], lang);
   return c.json(markTranslated(events, translated, lang), {
     headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
@@ -241,7 +248,8 @@ app.get("/api/events", async (c) => {
 app.get("/api/exhibitions", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const exhibitions = proxyImages(await getExhibitionsForDate(date));
+  const city = c.get("city") ?? "frankfurt";
+  const exhibitions = proxyImages(await getExhibitionsForDate(date, city));
   const translated = await translateFields(c.env, exhibitions, ["title"] as (keyof Exhibition)[], lang);
   return c.json(markTranslated(exhibitions, translated, lang), {
     headers: { "Cache-Control": "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600" },
@@ -249,7 +257,8 @@ app.get("/api/exhibitions", async (c) => {
 });
 
 app.get("/api/museums", async (c) => {
-  return c.json(getAllMuseums(), {
+  const city = c.get("city") ?? "frankfurt";
+  return c.json(getAllMuseums(city), {
     headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400" },
   });
 });
@@ -257,7 +266,11 @@ app.get("/api/museums", async (c) => {
 app.get("/api/day", async (c) => {
   const date = c.req.query("date") || todayIso();
   const lang = c.req.query("lang") || "de";
-  const [rawExhibitions, rawEvents] = await Promise.all([getExhibitionsForDate(date), getEventsForDate(date)]);
+  const city = c.get("city") ?? "frankfurt";
+  const [rawExhibitions, rawEvents] = await Promise.all([
+    getExhibitionsForDate(date, city),
+    getEventsForDate(date, city),
+  ]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
   const [trExh, trEv] = await Promise.all([
@@ -284,7 +297,8 @@ app.get("/event/:id/feed.ics", async (c) => {
   const { getEventById } = await import("./queries");
   const ev = await getEventById(id);
   if (!ev) return c.json({ error: "not found" }, { status: 404 });
-  return c.text(buildIcs([ev as Event & { museum_name: string }]), {
+  const city = c.get("city") ?? "frankfurt";
+  return c.text(buildIcs([ev as Event & { museum_name: string }], city), {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
       "Content-Disposition": `attachment; filename="${ev.id}.ics"`,
@@ -302,13 +316,14 @@ app.get(
     const { date: rawDate, lang, range } = c.req.valid("query");
     const date = rawDate || todayIso();
     const locale = (lang || detectLocale(c.req.raw)) as Locale;
+    const city = c.get("city") ?? "frankfurt";
     const endDate = range
       ? berlinNow()
           .add(range - 1, "day")
           .format("YYYY-MM-DD")
       : undefined;
-    const data = await fetchDayData(c.env, date, locale, endDate);
-    const tr = getTranslations(locale);
+    const data = await fetchDayData(c.env, date, locale, endDate, city);
+    const tr = localizeTranslations(getTranslations(locale), city, locale);
 
     const html = (
       <>
@@ -334,11 +349,13 @@ app.get(
   },
 );
 
-function renderMarkdown(data: InitialData, locale: Locale, museums: Record<string, MuseumInfo>): string {
-  const tr = getTranslations(locale);
+function renderMarkdown(data: InitialData, locale: Locale, museums: Record<string, MuseumInfo>, city: string): string {
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const dl = dateLocale(locale);
+  const host = city === "frankfurt" ? "museumsufer.app" : `${city}.ins.museum`;
+  const brand = city === "frankfurt" ? "Museumsufer Frankfurt" : host;
   const lines: string[] = [
-    `# Museumsufer Frankfurt — ${tr.subtitle}`,
+    `# ${brand} — ${tr.subtitle}`,
     "",
     `> ${tr.introText}`,
     "",
@@ -385,7 +402,7 @@ function renderMarkdown(data: InitialData, locale: Locale, museums: Record<strin
     lines.push("");
   }
 
-  lines.push(`---`, "", `Source: https://museumsufer.app · API: https://museumsufer.app/api/docs`);
+  lines.push(`---`, "", `Source: https://${host} · API: https://${host}/api/docs`);
   return lines.join("\n");
 }
 
@@ -399,6 +416,7 @@ app.get(
   }),
   async (c) => {
     const locale = detectLocale(c.req.raw);
+    const city = c.get("city") ?? "frankfurt";
     const { date: rawDate, sort, range } = c.req.valid("query");
     const date = range ? todayIso() : rawDate || todayIso();
     const endDate = range
@@ -407,9 +425,9 @@ app.get(
           .format("YYYY-MM-DD")
       : undefined;
     let initialData: InitialData | undefined;
-    const museums = await getMuseumMap().catch(() => ({}));
+    const museums = await getMuseumMap(city).catch(() => ({}));
     try {
-      initialData = await fetchDayData(c.env, date, locale, endDate);
+      initialData = await fetchDayData(c.env, date, locale, endDate, city);
     } catch (e) {
       console.error("Failed to fetch initial data:", e);
     }
@@ -424,7 +442,7 @@ app.get(
 
     const accept = c.req.header("Accept") || "";
     if (accept.includes("text/markdown") && initialData) {
-      const md = renderMarkdown(initialData, locale, museums);
+      const md = renderMarkdown(initialData, locale, museums, city);
       return c.body(md, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
@@ -438,7 +456,7 @@ app.get(
 
     const today = todayIso();
     const horizon = berlinNow().add(90, "day").format("YYYY-MM-DD");
-    const dateCounts = getEventCountsByDate(today, horizon);
+    const dateCounts = getEventCountsByDate(today, horizon, city);
 
     const reqUrl = new URL(c.req.url);
     return c.html(
@@ -451,6 +469,7 @@ app.get(
         dateCounts,
         c.env.TURNSTILE_SITE_KEY,
         reqUrl.pathname + reqUrl.search,
+        city,
       ),
       {
         headers: {
