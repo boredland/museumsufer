@@ -19,3 +19,27 @@ export function bundleSection(name: string, records: Record<string, unknown>[]):
   const items = records.map(stringifyRecord).join(",\n    ");
   return `  ${name}: [\n    ${items}\n  ],`;
 }
+
+/** Escape a string for safe embedding inside a JS template literal. */
+function escapeForTemplate(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
+}
+
+/**
+ * Body of a JSON-string bundle: the named sections serialised to one JSON
+ * object, one record per line, escaped for embedding inside a JS template
+ * literal. The caller wraps the returned text in backticks and `JSON.parse`.
+ *
+ * Use this instead of {@link bundleSection} for sections large or wide enough
+ * that a TS object literal overflows the compiler's union-complexity limit
+ * (TS2590). Parsing a JSON string yields `any`, so no per-literal type is
+ * formed — while one-record-per-line keeps the generated file's diffs
+ * reviewable across scrapes.
+ */
+export function bundleJsonParseBody(sections: Record<string, Record<string, unknown>[]>): string {
+  const parts = Object.entries(sections).map(([name, records]) => {
+    const items = records.map(stringifyRecord).join(",\n");
+    return `${JSON.stringify(name)}:[\n${items}\n]`;
+  });
+  return escapeForTemplate(`{${parts.join(",")}}`);
+}

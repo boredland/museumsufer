@@ -4,6 +4,11 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityAdj,
+  cityHost,
+  cityMeta,
+  cityName,
+  cityUrl,
   dateOffset,
   dateParts,
   escapeHtml,
@@ -41,20 +46,31 @@ interface PageProps {
   today: string;
   performances: DayPerformance[];
   dateStrip: DateWithCount[];
+  city: string;
   turnstileSiteKey?: string;
 }
 
+const APEX = "ins.theater";
 const APP_URL = "https://frankfurt.ins.theater";
 
 /** Absolute proxied image URL for JSON-LD / OG tags (callers need a full URL). */
-function absImageUrl(src: string | null | undefined): string | undefined {
+function absImageUrl(src: string | null | undefined, appUrl: string = APP_URL): string | undefined {
   const proxied = imageProxyUrl(src ?? undefined);
   if (!proxied) return undefined;
-  return proxied.startsWith("/") ? `${APP_URL}${proxied}` : proxied;
+  return proxied.startsWith("/") ? `${appUrl}${proxied}` : proxied;
 }
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
-const utm = buildUtm("frankfurt.ins.theater");
+/** UTM tagger bound to a city host, memoized so repeated rows for the same
+ *  city reuse one tagger. */
+const utmCache = new Map<string, (url: string, medium: string) => string>();
+function utmFor(city: string): (url: string, medium: string) => string {
+  const cached = utmCache.get(city);
+  if (cached) return cached;
+  const tagger = buildUtm(cityHost(APEX, city));
+  utmCache.set(city, tagger);
+  return tagger;
+}
 
 const fullGerman = formatGermanDateLong;
 
@@ -74,8 +90,9 @@ export interface HeadOptions {
   turnstileSiteKey?: string;
 }
 
-export function Head(opts: HeadOptions) {
-  const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
+export function Head(opts: HeadOptions & { appUrl?: string }) {
+  const base = opts.appUrl ?? APP_URL;
+  const ogImage = opts.ogImage ?? `${base}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
   return (
     <HtmlHead
@@ -115,18 +132,18 @@ export function Grain() {
   );
 }
 
-export function Masthead({ sublabel }: { sublabel?: string } = {}) {
+export function Masthead({ sublabel, city = "frankfurt" }: { sublabel?: string; city?: string } = {}) {
   return (
     <header class="masthead">
       <a class="masthead__brand" href="/">
         <h1 class="wordmark">
-          <span class="wordmark__line wordmark__line--1">Frankfurt</span>
+          <span class="wordmark__line wordmark__line--1">{cityMeta(city).short}</span>
           <span class="wordmark__ins" aria-hidden="true">
             ins
           </span>
           <span class="wordmark__line wordmark__line--2">Theater.</span>
         </h1>
-        <p class="tagline">{sublabel ?? "Was heute auf den Frankfurter Bühnen läuft."}</p>
+        <p class="tagline">{sublabel ?? `Was heute auf den ${cityAdj(city, "de")} Bühnen läuft.`}</p>
       </a>
       <ThemeToggle label="Farbthema wechseln" />
     </header>
@@ -271,7 +288,7 @@ function PerformanceCalendarPopover({ p }: { p: DayPerformance }) {
     description: p.show.subtitle ?? null,
     detail_url: (() => {
       const src = p.show.detail_url ?? p.ticket_url ?? null;
-      return src ? utm(src, "calendar") : null;
+      return src ? utmFor(p.show.city ?? "frankfurt")(src, "calendar") : null;
     })(),
   };
   return <CalendarPopover event={ev} popoverId={`cal-${p.id}`} icsHref={`/performance/${p.id}/feed.ics`} />;
@@ -355,8 +372,9 @@ function ShareButton({ p }: { p: DayPerformance }) {
 }
 
 function ReportButton({ p }: { p: DayPerformance }) {
+  const appUrl = cityUrl(APEX, p.show.city ?? "frankfurt");
   const regarding = `${p.show.title} — ${p.theater.name}, ${p.date}${p.time ? ` ${p.time}` : ""}`;
-  const context = `${regarding} (${APP_URL}/api/performance/${p.id})`;
+  const context = `${regarding} (${appUrl}/api/performance/${p.id})`;
   return (
     <button
       type="button"
@@ -382,7 +400,7 @@ function Terminus({ p }: { p: DayPerformance }) {
     (p.price_min === 0 && (p.price_max == null || p.price_max === 0)) || (p.price_min == null && p.price_max === 0);
   if (isFree) return null;
   return (
-    <a class="action" href={utm(p.ticket_url, "karten")} target="_blank" rel="noopener">
+    <a class="action" href={utmFor(p.show.city ?? "frankfurt")(p.ticket_url, "karten")} target="_blank" rel="noopener">
       <span>Karten</span>
       <span class="action__arrow" aria-hidden="true">
         →
@@ -432,7 +450,8 @@ export function Performance({ p, opts }: { p: DayPerformance; opts: PerformanceR
   const showPrice = p.status !== "sold_out" && p.status !== "cancelled";
   const hasPrice = showPrice && (p.price_min != null || p.price_max != null);
   const titleSource = p.show.detail_url ?? p.ticket_url ?? null;
-  const titleHref = titleSource ? utm(titleSource, p.show.detail_url ? "show_title" : "show_title_ticket") : null;
+  const rowUtm = utmFor(p.show.city ?? "frankfurt");
+  const titleHref = titleSource ? rowUtm(titleSource, p.show.detail_url ? "show_title" : "show_title_ticket") : null;
 
   // Sold-out and cancelled stamps live in the terminal (Karten) slot of the
   // rail so the layout matches available rows. Other statuses (e.g. few_left
@@ -504,12 +523,12 @@ export function Performance({ p, opts }: { p: DayPerformance; opts: PerformanceR
 
 // ─── Top-level page sections ───────────────────────────────────────────
 
-export function AskAi() {
+export function AskAi({ city = "frankfurt" }: { city?: string } = {}) {
   return (
     <SharedAskAi
       label="Frag eine KI"
       aria="Frag eine KI nach dem heutigen Spielplan"
-      prompt="Was läuft heute Abend auf den Frankfurter Bühnen? Quelle: https://frankfurt.ins.theater"
+      prompt={`Was läuft heute Abend auf den ${cityAdj(city, "de")} Bühnen? Quelle: ${cityUrl(APEX, city)}`}
     />
   );
 }
@@ -702,21 +721,24 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
  * after the performances list — a soft suggestion for visitors who
  * didn't find anything in today's theatre line-up.
  */
-function SiblingStrap() {
+function SiblingStrap({ city = "frankfurt" }: { city?: string } = {}) {
+  // Frankfurt keeps its SEO-primary museum host (museumsufer.app); other
+  // cities route to the <city>.ins.museum subdomain.
+  const museumUrl = city === "frankfurt" ? "https://museumsufer.app" : cityUrl("ins.museum", city);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
         Nichts dabei? Vielleicht stattdessen ein{" "}
-        <a href="https://frankfurt.konzert.haus" target="_blank" rel="noopener">
+        <a href={cityUrl("konzert.haus", city)} target="_blank" rel="noopener">
           Konzert
         </a>
         , ein{" "}
-        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+        <a href={museumUrl} target="_blank" rel="noopener">
           Museumsbesuch
         </a>{" "}
         oder ein{" "}
-        <a href="https://frankfurt.lehr.salon" target="_blank" rel="noopener">
+        <a href={cityUrl("lehr.salon", city)} target="_blank" rel="noopener">
           Vortrag
         </a>
         ?
@@ -725,7 +747,15 @@ function SiblingStrap() {
   );
 }
 
-export function ProgrammePartial({ date, performances }: { date: string; performances: DayPerformance[] }) {
+export function ProgrammePartial({
+  date,
+  performances,
+  city = "frankfurt",
+}: {
+  date: string;
+  performances: DayPerformance[];
+  city?: string;
+}) {
   const dp = dateParts(date);
   const headerWeekday = WEEKDAYS_LONG[dp.weekday];
   const visible = filterPastForToday(date, performances);
@@ -781,7 +811,7 @@ export function ProgrammePartial({ date, performances }: { date: string; perform
           ) : null}
         </>
       )}
-      <SiblingStrap />
+      <SiblingStrap city={city} />
     </>
   );
 }
@@ -1299,25 +1329,29 @@ export function ClientScript() {
 // ─── Page composition ─────────────────────────────────────────────────
 
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, performances, dateStrip, turnstileSiteKey } = props;
+  const { date, today, performances, dateStrip, city, turnstileSiteKey } = props;
+  const appUrl = cityUrl(APEX, city);
+  const host = cityHost(APEX, city);
+  const cityFull = cityName(city, "de", "full");
+  const brand = `${cityMeta(city).short} Theater`;
   const niceDate = fullGerman(date);
-  // Title carries the geo + intent keywords for "Theater Frankfurt
+  // Title carries the geo + intent keywords for "Theater <Stadt>
   // heute" queries. Non-today views suffix the date.
   const isToday = date === today;
   const title = isToday
-    ? "frankfurt.ins.theater — Vorstellungen heute in Frankfurt am Main"
-    : `frankfurt.ins.theater — Vorstellungen am ${niceDate} in Frankfurt am Main`;
+    ? `${host} — Vorstellungen heute in ${cityFull}`
+    : `${host} — Vorstellungen am ${niceDate} in ${cityFull}`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${APP_URL}/#website`,
-    url: APP_URL,
-    name: "Frankfurt Theater",
+    "@id": `${appUrl}/#website`,
+    url: appUrl,
+    name: brand,
     inLanguage: "de",
-    publisher: { "@type": "Organization", name: "Frankfurt Theater" },
+    publisher: { "@type": "Organization", name: brand },
     potentialAction: {
       "@type": "SearchAction",
-      target: `${APP_URL}/?q={search_term_string}`,
+      target: `${appUrl}/?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -1328,21 +1362,22 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         <head>
           <Head
             title={title}
-            description={`Vorstellungen und Karten der Frankfurter Bühnen am ${niceDate} — kuratiert nach Tag.`}
-            canonical={`${APP_URL}/`}
-            jsonLd={[websiteLd, ...buildHomeJsonLd(date, performances)]}
+            description={`Vorstellungen und Karten der ${cityAdj(city, "de")} Bühnen am ${niceDate} — kuratiert nach Tag.`}
+            canonical={`${appUrl}/`}
+            appUrl={appUrl}
+            jsonLd={[websiteLd, ...buildHomeJsonLd(date, performances, city)]}
             turnstileSiteKey={turnstileSiteKey}
           />
         </head>
         <body>
           <Grain />
-          <Masthead />
+          <Masthead city={city} />
           <DateStrip strip={dateStrip} active={date} today={today} />
           <DigestCue />
-          <AskAi />
+          <AskAi city={city} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} performances={performances} />
+              <ProgrammePartial date={date} performances={performances} city={city} />
             </div>
           </main>
           <Faq />
@@ -1354,8 +1389,12 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   ) as unknown as HtmlEscapedString;
 }
 
-export function renderProgrammePartial(date: string, performances: DayPerformance[]): HtmlEscapedString {
-  return (<ProgrammePartial date={date} performances={performances} />) as unknown as HtmlEscapedString;
+export function renderProgrammePartial(
+  date: string,
+  performances: DayPerformance[],
+  city = "frankfurt",
+): HtmlEscapedString {
+  return (<ProgrammePartial date={date} performances={performances} city={city} />) as unknown as HtmlEscapedString;
 }
 
 export function renderHead(opts: HeadOptions): HtmlEscapedString {
@@ -1374,7 +1413,7 @@ export function renderGrain(): HtmlEscapedString {
   return (<Grain />) as unknown as HtmlEscapedString;
 }
 
-export function renderMasthead(args: { sublabel?: string } = {}): HtmlEscapedString {
+export function renderMasthead(args: { sublabel?: string; city?: string } = {}): HtmlEscapedString {
   return (<Masthead {...args} />) as unknown as HtmlEscapedString;
 }
 
@@ -1405,11 +1444,15 @@ export function renderClientScript(): HtmlEscapedString {
 
 // ─── JSON-LD builders (unchanged) ─────────────────────────────────────
 
-export function buildHomeJsonLd(date: string, performances: DayPerformance[]): Record<string, unknown>[] {
+export function buildHomeJsonLd(
+  date: string,
+  performances: DayPerformance[],
+  city = "frankfurt",
+): Record<string, unknown>[] {
   const itemList = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Spielplan Frankfurt — ${date}`,
+    name: `Spielplan ${cityMeta(city).short} — ${date}`,
     itemListOrder: "https://schema.org/ItemListOrderAscending",
     numberOfItems: performances.length,
     itemListElement: performances.map((p, i) => ({
@@ -1426,6 +1469,7 @@ export function buildHomeJsonLd(date: string, performances: DayPerformance[]): R
 }
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {
+  const appUrl = cityUrl(APEX, p.show.city ?? "frankfurt");
   const startDate = p.time ? `${p.date}T${p.time}:00+02:00` : p.date;
   const endDate = p.end_time ? `${p.end_date ?? p.date}T${p.end_time}:00+02:00` : undefined;
   // Offer is only emitted when complete (priceCurrency without price
@@ -1446,11 +1490,11 @@ export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknow
   // sameAs) from there instead of treating each event as a detached
   // node. Falls back to inline name when slug isn't known.
   const location = p.theater.slug
-    ? { "@id": `${APP_URL}/theater/${p.theater.slug}#theater` }
+    ? { "@id": `${appUrl}/theater/${p.theater.slug}#theater` }
     : { "@type": "PerformingArtsTheater", name: p.theater.name, url: p.theater.website_url ?? undefined };
   return {
     "@type": "TheaterEvent",
-    "@id": `${APP_URL}/#performance/${p.id}`,
+    "@id": `${appUrl}/#performance/${p.id}`,
     name: p.show.title,
     description: p.show.subtitle ?? p.show.description ?? undefined,
     startDate,
@@ -1458,11 +1502,11 @@ export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknow
     eventStatus: p.status === "cancelled" ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     location,
-    image: absImageUrl(p.show.image_url),
+    image: absImageUrl(p.show.image_url, appUrl),
     // url points at the canonical /theater/<slug> page (where the
     // performance is listed), not the JSON-only /api/performance/<id>
     // endpoint Googlebot would otherwise try to index as a page.
-    url: p.theater.slug ? `${APP_URL}/theater/${p.theater.slug}` : APP_URL,
+    url: p.theater.slug ? `${appUrl}/theater/${p.theater.slug}` : appUrl,
     offers: offer,
   };
 }

@@ -2,6 +2,10 @@ import {
   buildIcsCalendar,
   buildRssFeed,
   buildUtm,
+  cityAdj,
+  cityHost,
+  cityMeta,
+  cityUrl,
   dateOffset,
   type IcsEventInput,
   type RssItem,
@@ -11,7 +15,6 @@ import {
 import { Hono } from "hono";
 import { type DayPerformance, getPerformanceById, getPerformancesInRange, getTheaterBySlug } from "../db";
 import type { Env } from "../types";
-import { APP_URL } from "./static";
 
 /**
  * RFC 5545 calendar feeds. Three flavours:
@@ -23,9 +26,9 @@ import { APP_URL } from "./static";
  * strikethrough rather than a plain event. Timed events default to a
  * 2-hour duration when no end_time is set.
  */
-const utm = buildUtm("frankfurt.ins.theater");
+const APEX = "ins.theater";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const ICS_HEADERS = {
   "Content-Type": "text/calendar; charset=utf-8",
@@ -37,13 +40,15 @@ const RSS_HEADERS = {
 };
 
 app.get("/feed.ics", async (c) => {
-  const performances = await getPerformancesInRange(todayIso(), dateOffset(14));
-  return c.body(buildIcs(performances, "Frankfurt Theater"), { headers: ICS_HEADERS });
+  const city = c.get("city") ?? "frankfurt";
+  const performances = await getPerformancesInRange(todayIso(), dateOffset(14), null, city);
+  return c.body(buildIcs(performances, `${cityMeta(city).short} Theater`, city), { headers: ICS_HEADERS });
 });
 
 app.get("/feed.xml", async (c) => {
-  const performances = await getPerformancesInRange(todayIso(), dateOffset(14));
-  return c.body(buildRss(performances), { headers: RSS_HEADERS });
+  const city = c.get("city") ?? "frankfurt";
+  const performances = await getPerformancesInRange(todayIso(), dateOffset(14), null, city);
+  return c.body(buildRss(performances, city), { headers: RSS_HEADERS });
 });
 
 app.get("/rss.xml", (c) => c.redirect("/feed.xml", 301));
@@ -54,7 +59,7 @@ app.get("/theater/:slug/feed.ics", async (c) => {
   const theater = await getTheaterBySlug(slug);
   if (!theater) return c.notFound();
   const performances = await getPerformancesInRange(todayIso(), dateOffset(60), slug);
-  return c.body(buildIcs(performances, theater.name), { headers: ICS_HEADERS });
+  return c.body(buildIcs(performances, theater.name, theater.city ?? "frankfurt"), { headers: ICS_HEADERS });
 });
 
 app.get("/event/:id/feed.ics", async (c) => {
@@ -64,7 +69,7 @@ app.get("/event/:id/feed.ics", async (c) => {
   if (!Number.isFinite(id)) return c.notFound();
   const perf = await getPerformanceById(id);
   if (!perf) return c.notFound();
-  return c.body(buildIcs([perf], `${perf.theater.name} – ${perf.show.title}`), {
+  return c.body(buildIcs([perf], `${perf.theater.name} – ${perf.show.title}`, perf.show.city ?? "frankfurt"), {
     headers: {
       ...ICS_HEADERS,
       "Content-Disposition": `attachment; filename="${slugify(perf.show.title).slice(0, 60)}-${perf.date}.ics"`,
@@ -75,7 +80,7 @@ app.get("/event/:id/feed.ics", async (c) => {
 
 export default app;
 
-function toIcsInput(p: DayPerformance): IcsEventInput {
+function toIcsInput(p: DayPerformance, appUrl: string, utm: (url: string, medium: string) => string): IcsEventInput {
   const sameVenue = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
   const locParts = [p.theater.name, sameVenue ? null : p.venue_room].filter((s): s is string => Boolean(s));
   const subtitle = p.show.subtitle?.replace(/\s*<br\s*\/?>\s*/gi, " · ");
@@ -86,9 +91,9 @@ function toIcsInput(p: DayPerformance): IcsEventInput {
   }
   descLines.push(`Status: ${p.status}`);
   if (p.ticket_url) descLines.push(utm(p.ticket_url, "ics"));
-  const link = p.show.detail_url ?? p.ticket_url ?? `${APP_URL}/api/performance/${p.id}`;
+  const link = p.show.detail_url ?? p.ticket_url ?? `${appUrl}/api/performance/${p.id}`;
   return {
-    uid: `perf-${p.id}@frankfurt.ins.theater`,
+    uid: `perf-${p.id}@${cityHost(APEX, p.show.city ?? "frankfurt")}`,
     date: p.date,
     time: p.time ?? null,
     end_time: p.end_time ?? null,
@@ -103,19 +108,23 @@ function toIcsInput(p: DayPerformance): IcsEventInput {
   };
 }
 
-function buildIcs(performances: DayPerformance[], calName: string): string {
+function buildIcs(performances: DayPerformance[], calName: string, city: string): string {
+  const appUrl = cityUrl(APEX, city);
+  const utm = buildUtm(cityHost(APEX, city));
   return buildIcsCalendar({
-    prodId: "-//Frankfurt Theater//DE",
+    prodId: `-//${cityMeta(city).short} Theater//DE`,
     name: calName,
-    events: performances.map(toIcsInput),
+    events: performances.map((p) => toIcsInput(p, appUrl, utm)),
   });
 }
 
-function buildRss(performances: DayPerformance[]): string {
+function buildRss(performances: DayPerformance[], city: string): string {
+  const appUrl = cityUrl(APEX, city);
+  const utm = buildUtm(cityHost(APEX, city));
   const items: RssItem[] = performances.map((p) => {
     const dateStr = p.time ? `${p.date}T${p.time}:00+02:00` : `${p.date}T00:00:00+02:00`;
     const linkSource = p.show.detail_url || p.ticket_url;
-    const link = linkSource ? utm(linkSource, "rss") : `${APP_URL}/api/performance/${p.id}`;
+    const link = linkSource ? utm(linkSource, "rss") : `${appUrl}/api/performance/${p.id}`;
     const descParts: string[] = [];
     const sameRoom = !!p.venue_room && p.venue_room.trim().toLowerCase() === p.theater.name.trim().toLowerCase();
     descParts.push(`${p.theater.name}${p.venue_room && !sameRoom ? `, ${p.venue_room}` : ""}`);
@@ -130,17 +139,17 @@ function buildRss(performances: DayPerformance[]): string {
     return {
       title: p.show.title + (p.time ? ` — ${p.time} Uhr` : ""),
       link,
-      guid: `perf-${p.id}@frankfurt.ins.theater`,
+      guid: `perf-${p.id}@${cityHost(APEX, p.show.city ?? "frankfurt")}`,
       pubDate: new Date(dateStr),
       category: p.theater.name,
       description: descParts.join(" — "),
     };
   });
   return buildRssFeed({
-    title: "Frankfurt Theater",
-    link: APP_URL,
-    selfLink: `${APP_URL}/feed.xml`,
-    description: "Spielplan der Frankfurter Bühnen — die nächsten 14 Tage",
+    title: `${cityMeta(city).short} Theater`,
+    link: appUrl,
+    selfLink: `${appUrl}/feed.xml`,
+    description: `Spielplan der ${cityAdj(city, "de")} Bühnen — die nächsten 14 Tage`,
     language: "de",
     items,
   });

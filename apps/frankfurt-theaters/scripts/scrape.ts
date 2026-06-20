@@ -5,7 +5,14 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, displayNameFor, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
+import {
+  type CanonicalEvent,
+  displayNameFor,
+  EVENTS,
+  FRANKFURT_BBOX,
+  HAMBURG_BBOX,
+  inBbox,
+} from "@museumsufer/event-hub";
 import { CURATED_THEATERS, type TheaterConfig } from "../src/theater-config";
 import type { AvailabilityStatus, Performance, ScrapeData, Show } from "../src/types";
 
@@ -33,9 +40,12 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+    const inFrankfurt = inBbox(ev.lat, ev.lon, FRANKFURT_BBOX);
+    const inHamburg = inBbox(ev.lat, ev.lon, HAMBURG_BBOX);
+    if (!inFrankfurt && !inHamburg) continue;
     if (!hasStageLabel(ev)) continue;
 
+    const city = inHamburg ? "hamburg" : "frankfurt";
     const showSlug = deriveShowSlug(ev);
     const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);
 
@@ -43,6 +53,7 @@ async function main(): Promise<void> {
       showsById.set(showId, {
         id: showId,
         theater_slug: ev.source_slug,
+        city,
         slug: showSlug,
         title: ev.title,
         subtitle: ev.subtitle ?? undefined,
@@ -100,6 +111,7 @@ function synthesizeTheaters(
       address: "",
       lat: coords.lat,
       lon: coords.lon,
+      city: inBbox(coords.lat, coords.lon, HAMBURG_BBOX) ? "hamburg" : "frankfurt",
       website_url: orphanUrls.get(slug) ?? "",
       ticketing_provider: null,
     });
@@ -125,6 +137,7 @@ function generateTheatersModule(theaters: TheaterConfig[]): string {
     address: ${JSON.stringify(t.address)},
     lat: ${t.lat},
     lon: ${t.lon},
+    city: ${JSON.stringify(t.city ?? "frankfurt")},
     website_url: ${JSON.stringify(t.website_url)},
     ticketing_provider: ${t.ticketing_provider === null ? "null" : JSON.stringify(t.ticketing_provider)},
   },`,
