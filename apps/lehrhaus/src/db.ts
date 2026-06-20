@@ -12,6 +12,7 @@ export type DayEvent = LehrhausEvent & {
 };
 
 export interface EventFilter {
+  city?: string | null;
   source?: string | null;
   category?: Category | null;
 }
@@ -49,6 +50,7 @@ function joinEvent(e: LehrhausEvent): DayEvent | null {
 
 function matchesFilter(e: LehrhausEvent, filter?: EventFilter): boolean {
   if (!filter) return true;
+  if (filter.city && e.city !== filter.city) return false;
   if (filter.source && e.source_slug !== filter.source) return false;
   if (filter.category && e.category !== filter.category) return false;
   return true;

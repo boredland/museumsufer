@@ -6,17 +6,25 @@ import { getEventsInRange, getSourceBySlug } from "../db";
 import { Event, Footer, Foxing, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import { renderSourceMarkdown, wantsMarkdown } from "../markdown";
-import type { Env } from "../types";
+import { type AppEnv, type Env } from "../types";
 import { APP_URL } from "./static";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<AppEnv>();
 
 app.get("/quelle/:slug", (c) => {
   const slug = c.req.param("slug");
   const source = getSourceBySlug(slug);
   if (!source) return c.notFound();
 
-  const events = getEventsInRange(todayIso(), dateOffset(60), { source: slug });
+  const city = c.get("city") ?? "frankfurt";
+  const isHamburg = city === "hamburg";
+  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
+  const cityName = isHamburg ? "Hamburg" : "Frankfurt am Main";
+  const cityShort = isHamburg ? "Hamburg" : "Frankfurt";
+  const regionName = isHamburg ? "Hamburg" : "Hessen";
+  const cityWikidata = isHamburg ? "Q1055" : "Q1794";
+
+  const events = getEventsInRange(todayIso(), dateOffset(60), { city, source: slug });
 
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderSourceMarkdown(source, events), {
@@ -30,11 +38,11 @@ app.get("/quelle/:slug", (c) => {
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const currentPath = `/quelle/${slug}`;
-  const sourceIri = `${APP_URL}/quelle/${slug}#source`;
+  const sourceIri = `${appUrl}/quelle/${slug}#source`;
   const sameAs: string[] = [];
   if (source.url) sameAs.push(source.url);
   if (source.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${source.wikidata}`);
-  const address = parsePostalAddress(source.address, { region: "Hessen" });
+  const address = parsePostalAddress(source.address, { region: regionName });
 
   const orgLd: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -56,15 +64,15 @@ app.get("/quelle/:slug", (c) => {
         }),
       containedInPlace: {
         "@type": "City",
-        name: "Frankfurt am Main",
-        sameAs: "https://www.wikidata.org/wiki/Q1794",
+        name: cityName,
+        sameAs: `https://www.wikidata.org/wiki/${cityWikidata}`,
       },
     },
     // Surface upcoming events so the page is rich-result eligible
     // even before the visitor scrolls.
     event: events.slice(0, 20).map((e) => ({
       "@type": "Event",
-      "@id": `${APP_URL}/#event/${e.id}`,
+      "@id": `${appUrl}/#event/${e.id}`,
       name: e.title,
       startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
       organizer: { "@id": sourceIri },
@@ -74,8 +82,8 @@ app.get("/quelle/:slug", (c) => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "lehr.salon", item: APP_URL },
-      { "@type": "ListItem", position: 2, name: tr.sourceKicker, item: `${APP_URL}/quelle` },
+      { "@type": "ListItem", position: 1, name: "lehr.salon", item: appUrl },
+      { "@type": "ListItem", position: 2, name: tr.sourceKicker, item: `${appUrl}/quelle` },
       { "@type": "ListItem", position: 3, name: source.name },
     ],
   };
@@ -87,9 +95,9 @@ app.get("/quelle/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${source.name} — Vorträge & Lesungen in Frankfurt am Main · lehr.salon`}
+            title={`${source.name} — Vorträge & Lesungen in ${cityName} · lehr.salon`}
             description={source.description ?? tr.sourceDescription(source.name, events.length)}
-            canonical={`${APP_URL}/quelle/${slug}?lang=${locale}`}
+            canonical={`${appUrl}/quelle/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={jsonLd}
@@ -111,7 +119,7 @@ app.get("/quelle/:slug", (c) => {
         </head>
         <body>
           <Foxing />
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="programme">
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.sourceKicker}</p>
@@ -129,7 +137,7 @@ app.get("/quelle/:slug", (c) => {
             <SharedAskAi
               label="Frag eine KI"
               aria={`Frag eine KI nach dem Programm der ${source.name}`}
-              prompt={`Welche Vorträge, Lesungen oder Diskussionen veranstaltet die ${source.name} in Frankfurt in den nächsten Wochen? Quelle: ${APP_URL}/quelle/${slug}`}
+              prompt={`Welche Vorträge, Lesungen oder Diskussionen veranstaltet die ${source.name} in ${cityShort} in den nächsten Wochen? Quelle: ${appUrl}/quelle/${slug}`}
             />
 
             {events.length === 0 ? (

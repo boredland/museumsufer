@@ -16,9 +16,7 @@ import pushRoutes from "./routes/push";
 import sourceRoutes from "./routes/source";
 import staticRoutes from "./routes/static";
 import { SERVICE_WORKER_JS } from "./service-worker";
-import { type Env, parseCategory } from "./types";
-
-type AppEnv = { Bindings: Env };
+import { type AppEnv, type Env, parseCategory } from "./types";
 
 const app = new Hono<AppEnv>();
 
@@ -54,14 +52,13 @@ app.use(
 );
 
 app.use("*", async (c, next) => {
-  // Apex → frankfurt subdomain redirect, mirroring konzert.haus's pattern.
-  // lehrhaus is currently Frankfurt-only; the redirect leaves room to add
-  // more cities later as additional custom_domain entries.
   const url = new URL(c.req.url);
   const host = (c.req.header("host") ?? "").toLowerCase();
   if (host === "lehr.salon") {
     return c.redirect(`https://frankfurt.lehr.salon${url.pathname}${url.search}`, 301);
   }
+  const city = host.endsWith(".lehr.salon") ? host.slice(0, -".lehr.salon".length) : "frankfurt";
+  c.set("city", city);
   await next();
 });
 
@@ -107,10 +104,11 @@ function renderHome(c: Context<AppEnv>, date: string, range: number | null) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const today = todayIso();
   const category = parseCategory(c.req.query("format"));
+  const city = c.get("city") ?? "frankfurt";
   const events = range
-    ? getEventsInRange(date, addDays(date, range - 1), { category })
-    : getEventsForDate(date, { category });
-  const dateStrip = getDatesWithEvents(today, dateOffset(60));
+    ? getEventsInRange(date, addDays(date, range - 1), { city, category })
+    : getEventsForDate(date, { city, category });
+  const dateStrip = getDatesWithEvents(today, dateOffset(60), { city });
   if (wantsMarkdown(c.req.raw)) {
     return c.body(renderDayMarkdown(date, events), {
       headers: {
@@ -132,6 +130,7 @@ function renderHome(c: Context<AppEnv>, date: string, range: number | null) {
       locale,
       tr,
       turnstileSiteKey: c.env.TURNSTILE_SITE_KEY,
+      city,
     }),
     {
       headers: {
@@ -159,12 +158,13 @@ app.get("/partial/content", (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const category = parseCategory(c.req.query("format"));
+  const city = c.get("city") ?? "frankfurt";
   const events = range
-    ? getEventsInRange(date, addDays(date, range - 1), { category })
-    : getEventsForDate(date, { category });
+    ? getEventsInRange(date, addDays(date, range - 1), { city, category })
+    : getEventsForDate(date, { city, category });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, events, tr, locale, range ?? undefined), {
+  return c.html(renderProgrammePartial(date, events, tr, locale, range ?? undefined, city), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

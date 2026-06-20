@@ -21,5 +21,8 @@
   "theater-fuer-kinder": "seasonal — TLS cert invalid on own site, Reservix subdomain returns generic page; venue between seasons as of June 2026",
   "landinsicht-buchladen": "network-unreachable — domain does not respond to fetch; venue may be temporarily offline or network-blocked",
   "deichtorhallen": "aggregator — fans out to child slugs: deichtorhallen-phoxxi, deichtorhallen-halle-aktuelle-kunst, deichtorhallen-sammlung-falckenberg",
-  "hamburgmusik": "aggregator — fans out to child slugs: elbphilharmonie, laeiszhalle"
+  "hamburgmusik": "aggregator — fans out to child slugs: elbphilharmonie, laeiszhalle",
+  "wdc2026": "aggregator — fans out to wdc2026-* child slugs",
+  "mut-theater": "seasonal — MUT! Theater has no upcoming events listed on their program page (website says 'Leider finden keine Stücke statt')",
+  "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable"
 }

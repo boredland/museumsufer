@@ -7,6 +7,8 @@ export interface Env extends FeedbackEnv, PushEnv {
   VAPID_SUBJECT?: string;
 }
 
+export type AppEnv = { Bindings: Env; Variables: { city: string } };
+
 export interface LehrhausSource {
   slug: string;
   name: string;
@@ -53,6 +55,7 @@ export interface LehrhausEvent {
   /** ISO 639-1 language code. Absent means German (the Frankfurt default). */
   language?: string;
   image_url?: string;
+  city: string;
 }
 
 export interface ScrapeData {
