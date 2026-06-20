@@ -1,4 +1,11 @@
-import { type Locale as CoreLocale, detectLocale as coreDetect, dateLocale } from "@museumsufer/core";
+import {
+  type Locale as CoreLocale,
+  cityMeta,
+  detectLocale as coreDetect,
+  DEFAULT_CITY,
+  dateLocale,
+  localizeCityText,
+} from "@museumsufer/core";
 
 export type Locale = Extract<CoreLocale, "de" | "en">;
 export const SUPPORTED_LOCALES: Locale[] = ["de", "en"];
@@ -476,4 +483,39 @@ const TRANSLATIONS: Record<Locale, Translations> = { de, en };
 
 export function getTranslations(locale: Locale): Translations {
   return TRANSLATIONS[locale];
+}
+
+const APEX = "lichtspiel.haus";
+
+/** Frankfurt-specific regional phrasing that plain name substitution can't
+ *  cover. Generic "und Umgebung" / "wider region" already read fine anywhere. */
+const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
+  de: [["Rhein-Main-Region", "Metropolregion"]],
+  en: [["Rhine-Main region", "metropolitan region"]],
+};
+
+/**
+ * Rewrite the Frankfurt-authored copy for another city, applied once per
+ * request so the localized `tr` reaches every component. Byte-identical for
+ * the default city.
+ *
+ * NOTE: the "why this site" FAQ answer names specific Frankfurt cinemas (DFF,
+ * Astor, …); for non-default cities that clause still lists Frankfurt venues
+ * and needs Hamburg-specific editorial copy — tracked as a follow-up.
+ */
+export function localizeTranslations(tr: Translations, city: string, locale: Locale): Translations {
+  if (cityMeta(city).slug === DEFAULT_CITY) return tr;
+  const s = (t: string): string => localizeCityText(t, city, locale, APEX, REGION_SUB[locale]);
+  return {
+    ...tr,
+    tagline: s(tr.tagline),
+    homeTitle: s(tr.homeTitle),
+    homeDescription: s(tr.homeDescription),
+    cinemasIndexTitle: s(tr.cinemasIndexTitle),
+    cinemasIndexLead: s(tr.cinemasIndexLead),
+    askAiPrompt: (date) => s(tr.askAiPrompt(date)),
+    askAiPromptFilm: (title, cinema, date) => s(tr.askAiPromptFilm(title, cinema, date)),
+    askAiPromptCinema: (cinema) => s(tr.askAiPromptCinema(cinema)),
+    faqItems: tr.faqItems.map((item) => ({ q: s(item.q), a: s(item.a) })),
+  };
 }

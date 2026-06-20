@@ -1,4 +1,4 @@
-import { buildOgSvg, fitOgTitleSize } from "@museumsufer/core";
+import { buildOgSvg, cityMeta, fitOgTitleSize } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getEventById } from "../db";
 import type { Env } from "../types";
@@ -16,19 +16,26 @@ app.get("/og/:id{[0-9]+}/image.svg", (c) => {
   if (!Number.isFinite(id)) return c.notFound();
   const event = getEventById(id);
   if (!event) return c.notFound();
-  return c.body(buildSvg(event.title, event.venue.name, event.date, event.time ?? null), {
+  return c.body(buildSvg(event.title, event.venue.name, event.date, event.time ?? null, event.venue.city), {
     headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400, s-maxage=604800" },
   });
 });
 
-function buildSvg(title: string, venueName: string, date: string, time: string | null): string {
+function buildSvg(title: string, venueName: string, date: string, time: string | null, city: string): string {
   const titleSize = fitOgTitleSize(title);
   return buildOgSvg({
     palette: PALETTE,
     fonts: FONTS,
     ariaLabel: title,
     rows: [
-      { text: "FRANKFURT · KONZERT.HAUS", y: 160, font: "mono", size: 20, letterSpacing: 6, color: PALETTE.accent },
+      {
+        text: `${cityMeta(city).short.toUpperCase()} · KONZERT.HAUS`,
+        y: 160,
+        font: "mono",
+        size: 20,
+        letterSpacing: 6,
+        color: PALETTE.accent,
+      },
       { text: title, y: 300 + titleSize / 4, font: "display", size: titleSize, weight: 500, tracking: -1 },
       { text: venueName, y: 450, font: "display", size: 30, italic: true, opacity: 0.62 },
       {

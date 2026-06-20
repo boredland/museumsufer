@@ -1,15 +1,14 @@
-import { dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
+import { cityMeta, cityName, cityUrl, dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange, getVenueBySlug } from "../db";
 import { Event, Footer, Grain, Head, Masthead } from "../frontend";
-import { detectLocale, getTranslations } from "../i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import { renderVenueMarkdown, wantsMarkdown } from "../markdown";
 import type { Env } from "../types";
-import { APP_URL } from "./static";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/spielort/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -28,11 +27,15 @@ app.get("/spielort/:slug", (c) => {
   }
 
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  // The venue belongs to one city; drive all copy + URLs off that, not the
+  // serving host, so a Hamburg venue renders Hamburg locality/canonical.
+  const city = venue.city;
+  const appUrl = cityUrl("konzert.haus", city);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/spielort/${slug}`;
-  const venueIri = `${APP_URL}/spielort/${slug}#venue`;
+  const venueIri = `${appUrl}/spielort/${slug}#venue`;
   const address = parsePostalAddress(venue.address, {
-    fallback: { addressLocality: "Frankfurt am Main" },
+    fallback: { addressLocality: cityName(city, locale, "full") },
   });
   const sameAs: string[] = [];
   if (venue.website_url) sameAs.push(venue.website_url);
@@ -43,15 +46,15 @@ app.get("/spielort/:slug", (c) => {
     "@type": "MusicVenue",
     "@id": venueIri,
     name: venue.name,
-    url: `${APP_URL}/spielort/${slug}`,
+    url: `${appUrl}/spielort/${slug}`,
     ...(venue.description && { description: venue.description }),
     address,
     geo: { "@type": "GeoCoordinates", latitude: venue.lat, longitude: venue.lon },
     hasMap: `https://www.google.com/maps?q=${venue.lat},${venue.lon}`,
     containedInPlace: {
       "@type": "City",
-      name: "Frankfurt am Main",
-      sameAs: "https://www.wikidata.org/wiki/Q1794",
+      name: cityName(city, locale, "full"),
+      sameAs: `https://www.wikidata.org/wiki/${cityMeta(city).wikidata}`,
     },
     ...(sameAs.length > 0 && { sameAs }),
     // Surface upcoming concerts as ItemList-style `event` entries so
@@ -59,7 +62,7 @@ app.get("/spielort/:slug", (c) => {
     // doesn't scroll into the list.
     event: events.slice(0, 20).map((e) => ({
       "@type": "MusicEvent",
-      "@id": `${APP_URL}/#event/${e.id}`,
+      "@id": `${appUrl}/#event/${e.id}`,
       name: e.title,
       startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
       location: { "@id": venueIri },
@@ -69,8 +72,8 @@ app.get("/spielort/:slug", (c) => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "konzert.haus", item: APP_URL },
-      { "@type": "ListItem", position: 2, name: tr.spielortIndexTitle, item: `${APP_URL}/spielort` },
+      { "@type": "ListItem", position: 1, name: "konzert.haus", item: appUrl },
+      { "@type": "ListItem", position: 2, name: tr.spielortIndexTitle, item: `${appUrl}/spielort` },
       { "@type": "ListItem", position: 3, name: venue.name },
     ],
   };
@@ -82,11 +85,12 @@ app.get("/spielort/:slug", (c) => {
       <html lang={locale}>
         <head>
           <Head
-            title={`${venue.name} — Konzerte in Frankfurt am Main | konzert.haus`}
+            title={`${venue.name} — Konzerte in ${cityName(city, locale, "full")} | konzert.haus`}
             description={venue.description ?? tr.venueDescription(venue.name, events.length)}
-            canonical={`${APP_URL}/spielort/${slug}?lang=${locale}`}
+            canonical={`${appUrl}/spielort/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
+            appUrl={appUrl}
             jsonLd={jsonLd}
             extraLinks={[
               {
@@ -106,7 +110,7 @@ app.get("/spielort/:slug", (c) => {
         </head>
         <body>
           <Grain />
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="programme">
             <section class="venue-hero">
               <p class="venue-hero__kicker">{tr.venueKicker}</p>
@@ -132,7 +136,7 @@ app.get("/spielort/:slug", (c) => {
             ) : (
               <ol class="concerts">
                 {events.map((e, i) => (
-                  <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, hideVenue: true, locale }} tr={tr} />
+                  <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, hideVenue: true, locale, appUrl }} tr={tr} />
                 ))}
               </ol>
             )}

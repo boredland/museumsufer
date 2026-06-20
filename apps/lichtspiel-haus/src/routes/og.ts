@@ -1,6 +1,7 @@
-import { buildOgSvg, fitOgTitleSize } from "@museumsufer/core";
+import { buildOgSvg, cityHost, cityMeta, cityName, cityUrl, fitOgTitleSize } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getScreeningById } from "../db";
+import { localizeTranslations } from "../i18n";
 import type { Env } from "../types";
 
 // Dark "auditorium" palette mirroring the site's dark mode — the OG image
@@ -11,22 +12,37 @@ const FONTS = {
   mono: "'DM Mono', ui-monospace, Menlo, monospace",
 };
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/og/:id{[0-9]+}/image.svg", (c) => {
   const id = parseInt(c.req.param("id"), 10);
   if (!Number.isFinite(id)) return c.notFound();
   const screening = getScreeningById(id);
   if (!screening) return c.notFound();
+  const city = c.get("city") ?? "frankfurt";
   return c.body(
-    buildSvg(screening.title, screening.cinema.name, screening.date, screening.time ?? null, screening.version ?? null),
+    buildSvg(
+      screening.title,
+      screening.cinema.name,
+      screening.date,
+      screening.time ?? null,
+      screening.version ?? null,
+      city,
+    ),
     {
       headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400, s-maxage=604800" },
     },
   );
 });
 
-function buildSvg(title: string, venueName: string, date: string, time: string | null, version: string | null): string {
+function buildSvg(
+  title: string,
+  venueName: string,
+  date: string,
+  time: string | null,
+  version: string | null,
+  city: string,
+): string {
   const titleSize = fitOgTitleSize(title);
   const dateRow = formatDate(date, time);
   const versionRow = version ? `${dateRow}  ·  ${version}` : dateRow;
@@ -35,7 +51,14 @@ function buildSvg(title: string, venueName: string, date: string, time: string |
     fonts: FONTS,
     ariaLabel: title,
     rows: [
-      { text: "FRANKFURT · LICHTSPIEL·HAUS", y: 150, font: "mono", size: 20, letterSpacing: 8, color: PALETTE.accent },
+      {
+        text: `${cityMeta(city).short.toUpperCase()} · LICHTSPIEL·HAUS`,
+        y: 150,
+        font: "mono",
+        size: 20,
+        letterSpacing: 8,
+        color: PALETTE.accent,
+      },
       { text: title, y: 310 + titleSize / 4, font: "display", size: titleSize, weight: 600, tracking: -1 },
       { text: venueName, y: 460, font: "display", size: 30, italic: true, opacity: 0.7 },
       {

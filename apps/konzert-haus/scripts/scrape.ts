@@ -6,7 +6,7 @@ import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import type { CanonicalEvent } from "@museumsufer/event-hub";
-import { displayNameFor, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
+import { displayNameFor, EVENTS, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox } from "@museumsufer/event-hub";
 import { CURATED_VENUES, type VenueConfig } from "../src/concert-config";
 import { dedupEvents } from "../src/dedup";
 import { type Event, GENRES, type Genre, type ScrapeData } from "../src/types";
@@ -26,7 +26,7 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX) && !inBbox(ev.lat, ev.lon, HAMBURG_BBOX)) continue;
     const genre = pickGenre(ev);
     if (!genre) continue;
 
@@ -103,7 +103,7 @@ function synthesizeVenues(
       address: "",
       lat: coords.lat,
       lon: coords.lon,
-      city: "frankfurt",
+      city: inBbox(coords.lat, coords.lon, HAMBURG_BBOX) ? "hamburg" : "frankfurt",
       website_url: orphanUrls.get(slug) ?? "",
       default_genre: defaultGenre,
     });

@@ -1,6 +1,8 @@
 export * from "./api-catalog";
 export * from "./bundle-writer";
 export * from "./calendar";
+export * from "./cities";
+export * from "./city-routing";
 export * from "./classify";
 // calendar-popover (JSX) is import-via-subpath only — it pulls in
 // hono/jsx-runtime and breaks Bun script-runner contexts that evaluate

@@ -1,16 +1,15 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { cityHost, cityMeta, cityName, cityUrl, dateOffset, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { CINEMAS } from "../cinema-config";
 import { getCinemaBySlug, getScreeningsInRange } from "../db";
 import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
-import { detectLocale, getTranslations } from "../i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import { renderCinemaMarkdown, wantsMarkdown } from "../markdown";
 import type { Env } from "../types";
-import { APP_URL } from "./static";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/kino/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -29,8 +28,10 @@ app.get("/kino/:slug", (c) => {
   }
 
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const city = c.get("city") ?? "frankfurt";
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/kino/${slug}`;
+  const appUrl = cityUrl("lichtspiel.haus", city);
   const addressLocality = cinema.city.length ? cinema.city[0].toUpperCase() + cinema.city.slice(1) : cinema.city;
   // Parse the bundled "<street>, <PLZ> <city>" string for the
   // PostalAddress block. Falls back gracefully when the format
@@ -39,9 +40,9 @@ app.get("/kino/:slug", (c) => {
   const movieTheaterLd = {
     "@context": "https://schema.org",
     "@type": "MovieTheater",
-    "@id": `${APP_URL}/kino/${slug}#cinema`,
+    "@id": `${appUrl}/kino/${slug}#cinema`,
     name: cinema.name,
-    url: `${APP_URL}/kino/${slug}`,
+    url: `${appUrl}/kino/${slug}`,
     address: {
       "@type": "PostalAddress",
       streetAddress: addrMatch?.[1] ?? cinema.address ?? undefined,
@@ -56,19 +57,19 @@ app.get("/kino/:slug", (c) => {
     // away on individual /film/:id pages.
     event: screenings.slice(0, 20).map((s) => ({
       "@type": "ScreeningEvent",
-      "@id": `${APP_URL}/film/${s.id}#screening`,
+      "@id": `${appUrl}/film/${s.id}#screening`,
       name: s.title,
       startDate: s.time ? `${s.date}T${s.time}:00+02:00` : s.date,
-      url: `${APP_URL}/film/${s.id}`,
-      location: { "@id": `${APP_URL}/kino/${slug}#cinema` },
+      url: `${appUrl}/film/${s.id}`,
+      location: { "@id": `${appUrl}/kino/${slug}#cinema` },
     })),
   };
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: APP_URL },
-      { "@type": "ListItem", position: 2, name: tr.cinemasIndexTitle, item: `${APP_URL}/kinos` },
+      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: appUrl },
+      { "@type": "ListItem", position: 2, name: tr.cinemasIndexTitle, item: `${appUrl}/kinos` },
       { "@type": "ListItem", position: 3, name: cinema.name },
     ],
   };
@@ -82,7 +83,7 @@ app.get("/kino/:slug", (c) => {
           <Head
             title={`${cinema.name} — lichtspiel.haus`}
             description={tr.cinemaDescription(cinema.name, screenings.length)}
-            canonical={`${APP_URL}/kino/${slug}?lang=${locale}`}
+            canonical={`${appUrl}/kino/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={jsonLd}
@@ -103,7 +104,7 @@ app.get("/kino/:slug", (c) => {
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="programme">
             <p class="back-link">
               <a href={`/kinos?lang=${locale}`}>← {tr.backToCinemasIndex}</a>
@@ -167,7 +168,9 @@ app.get("/kino/:slug", (c) => {
 // from a single URL.
 app.get("/kinos", (c) => {
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const city = c.get("city") ?? "frankfurt";
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+  const appUrl = cityUrl("lichtspiel.haus", city);
   const today = todayIso();
   // Pre-count upcoming screenings per cinema so the row carries a
   // "X screenings in the next 14 days" signal.
@@ -182,17 +185,17 @@ app.get("/kinos", (c) => {
   const collectionLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "@id": `${APP_URL}/kinos#collection`,
+    "@id": `${appUrl}/kinos#collection`,
     name: tr.cinemasIndexTitle,
     description: tr.cinemasIndexLead,
-    url: `${APP_URL}/kinos`,
+    url: `${appUrl}/kinos`,
     mainEntity: cinemas.map((cinema) => {
       const addrMatch = (cinema.address ?? "").match(/^(.+?),\s*(\d{4,5})\s+(.+)$/);
       return {
         "@type": "MovieTheater",
-        "@id": `${APP_URL}/kino/${cinema.slug}#cinema`,
+        "@id": `${appUrl}/kino/${cinema.slug}#cinema`,
         name: cinema.name,
-        url: `${APP_URL}/kino/${cinema.slug}`,
+        url: `${appUrl}/kino/${cinema.slug}`,
         address: {
           "@type": "PostalAddress",
           streetAddress: addrMatch?.[1] ?? cinema.address ?? undefined,
@@ -209,7 +212,7 @@ app.get("/kinos", (c) => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: APP_URL },
+      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: appUrl },
       { "@type": "ListItem", position: 2, name: tr.cinemasIndexTitle },
     ],
   };
@@ -222,14 +225,14 @@ app.get("/kinos", (c) => {
           <Head
             title={`${tr.cinemasIndexTitle} — lichtspiel.haus`}
             description={tr.cinemasIndexLead}
-            canonical={`${APP_URL}/kinos?lang=${locale}`}
+            canonical={`${appUrl}/kinos?lang=${locale}`}
             locale={locale}
             currentPath="/kinos"
             jsonLd={[collectionLd, breadcrumbLd]}
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath="/kinos" />
+          <Masthead tr={tr} locale={locale} currentPath="/kinos" city={city} />
           <main class="programme">
             <p class="back-link">
               <a href={`/?lang=${locale}`}>← {tr.backToProgramme}</a>

@@ -1,4 +1,11 @@
-import { type Locale as CoreLocale, detectLocale as coreDetect, dateLocale } from "@museumsufer/core";
+import {
+  type Locale as CoreLocale,
+  cityMeta,
+  detectLocale as coreDetect,
+  DEFAULT_CITY,
+  dateLocale,
+  localizeCityText,
+} from "@museumsufer/core";
 
 export type Locale = Extract<CoreLocale, "de" | "en" | "fr">;
 export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
@@ -520,4 +527,36 @@ const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr };
 
 export function getTranslations(locale: Locale): Translations {
   return TRANSLATIONS[locale];
+}
+
+const APEX = "konzert.haus";
+
+/** Frankfurt-specific region phrasing that name substitution can't cover.
+ *  The generic "und Umgebung" / "wider region" forms already read fine for
+ *  any city, so only the named regional bodies need rewriting. */
+const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
+  de: [["Rhein-Main-Region", "Metropolregion"]],
+  en: [["Rhine-Main region", "metropolitan region"]],
+  fr: [["région Rhin-Main", "région métropolitaine"]],
+};
+
+/**
+ * Rewrite the Frankfurt-authored copy for another city. Applied once per
+ * request at the handler so the localized `tr` propagates to every component.
+ * Returns the input unchanged for the default city (byte-identical output).
+ */
+export function localizeTranslations(tr: Translations, city: string, locale: Locale): Translations {
+  if (cityMeta(city).slug === DEFAULT_CITY) return tr;
+  const s = (t: string): string => localizeCityText(t, city, locale, APEX, REGION_SUB[locale]);
+  return {
+    ...tr,
+    tagline: s(tr.tagline),
+    homeTitle: s(tr.homeTitle),
+    homeDescription: s(tr.homeDescription),
+    genreDescription: (genre, count) => s(tr.genreDescription(genre, count)),
+    askAiPrompt: (date) => s(tr.askAiPrompt(date)),
+    askAiPromptVenue: (venue) => s(tr.askAiPromptVenue(venue)),
+    askAiPromptGenre: (genre) => s(tr.askAiPromptGenre(genre)),
+    faqItems: tr.faqItems.map((item) => ({ q: s(item.q), a: s(item.a) })),
+  };
 }

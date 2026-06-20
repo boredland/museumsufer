@@ -5,6 +5,9 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityHost,
+  cityMeta,
+  cityUrl,
   dateFormatter,
   dateLocale,
   dateParts,
@@ -179,11 +182,10 @@ export function Masthead({
   currentPath: string;
   city?: string;
 }) {
-  const isHamburg = city === "hamburg";
   return (
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
-        <p class="masthead__locality">{isHamburg ? "Hamburg" : "Frankfurt"}</p>
+        <p class="masthead__locality">{cityMeta(city).short}</p>
         <h1 class="wordmark">
           <span class="wordmark__lehr">lehr</span>
           <span class="wordmark__dot">.</span>
@@ -298,9 +300,8 @@ function buildEventJsonLd(e: DayEvent, city?: string): Record<string, unknown> {
   const startTime = e.time ?? "00:00";
   const eventType = e.category === "Diskussion" ? "EducationEvent" : "Event";
   const resolvedCity = city ?? e.city ?? "frankfurt";
-  const isHamburg = resolvedCity === "hamburg";
-  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
-  const cityName = isHamburg ? "Hamburg" : "Frankfurt am Main";
+  const appUrl = cityUrl("lehr.salon", resolvedCity);
+  const cityName = cityMeta(resolvedCity).name;
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": eventType,
@@ -341,8 +342,7 @@ export interface EventRowOptions {
 
 export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr: Translations }) {
   const city = opts.city ?? e.city ?? "frankfurt";
-  const isHamburg = city === "hamburg";
-  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
+  const appUrl = cityUrl("lehr.salon", city);
   const time = e.time ?? "—";
   const endTime = e.end_time ? `${tr.endTimePrefix} ${e.end_time}` : "";
   const titleSource = e.detail_url ?? e.ticket_url ?? null;
@@ -1061,36 +1061,34 @@ export function renderProgrammePartial(
   ) as unknown as HtmlEscapedString;
 }
 
-function localizeTranslations(tr: Translations, isHamburg: boolean): Translations {
-  if (!isHamburg) return tr;
+/** Base translation strings are authored for the default city (Frankfurt).
+ *  For any other city we rewrite the city name and canonical host to that
+ *  city via the shared registry — no hardcoded "Hamburg" literals, so adding
+ *  a third city needs no change here. */
+function localizeTranslations(tr: Translations, city: string | undefined): Translations {
+  if (cityMeta(city).slug === cityMeta(undefined).slug) return tr;
+  const meta = cityMeta(city);
+  const host = cityHost("lehr.salon", city);
+  const sub = (s: string): string =>
+    s
+      .replace(/frankfurt\.lehr\.salon/g, host)
+      .replace(/Frankfurt am Main/g, meta.name)
+      .replace(/Frankfurt/g, meta.short);
   return {
     ...tr,
-    tagline: tr.tagline.replace(/Frankfurt/g, "Hamburg"),
-    homeTitle: tr.homeTitle
-      .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
-      .replace(/Frankfurt am Main/g, "Hamburg")
-      .replace(/Frankfurt/g, "Hamburg"),
-    homeDescription: tr.homeDescription
-      .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
-      .replace(/Frankfurt/g, "Hamburg"),
-    digestCueText: tr.digestCueText.replace(/Frankfurt/g, "Hamburg"),
-    askAiPrompt: (date) =>
-      tr
-        .askAiPrompt(date)
-        .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
-        .replace(/Frankfurt/g, "Hamburg"),
-    faqItems: tr.faqItems.map((item) => ({
-      q: item.q.replace(/Frankfurt/g, "Hamburg"),
-      a: item.a.replace(/Frankfurt/g, "Hamburg"),
-    })),
+    tagline: sub(tr.tagline),
+    homeTitle: sub(tr.homeTitle),
+    homeDescription: sub(tr.homeDescription),
+    digestCueText: sub(tr.digestCueText),
+    askAiPrompt: (date) => sub(tr.askAiPrompt(date)),
+    faqItems: tr.faqItems.map((item) => ({ q: sub(item.q), a: sub(item.a) })),
   };
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {
   const { date, today, events, dateStrip, category, range, locale, tr: rawTr, turnstileSiteKey, city } = props;
-  const isHamburg = city === "hamburg";
-  const tr = localizeTranslations(rawTr, isHamburg);
-  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
+  const tr = localizeTranslations(rawTr, city);
+  const appUrl = cityUrl("lehr.salon", city);
   const niceDate = niceDateFor(date, locale);
   const currentPath = range ? "/" : category ? `/tag/${date}?format=${encodeURIComponent(category)}` : `/tag/${date}`;
   // Title now leads with the localised homeTitle ("lehr.salon –

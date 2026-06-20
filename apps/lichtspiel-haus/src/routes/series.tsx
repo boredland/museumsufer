@@ -1,13 +1,12 @@
-import { todayIso } from "@museumsufer/core";
+import { cityHost, cityMeta, cityName, cityUrl, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getAllSeries, getSeriesScreenings } from "../db";
 import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
-import { detectLocale, getTranslations } from "../i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import type { Env } from "../types";
-import { APP_URL } from "./static";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/reihe/:slug", (c) => {
   const slug = c.req.param("slug");
@@ -16,8 +15,10 @@ app.get("/reihe/:slug", (c) => {
   const name = screenings[0].series?.name ?? slug;
 
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const city = c.get("city") ?? "frankfurt";
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/reihe/${slug}`;
+  const appUrl = cityUrl("lichtspiel.haus", city);
 
   // Auto-derived series description -- date span + screening count +
   // host cinemas. Lifts the page from a bare event list to something
@@ -38,23 +39,23 @@ app.get("/reihe/:slug", (c) => {
   const eventSeriesLd = {
     "@context": "https://schema.org",
     "@type": "EventSeries",
-    "@id": `${APP_URL}${currentPath}#series`,
+    "@id": `${appUrl}${currentPath}#series`,
     name,
     description: lead,
-    url: `${APP_URL}${currentPath}`,
+    url: `${appUrl}${currentPath}`,
     startDate: firstDate,
     endDate: lastDate,
     location: {
       "@type": "Place",
       name: cinemaNames.join(", "),
-      address: { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" },
+      address: { "@type": "PostalAddress", addressLocality: cityName(city, locale, "full"), addressCountry: "DE" },
     },
     subEvent: screenings.slice(0, 20).map((s) => ({
       "@type": "ScreeningEvent",
-      "@id": `${APP_URL}/film/${s.id}#screening`,
+      "@id": `${appUrl}/film/${s.id}#screening`,
       name: s.title,
       startDate: s.time ? `${s.date}T${s.time}:00+02:00` : s.date,
-      url: `${APP_URL}/film/${s.id}`,
+      url: `${appUrl}/film/${s.id}`,
       location: { "@type": "MovieTheater", name: s.cinema.name },
     })),
   };
@@ -62,8 +63,8 @@ app.get("/reihe/:slug", (c) => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: APP_URL },
-      { "@type": "ListItem", position: 2, name: tr.seriesAll, item: `${APP_URL}/reihe` },
+      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: appUrl },
+      { "@type": "ListItem", position: 2, name: tr.seriesAll, item: `${appUrl}/reihe` },
       { "@type": "ListItem", position: 3, name },
     ],
   };
@@ -76,7 +77,7 @@ app.get("/reihe/:slug", (c) => {
           <Head
             title={`${name} — Filmreihe Frankfurt — lichtspiel.haus`}
             description={description}
-            canonical={`${APP_URL}/reihe/${slug}?lang=${locale}`}
+            canonical={`${appUrl}/reihe/${slug}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={[eventSeriesLd, breadcrumbLd]}
@@ -87,7 +88,7 @@ app.get("/reihe/:slug", (c) => {
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="programme">
             <p class="back-link">
               <a href={`/reihe?lang=${locale}`}>← {tr.backToSeriesIndex}</a>
@@ -131,8 +132,10 @@ app.get("/reihe/:slug", (c) => {
 
 app.get("/reihe", (c) => {
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const city = c.get("city") ?? "frankfurt";
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const all = getAllSeries(todayIso());
+  const appUrl = cityUrl("lichtspiel.haus", city);
   return c.html(
     <>
       {raw("<!DOCTYPE html>")}
@@ -141,13 +144,13 @@ app.get("/reihe", (c) => {
           <Head
             title={`${tr.seriesAll} — lichtspiel.haus`}
             description={tr.seriesAll}
-            canonical={`${APP_URL}/reihe?lang=${locale}`}
+            canonical={`${appUrl}/reihe?lang=${locale}`}
             locale={locale}
             currentPath="/reihe"
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath="/reihe" />
+          <Masthead tr={tr} locale={locale} currentPath="/reihe" city={city} />
           <main class="programme">
             <p class="back-link">
               <a href={`/?lang=${locale}`}>← {tr.backToProgramme}</a>

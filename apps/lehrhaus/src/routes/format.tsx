@@ -1,11 +1,11 @@
-import { dateOffset, todayIso } from "@museumsufer/core";
+import { cityAdj, cityMeta, cityUrl, dateOffset, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getEventsInRange } from "../db";
 import { categoryLabel, Event, Footer, Foxing, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
-import { type Category, type AppEnv, type Env, parseCategory } from "../types";
+import { type AppEnv, type Category, type Env, parseCategory } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<AppEnv>();
@@ -14,22 +14,25 @@ const app = new Hono<AppEnv>();
  *  the schema.org `description`. Audit flagged the format pages as
  *  thin (heading + iCal link only). DE only; EN visitors get the
  *  cinemaDescription template fallback. */
-function categoryLead(c: Category, isHamburg: boolean): { de: string; en: string } {
+function categoryLead(c: Category, city: string): { de: string; en: string } {
+  const adjDe = cityAdj(city, "de");
+  const adjEn = cityAdj(city, "en");
+  const short = cityMeta(city).short;
   if (c === "Vortrag") {
     return {
-      de: `Wissenschaftsvorträge, Buchvorstellungen und Sachvorträge der ${isHamburg ? "Hamburger" : "Frankfurter"} Akademien, Stiftungen, Forschungseinrichtungen und Bürgerhäuser.`,
-      en: `Academic lectures, book launches and informational talks from ${isHamburg ? "Hamburg's" : "Frankfurt's"} academies, foundations, research institutes and civic houses.`,
+      de: `Wissenschaftsvorträge, Buchvorstellungen und Sachvorträge der ${adjDe} Akademien, Stiftungen, Forschungseinrichtungen und Bürgerhäuser.`,
+      en: `Academic lectures, book launches and informational talks from ${adjEn} academies, foundations, research institutes and civic houses.`,
     };
   }
   if (c === "Lesung") {
     return {
-      de: `Lesungen, Autoren-Auftritte und Werkstattgespräche in den ${isHamburg ? "Hamburger" : "Frankfurter"} Literaturhäusern, Buchhandlungen und Akademien.`,
-      en: `Readings, author appearances and editorial conversations in ${isHamburg ? "Hamburg's" : "Frankfurt's"} literature houses, bookshops and academies.`,
+      de: `Lesungen, Autoren-Auftritte und Werkstattgespräche in den ${adjDe} Literaturhäusern, Buchhandlungen und Akademien.`,
+      en: `Readings, author appearances and editorial conversations in ${adjEn} literature houses, bookshops and academies.`,
     };
   }
   return {
-    de: `Diskussionen, Streitgespräche und Podien zu Gesellschaft, Politik und Wissenschaft in ${isHamburg ? "Hamburg" : "Frankfurt"}.`,
-    en: `Panel debates, conversations and forums on society, politics and scholarship in ${isHamburg ? "Hamburg" : "Frankfurt"}.`,
+    de: `Diskussionen, Streitgespräche und Podien zu Gesellschaft, Politik und Wissenschaft in ${short}.`,
+    en: `Panel debates, conversations and forums on society, politics and scholarship in ${short}.`,
   };
 }
 
@@ -38,16 +41,15 @@ app.get("/format/:slug", (c) => {
   if (!category) return c.notFound();
   const slug = category;
   const city = c.get("city") ?? "frankfurt";
-  const isHamburg = city === "hamburg";
-  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
-  const cityName = isHamburg ? "Hamburg" : "Frankfurt am Main";
-  const cityShort = isHamburg ? "Hamburg" : "Frankfurt";
+  const appUrl = cityUrl("lehr.salon", city);
+  const cityName = cityMeta(city).name;
+  const cityShort = cityMeta(city).short;
   const events = getEventsInRange(todayIso(), dateOffset(60), { city, category });
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const label = categoryLabel(category, tr);
   const currentPath = `/format/${slug}`;
-  const lead = categoryLead(category, isHamburg)[locale === "en" ? "en" : "de"];
+  const lead = categoryLead(category, city)[locale === "en" ? "en" : "de"];
   // Vortrag = LectureEvent, Lesung = LiteraryEvent, Diskussion =
   // generic Event (no exact subtype exists in schema.org).
   const eventType = category === "Vortrag" ? "EducationEvent" : category === "Lesung" ? "LiteraryEvent" : "Event";

@@ -1,15 +1,21 @@
-import { buildUtm, formatLocalisedDateLong, parsePostalAddress } from "@museumsufer/core";
+import {
+  buildUtm,
+  cityHost,
+  cityMeta,
+  cityName,
+  cityUrl,
+  formatLocalisedDateLong,
+  parsePostalAddress,
+} from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getScreeningById } from "../db";
 import { Footer, Head, Masthead, PosterCard, ScoreBadges } from "../frontend";
-import { detectLocale, getTranslations } from "../i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import { type Env, stripVersionChrome } from "../types";
-import { APP_URL } from "./static";
 
-const utm = buildUtm("frankfurt.lichtspiel.haus");
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 // One self-contained sentence pulling every important signal into a
 // continuous prose passage. AI citation models extract continuous
@@ -48,8 +54,13 @@ app.get("/film/:id{[0-9]+}", (c) => {
   const screening = getScreeningById(id);
   if (!screening) return c.notFound();
 
+  const city = c.get("city") ?? "frankfurt";
+  const host = cityHost("lichtspiel.haus", city);
+  const localUtm = buildUtm(host);
+  const appUrl = cityUrl("lichtspiel.haus", city);
+
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/film/${id}`;
   const dateLabel = formatLocalisedDateLong(screening.date, locale === "en" ? "en-US" : "de-DE");
   // Prefer TMDb's canonical localised title over the cinema's listing
@@ -91,7 +102,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
   // strings -- split them into a proper PostalAddress object so the
   // ScreeningEvent.location passes Google's Rich Results validator.
   const address = parsePostalAddress(screening.cinema.address, { fallback: "permissive" });
-  const cinemaIri = `${APP_URL}/kino/${screening.cinema_slug}#cinema`;
+  const cinemaIri = `${appUrl}/kino/${screening.cinema_slug}#cinema`;
 
   // The Movie entity gets aggregateRating from TMDb when there are
   // enough votes to be meaningful. Threshold of 10 mirrors what the
@@ -114,7 +125,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
   const screeningLd = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
-    "@id": `${APP_URL}/film/${id}#screening`,
+    "@id": `${appUrl}/film/${id}#screening`,
     name: displayTitle,
     description: screening.description ?? screening.subtitle ?? undefined,
     inLanguage: locale,
@@ -142,7 +153,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
       screening.ticket_url && screening.price_min != null
         ? {
             "@type": "Offer",
-            url: utm(screening.ticket_url, "film-detail"),
+            url: localUtm(screening.ticket_url, "film-detail"),
             price: screening.price_min,
             priceCurrency: "EUR",
             availability: "https://schema.org/InStock",
@@ -154,12 +165,12 @@ app.get("/film/:id{[0-9]+}", (c) => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: APP_URL },
+      { "@type": "ListItem", position: 1, name: "lichtspiel.haus", item: appUrl },
       {
         "@type": "ListItem",
         position: 2,
         name: screening.cinema.name,
-        item: `${APP_URL}/kino/${screening.cinema_slug}`,
+        item: `${appUrl}/kino/${screening.cinema_slug}`,
       },
       { "@type": "ListItem", position: 3, name: displayTitle },
     ],
@@ -179,7 +190,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
           <Head
             title={`${displayTitle} — ${screening.cinema.name} — lichtspiel.haus`}
             description={screening.description ?? screening.subtitle ?? `${displayTitle} im ${screening.cinema.name}`}
-            canonical={`${APP_URL}/film/${id}?lang=${locale}`}
+            canonical={`${appUrl}/film/${id}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}
             jsonLd={jsonLd}
@@ -195,7 +206,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="film-detail">
             <p class="back-link">
               <a href={`/tag/${screening.date}?lang=${locale}#screening-${id}`}>← {tr.backToProgramme}</a>
@@ -250,7 +261,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                     {screening.ticket_url ? (
                       <a
                         class="film-detail__ticket"
-                        href={utm(screening.ticket_url, "film-detail")}
+                        href={localUtm(screening.ticket_url, "film-detail")}
                         target="_blank"
                         rel="noopener"
                       >
@@ -263,7 +274,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
                     {screening.detail_url ? (
                       <a
                         class="film-detail__source"
-                        href={utm(screening.detail_url, "film-detail")}
+                        href={localUtm(screening.detail_url, "film-detail")}
                         target="_blank"
                         rel="noopener"
                       >

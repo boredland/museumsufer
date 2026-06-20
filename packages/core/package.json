@@ -13,6 +13,8 @@
     "./bundle-writer": "./src/bundle-writer.ts",
     "./calendar": "./src/calendar.ts",
     "./calendar-popover": "./src/calendar-popover.tsx",
+    "./cities": "./src/cities.ts",
+    "./city-routing": "./src/city-routing.ts",
     "./contact-dialog": "./src/contact-dialog.tsx",
     "./date": "./src/date.ts",
     "./digest-dialog": "./src/digest-dialog.tsx",

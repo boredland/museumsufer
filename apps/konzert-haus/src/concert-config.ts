@@ -356,6 +356,35 @@ export const CURATED_VENUES: VenueConfig[] = [
     description:
       "Festes Haus für freie Künste im Frankfurter Ostend, untergebracht in einer ehemaligen Tabakfabrik. Programmatisch nah an zeitgenössischem Tanz, Performance und Neuer Musik; Gastgeber von Ensemble-Modern-Reihen und Cresc Biennale.",
   },
+  // ─── Hamburg ────────────────────────────────────────────────────
+  {
+    slug: "elbphilharmonie",
+    name: "Elbphilharmonie Hamburg",
+    short_name: "Elbphilharmonie",
+    address: "Platz der Deutschen Einheit 4, 20457 Hamburg",
+    lat: 53.5414,
+    lon: 9.9842,
+    city: "hamburg",
+    website_url: "https://www.elbphilharmonie.de",
+    default_genre: "classical",
+    wikidata: "Q170280",
+    description:
+      "Hamburgs Wahrzeichen auf dem Kaispeicher in der HafenCity, 2017 eröffnet. Der Große Saal mit ~2.100 Plätzen folgt dem Weinberg-Prinzip; daneben programmiert der Kleine Saal Kammermusik und Recitals. Spielstätte des NDR Elbphilharmonie Orchesters und internationaler Gastorchester.",
+  },
+  {
+    slug: "laeiszhalle",
+    name: "Laeiszhalle — Musikhalle Hamburg",
+    short_name: "Laeiszhalle",
+    address: "Johannes-Brahms-Platz, 20355 Hamburg",
+    lat: 53.5561,
+    lon: 9.9811,
+    city: "hamburg",
+    website_url: "https://www.elbphilharmonie.de/de/laeiszhalle",
+    default_genre: "classical",
+    wikidata: "Q318566",
+    description:
+      "Neobarockes Konzerthaus von 1908 am Johannes-Brahms-Platz, bis zur Eröffnung der Elbphilharmonie Hamburgs erstes Haus für Sinfonik. Großer und Kleiner Saal beherbergen Orchesterkonzerte, Liederabende und Kammermusik unter dem Dach der Elbphilharmonie und Laeiszhalle gGmbH.",
+  },
 ];
 
 // Curated entries win over synthesised duplicates -- the scraper

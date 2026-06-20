@@ -1,4 +1,5 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { type Context, Hono } from "hono";
 import { getDatesWithEvents, getEventsForDate, getEventsInRange } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
@@ -51,16 +52,8 @@ app.use(
   }),
 );
 
-app.use("*", async (c, next) => {
-  const url = new URL(c.req.url);
-  const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "lehr.salon") {
-    return c.redirect(`https://frankfurt.lehr.salon${url.pathname}${url.search}`, 301);
-  }
-  const city = host.endsWith(".lehr.salon") ? host.slice(0, -".lehr.salon".length) : "frankfurt";
-  c.set("city", city);
-  await next();
-});
+// Apex (lehr.salon) → frankfurt.lehr.salon; `<city>.lehr.salon` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "lehr.salon" }));
 
 app.use("*", async (c, next) => {
   await next();

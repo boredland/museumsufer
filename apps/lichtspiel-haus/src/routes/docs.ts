@@ -1,8 +1,10 @@
+import { cityHost, cityMeta, cityName, cityUrl } from "@museumsufer/core";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
+import { localizeTranslations } from "../i18n";
 import type { Env } from "../types";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const spec = {
   openapi: "3.1.0",
@@ -124,7 +126,14 @@ const spec = {
   },
 };
 
-app.get("/openapi.json", (c) => c.json(spec, { headers: { "Cache-Control": "public, max-age=86400" } }));
+app.get("/openapi.json", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  const specWithServer = {
+    ...spec,
+    servers: [{ url: cityUrl("lichtspiel.haus", city) }],
+  };
+  return c.json(specWithServer, { headers: { "Cache-Control": "public, max-age=86400" } });
+});
 
 app.get(
   "/",

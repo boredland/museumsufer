@@ -1,4 +1,4 @@
-import { dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
+import { cityMeta, cityUrl, dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -6,7 +6,7 @@ import { getEventsInRange, getSourceBySlug } from "../db";
 import { Event, Footer, Foxing, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations } from "../i18n";
 import { renderSourceMarkdown, wantsMarkdown } from "../markdown";
-import { type AppEnv, type Env } from "../types";
+import type { AppEnv, Env } from "../types";
 import { APP_URL } from "./static";
 
 const app = new Hono<AppEnv>();
@@ -17,12 +17,12 @@ app.get("/quelle/:slug", (c) => {
   if (!source) return c.notFound();
 
   const city = c.get("city") ?? "frankfurt";
-  const isHamburg = city === "hamburg";
-  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
-  const cityName = isHamburg ? "Hamburg" : "Frankfurt am Main";
-  const cityShort = isHamburg ? "Hamburg" : "Frankfurt";
-  const regionName = isHamburg ? "Hamburg" : "Hessen";
-  const cityWikidata = isHamburg ? "Q1055" : "Q1794";
+  const meta = cityMeta(city);
+  const appUrl = cityUrl("lehr.salon", city);
+  const cityName = meta.name;
+  const cityShort = meta.short;
+  const regionName = meta.region;
+  const cityWikidata = meta.wikidata;
 
   const events = getEventsInRange(todayIso(), dateOffset(60), { city, source: slug });
 

@@ -1,3 +1,4 @@
+import { type Bbox, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX } from "@museumsufer/core/cities";
 import { MUSEUMS } from "./_museums/config";
 
 /**
@@ -224,12 +225,11 @@ export function coordinatesFor(sourceSlug: string): readonly [number, number] | 
   return null;
 }
 
-export interface Bbox {
-  readonly minLat: number;
-  readonly maxLat: number;
-  readonly minLon: number;
-  readonly maxLon: number;
-}
+// Bbox type, per-city boxes and `inBbox` live in @museumsufer/core/cities so
+// both build scripts and worker request paths share one source of truth.
+// Re-exported here for back-compat: @museumsufer/event-hub consumers import
+// these names from the scrapers barrel.
+export { type Bbox, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX };
 
 /** Frankfurt + Landau corridor bbox. Anything outside is dropped by the
  *  hub runner; this is defense-in-depth against scraper-level filter
@@ -240,36 +240,6 @@ export const GEOFENCE_BBOX: Bbox = {
   minLon: 7.85,
   maxLon: 9.05,
 };
-
-/** Frankfurt metro + Taunus / Rheingau / Offenbach edge. Bad Homburg and
- *  Forschungskolleg in the north (50.227), Rheingau festival in the west
- *  (8.046), Höchst / Bad Soden in the south-west, Offenbach in the east. */
-export const FRANKFURT_BBOX: Bbox = {
-  minLat: 49.95,
-  maxLat: 50.3,
-  minLon: 7.95,
-  maxLon: 8.85,
-};
-
-/** Landau in der Pfalz + Südliche Weinstraße + Hambach. */
-export const LANDAU_BBOX: Bbox = {
-  minLat: 49.05,
-  maxLat: 49.45,
-  minLon: 7.95,
-  maxLon: 8.3,
-};
-
-/** Hamburg city region bbox. */
-export const HAMBURG_BBOX: Bbox = {
-  minLat: 53.35,
-  maxLat: 53.75,
-  minLon: 9.7,
-  maxLon: 10.35,
-};
-
-export function inBbox(lat: number, lon: number, box: Bbox): boolean {
-  return lat >= box.minLat && lat <= box.maxLat && lon >= box.minLon && lon <= box.maxLon;
-}
 
 export function withinGeofence(lat: number, lon: number): boolean {
   return inBbox(lat, lon, GEOFENCE_BBOX) || inBbox(lat, lon, HAMBURG_BBOX);
