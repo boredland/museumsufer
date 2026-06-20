@@ -22,6 +22,9 @@ export type TicketingProvider = "eventim_inhouse" | "frankfurt_ticket" | "reserv
 export interface Show {
   id: number;
   theater_slug: string;
+  /** City slug ("frankfurt" / "hamburg"), derived at scrape time from the
+   *  theater's coordinates. Drives host-based programme partitioning. */
+  city: string;
   slug: string;
   title: string;
   subtitle?: string;

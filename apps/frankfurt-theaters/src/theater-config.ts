@@ -7,6 +7,9 @@ export interface TheaterConfig {
   address: string;
   lat: number;
   lon: number;
+  /** City slug ("frankfurt" / "hamburg"). Defaults to "frankfurt" when
+   *  absent so existing curated entries need no change. */
+  city?: string;
   website_url: string;
   ticketing_provider: TicketingProvider;
   /** Wikidata Q-id (without the "Q" prefix). Major Frankfurt
@@ -267,6 +270,166 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     lon: 8.6519,
     website_url: "https://landungsbruecken.org",
     ticketing_provider: "custom",
+  },
+
+  // ── Hamburg ───────────────────────────────────────────────────────────
+  {
+    slug: "deutsches-schauspielhaus",
+    name: "Deutsches SchauSpielHaus Hamburg",
+    address: "Kirchenallee 39, 20099 Hamburg",
+    lat: 53.5543,
+    lon: 10.0089,
+    city: "hamburg",
+    website_url: "https://www.schauspielhaus.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 248713",
+    description:
+      "Größtes deutsches Sprechtheater, 1900 am Hauptbahnhof eröffnet. Großes Haus, Malersaal und Rangfoyer; programmatisch zwischen klassischem Repertoire, Uraufführungen und internationalen Regiehandschriften.",
+  },
+  {
+    slug: "thalia-theater",
+    name: "Thalia Theater",
+    address: "Alstertor 1, 20095 Hamburg",
+    lat: 53.5521,
+    lon: 9.9986,
+    city: "hamburg",
+    website_url: "https://www.thalia-theater.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 328140",
+    description:
+      "Eines der führenden Sprechtheater im deutschsprachigen Raum, mehrfach zum „Theater des Jahres“ gewählt. Spielstätten am Alstertor und in der Gaußstraße in Altona.",
+  },
+  {
+    slug: "hamburgische-staatsoper",
+    name: "Hamburgische Staatsoper",
+    address: "Große Theaterstraße 25, 20354 Hamburg",
+    lat: 53.5567,
+    lon: 9.9889,
+    city: "hamburg",
+    website_url: "https://www.staatsoper-hamburg.de",
+    ticketing_provider: "custom",
+    telephone: "+49 40 356868",
+    description:
+      "Traditionsreiches Opernhaus mit eigenem Philharmonischen Staatsorchester und dem Hamburg Ballett. Repertoire von Barock bis Moderne, ergänzt durch Ballettabende in der Choreografie-Tradition John Neumeiers.",
+  },
+  {
+    slug: "ohnsorg-theater",
+    name: "Ohnsorg-Theater",
+    address: "Heidi-Kabel-Platz 1, 20099 Hamburg",
+    lat: 53.5528,
+    lon: 10.0075,
+    city: "hamburg",
+    website_url: "https://www.ohnsorg.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 350803-0",
+    description:
+      "Hamburgs niederdeutsche Bühne am Hauptbahnhof. Volkstheater, Komödien und Klassiker auf Plattdeutsch, viele Stücke mit deutscher Übertitelung.",
+  },
+  {
+    slug: "kampnagel",
+    name: "Kampnagel",
+    address: "Jarrestraße 20, 22303 Hamburg",
+    lat: 53.5833,
+    lon: 10.0218,
+    city: "hamburg",
+    website_url: "https://www.kampnagel.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 270949-49",
+    description:
+      "Internationales Produktionshaus für freie darstellende Künste in einer ehemaligen Kranfabrik. Zeitgenössischer Tanz, Performance, Theater und Musik; Gastgeber des Sommerfestivals.",
+  },
+  {
+    slug: "english-theatre-hamburg",
+    name: "The English Theatre of Hamburg",
+    address: "Lerchenfeld 14, 22081 Hamburg",
+    lat: 53.5693,
+    lon: 10.0286,
+    city: "hamburg",
+    website_url: "https://www.englishtheatre.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 227089-0",
+    description:
+      "Älteste professionelle englischsprachige Bühne auf dem europäischen Festland, gegründet 1976. Schwerpunkt auf zeitgenössischen Stücken und Klassikern des englischen und amerikanischen Theaters.",
+  },
+  {
+    slug: "st-pauli-theater",
+    name: "St. Pauli Theater",
+    address: "Spielbudenplatz 29-30, 20359 Hamburg",
+    lat: 53.5491,
+    lon: 9.963,
+    city: "hamburg",
+    website_url: "https://www.st-pauli-theater.de",
+    ticketing_provider: "custom",
+    telephone: "+49 40 4711066",
+    description:
+      "Ältestes Privattheater Hamburgs auf der Reeperbahn, 1841 gegründet. Boulevard, Schauspiel, Konzerte und Gastspiele namhafter Ensembles direkt am Spielbudenplatz.",
+  },
+  {
+    slug: "altonaer-theater",
+    name: "Altonaer Theater",
+    address: "Museumstraße 17, 22765 Hamburg",
+    lat: 53.5478,
+    lon: 9.9351,
+    city: "hamburg",
+    website_url: "https://www.altonaer-theater.de",
+    ticketing_provider: "reservix",
+    telephone: "+49 40 3905800",
+    description:
+      "Privattheater in Altona mit Schwerpunkt auf großen Romanadaptionen und literarischen Stoffen. Eines der ältesten noch bespielten Theater Hamburgs.",
+  },
+  {
+    slug: "hamburger-kammerspiele",
+    name: "Hamburger Kammerspiele",
+    address: "Hartungstraße 9-11, 20146 Hamburg",
+    lat: 53.5684,
+    lon: 9.9842,
+    city: "hamburg",
+    website_url: "https://www.hamburger-kammerspiele.de",
+    ticketing_provider: "reservix",
+    description:
+      "Traditionsreiche Sprechbühne im Grindelviertel. Literarisches Schauspiel, Kammerstücke und zeitgenössische Dramatik in intimem Rahmen.",
+  },
+  {
+    slug: "hamburger-sprechwerk",
+    name: "Hamburger Sprechwerk",
+    address: "Klaus-Groth-Straße 23, 20535 Hamburg",
+    lat: 53.5513,
+    lon: 10.0818,
+    city: "hamburg",
+    website_url: "https://www.hamburger-sprechwerk.de",
+    ticketing_provider: "reservix",
+  },
+  {
+    slug: "hamburger-puppentheater",
+    name: "Hamburger Puppentheater",
+    address: "Hopfensack 6, 20457 Hamburg",
+    lat: 53.5855,
+    lon: 10.0435,
+    city: "hamburg",
+    website_url: "https://www.hamburger-puppentheater.de",
+    ticketing_provider: "custom",
+  },
+  {
+    slug: "hamburger-kammeroper",
+    name: "Hamburger Kammeroper",
+    address: "Allee 75, 22765 Hamburg",
+    lat: 53.5477,
+    lon: 9.9366,
+    city: "hamburg",
+    website_url: "https://www.hamburger-kammeroper.de",
+    ticketing_provider: "custom",
+  },
+  {
+    slug: "theaterschiff-hamburg",
+    name: "Das Schiff — Hamburgs Theaterschiff",
+    address: "Holzbrücke 2, Anleger Nikolaifleet, 20459 Hamburg",
+    lat: 53.5453,
+    lon: 9.9864,
+    city: "hamburg",
+    website_url: "https://www.theaterschiff.de",
+    ticketing_provider: "custom",
+    description:
+      "Hamburgs schwimmende Bühne im Nikolaifleet. Kabarett, Comedy und literarisches Theater an Bord eines historischen Frachtschiffs.",
   },
 ];
 

@@ -1,7 +1,9 @@
-import { buildOgSvg, fitOgTitleSize } from "@museumsufer/core";
+import { buildOgSvg, cityHost, cityMeta, cityName, fitOgTitleSize } from "@museumsufer/core";
 import { Hono } from "hono";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
+
+const APEX = "ins.theater";
 
 const PALETTE = { paper: "#F4EFE2", ink: "#0F0A05", accent: "#B5341F" };
 const FONTS = {
@@ -20,14 +22,14 @@ app.get("/theater/:slug/og.svg", (c) => {
   if (!slug) return c.notFound();
   const config = THEATERS.find((t) => t.slug === slug);
   if (!config) return c.notFound();
-  return c.body(buildSvg(config.name, config.address ?? null), {
+  return c.body(buildSvg(config.name, config.address ?? null, config.city ?? "frankfurt"), {
     headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400, s-maxage=604800" },
   });
 });
 
-function buildSvg(theaterName: string, address: string | null): string {
+function buildSvg(theaterName: string, address: string | null, citySlug: string): string {
   const nameFontSize = fitOgTitleSize(theaterName, { ratio: 0.55, minSize: 56, maxSize: 144 });
-  const city = address?.split(",").pop()?.trim() ?? "Frankfurt am Main";
+  const city = address?.split(",").pop()?.trim() ?? cityName(citySlug, "de", "full");
   return buildOgSvg({
     palette: PALETTE,
     fonts: FONTS,
@@ -38,8 +40,8 @@ function buildSvg(theaterName: string, address: string | null): string {
       { text: "SPIELPLAN", y: 200, font: "mono", size: 22, letterSpacing: 6, color: PALETTE.accent },
       { text: theaterName, y: 330 + nameFontSize / 4, font: "display", size: nameFontSize, weight: 700, tracking: -2 },
       { text: city, y: 460, font: "display", size: 28, italic: true, opacity: 0.62 },
-      { text: "Frankfurt Theater.", y: 540, font: "display", size: 36, weight: 600, tracking: -1 },
-      { text: "frankfurt.ins.theater", y: 588, font: "mono", size: 20, letterSpacing: 4, color: PALETTE.accent },
+      { text: `${cityMeta(citySlug).short} Theater.`, y: 540, font: "display", size: 36, weight: 600, tracking: -1 },
+      { text: cityHost(APEX, citySlug), y: 588, font: "mono", size: 20, letterSpacing: 4, color: PALETTE.accent },
     ],
   });
 }

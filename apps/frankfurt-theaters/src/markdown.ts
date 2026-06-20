@@ -1,4 +1,6 @@
 import {
+  cityHost,
+  cityMeta,
   renderDayMarkdown as coreRenderDay,
   renderVenueMarkdown as coreRenderVenue,
   type MarkdownEvent,
@@ -9,7 +11,7 @@ import type { TheaterConfig } from "./theater-config";
 
 export { wantsMarkdown };
 
-const UTM_SOURCE = "frankfurt.ins.theater";
+const APEX = "ins.theater";
 const LOCALE_TAG = "de-DE";
 
 function toMarkdownEvent(p: DayPerformance): MarkdownEvent {
@@ -32,21 +34,23 @@ function toMarkdownEvent(p: DayPerformance): MarkdownEvent {
   };
 }
 
-export function renderDayMarkdown(date: string, performances: DayPerformance[]): string {
+export function renderDayMarkdown(date: string, performances: DayPerformance[], city = "frankfurt"): string {
+  const host = cityHost(APEX, city);
   return coreRenderDay({
     date,
     events: performances.map(toMarkdownEvent),
-    brand: "Frankfurt Theater",
+    brand: `${cityMeta(city).short} Theater`,
     localeTag: LOCALE_TAG,
     emptyCopy: "Heute kein Programm.",
     nounSingular: "Vorstellung",
     nounPlural: "Vorstellungen",
-    apiUrl: `https://${UTM_SOURCE}/api/day?date=${date}`,
-    utmSource: UTM_SOURCE,
+    apiUrl: `https://${host}/api/day?date=${date}`,
+    utmSource: host,
   });
 }
 
 export function renderTheaterMarkdown(config: TheaterConfig, performances: DayPerformance[]): string {
+  const host = cityHost(APEX, config.city ?? "frankfurt");
   return coreRenderVenue({
     events: performances.map(toMarkdownEvent),
     venueName: config.name,
@@ -54,7 +58,7 @@ export function renderTheaterMarkdown(config: TheaterConfig, performances: DayPe
     venueWebsite: config.website_url ?? null,
     localeTag: LOCALE_TAG,
     emptyCopy: "Noch kein angekündigtes Programm.",
-    apiUrl: `https://${UTM_SOURCE}/api/theater/${config.slug}`,
-    utmSource: UTM_SOURCE,
+    apiUrl: `https://${host}/api/theater/${config.slug}`,
+    utmSource: host,
   });
 }

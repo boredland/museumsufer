@@ -1,4 +1,14 @@
-import { buildUtm, dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
+import {
+  buildUtm,
+  cityAdj,
+  cityHost,
+  cityMeta,
+  cityName,
+  cityUrl,
+  dateOffset,
+  parsePostalAddress,
+  todayIso,
+} from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -7,11 +17,10 @@ import { buildPerformanceJsonLd, ClientScript, Footer, Grain, Head, Masthead, Pe
 import { renderTheaterMarkdown, wantsMarkdown } from "../markdown";
 import { THEATERS } from "../theater-config";
 import type { Env } from "../types";
-import { APP_URL } from "./static";
 
-const utm = buildUtm("frankfurt.ins.theater");
+const APEX = "ins.theater";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const MONTH_NAMES_DE = [
   "Januar",
@@ -84,7 +93,17 @@ app.get("/theater/:slug", async (c) => {
     });
   }
 
-  const theaterIri = `${APP_URL}/theater/${slug}#theater`;
+  // The theater's own city drives all content (its host, schema region,
+  // brand) — not the request host, so a deep link resolves correctly.
+  const city = config.city ?? "frankfurt";
+  const meta = cityMeta(city);
+  const appUrl = cityUrl(APEX, city);
+  const host = cityHost(APEX, city);
+  const brand = `${meta.short} Theater`;
+  const cityFull = cityName(city, "de", "full");
+  const utm = buildUtm(host);
+
+  const theaterIri = `${appUrl}/theater/${slug}#theater`;
   const sameAs: string[] = [];
   if (config.website_url) sameAs.push(config.website_url);
   if (config.wikidata) sameAs.push(`https://www.wikidata.org/wiki/${config.wikidata}`);
@@ -95,9 +114,9 @@ app.get("/theater/:slug", async (c) => {
       "@type": "PerformingArtsTheater",
       "@id": theaterIri,
       name: config.name,
-      url: `${APP_URL}/theater/${slug}`,
+      url: `${appUrl}/theater/${slug}`,
       ...(config.description && { description: config.description }),
-      address: parsePostalAddress(config.address, { region: "Hessen" }),
+      address: parsePostalAddress(config.address, { region: meta.region }),
       geo:
         config.lat && config.lon
           ? { "@type": "GeoCoordinates", latitude: config.lat, longitude: config.lon }
@@ -105,12 +124,12 @@ app.get("/theater/:slug", async (c) => {
       hasMap: config.lat && config.lon ? `https://www.google.com/maps?q=${config.lat},${config.lon}` : undefined,
       containedInPlace: {
         "@type": "City",
-        name: "Frankfurt am Main",
-        sameAs: "https://www.wikidata.org/wiki/Q1794",
+        name: cityFull,
+        sameAs: `https://www.wikidata.org/wiki/${meta.wikidata}`,
       },
       ...(config.telephone && { telephone: config.telephone }),
       ...(sameAs.length > 0 && { sameAs }),
-      image: `${APP_URL}/theater/${slug}/og.svg`,
+      image: `${appUrl}/theater/${slug}/og.svg`,
       hasOfferCatalog:
         performances.length > 0
           ? {
@@ -124,8 +143,8 @@ app.get("/theater/:slug", async (c) => {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Frankfurt Theater", item: APP_URL },
-        { "@type": "ListItem", position: 2, name: config.name, item: `${APP_URL}/theater/${slug}` },
+        { "@type": "ListItem", position: 1, name: brand, item: appUrl },
+        { "@type": "ListItem", position: 2, name: config.name, item: `${appUrl}/theater/${slug}` },
       ],
     },
     {
@@ -149,12 +168,13 @@ app.get("/theater/:slug", async (c) => {
       <html lang="de">
         <head>
           <Head
-            title={`${config.name} — Spielplan · Frankfurt Theater`}
-            description={`Aktueller Spielplan und Karten für ${config.name} in Frankfurt am Main. ${performances.length} kommende Vorstellung${
+            title={`${config.name} — Spielplan · ${brand}`}
+            description={`Aktueller Spielplan und Karten für ${config.name} in ${cityFull}. ${performances.length} kommende Vorstellung${
               performances.length === 1 ? "" : "en"
             }.`}
-            canonical={`${APP_URL}/theater/${slug}`}
-            ogImage={`${APP_URL}/theater/${slug}/og.svg`}
+            canonical={`${appUrl}/theater/${slug}`}
+            appUrl={appUrl}
+            ogImage={`${appUrl}/theater/${slug}/og.svg`}
             jsonLd={jsonLd}
             turnstileSiteKey={turnstileSiteKey}
             extraLinks={[
@@ -175,7 +195,7 @@ app.get("/theater/:slug", async (c) => {
         </head>
         <body>
           <Grain />
-          <Masthead sublabel="Frankfurter Bühnen, kuratiert nach Tag." />
+          <Masthead city={city} sublabel={`${cityAdj(city, "de")} Bühnen, kuratiert nach Tag.`} />
           <main class="programme programme--theater">
             <header class="theater-hero">
               <p class="theater-hero__line" />
@@ -196,7 +216,7 @@ app.get("/theater/:slug", async (c) => {
             <SharedAskAi
               label="Frag eine KI"
               aria={`Frag eine KI nach dem Spielplan im ${config.name}`}
-              prompt={`Was läuft in den nächsten Wochen im ${config.name} in Frankfurt am Main? Bitte gruppiere nach Vorstellungen. Quelle: ${APP_URL}/theater/${slug}`}
+              prompt={`Was läuft in den nächsten Wochen im ${config.name} in ${cityFull}? Bitte gruppiere nach Vorstellungen. Quelle: ${appUrl}/theater/${slug}`}
             />
             {performances.length === 0 ? (
               <div class="empty">

@@ -7,7 +7,7 @@ import type { Env } from "../types";
 const FEEDBACK_FROM = "no-reply@ins.theater";
 const FEEDBACK_TO = "feedback@ins.theater";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const DAY_HEADERS = {
   "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
@@ -16,14 +16,16 @@ const DAY_HEADERS = {
 app.get("/api/day", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
-  const performances = await getPerformancesForDate(date);
+  const city = c.get("city") ?? "frankfurt";
+  const performances = await getPerformancesForDate(date, city);
   return c.json({ date, performances }, { headers: DAY_HEADERS });
 });
 
-app.get("/api/theaters", (c) =>
-  c.json(
+app.get("/api/theaters", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.json(
     {
-      theaters: THEATERS.map((t) => ({
+      theaters: THEATERS.filter((t) => (t.city ?? "frankfurt") === city).map((t) => ({
         slug: t.slug,
         name: t.name,
         address: t.address,
@@ -36,8 +38,8 @@ app.get("/api/theaters", (c) =>
       })),
     },
     { headers: { "Cache-Control": "public, max-age=86400" } },
-  ),
-);
+  );
+});
 
 app.get("/api/theater/:slug{[^.]+}", async (c) => {
   const slug = c.req.param("slug");
@@ -58,7 +60,8 @@ app.get("/api/performances", async (c) => {
   if (from > to) return c.json({ error: "from > to" }, 400);
   const span = (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000;
   if (span > 60) return c.json({ error: "range too large (max 60 days)" }, 400);
-  const performances = await getPerformancesInRange(from, to, theater);
+  const city = c.get("city") ?? "frankfurt";
+  const performances = await getPerformancesInRange(from, to, theater, city);
   return c.json({ from, to, theater, performances }, { headers: DAY_HEADERS });
 });
 

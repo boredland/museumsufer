@@ -41,12 +41,14 @@ function joinPerformance(p: Performance): DayPerformance | null {
 }
 
 /** Performances on a given ISO date, sorted by start time then theater/show. */
-export async function getPerformancesForDate(date: string): Promise<DayPerformance[]> {
+export async function getPerformancesForDate(date: string, city?: string | null): Promise<DayPerformance[]> {
   const out: DayPerformance[] = [];
   for (const p of SCRAPE_DATA.performances) {
     if (p.date !== date) continue;
     const joined = joinPerformance(p);
-    if (joined) out.push(joined);
+    if (!joined) continue;
+    if (city && (joined.show.city ?? "frankfurt") !== city) continue;
+    out.push(joined);
   }
   return out.sort(
     (a, b) =>
@@ -56,11 +58,12 @@ export async function getPerformancesForDate(date: string): Promise<DayPerforman
   );
 }
 
-/** Performances inside `[fromDate, toDate]`, optionally filtered by theater slug. */
+/** Performances inside `[fromDate, toDate]`, optionally filtered by theater slug and city. */
 export async function getPerformancesInRange(
   fromDate: string,
   toDate: string,
   theaterSlug?: string | null,
+  city?: string | null,
 ): Promise<DayPerformance[]> {
   const wantedSlug = theaterSlug ?? null;
   const out: DayPerformance[] = [];
@@ -69,6 +72,7 @@ export async function getPerformancesInRange(
     const joined = joinPerformance(p);
     if (!joined) continue;
     if (wantedSlug && joined.theater.slug !== wantedSlug) continue;
+    if (city && (joined.show.city ?? "frankfurt") !== city) continue;
     out.push(joined);
   }
   return out.sort(
@@ -93,12 +97,20 @@ export async function getTheaterBySlug(slug: string): Promise<TheaterConfig | nu
 }
 
 /** Date histogram for the date strip — counts active (non-cancelled)
- *  performances per ISO date in the inclusive range. */
-export async function getDatesWithPerformances(fromDate: string, toDate: string): Promise<DateWithCount[]> {
+ *  performances per ISO date in the inclusive range, optionally per city. */
+export async function getDatesWithPerformances(
+  fromDate: string,
+  toDate: string,
+  city?: string | null,
+): Promise<DateWithCount[]> {
   const counts = new Map<string, number>();
   for (const p of SCRAPE_DATA.performances) {
     if (p.date < fromDate || p.date > toDate) continue;
     if (p.status === "cancelled") continue;
+    if (city) {
+      const show = SHOWS_BY_ID.get(p.show_id);
+      if (!show || (show.city ?? "frankfurt") !== city) continue;
+    }
     counts.set(p.date, (counts.get(p.date) ?? 0) + 1);
   }
   return [...counts.entries()].map(([date, n]) => ({ date, n })).sort((a, b) => a.date.localeCompare(b.date));

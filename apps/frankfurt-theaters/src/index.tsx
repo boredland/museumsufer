@@ -1,4 +1,5 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { Hono } from "hono";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
@@ -16,7 +17,7 @@ import theaterRoutes from "./routes/theater";
 import { SERVICE_WORKER_JS } from "./service-worker";
 import type { Env } from "./types";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.onError((err, c) => {
   console.error("Unhandled error:", err);
@@ -49,18 +50,8 @@ app.use(
   }),
 );
 
-// Apex → frankfurt subdomain. Anyone landing on ins.theater gets a permanent
-// redirect to the canonical host. Other apex paths in the same zone (e.g.,
-// /llms.txt, /robots.txt) follow the same rule so external referrers stay
-// consistent.
-app.use("*", async (c, next) => {
-  const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "ins.theater") {
-    const url = new URL(c.req.url);
-    return c.redirect(`https://frankfurt.ins.theater${url.pathname}${url.search}`, 301);
-  }
-  await next();
-});
+// Apex (ins.theater) → frankfurt.ins.theater; `<city>.ins.theater` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "ins.theater" }));
 
 // Theater-specific response headers: X-Robots-Tag on data API, Link header
 // pointing at the API discovery surfaces.
@@ -90,21 +81,25 @@ app.get("/", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
   const today = todayIso();
+  const city = c.get("city") ?? "frankfurt";
   const [performances, dateStrip] = await Promise.all([
-    getPerformancesForDate(date),
-    getDatesWithPerformances(today, dateOffset(60)),
+    getPerformancesForDate(date, city),
+    getDatesWithPerformances(today, dateOffset(60), city),
   ]);
   if (wantsMarkdown(c.req.raw)) {
-    return c.body(renderDayMarkdown(date, performances), {
+    return c.body(renderDayMarkdown(date, performances, city), {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=600, s-maxage=1800",
       },
     });
   }
-  return c.html(renderPage({ date, today, performances, dateStrip, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }), {
-    headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
-  });
+  return c.html(
+    renderPage({ date, today, performances, dateStrip, city, turnstileSiteKey: c.env.TURNSTILE_SITE_KEY }),
+    {
+      headers: { "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600" },
+    },
+  );
 });
 
 app.get("/sw.js", (c) =>
@@ -116,8 +111,9 @@ app.get("/sw.js", (c) =>
 app.get("/partial/content", async (c) => {
   const date = c.req.query("date") || todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.text("invalid date", 400);
-  const performances = await getPerformancesForDate(date);
-  return c.html(renderProgrammePartial(date, performances), {
+  const city = c.get("city") ?? "frankfurt";
+  const performances = await getPerformancesForDate(date, city);
+  return c.html(renderProgrammePartial(date, performances, city), {
     headers: { "Cache-Control": "public, max-age=300, s-maxage=900" },
   });
 });

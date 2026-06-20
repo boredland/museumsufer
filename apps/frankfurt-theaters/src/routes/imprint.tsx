@@ -1,40 +1,51 @@
-import { buildImprintSections } from "@museumsufer/core";
+import { buildImprintSections, cityAdj, cityHost, cityMeta, cityUrl } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { ClientScript, Footer, Grain, Head } from "../frontend";
 import type { Env } from "../types";
-import { APP_URL, REPO_URL } from "./static";
+import { REPO_URL } from "./static";
 
+const APEX = "ins.theater";
+
+// Operator is a single legal entity based in Frankfurt regardless of which
+// city's programme is served — its address is not localized.
 const OPERATOR = {
   name: "Jonas Strassel",
   email: "feedback@ins.theater",
   city: "Frankfurt am Main, Germany",
 };
 
-const SECTIONS = buildImprintSections({
-  operator: OPERATOR,
-  dataSourceCopy:
-    "Spielpläne, Vorstellungstermine, Kartenpreise und Verfügbarkeiten werden automatisiert von den öffentlichen " +
-    "Webseiten der jeweiligen Frankfurter Bühnen aggregiert. Die Rechte an den Inhalten verbleiben bei den jeweiligen " +
-    "Häusern. Diese Seite hat keinerlei kommerzielle Beziehung zu den gelisteten Theatern und übernimmt keine " +
-    "Verantwortung für die Richtigkeit der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf auf " +
-    "der Webseite des Hauses.",
-  sourceUrl: `${REPO_URL}/tree/main/apps/frankfurt-theaters`,
-});
+function sectionsFor(city: string) {
+  return buildImprintSections({
+    operator: OPERATOR,
+    dataSourceCopy:
+      `Spielpläne, Vorstellungstermine, Kartenpreise und Verfügbarkeiten werden automatisiert von den öffentlichen ` +
+      `Webseiten der jeweiligen ${cityAdj(city, "de")} Bühnen aggregiert. Die Rechte an den Inhalten verbleiben bei den jeweiligen ` +
+      "Häusern. Diese Seite hat keinerlei kommerzielle Beziehung zu den gelisteten Theatern und übernimmt keine " +
+      "Verantwortung für die Richtigkeit der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf auf " +
+      "der Webseite des Hauses.",
+    sourceUrl: `${REPO_URL}/tree/main/apps/frankfurt-theaters`,
+  });
+}
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/impressum", (c) => {
   const turnstileSiteKey = c.env.TURNSTILE_SITE_KEY;
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = cityUrl(APEX, city);
+  const brand = `${cityMeta(city).short} Theater`;
+  const SECTIONS = sectionsFor(city);
   return c.html(
     <>
       {raw("<!DOCTYPE html>")}
       <html lang="de">
         <head>
           <Head
-            title="Impressum · Frankfurt Theater"
-            description="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu frankfurt.ins.theater."
-            canonical={`${APP_URL}/impressum`}
+            title={`Impressum · ${brand}`}
+            description={`Kontakt, Verantwortlichkeit und rechtliche Hinweise zu ${cityHost(APEX, city)}.`}
+            canonical={`${appUrl}/impressum`}
+            appUrl={appUrl}
             turnstileSiteKey={turnstileSiteKey}
           />
           <meta name="robots" content="noindex,follow" />
@@ -42,9 +53,9 @@ app.get("/impressum", (c) => {
         <body>
           <Grain />
           <header class="masthead masthead--legal">
-            <a class="masthead__brand" href="/" aria-label="Frankfurt Theater Startseite">
+            <a class="masthead__brand" href="/" aria-label={`${brand} Startseite`}>
               <h1 class="wordmark">
-                <span>Frankfurt</span>
+                <span>{cityMeta(city).short}</span>
                 <span>Theater.</span>
               </h1>
               <p class="tagline">Impressum &amp; Verantwortliche</p>
