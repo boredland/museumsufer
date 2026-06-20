@@ -173,16 +173,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "wdc2026-instituto-cervantes",
-    name: "Instituto Cervantes",
-    address: "",
-    lat: 50.1193283,
-    lon: 8.6702494,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
-  {
     slug: "wdc2026-pavillon-wiesbaden",
     name: "Pavillon Wiesbaden",
     address: "",
