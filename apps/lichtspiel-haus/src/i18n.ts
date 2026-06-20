@@ -495,17 +495,31 @@ const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
 };
 
 /**
+ * City-specific "Why this site?" FAQ answer. The base copy names individual
+ * Frankfurt cinemas, which plain name-substitution can't transpose — each city
+ * gets its own hand-written venue list. Keyed by city slug, then locale.
+ */
+const WHY_FAQ_ANSWER: Record<string, Record<Locale, string>> = {
+  hamburg: {
+    de: "Hamburg hat eine lebendige Programmkino-Szene — das Abaton, das kommunale Metropolis, das 3001, die Zeise-Kinos, das Studio-Kino und das Savoy — aber kein gemeinsames Programmheft. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht.",
+    en: "Hamburg has a lively repertory-cinema scene — the Abaton, the municipal Metropolis, the 3001, the Zeise cinemas, the Studio-Kino and the Savoy — but no shared programme. This site lays every house onto one searchable day view.",
+  },
+};
+
+/** Whether a FAQ item is the "Why this site?" entry (Frankfurt-venue copy). */
+function isWhyFaq(q: string): boolean {
+  return q === "Warum diese Seite?" || q === "Why this site?";
+}
+
+/**
  * Rewrite the Frankfurt-authored copy for another city, applied once per
  * request so the localized `tr` reaches every component. Byte-identical for
  * the default city.
- *
- * NOTE: the "why this site" FAQ answer names specific Frankfurt cinemas (DFF,
- * Astor, …); for non-default cities that clause still lists Frankfurt venues
- * and needs Hamburg-specific editorial copy — tracked as a follow-up.
  */
 export function localizeTranslations(tr: Translations, city: string, locale: Locale): Translations {
   if (cityMeta(city).slug === DEFAULT_CITY) return tr;
   const s = (t: string): string => localizeCityText(t, city, locale, APEX, REGION_SUB[locale]);
+  const whyAnswer = WHY_FAQ_ANSWER[cityMeta(city).slug]?.[locale];
   return {
     ...tr,
     tagline: s(tr.tagline),
@@ -516,6 +530,11 @@ export function localizeTranslations(tr: Translations, city: string, locale: Loc
     askAiPrompt: (date) => s(tr.askAiPrompt(date)),
     askAiPromptFilm: (title, cinema, date) => s(tr.askAiPromptFilm(title, cinema, date)),
     askAiPromptCinema: (cinema) => s(tr.askAiPromptCinema(cinema)),
-    faqItems: tr.faqItems.map((item) => ({ q: s(item.q), a: s(item.a) })),
+    faqItems: tr.faqItems.map((item) => ({
+      q: s(item.q),
+      // The "why this site" answer names individual cinemas; use the
+      // city-specific copy when available rather than name-substituting.
+      a: isWhyFaq(item.q) && whyAnswer ? whyAnswer : s(item.a),
+    })),
   };
 }
