@@ -1,5 +1,6 @@
 import { decodeEntities, normalizeUrl, slugify, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { classifyChurchEvent } from "./_church-events";
 
 const BASE = "https://www.sankt-petri.de";
 const CAL_URL = `${BASE}/musik/konzertkalender`;
@@ -42,6 +43,10 @@ export async function scrapeHauptkircheStPetri(): Promise<VenueScrapeResult> {
     const detailUrl = normalizeUrl(titleMatch[1], BASE) || CAL_URL;
     const title = cleanText(titleMatch[2]);
 
+    // Drop services, devotions and tours — keep only genuine concerts.
+    const labels = classifyChurchEvent(title);
+    if (!labels) continue;
+
     // Description
     const descMatch = item.match(/<\/a>\s*<p class="">([\s\S]*?)<\/p>/i);
     const description = descMatch ? cleanText(descMatch[1]) : null;
@@ -69,7 +74,7 @@ export async function scrapeHauptkircheStPetri(): Promise<VenueScrapeResult> {
       venue_room: null,
       price_min: null,
       price_max: null,
-      labels: [{ label: "music:sacred", confidence: 0.9, classifier: "scraper-hardcoded" }],
+      labels,
     });
   }
 
