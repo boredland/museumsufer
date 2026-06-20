@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import { handleFeeds } from "../api";
 import type { Env } from "../types";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/feed.xml", async (c) => {
-  const response = await handleFeeds(c.req.raw);
+  const response = await handleFeeds(c.req.raw, c.get("city") ?? "frankfurt");
   return response ?? c.notFound();
 });
 
@@ -14,7 +14,7 @@ app.get("/rss.xml", (c) => {
 });
 
 app.get("/feed.ics", async (c) => {
-  const response = await handleFeeds(c.req.raw);
+  const response = await handleFeeds(c.req.raw, c.get("city") ?? "frankfurt");
   return response ?? c.notFound();
 });
 

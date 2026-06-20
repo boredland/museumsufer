@@ -575,3 +575,95 @@ const ALL: Record<Locale, Translations> = { de, en, fr };
 export function getTranslations(locale: Locale): Translations {
   return ALL[locale];
 }
+
+/**
+ * Generic, host-branded overrides for cities other than Frankfurt. The base
+ * copy is Frankfurt-specific institutional content ("Museumsufer", the
+ * Museumsufercard, "beide Mainufer") that doesn't transfer; for other cities
+ * we substitute neutral museum-aggregator copy keyed off the city name + host,
+ * matching the host-based branding the other verticals use.
+ *
+ * `name` is the localized city name (e.g. "Hamburg"); `host` is the canonical
+ * host (e.g. "hamburg.ins.museum"); `url` is `https://<host>`.
+ */
+function genericOverrides(locale: Locale, name: string, host: string): Translations {
+  const url = `https://${host}`;
+  if (locale === "en") {
+    return {
+      digestCueText: "Find out each morning what's on at the museums today.",
+      subtitle: `what's on at ${name}'s museums today`,
+      meta: `Current exhibitions and events at ${name}'s museums`,
+      pageTitle: `${host} — today's exhibitions & events in ${name}`,
+      metaLong: `All exhibitions and events at ${name}'s museums at a glance. Calendar, prices, directions and more.`,
+      llmPrompt: `What's on at ${name}'s museums today, and which exhibitions are ending soon? Source: ${url}`,
+      aboutHeading: `About ${host}`,
+      introText: `${host} collects the current exhibitions and events from ${name}'s museums onto one fast, searchable page — daily updated, with prices, calendar export and details. No app store, no account.`,
+      whyText: `${name} has many museums — and they deserve a better overview than the one they have. This app pulls exhibitions and events from every museum into one fast, searchable page. No app store, no account, no fuss.`,
+      faq1A: `Currently {n} museums in ${name} with active programmes: {venues}.`,
+      faq2Q: "What kinds of events are listed?",
+      faq2A:
+        "Special exhibitions, guided tours, workshops, talks and family programmes from the listed museums — updated daily.",
+      faq6A: `${name} has many museums — and they deserve a better overview than the one they have. This app pulls exhibitions and events into one fast, searchable page. No app store, no account, no fuss.`,
+      imprintTitle: `Imprint — ${host}`,
+      imprintDataSourceText:
+        "Content is collected automatically every day from the participating museums' websites. Translations are produced by DeepL. This site is not officially affiliated with any of the listed institutions.",
+    };
+  }
+  if (locale === "fr") {
+    return {
+      digestCueText: "Découvrez chaque matin ce qui se passe dans les musées aujourd'hui.",
+      subtitle: `ce qui se passe dans les musées de ${name} aujourd'hui`,
+      meta: `Expositions et événements actuels dans les musées de ${name}`,
+      pageTitle: `${host} — expositions & événements aujourd'hui à ${name}`,
+      metaLong: `Toutes les expositions et événements des musées de ${name}. Calendrier, prix, itinéraire et plus.`,
+      llmPrompt: `Qu'est-ce qui se passe dans les musées de ${name} aujourd'hui et quelles expositions se terminent bientôt ? Source : ${url}`,
+      aboutHeading: `À propos de ${host}`,
+      introText: `${host} rassemble les expositions et événements actuels des musées de ${name} sur une seule page consultable — mise à jour quotidienne, avec tarifs, export calendrier et détails. Sans téléchargement, sans compte.`,
+      whyText: `${name} compte de nombreux musées — qui méritent une meilleure vue d'ensemble. Cette application réunit les expositions et événements sur une seule page rapide et consultable. Sans téléchargement, sans compte.`,
+      faq1A: `Actuellement {n} musées à ${name} avec un programme : {venues}.`,
+      faq2Q: "Quels types d'événements sont listés ?",
+      faq2A:
+        "Expositions temporaires, visites guidées, ateliers, conférences et programmes familiaux des musées listés — mis à jour quotidiennement.",
+      faq6A: `${name} compte de nombreux musées — qui méritent une meilleure vue d'ensemble. Cette application les réunit sur une seule page consultable. Sans téléchargement, sans compte.`,
+      imprintTitle: `Mentions légales — ${host}`,
+      imprintDataSourceText:
+        "Le contenu est collecté automatiquement chaque jour à partir des sites des musées participants. Les traductions sont fournies par DeepL. Ce site n'est officiellement affilié à aucune des institutions listées.",
+    };
+  }
+  return {
+    digestCueText: "Erfahre morgens, was heute in den Museen los ist.",
+    subtitle: `was heute in ${name}s Museen los ist`,
+    meta: `Aktuelle Ausstellungen und Veranstaltungen in ${name}s Museen`,
+    pageTitle: `${host} — Ausstellungen & Events heute in ${name}`,
+    metaLong: `Alle Ausstellungen und Veranstaltungen in ${name}s Museen auf einen Blick. Kalender, Preise, Wegbeschreibung und mehr.`,
+    llmPrompt: `Was ist heute in ${name}s Museen los und welche Ausstellungen enden bald? Quelle: ${url}`,
+    aboutHeading: `Über ${host}`,
+    introText: `${host} bündelt die aktuellen Ausstellungen und Veranstaltungen der Museen in ${name} auf einer einzigen, durchsuchbaren Seite — täglich aktualisiert, mit Preisen, Kalender-Export und Details. Kein App-Store, kein Konto.`,
+    whyText: `${name} hat viele Museen — und die verdienen einen besseren Überblick. Diese App bündelt die Ausstellungen und Veranstaltungen aller Museen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.`,
+    faq1A: `Aktuell {n} Häuser in ${name} mit aktuellem Programm: {venues}.`,
+    faq2Q: "Welche Arten von Veranstaltungen sind gelistet?",
+    faq2A:
+      "Sonderausstellungen, Führungen, Workshops, Vorträge und Familienprogramme der gelisteten Häuser — täglich aktualisiert.",
+    faq6A: `${name} hat viele Museen — und die verdienen einen besseren Überblick. Diese App bündelt die Ausstellungen und Veranstaltungen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.`,
+    imprintTitle: `Impressum — ${host}`,
+    imprintDataSourceText:
+      "Inhalte werden täglich automatisch von den Webseiten der beteiligten Museen gesammelt. Übersetzungen erfolgen über DeepL. Diese Anwendung steht in keiner offiziellen Verbindung zu den gelisteten Häusern.",
+  };
+}
+
+/**
+ * Returns the translation table for `city`. Byte-identical to the base table
+ * for Frankfurt; for other cities the Frankfurt-specific brand/place copy is
+ * replaced with generic host-branded equivalents.
+ */
+export function localizeTranslations(tr: Translations, city: string, locale: Locale): Translations {
+  if (!city || city === "frankfurt") return tr;
+  const name = CITY_NAMES[city]?.[locale] ?? city;
+  const host = `${city}.ins.museum`;
+  return { ...tr, ...genericOverrides(locale, name, host) };
+}
+
+/** Localized display names for the cities this app can serve. */
+const CITY_NAMES: Record<string, Record<Locale, string>> = {
+  hamburg: { de: "Hamburg", en: "Hamburg", fr: "Hambourg" },
+};

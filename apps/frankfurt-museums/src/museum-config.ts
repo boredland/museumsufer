@@ -33,6 +33,8 @@ export interface MuseumConfig {
   website?: string;
   abbreviation?: string;
   group?: string;
+  /** City slug ("frankfurt" / "hamburg"). Absent ≡ "frankfurt". */
+  city?: string;
   lat: number;
   lng: number;
   rmvStopLid?: string;
@@ -469,6 +471,81 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lng: 8.6671,
     rmvStopLid: "A=1@O=Frankfurt (Main) Bockenheimer Warte@X=8649789@Y=50125353@U=80@L=3000111@",
   },
+
+  // ── Hamburg ───────────────────────────────────────────────────────────
+  // Slugs match the hub source_slugs so the directory join picks up their
+  // exhibitions/events. Transit times come from the walk-distance fallback
+  // (the RMV API only covers the Rhein-Main region).
+  "hamburger-kunsthalle": {
+    name: "Hamburger Kunsthalle",
+    city: "hamburg",
+    website: "https://www.hamburger-kunsthalle.de",
+    lat: 53.5538,
+    lng: 9.9982,
+  },
+  "mkg-hamburg": {
+    name: "Museum für Kunst und Gewerbe Hamburg",
+    city: "hamburg",
+    website: "https://www.mkg-hamburg.de",
+    lat: 53.5511,
+    lng: 10.0094,
+  },
+  "deichtorhallen-halle-aktuelle-kunst": {
+    name: "Deichtorhallen — Halle für aktuelle Kunst",
+    city: "hamburg",
+    website: "https://www.deichtorhallen.de",
+    lat: 53.5471,
+    lng: 10.0068,
+  },
+  "deichtorhallen-phoxxi": {
+    name: "Deichtorhallen — PHOXXI",
+    city: "hamburg",
+    website: "https://www.deichtorhallen.de",
+    lat: 53.5471,
+    lng: 10.0068,
+  },
+  "deichtorhallen-sammlung-falckenberg": {
+    name: "Deichtorhallen — Sammlung Falckenberg",
+    city: "hamburg",
+    website: "https://www.deichtorhallen.de",
+    lat: 53.4565,
+    lng: 9.9882,
+  },
+  "altonaer-museum": {
+    name: "Altonaer Museum",
+    city: "hamburg",
+    website: "https://www.shmh.de/altonaer-museum",
+    lat: 53.5489,
+    lng: 9.9344,
+  },
+  "museum-der-arbeit": {
+    name: "Museum der Arbeit",
+    city: "hamburg",
+    website: "https://www.shmh.de/museum-der-arbeit",
+    lat: 53.5828,
+    lng: 10.0385,
+  },
+  "museum-fuer-hamburgische-geschichte": {
+    name: "Museum für Hamburgische Geschichte",
+    city: "hamburg",
+    website: "https://www.shmh.de/hamburgmuseum",
+    lat: 53.5511,
+    lng: 9.9731,
+  },
+  "jenisch-haus": {
+    name: "Jenisch Haus",
+    city: "hamburg",
+    website: "https://www.shmh.de/jenisch-haus",
+    lat: 53.5525,
+    lng: 9.8656,
+  },
+  "deutsches-hafenmuseum": {
+    name: "Deutsches Hafenmuseum",
+    city: "hamburg",
+    website: "https://www.hafenmuseum-hamburg.de",
+    lat: 53.533,
+    lng: 9.975,
+  },
 };
 
 export function getMuseumConfig(slug: string): MuseumConfig | undefined {
@@ -489,6 +566,7 @@ export function getManualMuseums(): Array<{
   website: string | null;
   description: string | null;
   image: string | null;
+  city: string | null;
 }> {
   return Object.entries(MUSEUMS)
     .filter(([, c]) => c.name)
@@ -498,6 +576,7 @@ export function getManualMuseums(): Array<{
       website: c.website ?? null,
       description: c.description ?? null,
       image: c.image ?? null,
+      city: c.city ?? null,
     }));
 }
 

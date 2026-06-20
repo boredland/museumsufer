@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
+import { type CanonicalEvent, EVENTS, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox } from "@museumsufer/event-hub";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
 import { translateEvents } from "../src/translate";
 import type { Event, Exhibition, Museum, ScrapeData, Translation } from "../src/types";
@@ -28,7 +28,7 @@ const museumsBySlug = new Map<string, ParsedMuseum>(directory.museums.map((m) =>
 const hubEvents: CanonicalEvent[] = [];
 const hubExhibitions: ParsedExhibition[] = [];
 for (const ev of EVENTS) {
-  if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+  if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX) && !inBbox(ev.lat, ev.lon, HAMBURG_BBOX)) continue;
   if (!hasMuseumLabel(ev)) continue;
   if (isHubExhibition(ev)) {
     hubExhibitions.push(toParsedExhibitionFromHub(ev));
@@ -126,6 +126,7 @@ function buildScrapeData(input: {
         name: m.name,
         slug: m.slug,
         museumsufer_url: m.museumsufer_url,
+        ...(m.city && m.city !== "frankfurt" ? { city: m.city } : {}),
         ...(m.website_url ? { website_url: m.website_url } : {}),
         ...(m.description ? { description: m.description } : {}),
         ...(m.image_url ? { image_url: m.image_url } : {}),

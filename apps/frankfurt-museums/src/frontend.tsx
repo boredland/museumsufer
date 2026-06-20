@@ -1,6 +1,7 @@
 import {
   buildFaqPageSchema,
   buildHreflangAlternates,
+  cityName,
   dateFormatter,
   digestScheduleLabel,
   type FaqItem,
@@ -20,7 +21,14 @@ import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import { ContentBody, MuseumsSection } from "./components";
 import { berlinNow, todayIso } from "./date";
-import { DEFAULT_LOCALE, dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
+import {
+  DEFAULT_LOCALE,
+  dateLocale,
+  getTranslations,
+  type Locale,
+  localizeTranslations,
+  SUPPORTED_LOCALES,
+} from "./i18n";
 import { ICON, IconSprite } from "./icons";
 import { getMuseumConfig, getMuseumLocations } from "./museum-config";
 import { CLIENT_BUNDLE_HREF } from "./routes/static";
@@ -61,6 +69,7 @@ interface HtmlHeadOptions {
   description: string;
   canonicalUrl: string;
   ogImage?: string;
+  ogSiteName?: string;
   jsonSchemas?: Array<{ name: string; json: string }>;
   twitterCard?: "summary_large_image" | "summary";
 }
@@ -90,6 +99,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
     description,
     canonicalUrl,
     ogImage = "https://museumsufer.app/og-image.png",
+    ogSiteName = "Museumsufer Frankfurt",
     jsonSchemas = [],
     twitterCard = "summary_large_image",
   } = options;
@@ -101,7 +111,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       canonical={canonicalUrl}
       ogImage={ogImage}
       ogLocale={OG_LOCALE[locale]}
-      ogSiteName="Museumsufer Frankfurt"
+      ogSiteName={ogSiteName}
       ogImageSize={{ width: 1200, height: 630 }}
       twitterCard={twitterCard}
       twitter={{ title, description, image: ogImage }}
@@ -168,19 +178,26 @@ export function Masthead({
   locale,
   tr,
   currentPath = "/",
+  city = "frankfurt",
 }: {
   locale: Locale;
   tr: Record<string, string>;
   currentPath?: string;
+  city?: string;
 }) {
   const langItems = langSwitchItems({ locale, currentPath, supported: SUPPORTED_LOCALES, fallback: DEFAULT_LOCALE });
   const hrefByLocale = new Map(langItems.map((i) => [i.locale, i.href] as const));
+  // Frankfurt keeps the "Museumsufer" wordmark + its geo-coordinates;
+  // other cities get a generic city-named masthead.
+  const isFrankfurt = city === "frankfurt";
+  const title = isFrankfurt ? "Museumsufer" : cityName(city, locale, "short");
+  const location = isFrankfurt ? "Frankfurt am Main · 50.10°N 8.68°E" : cityName(city, locale, "full");
   return (
     <header class="masthead">
       <div class="masthead__head">
         <div class="masthead__brand">
           <Mark class="masthead__mark" />
-          <p class="section-eyebrow masthead__location">Frankfurt am Main · 50.10°N 8.68°E</p>
+          <p class="section-eyebrow masthead__location">{location}</p>
         </div>
         <div class="masthead__actions">
           <ThemeToggle label={tr.switchTheme} />
@@ -192,7 +209,7 @@ export function Masthead({
           />
         </div>
       </div>
-      <h1 class="masthead__title">Museumsufer</h1>
+      <h1 class="masthead__title">{title}</h1>
       <div class="masthead__band-row">
         <div class="river-band" aria-hidden="true" />
         <span class="masthead__band-label">{tr.subtitle}</span>
@@ -495,57 +512,74 @@ export function renderPage(
   dateCounts: Array<{ date: string; count: number }> = [],
   turnstileSiteKey?: string,
   currentPath = "/",
+  city = "frankfurt",
 ): HtmlEscapedString {
-  const tr = getTranslations(locale);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+  // Frankfurt keeps its SEO-primary museumsufer.app host + "Museumsufer
+  // Frankfurt" brand; other cities use the generic <city>.ins.museum host.
+  const isFrankfurt = city === "frankfurt";
+  const appUrl = isFrankfurt ? "https://museumsufer.app" : `https://${city}.ins.museum`;
+  const brand = isFrankfurt ? "Museumsufer Frankfurt" : `${cityName(city, locale, "short")} · ins.museum`;
+  const museumsListName = isFrankfurt
+    ? locale === "fr"
+      ? "Musées du Museumsufer"
+      : locale === "en"
+        ? "Museumsufer museums"
+        : "Museumsufer-Museen"
+    : locale === "fr"
+      ? `Musées de ${cityName(city, locale, "full")}`
+      : locale === "en"
+        ? `${cityName(city, locale, "short")} museums`
+        : `Museen in ${cityName(city, locale, "full")}`;
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    "@id": "https://museumsufer.app/#publisher",
+    "@id": `${appUrl}/#publisher`,
     name: "Jonas Strassel",
     email: "feedback@ins.museum",
-    url: "https://museumsufer.app/impressum",
+    url: `${appUrl}/impressum`,
     sameAs: ["https://github.com/boredland"],
   };
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "@id": "https://museumsufer.app/#org",
-    name: "Museumsufer Frankfurt",
-    url: "https://museumsufer.app/",
-    logo: { "@type": "ImageObject", url: "https://museumsufer.app/og-image.png", width: 1200, height: 630 },
-    founder: { "@id": "https://museumsufer.app/#publisher" },
+    "@id": `${appUrl}/#org`,
+    name: brand,
+    url: `${appUrl}/`,
+    logo: { "@type": "ImageObject", url: `${appUrl}/og-image.png`, width: 1200, height: 630 },
+    founder: { "@id": `${appUrl}/#publisher` },
     sameAs: ["https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"],
   };
   const webAppSchema = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "@id": "https://museumsufer.app/#webapp",
-    name: "Museumsufer Frankfurt",
-    url: "https://museumsufer.app/",
+    "@id": `${appUrl}/#webapp`,
+    name: brand,
+    url: `${appUrl}/`,
     description: tr.metaLong,
     applicationCategory: "EntertainmentApplication",
     operatingSystem: "All",
     inLanguage: ["de", "en", "fr"],
     offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
-    publisher: { "@id": "https://museumsufer.app/#org" },
+    publisher: { "@id": `${appUrl}/#org` },
   };
   const websiteSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Museumsufer Frankfurt",
-    url: "https://museumsufer.app/",
+    name: brand,
+    url: `${appUrl}/`,
     description: tr.metaLong,
     dateModified: todayIso(),
     inLanguage: ["de", "en", "fr"],
-    publisher: { "@id": "https://museumsufer.app/#org" },
+    publisher: { "@id": `${appUrl}/#org` },
     // Google's current SearchAction spec wants `target` as a bare
     // URL-template string. The legacy `{ @type: "EntryPoint" }`
     // wrapper still parses but is no longer documented as preferred.
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://museumsufer.app/?q={search_term_string}",
+      target: `${appUrl}/?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   });
@@ -556,26 +590,25 @@ export function renderPage(
 
   // ItemList of every museum in the directory. Signals the hub-and-
   // spoke relationship to Google + AI assistants; supports site-links
-  // rich results for navigational queries like "Museumsufer Frankfurt
-  // Museen". Built from the same `museums` prop the page renders.
+  // rich results for navigational queries. Built from the same `museums`
+  // prop the page renders.
   const itemListSchema = museums
     ? JSON.stringify({
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "@id": "https://museumsufer.app/#museums",
-        name:
-          locale === "fr" ? "Musées du Museumsufer" : locale === "en" ? "Museumsufer museums" : "Museumsufer-Museen",
+        "@id": `${appUrl}/#museums`,
+        name: museumsListName,
         numberOfItems: Object.keys(museums).length,
         itemListElement: Object.entries(museums).map(([slug, m], i) => ({
           "@type": "ListItem",
           position: i + 1,
-          url: `https://museumsufer.app/museum/${slug}`,
+          url: `${appUrl}/museum/${slug}`,
           name: m.name,
         })),
       })
     : null;
 
-  const canonicalUrl = locale === "de" ? "https://museumsufer.app/" : `https://museumsufer.app/?lang=${locale}`;
+  const canonicalUrl = locale === "de" ? `${appUrl}/` : `${appUrl}/?lang=${locale}`;
   const jsonSchemas = [
     { name: "website", json: websiteSchema },
     { name: "publisher", json: publisherSchema },
@@ -595,6 +628,8 @@ export function renderPage(
             title: tr.pageTitle,
             description: tr.metaLong,
             canonicalUrl,
+            ogImage: `${appUrl}/og-image.png`,
+            ogSiteName: brand,
             jsonSchemas,
           })}
           {eventSchemaJson ? (
@@ -609,7 +644,7 @@ export function renderPage(
           </a>
 
           <div class="page">
-            <Masthead locale={locale} tr={tr} currentPath={currentPath} />
+            <Masthead locale={locale} tr={tr} currentPath={currentPath} city={city} />
 
             <AskAI tr={tr} />
 
@@ -670,7 +705,8 @@ export function renderPage(
               )}
             </main>
 
-            <PassPromo locale={locale} tr={tr} />
+            {/* The Museumsufercard promo is a Frankfurt-only institution. */}
+            {isFrankfurt ? <PassPromo locale={locale} tr={tr} /> : null}
 
             <MuseumsSection museums={museums || {}} tr={tr} locale={locale} />
 
