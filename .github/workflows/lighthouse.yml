@@ -48,6 +48,11 @@ jobs:
           - { name: lehrhaus, url: "https://frankfurt.lehr.salon/" }
           - { name: lichtspiel-haus, url: "https://frankfurt.lichtspiel.haus/" }
           - { name: landau, url: "https://landau.today/" }
+          # Hamburg verticals
+          - { name: konzert-haus-hh, url: "https://hamburg.konzert.haus/" }
+          - { name: theaters-hh, url: "https://hamburg.ins.theater/" }
+          - { name: lehrhaus-hh, url: "https://hamburg.lehr.salon/" }
+          - { name: lichtspiel-haus-hh, url: "https://hamburg.lichtspiel.haus/" }
     steps:
       - uses: actions/checkout@v5
 
