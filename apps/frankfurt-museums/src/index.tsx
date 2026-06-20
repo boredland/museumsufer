@@ -1,5 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import { handleContactRequest, securityHeaders } from "@museumsufer/core";
+import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { z } from "zod";
@@ -41,7 +42,7 @@ const dayQuery = z.object({
   range: z.coerce.number().int().min(2).max(14).optional(),
 });
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 // Error middleware
 app.onError((err, c) => {
@@ -49,17 +50,17 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-// Apex → frankfurt subdomain. Anyone landing on ins.museum gets a permanent
-// redirect to the canonical host (museumsufer.app remains primary canonical
-// for SEO; this redirect just collapses the apex shortcut).
-app.use("*", async (c, next) => {
-  const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "ins.museum") {
-    const url = new URL(c.req.url);
-    return c.redirect(`https://frankfurt.ins.museum${url.pathname}${url.search}`, 301);
-  }
-  await next();
-});
+// Host → city. museumsufer.app stays the SEO-primary Frankfurt canonical
+// (alias, no redirect); `ins.museum` apex collapses to frankfurt.ins.museum;
+// `<city>.ins.museum` sets c.var.city. Hamburg content is not launched yet,
+// so this is byte-identical to the previous apex-only redirect for Frankfurt.
+app.use(
+  "*",
+  cityMiddleware({
+    apex: "ins.museum",
+    aliasHosts: { "museumsufer.app": "frankfurt" },
+  }),
+);
 
 // Security headers — applied to every response. CSP keeps the inline-script
 // allowance for the FOUC bootstrap; Permissions-Policy keeps geolocation
