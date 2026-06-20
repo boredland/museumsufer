@@ -54,6 +54,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "bistro leporello - alte druckerei|bad bergzabern": [49.102808, 7.999127],
   "bornheim kirchstraße|bornheim": [50.776518, 6.922559],
   "brennofen gbr|ilbesheim": [49.690821, 8.076285],
+  "buchbinderei müller|landau in der pfalz": [49.198283, 8.112344],
   "buchhandlung bücherknecht|landau in der pfalz": [49.198283, 8.112344],
   "buchhandlung lesezeit|bad bergzabern": [49.102808, 7.999127],
   "burg landeck|klingenmünster": [49.141025, 8.006176],
