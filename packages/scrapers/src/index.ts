@@ -110,6 +110,7 @@ import { scrapeJazzPalmengarten } from "./venues/jazz-palmengarten";
 import { scrapeJazzkeller } from "./venues/jazzkeller";
 import { scrapeJuedischeGemeinde } from "./venues/juedische-gemeinde-frankfurt";
 import { scrapeKahh } from "./venues/kahh";
+import { scrapeKoerberStiftung } from "./venues/koerber-stiftung";
 import { scrapeKampnagel } from "./venues/kampnagel";
 import { scrapeKarlMarxBuchhandlung } from "./venues/karl-marx-buchhandlung";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
@@ -256,6 +257,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hohe-luft-schiff", run: (_ctx: ScraperContext) => scrapeHoheLuftschiff() },
   { slug: "imperial-theater", run: (_ctx: ScraperContext) => scrapeImperialTheater() },
   { slug: "kahh", run: (_ctx: ScraperContext) => scrapeKahh() },
+  { slug: "koerber-stiftung", run: (_ctx: ScraperContext) => scrapeKoerberStiftung() },
   { slug: "kampnagel", run: (_ctx: ScraperContext) => scrapeKampnagel() },
   { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
   { slug: "hessisches-staatsballett", run: (_ctx: ScraperContext) => scrapeHessischesStaatsballett() },
@@ -431,6 +433,7 @@ export {
   scrapeJazzPalmengarten,
   scrapeJuedischeGemeinde,
   scrapeKahh,
+  scrapeKoerberStiftung,
   scrapeKampnagel,
   scrapeKarlMarxBuchhandlung,
   scrapeKellertheaterFrankfurt,
