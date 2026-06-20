@@ -51,6 +51,7 @@ jobs:
           # Hamburg verticals
           - { name: konzert-haus-hh, url: "https://hamburg.konzert.haus/" }
           - { name: theaters-hh, url: "https://hamburg.ins.theater/" }
+          - { name: museums-hh, url: "https://hamburg.ins.museum/" }
           - { name: lehrhaus-hh, url: "https://hamburg.lehr.salon/" }
           - { name: lichtspiel-haus-hh, url: "https://hamburg.lichtspiel.haus/" }
     steps:
