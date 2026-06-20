@@ -1,5 +1,6 @@
 import { decodeEntities, slugify, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { classifyChurchEvent } from "./_church-events";
 
 const BASE = "https://www.st-michaelis.de";
 const CAL_URL = `${BASE}/veranstaltungen-am-michel`;
@@ -31,6 +32,10 @@ export async function scrapeHauptkircheStMichaelis(): Promise<VenueScrapeResult>
     if (!titleMatch) continue;
     const title = cleanText(titleMatch[1]);
 
+    // Drop services, devotions and tours — keep only genuine concerts.
+    const labels = classifyChurchEvent(title);
+    if (!labels) continue;
+
     // Subtitle
     const subtitleMatch = row.match(/<div class="title">[\s\S]*?<p>([\s\S]*?)<\/p>/i);
     const subtitle = subtitleMatch ? cleanText(subtitleMatch[1]) : null;
@@ -59,7 +64,7 @@ export async function scrapeHauptkircheStMichaelis(): Promise<VenueScrapeResult>
       venue_room: null,
       price_min: null,
       price_max: null,
-      labels: [{ label: "music:sacred", confidence: 0.9, classifier: "scraper-hardcoded" }],
+      labels,
     });
   }
 

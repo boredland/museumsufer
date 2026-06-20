@@ -1,5 +1,6 @@
 import { decodeEntities, normalizeUrl, slugify, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { classifyChurchEvent } from "./_church-events";
 
 const BASE = "https://www.katharinen-hamburg.de";
 const CAL_URL = `${BASE}/musik/terminkalender/`;
@@ -66,6 +67,10 @@ export async function scrapeHauptkircheStKatharinen(): Promise<VenueScrapeResult
     const detailUrl = normalizeUrl(titleMatch[1], BASE) || CAL_URL;
     const title = cleanText(titleMatch[2]);
 
+    // Drop services, devotions and tours — keep only genuine concerts.
+    const labels = classifyChurchEvent(title);
+    if (!labels) continue;
+
     // Time and Location Description
     const descMatch = item.match(/<div[^>]*itemprop="description"[^>]*>\s*([\d:]+)\s*Uhr\s*\|\s*([\s\S]*?)<\/div>/i);
     let time: string | null = null;
@@ -98,7 +103,7 @@ export async function scrapeHauptkircheStKatharinen(): Promise<VenueScrapeResult
       venue_room: locationRoom || null,
       price_min: null,
       price_max: null,
-      labels: [{ label: "music:sacred", confidence: 0.9, classifier: "scraper-hardcoded" }],
+      labels,
     });
   }
 

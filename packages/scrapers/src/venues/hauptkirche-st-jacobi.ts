@@ -1,5 +1,6 @@
 import { decodeEntities, normalizeUrl, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { classifyChurchEvent } from "./_church-events";
 
 const BASE = "https://www.jacobus.de";
 const API_URL = `${BASE}/musik/konzertkalender?type=1574261111`;
@@ -70,9 +71,14 @@ export async function scrapeHauptkircheStJacobi(): Promise<VenueScrapeResult> {
     // Detail Link
     const detailUrl = `${BASE}/musik/konzertkalender?tx_pxcalendarjacobi_events%5Baction%5D=show&tx_pxcalendarjacobi_events%5BeventNr%5D=${ev.nr}&tx_pxcalendarjacobi_events%5Bcontroller%5D=Event`;
 
+    const title = cleanText(ev.title);
+    // Drop services, devotions and tours — keep only genuine concerts.
+    const labels = classifyChurchEvent(title);
+    if (!labels) continue;
+
     events.push({
       source_event_id: `jacobi-${ev.nr}`,
-      title: cleanText(ev.title),
+      title,
       subtitle: ev.subtitle ? cleanText(ev.subtitle) : null,
       description: description || null,
       date,
@@ -83,7 +89,7 @@ export async function scrapeHauptkircheStJacobi(): Promise<VenueScrapeResult> {
       venue_room: ev.room ? cleanText(ev.room) : null,
       price_min: null,
       price_max: null,
-      labels: [{ label: "music:sacred", confidence: 0.9, classifier: "scraper-hardcoded" }],
+      labels,
     });
   }
 
