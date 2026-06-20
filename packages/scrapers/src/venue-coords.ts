@@ -77,6 +77,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hamburgische-staatsoper": [53.5567, 9.9889],
   "akademie-der-wissenschaften-hamburg": [53.5963, 10.0218],
   kahh: [53.5478, 9.9806],
+  "koerber-stiftung": [53.5434, 9.9841],
   kampnagel: [53.5833, 10.0218],
   "st-pauli-theater": [53.5491, 9.963],
   "thalia-theater": [53.5521, 9.9986],
