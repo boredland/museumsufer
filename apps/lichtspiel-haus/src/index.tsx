@@ -1,9 +1,10 @@
-import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { cityUrl, dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { type Context, Hono } from "hono";
 import { getDatesWithScreenings, getScreeningsForDate, getScreeningsInRange } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
-import { detectLocale, getTranslations } from "./i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
@@ -52,31 +53,9 @@ app.use(
   }),
 );
 
-function isCloserToHamburg(lat: number, lon: number): boolean {
-  const distToHamburg = (lat - 53.55) ** 2 + (lon - 9.99) ** 2;
-  const distToFrankfurt = (lat - 50.11) ** 2 + (lon - 8.68) ** 2;
-  return distToHamburg < distToFrankfurt;
-}
-
-app.use("*", async (c, next) => {
-  const url = new URL(c.req.url);
-  const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "lichtspiel.haus") {
-    const cf = (c.req.raw as any).cf;
-    let city = "frankfurt";
-    if (cf?.latitude && cf?.longitude) {
-      if (isCloserToHamburg(Number(cf.latitude), Number(cf.longitude))) {
-        city = "hamburg";
-      }
-    } else if (cf?.city?.toLowerCase() === "hamburg") {
-      city = "hamburg";
-    }
-    return c.redirect(`https://${city}.lichtspiel.haus${url.pathname}${url.search}`, 301);
-  }
-  const city = host.endsWith(".lichtspiel.haus") ? host.slice(0, -".lichtspiel.haus".length) : "frankfurt";
-  c.set("city", city);
-  await next();
-});
+// Apex (lichtspiel.haus) redirects to the nearest city's subdomain using
+// Cloudflare edge geolocation; `<city>.lichtspiel.haus` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "lichtspiel.haus", apexBehavior: "geo" }));
 
 app.use("*", async (c, next) => {
   await next();
@@ -140,7 +119,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
     });
   }
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   return c.html(
     renderPage({
       date,
@@ -179,8 +158,9 @@ app.get("/partial/content", (c) => {
     ? getScreeningsInRange(date, endOfRange(date, range), { city, cinema, series })
     : getScreeningsForDate(date, { city, cinema, series });
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, screenings, tr, locale, range), {
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+  const appUrl = cityUrl("lichtspiel.haus", city);
+  return c.html(renderProgrammePartial(date, screenings, tr, locale, city, range, appUrl), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

@@ -5,6 +5,9 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityHost,
+  cityName,
+  cityUrl,
   dateFormatter,
   dateLocale,
   dateParts,
@@ -83,17 +86,20 @@ export interface HeadOptions {
   turnstileSiteKey?: string;
   locale?: Locale;
   currentPath?: string;
+  /** Canonical origin for this city (defaults to the Frankfurt apex). */
+  appUrl?: string;
 }
 
 const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB" };
 
 export function Head(opts: HeadOptions) {
-  const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
+  const base = opts.appUrl ?? APP_URL;
+  const ogImage = opts.ogImage ?? `${base}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
   const hreflangs = opts.currentPath
     ? buildHreflangAlternates({
         currentPath: opts.currentPath,
-        appUrl: APP_URL,
+        appUrl: base,
         supported: SUPPORTED_LOCALES,
         fallback: DEFAULT_LOCALE,
       })
@@ -141,11 +147,21 @@ function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: 
   );
 }
 
-export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale: Locale; currentPath: string }) {
+export function Masthead({
+  tr,
+  locale,
+  currentPath,
+  city,
+}: {
+  tr: Translations;
+  locale: Locale;
+  currentPath: string;
+  city: string;
+}) {
   return (
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
-        <p class="masthead__locality">Frankfurt</p>
+        <p class="masthead__locality">{cityName(city, locale, "short")}</p>
         <h1 class="wordmark">
           <span class="wordmark__lichtspiel">lichtspiel</span>
           <span class="wordmark__iris" aria-hidden="true">
@@ -322,6 +338,8 @@ function capitalize(s: string): string {
 function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
   const offset = berlinOffsetFor(s.date);
   const startTime = s.time ?? "00:00";
+  // A screening's canonical host follows its cinema's city.
+  const appUrl = cityUrl("lichtspiel.haus", s.cinema.city);
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "ScreeningEvent",
@@ -337,7 +355,7 @@ function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
         addressCountry: "DE",
       },
     },
-    url: `${APP_URL}/film/${s.id}`,
+    url: `${appUrl}/film/${s.id}`,
   };
   const description = s.description ?? s.subtitle ?? s.credits;
   if (description) jsonLd.description = description;
@@ -356,7 +374,7 @@ function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
   }
   if (s.image_url) {
     const proxied = imageProxyUrl(s.image_url);
-    jsonLd.image = proxied?.startsWith("/") ? `${APP_URL}${proxied}` : (proxied ?? s.image_url);
+    jsonLd.image = proxied?.startsWith("/") ? `${appUrl}${proxied}` : (proxied ?? s.image_url);
   }
   return jsonLd;
 }
@@ -367,6 +385,7 @@ export interface ScreeningRowOptions {
   /** Locale of the surrounding page — drives whether the row shows the
    *  English TMDb overview (when present) or the German cinema description. */
   locale: Locale;
+  appUrl?: string;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -531,11 +550,14 @@ export function PosterCard({
 }
 
 export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRowOptions; tr: Translations }) {
+  const appUrl = opts.appUrl ?? cityUrl("lichtspiel.haus", s.cinema.city);
+  const host = cityHost("lichtspiel.haus", s.cinema.city);
+  const screeningUtm = buildUtm(host);
   const time = s.time ?? "—";
   const endTime = s.end_time ? `${tr.endTimePrefix} ${s.end_time}` : "";
   const venueRoom = s.venue_room ?? null;
   const titleSource = s.detail_url ?? s.ticket_url ?? null;
-  const titleHref = titleSource ? utm(titleSource, "screening_title") : null;
+  const titleHref = titleSource ? screeningUtm(titleSource, "screening_title") : null;
   const priceNode = <PriceRange min={s.price_min} max={s.price_max} />;
   const hasPrice = (s.price_min != null && s.price_min > 0) || (s.price_max != null && s.price_max > 0);
   const isFree =
@@ -556,7 +578,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   const showDescription = description && description !== s.subtitle;
   const showCredits = s.credits && s.credits !== s.subtitle;
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
-  const reportContext = `${APP_URL}/film/${s.id}`;
+  const reportContext = `${appUrl}/film/${s.id}`;
   const filmHref = `/film/${s.id}${langSuffix(opts.locale)}`;
   const calendarEvent: CalendarEvent = {
     date: s.date,
@@ -568,7 +590,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
     description: s.subtitle ?? null,
     detail_url: (() => {
       const src = s.detail_url ?? s.ticket_url ?? null;
-      return src ? utm(src, "calendar") : null;
+      return src ? screeningUtm(src, "calendar") : null;
     })(),
   };
 
@@ -772,7 +794,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
             </button>
           ) : null}
           {s.ticket_url && !isFree ? (
-            <a class="action" href={utm(s.ticket_url, "karten")} target="_blank" rel="noopener">
+            <a class="action" href={screeningUtm(s.ticket_url, "karten")} target="_blank" rel="noopener">
               <span class="action__note" aria-hidden="true">
                 ◉
               </span>
@@ -795,11 +817,13 @@ export function DateGroupedScreenings({
   locale,
   tr,
   hideCinema,
+  appUrl,
 }: {
   screenings: DayScreening[];
   locale: Locale;
   tr: Translations;
   hideCinema?: boolean;
+  appUrl?: string;
 }) {
   if (screenings.length === 0) return null;
   const dl = dateLocale(locale);
@@ -817,7 +841,7 @@ export function DateGroupedScreenings({
                 <time dateTime={s.date}>{dayHeader.format(new Date(`${s.date}T12:00:00Z`))}</time>
               </li>
             ) : null}
-            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale }} tr={tr} />
+            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl }} tr={tr} />
           </>
         );
       })}
@@ -1374,18 +1398,18 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
   );
 }
 
-function SiblingStrap({ tr }: { tr: Translations }) {
+function SiblingStrap({ tr, city }: { tr: Translations; city: string }) {
   const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
         {parts[0]}
-        <a href="https://frankfurt.ins.theater" target="_blank" rel="noopener">
+        <a href={cityUrl("ins.theater", city)} target="_blank" rel="noopener">
           {tr.siblingTheaterLabel}
         </a>
         {parts[1]}
-        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+        <a href={cityUrl("ins.museum", city)} target="_blank" rel="noopener">
           {tr.siblingMuseumLabel}
         </a>
         {parts[2]}
@@ -1420,12 +1444,16 @@ export function ProgrammePartial({
   tr,
   locale = DEFAULT_LOCALE,
   range = null,
+  city,
+  appUrl,
 }: {
   date: string;
   screenings: DayScreening[];
   tr: Translations;
   locale?: Locale;
   range?: number | null;
+  city: string;
+  appUrl?: string;
 }) {
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
@@ -1466,9 +1494,9 @@ export function ProgrammePartial({
             <p class="empty__hint">{tr.emptyHint}</p>
           </div>
         ) : (
-          <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} />
+          <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} appUrl={appUrl} />
         )}
-        <SiblingStrap tr={tr} />
+        <SiblingStrap tr={tr} city={city} />
       </>
     );
   }
@@ -1498,13 +1526,13 @@ export function ProgrammePartial({
         <>
           <ol class="screenings" id="screenings">
             {visible.map((s, i) => (
-              <Screening key={s.id} s={s} opts={{ index: i, locale }} tr={tr} />
+              <Screening key={s.id} s={s} opts={{ index: i, locale, appUrl }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
         </>
       )}
-      <SiblingStrap tr={tr} />
+      <SiblingStrap tr={tr} city={city} />
     </>
   );
 }
@@ -1550,10 +1578,20 @@ export function renderProgrammePartial(
   screenings: DayScreening[],
   tr: Translations = DEFAULT_TR,
   locale: Locale = DEFAULT_LOCALE,
+  city: string = "frankfurt",
   range: number | null = null,
+  appUrl?: string,
 ): HtmlEscapedString {
   return (
-    <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} range={range} />
+    <ProgrammePartial
+      date={date}
+      screenings={screenings}
+      tr={tr}
+      locale={locale}
+      city={city}
+      range={range}
+      appUrl={appUrl}
+    />
   ) as unknown as HtmlEscapedString;
 }
 
@@ -1600,7 +1638,8 @@ function RangeToggle({
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, screenings, dateStrip, locale, tr, turnstileSiteKey, range = null } = props;
+  const { date, today, screenings, dateStrip, city, locale, tr, turnstileSiteKey, range = null } = props;
+  const appUrl = cityUrl("lichtspiel.haus", city);
   const niceDate = niceDateFor(date, locale);
   const currentPath = range ? `/tag/${date}?range=${range}` : `/tag/${date}`;
   // Title needs "Frankfurt" + "Kino"/cinema for the dominant SERP
@@ -1611,18 +1650,18 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   // Non-today dates remain self-canonical at /tag/<date>.
   const isToday = date === today;
   const title = isToday ? tr.homeTitle : `${tr.homeTitle} — ${niceDate}`;
-  const canonical = isToday ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+  const canonical = isToday ? `${appUrl}/${langSuffix(locale)}` : `${appUrl}/tag/${date}${langSuffix(locale)}`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${APP_URL}/#website`,
-    url: APP_URL,
+    "@id": `${appUrl}/#website`,
+    url: appUrl,
     name: "lichtspiel.haus",
     inLanguage: ["de", "en"],
     publisher: { "@type": "Organization", name: "lichtspiel.haus" },
     potentialAction: {
       "@type": "SearchAction",
-      target: { "@type": "EntryPoint", urlTemplate: `${APP_URL}/?q={search_term_string}` },
+      target: { "@type": "EntryPoint", urlTemplate: `${appUrl}/?q={search_term_string}` },
       "query-input": "required name=search_term_string",
     },
   };
@@ -1637,12 +1676,13 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             canonical={canonical}
             locale={locale}
             currentPath={currentPath}
+            appUrl={appUrl}
             turnstileSiteKey={turnstileSiteKey}
             jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
           />
         </head>
         <body>
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <DateStrip strip={dateStrip} active={range ? "" : date} today={today} tr={tr} locale={locale} />
           <RangeToggle date={date} range={range} locale={locale} tr={tr} />
           <DigestCue tr={tr} locale={locale} />
@@ -1650,7 +1690,15 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <SearchBar tr={tr} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} screenings={screenings} tr={tr} locale={locale} range={range} />
+              <ProgrammePartial
+                date={date}
+                screenings={screenings}
+                tr={tr}
+                locale={locale}
+                city={city}
+                range={range}
+                appUrl={appUrl}
+              />
             </div>
             <SeenBanner tr={tr} />
           </main>

@@ -1,9 +1,10 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { type Context, Hono } from "hono";
 import { getDatesWithEvents, getEventsForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
 import { renderPage, renderProgrammePartial } from "./frontend";
-import { detectLocale, getTranslations } from "./i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "./i18n";
 import { handleImageProxy } from "./image-proxy";
 import { renderDayMarkdown, wantsMarkdown } from "./markdown";
 import apiRoutes from "./routes/api";
@@ -53,16 +54,8 @@ app.use(
   }),
 );
 
-app.use("*", async (c, next) => {
-  const url = new URL(c.req.url);
-  const host = (c.req.header("host") ?? "").toLowerCase();
-  if (host === "konzert.haus") {
-    return c.redirect(`https://frankfurt.konzert.haus${url.pathname}${url.search}`, 301);
-  }
-  const city = host.endsWith(".konzert.haus") ? host.slice(0, -".konzert.haus".length) : "frankfurt";
-  c.set("city", city);
-  await next();
-});
+// Apex (konzert.haus) → frankfurt.konzert.haus; `<city>.konzert.haus` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "konzert.haus" }));
 
 app.use("*", async (c, next) => {
   await next();
@@ -102,7 +95,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
     });
   }
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   return c.html(
     renderPage({
       date,
@@ -135,8 +128,8 @@ app.get("/partial/content", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const events = getEventsForDate(date, { city, genre });
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
-  return c.html(renderProgrammePartial(date, events, tr, locale), {
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
+  return c.html(renderProgrammePartial(date, events, tr, locale, city), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

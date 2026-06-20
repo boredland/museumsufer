@@ -1,10 +1,10 @@
-import { buildImprintSections } from "@museumsufer/core";
+import { buildImprintSections, cityUrl } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { Footer, Grain, Head, Masthead } from "../frontend";
-import { detectLocale, getTranslations } from "../i18n";
+import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import type { Env } from "../types";
-import { APP_URL, REPO_URL } from "./static";
+import { REPO_URL } from "./static";
 
 const OPERATOR = {
   name: "Jonas Strassel",
@@ -22,11 +22,13 @@ const SECTIONS = buildImprintSections({
   sourceUrl: `${REPO_URL}/tree/main/apps/konzert-haus`,
 });
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/impressum", (c) => {
   const locale = detectLocale(c.req.raw);
-  const tr = getTranslations(locale);
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = cityUrl("konzert.haus", city);
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = "/impressum";
   return c.html(
     <>
@@ -36,15 +38,16 @@ app.get("/impressum", (c) => {
           <Head
             title="Impressum · konzert.haus"
             description="Kontakt, Verantwortlichkeit und rechtliche Hinweise zu konzert.haus."
-            canonical={`${APP_URL}/impressum`}
+            canonical={`${appUrl}/impressum`}
             locale={locale}
             currentPath={currentPath}
+            appUrl={appUrl}
           />
           <meta name="robots" content="noindex,follow" />
         </head>
         <body>
           <Grain />
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <main class="programme">
             <p>
               <a href="/">← Zum Programm</a>

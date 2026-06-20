@@ -5,6 +5,8 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityName,
+  cityUrl,
   dateFormatter,
   dateLocale,
   dateParts,
@@ -100,17 +102,20 @@ export interface HeadOptions {
   turnstileSiteKey?: string;
   locale?: Locale;
   currentPath?: string;
+  /** Canonical origin for this city (defaults to the Frankfurt apex). */
+  appUrl?: string;
 }
 
 const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR" };
 
 export function Head(opts: HeadOptions) {
-  const ogImage = opts.ogImage ?? `${APP_URL}/og-image.png`;
+  const base = opts.appUrl ?? APP_URL;
+  const ogImage = opts.ogImage ?? `${base}/og-image.png`;
   const jsonLdArr = opts.jsonLd ? (Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd]) : [];
   const hreflangs = opts.currentPath
     ? buildHreflangAlternates({
         currentPath: opts.currentPath,
-        appUrl: APP_URL,
+        appUrl: base,
         supported: SUPPORTED_LOCALES,
         fallback: DEFAULT_LOCALE,
       })
@@ -162,11 +167,21 @@ function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: 
   );
 }
 
-export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale: Locale; currentPath: string }) {
+export function Masthead({
+  tr,
+  locale,
+  currentPath,
+  city,
+}: {
+  tr: Translations;
+  locale: Locale;
+  currentPath: string;
+  city: string;
+}) {
   return (
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
-        <p class="masthead__locality">Frankfurt</p>
+        <p class="masthead__locality">{cityName(city, locale, "short")}</p>
         <h1 class="wordmark">
           <span class="wordmark__konzert">konzert</span>
           <span class="wordmark__dot">.</span>
@@ -304,14 +319,14 @@ function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
 
-function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
+function buildEventJsonLd(e: DayEvent, appUrl: string): Record<string, unknown> {
   const offset = berlinOffsetFor(e.date);
   const startTime = e.time ?? "00:00";
-  const venueIri = `${APP_URL}/spielort/${e.venue.slug}#venue`;
+  const venueIri = `${appUrl}/spielort/${e.venue.slug}#venue`;
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "MusicEvent",
-    "@id": `${APP_URL}/#event/${e.id}`,
+    "@id": `${appUrl}/#event/${e.id}`,
     name: e.title,
     startDate: `${e.date}T${startTime}:00${offset}`,
     eventStatus: "https://schema.org/EventScheduled",
@@ -321,7 +336,7 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
     // block from there instead of treating each event as a detached
     // node in the graph.
     location: { "@id": venueIri },
-    url: `${APP_URL}/tag/${e.date}#event-${e.id}`,
+    url: `${appUrl}/tag/${e.date}#event-${e.id}`,
   };
   const description = e.description ?? e.subtitle ?? e.performers;
   if (description) jsonLd.description = description;
@@ -345,7 +360,7 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
   }
   if (e.image_url) {
     const proxied = imageProxyUrl(e.image_url);
-    jsonLd.image = proxied?.startsWith("/") ? `${APP_URL}${proxied}` : (proxied ?? e.image_url);
+    jsonLd.image = proxied?.startsWith("/") ? `${appUrl}${proxied}` : (proxied ?? e.image_url);
   }
   return jsonLd;
 }
@@ -359,6 +374,8 @@ export interface EventRowOptions {
   /** Locale of the surrounding page -- threads through to internal
    *  link hrefs so an explicit `?lang=` survives every click. */
   locale: Locale;
+  /** Canonical origin for the current city (used in per-event JSON-LD). */
+  appUrl: string;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -398,7 +415,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
   const composerLine = e.subtitle ?? null;
   const showCast = e.performers && e.performers !== e.subtitle;
   const reportRegarding = `${e.title} — ${e.venue.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
-  const reportContext = `${APP_URL}/api/events/${e.id}`;
+  const reportContext = `${opts.appUrl}/api/events/${e.id}`;
   const calendarEvent: CalendarEvent = {
     date: e.date,
     time: e.time ?? null,
@@ -426,7 +443,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
       <script
         type="application/ld+json"
         data-id={String(e.id)}
-        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildEventJsonLd(e)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildEventJsonLd(e, opts.appUrl)) }}
       />
       <span class="prog-entry__numeral" aria-hidden="true" />
       <header class="prog-entry__head">
@@ -1003,12 +1020,15 @@ export function ProgrammePartial({
   events,
   tr,
   locale = DEFAULT_LOCALE,
+  city = "frankfurt",
 }: {
   date: string;
   events: DayEvent[];
   tr: Translations;
   locale?: Locale;
+  city?: string;
 }) {
+  const appUrl = cityUrl("konzert.haus", city);
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
   const dl = dateLocale(locale);
@@ -1040,7 +1060,7 @@ export function ProgrammePartial({
         <>
           <ol class="concerts" id="concerts">
             {visible.map((e, i) => (
-              <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, locale }} tr={tr} />
+              <Event key={e.id} e={e} opts={{ index: i, hero: i === 0, locale, appUrl }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
@@ -1085,12 +1105,16 @@ export function renderProgrammePartial(
   events: DayEvent[],
   tr: Translations = DEFAULT_TR,
   locale: Locale = DEFAULT_LOCALE,
+  city = "frankfurt",
 ): HtmlEscapedString {
-  return (<ProgrammePartial date={date} events={events} tr={tr} locale={locale} />) as unknown as HtmlEscapedString;
+  return (
+    <ProgrammePartial date={date} events={events} tr={tr} locale={locale} city={city} />
+  ) as unknown as HtmlEscapedString;
 }
 
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, events, dateStrip, genre, locale, tr, turnstileSiteKey } = props;
+  const { date, today, events, dateStrip, genre, locale, tr, turnstileSiteKey, city } = props;
+  const appUrl = cityUrl("konzert.haus", city);
   const niceDate = niceDateFor(date, locale);
   const currentPath = genre ? `/tag/${date}?genre=${genre}` : `/tag/${date}`;
   // Title carries the geo + intent keywords for "Konzert Frankfurt heute"
@@ -1099,18 +1123,18 @@ export function renderPage(props: PageProps): HtmlEscapedString {
   const title = isToday ? tr.homeTitle : `${tr.homeTitle} — ${niceDate}`;
   // Self-canonical: today's view collapses /tag/<today> → / so the
   // ephemeral date URL doesn't compete with the home for link equity.
-  const canonical = isToday ? `${APP_URL}/${langSuffix(locale)}` : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+  const canonical = isToday ? `${appUrl}/${langSuffix(locale)}` : `${appUrl}/tag/${date}${langSuffix(locale)}`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${APP_URL}/#website`,
-    url: APP_URL,
+    "@id": `${appUrl}/#website`,
+    url: appUrl,
     name: "konzert.haus",
     inLanguage: ["de", "en", "fr"],
     publisher: { "@type": "Organization", name: "konzert.haus" },
     potentialAction: {
       "@type": "SearchAction",
-      target: `${APP_URL}/?q={search_term_string}`,
+      target: `${appUrl}/?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -1126,19 +1150,20 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
+            appUrl={appUrl}
             jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
           />
         </head>
         <body>
           <Grain />
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <GenreFilter date={date} active={genre} tr={tr} locale={locale} />
           <DateStrip strip={dateStrip} active={date} today={today} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />
           <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} />
+              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} city={city} />
             </div>
           </main>
           <Faq tr={tr} locale={locale} />

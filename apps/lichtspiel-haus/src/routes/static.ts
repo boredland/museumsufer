@@ -1,33 +1,69 @@
-import { buildApiCatalog, buildManifest, buildRobotsTxt, dateOffset, todayIso } from "@museumsufer/core";
+import {
+  buildApiCatalog,
+  buildManifest,
+  buildRobotsTxt,
+  cityHost,
+  cityMeta,
+  cityName,
+  cityUrl,
+  dateOffset,
+  todayIso,
+} from "@museumsufer/core";
 import { Hono } from "hono";
 import { CINEMAS } from "../cinema-config";
 import { getAllSeries, getScreeningsInRange } from "../db";
+import { getTranslations, localizeTranslations } from "../i18n";
 import type { Env } from "../types";
 
-const APP_URL = "https://frankfurt.lichtspiel.haus";
 const REPO_URL = "https://github.com/boredland/museumsufer";
 
-const MANIFEST = buildManifest({
-  name: "lichtspiel.haus",
-  shortName: "lichtspiel.haus",
-  description: "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
-  themeColor: "#0E0B07",
-  backgroundColor: "#0E0B07",
-  lang: "de",
-  icons: [
-    { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
-    { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-    { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-    { src: "/icon-192-maskable.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-    { src: "/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-  ],
-  screenshots: [
-    { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "lichtspiel.haus" },
-    { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "lichtspiel.haus" },
-  ],
-});
+const manifestCache = new Map<string, string>();
+function manifestFor(city: string): string {
+  const cached = manifestCache.get(city);
+  if (cached) return cached;
+  const tr = localizeTranslations(
+    {
+      homeDescription:
+        "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
+    } as any,
+    city,
+    "de",
+  );
+  const manifest = buildManifest({
+    name: "lichtspiel.haus",
+    shortName: "lichtspiel.haus",
+    description: tr.homeDescription,
+    themeColor: "#0E0B07",
+    backgroundColor: "#0E0B07",
+    lang: "de",
+    icons: [
+      { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-192-maskable.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+      { src: "/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+    screenshots: [
+      { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: "lichtspiel.haus" },
+      { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: "lichtspiel.haus" },
+    ],
+  });
+  manifestCache.set(city, manifest);
+  return manifest;
+}
 
-function buildLlmsTxt(): string {
+const llmsCache = new Map<string, string>();
+function llmsFor(city: string): string {
+  const cached = llmsCache.get(city);
+  if (cached) return cached;
+  const appUrl = cityUrl("lichtspiel.haus", city);
+  const tr = localizeTranslations(
+    {
+      homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${CINEMAS.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
+    } as any,
+    city,
+    "de",
+  );
   const today = todayIso();
   const series = getAllSeries(today);
   const cinemaLines = CINEMAS.slice()
@@ -35,16 +71,16 @@ function buildLlmsTxt(): string {
     .map((c) => `- ${c.slug}: ${c.name}`)
     .join("\n");
   const seriesLines = series.map((s) => `- ${s.slug}: ${s.name}`).join("\n");
-  return `# lichtspiel.haus
+  const txt = `# lichtspiel.haus
 
-> Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${CINEMAS.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.
+> ${tr.homeDescription}
 
 Source: ${REPO_URL}
 License: Application code MIT. Screening data aggregated from public cinema sources.
 
 ## API
 
-Base URL: ${APP_URL}
+Base URL: ${appUrl}
 
 ### Screenings
 
@@ -91,20 +127,27 @@ ${seriesLines || "(none active)"}
 - Versions: OmU = original w/ German subtitles, OmeU = original w/ English subtitles, DF = German-dubbed, OV = original, stumm = silent.
 - Data refreshes multiple times daily via a GitHub Action.
 `;
+  llmsCache.set(city, txt);
+  return txt;
 }
 
-const API_CATALOG = buildApiCatalog({ apiBase: APP_URL });
-const ROBOTS_TXT = buildRobotsTxt({ siteUrl: APP_URL });
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
-const app = new Hono<{ Bindings: Env }>();
-
-app.get("/.well-known/api-catalog", (c) =>
-  c.body(API_CATALOG, {
+app.get("/.well-known/api-catalog", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = cityUrl("lichtspiel.haus", city);
+  return c.body(buildApiCatalog({ apiBase: appUrl }), {
     headers: { "Content-Type": "application/linkset+json", "Cache-Control": "public, max-age=86400" },
-  }),
-);
+  });
+});
 
-app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "public, max-age=86400" } }));
+app.get("/robots.txt", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = cityUrl("lichtspiel.haus", city);
+  return c.text(buildRobotsTxt({ siteUrl: appUrl }), {
+    headers: { "Cache-Control": "public, max-age=86400" },
+  });
+});
 
 // Window for date pages -- 14 days, matching the rolling window most
 // upstream cinema schedules publish. Beyond that the /tag/:date pages
@@ -113,20 +156,22 @@ app.get("/robots.txt", (c) => c.text(ROBOTS_TXT, { headers: { "Cache-Control": "
 const SITEMAP_DATE_DAYS = 14;
 
 app.get("/sitemap.xml", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = cityUrl("lichtspiel.haus", city);
   const today = todayIso();
   const cinemaUrls = CINEMAS.slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
-    .map((v) => `  <url>\n    <loc>${APP_URL}/kino/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
+    .map((v) => `  <url>\n    <loc>${appUrl}/kino/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const seriesUrls = getAllSeries(today)
-    .map((s) => `  <url>\n    <loc>${APP_URL}/reihe/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
+    .map((s) => `  <url>\n    <loc>${appUrl}/reihe/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const dateUrls = Array.from({ length: SITEMAP_DATE_DAYS }, (_, i) => dateOffset(i))
     // Each /tag/:date page's lastmod IS the date itself -- by the time
     // the day arrives the data is settled, before then the page may
     // still be backfilled. Stamping `today` everywhere would be the
     // mass-stamping antipattern Google ignores.
-    .map((d) => `  <url>\n    <loc>${APP_URL}/tag/${d}</loc>\n    <lastmod>${d}</lastmod>\n  </url>`)
+    .map((d) => `  <url>\n    <loc>${appUrl}/tag/${d}</loc>\n    <lastmod>${d}</lastmod>\n  </url>`)
     .join("\n");
 
   // /film/:id pages -- highest-intent landing pages. Cap to the same
@@ -134,25 +179,25 @@ app.get("/sitemap.xml", (c) => {
   // already happened and don't need indexing.
   const horizon = dateOffset(SITEMAP_DATE_DAYS);
   const filmUrls = getScreeningsInRange(today, horizon)
-    .map((s) => `  <url>\n    <loc>${APP_URL}/film/${s.id}</loc>\n    <lastmod>${s.date}</lastmod>\n  </url>`)
+    .map((s) => `  <url>\n    <loc>${appUrl}/film/${s.id}</loc>\n    <lastmod>${s.date}</lastmod>\n  </url>`)
     .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${APP_URL}/</loc>
+    <loc>${appUrl}/</loc>
     <lastmod>${today}</lastmod>
   </url>
   <url>
-    <loc>${APP_URL}/kinos</loc>
+    <loc>${appUrl}/kinos</loc>
     <lastmod>${today}</lastmod>
   </url>
   <url>
-    <loc>${APP_URL}/reihe</loc>
+    <loc>${appUrl}/reihe</loc>
     <lastmod>${today}</lastmod>
   </url>
   <url>
-    <loc>${APP_URL}/impressum</loc>
+    <loc>${appUrl}/impressum</loc>
     <lastmod>${today}</lastmod>
   </url>
 ${dateUrls}
@@ -163,23 +208,26 @@ ${filmUrls}
   return c.body(xml, { headers: { "Content-Type": "application/xml", "Cache-Control": "public, max-age=86400" } });
 });
 
-app.get("/manifest.json", (c) =>
-  c.body(MANIFEST, {
+app.get("/manifest.json", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.body(manifestFor(city), {
     headers: { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=86400" },
-  }),
-);
+  });
+});
 
-app.get("/llms.txt", (c) =>
-  c.body(buildLlmsTxt(), {
+app.get("/llms.txt", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.body(llmsFor(city), {
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
-  }),
-);
+  });
+});
 
-app.get("/.well-known/llms.txt", (c) =>
-  c.body(buildLlmsTxt(), {
+app.get("/.well-known/llms.txt", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.body(llmsFor(city), {
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" },
-  }),
-);
+  });
+});
 
 export default app;
-export { APP_URL, REPO_URL };
+export { REPO_URL };
