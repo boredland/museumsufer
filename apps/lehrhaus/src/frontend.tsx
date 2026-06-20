@@ -90,6 +90,7 @@ interface PageProps {
   locale: Locale;
   tr: Translations;
   turnstileSiteKey?: string;
+  city?: string;
 }
 
 export interface HeadOptions {
@@ -167,11 +168,22 @@ function LangSwitch({ locale, currentPath, tr }: { locale: Locale; currentPath: 
   );
 }
 
-export function Masthead({ tr, locale, currentPath }: { tr: Translations; locale: Locale; currentPath: string }) {
+export function Masthead({
+  tr,
+  locale,
+  currentPath,
+  city,
+}: {
+  tr: Translations;
+  locale: Locale;
+  currentPath: string;
+  city?: string;
+}) {
+  const isHamburg = city === "hamburg";
   return (
     <header class="masthead">
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
-        <p class="masthead__locality">Frankfurt</p>
+        <p class="masthead__locality">{isHamburg ? "Hamburg" : "Frankfurt"}</p>
         <h1 class="wordmark">
           <span class="wordmark__lehr">lehr</span>
           <span class="wordmark__dot">.</span>
@@ -281,10 +293,14 @@ function berlinOffsetFor(date: string): string {
   return day < dstEnd ? "+02:00" : "+01:00";
 }
 
-function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
+function buildEventJsonLd(e: DayEvent, city?: string): Record<string, unknown> {
   const offset = berlinOffsetFor(e.date);
   const startTime = e.time ?? "00:00";
   const eventType = e.category === "Diskussion" ? "EducationEvent" : "Event";
+  const resolvedCity = city ?? e.city ?? "frankfurt";
+  const isHamburg = resolvedCity === "hamburg";
+  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
+  const cityName = isHamburg ? "Hamburg" : "Frankfurt am Main";
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": eventType,
@@ -295,21 +311,21 @@ function buildEventJsonLd(e: DayEvent): Record<string, unknown> {
     location: {
       "@type": "Place",
       name: e.source.name,
-      address: { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" },
+      address: { "@type": "PostalAddress", addressLocality: cityName, addressCountry: "DE" },
     },
     organizer: {
       "@type": "Organization",
       name: e.source.name,
       url: e.source.url,
     },
-    url: `${APP_URL}/tag/${e.date}#event-${e.id}`,
+    url: `${appUrl}/tag/${e.date}#event-${e.id}`,
   };
   if (e.description) jsonLd.description = e.description;
   if (e.end_time && e.time) jsonLd.endDate = `${e.date}T${e.end_time}:00${offset}`;
   if (e.language) jsonLd.inLanguage = e.language;
   if (e.image_url) {
     const proxied = imageProxyUrl(e.image_url);
-    jsonLd.image = proxied?.startsWith("/") ? `${APP_URL}${proxied}` : (proxied ?? e.image_url);
+    jsonLd.image = proxied?.startsWith("/") ? `${appUrl}${proxied}` : (proxied ?? e.image_url);
   }
   return jsonLd;
 }
@@ -320,15 +336,19 @@ export interface EventRowOptions {
   /** Locale of the surrounding page -- threads through to internal
    *  link hrefs so an explicit `?lang=` survives every click. */
   locale: Locale;
+  city?: string;
 }
 
 export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr: Translations }) {
+  const city = opts.city ?? e.city ?? "frankfurt";
+  const isHamburg = city === "hamburg";
+  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
   const time = e.time ?? "—";
   const endTime = e.end_time ? `${tr.endTimePrefix} ${e.end_time}` : "";
   const titleSource = e.detail_url ?? e.ticket_url ?? null;
   const titleHref = titleSource ? utm(titleSource, "event_title") : null;
   const reportRegarding = `${e.title} — ${e.source.name}, ${e.date}${e.time ? ` ${e.time}` : ""}`;
-  const reportContext = `${APP_URL}/api/events/${e.id}`;
+  const reportContext = `${appUrl}/api/events/${e.id}`;
   const calendarEvent: CalendarEvent = {
     date: e.date,
     time: e.time ?? null,
@@ -356,7 +376,7 @@ export function Event({ e, opts, tr }: { e: DayEvent; opts: EventRowOptions; tr:
       <script
         type="application/ld+json"
         data-id={String(e.id)}
-        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildEventJsonLd(e)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildEventJsonLd(e, city)) }}
       />
       <span class="prog-entry__pilcrow" aria-hidden="true">
         ¶
@@ -855,12 +875,14 @@ function DayGroup({
   tr,
   locale,
   startIndex,
+  city,
 }: {
   date: string;
   events: DayEvent[];
   tr: Translations;
   locale: Locale;
   startIndex: number;
+  city?: string;
 }) {
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
@@ -880,7 +902,7 @@ function DayGroup({
       </header>
       <ol class="concerts">
         {events.map((e, i) => (
-          <Event key={e.id} e={e} opts={{ index: startIndex + i, locale }} tr={tr} />
+          <Event key={e.id} e={e} opts={{ index: startIndex + i, locale, city }} tr={tr} />
         ))}
       </ol>
     </section>
@@ -893,12 +915,14 @@ export function ProgrammePartial({
   tr,
   locale = DEFAULT_LOCALE,
   range,
+  city,
 }: {
   date: string;
   events: DayEvent[];
   tr: Translations;
   locale?: Locale;
   range?: number;
+  city?: string;
 }) {
   if (range) {
     const groups = new Map<string, DayEvent[]>();
@@ -933,7 +957,17 @@ export function ProgrammePartial({
               const dayEvents = filterPastForToday(d, groups.get(d) ?? []);
               const startIndex = cursor;
               cursor += dayEvents.length;
-              return <DayGroup key={d} date={d} events={dayEvents} tr={tr} locale={locale} startIndex={startIndex} />;
+              return (
+                <DayGroup
+                  key={d}
+                  date={d}
+                  events={dayEvents}
+                  tr={tr}
+                  locale={locale}
+                  startIndex={startIndex}
+                  city={city}
+                />
+              );
             })}
           </div>
         )}
@@ -974,7 +1008,7 @@ export function ProgrammePartial({
         <>
           <ol class="concerts" id="concerts">
             {visible.map((e, i) => (
-              <Event key={e.id} e={e} opts={{ index: i, locale }} tr={tr} />
+              <Event key={e.id} e={e} opts={{ index: i, locale, city }} tr={tr} />
             ))}
           </ol>
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
@@ -1020,14 +1054,43 @@ export function renderProgrammePartial(
   tr: Translations = DEFAULT_TR,
   locale: Locale = DEFAULT_LOCALE,
   range?: number,
+  city?: string,
 ): HtmlEscapedString {
   return (
-    <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} />
+    <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} city={city} />
   ) as unknown as HtmlEscapedString;
 }
 
+function localizeTranslations(tr: Translations, isHamburg: boolean): Translations {
+  if (!isHamburg) return tr;
+  return {
+    ...tr,
+    tagline: tr.tagline.replace(/Frankfurt/g, "Hamburg"),
+    homeTitle: tr.homeTitle
+      .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
+      .replace(/Frankfurt am Main/g, "Hamburg")
+      .replace(/Frankfurt/g, "Hamburg"),
+    homeDescription: tr.homeDescription
+      .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
+      .replace(/Frankfurt/g, "Hamburg"),
+    digestCueText: tr.digestCueText.replace(/Frankfurt/g, "Hamburg"),
+    askAiPrompt: (date) =>
+      tr
+        .askAiPrompt(date)
+        .replace(/frankfurt.lehr.salon/g, "hamburg.lehr.salon")
+        .replace(/Frankfurt/g, "Hamburg"),
+    faqItems: tr.faqItems.map((item) => ({
+      q: item.q.replace(/Frankfurt/g, "Hamburg"),
+      a: item.a.replace(/Frankfurt/g, "Hamburg"),
+    })),
+  };
+}
+
 export function renderPage(props: PageProps): HtmlEscapedString {
-  const { date, today, events, dateStrip, category, range, locale, tr, turnstileSiteKey } = props;
+  const { date, today, events, dateStrip, category, range, locale, tr: rawTr, turnstileSiteKey, city } = props;
+  const isHamburg = city === "hamburg";
+  const tr = localizeTranslations(rawTr, isHamburg);
+  const appUrl = isHamburg ? "https://hamburg.lehr.salon" : "https://frankfurt.lehr.salon";
   const niceDate = niceDateFor(date, locale);
   const currentPath = range ? "/" : category ? `/tag/${date}?format=${encodeURIComponent(category)}` : `/tag/${date}`;
   // Title now leads with the localised homeTitle ("lehr.salon –
@@ -1041,21 +1104,21 @@ export function renderPage(props: PageProps): HtmlEscapedString {
       : `${tr.homeTitle} — ${niceDate}`;
   // Today's /tag/<today> collapses to /, otherwise self-canonical.
   const canonical = range
-    ? `${APP_URL}/${langSuffix(locale)}`
+    ? `${appUrl}/${langSuffix(locale)}`
     : isToday
-      ? `${APP_URL}/${langSuffix(locale)}`
-      : `${APP_URL}/tag/${date}${langSuffix(locale)}`;
+      ? `${appUrl}/${langSuffix(locale)}`
+      : `${appUrl}/tag/${date}${langSuffix(locale)}`;
   const websiteLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${APP_URL}/#website`,
-    url: APP_URL,
+    "@id": `${appUrl}/#website`,
+    url: appUrl,
     name: "lehr.salon",
     inLanguage: ["de", "en"],
     publisher: { "@type": "Organization", name: "lehr.salon" },
     potentialAction: {
       "@type": "SearchAction",
-      target: `${APP_URL}/?q={search_term_string}`,
+      target: `${appUrl}/?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -1076,7 +1139,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
         </head>
         <body>
           <Foxing />
-          <Masthead tr={tr} locale={locale} currentPath={currentPath} />
+          <Masthead tr={tr} locale={locale} currentPath={currentPath} city={city} />
           <DateStrip strip={dateStrip} active={range ? "" : date} today={today} tr={tr} locale={locale} />
           <RangeRow active={!!range} tr={tr} locale={locale} />
           <DigestCue tr={tr} locale={locale} />

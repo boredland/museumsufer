@@ -5,7 +5,14 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import { type CanonicalEvent, displayNameFor, EVENTS, FRANKFURT_BBOX, inBbox } from "@museumsufer/event-hub";
+import {
+  type CanonicalEvent,
+  displayNameFor,
+  EVENTS,
+  FRANKFURT_BBOX,
+  HAMBURG_BBOX,
+  inBbox,
+} from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
 import type { Category, LehrhausEvent, LehrhausSource, ScrapeData } from "../src/types";
 
@@ -22,7 +29,10 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    if (!inBbox(ev.lat, ev.lon, FRANKFURT_BBOX)) continue;
+    const isFfm = inBbox(ev.lat, ev.lon, FRANKFURT_BBOX);
+    const isHam = inBbox(ev.lat, ev.lon, HAMBURG_BBOX);
+    if (!isFfm && !isHam) continue;
+    const city = isHam ? "hamburg" : "frankfurt";
     const category = pickCategory(ev);
     if (!category) continue;
 
@@ -44,6 +54,7 @@ async function main(): Promise<void> {
       category,
       language: ev.language,
       image_url: ev.image_url,
+      city,
     });
   }
 
