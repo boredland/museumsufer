@@ -17,10 +17,13 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  *
  * UPGRADE PATH: this is intentionally thin (~5 rolling events). The full year
  * (~54 events, with times) lives only in the yearly PDF linked from this page
- * (`/images/dokumente/Kalender_<year>_*.pdf`), which the Worker runtime can't
- * practically parse. If MainÄppelHaus ever exposes a structured calendar
- * (HTML list with times, an iCal feed, or a Joomla calendar plugin), switch to
- * that for full coverage with times.
+ * (`/images/dokumente/Kalender_<year>_*.pdf`). The scrape runs under Bun in CI
+ * (not a Worker), so a PDF text-extraction lib (unpdf/pdfjs) is feasible — the
+ * blocker is the column-dumped layout (dates/times/titles interleaved with
+ * sidebar boilerplate), which makes parsing fragile, and it'd be the only
+ * PDF-based scraper. Prefer switching to a structured calendar (HTML list with
+ * times, an iCal feed, or a Joomla calendar plugin) if MainÄppelHaus ever
+ * exposes one; otherwise the PDF is a viable-but-fragile route to full coverage.
  */
 const PROGRAM_URL = "https://www.mainaeppelhauslohrberg.de/index.php/lohrberg-erleben/veranstaltungskalender.html";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
