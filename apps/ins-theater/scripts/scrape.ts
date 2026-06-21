@@ -5,14 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import {
-  type CanonicalEvent,
-  displayNameFor,
-  EVENTS,
-  FRANKFURT_BBOX,
-  HAMBURG_BBOX,
-  inBbox,
-} from "@museumsufer/event-hub";
+import { type CanonicalEvent, cityFor, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
 import { CURATED_THEATERS, type TheaterConfig } from "../src/theater-config";
 import type { AvailabilityStatus, Performance, ScrapeData, Show } from "../src/types";
 
@@ -40,12 +33,9 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    const inFrankfurt = inBbox(ev.lat, ev.lon, FRANKFURT_BBOX);
-    const inHamburg = inBbox(ev.lat, ev.lon, HAMBURG_BBOX);
-    if (!inFrankfurt && !inHamburg) continue;
+    const city = cityOf(ev);
+    if (!city) continue;
     if (!hasStageLabel(ev)) continue;
-
-    const city = inHamburg ? "hamburg" : "frankfurt";
     const showSlug = deriveShowSlug(ev);
     const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);
 
@@ -111,7 +101,7 @@ function synthesizeTheaters(
       address: "",
       lat: coords.lat,
       lon: coords.lon,
-      city: inBbox(coords.lat, coords.lon, HAMBURG_BBOX) ? "hamburg" : "frankfurt",
+      city: cityFor(coords.lat, coords.lon) ?? "frankfurt",
       website_url: orphanUrls.get(slug) ?? "",
       ticketing_provider: null,
     });

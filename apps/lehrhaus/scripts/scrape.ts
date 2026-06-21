@@ -5,14 +5,7 @@ import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
-import {
-  type CanonicalEvent,
-  displayNameFor,
-  EVENTS,
-  FRANKFURT_BBOX,
-  HAMBURG_BBOX,
-  inBbox,
-} from "@museumsufer/event-hub";
+import { type CanonicalEvent, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
 import { SOURCES } from "../src/source-config";
 import type { Category, LehrhausEvent, LehrhausSource, ScrapeData } from "../src/types";
 
@@ -29,10 +22,8 @@ async function main(): Promise<void> {
 
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    const isFfm = inBbox(ev.lat, ev.lon, FRANKFURT_BBOX);
-    const isHam = inBbox(ev.lat, ev.lon, HAMBURG_BBOX);
-    if (!isFfm && !isHam) continue;
-    const city = isHam ? "hamburg" : "frankfurt";
+    const city = cityOf(ev);
+    if (!city) continue;
     const category = pickCategory(ev);
     if (!category) continue;
 

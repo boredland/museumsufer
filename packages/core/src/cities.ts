@@ -74,6 +74,11 @@ export interface CityMeta {
   readonly centroid: { readonly lat: number; readonly lon: number };
   /** Geofence used at bundle time to assign events to this city. */
   readonly bbox: Bbox;
+  /** Optional precise boundary as a GeoJSON-style [lon, lat] ring. `cityFor`
+   *  applies it after the bbox pre-filter, so two cities may share a bbox yet
+   *  split precisely — e.g. Frankfurt vs Mainz along the Rhine. Omit for
+   *  isolated cities, where the bbox alone is unambiguous. */
+  readonly polygon?: ReadonlyArray<readonly [number, number]>;
 }
 
 export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
@@ -181,4 +186,52 @@ export function nearestCity(lat: number, lon: number): CitySlug {
     }
   }
   return best;
+}
+
+/** Ray-casting point-in-polygon for a GeoJSON-style [lon, lat] ring.
+ *  Dependency-free; plane geometry is fine at city scale. */
+export function pointInPolygon(lat: number, lon: number, ring: ReadonlyArray<readonly [number, number]>): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+    const intersects = yi > lat !== yj > lat && lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+/**
+ * Assign a coordinate to a served city. The bbox is a cheap pre-filter; a city
+ * that also declares a `polygon` must contain the point as well — so two cities
+ * may share a bbox yet split precisely (e.g. Frankfurt and Mainz across the
+ * Rhine). When several still match, the nearest centroid wins. Returns null
+ * when the point lies outside every city.
+ */
+export function cityFor(lat: number, lon: number): CitySlug | null {
+  let best: CitySlug | null = null;
+  let bestDist = Number.POSITIVE_INFINITY;
+  for (const meta of Object.values(CITIES)) {
+    if (!inBbox(lat, lon, meta.bbox)) continue;
+    if (meta.polygon && !pointInPolygon(lat, lon, meta.polygon)) continue;
+    const d = (lat - meta.centroid.lat) ** 2 + (lon - meta.centroid.lon) ** 2;
+    if (d < bestDist) {
+      bestDist = d;
+      best = meta.slug;
+    }
+  }
+  return best;
+}
+
+/**
+ * City for an event: declarative first — an explicit `event.city` set by a
+ * scraper/orchestrator wins (e.g. a museum's configured city) — else geometric
+ * via `cityFor`. Returns null when neither resolves to a served city.
+ */
+export function cityOf(ev: { city?: string | null; lat?: number | null; lon?: number | null }): CitySlug | null {
+  if (ev.city && ev.city in CITIES) return ev.city as CitySlug;
+  if (typeof ev.lat === "number" && typeof ev.lon === "number") return cityFor(ev.lat, ev.lon);
+  return null;
 }

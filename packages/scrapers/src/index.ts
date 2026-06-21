@@ -11,6 +11,8 @@ export type {
 } from "./types";
 export {
   type Bbox,
+  cityFor,
+  cityOf,
   coordinatesFor,
   FRANKFURT_BBOX,
   GEOFENCE_BBOX,
