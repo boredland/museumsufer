@@ -99,18 +99,13 @@ const CINEMAS: CineamoCinema[] = [
     name: "SchanzenKino 73",
     websiteBase: "https://schanzenkino73.de",
   },
-  {
-    id: 1243,
-    source_slug: "astor-hafencity",
-    name: "Astor Film Lounge HafenCity",
-    websiteBase: "https://hafencity.premiumkino.de",
-  },
-  {
-    id: 1288,
-    source_slug: "savoy-filmtheater",
-    name: "Savoy Filmtheater",
-    websiteBase: "https://www.savoy-filmtheater.de",
-  },
+  // NB: astor-hafencity (Cineamo id 1243) and savoy-filmtheater (1288) are
+  // deliberately NOT listed here. Both run on the premiumkino platform and
+  // have dedicated scrapers (astor-hafencity.ts / savoy-filmtheater.ts) that
+  // emit the same source_slug. Cineamo prefixes the auditorium/format into
+  // the showing name ("ATMOS: …"), which fragments film grouping and breaks
+  // TMDB matching, so the premiumkino scrapers (clean movie.name) are the
+  // canonical source. Listing them here too produced duplicate screenings.
 ];
 
 interface CineamoShowing {
