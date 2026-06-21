@@ -129,9 +129,11 @@ app.get("/robots.txt", (c) =>
 const SITEMAP_DATE_DAYS = 14;
 
 app.get("/sitemap.xml", (c) => {
-  const appUrl = appUrlFor(c.get("city") ?? "frankfurt");
+  const city = c.get("city") ?? "frankfurt";
+  const appUrl = appUrlFor(city);
   const today = todayIso();
-  const venueUrls = VENUES.slice()
+  const venueUrls = VENUES.filter((v) => (v.city ?? "frankfurt") === city)
+    .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((v) => `  <url>\n    <loc>${appUrl}/spielort/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");

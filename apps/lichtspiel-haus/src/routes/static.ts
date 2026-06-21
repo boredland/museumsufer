@@ -159,11 +159,12 @@ app.get("/sitemap.xml", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const appUrl = cityUrl("lichtspiel.haus", city);
   const today = todayIso();
-  const cinemaUrls = CINEMAS.slice()
+  const cinemaUrls = CINEMAS.filter((v) => (v.city ?? "frankfurt") === city)
+    .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((v) => `  <url>\n    <loc>${appUrl}/kino/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
-  const seriesUrls = getAllSeries(today)
+  const seriesUrls = getAllSeries(today, city)
     .map((s) => `  <url>\n    <loc>${appUrl}/reihe/${s.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
     .join("\n");
   const dateUrls = Array.from({ length: SITEMAP_DATE_DAYS }, (_, i) => dateOffset(i))
@@ -178,7 +179,7 @@ app.get("/sitemap.xml", (c) => {
   // 14-day window so the sitemap stays bounded; older screenings have
   // already happened and don't need indexing.
   const horizon = dateOffset(SITEMAP_DATE_DAYS);
-  const filmUrls = getScreeningsInRange(today, horizon)
+  const filmUrls = getScreeningsInRange(today, horizon, { city })
     .map((s) => `  <url>\n    <loc>${appUrl}/film/${s.id}</loc>\n    <lastmod>${s.date}</lastmod>\n  </url>`)
     .join("\n");
 

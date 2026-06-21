@@ -146,10 +146,12 @@ export interface SeriesSummary {
   last_date: string;
 }
 
-export function getAllSeries(from?: string): SeriesSummary[] {
+export function getAllSeries(from?: string, city?: string | null): SeriesSummary[] {
   const summaries: SeriesSummary[] = [];
   for (const [slug, screenings] of SCREENINGS_BY_SERIES) {
-    const filtered = from ? screenings.filter((s) => s.date >= from) : screenings;
+    const filtered = screenings.filter(
+      (s) => (!from || s.date >= from) && (!city || CINEMAS_BY_SLUG.get(s.cinema_slug)?.city === city),
+    );
     if (filtered.length === 0) continue;
     const name = filtered[0].series?.name ?? slug;
     summaries.push({
