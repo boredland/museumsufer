@@ -48,16 +48,16 @@ jobs:
         working-directory: apps/konzert-haus
         run: bun scripts/scrape.ts
 
-      - name: Derive frankfurt-theaters
-        working-directory: apps/frankfurt-theaters
+      - name: Derive ins-theater
+        working-directory: apps/ins-theater
         run: bun scripts/scrape.ts
 
       - name: Derive landau-today
         working-directory: apps/landau-today
         run: bun scripts/scrape.ts
 
-      - name: Derive frankfurt-museums
-        working-directory: apps/frankfurt-museums
+      - name: Derive museumsufer
+        working-directory: apps/museumsufer
         # museumsufer.de is the only upstream not routed through the hub —
         # a transient 5xx there shouldn't block the other apps' commit.
         continue-on-error: true
@@ -82,11 +82,11 @@ jobs:
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
             apps/konzert-haus/src/synthesized-venues.ts \
-            apps/frankfurt-theaters/src/scrape-data.ts \
-            apps/frankfurt-theaters/src/synthesized-theaters.ts \
+            apps/ins-theater/src/scrape-data.ts \
+            apps/ins-theater/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
-            apps/frankfurt-museums/src/scrape-data.ts \
+            apps/museumsufer/src/scrape-data.ts \
             apps/lichtspiel-haus/src/scrape-data.ts \
             apps/lichtspiel-haus/src/synthesized-cinemas.ts
           if git diff --cached --quiet; then
@@ -101,11 +101,11 @@ jobs:
             apps/lehrhaus/src/scrape-data.ts \
             apps/konzert-haus/src/scrape-data.ts \
             apps/konzert-haus/src/synthesized-venues.ts \
-            apps/frankfurt-theaters/src/scrape-data.ts \
-            apps/frankfurt-theaters/src/synthesized-theaters.ts \
+            apps/ins-theater/src/scrape-data.ts \
+            apps/ins-theater/src/synthesized-theaters.ts \
             apps/landau-today/src/scrape-data.ts \
             apps/landau-today/src/geocode-cache.ts \
-            apps/frankfurt-museums/src/scrape-data.ts \
+            apps/museumsufer/src/scrape-data.ts \
             apps/lichtspiel-haus/src/scrape-data.ts \
             apps/lichtspiel-haus/src/synthesized-cinemas.ts
 

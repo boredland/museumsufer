@@ -1,7 +1,7 @@
 /**
  * Edge-cached image proxy shared by five sibling apps (lichtspiel-haus,
- * konzert-haus, lehrhaus, frankfurt-theaters, landau-today).
- * frankfurt-museums keeps its own implementation because its allow-list
+ * konzert-haus, lehrhaus, ins-theater, landau-today).
+ * museumsufer keeps its own implementation because its allow-list
  * is derived dynamically from the D1 database and it carries a
  * FETCH_PROXY_URL escape hatch the others don't need.
  *

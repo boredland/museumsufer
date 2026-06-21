@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "frankfurt-theaters",
+  "name": "ins-theater",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
   "routes": [

@@ -4,7 +4,7 @@ import { SCRAPE_DATA } from "./scrape-data";
 /**
  * Derived from every `image_url` in the bundled scrape data, so the
  * allow-list stays in sync with whatever the scrapers actually emit.
- * Mirrors `apps/frankfurt-museums/src/image-proxy.ts` — see the
+ * Mirrors `apps/museumsufer/src/image-proxy.ts` — see the
  * project-image-proxy-allowlist note for context.
  */
 const ALLOWED_HOSTS: ReadonlySet<string> = (() => {

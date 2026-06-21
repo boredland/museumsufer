@@ -1595,7 +1595,7 @@ export function renderProgrammePartial(
   ) as unknown as HtmlEscapedString;
 }
 
-/** Day / week toggle near the date strip. Mirrors frankfurt-museums'
+/** Day / week toggle near the date strip. Mirrors museumsufer'
  *  range-pill row, lichtspiel.haus-styled. URL pattern:
  *  /tag/{date}?range=7 — HTMX swaps the programme-content. */
 function RangeToggle({

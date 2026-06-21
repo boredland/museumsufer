@@ -3,7 +3,7 @@
  * TMDb enrichment pass when TMDb has a German overview but no English
  * one (typical for European arthouse and older catalogue titles).
  *
- * Mirrors the apps/frankfurt-museums/src/translate.ts call shape — same
+ * Mirrors the apps/museumsufer/src/translate.ts call shape — same
  * comma-separated multi-key failover (free tier hits 500K-char/month
  * limits faster than we'd like) and same 50-string batch size.
  */

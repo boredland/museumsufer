@@ -4,14 +4,14 @@ Six Cloudflare Workers that aggregate Frankfurt (plus Landau in der Pfalz) cultu
 
 ## Apps
 
-### [`apps/frankfurt-museums`](apps/frankfurt-museums) → [museumsufer.app](https://museumsufer.app)
+### [`apps/museumsufer`](apps/museumsufer) → [museumsufer.app](https://museumsufer.app)
 
 Daily exhibitions and events for ~40 Museumsufer museums. Aggregates from museumsufer.de + per-museum APIs (15+ deterministic parsers in `api-scrapers.ts`: Tribe Events, TYPO3 calendarize, schema.org Event microdata, WP REST + ACF, RSS, Kirby CMS, …). DeepL EN/FR translation runs in the same scrape pipeline; the cache rides in the bundle. Image proxy with edge caching, distance sorting via RMV, fuzzy search, PWA.
 
 - Scrape: daily 06:00 UTC via `.github/workflows/scrape.yml` (museums job)
 - D1: `likes` only (request-time user writes)
 
-### [`apps/frankfurt-theaters`](apps/frankfurt-theaters) → [frankfurt.ins.theater](https://frankfurt.ins.theater)
+### [`apps/ins-theater`](apps/ins-theater) → [frankfurt.ins.theater](https://frankfurt.ins.theater)
 
 Hourly performance schedule for 24 Frankfurt theaters — Schauspiel, Oper, Mousonturm, English Theatre, Komödie, Tigerpalast, the Reservix-fronted small houses, plus a dozen long-tail venues. Each theater has its own scraper module under `src/scrapers/` (Reservix HTML, Tribe Events REST, MEC plugin, schema.org microdata, custom CMSes, …). Editorial Programmheft styling — Fraunces serif, JetBrains Mono numerals, single brick-red accent.
 

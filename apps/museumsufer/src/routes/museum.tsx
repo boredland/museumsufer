@@ -383,7 +383,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
 
             <p class="museum-detail__source">
               <a
-                href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
+                href="https://github.com/boredland/museumsufer/tree/main/apps/museumsufer"
                 target="_blank"
                 rel="noopener"
                 class="museum-detail__source-link"

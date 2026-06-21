@@ -23,8 +23,8 @@ interface AppTarget {
 }
 
 const APPS: readonly AppTarget[] = [
-  { slug: "frankfurt-museums", dir: "apps/frankfurt-museums" },
-  { slug: "frankfurt-theaters", dir: "apps/frankfurt-theaters" },
+  { slug: "museumsufer", dir: "apps/museumsufer" },
+  { slug: "ins-theater", dir: "apps/ins-theater" },
   { slug: "konzert-haus", dir: "apps/konzert-haus" },
   { slug: "lehrhaus", dir: "apps/lehrhaus" },
   { slug: "lichtspiel-haus", dir: "apps/lichtspiel-haus" },

@@ -9,8 +9,8 @@ Cloudflare Worker that serves an aggregated programme of Frankfurt theaters.
 ```
 GitHub Action (.github/workflows/scrape.yml)
   ↓ hourly cron 09–21 CEST
-  ↓ runs `bun apps/frankfurt-theaters/scripts/scrape.ts`
-  ↓ writes apps/frankfurt-theaters/src/scrape-data.ts (typed module)
+  ↓ runs `bun apps/ins-theater/scripts/scrape.ts`
+  ↓ writes apps/ins-theater/src/scrape-data.ts (typed module)
   ↓ commits + pushes if content actually changed
 Cloudflare git integration
   ↓ redeploys the worker with the new bundled data
@@ -49,10 +49,10 @@ bun run db:migrate          # remote D1
 
 ```bash
 bun install                 # from repo root
-bun run -F @museumsufer/frankfurt-theaters dev
+bun run -F @museumsufer/ins-theater dev
 
 # Run a one-shot scrape locally and regenerate src/scrape-data.ts:
-bun run -F @museumsufer/frankfurt-theaters scrape
+bun run -F @museumsufer/ins-theater scrape
 
 # Hit the API:
 curl http://localhost:8787/api/day?date=2026-05-08

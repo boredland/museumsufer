@@ -102,7 +102,7 @@ function ImprintPage({ locale, city }: { locale: Locale; city: string }) {
 
             <p class="imprint__source">
               <a
-                href="https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"
+                href="https://github.com/boredland/museumsufer/tree/main/apps/museumsufer"
                 target="_blank"
                 rel="noopener"
                 class="imprint__source-link"

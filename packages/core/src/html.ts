@@ -1,7 +1,7 @@
 /**
  * HTML decoding and stripping with German named-entity support.
  *
- * Lifted from frankfurt-theaters/src/shared.ts where it was developed
+ * Lifted from ins-theater/src/shared.ts where it was developed
  * to handle the &auml;/&ouml;/&shy; escapes the museum scrapers also
  * need but were silently dropping.
  */

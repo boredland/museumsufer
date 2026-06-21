@@ -60,8 +60,8 @@ function llmsFor(city: string): string {
 > ${intro}
 
 Contact: feedback@ins.museum
-License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums)
-Source: https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums
+License: Content aggregated from public museum sources. Application code: MIT (github.com/boredland/museumsufer/tree/main/apps/museumsufer)
+Source: https://github.com/boredland/museumsufer/tree/main/apps/museumsufer
 
 This site provides a JSON API for querying museum exhibitions and events in ${cityFull}, Germany.
 

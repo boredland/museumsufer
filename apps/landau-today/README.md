@@ -90,7 +90,7 @@ Source priority for tie-breaks: kulturnetz > landau-de > hambach > rptu
 - Tailwind v4 (utility classes only — most of the design is in plain CSS
   in `src/app.css`)
 - [Bun](https://bun.sh) for installs, scripts, and the scrape pipeline
-- Turborepo workspace alongside `frankfurt-museums` and `frankfurt-theaters`
+- Turborepo workspace alongside `museumsufer` and `ins-theater`
 
 D1 is used only for Web Push subscriptions; no Workers AI, no DeepL, no
 `nodejs_compat` — the worker runtime path stays tight.
@@ -126,8 +126,8 @@ rounded corners; hairline rules instead of shadows. See
 [`src/app.css`](src/app.css) and the design spec in the project history.
 
 Differentiates from sister apps:
-- **frankfurt-museums** — Bauhaus geometric, sans-serif, primary triad
-- **frankfurt-theaters** — editorial Programmheft, Fraunces serif, brick-red
+- **museumsufer** — Bauhaus geometric, sans-serif, primary triad
+- **ins-theater** — editorial Programmheft, Fraunces serif, brick-red
 - **landau.today** — didone label, Bodoni + Newsreader, sandstone
 
 ## Development

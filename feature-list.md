@@ -4,7 +4,7 @@ Four public event sites + one internal proxy. Each public site is a Hono app on 
 
 ---
 
-## museumsufer.app / frankfurt.ins.museum — `apps/frankfurt-museums`
+## museumsufer.app / frankfurt.ins.museum — `apps/museumsufer`
 
 Aggregated programme for Frankfurt's Museumsufer district (museums + exhibitions + events). Apex `ins.museum` 301-redirects to `frankfurt.ins.museum`; sitemap declares `museumsufer.app` as the canonical brand host.
 
@@ -62,7 +62,7 @@ Aggregated programme for Frankfurt's Museumsufer district (museums + exhibitions
 
 ---
 
-## frankfurt.ins.theater — `apps/frankfurt-theaters`
+## frankfurt.ins.theater — `apps/ins-theater`
 
 Aggregated theatre programme for Frankfurt. Apex `ins.theater` 301-redirects to the subdomain.
 

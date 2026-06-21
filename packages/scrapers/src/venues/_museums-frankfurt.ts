@@ -144,7 +144,7 @@ function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): Canonica
 }
 
 /** Every event from a museum source carries a `museum:<category>` label so
- *  frankfurt-museums can filter by namespace. Talks and concerts at museums
+ *  museumsufer can filter by namespace. Talks and concerts at museums
  *  also carry their topical label (talk:* / music:*) so lehrhaus and
  *  konzert-haus pick them up via their natural filters. */
 function labelsForEvent(type: EventType | null, title: string, description: string | null): ScrapedLabel[] {
