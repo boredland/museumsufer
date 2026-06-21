@@ -129,6 +129,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "",
   },
   {
+    slug: "hugenottenhalle",
+    name: "Hugenottenhalle",
+    address: "",
+    lat: 50.0494,
+    lon: 8.6942,
+    city: "frankfurt",
+    website_url: "https://www.hugenottenhalle.de",
+  },
+  {
     slug: "koralle-lichtspiele",
     name: "Koralle Lichtspiele",
     address: "",
