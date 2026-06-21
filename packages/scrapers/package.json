@@ -117,7 +117,8 @@
     "@museumsufer/classify": "*",
     "@museumsufer/core": "*",
     "dayjs": "^1.11.20",
-    "p-queue": "^9.2.0"
+    "p-queue": "^9.2.0",
+    "unpdf": "^1.6.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260509.1",
