@@ -2,6 +2,7 @@
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ["frankfurt","hamburg"],
   museums: [
     {"city":"hamburg","id":464946032,"museumsufer_url":"","name":"Altonaer Museum","slug":"altonaer-museum","website_url":"https://www.shmh.de/altonaer-museum"},
     {"description":"Das Archäologische Museum bewahrt, erforscht, präsentiert und vermittelt die Geschichte Frankfurts von der Altsteinzeit bis zur frühen Neuzeit.","id":998808412,"image_url":"https://www.museumsufer.de/media/sliderimages/archaeologisches_museum_aussenansicht_uwe_dettmar_archaeologisches_museum_frankfurt_web.jpg","museumsufer_url":"https://www.museumsufer.de/de/museen/archaeologisches-museum-frankfurt/","name":"Archäologisches Museum Frankfurt","slug":"archaeologisches-museum-frankfurt"},

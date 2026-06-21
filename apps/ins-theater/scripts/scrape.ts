@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
+import { CITIES } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityFor, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
@@ -31,10 +32,12 @@ async function main(): Promise<void> {
   const orphanCoords = new Map<string, { lat: number; lon: number }>();
   const orphanUrls = new Map<string, string>();
 
+  const presentCities = new Set<string>();
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
     const city = cityOf(ev);
     if (!city) continue;
+    presentCities.add(city);
     if (!hasStageLabel(ev)) continue;
     const showSlug = deriveShowSlug(ev);
     const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);
@@ -77,7 +80,8 @@ async function main(): Promise<void> {
     }
   }
 
-  const data: ScrapeData = buildScrapeData(showsById, performancesById);
+  const supportedCities = Object.keys(CITIES).filter((c) => presentCities.has(c));
+  const data: ScrapeData = { ...buildScrapeData(showsById, performancesById), supportedCities };
   const synthesized = synthesizeTheaters(orphanCoords, orphanUrls);
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
   await writeFile(resolve(root, "src/synthesized-theaters.ts"), generateTheatersModule(synthesized), "utf8");
@@ -166,7 +170,10 @@ function deriveShowSlug(ev: CanonicalEvent): string {
     .replace(/^-|-$/g, "");
 }
 
-function buildScrapeData(showsById: Map<number, Show>, performancesById: Map<number, Performance>): ScrapeData {
+function buildScrapeData(
+  showsById: Map<number, Show>,
+  performancesById: Map<number, Performance>,
+): { shows: Show[]; performances: Performance[] } {
   const shows = [...showsById.values()].sort(
     (a, b) => a.theater_slug.localeCompare(b.theater_slug) || a.slug.localeCompare(b.slug),
   );
@@ -185,6 +192,7 @@ function generateModule(data: ScrapeData): string {
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ${JSON.stringify(data.supportedCities)},
 ${bundleSection("shows", data.shows)}
 ${bundleSection("performances", data.performances)}
 };

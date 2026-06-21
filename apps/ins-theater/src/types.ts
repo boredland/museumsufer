@@ -57,4 +57,6 @@ export interface Performance {
 export interface ScrapeData {
   shows: Show[];
   performances: Performance[];
+  /** Cities this vertical currently has data for, in display order. */
+  supportedCities: string[];
 }

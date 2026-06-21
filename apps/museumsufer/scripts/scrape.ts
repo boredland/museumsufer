@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
+import { CITIES } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityOf, EVENTS } from "@museumsufer/event-hub";
@@ -209,7 +210,8 @@ function buildScrapeData(input: {
     .filter((t) => livingTexts.has(t.source_text))
     .sort((a, b) => a.source_hash.localeCompare(b.source_hash) || a.target_lang.localeCompare(b.target_lang));
 
-  return { museums, exhibitions, events, translations };
+  const supportedCities = Object.keys(CITIES).filter((c) => input.museums.some((m) => (m.city ?? "frankfurt") === c));
+  return { museums, exhibitions, events, translations, supportedCities };
 }
 
 function normalizeForDedup(title: string): string {
@@ -281,7 +283,7 @@ function wordsOverlapPrenormalised(a: string[], b: string[]): boolean {
 }
 
 async function loadPreviousBundle(path: string): Promise<ScrapeData> {
-  const empty: ScrapeData = { museums: [], exhibitions: [], events: [], translations: [] };
+  const empty: ScrapeData = { museums: [], exhibitions: [], events: [], translations: [], supportedCities: [] };
   try {
     const mod = (await import(path)) as { SCRAPE_DATA?: ScrapeData };
     return mod.SCRAPE_DATA ?? empty;
@@ -295,6 +297,7 @@ function generateModule(data: ScrapeData): string {
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ${JSON.stringify(data.supportedCities)},
 ${bundleSection("museums", data.museums)}
 ${bundleSection("exhibitions", data.exhibitions)}
 ${bundleSection("events", data.events)}
