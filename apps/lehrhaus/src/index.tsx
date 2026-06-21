@@ -52,8 +52,8 @@ app.use(
   }),
 );
 
-// Apex (lehr.salon) → frankfurt.lehr.salon; `<city>.lehr.salon` sets c.var.city.
-app.use("*", cityMiddleware({ apex: "lehr.salon" }));
+// Apex (lehr.salon) → nearest city's subdomain (geo); `<city>.lehr.salon` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "lehr.salon", apexBehavior: "geo" }));
 
 app.use("*", async (c, next) => {
   await next();

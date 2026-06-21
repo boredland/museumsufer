@@ -54,8 +54,8 @@ app.use(
   }),
 );
 
-// Apex (konzert.haus) → frankfurt.konzert.haus; `<city>.konzert.haus` sets c.var.city.
-app.use("*", cityMiddleware({ apex: "konzert.haus" }));
+// Apex (konzert.haus) → nearest city's subdomain (geo); `<city>.konzert.haus` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "konzert.haus", apexBehavior: "geo" }));
 
 app.use("*", async (c, next) => {
   await next();

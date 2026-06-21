@@ -59,6 +59,7 @@ app.use(
   cityMiddleware({
     apex: "ins.museum",
     aliasHosts: { "museumsufer.app": "frankfurt" },
+    apexBehavior: "geo",
   }),
 );
 

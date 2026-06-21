@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from "hono";
-import { type CitySlug, CITIES, DEFAULT_CITY, nearestCity } from "./cities";
+import { CITIES, type CitySlug, DEFAULT_CITY, nearestCity } from "./cities";
 
 export interface CityMiddlewareOptions {
   /** Bare apex domain for the vertical, e.g. "lehr.salon" or "ins.museum". */
@@ -48,11 +48,14 @@ export function cityMiddleware(opts: CityMiddlewareOptions): MiddlewareHandler<C
       return next();
     }
 
-    // Bare apex → redirect to a canonical city subdomain.
+    // Bare apex → redirect to a canonical city subdomain. A static redirect is
+    // permanent (301); a geo redirect is per-visitor and must stay temporary
+    // (302) so browsers/CDNs don't pin someone to the first city they resolved.
     if (host === apex) {
       const url = new URL(c.req.url);
-      const target = apexBehavior === "geo" ? geoCity(c, defaultCity) : defaultCity;
-      return c.redirect(`https://${target}.${apex}${url.pathname}${url.search}`, 301);
+      const geo = apexBehavior === "geo";
+      const target = geo ? geoCity(c, defaultCity) : defaultCity;
+      return c.redirect(`https://${target}.${apex}${url.pathname}${url.search}`, geo ? 302 : 301);
     }
 
     // `<city>.<apex>` → use the prefix when it's a known city, else default.
