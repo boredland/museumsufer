@@ -1,7 +1,8 @@
 import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities, stripHtml } from "@museumsufer/core/html";
-import { getDocumentProxy } from "unpdf";
+import { PDF_EVENTS_CACHE } from "../data/pdf-events-cache";
+import type { RawPdfEvent } from "../pdf-events";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 /**
@@ -10,165 +11,64 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
  * children's courses, nature walks and orchard workshops.
  *
  * The full year (~70 dated items, with times) is published only as a yearly
- * PDF linked from the Veranstaltungskalender page
- * (`/images/dokumente/Kalender_<year>_*.pdf`). We parse it positionally: the
- * brochure is a fixed five-column table (Termine/Referenten · Veranstaltung ·
- * Ort · Gebühren · Bemerkung), and pdf.js text items carry x/y, so each event
- * row is a y-band anchored on its date (column 1), with the title as the top
- * line of column 2 and the description on the lines below. This separates
- * title/referent/description cleanly without guessing sentence boundaries.
+ * PDF. We do NOT parse it during the scrape — an LLM call is non-deterministic
+ * and network-bound, so it stays out of the deterministic scrape path (see
+ * AGENTS.md). Instead `scripts/refresh-pdf-cache.ts` is run by hand, has the AI
+ * proxy structure the PDF's plain text, and commits the result to
+ * `src/data/pdf-events-cache.ts`. This scraper reads only that committed cache —
+ * which is also resilient to the brochure's yearly layout redesigns, since the
+ * model works off plain text, not a fixed column geometry.
  *
- * The HTML page itself only carries a short rolling "Die nächsten
- * Veranstaltungen" teaser; we keep a parser for it as a fallback if the PDF
- * can't be fetched/parsed (e.g. a future layout change). Labels come from the
- * title via the shared event classifier (the venue is genuinely mixed).
- *
- * NOTE: the positional parser depends on the brochure's column layout. If a
- * future edition is redesigned the PDF may yield nothing — the teaser fallback
- * then keeps the source alive (thin) until the parser is updated.
+ * Fallback: if there's no committed entry yet (a brand-new PDF the helper hasn't
+ * processed), or once the cached programme is fully in the past, we scrape the
+ * page's thin rolling "Die nächsten Veranstaltungen" teaser so the source still
+ * yields something until the cache is refreshed.
  */
+const PDF_TAG = "mainaeppelhaus-lohrberg";
 const PROGRAM_URL = "https://www.mainaeppelhauslohrberg.de/index.php/lohrberg-erleben/veranstaltungskalender.html";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
-// "24.01.2026" or a two-day "14./ 15.01.2026" (start-day prefix + main date).
-const DATE_RE = /(?:(\d{1,2})\.\s*\/\s*)?(\d{1,2})\.(\d{1,2})\.(\d{4})/;
-const TIME_RE = /(\d{1,2}):(\d{2})(?:\s*bis\s*(\d{1,2}):(\d{2}))?/;
-// A pure weekday cell ("Sa.", "Mi. und Do.") — used to tell it from a referent.
-const WEEKDAY_RE = /^(?:Mo|Di|Mi|Do|Fr|Sa|So)\.?(?:\s*(?:u\.|und|\/|-|–|bis)\s*(?:Mo|Di|Mi|Do|Fr|Sa|So)\.?)*$/i;
-
-// Column x-boundaries (pdf user-space units) for the brochure table.
-const COL2_MIN = 110; // Veranstaltung column starts here; col 1 is to its left.
-const COL2_MAX = 380; // …and ends before the Ort column.
-const PRICE_MIN = 480;
-const PRICE_MAX = 565;
-
-interface PdfTextItem {
-  str?: string;
-  transform?: number[];
-}
-interface Cell {
-  s: string;
-  x: number;
-  y: number;
-}
-
 export async function scrapeMainaeppelhausLohrberg(): Promise<VenueScrapeResult> {
   const today = todayIso();
+
+  // Primary: the committed, hand-refreshed PDF extraction.
+  const cached = PDF_EVENTS_CACHE[PDF_TAG];
+  if (cached?.events?.length) {
+    const events = cached.events
+      .map((r) => toCanonical(r, today))
+      .filter((e): e is CanonicalScrapedEvent => e !== null);
+    if (events.length > 0) return result(events);
+  }
+
+  // Fallback: live HTML teaser (no cache yet, or cached programme all past).
   const res = await fetch(PROGRAM_URL, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
   if (!res.ok) throw new Error(`mainaeppelhaus-lohrberg fetch failed: ${res.status}`);
-  const html = await res.text();
-
-  let events: CanonicalScrapedEvent[] = [];
-
-  // Primary: the yearly PDF (full programme with times).
-  const pdfHref = html.match(/\/images\/dokumente\/[^"']*\.pdf/i)?.[0];
-  if (pdfHref) {
-    try {
-      events = await parsePdf(new URL(pdfHref, PROGRAM_URL).href, today);
-    } catch (err) {
-      console.warn(`mainaeppelhaus-lohrberg PDF parse failed: ${(err as Error).message}`);
-    }
-  }
-
-  // Fallback: the HTML "Die nächsten Veranstaltungen" teaser (thin).
-  if (events.length === 0) events = parseTeaser(html, today);
-
-  return { source_slug: "mainaeppelhaus-lohrberg", display_name: "MainÄppelHaus Lohrberg", events };
+  return result(parseTeaser(await res.text(), today));
 }
 
-async function parsePdf(url: string, today: string): Promise<CanonicalScrapedEvent[]> {
-  const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
-  if (!res.ok) throw new Error(`pdf ${res.status}`);
-  const pdf = await getDocumentProxy(new Uint8Array(await res.arrayBuffer()));
+function result(events: CanonicalScrapedEvent[]): VenueScrapeResult {
+  return { source_slug: PDF_TAG, display_name: "MainÄppelHaus Lohrberg", events };
+}
 
-  const events: CanonicalScrapedEvent[] = [];
-  const seen = new Set<string>();
-
-  for (let pg = 1; pg <= pdf.numPages; pg++) {
-    const page = await pdf.getPage(pg);
-    const content = await page.getTextContent();
-    const items: Cell[] = (content.items as PdfTextItem[])
-      .filter((it): it is Required<PdfTextItem> => Array.isArray(it.transform) && typeof it.str === "string")
-      .map((it) => ({
-        s: it.str.replace(/\s+/g, " ").trim(),
-        x: Math.round(it.transform[4]),
-        y: Math.round(it.transform[5]),
-      }))
-      .filter((it) => it.s);
-
-    // Each event row is anchored on its date in column 1, top to bottom.
-    const anchors = items.filter((it) => it.x < COL2_MIN && DATE_RE.test(it.s)).sort((a, b) => b.y - a.y);
-
-    for (let i = 0; i < anchors.length; i++) {
-      const a = anchors[i];
-      const yHi = a.y + 14; // include the weekday/title line just above the date
-      const yLo = i + 1 < anchors.length ? anchors[i + 1].y + 14 : Number.NEGATIVE_INFINITY;
-      const band = items.filter((it) => it.y <= yHi && it.y > yLo);
-
-      const col1 = band.filter((it) => it.x < COL2_MIN).sort((p, q) => q.y - p.y);
-      const col2 = band.filter((it) => it.x >= COL2_MIN && it.x < COL2_MAX).sort((p, q) => q.y - p.y);
-      const priceCell = band.filter((it) => it.x >= PRICE_MIN && it.x < PRICE_MAX);
-
-      const dm = DATE_RE.exec(a.s);
-      if (!dm) continue;
-      const [, startDay, dd, mm, yyyy] = dm;
-      const m = mm.padStart(2, "0");
-      const main = `${yyyy}-${m}-${dd.padStart(2, "0")}`;
-      // "14./ 15.01.2026": the prefix is the start day, the main date the end.
-      const date = startDay ? `${yyyy}-${m}-${startDay.padStart(2, "0")}` : main;
-      const endDate = startDay ? main : null;
-
-      if ((endDate ?? date) < today) continue;
-
-      const title = col2[0]?.s;
-      if (!title) continue;
-      const description =
-        col2
-          .slice(1)
-          .map((it) => it.s)
-          .join(" ")
-          .trim() || null;
-
-      const timeCell = col1.find((it) => /\d{1,2}:\d{2}/.test(it.s));
-      let time: string | null = null;
-      let endTime: string | null = null;
-      if (timeCell) {
-        const tm = TIME_RE.exec(timeCell.s);
-        if (tm) {
-          time = `${tm[1].padStart(2, "0")}:${tm[2]}`;
-          if (tm[3]) endTime = `${tm[3].padStart(2, "0")}:${tm[4]}`;
-        }
-      }
-
-      const performers = col1.find((it) => !/\d/.test(it.s) && !WEEKDAY_RE.test(it.s))?.s ?? null;
-      const priceMin = priceCell
-        .map((it) => it.s)
-        .join(" ")
-        .match(/(\d+)\s*€/)?.[1];
-
-      const key = `${date}|${time ?? ""}|${title}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      events.push({
-        source_event_id: key,
-        title,
-        description,
-        date,
-        time,
-        end_date: endDate,
-        end_time: endTime,
-        detail_url: PROGRAM_URL,
-        ticket_url: null,
-        image_url: null,
-        performers,
-        price_min: priceMin ? Number(priceMin) : null,
-        labels: labelsFor(title),
-      });
-    }
-  }
-
-  return events;
+function toCanonical(r: RawPdfEvent, today: string): CanonicalScrapedEvent | null {
+  // Filter past events in-code (after the cache read) — keeps the cache
+  // today-independent and the build deterministic for same-day reruns.
+  if ((r.end_date ?? r.date) < today) return null;
+  return {
+    source_event_id: `${r.date}|${r.time ?? ""}|${r.title}`,
+    title: r.title,
+    description: r.description ?? null,
+    date: r.date,
+    time: r.time ?? null,
+    end_date: r.end_date ?? null,
+    end_time: r.end_time ?? null,
+    detail_url: PROGRAM_URL,
+    ticket_url: null,
+    image_url: null,
+    performers: r.performers ?? null,
+    price_min: r.price_min ?? null,
+    labels: labelsFor(r.title),
+  };
 }
 
 const MONTHS: Record<string, string> = {
@@ -187,7 +87,7 @@ const MONTHS: Record<string, string> = {
 };
 const TEASER_DATE_RE = new RegExp(`(\\d{1,2})\\.\\s*(${Object.keys(MONTHS).join("|")})`, "i");
 
-/** Fallback: the page's rolling "Die nächsten Veranstaltungen" teaser — a
+/** Fallback parser: the page's rolling "Die nächsten Veranstaltungen" teaser — a
  *  hand-edited module of "<weekday>, <DD>. <Monat>" + title(s), no times. */
 function parseTeaser(html: string, today: string): CanonicalScrapedEvent[] {
   const start = Math.max(html.indexOf("mod-custom194"), html.search(/nächsten Veranstaltungen/i));
