@@ -115,6 +115,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "komoedie-winterhuder-faehrhaus": [53.5939, 9.9942],
   landungsbruecken: [50.0976, 8.6519],
   "lichthof-theater": [53.5647, 9.9248],
+  "lichtmess-kino": [53.5556, 9.935],
   "monsun-theater": [53.5492, 9.9272],
   mousonturm: [50.1183, 8.7019],
   "neues-theater-hoechst": [50.1014, 8.5443],

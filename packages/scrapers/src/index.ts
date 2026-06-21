@@ -127,6 +127,7 @@ import { scrapeLandauDe } from "./venues/landau-de";
 import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
 import { scrapeLandungsbruecken } from "./venues/landungsbruecken";
 import { scrapeLichthofTheater } from "./venues/lichthof-theater";
+import { scrapeLichtmessKino } from "./venues/lichtmess-kino";
 import { scrapeLichtwarkTheater } from "./venues/lichtwark-theater";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeLiteraturhausHamburg } from "./venues/literaturhaus-hamburg";
@@ -292,6 +293,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "landinsicht-buchladen", run: (_ctx: ScraperContext) => scrapeLandinsichtBuchladen() },
   { slug: "landungsbruecken", run: (_ctx: ScraperContext) => scrapeLandungsbruecken() },
   { slug: "lichthof-theater", run: (_ctx: ScraperContext) => scrapeLichthofTheater() },
+  { slug: "lichtmess-kino", run: (_ctx: ScraperContext) => scrapeLichtmessKino() },
   { slug: "lichtwark-theater", run: (_ctx: ScraperContext) => scrapeLichtwarkTheater() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "literaturhaus-hamburg", run: (_ctx: ScraperContext) => scrapeLiteraturhausHamburg() },
