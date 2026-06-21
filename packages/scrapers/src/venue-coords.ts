@@ -152,6 +152,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "haus-am-dom": [50.1107, 8.6826],
   "hospital-zum-heiligen-geist": [50.1109, 8.6852],
   "hsfk-frankfurt": [50.0925, 8.6863],
+  hugenottenhalle: [50.0494, 8.6942],
   "institut-francais-frankfurt": [50.1208, 8.6595],
   "institut-fuer-sozialforschung": [50.1217, 8.6558],
   "instituto-cervantes-frankfurt": [50.1108, 8.6749],
