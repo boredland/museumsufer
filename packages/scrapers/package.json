@@ -111,7 +111,8 @@
     "./venues/waggong": "./src/venues/waggong.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "refresh-pdf-cache": "bun scripts/refresh-pdf-cache.ts"
   },
   "dependencies": {
     "@museumsufer/classify": "*",
