@@ -77,6 +77,7 @@ import { scrapeFirstStageTheater } from "./venues/first-stage-theater";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
+import { scrapeFreiluftkinoFrankfurt } from "./venues/freiluftkino-frankfurt";
 import { scrapeFundusTheater } from "./venues/fundus-theater";
 import { scrapeGalliTheater } from "./venues/galli-theater";
 import { scrapeGallusTheater } from "./venues/gallus-theater";
@@ -244,6 +245,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   },
   { slug: "frankfurt-uas", run: (_ctx: ScraperContext) => scrapeFrankfurtUas() },
   { slug: "frankfurter-sparkasse", run: (_ctx: ScraperContext) => scrapeFrankfurterSparkasse() },
+  { slug: "freiluftkino-frankfurt", run: (_ctx: ScraperContext) => scrapeFreiluftkinoFrankfurt() },
   { slug: "fundus-theater", run: (_ctx: ScraperContext) => scrapeFundusTheater() },
   { slug: "galli-theater", run: (_ctx: ScraperContext) => scrapeGalliTheater() },
   { slug: "gallus-theater", run: (_ctx: ScraperContext) => scrapeGallusTheater() },
