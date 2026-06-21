@@ -23,6 +23,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "boell-hessen": "Heinrich-Böll-Stiftung Hessen",
   "brotfabrik": "Brotfabrik",
   "buergeruniversitaet": "Goethe-Uni Bürgeruniversität",
+  "cafe-mutz": "Café Mutz",
   "caligari-wiesbaden": "Caligari FilmBühne Wiesbaden",
   "capitol-mainz": "Capitol Arthouse Kino Mainz",
   "caricatura-museum-frankfurt": "Caricatura Museum Frankfurt – Museum für Komische Kunst",
