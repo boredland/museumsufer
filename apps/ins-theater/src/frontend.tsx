@@ -24,6 +24,7 @@ import {
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { CitySwitch } from "@museumsufer/core/cityswitch";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq as SharedFaq } from "@museumsufer/core/faq-ui";
@@ -135,6 +136,7 @@ export function Grain() {
 export function Masthead({ sublabel, city = "frankfurt" }: { sublabel?: string; city?: string } = {}) {
   return (
     <header class="masthead">
+      <CitySwitch apex="ins.theater" city={city} supported={SCRAPE_DATA.supportedCities} locale="de" />
       <a class="masthead__brand" href="/">
         <h1 class="wordmark">
           <span class="wordmark__line wordmark__line--1">{cityMeta(city).short}</span>

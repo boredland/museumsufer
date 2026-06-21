@@ -9,6 +9,7 @@ import {
   langSwitchItems,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
+import { CitySwitch } from "@museumsufer/core/cityswitch";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { Faq } from "@museumsufer/core/faq-ui";
@@ -191,13 +192,18 @@ export function Masthead({
   // other cities get a generic city-named masthead.
   const isFrankfurt = city === "frankfurt";
   const title = isFrankfurt ? "Museumsufer" : cityName(city, locale, "short");
-  const location = isFrankfurt ? "Frankfurt am Main · 50.10°N 8.68°E" : cityName(city, locale, "full");
   return (
     <header class="masthead">
       <div class="masthead__head">
         <div class="masthead__brand">
           <Mark class="masthead__mark" />
-          <p class="section-eyebrow masthead__location">{location}</p>
+          <CitySwitch
+            apex="ins.museum"
+            city={city ?? "frankfurt"}
+            supported={SCRAPE_DATA.supportedCities}
+            locale={locale}
+            path={currentPath || "/"}
+          />
         </div>
         <div class="masthead__actions">
           <ThemeToggle label={tr.switchTheme} />

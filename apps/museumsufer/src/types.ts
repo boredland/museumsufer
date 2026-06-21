@@ -54,6 +54,8 @@ export interface ScrapeData {
   exhibitions: Exhibition[];
   events: Event[];
   translations: Translation[];
+  /** Cities this vertical currently has museums for, in display order. */
+  supportedCities: string[];
 }
 
 export interface Exhibition {

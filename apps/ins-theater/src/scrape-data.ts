@@ -2,6 +2,7 @@
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ["frankfurt","hamburg"],
   shows: [
     {"city":"hamburg","detail_url":"https://alleetheater.eventim-inhouse.de/webshop/webticket/shop?kassierer=web&event=6984","id":37877583,"slug":"das-tapfere-schneiderlei","theater_slug":"alleetheater","title":"Das tapfere Schneiderlei..."},
     {"city":"hamburg","detail_url":"https://alleetheater.eventim-inhouse.de/webshop/webticket/shop?kassierer=web&event=6977","id":2990137393,"slug":"der-froschk-nig","theater_slug":"alleetheater","title":"Der Froschkönig"},
