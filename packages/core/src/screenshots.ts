@@ -27,6 +27,13 @@ export interface CaptureOpts {
   readyTimeoutMs?: number;
   postReadyDelayMs?: number;
   formats?: readonly ScreenshotFormat[];
+  /** Inserted before `.png` in each output filename, e.g. "-hamburg"
+   *  yields `ss-wide-hamburg.png`. Defaults to "" (the canonical paths). */
+  filenameSuffix?: string;
+  /** Override the `Host` header. Lets one local `wrangler dev` serve a
+   *  non-default city's content via the host→city middleware (prod mode
+   *  just points `baseUrl` at the city's real subdomain instead). */
+  hostHeader?: string;
 }
 
 export async function captureManifestScreenshots(opts: CaptureOpts): Promise<string[]> {
@@ -39,6 +46,8 @@ export async function captureManifestScreenshots(opts: CaptureOpts): Promise<str
     readyTimeoutMs = 10_000,
     postReadyDelayMs = 400,
     formats = ["landscape", "portrait"] as const,
+    filenameSuffix = "",
+    hostHeader,
   } = opts;
 
   await mkdir(outDir, { recursive: true });
@@ -53,6 +62,7 @@ export async function captureManifestScreenshots(opts: CaptureOpts): Promise<str
         isMobile: preset.isMobile,
         colorScheme: theme,
         locale,
+        ...(hostHeader && { extraHTTPHeaders: { Host: hostHeader } }),
       });
       const page = await ctx.newPage();
       // `networkidle` deadlocks on pages with continuous lazy-image
@@ -64,7 +74,7 @@ export async function captureManifestScreenshots(opts: CaptureOpts): Promise<str
       await page.evaluate(() => document.fonts.ready);
       if (postReadyDelayMs > 0) await page.waitForTimeout(postReadyDelayMs);
 
-      const path = join(outDir, preset.filename);
+      const path = join(outDir, preset.filename.replace(/\.png$/, `${filenameSuffix}.png`));
       await page.screenshot({ path, fullPage: false });
       written.push(path);
       await ctx.close();

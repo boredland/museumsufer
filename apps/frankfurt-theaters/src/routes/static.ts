@@ -5,6 +5,7 @@ import {
   cityAdj,
   cityMeta,
   cityName,
+  cityScreenshots,
   cityUrl,
   todayIso,
 } from "@museumsufer/core";
@@ -40,10 +41,7 @@ function manifestFor(city: string): string {
       { src: "/icon-192-maskable.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
       { src: "/icon-512-maskable.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
-    screenshots: [
-      { src: "/ss-wide.png", sizes: "1280x720", type: "image/png", form_factor: "wide", label: brand },
-      { src: "/ss-mobile.png", sizes: "390x844", type: "image/png", label: brand },
-    ],
+    screenshots: cityScreenshots({ city, label: brand }),
   });
   manifestCache.set(city, manifest);
   return manifest;
