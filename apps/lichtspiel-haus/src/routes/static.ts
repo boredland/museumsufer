@@ -65,7 +65,7 @@ function llmsFor(city: string): string {
     "de",
   );
   const today = todayIso();
-  const series = getAllSeries(today);
+  const series = getAllSeries(today, city);
   const cinemaLines = CINEMAS.slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((c) => `- ${c.slug}: ${c.name}`)

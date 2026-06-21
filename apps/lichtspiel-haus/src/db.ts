@@ -165,11 +165,12 @@ export function getAllSeries(from?: string, city?: string | null): SeriesSummary
   return summaries.sort((a, b) => a.first_date.localeCompare(b.first_date) || a.name.localeCompare(b.name));
 }
 
-export function getSeriesScreenings(slug: string, from?: string): DayScreening[] {
+export function getSeriesScreenings(slug: string, from?: string, city?: string | null): DayScreening[] {
   const screenings = SCREENINGS_BY_SERIES.get(slug) ?? [];
   const out: DayScreening[] = [];
   for (const s of screenings) {
     if (from && s.date < from) continue;
+    if (city && CINEMAS_BY_SLUG.get(s.cinema_slug)?.city !== city) continue;
     const joined = joinScreening(s);
     if (joined) out.push(joined);
   }

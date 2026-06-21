@@ -10,12 +10,14 @@ const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 app.get("/reihe/:slug", (c) => {
   const slug = c.req.param("slug");
-  const screenings = getSeriesScreenings(slug, todayIso());
+  const city = c.get("city") ?? "frankfurt";
+  // Scope to the host city: a series with no screening in this city has no
+  // page here (it lives on the other city's host).
+  const screenings = getSeriesScreenings(slug, todayIso(), city);
   if (screenings.length === 0) return c.notFound();
   const name = screenings[0].series?.name ?? slug;
 
   const locale = detectLocale(c.req.raw);
-  const city = c.get("city") ?? "frankfurt";
   const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/reihe/${slug}`;
   const appUrl = cityUrl("lichtspiel.haus", city);
@@ -134,7 +136,7 @@ app.get("/reihe", (c) => {
   const locale = detectLocale(c.req.raw);
   const city = c.get("city") ?? "frankfurt";
   const tr = localizeTranslations(getTranslations(locale), city, locale);
-  const all = getAllSeries(todayIso());
+  const all = getAllSeries(todayIso(), city);
   const appUrl = cityUrl("lichtspiel.haus", city);
   return c.html(
     <>
