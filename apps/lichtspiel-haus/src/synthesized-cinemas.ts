@@ -57,6 +57,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.b-movie.de",
   },
   {
+    slug: "bad-vilbel-open-air-kino",
+    name: "Open-Air-Kino Bad Vilbel",
+    address: "",
+    lat: 50.1935,
+    lon: 8.7497,
+    city: "frankfurt",
+    website_url: "https://www.kultur-bad-vilbel.de",
+  },
+  {
     slug: "blankeneser-kino",
     name: "Blankeneser Kino",
     address: "",
@@ -253,6 +262,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.957,
     city: "hamburg",
     website_url: "https://www.studio-kino.de",
+  },
+  {
+    slug: "taunale-oberursel",
+    name: "TAUNALE – Taunus Filmfest Oberursel",
+    address: "",
+    lat: 50.2004,
+    lon: 8.5765,
+    city: "frankfurt",
+    website_url: "https://taunale.de",
   },
   {
     slug: "zeise-kinos",
