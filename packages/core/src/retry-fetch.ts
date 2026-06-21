@@ -20,6 +20,12 @@ export interface RetryFetchOptions {
   factor?: number;
   /** Used in retry-attempt error messages. Defaults to the URL. */
   label?: string;
+  /** Per-attempt request timeout (ms). `fetch` has no default timeout, so a
+   *  server that accepts the connection but never responds would hang the
+   *  attempt forever — and p-retry can't even count it as a failure. Each
+   *  attempt aborts after this so it becomes a retryable error. Ignored when
+   *  the caller passes its own `signal`. Defaults to 20s. */
+  requestTimeout?: number;
 }
 
 const RETRYABLE_STATUS = new Set([408, 429]);
@@ -29,10 +35,12 @@ export async function retryFetch(
   init?: RequestInit,
   options: RetryFetchOptions = {},
 ): Promise<Response> {
-  const { retries = 3, minTimeout = 1000, maxTimeout = 10_000, factor = 3, label } = options;
+  const { retries = 3, minTimeout = 1000, maxTimeout = 10_000, factor = 3, label, requestTimeout = 20_000 } = options;
   return pRetry(
     async () => {
-      const res = await fetch(input, init);
+      // Fresh timeout per attempt; respect a caller-supplied signal if present.
+      const signal = init?.signal ?? AbortSignal.timeout(requestTimeout);
+      const res = await fetch(input, { ...init, signal });
       if (res.ok) return res;
       const transient = res.status >= 500 || RETRYABLE_STATUS.has(res.status);
       if (!transient) return res;
