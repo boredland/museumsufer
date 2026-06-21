@@ -43,6 +43,7 @@ import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
+import { scrapeBotschaftDerWildtiere } from "./venues/botschaft-der-wildtiere";
 import { scrapeBrotfabrik } from "./venues/brotfabrik";
 import { scrapeBuergeruniversitaet } from "./venues/buergeruniversitaet";
 import { scrapeCafeMutz } from "./venues/cafe-mutz";
@@ -207,6 +208,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
+  { slug: "botschaft-der-wildtiere", run: (_ctx: ScraperContext) => scrapeBotschaftDerWildtiere() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
   { slug: "bnai-brith-frankfurt", run: (_ctx: ScraperContext) => scrapeBnaiBrithFrankfurt() },
   { slug: "boell-hessen", run: (_ctx: ScraperContext) => scrapeBoellHessen() },
