@@ -42,6 +42,7 @@ import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx
 import { scrapeBMovie } from "./venues/b-movie";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
+import { scrapeBadVilbelOpenAirKino } from "./venues/bad-vilbel-open-air-kino";
 import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
 import { scrapeBotschaftDerWildtiere } from "./venues/botschaft-der-wildtiere";
@@ -210,6 +211,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "astor-hafencity", run: (_ctx: ScraperContext) => scrapeAstorHafencity() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
+  { slug: "bad-vilbel-open-air-kino", run: (_ctx: ScraperContext) => scrapeBadVilbelOpenAirKino() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
   { slug: "botschaft-der-wildtiere", run: (_ctx: ScraperContext) => scrapeBotschaftDerWildtiere() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -383,6 +385,7 @@ export {
   scrapeAutorenbuchhandlungMarx,
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
+  scrapeBadVilbelOpenAirKino,
   scrapeBnaiBrithFrankfurt,
   scrapeBoellHessen,
   scrapeBrotfabrik,
