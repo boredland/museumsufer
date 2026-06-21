@@ -53,7 +53,8 @@ Regeln:
 - Datum im Text steht als TT.MM.JJJJ → wandle in ISO YYYY-MM-DD um.
 - Zweitägige Angabe wie "14./ 15.01.2026": date = 2026-01-14, end_date = 2026-01-15.
 - Zeit "HH:MM bis HH:MM Uhr": time = Beginn, end_time = Ende. Nur ein Beginn: time = Beginn, end_time = null.
-- "Referent"/Leitung → performers. Preis "NN €" → price_min als ganze Zahl (nur der Euro-Betrag).
+- performers: NUR ein im Text ausdrücklich genannter Referent / Leitung / Dozent bzw. die namentlich auftretende Person. Erfinde KEINEN Personennamen und leite keinen aus einem reinen Titel ab. Steht nur ein Veranstaltungs- oder Bandname ohne separat genannte Person, setze null. Im Zweifel null.
+- Preis "NN €" → price_min als ganze Zahl (nur der Euro-Betrag).
 - title = die Veranstaltungsüberschrift, NICHT Datum/Ort/Gebühr/Referent.
 - Erfinde nichts. Fehlt ein Feld, setze null. Keine Events ohne klares Datum.`;
 
