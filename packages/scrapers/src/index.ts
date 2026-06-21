@@ -31,6 +31,7 @@ import { scrapeWdc2026 } from "./venues/_wdc2026";
 import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
 import { scrapeAlabamaKino } from "./venues/alabama-kino";
 import { scrapeAlmaHoppesLustspielhaus } from "./venues/alma-hoppes-lustspielhaus";
+import { scrapeAlsterdorfSommerkino } from "./venues/alsterdorf-sommerkino";
 import { scrapeAlteOper } from "./venues/alte-oper";
 import { scrapeAltonaerTheater } from "./venues/altonaer-theater";
 import { scrapeAndreasKoehs } from "./venues/andreas-koehs";
@@ -187,6 +188,7 @@ import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
 import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
+import { scrapeZeiseOpenAir } from "./venues/zeise-open-air";
 
 /**
  * The set of canonical hub scrapers. Each emits canonical-shaped events
@@ -198,6 +200,7 @@ import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> = [
   { slug: "akademie-der-wissenschaften-hamburg", run: (_ctx: ScraperContext) => scrapeAkademieWissenschaftenHamburg() },
   { slug: "alabama-kino", run: (_ctx: ScraperContext) => scrapeAlabamaKino() },
+  { slug: "alsterdorf-sommerkino", run: (_ctx: ScraperContext) => scrapeAlsterdorfSommerkino() },
   { slug: "alma-hoppes-lustspielhaus", run: (_ctx: ScraperContext) => scrapeAlmaHoppesLustspielhaus() },
   { slug: "altonaer-theater", run: (_ctx: ScraperContext) => scrapeAltonaerTheater() },
   { slug: "alte-oper", run: (_ctx: ScraperContext) => scrapeAlteOper() },
@@ -364,6 +367,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
   { slug: "wdc2026", run: (ctx: ScraperContext) => scrapeWdc2026(ctx.proxy) },
   { slug: "ypsilon-buchladen", run: (_ctx: ScraperContext) => scrapeYpsilonBuchladen() },
+  { slug: "zeise-open-air", run: (_ctx: ScraperContext) => scrapeZeiseOpenAir() },
 ];
 
 export {
