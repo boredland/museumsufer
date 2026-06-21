@@ -175,6 +175,7 @@ import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt
 import { scrapeStalburgTheater } from "./venues/stalburg-theater";
 import { scrapeStKatharinen } from "./venues/stk-musik";
 import { scrapeSuew } from "./venues/suew";
+import { scrapeTaunaleOberursel } from "./venues/taunale-oberursel";
 import { scrapeThaliaTheater } from "./venues/thalia-theater";
 import { scrapeTheaterAlteBruecke } from "./venues/theater-alte-bruecke";
 import { scrapeTheaterDasZimmer } from "./venues/theater-das-zimmer";
@@ -354,6 +355,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
   { slug: "stalburg-theater", run: (_ctx: ScraperContext) => scrapeStalburgTheater() },
   { slug: "suew", run: (_ctx: ScraperContext) => scrapeSuew() },
+  { slug: "taunale-oberursel", run: (_ctx: ScraperContext) => scrapeTaunaleOberursel() },
   { slug: "thalia-theater", run: (_ctx: ScraperContext) => scrapeThaliaTheater() },
   { slug: "theater-das-zimmer", run: (_ctx: ScraperContext) => scrapeTheaterDasZimmer() },
   { slug: "theater-alte-bruecke", run: (_ctx: ScraperContext) => scrapeTheaterAlteBruecke() },
@@ -511,6 +513,7 @@ export {
   scrapeStKatharinen,
   scrapeStPauliTheater,
   scrapeSuew,
+  scrapeTaunaleOberursel,
   scrapeThaliaTheater,
   scrapeTheaterAlteBruecke,
   scrapeTheaterDasZimmer,
