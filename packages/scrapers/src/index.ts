@@ -49,6 +49,7 @@ import { scrapeCafeMutz } from "./venues/cafe-mutz";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
+import { scrapeCottonClub } from "./venues/cotton-club";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
 import { scrapeDeichtorhallen } from "./venues/deichtorhallen";
 import { scrapeDenkbar } from "./venues/denkbar";
@@ -213,6 +214,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "caligari-wiesbaden", run: (_ctx: ScraperContext) => scrapeCaligariWiesbaden() },
   { slug: "centralkomitee", run: (_ctx: ScraperContext) => scrapeCentralkomitee() },
   { slug: "club-voltaire", run: (_ctx: ScraperContext) => scrapeClubVoltaire() },
+  { slug: "cotton-club", run: (_ctx: ScraperContext) => scrapeCottonClub() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
   { slug: "denkbar-frankfurt", run: (_ctx: ScraperContext) => scrapeDenkbar() },
   { slug: "deutsches-schauspielhaus", run: (_ctx: ScraperContext) => scrapeDeutschesSchauspielhaus() },
