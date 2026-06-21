@@ -5,7 +5,7 @@ const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
 /** go~mus serves several rendition URLs per image; `detail` is the largest
  *  card-sized variant, with progressively smaller fallbacks. */
-interface GomusPicture {
+export interface GomusPicture {
   original?: string | null;
   detail?: string | null;
   detail_3x2?: string | null;
@@ -16,7 +16,7 @@ interface GomusPicture {
 
 /** Pick the best available rendition. `detail`/`article` are ~card-sized;
  *  `original` can be very large but is a safe last resort. */
-function pickImage(picture: GomusPicture | null | undefined): string | null {
+export function pickGomusImage(picture: GomusPicture | null | undefined): string | null {
   if (!picture) return null;
   return picture.detail ?? picture.article ?? picture.detail_3x2 ?? picture.teaser ?? picture.original ?? null;
 }
@@ -94,7 +94,7 @@ export async function scrapeGomusMuseum(
       const data = (await res.json()) as { exhibitions?: GomusExhibition[] };
       const list = data.exhibitions ?? [];
       for (const ex of list) {
-        const exImage = pickImage(ex.picture);
+        const exImage = pickGomusImage(ex.picture);
         if (exImage) exhibitionImageById.set(ex.id, exImage);
         let slug = config.slug;
         let _displayName = config.name;
@@ -155,7 +155,7 @@ export async function scrapeGomusMuseum(
     if (res.ok) {
       const data = (await res.json()) as { events?: GomusEvent[] };
       for (const ev of data.events ?? []) {
-        const img = pickImage(ev.picture);
+        const img = pickGomusImage(ev.picture);
         if (img) eventImageById.set(ev.id, img);
       }
     }
