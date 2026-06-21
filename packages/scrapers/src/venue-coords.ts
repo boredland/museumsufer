@@ -71,6 +71,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hohe-luft-schiff": [53.5794, 9.9723],
   "theaterschiff-hamburg": [53.5453, 9.9864],
   "alma-hoppes-lustspielhaus": [53.5855, 9.9863],
+  "alsterdorf-sommerkino": [53.6123, 10.0243],
   "mut-theater": [53.5622, 9.9608],
   "theater-das-zimmer": [53.5524, 10.0822],
   centralkomitee: [53.5552, 10.0163],
@@ -213,6 +214,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "schanzenkino-73": [53.561, 9.963],
   "studio-kino": [53.556, 9.957],
   "zeise-kinos": [53.552, 9.933],
+  "zeise-open-air": [53.552, 9.933],
 
   // ─── Landau / Pfalz regional sources ─────────────────────────────
   "hambacher-schloss": [49.3236, 8.1153],
