@@ -164,6 +164,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "literaturhaus-frankfurt": "Literaturhaus Frankfurt",
   "literaturhaus-hamburg": "Literaturhaus Hamburg",
   "magazin-filmkunsttheater": "Magazin Filmkunsttheater",
+  "mainaeppelhaus-lohrberg": "MainÄppelHaus Lohrberg",
   "malsehn": "Mal seh'n Kino",
   "mampf": "Jazzlokal Mampf",
   "meetup-analytics-pioneers-frankfurt": "Analytics Pioneers Frankfurt",
