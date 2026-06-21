@@ -38,6 +38,7 @@ import { scrapeArthouseKinos } from "./venues/arthouse-kinos";
 import { scrapeAstorFrankfurt } from "./venues/astor-frankfurt";
 import { scrapeAstorHafencity } from "./venues/astor-hafencity";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
+import { scrapeBMovie } from "./venues/b-movie";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
@@ -201,6 +202,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "astor-hafencity", run: (_ctx: ScraperContext) => scrapeAstorHafencity() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
+  { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
   { slug: "bnai-brith-frankfurt", run: (_ctx: ScraperContext) => scrapeBnaiBrithFrankfurt() },
   { slug: "boell-hessen", run: (_ctx: ScraperContext) => scrapeBoellHessen() },

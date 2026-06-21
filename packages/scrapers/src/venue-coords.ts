@@ -22,6 +22,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "andreas-koehs": [50.1115, 8.6839],
   "autorenbuchhandlung-marx": [50.1029, 8.6748],
   "bad-homburger-schlosskonzerte": [50.2275, 8.6172],
+  "b-movie": [53.5557, 9.9646],
   "bad-soden": [50.1411, 8.4985],
   "bnai-brith-frankfurt": [50.1182, 8.6611],
   "boell-hessen": [50.1056, 8.6517],
