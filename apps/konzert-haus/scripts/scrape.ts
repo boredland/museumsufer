@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
+import { CITIES } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import type { CanonicalEvent } from "@museumsufer/event-hub";
@@ -24,9 +25,12 @@ async function main(): Promise<void> {
   const orphanGenres = new Map<string, Map<Genre, number>>();
   const orphanUrls = new Map<string, string>();
 
+  const presentCities = new Set<string>();
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    if (!cityOf(ev)) continue;
+    const evCity = cityOf(ev);
+    if (!evCity) continue;
+    presentCities.add(evCity);
     const genre = pickGenre(ev);
     if (!genre) continue;
 
@@ -73,7 +77,8 @@ async function main(): Promise<void> {
       a.title.localeCompare(b.title),
   );
 
-  const data: ScrapeData = { events: deduped };
+  const supportedCities = Object.keys(CITIES).filter((c) => presentCities.has(c));
+  const data: ScrapeData = { events: deduped, supportedCities };
   await writeFile(resolve(root, "src/scrape-data.ts"), generateModule(data), "utf8");
   await writeFile(resolve(root, "src/synthesized-venues.ts"), generateVenuesModule(synthesized), "utf8");
 
@@ -161,6 +166,7 @@ function generateModule(data: ScrapeData): string {
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ${JSON.stringify(data.supportedCities)},
 ${bundleSection("events", data.events)}
 };
 `;

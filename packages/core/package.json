@@ -14,6 +14,7 @@
     "./calendar": "./src/calendar.ts",
     "./calendar-popover": "./src/calendar-popover.tsx",
     "./cities": "./src/cities.ts",
+    "./cityswitch": "./src/cityswitch.tsx",
     "./city-routing": "./src/city-routing.ts",
     "./contact-dialog": "./src/contact-dialog.tsx",
     "./date": "./src/date.ts",

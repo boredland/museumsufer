@@ -38,4 +38,6 @@ export interface Event {
 
 export interface ScrapeData {
   events: Event[];
+  /** Cities this vertical currently has data for, in display order. */
+  supportedCities: string[];
 }

@@ -2,6 +2,7 @@
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ["frankfurt","hamburg"],
   events: [
     {"date":"2026-06-21","description":"Ludwig van Beethoven (1770–1827) Klavierkonzerte Nr. 2 B-Dur op. 19 Pause Ludwig van Beethoven (1770–1827) Nr. 4 G-Dur op. 58 Änderungen vorbehalten.","detail_url":"https://www.kronbergacademy.de/konzerte-projekte/kalender/detail/kosmos-beethoven-die-klavierkonzerte-iii-21-06-2026","end_time":"13:00","genre":"classical","id":2555811320,"performers":"Kirill Gerstein, Chamber Orchestra of Europe","price_max":75,"price_min":35,"slug":"kosmos-beethoven-die-klavierkonzerte-iii-21-06-2026","subtitle":"2025/2026 Kosmos Beethoven · Chamber Orchestra of Europe, Kirill Gerstein","time":"11:00","title":"Kosmos Beethoven: die Klavierkonzerte III","venue_room":"Großer Saal, Casals Forum","venue_slug":"kronberg-academy"},
     {"date":"2026-06-21","description":"mit Schüler*innen der Querflötenklasse Dessi Schell","detail_url":"https://www.musikschule-frankfurt.de/index.php?article_id=130","genre":"classical","id":1274164749,"slug":"musikschule-ffm-klassenvorspiel-2026-06-21","time":"11:00","title":"Klassenvorspiel","venue_slug":"musikschule-frankfurt"},
