@@ -195,6 +195,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hansa-filmstudio": [53.485, 10.218],
   "harmonie-frankfurt": [50.0976, 8.6818],
   "kino-alte-muehle-bad-vilbel": [50.1846, 8.7464],
+  "bad-vilbel-open-air-kino": [50.1935, 8.7497],
   "kino-kelkheim": [50.1474, 8.4501],
   "kino-koeppern": [50.2554, 8.6453],
   "koralle-lichtspiele": [53.663, 10.147],
