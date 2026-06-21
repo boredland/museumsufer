@@ -14,6 +14,13 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  * title, with no times, images or per-event links. We scrape that teaser; the
  * year is year-less so it's inferred against today. Labels come from the
  * title via the shared event classifier (the venue is genuinely mixed).
+ *
+ * UPGRADE PATH: this is intentionally thin (~5 rolling events). The full year
+ * (~54 events, with times) lives only in the yearly PDF linked from this page
+ * (`/images/dokumente/Kalender_<year>_*.pdf`), which the Worker runtime can't
+ * practically parse. If MainÄppelHaus ever exposes a structured calendar
+ * (HTML list with times, an iCal feed, or a Joomla calendar plugin), switch to
+ * that for full coverage with times.
  */
 const PROGRAM_URL = "https://www.mainaeppelhauslohrberg.de/index.php/lohrberg-erleben/veranstaltungskalender.html";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
