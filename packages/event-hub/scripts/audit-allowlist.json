@@ -24,5 +24,7 @@
   "hamburgmusik": "aggregator — fans out to child slugs: elbphilharmonie, laeiszhalle",
   "wdc2026": "aggregator — fans out to wdc2026-* child slugs",
   "mut-theater": "seasonal — MUT! Theater has no upcoming events listed on their program page (website says 'Leider finden keine Stücke statt')",
-  "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable"
+  "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable",
+  "hessisches-staatsballett": "seasonal — joint Wiesbaden/Darmstadt company between seasons; spielplan returns 'keine Ergebnisse gefunden' as of June 2026 (2026/27 not yet published). Parser verified against live markup.",
+  "lichtmess-kino": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows)."
 }

@@ -1,3 +1,3 @@
 ## Scraper health audit
 
-✅ All configured scrapers are delivering. 9696 events across 363 sources.
+✅ All configured scrapers are delivering. 8851 events across 368 sources.
