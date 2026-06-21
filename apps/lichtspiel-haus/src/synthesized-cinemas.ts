@@ -102,6 +102,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.filmraum.com",
   },
   {
+    slug: "freiluftkino-frankfurt",
+    name: "Freiluftkino Frankfurt",
+    address: "",
+    lat: 50.1109,
+    lon: 8.6821,
+    city: "frankfurt",
+    website_url: "https://booking.cinetixx.de",
+  },
+  {
     slug: "hafen-2-offenbach",
     name: "Hafen 2 Offenbach",
     address: "",
