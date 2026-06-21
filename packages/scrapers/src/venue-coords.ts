@@ -1,4 +1,12 @@
-import { type Bbox, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX } from "@museumsufer/core/cities";
+import {
+  type Bbox,
+  cityFor,
+  cityOf,
+  FRANKFURT_BBOX,
+  HAMBURG_BBOX,
+  inBbox,
+  LANDAU_BBOX,
+} from "@museumsufer/core/cities";
 import { MUSEUMS } from "./_museums/config";
 
 /**
@@ -243,7 +251,7 @@ export function coordinatesFor(sourceSlug: string): readonly [number, number] | 
 // both build scripts and worker request paths share one source of truth.
 // Re-exported here for back-compat: @museumsufer/event-hub consumers import
 // these names from the scrapers barrel.
-export { type Bbox, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX };
+export { type Bbox, cityFor, cityOf, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX };
 
 /** Frankfurt + Landau corridor bbox. Anything outside is dropped by the
  *  hub runner; this is defense-in-depth against scraper-level filter

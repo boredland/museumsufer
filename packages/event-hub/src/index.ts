@@ -1,5 +1,7 @@
 export {
   type Bbox,
+  cityFor,
+  cityOf,
   FRANKFURT_BBOX,
   HAMBURG_BBOX,
   inBbox,
