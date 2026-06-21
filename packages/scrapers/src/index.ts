@@ -66,6 +66,7 @@ import { scrapeEnsembleResonanz } from "./venues/ensemble-resonanz";
 import { scrapeErnstDeutschTheater } from "./venues/ernst-deutsch-theater";
 import { scrapeEschbornK } from "./venues/eschborn-k";
 import { scrapeEvangelischeAkademie } from "./venues/evangelische-akademie";
+import { scrapeFabrik } from "./venues/fabrik";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeFilmforumHoechst } from "./venues/filmforum-hoechst";
@@ -225,6 +226,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "ernst-deutsch-theater", run: (_ctx: ScraperContext) => scrapeErnstDeutschTheater() },
   { slug: "eschborn-k", run: (_ctx: ScraperContext) => scrapeEschbornK() },
   { slug: "evangelische-akademie-frankfurt", run: (_ctx: ScraperContext) => scrapeEvangelischeAkademie() },
+  { slug: "fabrik", run: (_ctx: ScraperContext) => scrapeFabrik() },
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
   { slug: "filmforum-hoechst", run: (_ctx: ScraperContext) => scrapeFilmforumHoechst() },
