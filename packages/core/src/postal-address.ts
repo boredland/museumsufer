@@ -6,7 +6,7 @@
  *
  * Three behaviours are needed across the apps and parameterised here:
  *
- * 1. Frankfurt-Hessen venues (lehrhaus, frankfurt-theaters): always
+ * 1. Frankfurt-Hessen venues (lehrhaus, ins-theater): always
  *    stamp `addressRegion: "Hessen"` on success; return undefined for
  *    empty/unparseable input so the caller decides whether to emit a
  *    `location.address` at all.

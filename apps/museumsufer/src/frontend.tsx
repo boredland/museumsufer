@@ -550,7 +550,7 @@ export function renderPage(
     url: `${appUrl}/`,
     logo: { "@type": "ImageObject", url: `${appUrl}/og-image.png`, width: 1200, height: 630 },
     founder: { "@id": `${appUrl}/#publisher` },
-    sameAs: ["https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums"],
+    sameAs: ["https://github.com/boredland/museumsufer/tree/main/apps/museumsufer"],
   };
   const webAppSchema = {
     "@context": "https://schema.org",
@@ -728,7 +728,7 @@ export function renderPage(
                   label: tr.imprint,
                 },
                 {
-                  href: "https://github.com/boredland/museumsufer/tree/main/apps/frankfurt-museums",
+                  href: "https://github.com/boredland/museumsufer/tree/main/apps/museumsufer",
                   label: "GitHub",
                   external: true,
                   ariaLabel: "GitHub",

@@ -369,7 +369,7 @@ export interface EventRowOptions {
   index: number;
   hideVenue?: boolean;
   /** First-of-list gets richer typography + a larger image slot, mirroring
-   *  the frankfurt-museums hero-card pattern. Pass `index === 0`. */
+   *  the museumsufer hero-card pattern. Pass `index === 0`. */
   hero?: boolean;
   /** Locale of the surrounding page -- threads through to internal
    *  link hrefs so an explicit `?lang=` survives every click. */

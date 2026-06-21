@@ -1,6 +1,6 @@
 # Agents Guide
 
-This document helps AI agents understand and work on `apps/frankfurt-museums`.
+This document helps AI agents understand and work on `apps/museumsufer`.
 
 ## Project overview
 
@@ -75,7 +75,7 @@ The per-museum parsers live in `packages/scrapers/src/_museums/`:
 
 - **`config.ts`** — `MUSEUMS` registry: per-museum `eventApi` / `exhibitionApi`
   endpoints + types, coords, flags (`proxy`, `skipEvents`, `hidden`, `spa`),
-  `manualExhibitions`. (`apps/frankfurt-museums/src/museum-config.ts` is the
+  `manualExhibitions`. (`apps/museumsufer/src/museum-config.ts` is the
   app-side copy used for the directory + transit; keep the two in sync when
   adding a museum.)
 - **`api.ts`** — ~26 typed parsers behind `fetchEventsFromApi()` /
@@ -168,8 +168,8 @@ referenced live in `@museumsufer/core` (`date.ts`, `html.ts`).
 ## QA: checking a scraper
 
 1. **Run the hub locally:** `bun packages/event-hub/scripts/scrape.ts` (set `TMDB_API_KEY` / `DEEPL_API_KEYS` if you want enrichment), or `gh workflow run scrape.yml`.
-2. **Re-derive this app:** `bun run -F @museumsufer/frankfurt-museums scrape`.
-3. **Spot-check the bundle:** `grep -c "your-museum-slug" apps/frankfurt-museums/src/scrape-data.ts`.
+2. **Re-derive this app:** `bun run -F @museumsufer/museumsufer scrape`.
+3. **Spot-check the bundle:** `grep -c "your-museum-slug" apps/museumsufer/src/scrape-data.ts`.
 4. **Inspect by label:** `bun --cwd packages/event-hub query --source <slug>`.
 5. **Daily audit:** `.github/workflows/scraper-audit.yml` flags under-delivering scrapers and hands them to Copilot; verified-empty/seasonal sources go in `packages/event-hub/scripts/audit-allowlist.json`, not code.
 

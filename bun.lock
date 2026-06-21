@@ -11,35 +11,8 @@
         "typescript": "^5.9.3",
       },
     },
-    "apps/frankfurt-museums": {
-      "name": "@museumsufer/frankfurt-museums",
-      "version": "0.0.1",
-      "dependencies": {
-        "@fontsource-variable/dm-sans": "^5.2.8",
-        "@fontsource-variable/fraunces": "^5.2.9",
-        "@fontsource/dm-mono": "^5.2.7",
-        "@hono/zod-validator": "^0.7.6",
-        "@museumsufer/core": "*",
-        "@museumsufer/event-hub": "*",
-        "@museumsufer/scrapers": "*",
-        "@scalar/hono-api-reference": "^0.10.14",
-        "dayjs": "^1.11.20",
-        "fuse.js": "^7.3.0",
-        "hono": "^4.12.18",
-        "htmx.org": "^2.0.10",
-        "p-queue": "^9.2.0",
-        "zod": "^4.4.3",
-      },
-      "devDependencies": {
-        "@cloudflare/workers-types": "^4.20260509.1",
-        "@museumsufer/tsconfig": "*",
-        "lightningcss-cli": "^1.32.0",
-        "typescript": "^5.9.3",
-        "wrangler": "^4.90.0",
-      },
-    },
-    "apps/frankfurt-theaters": {
-      "name": "@museumsufer/frankfurt-theaters",
+    "apps/ins-theater": {
+      "name": "@museumsufer/ins-theater",
       "version": "0.0.1",
       "dependencies": {
         "@fontsource-variable/fraunces": "^5.2.9",
@@ -145,6 +118,33 @@
         "@museumsufer/event-hub": "*",
         "@scalar/hono-api-reference": "^0.10.14",
         "dayjs": "^1.11.20",
+        "hono": "^4.12.18",
+        "htmx.org": "^2.0.10",
+        "p-queue": "^9.2.0",
+        "zod": "^4.4.3",
+      },
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4.20260509.1",
+        "@museumsufer/tsconfig": "*",
+        "lightningcss-cli": "^1.32.0",
+        "typescript": "^5.9.3",
+        "wrangler": "^4.90.0",
+      },
+    },
+    "apps/museumsufer": {
+      "name": "@museumsufer/museumsufer",
+      "version": "0.0.1",
+      "dependencies": {
+        "@fontsource-variable/dm-sans": "^5.2.8",
+        "@fontsource-variable/fraunces": "^5.2.9",
+        "@fontsource/dm-mono": "^5.2.7",
+        "@hono/zod-validator": "^0.7.6",
+        "@museumsufer/core": "*",
+        "@museumsufer/event-hub": "*",
+        "@museumsufer/scrapers": "*",
+        "@scalar/hono-api-reference": "^0.10.14",
+        "dayjs": "^1.11.20",
+        "fuse.js": "^7.3.0",
         "hono": "^4.12.18",
         "htmx.org": "^2.0.10",
         "p-queue": "^9.2.0",
@@ -392,9 +392,7 @@
 
     "@museumsufer/event-hub": ["@museumsufer/event-hub@workspace:packages/event-hub"],
 
-    "@museumsufer/frankfurt-museums": ["@museumsufer/frankfurt-museums@workspace:apps/frankfurt-museums"],
-
-    "@museumsufer/frankfurt-theaters": ["@museumsufer/frankfurt-theaters@workspace:apps/frankfurt-theaters"],
+    "@museumsufer/ins-theater": ["@museumsufer/ins-theater@workspace:apps/ins-theater"],
 
     "@museumsufer/konzert-haus": ["@museumsufer/konzert-haus@workspace:apps/konzert-haus"],
 
@@ -403,6 +401,8 @@
     "@museumsufer/lehrhaus": ["@museumsufer/lehrhaus@workspace:apps/lehrhaus"],
 
     "@museumsufer/lichtspiel-haus": ["@museumsufer/lichtspiel-haus@workspace:apps/lichtspiel-haus"],
+
+    "@museumsufer/museumsufer": ["@museumsufer/museumsufer@workspace:apps/museumsufer"],
 
     "@museumsufer/scrapers": ["@museumsufer/scrapers@workspace:packages/scrapers"],
 

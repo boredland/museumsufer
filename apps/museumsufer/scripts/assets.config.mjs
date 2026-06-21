@@ -1,5 +1,5 @@
 /**
- * Vendor assets for frankfurt-museums. Consumed by `scripts/sync-assets.mjs`
+ * Vendor assets for museumsufer. Consumed by `scripts/sync-assets.mjs`
  * at the repo root. The Google Fonts URL we previously loaded was:
  *   Fraunces ital,opsz,wght@0,9..144,400..600;1,9..144,400..600
  *   DM Sans  wght@400;500;600;700

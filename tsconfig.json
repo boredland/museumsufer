@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "./apps/frankfurt-museums" },
+    { "path": "./apps/museumsufer" },
     { "path": "./packages/core" }
   ]
 }

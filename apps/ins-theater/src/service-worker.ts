@@ -1,7 +1,7 @@
 import { buildServiceWorkerJs } from "@museumsufer/core";
 
 export const SERVICE_WORKER_JS = buildServiceWorkerJs({
-  cacheKey: "frankfurt-theaters-v6",
+  cacheKey: "ins-theater-v6",
   staticAssets: [
     "/favicon.svg",
     "/mark.svg",

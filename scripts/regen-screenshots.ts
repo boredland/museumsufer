@@ -60,8 +60,8 @@ interface AppTarget {
 
 const APPS: readonly AppTarget[] = [
   {
-    slug: "frankfurt-museums",
-    dir: "apps/frankfurt-museums",
+    slug: "museumsufer",
+    dir: "apps/museumsufer",
     port: 8801,
     path: "/",
     readySelector: ".section",
@@ -71,8 +71,8 @@ const APPS: readonly AppTarget[] = [
     ],
   },
   {
-    slug: "frankfurt-theaters",
-    dir: "apps/frankfurt-theaters",
+    slug: "ins-theater",
+    dir: "apps/ins-theater",
     port: 8802,
     path: "/",
     readySelector: ".programme",

@@ -24,7 +24,7 @@ function sectionsFor(city: string) {
       "Häusern. Diese Seite hat keinerlei kommerzielle Beziehung zu den gelisteten Theatern und übernimmt keine " +
       "Verantwortung für die Richtigkeit der angezeigten Daten — bitte prüfen Sie alle Angaben vor dem Kartenkauf auf " +
       "der Webseite des Hauses.",
-    sourceUrl: `${REPO_URL}/tree/main/apps/frankfurt-theaters`,
+    sourceUrl: `${REPO_URL}/tree/main/apps/ins-theater`,
   });
 }
 

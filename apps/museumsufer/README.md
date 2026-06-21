@@ -10,10 +10,10 @@ A Cloudflare Worker that aggregates exhibitions and events from Frankfurt's [Mus
 GitHub Action (.github/workflows/scrape.yml)
   ↓ daily/hourly cron
   ↓ runs the hub scrape (packages/event-hub) once, then
-  ↓ `bun apps/frankfurt-museums/scripts/scrape.ts` derives this app's slice:
+  ↓ `bun apps/museumsufer/scripts/scrape.ts` derives this app's slice:
   ↓   keeps hub EVENTS in the Frankfurt bbox carrying a `museum:*` label,
   ↓   merges the frozen museum directory, runs DeepL DE→EN/FR
-  ↓ writes apps/frankfurt-museums/src/scrape-data.ts (typed module)
+  ↓ writes apps/museumsufer/src/scrape-data.ts (typed module)
   ↓ commits + pushes if content actually changed
 Cloudflare git integration
   ↓ redeploys the worker with the new bundled data
@@ -88,10 +88,10 @@ bun run db:migrate
 bun install                 # from repo root
 
 # Start the worker
-bun run -F @museumsufer/frankfurt-museums dev
+bun run -F @museumsufer/museumsufer dev
 
 # Run a one-shot scrape locally and regenerate src/scrape-data.ts:
-bun run -F @museumsufer/frankfurt-museums scrape
+bun run -F @museumsufer/museumsufer scrape
 # (DeepL translations skipped unless DEEPL_API_KEYS is set in your shell)
 ```
 

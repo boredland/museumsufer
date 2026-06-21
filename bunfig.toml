@@ -13,8 +13,8 @@ minimumReleaseAge = 259200  # 3 days, in seconds
 minimumReleaseAgeExcludes = [
   "@museumsufer/core",
   "@museumsufer/tsconfig",
-  "@museumsufer/frankfurt-museums",
-  "@museumsufer/frankfurt-theaters",
+  "@museumsufer/museumsufer",
+  "@museumsufer/ins-theater",
   "@museumsufer/konzert-haus",
   "@museumsufer/landau-today",
 ]

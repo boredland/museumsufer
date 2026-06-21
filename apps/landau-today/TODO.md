@@ -1,6 +1,6 @@
 # landau.today — port roadmap
 
-Items to port from `frankfurt-museums` (and a few from `frankfurt-theaters`),
+Items to port from `museumsufer` (and a few from `ins-theater`),
 ranked by ROI for landau.today. Tick when shipped.
 
 All initial port targets are now live; remaining items are speculative

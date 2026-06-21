@@ -228,7 +228,7 @@ app.post("/api/contact", (c) =>
   handleContactRequest({
     request: c.req.raw,
     env: c.env,
-    app: "frankfurt-museums",
+    app: "museumsufer",
     from: FEEDBACK_FROM,
     to: FEEDBACK_TO,
   }),

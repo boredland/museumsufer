@@ -54,7 +54,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "st-katharinen": [50.1138, 8.679],
   waggong: [50.1304, 8.7081],
 
-  // ─── frankfurt-theaters venues ───────────────────────────────────
+  // ─── ins-theater venues ───────────────────────────────────
   "die-kaes": [50.1196, 8.7041],
   "die-schmiere": [50.1112, 8.6833],
   "dramatische-buehne": [50.1109, 8.6821],
@@ -230,7 +230,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
  *  MUSEUMS config (lat/lng) for museum sub-slugs produced by the
- *  frankfurt-museums orchestrator. */
+ *  museumsufer orchestrator. */
 export function coordinatesFor(sourceSlug: string): readonly [number, number] | null {
   const explicit = VENUE_COORDS[sourceSlug];
   if (explicit) return explicit;

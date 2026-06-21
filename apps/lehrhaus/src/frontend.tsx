@@ -257,7 +257,7 @@ function DateStrip({
  * The "Next 7 days" toggle pill. Sits just below the date strip; when active,
  * the date strip's per-tile highlight clears and the programme content
  * switches to a date-grouped list of the upcoming week. Mirrors museumsufer's
- * range-pill UX (see frankfurt-museums/src/frontend.tsx).
+ * range-pill UX (see museumsufer/src/frontend.tsx).
  */
 function RangeRow({ active, tr, locale }: { active: boolean; tr: Translations; locale: Locale }) {
   const lang = langSuffix(locale);

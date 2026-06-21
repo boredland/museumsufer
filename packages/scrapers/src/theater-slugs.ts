@@ -1,6 +1,6 @@
 /** Hub source_slugs whose scrapers emit theater-shape events. Other apps
  *  (lehrhaus) use this to decide which events roll up under the
- *  `frankfurt-theaters` source. mousonturm is excluded because it
+ *  `ins-theater` source. mousonturm is excluded because it
  *  doubles as a direct lehrhaus source. */
 export const THEATER_SLUGS: ReadonlySet<string> = new Set([
   "die-kaes",
