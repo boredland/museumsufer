@@ -39,7 +39,7 @@ const MAINAEPPELHAUS_PROGRAM =
 const VENUES: PdfVenue[] = [
   {
     tag: "mainaeppelhaus-lohrberg",
-    version: 1,
+    version: 3,
     prompt: "Das Programm stammt vom MainÄppelHaus Lohrberg (Streuobstzentrum auf dem Lohrberg, Frankfurt).",
     async discover() {
       const res = await fetch(MAINAEPPELHAUS_PROGRAM, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
