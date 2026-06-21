@@ -140,6 +140,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   buergeruniversitaet: [50.1284, 8.6679],
   "dfg-frankfurt": [50.1109, 8.6736],
   "dig-frankfurt": [50.1109, 8.6821],
+  fabrik: [53.5505, 9.9293],
   "fes-hessen": [50.1075, 8.6655],
   "fgz-streitclub": [50.1108, 8.6622],
   "forschungskolleg-humanwissenschaften": [50.2273, 8.6088],
