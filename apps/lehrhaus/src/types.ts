@@ -61,6 +61,8 @@ export interface LehrhausEvent {
 export interface ScrapeData {
   sources: LehrhausSource[];
   events: LehrhausEvent[];
+  /** Cities this vertical currently has data for, in display order. */
+  supportedCities: string[];
 }
 
 export interface ScrapedEvent {
