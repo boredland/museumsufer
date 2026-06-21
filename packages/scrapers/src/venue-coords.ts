@@ -26,6 +26,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "bad-soden": [50.1411, 8.4985],
   "bnai-brith-frankfurt": [50.1182, 8.6611],
   "boell-hessen": [50.1056, 8.6517],
+  "botschaft-der-wildtiere": [53.5382, 10.0181],
   brotfabrik: [50.1303, 8.6071],
   "cafe-mutz": [50.1726, 8.6357],
   "club-voltaire": [50.1151, 8.674],
