@@ -207,7 +207,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.5542,
     lon: 10.0142,
     city: "hamburg",
-    website_url: "https://www.savoy-filmtheater.de",
+    website_url: "https://savoy.premiumkino.de",
   },
   {
     slug: "schanzenkino-73",
