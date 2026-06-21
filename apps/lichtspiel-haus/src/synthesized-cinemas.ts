@@ -31,7 +31,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   },
   {
     slug: "astor-hafencity",
-    name: "Astor Film Lounge HafenCity",
+    name: "ASTOR Film Lounge HafenCity",
     address: "",
     lat: 53.543,
     lon: 9.995,

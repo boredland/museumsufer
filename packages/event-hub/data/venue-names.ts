@@ -12,7 +12,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "andreas-koehs": "Kirchenmusik Andreas Köhs",
   "archaeologisches-museum-frankfurt": "Archäologisches Museum Frankfurt",
   "astor-frankfurt": "ASTOR Film Lounge MyZeil",
-  "astor-hafencity": "Astor Film Lounge HafenCity",
+  "astor-hafencity": "ASTOR Film Lounge HafenCity",
   "atelierfrankfurt": "Atelierfrankfurt",
   "autorenbuchhandlung-marx": "Autorenbuchhandlung Marx",
   "b-movie": "B-Movie",
