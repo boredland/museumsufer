@@ -2,6 +2,7 @@
 import type { ScrapeData } from "./types";
 
 export const SCRAPE_DATA: ScrapeData = {
+  supportedCities: ["frankfurt","hamburg"],
   sources: [
     {"address":"Untermainanlage 5, 60329 Frankfurt am Main","description":"1816 gegründete Bürgerstiftung in Frankfurt, getragen von rund 1.000 Mitgliedern. Veranstaltet Vorträge zu Wissenschaft, Bildung und Stadtgesellschaft im Stiftungshaus an der Untermainanlage und in Kooperation mit Frankfurter Hochschulen.","lat":50.1136,"lon":8.6833,"name":"Polytechnische Gesellschaft Frankfurt","short_name":"Polytechnische","slug":"polytechnische-gesellschaft","telephone":"+49 69 7895807-0","url":"https://polytechnische.de","wikidata":"Q875645"},
     {"address":"Domplatz 3, 60311 Frankfurt am Main","description":"Katholisches Bildungs- und Begegnungszentrum am Frankfurter Domplatz. Programmschwerpunkte: Theologie, Ethik, Gesellschaft, Migration und Kultur. Räumlich an die Katholische Akademie Rabanus Maurus angeschlossen.","lat":50.1107,"lon":8.6826,"name":"Haus am Dom – Kath. Akademie Rabanus Maurus","short_name":"Haus am Dom","slug":"haus-am-dom","telephone":"+49 69 8008718-400","url":"https://hausamdom-frankfurt.de"},

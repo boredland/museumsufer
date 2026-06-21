@@ -23,6 +23,7 @@ import {
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { CitySwitch } from "@museumsufer/core/cityswitch";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
@@ -184,8 +185,14 @@ export function Masthead({
 }) {
   return (
     <header class="masthead">
+      <CitySwitch
+        apex="lehr.salon"
+        city={city ?? "frankfurt"}
+        supported={SCRAPE_DATA.supportedCities}
+        locale={locale}
+        path={currentPath || "/"}
+      />
       <a class="masthead__brand" href={`/${langSuffix(locale)}`}>
-        <p class="masthead__locality">{cityMeta(city).short}</p>
         <h1 class="wordmark">
           <span class="wordmark__lehr">lehr</span>
           <span class="wordmark__dot">.</span>
