@@ -48,6 +48,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.blankeneser-kino.de",
   },
   {
+    slug: "cafe-mutz",
+    name: "Café Mutz",
+    address: "",
+    lat: 50.1726,
+    lon: 8.6357,
+    city: "frankfurt",
+    website_url: "https://www.cafemutz.de",
+  },
+  {
     slug: "dfg-frankfurt",
     name: "Deutsch-Französische Gesellschaft Frankfurt",
     address: "",
@@ -171,7 +180,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.5542,
     lon: 10.0142,
     city: "hamburg",
-    website_url: "https://savoy.premiumkino.de",
+    website_url: "https://www.savoy-filmtheater.de",
   },
   {
     slug: "schanzenkino-73",
