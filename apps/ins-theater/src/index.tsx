@@ -50,8 +50,8 @@ app.use(
   }),
 );
 
-// Apex (ins.theater) → frankfurt.ins.theater; `<city>.ins.theater` sets c.var.city.
-app.use("*", cityMiddleware({ apex: "ins.theater" }));
+// Apex (ins.theater) → nearest city's subdomain (geo); `<city>.ins.theater` sets c.var.city.
+app.use("*", cityMiddleware({ apex: "ins.theater", apexBehavior: "geo" }));
 
 // Theater-specific response headers: X-Robots-Tag on data API, Link header
 // pointing at the API discovery surfaces.
