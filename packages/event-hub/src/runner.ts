@@ -34,6 +34,28 @@ export interface RunOptions {
 const DEFAULT_CONCURRENCY = 8;
 const STALE_TTL_DAYS = 14;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+/** A single scraper must never stall the whole run. `fetch` has no default
+ *  timeout, so a venue server that accepts the connection but never responds
+ *  would otherwise hang `queue.onIdle()` until the CI job's 6h limit. On
+ *  timeout the scraper is abandoned and its previous events ride the stale-TTL
+ *  grace, exactly like any other transient failure. */
+const SCRAPER_TIMEOUT_MS = 90_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`scraper timed out after ${ms}ms`)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
 
 /**
  * Runs every venue scraper, applies the keyword-pass classifier, and
@@ -59,7 +81,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   for (const { slug, run } of VENUE_SCRAPERS) {
     queue.add(async () => {
       try {
-        const raw = await run(ctx);
+        const raw = await withTimeout(run(ctx), SCRAPER_TIMEOUT_MS);
         const results = Array.isArray(raw) ? raw : [raw];
         for (const result of results) {
           const label = results.length === 1 ? slug : `${slug}/${result.source_slug}`;

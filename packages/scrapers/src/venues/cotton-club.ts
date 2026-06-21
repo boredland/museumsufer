@@ -24,7 +24,7 @@ const OUT_OF_TOWN_RE = /\b(?:duisburg|düsseldorf|duesseldorf|köln|koeln|bremen
 
 export async function scrapeCottonClub(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(ICAL_URL, { headers: { "User-Agent": UA } });
+  const res = await fetch(ICAL_URL, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(30_000) });
   if (!res.ok) throw new Error(`cotton-club fetch failed: ${res.status}`);
   const ical = await res.text();
 
