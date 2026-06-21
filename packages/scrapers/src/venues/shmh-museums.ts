@@ -1,5 +1,6 @@
 import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@museumsufer/classify";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
+import { type GomusPicture, pickGomusImage } from "./_gomus-generic";
 
 const GOMUS_API_BASE = "https://shmh.gomus.de/api/v4";
 const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
@@ -9,6 +10,7 @@ interface GomusExhibition {
   museum_id: number;
   title: string;
   description: string | null;
+  picture?: GomusPicture | null;
   time_frames?: Array<{ start_at?: string; end_at?: string }>;
   location?: {
     name: string;
@@ -19,9 +21,15 @@ interface GomusExhibition {
   };
 }
 
+interface GomusEvent {
+  id: number;
+  picture?: GomusPicture | null;
+}
+
 interface GomusDate {
   id: number;
   event_id: number;
+  exhibition_id?: number | null;
   museum_id: number;
   title: string;
   event_title: string;
@@ -55,6 +63,8 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
   for (const info of Object.values(SHMH_MUSEUM_MAP)) {
     byMuseum.set(info.slug, []);
   }
+  // exhibition id → image, for event dates that reference a parent exhibition.
+  const exhibitionImageById = new Map<number, string>();
 
   // 1. Fetch and process Exhibitions
   try {
@@ -64,6 +74,8 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
       const data = (await res.json()) as { exhibitions?: GomusExhibition[] };
       const list = data.exhibitions ?? [];
       for (const ex of list) {
+        const exImage = pickGomusImage(ex.picture);
+        if (exImage) exhibitionImageById.set(ex.id, exImage);
         const museumInfo = SHMH_MUSEUM_MAP[ex.museum_id];
         if (!museumInfo) continue;
 
@@ -88,7 +100,7 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
           end_time: null,
           detail_url: `https://tickets.shmh.de/de/exhibitions/${ex.id}`,
           ticket_url: `https://tickets.shmh.de/de/exhibitions/${ex.id}`,
-          image_url: null,
+          image_url: exImage,
           labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
         };
 
@@ -109,7 +121,22 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
     console.warn(`shmh-museums exhibitions scrape failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // 2. Fetch and process Event Dates
+  // 2a. Map parent event id → image (the /dates rows carry no picture).
+  const eventImageById = new Map<number, string>();
+  try {
+    const res = await fetch(`${GOMUS_API_BASE}/events?per_page=100`, { headers: { "User-Agent": USER_AGENT } });
+    if (res.ok) {
+      const data = (await res.json()) as { events?: GomusEvent[] };
+      for (const ev of data.events ?? []) {
+        const img = pickGomusImage(ev.picture);
+        if (img) eventImageById.set(ev.id, img);
+      }
+    }
+  } catch (err) {
+    console.warn(`shmh-museums events-image scrape failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
+  // 2b. Fetch and process Event Dates
   try {
     const datesUrl = `${GOMUS_API_BASE}/dates?per_page=100`;
     const res = await fetch(datesUrl, { headers: { "User-Agent": USER_AGENT } });
@@ -153,7 +180,10 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
           end_time: endTime,
           detail_url: `https://tickets.shmh.de/de/dates/${d.id}`,
           ticket_url: `https://tickets.shmh.de/de/dates/${d.id}`,
-          image_url: null,
+          // Dates inherit their parent event's image, then the exhibition's.
+          image_url:
+            eventImageById.get(d.event_id) ??
+            (d.exhibition_id != null ? (exhibitionImageById.get(d.exhibition_id) ?? null) : null),
           labels,
         };
 
