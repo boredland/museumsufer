@@ -80,6 +80,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "frankfurter-goethe-haus": "Frankfurter Goethe-Haus / Freies Deutsches Hochstift",
   "frankfurter-kunstverein": "Frankfurter Kunstverein",
   "frankfurter-sparkasse": "Frankfurter Sparkasse Engagement",
+  "freiluftkino-frankfurt": "Freiluftkino Frankfurt",
   "fundus-theater": "FUNDUS THEATER",
   "galli-theater": "Galli Theater Frankfurt",
   "gallus-theater": "Gallus Theater",
