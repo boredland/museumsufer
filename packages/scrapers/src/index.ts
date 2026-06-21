@@ -104,6 +104,7 @@ import { scrapeHolzhausenschloesschen } from "./venues/holzhausenschloesschen";
 import { scrapeHrBigband } from "./venues/hr-bigband";
 import { scrapeHrSinfonieorchester } from "./venues/hr-sinfonieorchester";
 import { scrapeHsfkFrankfurt } from "./venues/hsfk-frankfurt";
+import { scrapeHugenottenhalle } from "./venues/hugenottenhalle";
 import { scrapeImperialTheater } from "./venues/imperial-theater";
 import { scrapeInstitutFrancaisFrankfurt } from "./venues/institut-francais-frankfurt";
 import { scrapeInstitutFuerSozialforschung } from "./venues/institut-fuer-sozialforschung";
@@ -275,6 +276,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },
   { slug: "hr-sinfonieorchester", run: (_ctx: ScraperContext) => scrapeHrSinfonieorchester() },
   { slug: "hsfk-frankfurt", run: (_ctx: ScraperContext) => scrapeHsfkFrankfurt() },
+  { slug: "hugenottenhalle", run: (_ctx: ScraperContext) => scrapeHugenottenhalle() },
   { slug: "institut-francais-frankfurt", run: (_ctx: ScraperContext) => scrapeInstitutFrancaisFrankfurt() },
   { slug: "institut-fuer-sozialforschung", run: (_ctx: ScraperContext) => scrapeInstitutFuerSozialforschung() },
   { slug: "instituto-cervantes-frankfurt", run: (_ctx: ScraperContext) => scrapeInstitutoCervantesFrankfurt() },
