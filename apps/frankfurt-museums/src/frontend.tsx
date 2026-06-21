@@ -335,7 +335,7 @@ function RiverNav({
         <button
           type="button"
           id="btn-upcoming"
-          data-range="7"
+          data-range="14"
           aria-pressed={activeRange ? "true" : "false"}
           class={`range-pill${activeRange ? " active" : ""}`}
         >
