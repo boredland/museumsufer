@@ -93,6 +93,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "hugenottenhalle",
+    name: "Hugenottenhalle",
+    address: "",
+    lat: 50.0494,
+    lon: 8.6942,
+    city: "frankfurt",
+    website_url: "https://www.hugenottenhalle.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "imperial-theater",
     name: "Imperial Theater",
     address: "",

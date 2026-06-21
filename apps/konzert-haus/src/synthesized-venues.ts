@@ -43,6 +43,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "cotton-club",
+    name: "Cotton Club",
+    address: "",
+    lat: 53.5476,
+    lon: 9.9856,
+    city: "hamburg",
+    website_url: "https://www.cotton-club.de",
+    default_genre: "jazz",
+  },
+  {
     slug: "deutsches-schauspielhaus",
     name: "Deutsches Schauspielhaus",
     address: "",
@@ -190,6 +200,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 9.9723,
     city: "hamburg",
     website_url: "https://hoheluftschiff.de",
+    default_genre: "classical",
+  },
+  {
+    slug: "hugenottenhalle",
+    name: "Hugenottenhalle",
+    address: "",
+    lat: 50.0494,
+    lon: 8.6942,
+    city: "frankfurt",
+    website_url: "https://www.hugenottenhalle.de",
     default_genre: "classical",
   },
   {
