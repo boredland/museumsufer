@@ -21,12 +21,23 @@ import { captureManifestScreenshots } from "../packages/core/src/screenshots";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
+interface CityCapture {
+  /** City slug, for logging. */
+  city: string;
+  /** Production custom-domain origin for this city; used by --prod mode. */
+  prodOrigin: string;
+  /**
+   * Filename suffix inserted before `.png` — "" for the canonical
+   * `ss-wide.png`/`ss-mobile.png` (the default city), `-hamburg` for
+   * the rest. Must match `cityScreenshots()` in the app manifests.
+   */
+  suffix: string;
+}
+
 interface AppTarget {
   slug: string;
   dir: string;
   port: number;
-  /** Production custom-domain origin; used by --prod mode. */
-  prodOrigin: string;
   /**
    * The route to capture. Each app's home is locale-dependent; we keep
    * the default `?lang=de` for consistent screenshots.
@@ -38,6 +49,13 @@ interface AppTarget {
    * can name a more specific selector.
    */
   readySelector: string;
+  /**
+   * One capture per city this Worker serves. Multi-city apps list both
+   * Frankfurt (suffix "") and Hamburg (suffix "-hamburg"); single-city
+   * apps list one entry. In local mode the city is selected by sending
+   * the prod host as the `Host` header to one `wrangler dev`.
+   */
+  cities: CityCapture[];
 }
 
 const APPS: readonly AppTarget[] = [
@@ -45,49 +63,64 @@ const APPS: readonly AppTarget[] = [
     slug: "frankfurt-museums",
     dir: "apps/frankfurt-museums",
     port: 8801,
-    prodOrigin: "https://museumsufer.app",
     path: "/",
     readySelector: ".section",
+    cities: [
+      { city: "frankfurt", prodOrigin: "https://museumsufer.app", suffix: "" },
+      { city: "hamburg", prodOrigin: "https://hamburg.ins.museum", suffix: "-hamburg" },
+    ],
   },
   {
     slug: "frankfurt-theaters",
     dir: "apps/frankfurt-theaters",
     port: 8802,
-    prodOrigin: "https://frankfurt.ins.theater",
     path: "/",
     readySelector: ".programme",
+    cities: [
+      { city: "frankfurt", prodOrigin: "https://frankfurt.ins.theater", suffix: "" },
+      { city: "hamburg", prodOrigin: "https://hamburg.ins.theater", suffix: "-hamburg" },
+    ],
   },
   {
     slug: "konzert-haus",
     dir: "apps/konzert-haus",
     port: 8803,
-    prodOrigin: "https://frankfurt.konzert.haus",
     path: "/",
     readySelector: ".programme",
+    cities: [
+      { city: "frankfurt", prodOrigin: "https://frankfurt.konzert.haus", suffix: "" },
+      { city: "hamburg", prodOrigin: "https://hamburg.konzert.haus", suffix: "-hamburg" },
+    ],
   },
   {
     slug: "landau-today",
     dir: "apps/landau-today",
     port: 8804,
-    prodOrigin: "https://landau.today",
     path: "/",
     readySelector: "main",
+    cities: [{ city: "landau", prodOrigin: "https://landau.today", suffix: "" }],
   },
   {
     slug: "lehrhaus",
     dir: "apps/lehrhaus",
     port: 8805,
-    prodOrigin: "https://frankfurt.lehr.salon",
     path: "/",
     readySelector: ".programme",
+    cities: [
+      { city: "frankfurt", prodOrigin: "https://frankfurt.lehr.salon", suffix: "" },
+      { city: "hamburg", prodOrigin: "https://hamburg.lehr.salon", suffix: "-hamburg" },
+    ],
   },
   {
     slug: "lichtspiel-haus",
     dir: "apps/lichtspiel-haus",
     port: 8806,
-    prodOrigin: "https://frankfurt.lichtspiel.haus",
     path: "/",
     readySelector: ".programme",
+    cities: [
+      { city: "frankfurt", prodOrigin: "https://frankfurt.lichtspiel.haus", suffix: "" },
+      { city: "hamburg", prodOrigin: "https://hamburg.lichtspiel.haus", suffix: "-hamburg" },
+    ],
   },
 ];
 
@@ -121,12 +154,18 @@ async function captureLocal(app: AppTarget): Promise<void> {
 
   try {
     await waitForPort(baseUrl);
-    const written = await captureManifestScreenshots({
-      baseUrl,
-      outDir: join(cwd, "public"),
-      readySelector: app.readySelector,
-    });
-    for (const path of written) console.log(`  wrote ${path}`);
+    // One dev server, N cities: the host→city middleware reads the Host
+    // header, so we point each capture at the city's prod host.
+    for (const c of app.cities) {
+      const written = await captureManifestScreenshots({
+        baseUrl,
+        outDir: join(cwd, "public"),
+        readySelector: app.readySelector,
+        filenameSuffix: c.suffix,
+        hostHeader: new URL(c.prodOrigin).host,
+      });
+      for (const path of written) console.log(`  [${c.city}] wrote ${path}`);
+    }
   } finally {
     proc.kill("SIGTERM");
     await new Promise<void>((r) => {
@@ -144,14 +183,21 @@ async function captureLocal(app: AppTarget): Promise<void> {
 
 async function captureProd(app: AppTarget): Promise<void> {
   const cwd = join(REPO_ROOT, app.dir);
-  const baseUrl = `${app.prodOrigin}${app.path}`;
-  console.log(`\n→ ${app.slug} (${baseUrl})`);
-  const written = await captureManifestScreenshots({
-    baseUrl,
-    outDir: join(cwd, "public"),
-    readySelector: app.readySelector,
-  });
-  for (const path of written) console.log(`  wrote ${path}`);
+  // Each city has its own subdomain in prod — hit it directly, no Host
+  // override needed.
+  await Promise.all(
+    app.cities.map(async (c) => {
+      const baseUrl = `${c.prodOrigin}${app.path}`;
+      console.log(`\n→ ${app.slug} [${c.city}] (${baseUrl})`);
+      const written = await captureManifestScreenshots({
+        baseUrl,
+        outDir: join(cwd, "public"),
+        readySelector: app.readySelector,
+        filenameSuffix: c.suffix,
+      });
+      for (const path of written) console.log(`  [${c.city}] wrote ${path}`);
+    }),
+  );
 }
 
 async function main() {
