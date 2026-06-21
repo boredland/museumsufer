@@ -293,6 +293,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "mainaeppelhaus-lohrberg",
+    name: "MainÄppelHaus Lohrberg",
+    address: "",
+    lat: 50.152,
+    lon: 8.734,
+    city: "frankfurt",
+    website_url: "https://www.mainaeppelhauslohrberg.de",
+    default_genre: "classical",
+  },
+  {
     slug: "ohnsorg-theater",
     name: "Ohnsorg-Theater",
     address: "",
