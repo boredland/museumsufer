@@ -35,7 +35,7 @@ app.get("/feed.ics", (c) => {
   const host = cityHost("lichtspiel.haus", city);
   const appUrl = cityUrl("lichtspiel.haus", city);
   const localUtm = buildUtm(host);
-  const screenings = getScreeningsInRange(todayIso(), dateOffset(14));
+  const screenings = getScreeningsInRange(todayIso(), dateOffset(14), { city });
   return c.body(buildIcs(screenings, "lichtspiel.haus", localUtm, appUrl, host), { headers: ICS_HEADERS });
 });
 
@@ -44,7 +44,7 @@ app.get("/feed.rss", (c) => {
   const host = cityHost("lichtspiel.haus", city);
   const appUrl = cityUrl("lichtspiel.haus", city);
   const localUtm = buildUtm(host);
-  const screenings = getScreeningsInRange(todayIso(), dateOffset(14));
+  const screenings = getScreeningsInRange(todayIso(), dateOffset(14), { city });
   return c.body(buildRss(screenings, city, localUtm, appUrl, host), { headers: RSS_HEADERS });
 });
 
@@ -68,7 +68,7 @@ app.get("/reihe/:slug/feed.ics", (c) => {
   const appUrl = cityUrl("lichtspiel.haus", city);
   const localUtm = buildUtm(host);
   const slug = c.req.param("slug");
-  const screenings = getSeriesScreenings(slug, todayIso());
+  const screenings = getSeriesScreenings(slug, todayIso(), city);
   if (screenings.length === 0) return c.notFound();
   const name = screenings[0].series?.name ?? slug;
   return c.body(buildIcs(screenings, `lichtspiel.haus — ${name}`, localUtm, appUrl, host), { headers: ICS_HEADERS });
