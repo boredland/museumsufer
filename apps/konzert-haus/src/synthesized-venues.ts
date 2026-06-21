@@ -103,6 +103,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "fabrik",
+    name: "Fabrik",
+    address: "",
+    lat: 53.5505,
+    lon: 9.9293,
+    city: "hamburg",
+    website_url: "https://fabrik.de",
+    default_genre: "world",
+  },
+  {
     slug: "frankfurter-buergerstiftung",
     name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
     address: "",
