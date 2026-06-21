@@ -6,6 +6,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "alabama-kino": "Alabama Kino",
   "alleetheater": "Allee Theater",
   "alma-hoppes-lustspielhaus": "Alma Hoppes Lustspielhaus",
+  "alsterdorf-sommerkino": "Sommerkino Alsterdorf",
   "alte-oper": "Alte Oper Frankfurt",
   "altonaer-museum": "Altonaer Museum",
   "altonaer-theater": "Altonaer Theater",
@@ -22,6 +23,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "blankeneser-kino": "Blankeneser Kino",
   "bnai-brith-frankfurt": "B'nai B'rith Frankfurt Schönstädt Loge",
   "boell-hessen": "Heinrich-Böll-Stiftung Hessen",
+  "botschaft-der-wildtiere": "Botschaft der Wildtiere",
   "brotfabrik": "Brotfabrik",
   "buergeruniversitaet": "Goethe-Uni Bürgeruniversität",
   "cafe-mutz": "Café Mutz",
@@ -485,5 +487,6 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wollheim-memorial-frankfurt": "Wollheim Memorial",
   "ypsilon-buchladen": "Ypsilon Buchladen",
   "zeise-kinos": "Zeise Kinos",
+  "zeise-open-air": "Zeise Open Air",
   "zollamt-mmk-museum-mmk-fuer-moderne-kunst": "Zollamt MMK – Museum MMK für Moderne Kunst",
 };

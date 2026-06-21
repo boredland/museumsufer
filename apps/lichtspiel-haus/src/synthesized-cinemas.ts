@@ -30,6 +30,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://kinotickets.express",
   },
   {
+    slug: "alsterdorf-sommerkino",
+    name: "Sommerkino Alsterdorf",
+    address: "",
+    lat: 53.6123,
+    lon: 10.0243,
+    city: "hamburg",
+    website_url: "https://www.alsterdorf.de",
+  },
+  {
     slug: "astor-hafencity",
     name: "ASTOR Film Lounge HafenCity",
     address: "",
@@ -55,6 +64,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.812,
     city: "hamburg",
     website_url: "https://www.blankeneser-kino.de",
+  },
+  {
+    slug: "botschaft-der-wildtiere",
+    name: "Botschaft der Wildtiere",
+    address: "",
+    lat: 53.5382,
+    lon: 10.0181,
+    city: "hamburg",
+    website_url: "https://www.botschaftderwildtiere.de",
   },
   {
     slug: "cafe-mutz",
@@ -239,6 +257,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   {
     slug: "zeise-kinos",
     name: "Zeise Kinos",
+    address: "",
+    lat: 53.552,
+    lon: 9.933,
+    city: "hamburg",
+    website_url: "https://www.zeise.de",
+  },
+  {
+    slug: "zeise-open-air",
+    name: "Zeise Open Air",
     address: "",
     lat: 53.552,
     lon: 9.933,
