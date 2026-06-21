@@ -137,6 +137,7 @@ import { scrapeLichtmessKino } from "./venues/lichtmess-kino";
 import { scrapeLichtwarkTheater } from "./venues/lichtwark-theater";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeLiteraturhausHamburg } from "./venues/literaturhaus-hamburg";
+import { scrapeMainaeppelhausLohrberg } from "./venues/mainaeppelhaus-lohrberg";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
 import { scrapeMkgHamburg } from "./venues/mkg-hamburg";
@@ -311,6 +312,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "lichtwark-theater", run: (_ctx: ScraperContext) => scrapeLichtwarkTheater() },
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "literaturhaus-hamburg", run: (_ctx: ScraperContext) => scrapeLiteraturhausHamburg() },
+  { slug: "mainaeppelhaus-lohrberg", run: (_ctx: ScraperContext) => scrapeMainaeppelhausLohrberg() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
   { slug: "monsun-theater", run: (_ctx: ScraperContext) => scrapeMonsunTheater() },
@@ -475,6 +477,7 @@ export {
   scrapeLichtwarkTheater,
   scrapeLiteraturhaus,
   scrapeLiteraturhausHamburg,
+  scrapeMainaeppelhausLohrberg,
   scrapeMalsehn,
   scrapeMampf,
   scrapeMkgHamburg,

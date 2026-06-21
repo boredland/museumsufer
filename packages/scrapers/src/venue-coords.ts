@@ -203,6 +203,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "kronberger-lichtspiele": [50.1795, 8.5102],
   "lichtblick-moerfelden": [50.0001, 8.5709],
   "magazin-filmkunsttheater": [53.591, 9.99],
+  "mainaeppelhaus-lohrberg": [50.152, 8.734],
   malsehn: [50.1235, 8.6789],
   "metropolis-kino": [53.5563, 9.9889],
   "murnau-filmtheater": [50.0857, 8.2456],
