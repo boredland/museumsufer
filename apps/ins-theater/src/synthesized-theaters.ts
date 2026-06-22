@@ -193,16 +193,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-johannes-gemeinde",
-    name: "Johannes Gemeinde",
-    address: "",
-    lat: 50.0512686,
-    lon: 8.6855195,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-judisches-museum-frankfurt",
     name: "Jüdisches Museum Frankfurt",
     address: "",
