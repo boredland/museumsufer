@@ -61,9 +61,14 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name "regen-assets-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Multi-city apps emit per-city variants (ss-wide-hamburg.png,
+          # ss-mobile-hamburg.png) next to the default-city files, so
+          # match the suffixed names too. Missing any leaves them
+          # unstaged and makes the `git pull --rebase` below abort with
+          # "You have unstaged changes."
           git add \
-            apps/*/public/ss-wide.png \
-            apps/*/public/ss-mobile.png \
+            apps/*/public/ss-wide*.png \
+            apps/*/public/ss-mobile*.png \
             apps/*/public/og-image.png
           if git diff --cached --quiet; then
             echo "no asset changes, skipping commit"
