@@ -153,6 +153,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "mut-theater",
+    name: "MUT! Theater",
+    address: "",
+    lat: 53.5622,
+    lon: 9.9608,
+    city: "hamburg",
+    website_url: "https://muttheater.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "opernloft",
     name: "Opernloft",
     address: "",
