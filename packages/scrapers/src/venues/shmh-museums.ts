@@ -1,9 +1,62 @@
 import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@museumsufer/classify";
+import { todayIso } from "@museumsufer/core/date";
+import { decodeEntities } from "@museumsufer/core/html";
+import PQueue from "p-queue";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
 import { type GomusPicture, pickGomusImage } from "./_gomus-generic";
 
 const GOMUS_API_BASE = "https://shmh.gomus.de/api/v4";
 const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
+
+// WP REST source (shmh.de) — extends the horizon past the gomus booking API,
+// which only publishes ~1 week of bookable dates. The /wp/v2/event collection
+// has no structured date (acf is empty), so date+time are parsed from each
+// event's detail page. We detect the museum from the list payload first, so
+// only museum-matched events incur a detail fetch; bounded to the most-recently
+// published pages (which carry the upcoming events). Runs daily with the museums job.
+const WP_EVENT_API = "https://www.shmh.de/wp-json/wp/v2/event";
+const WP_PAGES = 3;
+const WP_DETAIL_CONCURRENCY = 6;
+const WP_HORIZON_DAYS = 45;
+
+const WP_MUSEUM_BY_NAME: ReadonlyArray<readonly [RegExp, string]> = [
+  [/Museum für Hamburgische Geschichte|hamburgmuseum/i, "museum-fuer-hamburgische-geschichte"],
+  [/Museum der Arbeit/i, "museum-der-arbeit"],
+  [/Altonaer Museum/i, "altonaer-museum"],
+  [/Deutsches Hafenmuseum|\bPEKING\b/, "deutsches-hafenmuseum"],
+  [/Speicherstadtmuseum/i, "speicherstadtmuseum"],
+  [/Jenisch[ -]?Haus/i, "jenisch-haus"],
+];
+
+const DE_MONTHS: Record<string, string> = {
+  januar: "01",
+  februar: "02",
+  märz: "03",
+  april: "04",
+  mai: "05",
+  juni: "06",
+  juli: "07",
+  august: "08",
+  september: "09",
+  oktober: "10",
+  november: "11",
+  dezember: "12",
+};
+const DE_DATE_RE = new RegExp(`(\\d{1,2})\\.\\s*(${Object.keys(DE_MONTHS).join("|")})\\s*(\\d{4})`, "i");
+const DE_NUM_DATE_RE = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
+const DE_TIME_RE = /(\d{1,2}):(\d{2})/;
+// The detail page's event date+time live in this heading, e.g.
+// "13.07.2026 14:00 - 17:00 Uhr" or "14. Juni 2026 …". Targeting it avoids
+// misreading related exhibition date-ranges elsewhere on the page.
+const SUB_SUB_RE = /<h2[^>]*class="[^"]*sub-sub-title[^"]*"[^>]*>([\s\S]*?)<\/h2>/i;
+
+interface WpEvent {
+  id: number;
+  link: string;
+  title: { rendered: string };
+  content: { rendered: string };
+  class_list: string[];
+}
 
 interface GomusExhibition {
   id: number;
@@ -203,6 +256,81 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
     console.warn(`shmh-museums events scrape failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
+  // 2c. WP REST (shmh.de) — events beyond gomus's ~1-week booking window.
+  try {
+    const today = todayIso();
+    const horizon = isoPlusDays(today, WP_HORIZON_DAYS);
+
+    const items: WpEvent[] = [];
+    for (let page = 1; page <= WP_PAGES; page++) {
+      const url = `${WP_EVENT_API}?per_page=100&page=${page}&_fields=id,link,title,content,class_list`;
+      const res = await fetch(url, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(20_000) });
+      if (!res.ok) break;
+      const data = (await res.json()) as WpEvent[];
+      if (!Array.isArray(data) || data.length === 0) break;
+      items.push(...data);
+    }
+
+    const seen = new Set<string>();
+    const queue = new PQueue({ concurrency: WP_DETAIL_CONCURRENCY });
+    await Promise.all(
+      items.map((it) =>
+        queue.add(async () => {
+          // Place the event by museum from the list payload BEFORE spending a
+          // detail fetch — only matched events are worth fetching.
+          const slug = detectWpMuseum(it);
+          if (!slug || !byMuseum.has(slug)) return;
+          const title = cleanText(decodeEntities(it.title.rendered));
+          if (!title) return;
+
+          let detailHtml: string;
+          try {
+            const r = await fetch(it.link, {
+              headers: { "User-Agent": USER_AGENT },
+              signal: AbortSignal.timeout(15_000),
+            });
+            if (!r.ok) return;
+            detailHtml = await r.text();
+          } catch {
+            return;
+          }
+
+          // Pull the event's own date+time from the `sub-sub-title` heading
+          // (no JSON-LD; full-text scraping would catch unrelated ranges).
+          const head = SUB_SUB_RE.exec(detailHtml)?.[1];
+          if (!head) return;
+          const headText = head.replace(/<[^>]+>/g, " ");
+          const date = parseGermanDate(headText);
+          if (!date || date < today || date > horizon) return;
+
+          const key = `${slug}|${date}|${title}`;
+          if (seen.has(key)) return;
+          seen.add(key);
+
+          const tm = DE_TIME_RE.exec(headText);
+          const time = tm ? `${tm[1].padStart(2, "0")}:${tm[2]}` : null;
+          const type = wpEventType(it) ?? classifyEvent(title);
+
+          byMuseum.get(slug)?.push({
+            source_event_id: `${slug}|wp-event|${it.id}`,
+            title,
+            description: null,
+            date,
+            time,
+            end_date: null,
+            end_time: null,
+            detail_url: it.link,
+            ticket_url: it.link,
+            image_url: null, // no clean image in REST; hub enrichment doesn't apply to museum events
+            labels: labelsForEvent(type, title, null),
+          });
+        }),
+      ),
+    );
+  } catch (err) {
+    console.warn(`shmh-museums WP scrape failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+
   // Build result
   const results: VenueScrapeResult[] = [];
   for (const [slug, events] of byMuseum) {
@@ -250,5 +378,48 @@ function cleanText(text: string): string {
     .replace(/\\"/g, '"')
     .replace(/\\'/g, "'")
     .replace(/<[^>]+>/g, "") // strip html just in case
+    .replace(/\s+/g, " ")
     .trim();
+}
+
+function isoPlusDays(iso: string, days: number): string {
+  return new Date(new Date(`${iso}T00:00:00Z`).getTime() + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Place a WP event at one of the SHMH museums by name in its title/content. */
+function detectWpMuseum(it: WpEvent): string | null {
+  const hay = `${it.title?.rendered ?? ""} ${it.content?.rendered ?? ""}`;
+  for (const [re, slug] of WP_MUSEUM_BY_NAME) if (re.test(hay)) return slug;
+  return null;
+}
+
+/** Parse an SHMH heading date — numeric "13.07.2026" or spelled "14. Juni 2026"
+ *  (both carry the year). Returns ISO or null. */
+function parseGermanDate(s: string): string | null {
+  const n = DE_NUM_DATE_RE.exec(s);
+  if (n) return `${n[3]}-${n[2].padStart(2, "0")}-${n[1].padStart(2, "0")}`;
+  const d = DE_DATE_RE.exec(s);
+  if (d) return `${d[3]}-${DE_MONTHS[d[2].toLowerCase()]}-${d[1].padStart(2, "0")}`;
+  return null;
+}
+
+/** Map the WP `event_category-*` body class to our EventType (more reliable
+ *  than title heuristics); null → caller falls back to classifyEvent. */
+function wpEventType(it: WpEvent): EventType | null {
+  const cls = it.class_list?.find((c) => c.startsWith("event_category-"));
+  if (!cls) return null;
+  const map: Record<string, EventType> = {
+    konzert: "Konzert",
+    fuehrung: "Führung",
+    führung: "Führung",
+    fuehrungen: "Führung",
+    vortrag: "Vortrag",
+    lesung: "Vortrag",
+    film: "Film",
+    workshop: "Workshop",
+    familie: "Familie",
+    kinder: "Familie",
+    vernissage: "Vernissage",
+  };
+  return map[cls.slice("event_category-".length)] ?? null;
 }
