@@ -535,56 +535,78 @@ export function AskAi({ city = "frankfurt" }: { city?: string } = {}) {
   );
 }
 
-const VENUE_LIST_DE = ((): { count: number; list: string } => {
-  const nameBySlug = new Map(THEATERS.map((t) => [t.slug, t.name]));
+const venueListCache = new Map<string, { count: number; list: string }>();
+
+/** FAQ venue list + count for one city. Filtering the slug→name map to that
+ *  city's theaters makes rankVenuesByEventCount drop every other city's
+ *  performances, so hamburg.ins.theater lists Hamburg stages, not Frankfurt's. */
+function venueListFor(city: string): { count: number; list: string } {
+  const cached = venueListCache.get(city);
+  if (cached) return cached;
+  const nameBySlug = new Map(
+    THEATERS.filter((t) => (t.city ?? "frankfurt") === city).map((t) => [t.slug, t.name] as const),
+  );
   const slugByShowId = new Map(SCRAPE_DATA.shows.map((s) => [s.id, s.theater_slug]));
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.performances, (p) => slugByShowId.get(p.show_id), nameBySlug);
-  return {
+  const result = {
     count: ranked.length,
     list: joinNames(
       ranked.map((v) => v.name),
       "de",
     ),
   };
-})();
+  venueListCache.set(city, result);
+  return result;
+}
 
-const FAQ_ITEMS: FaqItem[] = [
-  {
-    q: "Welche Bühnen sind hier vertreten?",
-    a: `Aktuell ${VENUE_LIST_DE.count} Frankfurter Häuser: ${VENUE_LIST_DE.list}. Tanz und Musical sind dabei.`,
-  },
-  {
-    q: "Wie aktuell ist der Spielplan?",
-    a: "Die Daten werden stündlich zwischen 09 und 21 Uhr direkt von den Webseiten der Häuser abgerufen. Änderungen wie Absagen oder ausverkaufte Vorstellungen erscheinen normalerweise innerhalb einer Stunde.",
-  },
-  {
-    q: "Kann ich hier Karten kaufen?",
-    a: "Nein — die Tickets-Schaltfläche an jeder Vorstellung führt direkt auf die Buchungsseite des jeweiligen Hauses. Diese Seite ist keine Verkaufsplattform und nimmt keine Provision.",
-  },
-  {
-    q: "Ist die Seite kostenlos?",
-    a: "Ja, frankfurt.ins.theater ist vollständig kostenlos, ohne Registrierung und ohne App-Store. Die Seite läuft als Progressive Web App direkt im Browser.",
-  },
-  {
-    q: "Was ist mit Vorstellungen, die schon angefangen haben?",
-    a: "Auf dem heutigen Spielplan werden Vorstellungen 30 Minuten nach Beginn ausgeblendet, damit nur noch erreichbare Termine sichtbar sind. Eine kleine Notiz unter der Liste zeigt, wie viele bereits gestartet sind.",
-  },
-  {
-    q: "Wie geht die Seite mit meinen Daten um?",
-    a: "Es werden keine personenbezogenen Daten erhoben. Feedback-Nachrichten werden nur dann gespeichert, wenn du sie selbst absendest. Die Seite verwendet weder Tracking noch Analyse-Cookies.",
-  },
-  {
-    q: "Warum diese Seite?",
-    a: "Frankfurt hat eine ungewöhnlich dichte Theaterlandschaft, aber keinen gemeinsamen Spielplan. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Programmheft für die ganze Stadt.",
-  },
-  {
-    q: "Wie funktionieren die Push-Mitteilungen?",
-    a: "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Bühnen einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
-  },
-];
+const faqItemsCache = new Map<string, FaqItem[]>();
 
-export function Faq() {
-  return <SharedFaq kicker="Häufige Fragen" items={FAQ_ITEMS} />;
+/** FAQ for one city: the three city-specific answers (venue list, canonical
+ *  host, the "why" intro) are transposed; the rest are city-neutral. */
+function faqItemsFor(city: string): FaqItem[] {
+  const cached = faqItemsCache.get(city);
+  if (cached) return cached;
+  const venues = venueListFor(city);
+  const items: FaqItem[] = [
+    {
+      q: "Welche Bühnen sind hier vertreten?",
+      a: `Aktuell ${venues.count} ${cityAdj(city, "de")} Häuser: ${venues.list}. Tanz und Musical sind dabei.`,
+    },
+    {
+      q: "Wie aktuell ist der Spielplan?",
+      a: "Die Daten werden stündlich zwischen 09 und 21 Uhr direkt von den Webseiten der Häuser abgerufen. Änderungen wie Absagen oder ausverkaufte Vorstellungen erscheinen normalerweise innerhalb einer Stunde.",
+    },
+    {
+      q: "Kann ich hier Karten kaufen?",
+      a: "Nein — die Tickets-Schaltfläche an jeder Vorstellung führt direkt auf die Buchungsseite des jeweiligen Hauses. Diese Seite ist keine Verkaufsplattform und nimmt keine Provision.",
+    },
+    {
+      q: "Ist die Seite kostenlos?",
+      a: `Ja, ${cityHost(APEX, city)} ist vollständig kostenlos, ohne Registrierung und ohne App-Store. Die Seite läuft als Progressive Web App direkt im Browser.`,
+    },
+    {
+      q: "Was ist mit Vorstellungen, die schon angefangen haben?",
+      a: "Auf dem heutigen Spielplan werden Vorstellungen 30 Minuten nach Beginn ausgeblendet, damit nur noch erreichbare Termine sichtbar sind. Eine kleine Notiz unter der Liste zeigt, wie viele bereits gestartet sind.",
+    },
+    {
+      q: "Wie geht die Seite mit meinen Daten um?",
+      a: "Es werden keine personenbezogenen Daten erhoben. Feedback-Nachrichten werden nur dann gespeichert, wenn du sie selbst absendest. Die Seite verwendet weder Tracking noch Analyse-Cookies.",
+    },
+    {
+      q: "Warum diese Seite?",
+      a: `${cityName(city, "de", "short")} hat eine ungewöhnlich dichte Theaterlandschaft, aber keinen gemeinsamen Spielplan. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht — ein Programmheft für die ganze Stadt.`,
+    },
+    {
+      q: "Wie funktionieren die Push-Mitteilungen?",
+      a: "Push-Mitteilungen lassen sich über die »Push-Digest«-Schaltfläche oder den Link im Footer abonnieren. Drei Zeitfenster stehen zur Wahl: morgens (07:00 Uhr), nachmittags (17:00 Uhr) und ein wöchentlicher Sonntagsüberblick (09:00 Uhr). Optional lassen sich die Mitteilungen auf bestimmte Bühnen einschränken. Die Anmeldung ist anonym — kein Konto, keine E-Mail — und jederzeit kündbar. Auf iOS muss die Seite vorher als Web-App zum Home-Bildschirm hinzugefügt werden.",
+    },
+  ];
+  faqItemsCache.set(city, items);
+  return items;
+}
+
+export function Faq({ city = "frankfurt" }: { city?: string } = {}) {
+  return <SharedFaq kicker="Häufige Fragen" items={faqItemsFor(city)} />;
 }
 
 export function DigestCue() {
@@ -1382,7 +1404,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
               <ProgrammePartial date={date} performances={performances} city={city} />
             </div>
           </main>
-          <Faq />
+          <Faq city={city} />
           <Footer turnstileSiteKey={turnstileSiteKey} />
           <ClientScript />
         </body>
@@ -1432,8 +1454,8 @@ export function renderAskAi(): HtmlEscapedString {
   return (<AskAi />) as unknown as HtmlEscapedString;
 }
 
-export function renderFaq(): HtmlEscapedString {
-  return (<Faq />) as unknown as HtmlEscapedString;
+export function renderFaq(city = "frankfurt"): HtmlEscapedString {
+  return (<Faq city={city} />) as unknown as HtmlEscapedString;
 }
 
 export function renderDigestCue(): HtmlEscapedString {
@@ -1467,7 +1489,7 @@ export function buildHomeJsonLd(
   // this helper no longer emits a second one (the previous duplicate
   // had a conflicting `?date=` EntryPoint that broke Sitelinks
   // Searchbox eligibility per the schema audit).
-  return [itemList, buildFaqPageSchema(FAQ_ITEMS)];
+  return [itemList, buildFaqPageSchema(faqItemsFor(city))];
 }
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {

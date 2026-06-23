@@ -1,4 +1,4 @@
-import { compareNullsLast } from "@museumsufer/core";
+import { cityFor, compareNullsLast } from "@museumsufer/core";
 import { CINEMAS, type CinemaConfig } from "./cinema-config";
 import { SCRAPE_DATA } from "./scrape-data";
 import type { Screening } from "./types";
@@ -27,6 +27,14 @@ export interface ScreeningFilter {
 
 const SCREENINGS_BY_ID = new Map<number, Screening>(SCRAPE_DATA.screenings.map((s) => [s.id, s]));
 const CINEMAS_BY_SLUG = new Map<string, CinemaConfig>(CINEMAS.map((c) => [c.slug, c]));
+
+/** Served city (the frankfurt/hamburg subdomain) is geographic — derived from
+ *  coordinates, NOT the config `.city` field, which holds the display town
+ *  ("wiesbaden", "mainz"). Filtering by `.city` orphaned Rhein-Main cinemas
+ *  from both subdomains; `.city` stays only for the address locality. */
+const SERVED_CITY_BY_CINEMA: Record<string, string | null> = Object.fromEntries(
+  CINEMAS.map((c) => [c.slug, cityFor(c.lat, c.lon)]),
+);
 
 const SCREENINGS_BY_DATE = (() => {
   const map = new Map<string, Screening[]>();
@@ -78,7 +86,7 @@ function joinScreening(s: Screening): DayScreening | null {
 
 function matchesFilter(s: Screening, cinema: CinemaConfig, filter?: ScreeningFilter): boolean {
   if (!filter) return true;
-  if (filter.city && cinema.city !== filter.city) return false;
+  if (filter.city && SERVED_CITY_BY_CINEMA[cinema.slug] !== filter.city) return false;
   if (filter.cinema && s.cinema_slug !== filter.cinema) return false;
   if (filter.series && s.series?.slug !== filter.series) return false;
   return true;
@@ -150,7 +158,7 @@ export function getAllSeries(from?: string, city?: string | null): SeriesSummary
   const summaries: SeriesSummary[] = [];
   for (const [slug, screenings] of SCREENINGS_BY_SERIES) {
     const filtered = screenings.filter(
-      (s) => (!from || s.date >= from) && (!city || CINEMAS_BY_SLUG.get(s.cinema_slug)?.city === city),
+      (s) => (!from || s.date >= from) && (!city || SERVED_CITY_BY_CINEMA[s.cinema_slug] === city),
     );
     if (filtered.length === 0) continue;
     const name = filtered[0].series?.name ?? slug;
@@ -170,7 +178,7 @@ export function getSeriesScreenings(slug: string, from?: string, city?: string |
   const out: DayScreening[] = [];
   for (const s of screenings) {
     if (from && s.date < from) continue;
-    if (city && CINEMAS_BY_SLUG.get(s.cinema_slug)?.city !== city) continue;
+    if (city && SERVED_CITY_BY_CINEMA[s.cinema_slug] !== city) continue;
     const joined = joinScreening(s);
     if (joined) out.push(joined);
   }

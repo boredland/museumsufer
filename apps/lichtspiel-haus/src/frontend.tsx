@@ -5,6 +5,7 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityFor,
   cityHost,
   cityUrl,
   dateFormatter,
@@ -47,8 +48,6 @@ export type { DayScreening } from "./db";
 
 export const APP_URL = "https://frankfurt.lichtspiel.haus";
 export const REPO_URL = "https://github.com/boredland/museumsufer";
-
-const utm = buildUtm("frankfurt.lichtspiel.haus");
 
 // Always emit `?lang=<locale>` on internal links so an explicit user
 // choice survives sub-page navigation. The fallback-omitting variant
@@ -1545,33 +1544,42 @@ export function ProgrammePartial({
 
 const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
 
-const CINEMA_FAQ = ((): { count: number; byLocale: Record<Locale, string> } => {
-  const nameBySlug = new Map<string, string>(CINEMAS.map((c) => [c.slug, c.name]));
+const cinemaFaqCache = new Map<string, { count: number; byLocale: Record<Locale, string> }>();
+
+/** FAQ cinema list + count for one city. Filtering the slug→name map to that
+ *  city's cinemas makes rankVenuesByEventCount drop every other city's
+ *  screenings, so each host lists only its own cinemas — no cross-city spill. */
+function cinemaFaqFor(city: string): { count: number; byLocale: Record<Locale, string> } {
+  const cached = cinemaFaqCache.get(city);
+  if (cached) return cached;
+  const nameBySlug = new Map<string, string>(
+    CINEMAS.filter((c) => cityFor(c.lat, c.lon) === city).map((c) => [c.slug, c.name]),
+  );
   const ranked = rankVenuesByEventCount<DayScreening | { cinema_slug: string }>(
     SCRAPE_DATA.screenings as unknown as Array<{ cinema_slug: string }>,
     (s) => (s as { cinema_slug: string }).cinema_slug,
     nameBySlug,
   );
   const names = ranked.map((v) => v.name);
-  return {
-    count: ranked.length,
-    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en") },
-  };
-})();
+  const faq = { count: ranked.length, byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en") } };
+  cinemaFaqCache.set(city, faq);
+  return faq;
+}
 
-function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale): FaqItem[] {
+function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale, city: string): FaqItem[] {
+  const faq = cinemaFaqFor(city);
   return items.map((item) =>
     item.a.includes("{venues}")
       ? {
           q: item.q,
-          a: item.a.replace("{n}", String(CINEMA_FAQ.count)).replace("{venues}", CINEMA_FAQ.byLocale[locale]),
+          a: item.a.replace("{n}", String(faq.count)).replace("{venues}", faq.byLocale[locale]),
         }
       : item,
   );
 }
 
-function Faq({ tr, locale }: { tr: Translations; locale: Locale }) {
-  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale)} />;
+function Faq({ tr, locale, city }: { tr: Translations; locale: Locale; city: string }) {
+  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale, city)} />;
 }
 
 function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
@@ -1684,7 +1692,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             currentPath={currentPath}
             appUrl={appUrl}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale, city))]}
           />
         </head>
         <body>
@@ -1708,7 +1716,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             </div>
             <SeenBanner tr={tr} />
           </main>
-          <Faq tr={tr} locale={locale} />
+          <Faq tr={tr} locale={locale} city={city} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />

@@ -1028,26 +1028,34 @@ export function ProgrammePartial({
 
 const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
 
-const VENUE_FAQ = ((): { count: number; byLocale: Record<Locale, string> } => {
-  const nameBySlug = new Map(SOURCES.map((s) => [s.slug, s.name]));
-  const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => e.source_slug, nameBySlug);
-  const names = ranked.map((v) => v.name);
-  return {
-    count: ranked.length,
-    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en") },
-  };
-})();
+const venueFaqCache = new Map<string, { count: number; byLocale: Record<Locale, string> }>();
 
-function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale): FaqItem[] {
+/** FAQ source list + count for one city. Talks carry their geographic `city`
+ *  (set in the derive via cityFor), so filtering events to the host city makes
+ *  hamburg.lehr.salon list Hamburg institutions, not the Frankfurt directory. */
+function venueFaqFor(city: string): { count: number; byLocale: Record<Locale, string> } {
+  const cached = venueFaqCache.get(city);
+  if (cached) return cached;
+  const cityEvents = SCRAPE_DATA.events.filter((e) => e.city === city);
+  const nameBySlug = new Map(cityEvents.map((e) => [e.source_slug, e.source_name] as const));
+  const ranked = rankVenuesByEventCount(cityEvents, (e) => e.source_slug, nameBySlug);
+  const names = ranked.map((v) => v.name);
+  const faq = { count: ranked.length, byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en") } };
+  venueFaqCache.set(city, faq);
+  return faq;
+}
+
+function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale, city: string): FaqItem[] {
+  const faq = venueFaqFor(city);
   return items.map((item) =>
     item.a.includes("{venues}")
-      ? { q: item.q, a: item.a.replace("{n}", String(VENUE_FAQ.count)).replace("{venues}", VENUE_FAQ.byLocale[locale]) }
+      ? { q: item.q, a: item.a.replace("{n}", String(faq.count)).replace("{venues}", faq.byLocale[locale]) }
       : item,
   );
 }
 
-function Faq({ tr, locale }: { tr: Translations; locale: Locale }) {
-  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale)} />;
+function Faq({ tr, locale, city }: { tr: Translations; locale: Locale; city: string }) {
+  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale, city)} />;
 }
 
 function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
@@ -1139,7 +1147,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             locale={locale}
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
-            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale, city ?? "frankfurt"))]}
           />
         </head>
         <body>
@@ -1154,7 +1162,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
               <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} />
             </div>
           </main>
-          <Faq tr={tr} locale={locale} />
+          <Faq tr={tr} locale={locale} city={city ?? "frankfurt"} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />
