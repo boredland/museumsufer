@@ -68,6 +68,8 @@ const APPS: readonly AppTarget[] = [
     cities: [
       { city: "frankfurt", prodOrigin: "https://museumsufer.app", suffix: "" },
       { city: "hamburg", prodOrigin: "https://hamburg.ins.museum", suffix: "-hamburg" },
+      { city: "darmstadt", prodOrigin: "https://darmstadt.ins.museum", suffix: "-darmstadt" },
+      { city: "heidelberg", prodOrigin: "https://heidelberg.ins.museum", suffix: "-heidelberg" },
     ],
   },
   {
@@ -79,6 +81,8 @@ const APPS: readonly AppTarget[] = [
     cities: [
       { city: "frankfurt", prodOrigin: "https://frankfurt.ins.theater", suffix: "" },
       { city: "hamburg", prodOrigin: "https://hamburg.ins.theater", suffix: "-hamburg" },
+      { city: "darmstadt", prodOrigin: "https://darmstadt.ins.theater", suffix: "-darmstadt" },
+      { city: "heidelberg", prodOrigin: "https://heidelberg.ins.theater", suffix: "-heidelberg" },
     ],
   },
   {
@@ -90,6 +94,8 @@ const APPS: readonly AppTarget[] = [
     cities: [
       { city: "frankfurt", prodOrigin: "https://frankfurt.konzert.haus", suffix: "" },
       { city: "hamburg", prodOrigin: "https://hamburg.konzert.haus", suffix: "-hamburg" },
+      { city: "darmstadt", prodOrigin: "https://darmstadt.konzert.haus", suffix: "-darmstadt" },
+      { city: "heidelberg", prodOrigin: "https://heidelberg.konzert.haus", suffix: "-heidelberg" },
     ],
   },
   {
@@ -109,6 +115,8 @@ const APPS: readonly AppTarget[] = [
     cities: [
       { city: "frankfurt", prodOrigin: "https://frankfurt.lehr.salon", suffix: "" },
       { city: "hamburg", prodOrigin: "https://hamburg.lehr.salon", suffix: "-hamburg" },
+      { city: "darmstadt", prodOrigin: "https://darmstadt.lehr.salon", suffix: "-darmstadt" },
+      { city: "heidelberg", prodOrigin: "https://heidelberg.lehr.salon", suffix: "-heidelberg" },
     ],
   },
   {
@@ -120,6 +128,8 @@ const APPS: readonly AppTarget[] = [
     cities: [
       { city: "frankfurt", prodOrigin: "https://frankfurt.lichtspiel.haus", suffix: "" },
       { city: "hamburg", prodOrigin: "https://hamburg.lichtspiel.haus", suffix: "-hamburg" },
+      { city: "darmstadt", prodOrigin: "https://darmstadt.lichtspiel.haus", suffix: "-darmstadt" },
+      { city: "heidelberg", prodOrigin: "https://heidelberg.lichtspiel.haus", suffix: "-heidelberg" },
     ],
   },
 ];
@@ -184,18 +194,26 @@ async function captureLocal(app: AppTarget): Promise<void> {
 async function captureProd(app: AppTarget): Promise<void> {
   const cwd = join(REPO_ROOT, app.dir);
   // Each city has its own subdomain in prod — hit it directly, no Host
-  // override needed.
+  // override needed. A newly-added city's custom domain may still be
+  // provisioning (DNS/cert) right after deploy, so a non-canonical city's
+  // failure only warns; the canonical (default-suffix) city must succeed.
   await Promise.all(
     app.cities.map(async (c) => {
       const baseUrl = `${c.prodOrigin}${app.path}`;
       console.log(`\n→ ${app.slug} [${c.city}] (${baseUrl})`);
-      const written = await captureManifestScreenshots({
-        baseUrl,
-        outDir: join(cwd, "public"),
-        readySelector: app.readySelector,
-        filenameSuffix: c.suffix,
-      });
-      for (const path of written) console.log(`  [${c.city}] wrote ${path}`);
+      try {
+        const written = await captureManifestScreenshots({
+          baseUrl,
+          outDir: join(cwd, "public"),
+          readySelector: app.readySelector,
+          filenameSuffix: c.suffix,
+        });
+        for (const path of written) console.log(`  [${c.city}] wrote ${path}`);
+      } catch (err) {
+        if (c.suffix === "") throw err;
+        const msg = err instanceof Error ? err.message : String(err);
+        console.warn(`  [${c.city}] skipped — ${msg}`);
+      }
     }),
   );
 }

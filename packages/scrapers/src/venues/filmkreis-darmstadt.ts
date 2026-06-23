@@ -51,6 +51,7 @@ export async function scrapeFilmkreisDarmstadt(): Promise<VenueScrapeResult> {
 
     events.push({
       source_event_id: vorstellungId,
+      city: "darmstadt",
       title,
       subtitle: lang || null,
       date,

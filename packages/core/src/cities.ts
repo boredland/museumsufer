@@ -50,7 +50,27 @@ export const LANDAU_BBOX: Bbox = {
   maxLon: 8.3,
 };
 
-export type CitySlug = "frankfurt" | "hamburg";
+/** Darmstadt + southern-Hesse edge. Capped at maxLat 49.94 to stay strictly
+ *  south of FRANKFURT_BBOX (minLat 49.95), so the ~30km Frankfurt seam splits
+ *  cleanly without a shared-bbox tiebreak. */
+export const DARMSTADT_BBOX: Bbox = {
+  minLat: 49.75,
+  maxLat: 49.94,
+  minLon: 8.5,
+  maxLon: 8.8,
+};
+
+/** Heidelberg + Bergstraße. minLon 8.55 keeps it east of Mannheim's centroid
+ *  (~8.47, covered by the Mannheim cluster) so the western seam splits on the
+ *  bbox alone. */
+export const HEIDELBERG_BBOX: Bbox = {
+  minLat: 49.3,
+  maxLat: 49.52,
+  minLon: 8.55,
+  maxLon: 8.87,
+};
+
+export type CitySlug = "frankfurt" | "hamburg" | "darmstadt" | "heidelberg";
 
 export interface CityMeta {
   /** URL subdomain prefix and the value stored on bundled events. */
@@ -111,6 +131,36 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
     wikidata: "Q1055",
     centroid: { lat: 53.55, lon: 9.99 },
     bbox: HAMBURG_BBOX,
+  },
+  darmstadt: {
+    slug: "darmstadt",
+    name: "Darmstadt",
+    short: "Darmstadt",
+    adj: { de: "Darmstädter", en: "Darmstadt's" },
+    i18nName: {
+      de: { full: "Darmstadt", short: "Darmstadt" },
+      en: { full: "Darmstadt", short: "Darmstadt" },
+      fr: { full: "Darmstadt", short: "Darmstadt" },
+    },
+    region: "Hessen",
+    wikidata: "Q2973",
+    centroid: { lat: 49.8667, lon: 8.65 },
+    bbox: DARMSTADT_BBOX,
+  },
+  heidelberg: {
+    slug: "heidelberg",
+    name: "Heidelberg",
+    short: "Heidelberg",
+    adj: { de: "Heidelberger", en: "Heidelberg's" },
+    i18nName: {
+      de: { full: "Heidelberg", short: "Heidelberg" },
+      en: { full: "Heidelberg", short: "Heidelberg" },
+      fr: { full: "Heidelberg", short: "Heidelberg" },
+    },
+    region: "Baden-Württemberg",
+    wikidata: "Q2966",
+    centroid: { lat: 49.4122, lon: 8.71 },
+    bbox: HEIDELBERG_BBOX,
   },
 };
 

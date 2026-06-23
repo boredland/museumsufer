@@ -2,8 +2,10 @@ import {
   type Bbox,
   cityFor,
   cityOf,
+  DARMSTADT_BBOX,
   FRANKFURT_BBOX,
   HAMBURG_BBOX,
+  HEIDELBERG_BBOX,
   inBbox,
   LANDAU_BBOX,
 } from "@museumsufer/core/cities";
@@ -71,6 +73,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "english-theatre-hamburg": [53.5693, 10.0286],
   "galli-theater": [50.1116, 8.6841],
   "gallus-theater": [50.101, 8.6334],
+  "gloria-gloriette-heidelberg": [49.4115, 8.696],
   "hamburger-kammeroper": [53.5477, 9.9366],
   "hamburger-kammerspiele": [53.5684, 9.9842],
   "hamburger-puppentheater": [53.5855, 10.0435],
@@ -204,6 +207,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "hansa-filmstudio": [53.485, 10.218],
   "harmonie-frankfurt": [50.0976, 8.6818],
   "kino-alte-muehle-bad-vilbel": [50.1846, 8.7464],
+  "kamera-heidelberg": [49.414, 8.689],
   "bad-vilbel-open-air-kino": [50.1935, 8.7497],
   "taunale-oberursel": [50.2004, 8.5765],
   "kino-kelkheim": [50.1474, 8.4501],
@@ -252,7 +256,17 @@ export function coordinatesFor(sourceSlug: string): readonly [number, number] | 
 // both build scripts and worker request paths share one source of truth.
 // Re-exported here for back-compat: @museumsufer/event-hub consumers import
 // these names from the scrapers barrel.
-export { type Bbox, cityFor, cityOf, FRANKFURT_BBOX, HAMBURG_BBOX, inBbox, LANDAU_BBOX };
+export {
+  type Bbox,
+  cityFor,
+  cityOf,
+  DARMSTADT_BBOX,
+  FRANKFURT_BBOX,
+  HAMBURG_BBOX,
+  HEIDELBERG_BBOX,
+  inBbox,
+  LANDAU_BBOX,
+};
 
 /** Frankfurt + Landau corridor bbox. Anything outside is dropped by the
  *  hub runner; this is defense-in-depth against scraper-level filter
