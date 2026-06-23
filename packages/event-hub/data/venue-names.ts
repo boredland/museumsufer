@@ -388,6 +388,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-kunstforum-der-tu-darmstadt": "Kunstforum der TU Darmstadt",
   "wdc2026-kurhaus-bad-homburg": "Kurhaus Bad Homburg",
   "wdc2026-kurhaus-bad-schwalbach": "Kurhaus Bad Schwalbach",
+  "wdc2026-lauteschlagerstrasse-28a": "Lauteschlägerstraße 28a",
   "wdc2026-lincoln-wall": "Lincoln Wall",
   "wdc2026-literaturhaus-darmstadt": "Literaturhaus Darmstadt",
   "wdc2026-literaturhaus-frankfurt": "Literaturhaus Frankfurt",
