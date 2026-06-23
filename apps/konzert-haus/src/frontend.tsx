@@ -5,6 +5,7 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityFor,
   cityUrl,
   dateFormatter,
   dateLocale,
@@ -319,10 +320,6 @@ function berlinOffsetFor(date: string): string {
   if (month < 3 || month > 10) return "+01:00";
   if (month === 3) return day >= dstStart ? "+02:00" : "+01:00";
   return day < dstEnd ? "+02:00" : "+01:00";
-}
-
-function capitalize(s: string): string {
-  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
 
 function buildEventJsonLd(e: DayEvent, appUrl: string): Record<string, unknown> {
@@ -1079,26 +1076,38 @@ export function ProgrammePartial({
 
 const DEFAULT_TR = getTranslations(DEFAULT_LOCALE);
 
-const VENUE_FAQ = ((): { count: number; byLocale: Record<Locale, string> } => {
-  const nameBySlug = new Map(VENUES.map((v) => [v.slug, v.name]));
+const venueFaqCache = new Map<string, { count: number; byLocale: Record<Locale, string> }>();
+
+/** FAQ venue list + count for one city. Filtering the slug→name map to that
+ *  city's venues makes rankVenuesByEventCount drop every other city's events,
+ *  so hamburg.konzert.haus lists Hamburg venues, not the Frankfurt directory. */
+function venueFaqFor(city: string): { count: number; byLocale: Record<Locale, string> } {
+  const cached = venueFaqCache.get(city);
+  if (cached) return cached;
+  const nameBySlug = new Map(
+    VENUES.filter((v) => cityFor(v.lat, v.lon) === city).map((v) => [v.slug, v.name] as const),
+  );
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => e.venue_slug, nameBySlug);
   const names = ranked.map((v) => v.name);
-  return {
+  const faq = {
     count: ranked.length,
     byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
   };
-})();
+  venueFaqCache.set(city, faq);
+  return faq;
+}
 
-function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale): FaqItem[] {
+function applyVenueSubstitution(items: ReadonlyArray<FaqItem>, locale: Locale, city: string): FaqItem[] {
+  const faq = venueFaqFor(city);
   return items.map((item) =>
     item.a.includes("{venues}")
-      ? { q: item.q, a: item.a.replace("{n}", String(VENUE_FAQ.count)).replace("{venues}", VENUE_FAQ.byLocale[locale]) }
+      ? { q: item.q, a: item.a.replace("{n}", String(faq.count)).replace("{venues}", faq.byLocale[locale]) }
       : item,
   );
 }
 
-function Faq({ tr, locale }: { tr: Translations; locale: Locale }) {
-  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale)} />;
+function Faq({ tr, locale, city }: { tr: Translations; locale: Locale; city: string }) {
+  return <SharedFaq kicker={tr.faqKicker} items={applyVenueSubstitution(tr.faqItems, locale, city)} />;
 }
 
 function AskAi({ date, tr, locale }: { date: string; tr: Translations; locale: Locale }) {
@@ -1157,7 +1166,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
             currentPath={currentPath}
             turnstileSiteKey={turnstileSiteKey}
             appUrl={appUrl}
-            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale))]}
+            jsonLd={[websiteLd, buildFaqPageSchema(applyVenueSubstitution(tr.faqItems, locale, city))]}
           />
         </head>
         <body>
@@ -1172,7 +1181,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
               <ProgrammePartial date={date} events={events} tr={tr} locale={locale} city={city} />
             </div>
           </main>
-          <Faq tr={tr} locale={locale} />
+          <Faq tr={tr} locale={locale} city={city} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
           <DigestDialog tr={tr} />
