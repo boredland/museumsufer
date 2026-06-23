@@ -1,121 +1,69 @@
-import { detectTalkLanguage } from "@museumsufer/classify";
+import { classifyMusic, classifyTalk, detectTalkLanguage, looksLikeMusic } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
-import { decodeEntities, stripHtml } from "@museumsufer/core/html";
-import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { HTML_EVENTS_CACHE } from "../data/html-events-cache";
+import type { RawProgrammeEvent } from "../programme-events";
+import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
-const API_URL = "https://blog.sub.uni-hamburg.de/index.php?rest_route=/wp/v2/posts&categories=9&per_page=100";
-
-interface WPPost {
-  id: number;
-  date: string;
-  link: string;
-  title: { rendered: string };
-  content: { rendered: string };
-  excerpt: { rendered: string };
-}
+/**
+ * Hamburger Studienbibliothek (HSB) — studienbibliothek.org. A small
+ * critical-theory library in Hamburg-Rothenburgsort whose evening programme —
+ * avant-garde "Bibliothekskonzerte", talks, discussions — is published only as
+ * free German prose in the index page's news feed: no API, no microdata, dates
+ * buried mid-sentence ("Montag, 22. Juni 2026, 20 Uhr"), layout per item.
+ *
+ * So it is NOT parsed during the scrape. `scripts/refresh-html-cache.ts` is run
+ * by hand, has the AI proxy structure the page text, and commits the result to
+ * `src/data/html-events-cache.ts` (see AGENTS.md — an LLM call is
+ * non-deterministic + network-bound and never belongs in `scrape()`). This
+ * scraper reads only that committed cache, so reruns stay deterministic + offline.
+ *
+ * NOT the Stabi (Staats- und Universitätsbibliothek, blog.sub.uni-hamburg.de),
+ * which is the separate `stabi-hamburg` scraper.
+ */
+const TAG = "hamburger-studienbibliothek";
+const PAGE_URL = "https://www.studienbibliothek.org/index.shtml";
 
 export async function scrapeHamburgerStudienbibliothek(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(API_URL);
-  if (!res.ok) throw new Error(`hamburger-studienbibliothek fetch failed: ${res.status}`);
-  const posts = (await res.json()) as WPPost[];
+  const cached = HTML_EVENTS_CACHE[TAG];
+  const events = (cached?.events ?? [])
+    .map((r) => toCanonical(r, today))
+    .filter((e): e is CanonicalScrapedEvent => e !== null);
+  return { source_slug: TAG, display_name: "Hamburger Studienbibliothek", events };
+}
 
-  const events: CanonicalScrapedEvent[] = [];
-
-  for (const post of posts) {
-    const title = decodeEntities(post.title.rendered).trim();
-
-    // Skip exhibitions or general program flyers
-    if (/^ausstellung:|sommerprogramm|veranstaltungsflyer/i.test(title)) continue;
-
-    const excerpt = decodeEntities(post.excerpt.rendered);
-    const content = decodeEntities(post.content.rendered);
-
-    // Try to parse date, time from content/excerpt
-    const parsed = parseEventDateTime(title, content || excerpt, post.date);
-    if (!parsed) continue;
-
-    const { date, time, end_time } = parsed;
-    if (date < today) continue;
-
-    const description = stripHtml(content).trim().slice(0, 600) || null;
-
-    // Detect type of lecture
-    let label = "talk:vortrag";
-    if (/diskussion|podium/i.test(title)) {
-      label = "talk:diskussion";
-    } else if (/lesung/i.test(title)) {
-      label = "talk:lesung";
-    }
-
-    events.push({
-      source_event_id: String(post.id),
-      title: title.replace(/\s*\(\d{1,2}\.\d{1,2}\.?\)/, "").trim(), // Strip date from title
-      date,
-      time,
-      end_time,
-      description,
-      detail_url: post.link,
-      language: detectTalkLanguage(title, description),
-      labels: [{ label, confidence: 0.95, classifier: "scraper-hardcoded" }],
-    });
-  }
-
+function toCanonical(r: RawProgrammeEvent, today: string): CanonicalScrapedEvent | null {
+  // Filter past events in-code (after the cache read) — keeps the cache
+  // today-independent and the build deterministic for same-day reruns.
+  if ((r.end_date ?? r.date) < today) return null;
+  const description = r.description ?? null;
   return {
-    source_slug: "hamburger-studienbibliothek",
-    display_name: "Stabi Hamburg",
-    events,
+    source_event_id: `${r.date}|${r.time ?? ""}|${r.title}`,
+    title: r.title,
+    description,
+    date: r.date,
+    time: r.time ?? null,
+    end_date: r.end_date ?? null,
+    end_time: r.end_time ?? null,
+    detail_url: PAGE_URL,
+    performers: r.performers ?? null,
+    price_min: r.price_min ?? null,
+    language: detectTalkLanguage(r.title, description),
+    labels: labelsFor(r.title, description),
   };
 }
 
-function parseEventDateTime(title: string, text: string, postDateStr: string) {
-  const cleanText = stripHtml(text).trim();
-
-  // Look for: "Dienstag, 16.6., 18 Uhr, Vortragsraum"
-  // or "Montag, 29.6., 17.30 Uhr bis 19.30 Uhr, Vortragsraum"
-  const timeRegex =
-    /(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*(\d{1,2})\.(\d{1,2})\.,\s*(\d{1,2}(?:\.\d{2})?)\s*Uhr(?:\s*(?:bis|-)\s*(\d{1,2}(?:\.\d{2})?)\s*Uhr)?/i;
-  const match = cleanText.match(timeRegex);
-
-  let day = 0;
-  let month = 0;
-  let startTimeStr: string | null = null;
-  let endTimeStr: string | null = null;
-
-  if (match) {
-    day = parseInt(match[1], 10);
-    month = parseInt(match[2], 10);
-    startTimeStr = match[3].replace(".", ":");
-    if (!startTimeStr.includes(":")) startTimeStr += ":00";
-    if (startTimeStr.length === 4) startTimeStr = `0${startTimeStr}`;
-
-    if (match[4]) {
-      endTimeStr = match[4].replace(".", ":");
-      if (!endTimeStr.includes(":")) endTimeStr += ":00";
-      if (endTimeStr.length === 4) endTimeStr = `0${endTimeStr}`;
-    }
-  } else {
-    // Fallback: title date parsing e.g. (29.6.)
-    const titleMatch = title.match(/\((\d{1,2})\.(\d{1,2})\.?\)/);
-    if (titleMatch) {
-      day = parseInt(titleMatch[1], 10);
-      month = parseInt(titleMatch[2], 10);
-    }
+/** HSB runs two event classes: avant-garde "Bibliothekskonzerte" (→ music, genre
+ *  refined from the description, defaulting to experimental for this venue) and
+ *  political talks/discussions/readings (→ talk:*). Music wins only on an explicit
+ *  music signal; everything else is a talk, matching the venue's lecture core. */
+function labelsFor(title: string, description: string | null): ScrapedLabel[] {
+  // Every HSB concert is titled "Bibliothekskonzert"; that compound slips past
+  // looksLikeMusic's \bkonzert\b boundary, so match the substring directly.
+  if (/konzert/i.test(title) || looksLikeMusic(title, description)) {
+    const genre = classifyMusic(title, null, description, "experimental");
+    return [{ label: `music:${genre}`, confidence: 0.9, classifier: "keyword:music" }];
   }
-
-  if (day === 0 || month === 0) return null;
-
-  const postDate = new Date(postDateStr);
-  const currentYear = postDate.getFullYear();
-  const currentMonth = postDate.getMonth() + 1;
-
-  // If the event month is smaller than the post publish month, it is likely next year
-  const year = month < currentMonth - 2 ? currentYear + 1 : currentYear;
-
-  const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-  return {
-    date: dateStr,
-    time: startTimeStr,
-    end_time: endTimeStr,
-  };
+  const category = classifyTalk(title, description).toLowerCase();
+  return [{ label: `talk:${category}`, confidence: 0.9, classifier: "keyword:talk" }];
 }

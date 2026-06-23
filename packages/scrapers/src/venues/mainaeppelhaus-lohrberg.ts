@@ -2,7 +2,7 @@ import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities, stripHtml } from "@museumsufer/core/html";
 import { PDF_EVENTS_CACHE } from "../data/pdf-events-cache";
-import type { RawPdfEvent } from "../pdf-events";
+import type { RawProgrammeEvent } from "../programme-events";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 /**
@@ -50,7 +50,7 @@ function result(events: CanonicalScrapedEvent[]): VenueScrapeResult {
   return { source_slug: PDF_TAG, display_name: "MainÄppelHaus Lohrberg", events };
 }
 
-function toCanonical(r: RawPdfEvent, today: string): CanonicalScrapedEvent | null {
+function toCanonical(r: RawProgrammeEvent, today: string): CanonicalScrapedEvent | null {
   // Filter past events in-code (after the cache read) — keeps the cache
   // today-independent and the build deterministic for same-day reruns.
   if ((r.end_date ?? r.date) < today) return null;

@@ -174,6 +174,7 @@ import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
 import { scrapeShmhMuseums } from "./venues/shmh-museums";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStPauliTheater } from "./venues/st-pauli-theater";
+import { scrapeStabiHamburg } from "./venues/stabi-hamburg";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStalburgTheater } from "./venues/stalburg-theater";
 import { scrapeStKatharinen } from "./venues/stk-musik";
@@ -355,6 +356,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "schauspiel-frankfurt", run: (_ctx: ScraperContext) => scrapeSchauspielFrankfurt() },
   { slug: "sigmund-freud-institut", run: (_ctx: ScraperContext) => scrapeSigmundFreudInstitut() },
   { slug: "st-pauli-theater", run: (_ctx: ScraperContext) => scrapeStPauliTheater() },
+  { slug: "stabi-hamburg", run: (_ctx: ScraperContext) => scrapeStabiHamburg() },
   { slug: "st-katharinen", run: (_ctx: ScraperContext) => scrapeStKatharinen() },
   { slug: "stadtbuecherei-frankfurt", run: (ctx: ScraperContext) => scrapeStadtbuechereiFrankfurt(ctx.proxy) },
   { slug: "stalburg-theater", run: (_ctx: ScraperContext) => scrapeStalburgTheater() },
@@ -513,6 +515,7 @@ export {
   scrapeSchauspielFrankfurt,
   scrapeShmhMuseums,
   scrapeSigmundFreudInstitut,
+  scrapeStabiHamburg,
   scrapeStadtbuechereiFrankfurt,
   scrapeStalburgTheater,
   scrapeStKatharinen,
