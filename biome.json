@@ -18,7 +18,8 @@
       "!apps/lichtspiel-haus/src/synthesized-cinemas.ts",
       "!packages/event-hub/data/events.ts",
       "!packages/event-hub/data/tmdb-cache.ts",
-      "!packages/scrapers/src/data/pdf-events-cache.ts"
+      "!packages/scrapers/src/data/pdf-events-cache.ts",
+      "!packages/scrapers/src/data/html-events-cache.ts"
     ]
   }
 }

@@ -27,5 +27,6 @@
   "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable",
   "hessisches-staatsballett": "seasonal — joint Wiesbaden/Darmstadt company between seasons; spielplan returns 'keine Ergebnisse gefunden' as of June 2026 (2026/27 not yet published). Parser verified against live markup.",
   "lichtmess-kino": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows).",
+  "hamburger-studienbibliothek": "sporadic — small critical-theory library (studienbibliothek.org); avant-garde 'Bibliothekskonzerte' + occasional talks published only as prose in the index news feed, extracted via the AI proxy into html-events-cache.ts (refresh-html-cache.ts). Latest listed event was 22 Jun 2026; often empty between events.",
   "frankfurter-kunstverein": "between event batches — the FKV 'current-events' FacetWP listing is empty server-side (preload total_rows:0) and JS-rendered (0 tiles) as of 23 Jun 2026; last events were the Grönland-exhibition Führungen through 21 Jun. Parser selectors (tile-link / archive-title / subtitle) verified still valid against the live archive markup, so it re-delivers when FKV publishes its next event batch."
 }

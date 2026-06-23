@@ -112,7 +112,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "refresh-pdf-cache": "bun scripts/refresh-pdf-cache.ts"
+    "refresh-pdf-cache": "bun scripts/refresh-pdf-cache.ts",
+    "refresh-html-cache": "bun scripts/refresh-html-cache.ts"
   },
   "dependencies": {
     "@museumsufer/classify": "*",
