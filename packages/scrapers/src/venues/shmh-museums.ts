@@ -2,6 +2,7 @@ import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@
 import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities } from "@museumsufer/core/html";
 import PQueue from "p-queue";
+import { addClockMinutes } from "../_time";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
 import { type GomusPicture, pickGomusImage } from "./_gomus-generic";
 
@@ -204,17 +205,9 @@ export async function scrapeShmhMuseums(_ctx: ScraperContext): Promise<VenueScra
         const date = d.start_time.substring(0, 10);
         const time = d.start_time.substring(11, 16);
 
-        let endTime: string | null = null;
-        if (d.duration) {
-          try {
-            const startParsed = new Date(d.start_time);
-            const endParsed = new Date(startParsed.getTime() + d.duration * 60 * 1000);
-            // format end time as HH:MM in local/berlin time zone context
-            const endHours = String(endParsed.getHours()).padStart(2, "0");
-            const endMins = String(endParsed.getMinutes()).padStart(2, "0");
-            endTime = `${endHours}:${endMins}`;
-          } catch {}
-        }
+        // Literal local start (`time`) + duration; see addClockMinutes for why
+        // we avoid `new Date(...).getHours()` (timezone-skewed, non-deterministic).
+        const endTime = d.duration ? addClockMinutes(time, d.duration) : null;
 
         const title = cleanText(d.event_title || d.title);
         const description = d.description ? cleanText(d.description) : null;
