@@ -123,16 +123,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "world",
   },
   {
-    slug: "frankfurter-buergerstiftung",
-    name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
-    address: "",
-    lat: 50.1262,
-    lon: 8.6792,
-    city: "frankfurt",
-    website_url: "https://www.frankfurter-buergerstiftung.de",
-    default_genre: "classical",
-  },
-  {
     slug: "hafen-2-offenbach",
     name: "Hafen 2 Offenbach",
     address: "",
@@ -270,16 +260,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 9.9942,
     city: "hamburg",
     website_url: "https://shop-komoedie.comfortticket.de",
-    default_genre: "classical",
-  },
-  {
-    slug: "literaturhaus-hamburg",
-    name: "Literaturhaus Hamburg",
-    address: "",
-    lat: 53.5649,
-    lon: 10.0135,
-    city: "hamburg",
-    website_url: "https://literaturhaus-hamburg.reservix.de",
     default_genre: "classical",
   },
   {
