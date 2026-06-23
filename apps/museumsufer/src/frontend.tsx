@@ -476,24 +476,37 @@ function AboutSection({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-const MUSEUM_FAQ = ((): { count: number; byLocale: Record<FaqLocale, string> } => {
-  const nameById = new Map(SCRAPE_DATA.museums.map((m) => [String(m.id), m.name] as const));
+const museumFaqCache = new Map<string, { count: number; byLocale: Record<FaqLocale, string> }>();
+
+/** FAQ venue list + count for a single city. Filtering the id→name lookup to
+ *  the city's own museums means every other city's events are dropped
+ *  (rankVenuesByEventCount skips ids missing from the map), so the Hamburg
+ *  page lists Hamburg houses rather than the Frankfurt directory. Memoised. */
+function museumFaqFor(city: string): { count: number; byLocale: Record<FaqLocale, string> } {
+  const cached = museumFaqCache.get(city);
+  if (cached) return cached;
+  const nameById = new Map(
+    SCRAPE_DATA.museums.filter((m) => (m.city ?? "frankfurt") === city).map((m) => [String(m.id), m.name] as const),
+  );
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => String(e.museum_id), nameById);
   const names = ranked.map((v) => v.name);
-  return {
+  const faq = {
     count: ranked.length,
     byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
   };
-})();
-
-function substituteVenues(answer: string, locale: Locale): string {
-  if (!answer.includes("{venues}")) return answer;
-  return answer.replace("{n}", String(MUSEUM_FAQ.count)).replace("{venues}", MUSEUM_FAQ.byLocale[locale]);
+  museumFaqCache.set(city, faq);
+  return faq;
 }
 
-function faqItems(tr: Record<string, string>, locale: Locale): FaqItem[] {
+function substituteVenues(answer: string, locale: Locale, city: string): string {
+  if (!answer.includes("{venues}")) return answer;
+  const faq = museumFaqFor(city);
+  return answer.replace("{n}", String(faq.count)).replace("{venues}", faq.byLocale[locale]);
+}
+
+function faqItems(tr: Record<string, string>, locale: Locale, city: string): FaqItem[] {
   return [
-    { q: tr.faq1Q, a: substituteVenues(tr.faq1A, locale) },
+    { q: tr.faq1Q, a: substituteVenues(tr.faq1A, locale, city) },
     { q: tr.faq2Q, a: tr.faq2A },
     { q: tr.faq3Q, a: tr.faq3A },
     { q: tr.faq4Q, a: tr.faq4A },
@@ -504,8 +517,8 @@ function faqItems(tr: Record<string, string>, locale: Locale): FaqItem[] {
   ];
 }
 
-function FaqSection({ tr, locale }: { tr: Record<string, string>; locale: Locale }) {
-  return <Faq kicker={tr.faqTitle} items={faqItems(tr, locale)} />;
+function FaqSection({ tr, locale, city }: { tr: Record<string, string>; locale: Locale; city: string }) {
+  return <Faq kicker={tr.faqTitle} items={faqItems(tr, locale, city)} />;
 }
 
 /** Renders the complete landing page with all sections, schemas, and interactivity */
@@ -592,7 +605,7 @@ export function renderPage(
   const publisherSchema = JSON.stringify(personSchema);
   const orgSchemaJson = JSON.stringify(orgSchema);
   const webAppSchemaJson = JSON.stringify(webAppSchema);
-  const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr, locale)));
+  const faqSchema = JSON.stringify(buildFaqPageSchema(faqItems(tr, locale, city)));
 
   // ItemList of every museum in the directory. Signals the hub-and-
   // spoke relationship to Google + AI assistants; supports site-links
@@ -717,7 +730,7 @@ export function renderPage(
             <MuseumsSection museums={museums || {}} tr={tr} locale={locale} />
 
             <AboutSection tr={tr} />
-            <FaqSection tr={tr} locale={locale} />
+            <FaqSection tr={tr} locale={locale} city={city} />
 
             <Footer
               description={tr.metaShort ?? tr.subtitle}
