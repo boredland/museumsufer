@@ -201,6 +201,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
+    slug: "karlstorkino",
+    name: "Karlstorkino Heidelberg",
+    address: "",
+    lat: 49.4106,
+    lon: 8.714,
+    city: "heidelberg",
+    website_url: "https://www.karlstorkino.de",
+  },
+  {
     slug: "koralle-lichtspiele",
     name: "Koralle Lichtspiele",
     address: "",

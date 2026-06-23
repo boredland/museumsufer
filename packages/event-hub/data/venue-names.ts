@@ -152,6 +152,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "kampnagel": "Kampnagel",
   "karl-marx-buchhandlung": "Karl Marx Buchhandlung",
   "karlstorbahnhof": "Karlstorbahnhof Heidelberg",
+  "karlstorkino": "Karlstorkino Heidelberg",
   "kellertheater-frankfurt": "Kellertheater Frankfurt",
   "kino-alte-muehle-bad-vilbel": "Kino Alte Mühle Bad Vilbel",
   "kino-kelkheim": "Kino Kelkheim",
