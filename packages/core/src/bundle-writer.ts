@@ -36,10 +36,18 @@ function escapeForTemplate(s: string): string {
  * formed — while one-record-per-line keeps the generated file's diffs
  * reviewable across scrapes.
  */
-export function bundleJsonParseBody(sections: Record<string, Record<string, unknown>[]>): string {
-  const parts = Object.entries(sections).map(([name, records]) => {
-    const items = records.map(stringifyRecord).join(",\n");
-    return `${JSON.stringify(name)}:[\n${items}\n]`;
+export function bundleJsonParseBody(sections: Record<string, readonly unknown[]>): string {
+  const parts = Object.entries(sections).map(([name, items]) => {
+    // Records serialise one-per-line via stringifyRecord; primitive items
+    // (e.g. a `supportedCities: string[]` section) serialise verbatim — never
+    // route a string through stringifyRecord, which would explode it into a
+    // char-indexed object ({"0":"f",…}).
+    const body = items.map((item) => (isRecord(item) ? stringifyRecord(item) : JSON.stringify(item))).join(",\n");
+    return `${JSON.stringify(name)}:[\n${body}\n]`;
   });
   return escapeForTemplate(`{${parts.join(",")}}`);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
