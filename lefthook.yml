@@ -1,9 +1,17 @@
 pre-commit:
-  parallel: true
+  # Piped (sequential) so the css rebuild regenerates + re-stages each app's
+  # inlined styles-inline.ts before typecheck reads it.
+  piped: true
   commands:
+    css:
+      priority: 1
+      glob: "apps/*/src/*.css"
+      run: bun scripts/rebuild-inline-css.mjs {staged_files}
     typecheck:
+      priority: 2
       glob: "*.{ts,tsx}"
       run: bun run typecheck
     lint:
+      priority: 3
       glob: "*.{ts,tsx}"
       run: bunx biome check --no-errors-on-unmatched {staged_files}
