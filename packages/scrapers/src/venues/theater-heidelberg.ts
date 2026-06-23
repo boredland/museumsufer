@@ -41,78 +41,86 @@ function parseCalendar(html: string, today: string): CanonicalScrapedEvent[] {
   const out: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  // Split on each calendar day; each fragment starts with `data-date="..."`
-  // and contains the day's `<article class="calendar-item">` blocks.
-  const dayParts = html.split(/<div\s+class="calendar__day js-overview-section"/i);
-  for (const part of dayParts.slice(1)) {
-    const dateMatch = part.match(/^\s*data-date="(\d{4}-\d{2}-\d{2})"/i);
-    if (!dateMatch) continue;
-    const date = dateMatch[1];
-    if (date < today) continue;
+  // Events sit under `<div class="calendar__day … data-date="YYYY-MM-DD">`
+  // day groups — but only the first few days also carry `js-overview-section`;
+  // later days render with a different class, so a fixed-wrapper split lumps
+  // every later day onto the last matched date. Anchor each article to the
+  // nearest preceding `data-date` marker instead, which is wrapper-agnostic.
+  const dateMarkers = [...html.matchAll(/data-date="(\d{4}-\d{2}-\d{2})"/gi)].map((m) => ({
+    idx: m.index ?? 0,
+    date: m[1],
+  }));
 
-    const articleRe = /<article\s+class="calendar-item"\s+aria-label="[^"]*">([\s\S]*?)<\/article>/gi;
-    for (const am of part.matchAll(articleRe)) {
-      const block = am[1];
-      if (!block) continue;
+  const articleRe = /<article\s+class="calendar-item"\s+aria-label="[^"]*">([\s\S]*?)<\/article>/gi;
+  for (const am of html.matchAll(articleRe)) {
+    const block = am[1];
+    if (!block) continue;
 
-      const title = cleanText(
-        extractFirst(block, /<div\s+class="calendar-item__title">\s*<p>([\s\S]*?)<\/p>\s*<\/div>/i),
-      );
-      if (!title) continue;
-
-      const infoHtml = extractFirst(block, /<div\s+class="calendar-item__information">([\s\S]*?)<\/div>/i);
-      const infoLines = infoHtml ? extractTextLines(infoHtml) : [];
-      const categoryHint = infoLines[0] ?? "";
-      const timeLine = infoLines[1] ?? "";
-      const venueRoom = infoLines[2] ?? null;
-      const { startTime, endTime } = parseTimeLine(timeLine);
-
-      const detailHref = extractFirst(
-        block,
-        /<a\s+[^>]*href="(\/de\/produktionen\/[^"]+)"[^>]*>\s*<span\s+aria-hidden="true">Details<\/span><\/a>/i,
-      );
-      const detailUrl = detailHref ? `${BASE}${detailHref}` : null;
-
-      const ticketUrl = extractFirst(block, /href="(https:\/\/theaterheidelberg\.eventim-inhouse\.de\/[^"]+)"/i);
-
-      const icalId = extractFirst(block, /href="\/de\/produktionen\/[^"]+\/(\d+)\.ics"/i);
-      const ticketEventId = ticketUrl ? extractFirst(ticketUrl, /[?&]event=(\d+)/) : null;
-      const sourceEventId = ticketEventId ?? icalId ?? `${slugify(title)}|${date}|${startTime ?? ""}`;
-      if (seen.has(sourceEventId)) continue;
-
-      const description = extractDescription(block);
-      const availability = extractAvailability(block);
-      const tags = extractTags(block);
-      const hint = [categoryHint, tags, description].filter(Boolean).join(" / ");
-
-      seen.add(sourceEventId);
-      out.push({
-        source_event_id: sourceEventId,
-        title,
-        subtitle: null,
-        description,
-        date,
-        time: startTime,
-        end_time: endTime && endTime !== startTime ? endTime : null,
-        detail_url: detailUrl,
-        ticket_url: ticketUrl,
-        price_min: null,
-        price_max: null,
-        performers: null,
-        venue_room: venueRoom,
-        availability,
-        city: "heidelberg",
-        lat: LAT,
-        lon: LON,
-        labels: resolveStageLabels({
-          title,
-          hint,
-          defaultLabel: "stage:theater",
-          classifier: "scraper-hardcoded",
-          confidence: 0.85,
-        }),
-      });
+    const pos = am.index ?? 0;
+    let date: string | null = null;
+    for (const dm of dateMarkers) {
+      if (dm.idx < pos) date = dm.date;
+      else break;
     }
+    if (!date || date < today) continue;
+
+    const title = cleanText(
+      extractFirst(block, /<div\s+class="calendar-item__title">\s*<p>([\s\S]*?)<\/p>\s*<\/div>/i),
+    );
+    if (!title) continue;
+
+    const infoHtml = extractFirst(block, /<div\s+class="calendar-item__information">([\s\S]*?)<\/div>/i);
+    const infoLines = infoHtml ? extractTextLines(infoHtml) : [];
+    const categoryHint = infoLines[0] ?? "";
+    const timeLine = infoLines[1] ?? "";
+    const venueRoom = infoLines[2] ?? null;
+    const { startTime, endTime } = parseTimeLine(timeLine);
+
+    const detailHref = extractFirst(
+      block,
+      /<a\s+[^>]*href="(\/de\/produktionen\/[^"]+)"[^>]*>\s*<span\s+aria-hidden="true">Details<\/span><\/a>/i,
+    );
+    const detailUrl = detailHref ? `${BASE}${detailHref}` : null;
+
+    const ticketUrl = extractFirst(block, /href="(https:\/\/theaterheidelberg\.eventim-inhouse\.de\/[^"]+)"/i);
+
+    const icalId = extractFirst(block, /href="\/de\/produktionen\/[^"]+\/(\d+)\.ics"/i);
+    const ticketEventId = ticketUrl ? extractFirst(ticketUrl, /[?&]event=(\d+)/) : null;
+    const sourceEventId = ticketEventId ?? icalId ?? `${slugify(title)}|${date}|${startTime ?? ""}`;
+    if (seen.has(sourceEventId)) continue;
+
+    const description = extractDescription(block);
+    const availability = extractAvailability(block);
+    const tags = extractTags(block);
+    const hint = [categoryHint, tags, description].filter(Boolean).join(" / ");
+
+    seen.add(sourceEventId);
+    out.push({
+      source_event_id: sourceEventId,
+      title,
+      subtitle: null,
+      description,
+      date,
+      time: startTime,
+      end_time: endTime && endTime !== startTime ? endTime : null,
+      detail_url: detailUrl,
+      ticket_url: ticketUrl,
+      price_min: null,
+      price_max: null,
+      performers: null,
+      venue_room: venueRoom,
+      availability,
+      city: "heidelberg",
+      lat: LAT,
+      lon: LON,
+      labels: resolveStageLabels({
+        title,
+        hint,
+        defaultLabel: "stage:theater",
+        classifier: "scraper-hardcoded",
+        confidence: 0.85,
+      }),
+    });
   }
 
   return out;
