@@ -7,6 +7,8 @@
     { "pattern": "museumsufer.app", "custom_domain": true },
     { "pattern": "frankfurt.ins.museum", "custom_domain": true },
     { "pattern": "hamburg.ins.museum", "custom_domain": true },
+    { "pattern": "darmstadt.ins.museum", "custom_domain": true },
+    { "pattern": "heidelberg.ins.museum", "custom_domain": true },
     { "pattern": "ins.museum", "custom_domain": true }
   ],
   // Scraping moved to .github/workflows/scrape.yml (museums job) — the

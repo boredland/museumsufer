@@ -9,6 +9,8 @@
   "routes": [
     { "pattern": "frankfurt.lehr.salon", "custom_domain": true },
     { "pattern": "hamburg.lehr.salon", "custom_domain": true },
+    { "pattern": "darmstadt.lehr.salon", "custom_domain": true },
+    { "pattern": "heidelberg.lehr.salon", "custom_domain": true },
     { "pattern": "lehr.salon", "custom_domain": true }
   ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action

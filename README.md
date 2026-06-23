@@ -6,13 +6,13 @@ Five of the six are multi-city culture verticals (museums, theater, concerts, le
 
 ## Cities
 
-Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt** and **Hamburg**.
+Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt**, **Hamburg**, **Darmstadt** and **Heidelberg**.
 
 - **Hosts** — each city is served at `<city>.<apex>` (e.g. `frankfurt.konzert.haus` / `hamburg.konzert.haus`). The bare apex (`konzert.haus`) 302-redirects to the nearest city by Cloudflare edge geolocation (`cityMiddleware({ apexBehavior: "geo" })` in `packages/core/src/city-routing.ts`). `museumsufer.app` is an SEO-primary alias host pinned to Frankfurt (resolved without a redirect).
 - **Switcher** — the masthead `CitySwitch` (`packages/core/src/cityswitch.tsx`) lists only the cities a vertical actually has data for (`supportedCities`, derived per bundle), and degrades to a plain locality label when a vertical covers a single city.
 - **Event → city** — declarative first (a scraper/orchestrator may set `event.city`), else geometric: a bbox pre-filter plus an optional precise polygon (`cityFor` / `cityOf`), so neighbouring cities can share a bbox yet split cleanly.
 
-Hamburg coverage is rolling out vertical by vertical — live in museums, theater and lectures; concerts and cinema are wired for both cities and fill in as programming lands.
+Hamburg coverage is rolling out vertical by vertical — live in museums, theater and lectures; concerts and cinema are wired for both cities and fill in as programming lands. The **Darmstadt + Heidelberg** cluster (upper-Rhine / Bergstraße) is wired across all five verticals — theaters, concerts, lectures, cinema and museums — via declarative-city routing plus reused ticketing adapters (Reservix, ztix, Kinoheld, Kinopolis, Bilettix/Eventim webshops) and bespoke venue/museum scrapers.
 
 **Roadmap.** Hamburg proved the machinery is city-agnostic — the city model, geo-routing, per-city custom domains and the masthead switcher carry any number of cities, so a new one is mostly data + scrapers, not architecture. A backlog of [`city-expansion`](https://github.com/boredland/museumsufer/labels/city-expansion) discovery tickets now maps **every German city over 150k** — Berlin, Munich, Cologne, the Rhine-Ruhr, Saxony, and the northern, central and south-western hubs — into per-vertical venue inventories (with proposed geofence + reuse notes) for staged, vertical-by-vertical rollout.
 

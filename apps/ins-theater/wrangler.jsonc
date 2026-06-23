@@ -6,6 +6,8 @@
   "routes": [
     { "pattern": "frankfurt.ins.theater", "custom_domain": true },
     { "pattern": "hamburg.ins.theater", "custom_domain": true },
+    { "pattern": "darmstadt.ins.theater", "custom_domain": true },
+    { "pattern": "heidelberg.ins.theater", "custom_domain": true },
     { "pattern": "ins.theater", "custom_domain": true }
   ],
   // Digest cron — fires at the UTC candidates for both CET and CEST; the

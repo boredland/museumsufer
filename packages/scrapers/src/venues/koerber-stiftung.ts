@@ -41,7 +41,7 @@ export async function scrapeKoerberStiftung(): Promise<VenueScrapeResult> {
 
     const json = (await res.json()) as SearchResponse;
     const eventGroup = json.results?.find((g) => g.group === "event");
-    if (!eventGroup || !eventGroup.items || eventGroup.items.length === 0) {
+    if (!eventGroup?.items || eventGroup.items.length === 0) {
       break;
     }
 

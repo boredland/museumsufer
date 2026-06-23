@@ -33,7 +33,7 @@ export interface MuseumConfig {
   website?: string;
   abbreviation?: string;
   group?: string;
-  /** City slug ("frankfurt" / "hamburg"). Absent ≡ "frankfurt". */
+  /** City slug (CitySlug: "frankfurt" / "hamburg" / "darmstadt" / "heidelberg"). Absent ≡ "frankfurt". */
   city?: string;
   lat: number;
   lng: number;
@@ -545,6 +545,61 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     website: "https://www.hafenmuseum-hamburg.de",
     lat: 53.533,
     lng: 9.975,
+  },
+
+  // ── Darmstadt ─────────────────────────────────────────────────────────
+  // Slugs match the hub source_slugs so the directory join picks up their
+  // exhibitions/events.
+  mathildenhoehe: {
+    name: "Institut Mathildenhöhe",
+    city: "darmstadt",
+    website: "https://www.mathildenhoehe.eu",
+    lat: 49.8773,
+    lng: 8.666,
+  },
+  "hlmd-darmstadt": {
+    name: "Hessisches Landesmuseum Darmstadt",
+    city: "darmstadt",
+    website: "https://www.hlmd.de",
+    lat: 49.873,
+    lng: 8.65,
+  },
+  "kunsthalle-darmstadt": {
+    name: "Kunsthalle Darmstadt",
+    city: "darmstadt",
+    website: "https://www.kunsthalle-darmstadt.de",
+    lat: 49.874,
+    lng: 8.636,
+  },
+
+  // ── Heidelberg ────────────────────────────────────────────────────────
+  "kurpfaelzisches-museum": {
+    name: "Kurpfälzisches Museum",
+    city: "heidelberg",
+    website: "https://www.museum-heidelberg.de",
+    lat: 49.411,
+    lng: 8.705,
+  },
+  "sammlung-prinzhorn": {
+    name: "Sammlung Prinzhorn",
+    city: "heidelberg",
+    website: "https://www.sammlung-prinzhorn.de",
+    lat: 49.418,
+    lng: 8.672,
+  },
+  "hdkv-heidelberg": {
+    name: "Heidelberger Kunstverein",
+    city: "heidelberg",
+    website: "https://www.hdkv.de",
+    lat: 49.411,
+    lng: 8.705,
+  },
+  "deutsches-apotheken-museum": {
+    name: "Deutsches Apotheken-Museum",
+    city: "heidelberg",
+    website: "https://www.deutsches-apotheken-museum.de",
+    lat: 49.4106,
+    lng: 8.7155,
   },
 };
 

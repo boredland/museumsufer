@@ -53,6 +53,20 @@ const CINEMAS: KinoheldCinema[] = [
     source_slug: "hansa-filmstudio-bergedorf",
     name: "Hansa-Filmstudio Bergedorf",
   },
+  {
+    id: "597",
+    citySlug: "heidelberg",
+    urlSlug: "gloria-gloriette",
+    source_slug: "gloria-gloriette-heidelberg",
+    name: "Gloria & Gloriette Heidelberg",
+  },
+  {
+    id: "640",
+    citySlug: "heidelberg",
+    urlSlug: "kamera",
+    source_slug: "kamera-heidelberg",
+    name: "Die Kamera Heidelberg",
+  },
   // Filmpalast Hofheim is also on kinoheld (id 3809) but doesn't publish
   // showtimes there — they use Cineamo for booking. Keep in mind for a
   // future Cineamo scraper.
@@ -103,8 +117,9 @@ const HORIZON_DAYS = 28;
 /**
  * Generic kinoheld.de GraphQL scraper. The `shows(cinemaId, dates)` query
  * returns one entry per screening; we batch the next ~4 weeks into a single
- * request per cinema. Currently covers five small Frankfurt-region cinemas
- * that publish exclusively through the kinoheld widget.
+ * request per cinema. Covers the small Frankfurt-region, Hamburg, and
+ * Heidelberg (Gloria & Gloriette, Die Kamera) cinemas that publish through
+ * the kinoheld widget.
  */
 export async function scrapeKinoheld(): Promise<VenueScrapeResult[]> {
   const dates = Array.from({ length: HORIZON_DAYS }, (_, i) => dateOffset(i));
