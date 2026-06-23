@@ -26,5 +26,6 @@
   "mut-theater": "seasonal — MUT! Theater has no upcoming events listed on their program page (website says 'Leider finden keine Stücke statt')",
   "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable",
   "hessisches-staatsballett": "seasonal — joint Wiesbaden/Darmstadt company between seasons; spielplan returns 'keine Ergebnisse gefunden' as of June 2026 (2026/27 not yet published). Parser verified against live markup.",
-  "lichtmess-kino": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows)."
+  "lichtmess-kino": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows).",
+  "frankfurter-kunstverein": "between event batches — the FKV 'current-events' FacetWP listing is empty server-side (preload total_rows:0) and JS-rendered (0 tiles) as of 23 Jun 2026; last events were the Grönland-exhibition Führungen through 21 Jun. Parser selectors (tile-link / archive-title / subtitle) verified still valid against the live archive markup, so it re-delivers when FKV publishes its next event batch."
 }
