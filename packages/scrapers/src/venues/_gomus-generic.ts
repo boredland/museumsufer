@@ -1,4 +1,5 @@
 import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@museumsufer/classify";
+import { addClockMinutes } from "../_time";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
 
 const USER_AGENT = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
@@ -184,16 +185,9 @@ export async function scrapeGomusMuseum(
         const date = d.start_time.substring(0, 10);
         const time = d.start_time.substring(11, 16);
 
-        let endTime: string | null = null;
-        if (d.duration) {
-          try {
-            const startParsed = new Date(d.start_time);
-            const endParsed = new Date(startParsed.getTime() + d.duration * 60 * 1000);
-            const endHours = String(endParsed.getHours()).padStart(2, "0");
-            const endMins = String(endParsed.getMinutes()).padStart(2, "0");
-            endTime = `${endHours}:${endMins}`;
-          } catch {}
-        }
+        // Literal local start (`time`) + duration; see addClockMinutes for why
+        // we avoid `new Date(...).getHours()` (timezone-skewed, non-deterministic).
+        const endTime = d.duration ? addClockMinutes(time, d.duration) : null;
 
         const title = cleanText(d.event_title || d.title);
         const description = d.description ? cleanText(d.description) : null;
