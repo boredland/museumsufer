@@ -715,6 +715,7 @@ export function renderPage(
                   locale={locale}
                   todayIso={todayIso()}
                   groupByDate={!!range}
+                  city={city}
                 />
               ) : (
                 <div class="loading-state">

@@ -222,6 +222,13 @@ export function cityUrl(apex: string, slug: string | undefined): string {
   return `https://${cityHost(apex, slug)}`;
 }
 
+/** Canonical URL for the museum app in a given city. Frankfurt keeps its
+ *  SEO-primary host (museumsufer.app); other cities route to the
+ *  <city>.ins.museum subdomain. */
+export function museumUrl(slug: string | undefined): string {
+  return cityMeta(slug).slug === DEFAULT_CITY ? "https://museumsufer.app" : cityUrl("ins.museum", slug);
+}
+
 /** Pick the nearest city to a coordinate by squared centroid distance.
  *  Used for geo-routing apex hits (degrees are fine at these latitudes
  *  for a simple "which is closer" comparison). */

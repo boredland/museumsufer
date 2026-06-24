@@ -16,6 +16,7 @@ import {
   formatGermanDateLong,
   HTMX_LIFECYCLE_SCRIPT,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
+  museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
@@ -746,9 +747,6 @@ function filterPastForToday(date: string, performances: DayPerformance[]): DayPe
  * didn't find anything in today's theatre line-up.
  */
 function SiblingStrap({ city = "frankfurt" }: { city?: string } = {}) {
-  // Frankfurt keeps its SEO-primary museum host (museumsufer.app); other
-  // cities route to the <city>.ins.museum subdomain.
-  const museumUrl = city === "frankfurt" ? "https://museumsufer.app" : cityUrl("ins.museum", city);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
@@ -758,7 +756,7 @@ function SiblingStrap({ city = "frankfurt" }: { city?: string } = {}) {
           Konzert
         </a>
         , ein{" "}
-        <a href={museumUrl} target="_blank" rel="noopener">
+        <a href={museumUrl(city)} target="_blank" rel="noopener">
           Museumsbesuch
         </a>{" "}
         oder ein{" "}
