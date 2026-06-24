@@ -184,6 +184,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "kunstschule villa wieser|herxheim": [49.145382, 8.215379],
   "kurpark|bad bergzabern": [49.098406, 7.988887],
   "königstraße 50|landau in der pfalz": [49.196646, 8.11535],
+  "königstraße, auf höhe des restaurants »ich bin so frey«|landau in der pfalz": [49.198283, 8.112344],
   "la nef - relais culturel de wissembourg|wissenbourg": [0, 0],
   "landau in der pfalz|": [49.192464, 8.134193],
   "landau in der pfalz|landau in der pfalz": [49.192464, 8.134193],
