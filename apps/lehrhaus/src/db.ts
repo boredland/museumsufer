@@ -1,4 +1,4 @@
-import { compareNullsLast } from "@museumsufer/core";
+import { compareNullsLast, servesCity } from "@museumsufer/core";
 import { SCRAPE_DATA } from "./scrape-data";
 import type { Category, LehrhausEvent, LehrhausSource } from "./types";
 
@@ -50,7 +50,7 @@ function joinEvent(e: LehrhausEvent): DayEvent | null {
 
 function matchesFilter(e: LehrhausEvent, filter?: EventFilter): boolean {
   if (!filter) return true;
-  if (filter.city && e.city !== filter.city) return false;
+  if (filter.city && !servesCity(e.city, filter.city)) return false;
   if (filter.source && e.source_slug !== filter.source) return false;
   if (filter.category && e.category !== filter.category) return false;
   return true;

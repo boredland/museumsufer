@@ -7,6 +7,7 @@ import {
   type FaqItem,
   LLM_SERVICES,
   langSwitchItems,
+  servesCity,
   THEME_FOUC_SCRIPT,
 } from "@museumsufer/core";
 import { CitySwitch } from "@museumsufer/core/cityswitch";
@@ -486,7 +487,7 @@ function museumFaqFor(city: string): { count: number; byLocale: Record<FaqLocale
   const cached = museumFaqCache.get(city);
   if (cached) return cached;
   const nameById = new Map(
-    SCRAPE_DATA.museums.filter((m) => (m.city ?? "frankfurt") === city).map((m) => [String(m.id), m.name] as const),
+    SCRAPE_DATA.museums.filter((m) => servesCity(m.city, city)).map((m) => [String(m.id), m.name] as const),
   );
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => String(e.museum_id), nameById);
   const names = ranked.map((v) => v.name);

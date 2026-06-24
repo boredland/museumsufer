@@ -9,6 +9,8 @@
     { "pattern": "hamburg.ins.museum", "custom_domain": true },
     { "pattern": "darmstadt.ins.museum", "custom_domain": true },
     { "pattern": "heidelberg.ins.museum", "custom_domain": true },
+    { "pattern": "mainz.ins.museum", "custom_domain": true },
+    { "pattern": "wiesbaden.ins.museum", "custom_domain": true },
     { "pattern": "ins.museum", "custom_domain": true }
   ],
   // Scraping moved to .github/workflows/scrape.yml (museums job) — the

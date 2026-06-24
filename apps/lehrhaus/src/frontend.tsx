@@ -18,6 +18,7 @@ import {
   jsonLdSafe,
   langSwitchItems,
   museumUrl,
+  servesCity,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   type WebMcpToolDef,
@@ -1037,7 +1038,7 @@ const venueFaqCache = new Map<string, { count: number; byLocale: Record<Locale, 
 function venueFaqFor(city: string): { count: number; byLocale: Record<Locale, string> } {
   const cached = venueFaqCache.get(city);
   if (cached) return cached;
-  const cityEvents = SCRAPE_DATA.events.filter((e) => e.city === city);
+  const cityEvents = SCRAPE_DATA.events.filter((e) => servesCity(e.city, city));
   const nameBySlug = new Map(cityEvents.map((e) => [e.source_slug, e.source_name] as const));
   const ranked = rankVenuesByEventCount(cityEvents, (e) => e.source_slug, nameBySlug);
   const names = ranked.map((v) => v.name);

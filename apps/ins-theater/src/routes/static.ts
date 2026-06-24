@@ -7,6 +7,7 @@ import {
   cityName,
   cityScreenshots,
   cityUrl,
+  servesCity,
   todayIso,
 } from "@museumsufer/core";
 import { Hono } from "hono";
@@ -54,7 +55,7 @@ function llmsFor(city: string): string {
   const brand = `${cityMeta(city).short} Theater`;
   const cityFull = cityName(city, "de", "full");
   const appUrl = appUrlFor(city);
-  const count = THEATERS.filter((t) => (t.city ?? "frankfurt") === city).length;
+  const count = THEATERS.filter((t) => servesCity(t.city, city)).length;
   const txt = `# ${brand}
 
 > Spielplan der ${cityAdj(city, "de")} Bühnen — aggregierte Vorstellungen, Karten und Verfügbarkeiten von ${count} Häusern in ${cityFull}, kuratiert nach Tag.
@@ -142,7 +143,7 @@ app.get("/sitemap.xml", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const appUrl = appUrlFor(city);
   const today = todayIso();
-  const theaterUrls = THEATERS.filter((t) => (t.city ?? "frankfurt") === city)
+  const theaterUrls = THEATERS.filter((t) => servesCity(t.city, city))
     .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map(

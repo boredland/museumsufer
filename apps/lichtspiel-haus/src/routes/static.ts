@@ -7,6 +7,7 @@ import {
   cityName,
   cityScreenshots,
   cityUrl,
+  coordServesCity,
   dateOffset,
   todayIso,
 } from "@museumsufer/core";
@@ -157,7 +158,7 @@ app.get("/sitemap.xml", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const appUrl = cityUrl("lichtspiel.haus", city);
   const today = todayIso();
-  const cinemaUrls = CINEMAS.filter((v) => (v.city ?? "frankfurt") === city)
+  const cinemaUrls = CINEMAS.filter((v) => coordServesCity(v.lat, v.lon, city))
     .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((v) => `  <url>\n    <loc>${appUrl}/kino/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)

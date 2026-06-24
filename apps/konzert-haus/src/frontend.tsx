@@ -5,8 +5,8 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
-  cityFor,
   cityUrl,
+  coordServesCity,
   dateFormatter,
   dateLocale,
   dateParts,
@@ -1086,7 +1086,7 @@ function venueFaqFor(city: string): { count: number; byLocale: Record<Locale, st
   const cached = venueFaqCache.get(city);
   if (cached) return cached;
   const nameBySlug = new Map(
-    VENUES.filter((v) => cityFor(v.lat, v.lon) === city).map((v) => [v.slug, v.name] as const),
+    VENUES.filter((v) => coordServesCity(v.lat, v.lon, city)).map((v) => [v.slug, v.name] as const),
   );
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.events, (e) => e.venue_slug, nameBySlug);
   const names = ranked.map((v) => v.name);

@@ -1,4 +1,4 @@
-import { cityFor, compareNullsLast } from "@museumsufer/core";
+import { citiesFor, compareNullsLast } from "@museumsufer/core";
 import { VENUES, type VenueConfig } from "./concert-config";
 import { SCRAPE_DATA } from "./scrape-data";
 import type { Event, Genre } from "./types";
@@ -28,12 +28,13 @@ export interface EventFilter {
 const EVENTS_BY_ID = new Map<number, Event>(SCRAPE_DATA.events.map((e) => [e.id, e]));
 const VENUES_BY_SLUG = new Map<string, VenueConfig>(VENUES.map((v) => [v.slug, v]));
 
-/** Served city (the frankfurt/hamburg subdomain) is geographic — derived from
+/** Served cities (the per-city subdomains) are geographic — derived from
  *  coordinates, NOT the config `.city` field, which holds the display town
- *  ("kronberg", "eltville"). Filtering by `.city` orphaned Rhein-Main venues
- *  from both subdomains; `.city` stays only for the address locality. */
-const SERVED_CITY_BY_VENUE: Record<string, string | null> = Object.fromEntries(
-  VENUES.map((v) => [v.slug, cityFor(v.lat, v.lon)]),
+ *  ("kronberg", "eltville"). A venue may serve more than one surface when it
+ *  sits in a shared region (Mainz ⇄ Wiesbaden), so each venue maps to the full
+ *  set of surfaces it serves; `.city` stays only for the address locality. */
+const SERVED_CITIES_BY_VENUE: Record<string, readonly string[]> = Object.fromEntries(
+  VENUES.map((v) => [v.slug, citiesFor(v.lat, v.lon)]),
 );
 
 const EVENTS_BY_DATE = (() => {
@@ -70,7 +71,7 @@ function joinEvent(e: Event): DayEvent | null {
 
 function matchesFilter(e: Event, venue: VenueConfig, filter?: EventFilter): boolean {
   if (!filter) return true;
-  if (filter.city && SERVED_CITY_BY_VENUE[venue.slug] !== filter.city) return false;
+  if (filter.city && !SERVED_CITIES_BY_VENUE[venue.slug].includes(filter.city)) return false;
   if (filter.venue && e.venue_slug !== filter.venue) return false;
   if (filter.genre && e.genre !== filter.genre) return false;
   return true;
