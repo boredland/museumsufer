@@ -239,6 +239,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "pfalz-de": [49.198, 8.1192],
   "rptu-campuskultur": [49.1898, 8.1144],
   suew: [49.198, 8.1192],
+  "museum-wiesbaden": [50.0771, 8.24588],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
