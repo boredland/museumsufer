@@ -1,4 +1,4 @@
-import { buildUtm, dateFormatter } from "@museumsufer/core";
+import { buildUtm, cityUrl, dateFormatter } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort } from "./shared";
@@ -660,22 +660,22 @@ function MuseumRow({
  * after the events + exhibitions block — a soft suggestion for visitors
  * who didn't find anything in today's museum line-up.
  */
-function SiblingStrap({ tr }: { tr: Record<string, string> }) {
+function SiblingStrap({ tr, city }: { tr: Record<string, string>; city?: string }) {
   const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="sibling-strap">
       <hr class="sibling-strap__rule" />
       <p class="sibling-strap__text">
         {parts[0]}
-        <a href="https://frankfurt.ins.theater" class="sibling-strap__link">
+        <a href={cityUrl("ins.theater", city)} class="sibling-strap__link">
           {tr.siblingTheaterLabel}
         </a>
         {parts[1]}
-        <a href="https://frankfurt.konzert.haus" class="sibling-strap__link">
+        <a href={cityUrl("konzert.haus", city)} class="sibling-strap__link">
           {tr.siblingKonzertLabel}
         </a>
         {parts[2]}
-        <a href="https://frankfurt.lehr.salon" class="sibling-strap__link">
+        <a href={cityUrl("lehr.salon", city)} class="sibling-strap__link">
           {tr.siblingLehrLabel}
         </a>
         {parts[3]}
@@ -692,6 +692,7 @@ export function ContentBody({
   locale,
   todayIso,
   groupByDate,
+  city,
 }: {
   events: Event[];
   exhibitions: Exhibition[];
@@ -699,6 +700,7 @@ export function ContentBody({
   locale: Locale;
   todayIso: string;
   groupByDate?: boolean;
+  city?: string;
 }) {
   const sortedEvents = [...events].sort((a, b) =>
     a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time || "").localeCompare(b.time || ""),
@@ -755,7 +757,7 @@ export function ContentBody({
         )}
       </Section>
 
-      <SiblingStrap tr={tr} />
+      <SiblingStrap tr={tr} city={city} />
     </>
   );
 }

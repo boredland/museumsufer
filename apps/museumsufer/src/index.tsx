@@ -335,6 +335,7 @@ app.get(
           locale={locale}
           todayIso={todayIso()}
           groupByDate={!!range}
+          city={city}
         />
         <script type="application/json" id="partial-data" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
       </>

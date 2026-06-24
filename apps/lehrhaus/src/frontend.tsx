@@ -17,6 +17,7 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   jsonLdSafe,
   langSwitchItems,
+  museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   type WebMcpToolDef,
@@ -840,22 +841,22 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
  * Editorial cross-link to the three sibling Frankfurt apps — sits after the
  * lecture list as a soft suggestion when nothing today fits.
  */
-function SiblingStrap({ tr }: { tr: Translations }) {
+function SiblingStrap({ tr, city }: { tr: Translations; city?: string }) {
   const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
         {parts[0]}
-        <a href="https://frankfurt.ins.theater" target="_blank" rel="noopener">
+        <a href={cityUrl("ins.theater", city)} target="_blank" rel="noopener">
           {tr.siblingTheaterLabel}
         </a>
         {parts[1]}
-        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+        <a href={museumUrl(city)} target="_blank" rel="noopener">
           {tr.siblingMuseumLabel}
         </a>
         {parts[2]}
-        <a href="https://frankfurt.konzert.haus" target="_blank" rel="noopener">
+        <a href={cityUrl("konzert.haus", city)} target="_blank" rel="noopener">
           {tr.siblingConcertLabel}
         </a>
         {parts[3]}
@@ -978,7 +979,7 @@ export function ProgrammePartial({
             })}
           </div>
         )}
-        <SiblingStrap tr={tr} />
+        <SiblingStrap tr={tr} city={city} />
       </>
     );
   }
@@ -1021,7 +1022,7 @@ export function ProgrammePartial({
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
         </>
       )}
-      <SiblingStrap tr={tr} />
+      <SiblingStrap tr={tr} city={city} />
     </>
   );
 }
@@ -1159,7 +1160,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <AskAi date={date} tr={tr} locale={locale} />
           <main class="programme" id="programme">
             <div id="programme-content">
-              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} />
+              <ProgrammePartial date={date} events={events} tr={tr} locale={locale} range={range} city={city} />
             </div>
           </main>
           <Faq tr={tr} locale={locale} city={city ?? "frankfurt"} />

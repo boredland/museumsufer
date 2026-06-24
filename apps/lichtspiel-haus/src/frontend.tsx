@@ -17,6 +17,7 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   jsonLdSafe,
   langSwitchItems,
+  museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   type WebMcpToolDef,
@@ -1414,11 +1415,11 @@ function SiblingStrap({ tr, city }: { tr: Translations; city: string }) {
           {tr.siblingTheaterLabel}
         </a>
         {parts[1]}
-        <a href={cityUrl("ins.museum", city)} target="_blank" rel="noopener">
+        <a href={museumUrl(city)} target="_blank" rel="noopener">
           {tr.siblingMuseumLabel}
         </a>
         {parts[2]}
-        <a href="https://frankfurt.konzert.haus" target="_blank" rel="noopener">
+        <a href={cityUrl("konzert.haus", city)} target="_blank" rel="noopener">
           {tr.siblingKonzertLabel}
         </a>
         {parts[3]}

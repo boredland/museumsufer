@@ -16,6 +16,7 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   jsonLdSafe,
   langSwitchItems,
+  museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   type WebMcpToolDef,
@@ -982,22 +983,22 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
  * after the concert list — a soft suggestion for visitors who didn't
  * find anything in today's programme.
  */
-function SiblingStrap({ tr }: { tr: Translations }) {
+function SiblingStrap({ tr, city }: { tr: Translations; city?: string }) {
   const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
       <p class="programme__siblings-prompt">
         {parts[0]}
-        <a href="https://frankfurt.ins.theater" target="_blank" rel="noopener">
+        <a href={cityUrl("ins.theater", city)} target="_blank" rel="noopener">
           {tr.siblingTheaterLabel}
         </a>
         {parts[1]}
-        <a href="https://museumsufer.app" target="_blank" rel="noopener">
+        <a href={museumUrl(city)} target="_blank" rel="noopener">
           {tr.siblingMuseumLabel}
         </a>
         {parts[2]}
-        <a href="https://frankfurt.lehr.salon" target="_blank" rel="noopener">
+        <a href={cityUrl("lehr.salon", city)} target="_blank" rel="noopener">
           {tr.siblingLehrLabel}
         </a>
         {parts[3]}
@@ -1069,7 +1070,7 @@ export function ProgrammePartial({
           {hidden > 0 ? <p class="programme__past-note">{tr.pastNote(hidden)}</p> : null}
         </>
       )}
-      <SiblingStrap tr={tr} />
+      <SiblingStrap tr={tr} city={city} />
     </>
   );
 }
