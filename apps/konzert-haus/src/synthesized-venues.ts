@@ -173,6 +173,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "experimental",
   },
   {
+    slug: "halle02",
+    name: "halle02",
+    address: "",
+    lat: 49.3998,
+    lon: 8.686,
+    city: "heidelberg",
+    website_url: "https://www.halle02.de",
+    default_genre: "classical",
+  },
+  {
     slug: "hamburger-kammerspiele",
     name: "Hamburger Kammerspiele",
     address: "",
@@ -421,16 +431,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "heidelberg",
     website_url: "https://www.theaterheidelberg.de",
     default_genre: "classical",
-  },
-  {
-    slug: "theater-moller-haus",
-    name: "Theater Moller Haus",
-    address: "",
-    lat: 49.873,
-    lon: 8.647,
-    city: "darmstadt",
-    website_url: "https://www.ztix.de",
-    default_genre: "jazz",
   },
   {
     slug: "tip-darmstadt",
