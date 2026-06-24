@@ -41,14 +41,26 @@ export async function scrapeHalle02(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const posts = await fetchProgramList();
 
+  // The REST listing is publish-ordered and littered with already-past events
+  // whose event date lives only on the heavy (~4.4 s render) detail page.
+  // Fetching every candidate at concurrency 8 ran ~107 s and tripped the hub's
+  // 90 s per-scraper timeout (→ 0 events in the bundle). Two changes keep the
+  // fan-out well under budget without dropping any upcoming event:
+  //   1. Skip posts whose slug month-code (`…-mai26`, `…-nov25`) names a month
+  //      strictly before the current one — already past. The coarse code never
+  //      misclassifies an upcoming event: undated and same-/future-month slugs
+  //      fall through and are still date-checked after the detail fetch.
+  //   2. Fan the rest out at concurrency 20 — the highest rate halle02.de
+  //      serves cleanly (40 starts rate-limiting/erroring).
   const toFetch: WpProgram[] = [];
   for (const post of posts) {
     const slugDate = parseSlugDate(post.slug);
     if (slugDate && slugDate.date < today) continue;
+    if (slugMonthBefore(post.slug, today)) continue;
     toFetch.push(post);
   }
 
-  const queue = new PQueue({ concurrency: 8 });
+  const queue = new PQueue({ concurrency: 20 });
   const detailResults = await Promise.all(
     toFetch.map((post) =>
       queue.add(async () => {
@@ -136,6 +148,40 @@ function parseSlugDate(slug: string): { date: string } | null {
     }
   }
   return null;
+}
+
+const SLUG_MONTHS: Record<string, number> = {
+  jan: 1,
+  feb: 2,
+  maerz: 3,
+  mar: 3,
+  apr: 4,
+  mai: 5,
+  juni: 6,
+  jun: 6,
+  juli: 7,
+  jul: 7,
+  aug: 8,
+  sept: 9,
+  sep: 9,
+  okt: 10,
+  nov: 11,
+  dez: 12,
+};
+const SLUG_MONTH_RE = /-(jan|feb|maerz|mar|apr|mai|juni|jun|juli|jul|aug|sept|sep|okt|nov|dez)-?(\d{2})(?:$|-)/i;
+
+/** Many halle02 slugs end in a German month-code (`…-mai26`, `…-nov25`). When
+ *  that code names a month strictly before the current one the event is already
+ *  past, so its detail fetch can be skipped. Undated or same-/future-month slugs
+ *  return false and are fetched + date-checked as before, so the coarse code can
+ *  never drop an upcoming event. */
+function slugMonthBefore(slug: string, todayIso: string): boolean {
+  const m = SLUG_MONTH_RE.exec(slug);
+  if (!m) return false;
+  const month = SLUG_MONTHS[m[1].toLowerCase()];
+  if (!month) return false;
+  const ym = `${2000 + parseInt(m[2], 10)}-${String(month).padStart(2, "0")}`;
+  return ym < todayIso.slice(0, 7);
 }
 
 function parseDetail(html: string, post: WpProgram): ParsedDetail | null {
