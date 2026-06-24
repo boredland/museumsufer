@@ -70,7 +70,20 @@ export const HEIDELBERG_BBOX: Bbox = {
   maxLon: 8.87,
 };
 
-export type CitySlug = "frankfurt" | "hamburg" | "darmstadt" | "heidelberg";
+/** Mainz + Wiesbaden — the shared "Rhein-Main-West" region. It nests INSIDE
+ *  FRANKFURT_BBOX (lon 8.1–8.4 vs Frankfurt's 7.95–8.85), so `cityFor` checks
+ *  REGIONS first: a point here resolves to Mainz/Wiesbaden, never Frankfurt
+ *  (no Frankfurt venue lies in this box). Both cities share this one box and
+ *  fan out to each other's surfaces; the Rheingau festival at lon 8.046 stays
+ *  west of minLon 8.1 → Frankfurt. */
+export const RHEINMAIN_WEST_BBOX: Bbox = {
+  minLat: 49.93,
+  maxLat: 50.16,
+  minLon: 8.1,
+  maxLon: 8.4,
+};
+
+export type CitySlug = "frankfurt" | "hamburg" | "darmstadt" | "heidelberg" | "mainz" | "wiesbaden";
 
 export interface CityMeta {
   /** URL subdomain prefix and the value stored on bundled events. */
@@ -162,9 +175,55 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
     centroid: { lat: 49.4122, lon: 8.71 },
     bbox: HEIDELBERG_BBOX,
   },
+  mainz: {
+    slug: "mainz",
+    name: "Mainz",
+    short: "Mainz",
+    adj: { de: "Mainzer", en: "Mainz's" },
+    i18nName: {
+      de: { full: "Mainz", short: "Mainz" },
+      en: { full: "Mainz", short: "Mainz" },
+      fr: { full: "Mayence", short: "Mayence" },
+    },
+    region: "Rheinland-Pfalz",
+    wikidata: "Q1720",
+    centroid: { lat: 50.0, lon: 8.27 },
+    bbox: RHEINMAIN_WEST_BBOX,
+  },
+  wiesbaden: {
+    slug: "wiesbaden",
+    name: "Wiesbaden",
+    short: "Wiesbaden",
+    adj: { de: "Wiesbadener", en: "Wiesbaden's" },
+    i18nName: {
+      de: { full: "Wiesbaden", short: "Wiesbaden" },
+      en: { full: "Wiesbaden", short: "Wiesbaden" },
+      fr: { full: "Wiesbaden", short: "Wiesbaden" },
+    },
+    region: "Hessen",
+    wikidata: "Q1721",
+    centroid: { lat: 50.0825, lon: 8.24 },
+    bbox: RHEINMAIN_WEST_BBOX,
+  },
 };
 
 export const DEFAULT_CITY: CitySlug = "frankfurt";
+
+/**
+ * A geofence region whose events fan out to several city surfaces. The region
+ * bbox takes precedence over any overlapping single-city bbox in `cityFor`, so
+ * a point inside it resolves to the region's members and never to the larger
+ * city it nests within (Rhein-Main-West sits inside Frankfurt).
+ */
+export interface CityRegion {
+  readonly slug: string;
+  readonly bbox: Bbox;
+  readonly cities: readonly CitySlug[];
+}
+
+export const REGIONS: readonly CityRegion[] = [
+  { slug: "rhein-main-west", bbox: RHEINMAIN_WEST_BBOX, cities: ["mainz", "wiesbaden"] },
+];
 
 /** Resolve a (possibly untrusted) slug to its metadata, falling back to
  *  the default city so callers never have to null-check. */
@@ -261,13 +320,29 @@ export function pointInPolygon(lat: number, lon: number, ring: ReadonlyArray<rea
 }
 
 /**
- * Assign a coordinate to a served city. The bbox is a cheap pre-filter; a city
- * that also declares a `polygon` must contain the point as well — so two cities
- * may share a bbox yet split precisely (e.g. Frankfurt and Mainz across the
- * Rhine). When several still match, the nearest centroid wins. Returns null
- * when the point lies outside every city.
+ * Assign a coordinate to a single "home" city. A REGIONS box is tried first
+ * and wins outright — its nearest member is returned and the enclosing city is
+ * never considered (so Rhein-Main-West beats Frankfurt). Otherwise the per-city
+ * bbox is a cheap pre-filter; a city that also declares a `polygon` must
+ * contain the point too, and when several still match the nearest centroid
+ * wins. Returns null when the point lies outside every city. For the full set
+ * of surfaces an event appears on (region fan-out), use `citiesFor`.
  */
 export function cityFor(lat: number, lon: number): CitySlug | null {
+  for (const region of REGIONS) {
+    if (!inBbox(lat, lon, region.bbox)) continue;
+    let nearest: CitySlug | null = null;
+    let nearestDist = Number.POSITIVE_INFINITY;
+    for (const slug of region.cities) {
+      const c = CITIES[slug].centroid;
+      const d = (lat - c.lat) ** 2 + (lon - c.lon) ** 2;
+      if (d < nearestDist) {
+        nearestDist = d;
+        nearest = slug;
+      }
+    }
+    return nearest;
+  }
   let best: CitySlug | null = null;
   let bestDist = Number.POSITIVE_INFINITY;
   for (const meta of Object.values(CITIES)) {
@@ -291,4 +366,39 @@ export function cityOf(ev: { city?: string | null; lat?: number | null; lon?: nu
   if (ev.city && ev.city in CITIES) return ev.city as CitySlug;
   if (typeof ev.lat === "number" && typeof ev.lon === "number") return cityFor(ev.lat, ev.lon);
   return null;
+}
+
+/** All city surfaces a home city appears on. Region members fan out to every
+ *  sibling (Mainz ⇄ Wiesbaden); standalone cities map to just themselves. */
+export function citySurfaces(slug: CitySlug): readonly CitySlug[] {
+  for (const region of REGIONS) if (region.cities.includes(slug)) return region.cities;
+  return [slug];
+}
+
+/** Every surface a coordinate serves, region-expanded — a Rhein-Main-West
+ *  venue returns both Mainz and Wiesbaden. Empty when outside every city. */
+export function citiesFor(lat: number, lon: number): CitySlug[] {
+  const home = cityFor(lat, lon);
+  return home ? [...citySurfaces(home)] : [];
+}
+
+/** Every surface an event belongs to — declarative or geometric, expanded
+ *  across the home city's region. Empty when it resolves to no served city. */
+export function citiesOf(ev: { city?: string | null; lat?: number | null; lon?: number | null }): CitySlug[] {
+  const home = cityOf(ev);
+  return home ? [...citySurfaces(home)] : [];
+}
+
+/** Does an item whose home city is `home` (default Frankfurt) surface on
+ *  `city`? True when identical or region-siblings. */
+export function servesCity(home: string | null | undefined, city: string): boolean {
+  const surfaces: readonly string[] = citySurfaces((home ?? DEFAULT_CITY) as CitySlug);
+  return surfaces.includes(city);
+}
+
+/** Coordinate analogue of `servesCity`: does a venue at (`lat`,`lon`) surface
+ *  on `city`? Region-aware. */
+export function coordServesCity(lat: number, lon: number, city: string): boolean {
+  const surfaces: readonly string[] = citiesFor(lat, lon);
+  return surfaces.includes(city);
 }

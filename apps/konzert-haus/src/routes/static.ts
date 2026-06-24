@@ -4,6 +4,7 @@ import {
   buildRobotsTxt,
   cityScreenshots,
   cityUrl,
+  coordServesCity,
   dateOffset,
   localizeCityText,
   todayIso,
@@ -130,7 +131,7 @@ app.get("/sitemap.xml", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const appUrl = appUrlFor(city);
   const today = todayIso();
-  const venueUrls = VENUES.filter((v) => (v.city ?? "frankfurt") === city)
+  const venueUrls = VENUES.filter((v) => coordServesCity(v.lat, v.lon, city))
     .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((v) => `  <url>\n    <loc>${appUrl}/spielort/${v.slug}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)

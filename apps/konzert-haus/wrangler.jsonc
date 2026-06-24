@@ -11,6 +11,8 @@
     { "pattern": "hamburg.konzert.haus", "custom_domain": true },
     { "pattern": "darmstadt.konzert.haus", "custom_domain": true },
     { "pattern": "heidelberg.konzert.haus", "custom_domain": true },
+    { "pattern": "mainz.konzert.haus", "custom_domain": true },
+    { "pattern": "wiesbaden.konzert.haus", "custom_domain": true },
     { "pattern": "konzert.haus", "custom_domain": true }
   ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action

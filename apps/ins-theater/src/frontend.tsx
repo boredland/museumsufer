@@ -17,6 +17,7 @@ import {
   HTMX_LIFECYCLE_SCRIPT,
   GERMAN_MONTHS_LONG as MONTHS_LONG,
   museumUrl,
+  servesCity,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
@@ -544,9 +545,7 @@ const venueListCache = new Map<string, { count: number; list: string }>();
 function venueListFor(city: string): { count: number; list: string } {
   const cached = venueListCache.get(city);
   if (cached) return cached;
-  const nameBySlug = new Map(
-    THEATERS.filter((t) => (t.city ?? "frankfurt") === city).map((t) => [t.slug, t.name] as const),
-  );
+  const nameBySlug = new Map(THEATERS.filter((t) => servesCity(t.city, city)).map((t) => [t.slug, t.name] as const));
   const slugByShowId = new Map(SCRAPE_DATA.shows.map((s) => [s.id, s.theater_slug]));
   const ranked = rankVenuesByEventCount(SCRAPE_DATA.performances, (p) => slugByShowId.get(p.show_id), nameBySlug);
   const result = {

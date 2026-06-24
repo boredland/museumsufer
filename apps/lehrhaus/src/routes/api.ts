@@ -1,4 +1,4 @@
-import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
+import { dateOffset, handleContactRequest, servesCity, todayIso } from "@museumsufer/core";
 import { FRANKFURT_BBOX, HAMBURG_BBOX, inBbox } from "@museumsufer/event-hub";
 import { Hono } from "hono";
 import { getEventById, getEventsForDate, getEventsInRange, getSourceBySlug } from "../db";
@@ -60,7 +60,7 @@ app.get("/api/events/:id{[0-9]+}", (c) => {
 app.get("/api/sources", (c) => {
   const city = c.get("city") ?? "frankfurt";
   const bbox = city === "hamburg" ? HAMBURG_BBOX : FRANKFURT_BBOX;
-  const citySourceSlugs = new Set(SCRAPE_DATA.events.filter((e) => e.city === city).map((e) => e.source_slug));
+  const citySourceSlugs = new Set(SCRAPE_DATA.events.filter((e) => servesCity(e.city, city)).map((e) => e.source_slug));
   const filteredSources = SCRAPE_DATA.sources.filter((s) => {
     if (citySourceSlugs.has(s.slug)) return true;
     if (s.lat != null && s.lon != null && inBbox(s.lat, s.lon, bbox)) return true;

@@ -12,7 +12,7 @@
  *
  * `likes` is the only D1 path left (user-submitted, mutable).
  */
-import { compareNullsLast } from "@museumsufer/core";
+import { compareNullsLast, servesCity } from "@museumsufer/core";
 import { berlinHourMinute, todayIso } from "./date";
 import { SCRAPE_DATA } from "./scrape-data";
 import type { Event, Exhibition, Museum, Translation } from "./types";
@@ -37,7 +37,7 @@ export function listTranslations(): Translation[] {
 /** Whether a museum belongs to the requested city ("frankfurt" default). */
 function museumInCity(m: Museum | undefined, city: string | null | undefined): boolean {
   if (!city) return true;
-  return (m?.city ?? "frankfurt") === city;
+  return servesCity(m?.city, city);
 }
 
 export function getAllMuseums(city?: string | null): Museum[] {

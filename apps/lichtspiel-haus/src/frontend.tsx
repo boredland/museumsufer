@@ -5,9 +5,9 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
-  cityFor,
   cityHost,
   cityUrl,
+  coordServesCity,
   dateFormatter,
   dateLocale,
   dateParts,
@@ -1554,7 +1554,7 @@ function cinemaFaqFor(city: string): { count: number; byLocale: Record<Locale, s
   const cached = cinemaFaqCache.get(city);
   if (cached) return cached;
   const nameBySlug = new Map<string, string>(
-    CINEMAS.filter((c) => cityFor(c.lat, c.lon) === city).map((c) => [c.slug, c.name]),
+    CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city)).map((c) => [c.slug, c.name]),
   );
   const ranked = rankVenuesByEventCount<DayScreening | { cinema_slug: string }>(
     SCRAPE_DATA.screenings as unknown as Array<{ cinema_slug: string }>,

@@ -6,6 +6,7 @@ import {
   cityUrl,
   dateOffset,
   localizeCityText,
+  servesCity,
   todayIso,
 } from "@museumsufer/core";
 import { Hono } from "hono";
@@ -32,7 +33,7 @@ function appUrlFor(city: string): string {
 function citySourceSlugs(city: string): Set<string> {
   const slugs = new Set<string>();
   for (const e of SCRAPE_DATA.events) {
-    if ((e.city ?? "frankfurt") === city) slugs.add(e.source_slug);
+    if (servesCity(e.city, city)) slugs.add(e.source_slug);
   }
   return slugs;
 }

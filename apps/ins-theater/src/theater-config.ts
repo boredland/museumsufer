@@ -203,6 +203,7 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     address: "Hessisches Staatstheater Wiesbaden, Christian-Zais-Straße 3, 65189 Wiesbaden",
     lat: 50.0823,
     lon: 8.2417,
+    city: "wiesbaden",
     website_url: "https://www.hessisches-staatsballett.de",
     ticketing_provider: "custom",
     description:

@@ -3,7 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
-import { CITIES } from "@museumsufer/core/cities";
+import { CITIES, citiesOf } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityFor, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
     if (ev.date < today) continue;
     const city = cityOf(ev);
     if (!city) continue;
-    presentCities.add(city);
+    for (const c of citiesOf(ev)) presentCities.add(c);
     if (!hasStageLabel(ev)) continue;
     const showSlug = deriveShowSlug(ev);
     const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);

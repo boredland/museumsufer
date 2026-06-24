@@ -1,4 +1,4 @@
-import { compareNullsLast } from "@museumsufer/core";
+import { compareNullsLast, servesCity } from "@museumsufer/core";
 import { SCRAPE_DATA } from "./scrape-data";
 import { THEATERS, type TheaterConfig } from "./theater-config";
 import type { Performance, Show } from "./types";
@@ -47,7 +47,7 @@ export async function getPerformancesForDate(date: string, city?: string | null)
     if (p.date !== date) continue;
     const joined = joinPerformance(p);
     if (!joined) continue;
-    if (city && (joined.show.city ?? "frankfurt") !== city) continue;
+    if (city && !servesCity(joined.show.city, city)) continue;
     out.push(joined);
   }
   return out.sort(
@@ -72,7 +72,7 @@ export async function getPerformancesInRange(
     const joined = joinPerformance(p);
     if (!joined) continue;
     if (wantedSlug && joined.theater.slug !== wantedSlug) continue;
-    if (city && (joined.show.city ?? "frankfurt") !== city) continue;
+    if (city && !servesCity(joined.show.city, city)) continue;
     out.push(joined);
   }
   return out.sort(
@@ -109,7 +109,7 @@ export async function getDatesWithPerformances(
     if (p.status === "cancelled") continue;
     if (city) {
       const show = SHOWS_BY_ID.get(p.show_id);
-      if (!show || (show.city ?? "frankfurt") !== city) continue;
+      if (!show || !servesCity(show.city, city)) continue;
     }
     counts.set(p.date, (counts.get(p.date) ?? 0) + 1);
   }

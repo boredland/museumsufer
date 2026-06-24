@@ -3,11 +3,11 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
-import { CITIES } from "@museumsufer/core/cities";
+import { CITIES, citiesOf } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import type { CanonicalEvent } from "@museumsufer/event-hub";
-import { cityFor, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
+import { cityFor, displayNameFor, EVENTS } from "@museumsufer/event-hub";
 import { CURATED_VENUES, type VenueConfig } from "../src/concert-config";
 import { dedupEvents } from "../src/dedup";
 import { type Event, GENRES, type Genre, type ScrapeData } from "../src/types";
@@ -28,9 +28,9 @@ async function main(): Promise<void> {
   const presentCities = new Set<string>();
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
-    const evCity = cityOf(ev);
-    if (!evCity) continue;
-    presentCities.add(evCity);
+    const evCities = citiesOf(ev);
+    if (evCities.length === 0) continue;
+    for (const c of evCities) presentCities.add(c);
     const genre = pickGenre(ev);
     if (!genre) continue;
 

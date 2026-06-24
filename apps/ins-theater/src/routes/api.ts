@@ -1,4 +1,4 @@
-import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
+import { dateOffset, handleContactRequest, servesCity, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getPerformanceById, getPerformancesForDate, getPerformancesInRange } from "../db";
 import { THEATERS } from "../theater-config";
@@ -25,7 +25,7 @@ app.get("/api/theaters", (c) => {
   const city = c.get("city") ?? "frankfurt";
   return c.json(
     {
-      theaters: THEATERS.filter((t) => (t.city ?? "frankfurt") === city).map((t) => ({
+      theaters: THEATERS.filter((t) => servesCity(t.city, city)).map((t) => ({
         slug: t.slug,
         name: t.name,
         address: t.address,
