@@ -221,6 +221,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "museum-giersch-der-goethe-universitaet": "MGGU – Museum Giersch der Goethe-Universität",
   "museum-mmk-museum-mmk-fuer-moderne-kunst": "Museum MMK – Museum MMK für Moderne Kunst",
   "museum-sinclair-haus-bad-homburg": "Museum Sinclair-Haus Bad Homburg",
+  "museum-wiesbaden": "Museum Wiesbaden",
   "musikschule-frankfurt": "Städtische Musikschule Frankfurt",
   "mut-theater": "MUT! Theater",
   "naxos-hallenkonzerte": "Naxos Hallenkonzerte",
