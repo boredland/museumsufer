@@ -41,6 +41,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "bad bergzaberner schloss|bad bergzabern": [49.102808, 7.999127],
   "bahnhof bad bergzabern|bad bergzabern": [49.103238, 8.003372],
   "bahnhof maikammer-kirrweiler|kirrweiler": [49.305082, 8.146833],
+  "bauernkriegshaus nußdorf|landau in der pfalz": [49.226457, 8.110851],
   "beginn am deutschen tor|landau in der pfalz": [49.198283, 8.112344],
   "berufsgenossenschaft bg rci|maikammer": [49.305216, 8.131629],
   "bethesda landau|landau in der pfalz": [49.206863, 8.107198],
