@@ -95,6 +95,7 @@ export interface Translations {
   siblingTheaterLabel: string;
   siblingMuseumLabel: string;
   siblingConcertLabel: string;
+  siblingCinemaLabel: string;
   askAiLabel: string;
   askAiPrompt: (date: string) => string;
   askAiAria: string;
@@ -188,10 +189,11 @@ const de: Translations = {
     `${cat}-Termine in Frankfurt. ${count} Termin${count === 1 ? "" : "e"} in den nächsten 60 Tagen.`,
   languageBadge: (lang) => `auf ${lang}`,
   langSwitchAria: "Sprache",
-  siblingTemplate: "Nichts dabei? Vielleicht stattdessen {first}, {second} oder {third}?",
+  siblingTemplate: "Nichts dabei? Vielleicht stattdessen {first}, {second}, {third} oder {fourth}?",
   siblingTheaterLabel: "ein Theaterstück",
   siblingMuseumLabel: "ein Museumsbesuch",
   siblingConcertLabel: "ein Konzert",
+  siblingCinemaLabel: "ein Kinobesuch",
   askAiLabel: "Frag eine KI",
   askAiPrompt: (date) =>
     `Welche Vorträge und Diskussionen finden am ${date} in Frankfurt statt? Quelle: https://frankfurt.lehr.salon`,
@@ -309,11 +311,11 @@ const en: Translations = {
   categoryDescription: (cat, count) =>
     `${cat}s in Frankfurt. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
   languageBadge: (lang) => `in ${lang}`,
-  langSwitchAria: "Language",
-  siblingTemplate: "Nothing for you? How about {first}, {second}, or {third} instead?",
+  siblingTemplate: "Nothing for you? How about {first}, {second}, {third}, or {fourth} instead?",
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",
   siblingConcertLabel: "a concert",
+  siblingCinemaLabel: "a trip to the cinema",
   askAiLabel: "Ask an AI",
   askAiPrompt: (date) =>
     `Which lectures and discussions are happening in Frankfurt on ${date}? Source: https://frankfurt.lehr.salon`,

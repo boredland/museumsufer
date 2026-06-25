@@ -984,7 +984,7 @@ export function Footer({ tr, locale }: { tr: Translations; locale: Locale }) {
  * find anything in today's programme.
  */
 function SiblingStrap({ tr, city }: { tr: Translations; city?: string }) {
-  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
+  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}|\{fourth\}/);
   return (
     <section class="programme__siblings">
       <hr class="programme__siblings-rule" />
@@ -1002,6 +1002,10 @@ function SiblingStrap({ tr, city }: { tr: Translations; city?: string }) {
           {tr.siblingLehrLabel}
         </a>
         {parts[3]}
+        <a href={cityUrl("lichtspiel.haus", city)} target="_blank" rel="noopener">
+          {tr.siblingCinemaLabel}
+        </a>
+        {parts[4]}
       </p>
     </section>
   );
