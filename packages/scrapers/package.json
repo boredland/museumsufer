@@ -46,6 +46,7 @@
     "./venues/gallus-theater": "./src/venues/gallus-theater.ts",
     "./venues/hafen-2-offenbach": "./src/venues/hafen-2-offenbach.ts",
     "./venues/hambacher-schloss": "./src/venues/hambacher-schloss.ts",
+    "./venues/_reservix": "./src/venues/_reservix.ts",
     "./venues/_tribe-events": "./src/venues/_tribe-events.ts",
     "./venues/hessisches-staatstheater-wiesbaden": "./src/venues/hessisches-staatstheater-wiesbaden.ts",
     "./venues/hamburger-kammerspiele": "./src/venues/hamburger-kammerspiele.ts",
@@ -115,6 +116,7 @@
     "./venues/theater-willy-praml": "./src/venues/theater-willy-praml.ts",
     "./venues/theaterhaus-frankfurt": "./src/venues/theaterhaus-frankfurt.ts",
     "./venues/tigerpalast-variete": "./src/venues/tigerpalast-variete.ts",
+    "./venues/velvets-theater": "./src/venues/velvets-theater.ts",
     "./venues/volksbuehne-frankfurt": "./src/venues/volksbuehne-frankfurt.ts",
     "./venues/waggong": "./src/venues/waggong.ts"
   },
@@ -123,6 +125,8 @@
     "refresh-pdf-cache": "bun scripts/refresh-pdf-cache.ts",
     "refresh-html-cache": "bun scripts/refresh-html-cache.ts"
   },
+    "./venues/bach-wiesbaden": "./src/venues/bach-wiesbaden.ts",
+    "./venues/lutherkirche-wiesbaden": "./src/venues/lutherkirche-wiesbaden.ts",
   "dependencies": {
     "@museumsufer/classify": "*",
     "@museumsufer/core": "*",
