@@ -93,6 +93,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.cafemutz.de",
   },
   {
+    slug: "cinema-wuppertal",
+    name: "Cinema Wuppertal",
+    address: "",
+    lat: 51.256,
+    lon: 7.155,
+    city: "wuppertal",
+    website_url: "https://www.kinoheld.de",
+  },
+  {
     slug: "citydome-darmstadt",
     name: "Citydome Darmstadt",
     address: "",
@@ -100,6 +109,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.6508,
     city: "darmstadt",
     website_url: "https://www.kinopolis.de",
+  },
+  {
+    slug: "das-lumen-filmtheater-solingen",
+    name: "Das Lumen Filmtheater Solingen",
+    address: "",
+    lat: 51.164,
+    lon: 7.082,
+    city: "solingen",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "deutsches-ledermuseum-of",
@@ -271,6 +289,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.991,
     city: "hamburg",
     website_url: "https://www.passagekino.de",
+  },
+  {
+    slug: "rex-filmtheater-wuppertal",
+    name: "Rex Filmtheater Wuppertal",
+    address: "",
+    lat: 51.258,
+    lon: 7.148,
+    city: "wuppertal",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "sammlung-prinzhorn",

@@ -293,6 +293,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "theater-im-pariser-hof",
+    name: "Theater im Pariser Hof",
+    address: "",
+    lat: 50.0853,
+    lon: 8.2427,
+    city: "wiesbaden",
+    website_url: "https://www.theaterimpariserhof.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "theater-moller-haus",
     name: "Theater Moller Haus",
     address: "",
