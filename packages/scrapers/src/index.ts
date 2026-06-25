@@ -117,6 +117,7 @@ import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHdkvHeidelberg } from "./venues/hdkv-heidelberg";
 import { scrapeHeidelbergerFruehling } from "./venues/heidelberger-fruehling";
 import { scrapeHessischesStaatsballett } from "./venues/hessisches-staatsballett";
+import { scrapeStaatstheaterWiesbaden } from "./venues/hessisches-staatstheater-wiesbaden";
 import { scrapeHfmdk } from "./venues/hfmdk";
 import { scrapeHlmdDarmstadt } from "./venues/hlmd-darmstadt";
 import { scrapeHoheLuftschiff } from "./venues/hohe-luft-schiff";
@@ -336,6 +337,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "kampnagel", run: (_ctx: ScraperContext) => scrapeKampnagel() },
   { slug: "haus-am-dom", run: (ctx: ScraperContext) => scrapeHausAmDom(ctx.proxy) },
   { slug: "hessisches-staatsballett", run: (_ctx: ScraperContext) => scrapeHessischesStaatsballett() },
+  { slug: "hessisches-staatstheater-wiesbaden", run: (_ctx: ScraperContext) => scrapeStaatstheaterWiesbaden() },
   { slug: "hfmdk", run: (_ctx: ScraperContext) => scrapeHfmdk() },
   { slug: "holzhausenschloesschen", run: (_ctx: ScraperContext) => scrapeHolzhausenschloesschen() },
   { slug: "hr-bigband", run: (_ctx: ScraperContext) => scrapeHrBigband() },

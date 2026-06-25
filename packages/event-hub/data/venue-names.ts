@@ -120,6 +120,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "haus-der-stadtgeschichte-of": "Haus der Stadtgeschichte Offenbach am Main",
   "hdkv-heidelberg": "Heidelberger Kunstverein",
   "heidelberger-fruehling": "Heidelberger Frühling",
+  "hessisches-staatstheater-wiesbaden": "Hessisches Staatstheater Wiesbaden",
   "hessisches-staatsballett": "Hessisches Staatsballett",
   "hfmdk": "Hochschule für Musik und Darstellende Kunst Frankfurt",
   "hindemith-kabinett": "Hindemith Kabinett im Kuhhirtenturm",
