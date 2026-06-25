@@ -71,6 +71,7 @@ import { scrapeDfgFrankfurt } from "./venues/dfg-frankfurt";
 import { scrapeDieKaes } from "./venues/die-kaes";
 import { scrapeDieSchmiere } from "./venues/die-schmiere";
 import { scrapeDigFrankfurt } from "./venues/dig-frankfurt";
+import { scrapeDommuseumMainz } from "./venues/dommuseum-mainz";
 import { scrapeDrHochs } from "./venues/dr-hochs";
 import { scrapeDramatischeBuehne } from "./venues/dramatische-buehne";
 import { scrapeDresdenFrankfurtDanceCompany } from "./venues/dresden-frankfurt-dance-company";
@@ -275,6 +276,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "dfg-frankfurt", run: (_ctx: ScraperContext) => scrapeDfgFrankfurt() },
   { slug: "die-kaes", run: (_ctx: ScraperContext) => scrapeDieKaes() },
   { slug: "die-schmiere", run: (_ctx: ScraperContext) => scrapeDieSchmiere() },
+  { slug: "dommuseum-mainz", run: (_ctx: ScraperContext) => scrapeDommuseumMainz() },
   { slug: "dig-frankfurt", run: (_ctx: ScraperContext) => scrapeDigFrankfurt() },
   { slug: "dramatische-buehne", run: (_ctx: ScraperContext) => scrapeDramatischeBuehne() },
   { slug: "dresden-frankfurt-dance-company", run: (_ctx: ScraperContext) => scrapeDresdenFrankfurtDanceCompany() },

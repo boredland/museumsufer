@@ -58,6 +58,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "die-schmiere": "Die Schmiere",
   "dig-frankfurt": "Deutsch-Israelische Gesellschaft Frankfurt",
   "dommuseum-frankfurt": "Dommuseum Frankfurt",
+  "dommuseum-mainz": "Dom- und Diözesanmuseum Mainz",
   "dr-hochs-konservatorium": "Dr. Hoch's Konservatorium",
   "dramatische-buehne": "Die Dramatische Bühne",
   "dresden-frankfurt-dance-company": "Dresden Frankfurt Dance Company",
