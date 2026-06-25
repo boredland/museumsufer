@@ -240,6 +240,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "rptu-campuskultur": [49.1898, 8.1144],
   suew: [49.198, 8.1192],
   "museum-wiesbaden": [50.0771, 8.24588],
+  "museum-reinhard-ernst": [50.0775, 8.2385],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
