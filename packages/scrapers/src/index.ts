@@ -173,6 +173,7 @@ import { scrapeLutherkircheWiesbaden } from "./venues/lutherkirche-wiesbaden";
 import { scrapeMainaeppelhausLohrberg } from "./venues/mainaeppelhaus-lohrberg";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
+import { scrapeMusicstarNorderstedt } from "./venues/musicstar-norderstedt";
 import { scrapeMathildenhoehe } from "./venues/mathildenhoehe";
 import { scrapeMkgHamburg } from "./venues/mkg-hamburg";
 import { scrapeMonsunTheater } from "./venues/monsun-theater";
@@ -393,6 +394,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "lutherkirche-wiesbaden", run: (_ctx: ScraperContext) => scrapeLutherkircheWiesbaden() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
+  { slug: "musicstar-norderstedt", run: (_ctx: ScraperContext) => scrapeMusicstarNorderstedt() },
   { slug: "mathildenhoehe", run: (_ctx: ScraperContext) => scrapeMathildenhoehe() },
   { slug: "monsun-theater", run: (_ctx: ScraperContext) => scrapeMonsunTheater() },
   { slug: "mousonturm", run: (_ctx: ScraperContext) => scrapeMousonturm() },
