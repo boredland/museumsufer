@@ -38,5 +38,6 @@
   "congresshalle-saarbruecken": "new scraper — Saarbrücken expansion; Congress Centrum Saar WordPress site",
   "drp-saarbruecken": "new scraper — Saarbrücken expansion; Deutsche Radio Philharmonie via Reservix",
   "garage-saarbruecken": "new scraper — Saarbrücken expansion; saarevent.com WordPress/WooCommerce",
-  "city-kinos-saarbruecken": "new Kinoheld cinemas — UT-Kino + Passage-Kino; bundle not yet populated"
+  "city-kinos-saarbruecken": "new Kinoheld cinemas — UT-Kino + Passage-Kino; bundle not yet populated",
+  "musicstar-norderstedt": "new scraper — harksheide.de only shows next 2-3 events; site has very few at a time"
 }
