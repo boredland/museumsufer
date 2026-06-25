@@ -105,6 +105,7 @@
     "./venues/rptu-campuskultur": "./src/venues/rptu-campuskultur.ts",
     "./venues/schauspiel-frankfurt": "./src/venues/schauspiel-frankfurt.ts",
     "./venues/sigmund-freud-institut": "./src/venues/sigmund-freud-institut.ts",
+    "./venues/staatstheater-mainz": "./src/venues/staatstheater-mainz.ts",
     "./venues/stadtbuecherei-frankfurt": "./src/venues/stadtbuecherei-frankfurt.ts",
     "./venues/stalburg-theater": "./src/venues/stalburg-theater.ts",
     "./venues/stk-musik": "./src/venues/stk-musik.ts",

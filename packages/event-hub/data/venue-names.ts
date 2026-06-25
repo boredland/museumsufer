@@ -336,6 +336,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-carree-darmstadt": "Carree Darmstadt",
   "wdc2026-circle-cube": "Circle Cube",
   "wdc2026-colour-research-studio-verlag-form-gmbh-co-kg": "Colour Research Studio / Verlag form GmbH & Co. KG",
+  "staatstheater-mainz": "Staatstheater Mainz",
   "wdc2026-congress-park-hanau": "Congress Park Hanau",
   "wdc2026-dam-deutsches-architekturmuseum": "DAM – Deutsches Architekturmuseum",
   "wdc2026-danzig-am-platz": "Danzig am Platz",
