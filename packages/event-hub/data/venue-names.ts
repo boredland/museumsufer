@@ -137,6 +137,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "institut-francais-frankfurt": "Institut français Frankfurt",
   "institut-fuer-sozialforschung": "Institut für Sozialforschung Frankfurt",
   "institut-fuer-stadtgeschichte": "Institut für Stadtgeschichte",
+  "kunsthalle-mainz": "Kunsthalle Mainz",
   "instituto-cervantes-frankfurt": "Instituto Cervantes Frankfurt",
   "internationales-theater": "Internationales Theater Frankfurt",
   "jazz-frankfurt": "Jazz in Frankfurt",

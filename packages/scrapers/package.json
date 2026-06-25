@@ -66,6 +66,7 @@
     "./venues/komoedie-winterhuder-faehrhaus": "./src/venues/komoedie-winterhuder-faehrhaus.ts",
     "./venues/kronberg-academy": "./src/venues/kronberg-academy.ts",
     "./venues/kulturnetz-landau": "./src/venues/kulturnetz-landau.ts",
+    "./venues/kunsthalle-mainz": "./src/venues/kunsthalle-mainz.ts",
     "./venues/landau-de": "./src/venues/landau-de.ts",
     "./venues/landungsbruecken": "./src/venues/landungsbruecken.ts",
     "./venues/lichthof-theater": "./src/venues/lichthof-theater.ts",

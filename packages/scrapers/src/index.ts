@@ -149,6 +149,7 @@ import { scrapeKomoedieWinterhuderFaehrhaus } from "./venues/komoedie-winterhude
 import { scrapeKronbergAcademy } from "./venues/kronberg-academy";
 import { scrapeKulturnetzLandau } from "./venues/kulturnetz-landau";
 import { scrapeKunsthalleDarmstadt } from "./venues/kunsthalle-darmstadt";
+import { scrapeKunsthalleMainz } from "./venues/kunsthalle-mainz";
 import { scrapeKurpfaelzischesMuseum } from "./venues/kurpfaelzisches-museum";
 import { scrapeLandauDe } from "./venues/landau-de";
 import { scrapeLandinsichtBuchladen } from "./venues/landinsicht-buchladen";
@@ -348,6 +349,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "karl-marx-buchhandlung", run: (_ctx: ScraperContext) => scrapeKarlMarxBuchhandlung() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
+  { slug: "kunsthalle-mainz", run: (_ctx: ScraperContext) => scrapeKunsthalleMainz() },
   { slug: "kino-koeppern", run: (_ctx: ScraperContext) => scrapeKinoKoeppern() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
   { slug: "komoedie-frankfurt", run: (_ctx: ScraperContext) => scrapeKomoedieFrankfurt() },
