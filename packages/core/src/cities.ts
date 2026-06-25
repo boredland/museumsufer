@@ -82,8 +82,39 @@ export const RHEINMAIN_WEST_BBOX: Bbox = {
   minLon: 8.1,
   maxLon: 8.4,
 };
+/** Wuppertal — long E-W bbox along the Wupper valley. */
+export const WUPPERTAL_BBOX: Bbox = {
+  minLat: 51.2,
+  maxLat: 51.32,
+  minLon: 7.06,
+  maxLon: 7.31,
+};
 
-export type CitySlug = "frankfurt" | "hamburg" | "darmstadt" | "heidelberg" | "mainz" | "wiesbaden";
+/** Solingen — abuts Remscheid to the west; declarative city wins at the seam. */
+export const SOLINGEN_BBOX: Bbox = {
+  minLat: 51.13,
+  maxLat: 51.21,
+  minLon: 6.98,
+  maxLon: 7.14,
+};
+
+/** Remscheid — abuts Solingen to the east; no overlap. */
+export const REMSCHEID_BBOX: Bbox = {
+  minLat: 51.14,
+  maxLat: 51.23,
+  minLon: 7.16,
+  maxLon: 7.28,
+};
+export type CitySlug =
+  | "frankfurt"
+  | "hamburg"
+  | "darmstadt"
+  | "heidelberg"
+  | "mainz"
+  | "wiesbaden"
+  | "wuppertal"
+  | "solingen"
+  | "remscheid";
 
 export interface CityMeta {
   /** URL subdomain prefix and the value stored on bundled events. */
@@ -204,6 +235,51 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
     wikidata: "Q1721",
     centroid: { lat: 50.0825, lon: 8.24 },
     bbox: RHEINMAIN_WEST_BBOX,
+  },
+  wuppertal: {
+    slug: "wuppertal",
+    name: "Wuppertal",
+    short: "Wuppertal",
+    adj: { de: "Wuppertaler", en: "Wuppertal's" },
+    i18nName: {
+      de: { full: "Wuppertal", short: "Wuppertal" },
+      en: { full: "Wuppertal", short: "Wuppertal" },
+      fr: { full: "Wuppertal", short: "Wuppertal" },
+    },
+    region: "Nordrhein-Westfalen",
+    wikidata: "Q2107",
+    centroid: { lat: 51.256, lon: 7.15 },
+    bbox: WUPPERTAL_BBOX,
+  },
+  solingen: {
+    slug: "solingen",
+    name: "Solingen",
+    short: "Solingen",
+    adj: { de: "Solinger", en: "Solingen's" },
+    i18nName: {
+      de: { full: "Solingen", short: "Solingen" },
+      en: { full: "Solingen", short: "Solingen" },
+      fr: { full: "Solingen", short: "Solingen" },
+    },
+    region: "Nordrhein-Westfalen",
+    wikidata: "Q2942",
+    centroid: { lat: 51.171, lon: 7.085 },
+    bbox: SOLINGEN_BBOX,
+  },
+  remscheid: {
+    slug: "remscheid",
+    name: "Remscheid",
+    short: "Remscheid",
+    adj: { de: "Remscheider", en: "Remscheid's" },
+    i18nName: {
+      de: { full: "Remscheid", short: "Remscheid" },
+      en: { full: "Remscheid", short: "Remscheid" },
+      fr: { full: "Remscheid", short: "Remscheid" },
+    },
+    region: "Nordrhein-Westfalen",
+    wikidata: "Q3097",
+    centroid: { lat: 51.178, lon: 7.193 },
+    bbox: REMSCHEID_BBOX,
   },
 };
 
