@@ -236,6 +236,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "museum-reinhard-ernst": "Museum Reinhard Ernst (mre)",
   "museum-sinclair-haus-bad-homburg": "Museum Sinclair-Haus Bad Homburg",
   "museum-wiesbaden": "Museum Wiesbaden",
+  "musicstar-norderstedt": "Music Star Norderstedt",
   "musikschule-frankfurt": "Städtische Musikschule Frankfurt",
   "mut-theater": "MUT! Theater",
   "naxos-hallenkonzerte": "Naxos Hallenkonzerte",
