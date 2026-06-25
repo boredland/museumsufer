@@ -199,6 +199,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "landau|landau in der pfalz": [49.209942, 8.123134],
   "landfrauenheim mörlheim|landau in der pfalz": [49.198283, 8.112344],
   "landjugend kirrweiler|kirrweiler": [49.634729, 7.500757],
+  "laurentiusgarten göcklingen|göcklingen": [49.161549, 8.042512],
   "leinsweiler hof hotel-betriebs-gmbh|leinsweiler": [49.182507, 8.020491],
   "liva cafe|landau/pfalz": [49.196234, 8.111915],
   "lobby für kinder e.v.|klingenmünster": [49.139546, 8.018758],
