@@ -251,6 +251,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "velvets-theater": [50.0575, 8.2564],
   "kammerspiele-wiesbaden": [50.077, 8.233],
   kuenstlerhaus43: [50.081, 8.239],
+  "theater-im-pariser-hof": [50.0853, 8.2427],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

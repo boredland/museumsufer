@@ -114,6 +114,7 @@
     "./venues/theater-alte-bruecke": "./src/venues/theater-alte-bruecke.ts",
     "./venues/theater-lempenfieber": "./src/venues/theater-lempenfieber.ts",
     "./venues/theater-willy-praml": "./src/venues/theater-willy-praml.ts",
+    "./venues/theater-im-pariser-hof": "./src/venues/theater-im-pariser-hof.ts",
     "./venues/theaterhaus-frankfurt": "./src/venues/theaterhaus-frankfurt.ts",
     "./venues/tigerpalast-variete": "./src/venues/tigerpalast-variete.ts",
     "./venues/velvets-theater": "./src/venues/velvets-theater.ts",
