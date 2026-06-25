@@ -65,7 +65,7 @@ export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
 // ─── helpers ────────────────────────────────────────────────────────────
 
 function extractText(blocks: SanityBlock[] | null | undefined): string | null {
-  if (!blocks || !blocks.length) return null;
+  if (!blocks?.length) return null;
   const parts: string[] = [];
   for (const block of blocks) {
     if (!block.children) continue;
