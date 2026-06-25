@@ -244,8 +244,11 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "museum-wiesbaden": [50.0771, 8.24588],
   "kunsthalle-mainz": [50.0155, 8.2587],
   "dommuseum-mainz": [49.998, 8.274],
+  "bach-wiesbaden": [50.0825, 8.24],
+  "lutherkirche-wiesbaden": [50.078, 8.238],
   "nhm-mainz": [50.003, 8.269],
   "museum-reinhard-ernst": [50.0775, 8.2385],
+  "velvets-theater": [50.0575, 8.2564],
   "kammerspiele-wiesbaden": [50.077, 8.233],
   kuenstlerhaus43: [50.081, 8.239],
 };

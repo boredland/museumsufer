@@ -1,3 +1,5 @@
+import { scrapeWdc2026 } from "./venues/_wdc2026";
+
 export { MUSEUM_SLUGS, MUSEUMS } from "./_museums/config";
 export { type ProxyConfig, proxyFetch } from "./proxy";
 export { THEATER_SLUGS } from "./theater-slugs";
@@ -31,7 +33,6 @@ import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
-import { scrapeWdc2026 } from "./venues/_wdc2026";
 import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
 import { scrapeAlabamaKino } from "./venues/alabama-kino";
 import { scrapeAlmaHoppesLustspielhaus } from "./venues/alma-hoppes-lustspielhaus";
@@ -44,6 +45,7 @@ import { scrapeAstorFrankfurt } from "./venues/astor-frankfurt";
 import { scrapeAstorHafencity } from "./venues/astor-hafencity";
 import { scrapeAutorenbuchhandlungMarx } from "./venues/autorenbuchhandlung-marx";
 import { scrapeBMovie } from "./venues/b-movie";
+import { scrapeBachWiesbaden } from "./venues/bach-wiesbaden";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBadVilbelOpenAirKino } from "./venues/bad-vilbel-open-air-kino";
@@ -162,6 +164,7 @@ import { scrapeLichtwarkTheater } from "./venues/lichtwark-theater";
 import { scrapeLiteraturhausDarmstadt } from "./venues/literaturhaus-darmstadt";
 import { scrapeLiteraturhaus } from "./venues/literaturhaus-frankfurt";
 import { scrapeLiteraturhausHamburg } from "./venues/literaturhaus-hamburg";
+import { scrapeLutherkircheWiesbaden } from "./venues/lutherkirche-wiesbaden";
 import { scrapeMainaeppelhausLohrberg } from "./venues/mainaeppelhaus-lohrberg";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
@@ -227,6 +230,7 @@ import { scrapeTuDarmstadtVortraege } from "./venues/tu-darmstadt-vortraege";
 import { scrapeUniHeidelbergRingvorlesung } from "./venues/uni-heidelberg-ringvorlesung";
 import { scrapeUnimedizinFrankfurt } from "./venues/unimedizin-frankfurt";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
+import { scrapeVelvetsTheater } from "./venues/velvets-theater";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
 import { scrapeWaggong } from "./venues/waggong";
 import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
@@ -252,6 +256,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "astor-frankfurt", run: (_ctx: ScraperContext) => scrapeAstorFrankfurt() },
   { slug: "astor-hafencity", run: (_ctx: ScraperContext) => scrapeAstorHafencity() },
   { slug: "autorenbuchhandlung-marx", run: (_ctx: ScraperContext) => scrapeAutorenbuchhandlungMarx() },
+  { slug: "bach-wiesbaden", run: (_ctx: ScraperContext) => scrapeBachWiesbaden() },
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-vilbel-open-air-kino", run: (_ctx: ScraperContext) => scrapeBadVilbelOpenAirKino() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
@@ -374,6 +379,8 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-frankfurt", run: (_ctx: ScraperContext) => scrapeLiteraturhaus() },
   { slug: "literaturhaus-hamburg", run: (_ctx: ScraperContext) => scrapeLiteraturhausHamburg() },
   { slug: "mainaeppelhaus-lohrberg", run: (_ctx: ScraperContext) => scrapeMainaeppelhausLohrberg() },
+  { slug: "lutherkirche-wiesbaden", run: (_ctx: ScraperContext) => scrapeLutherkircheWiesbaden() },
+  { slug: "lutherkirche-wiesbaden", run: (_ctx: ScraperContext) => scrapeLutherkircheWiesbaden() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
   { slug: "mathildenhoehe", run: (_ctx: ScraperContext) => scrapeMathildenhoehe() },
@@ -382,7 +389,6 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "mut-theater", run: (_ctx: ScraperContext) => scrapeMutTheater() },
   { slug: "cineamo-frankfurt-region", run: (_ctx: ScraperContext) => scrapeCineamo() },
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
-  { slug: "meetup", run: (_ctx: ScraperContext) => scrapeMeetup() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
   { slug: "deichtorhallen", run: (ctx: ScraperContext) => scrapeDeichtorhallen(ctx) },
   { slug: "mkg-hamburg", run: (ctx: ScraperContext) => scrapeMkgHamburg(ctx) },
@@ -444,6 +450,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "tip-darmstadt", run: (_ctx: ScraperContext) => scrapeTipDarmstadt() },
   { slug: "unimedizin-frankfurt", run: (ctx: ScraperContext) => scrapeUnimedizinFrankfurt(ctx.proxy) },
   { slug: "union-club-frankfurt", run: (_ctx: ScraperContext) => scrapeUnionClubFrankfurt() },
+  { slug: "velvets-theater", run: (_ctx: ScraperContext) => scrapeVelvetsTheater() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },
   { slug: "wdc2026", run: (ctx: ScraperContext) => scrapeWdc2026(ctx.proxy) },
