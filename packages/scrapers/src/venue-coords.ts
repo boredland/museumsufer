@@ -245,6 +245,8 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "dommuseum-mainz": [49.998, 8.274],
   "nhm-mainz": [50.003, 8.269],
   "museum-reinhard-ernst": [50.0775, 8.2385],
+  "kammerspiele-wiesbaden": [50.077, 8.233],
+  kuenstlerhaus43: [50.081, 8.239],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

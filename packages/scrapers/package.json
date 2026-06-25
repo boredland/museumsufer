@@ -46,6 +46,7 @@
     "./venues/gallus-theater": "./src/venues/gallus-theater.ts",
     "./venues/hafen-2-offenbach": "./src/venues/hafen-2-offenbach.ts",
     "./venues/hambacher-schloss": "./src/venues/hambacher-schloss.ts",
+    "./venues/_tribe-events": "./src/venues/_tribe-events.ts",
     "./venues/hessisches-staatstheater-wiesbaden": "./src/venues/hessisches-staatstheater-wiesbaden.ts",
     "./venues/hamburger-kammerspiele": "./src/venues/hamburger-kammerspiele.ts",
     "./venues/hamburger-puppentheater": "./src/venues/hamburger-puppentheater.ts",

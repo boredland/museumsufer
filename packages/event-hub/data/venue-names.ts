@@ -124,6 +124,8 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "hessisches-staatsballett": "Hessisches Staatsballett",
   "hfmdk": "Hochschule für Musik und Darstellende Kunst Frankfurt",
   "hindemith-kabinett": "Hindemith Kabinett im Kuhhirtenturm",
+  "kammerspiele-wiesbaden": "Kammerspiele Wiesbaden",
+  "kuenstlerhaus43": "kuenstlerhaus43",
   "historisches-museum-frankfurt": "Historisches Museum Frankfurt",
   "hlmd-darmstadt": "Hessisches Landesmuseum Darmstadt",
   "hohe-luft-schiff": "HoheLuftschiff",
