@@ -233,6 +233,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "musikschule-frankfurt": "Städtische Musikschule Frankfurt",
   "mut-theater": "MUT! Theater",
   "naxos-hallenkonzerte": "Naxos Hallenkonzerte",
+  "theater-im-pariser-hof": "Theater im Pariser Hof",
   "naxos-kino": "naxos.Kino",
   "neues-theater-hoechst": "Neues Theater Höchst",
   "nhm-mainz": "Naturhistorisches Museum Mainz",
