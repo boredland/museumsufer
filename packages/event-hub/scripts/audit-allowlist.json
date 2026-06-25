@@ -32,5 +32,5 @@
   "imd-darmstadt": "biennial — Darmstädter Ferienkurse run in odd years (last 2025, next 10–24 Jul 2027); the festival/programm pages still show the 2025 edition and carry no ztix booking links, so there are no upcoming ticketed events between editions. The shared ztix parser is verified against the other Darmstadt venues.",
   "mathildenhoehe": "between exhibitions — both /ausstellungen/aktuell/ and /ausstellungen/vorschau/ render the empty marker ('Es sind derzeit keine Ausstellungen in dieser Kategorie eingetragen') as of 24 Jun 2026; the site lists no current or upcoming exhibitions. Parser verified — it keys off that marker and the <article> list.",
   "frankfurter-buergerstiftung": "false-positive — buergerstiftung listing page only shows past events (June 2026); real upcoming events arrive via the holzhausenschloesschen venue scraper",
-  "museum-wiesbaden": "verified — GoMus v4 scraper returns 147+ events; audit was stale from a pre-scrape commit",
+  "museum-wiesbaden": "verified — GoMus v4 scraper returns 147+ events; audit was stale from a pre-scrape commit"
 }
