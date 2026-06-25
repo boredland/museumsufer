@@ -203,6 +203,7 @@ import { scrapeShmhMuseums } from "./venues/shmh-museums";
 import { scrapeSigmundFreudInstitut } from "./venues/sigmund-freud-institut";
 import { scrapeStPauliTheater } from "./venues/st-pauli-theater";
 import { scrapeStaatstheaterDarmstadt } from "./venues/staatstheater-darmstadt";
+import { scrapeStaatstheaterMainz } from "./venues/staatstheater-mainz";
 import { scrapeStabiHamburg } from "./venues/stabi-hamburg";
 import { scrapeStadtbuechereiFrankfurt } from "./venues/stadtbuecherei-frankfurt";
 import { scrapeStalburgTheater } from "./venues/stalburg-theater";
@@ -390,6 +391,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "museum-reinhard-ernst", run: (_ctx: ScraperContext) => scrapeMuseumRe() },
   { slug: "sammlung-prinzhorn", run: (_ctx: ScraperContext) => scrapeSammlungPrinzhorn() },
   { slug: "staatstheater-darmstadt", run: (_ctx: ScraperContext) => scrapeStaatstheaterDarmstadt() },
+  { slug: "staatstheater-mainz", run: (_ctx: ScraperContext) => scrapeStaatstheaterMainz() },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },
   { slug: "murnau-filmtheater", run: (_ctx: ScraperContext) => scrapeMurnauFilmtheater() },
   { slug: "musikschule-frankfurt", run: (_ctx: ScraperContext) => scrapeMusikschuleFrankfurt() },
