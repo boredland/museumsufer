@@ -9,6 +9,7 @@ import {
   inBbox,
   LANDAU_BBOX,
   REMSCHEID_BBOX,
+  SAARBRUECKEN_BBOX,
   SOLINGEN_BBOX,
   WUPPERTAL_BBOX,
 } from "@museumsufer/core/cities";
@@ -150,6 +151,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "theaterhaus-frankfurt": [50.1116, 8.6877],
   "lichtwark-theater": [53.4851, 10.2285],
   "staatstheater-mainz": [50.001, 8.269],
+  "staatstheater-saarland": [49.234, 6.996],
   "tigerpalast-variete": [50.1146, 8.6836],
   "unimedizin-frankfurt": [50.0942, 8.6536],
   "union-club-frankfurt": [50.1226, 8.647],
@@ -259,6 +261,25 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "rex-filmtheater-wuppertal": [51.258, 7.148],
   "cinema-wuppertal": [51.256, 7.155],
   "das-lumen-filmtheater-solingen": [51.164, 7.082],
+  // ─── Saarbrücken ────────────────────────────────────────────────
+  "congresshalle-saarbruecken": [49.234, 6.996],
+  "garage-saarbruecken": [49.232, 6.995],
+  "drp-saarbruecken": [49.241, 7.024],
+  "filmhaus-saarbruecken": [49.234, 6.998],
+  "kino-achteinhalb": [49.233, 6.997],
+  "camera-zwo": [49.235, 7.0],
+  "city-kinos-saarbruecken": [49.234, 6.998],
+  "kulturbesitz-saarbruecken": [49.233, 6.994],
+  "historisches-museum-saar": [49.234, 6.996],
+  "studio-30-saarbruecken": [49.232, 6.995],
+  "kuba-saarbruecken": [49.241, 7.024],
+  "theater-ueberzwerg": [49.234, 6.996],
+  "theater-im-viertel": [49.233, 6.997],
+  "uni-saarland": [49.254, 7.044],
+  "hfm-saar": [49.237, 7.006],
+  "literaturarchiv-saar": [49.254, 7.044],
+  "ut-kinos-saarbruecken": [49.234, 6.998],
+  "passage-kinos-saarbruecken": [49.234, 6.998],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
@@ -287,6 +308,7 @@ export {
   inBbox,
   LANDAU_BBOX,
   REMSCHEID_BBOX,
+  SAARBRUECKEN_BBOX,
   SOLINGEN_BBOX,
   WUPPERTAL_BBOX,
 };
@@ -307,6 +329,7 @@ export function withinGeofence(lat: number, lon: number): boolean {
     inBbox(lat, lon, HAMBURG_BBOX) ||
     inBbox(lat, lon, WUPPERTAL_BBOX) ||
     inBbox(lat, lon, SOLINGEN_BBOX) ||
-    inBbox(lat, lon, REMSCHEID_BBOX)
+    inBbox(lat, lon, REMSCHEID_BBOX) ||
+    inBbox(lat, lon, SAARBRUECKEN_BBOX)
   );
 }

@@ -105,6 +105,14 @@ export const REMSCHEID_BBOX: Bbox = {
   minLon: 7.16,
   maxLon: 7.28,
 };
+
+/** Saarbrücken + immediate surroundings (Völklingen edge for Völklinger Hütte). */
+export const SAARBRUECKEN_BBOX: Bbox = {
+  minLat: 49.13,
+  maxLat: 49.33,
+  minLon: 6.8,
+  maxLon: 7.15,
+};
 export type CitySlug =
   | "frankfurt"
   | "hamburg"
@@ -114,7 +122,8 @@ export type CitySlug =
   | "wiesbaden"
   | "wuppertal"
   | "solingen"
-  | "remscheid";
+  | "remscheid"
+  | "saarbruecken";
 
 export interface CityMeta {
   /** URL subdomain prefix and the value stored on bundled events. */
@@ -280,6 +289,21 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
     wikidata: "Q3097",
     centroid: { lat: 51.178, lon: 7.193 },
     bbox: REMSCHEID_BBOX,
+  },
+  saarbruecken: {
+    slug: "saarbruecken",
+    name: "Saarbrücken",
+    short: "Saarbrücken",
+    adj: { de: "Saarbrücker", en: "Saarbrücken's" },
+    i18nName: {
+      de: { full: "Saarbrücken", short: "Saarbrücken" },
+      en: { full: "Saarbrücken", short: "Saarbrücken" },
+      fr: { full: "Sarrebruck", short: "Sarrebruck" },
+    },
+    region: "Saarland",
+    wikidata: "Q1724",
+    centroid: { lat: 49.2333, lon: 7.0 },
+    bbox: SAARBRUECKEN_BBOX,
   },
 };
 

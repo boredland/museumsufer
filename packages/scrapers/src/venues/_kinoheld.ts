@@ -93,6 +93,21 @@ const CINEMAS: KinoheldCinema[] = [
     source_slug: "das-lumen-filmtheater-solingen",
     name: "Das Lumen Filmtheater Solingen",
   },
+  // City Kinos Saarbrücken — UT-Kino + Passage-Kinos
+  {
+    id: "1266",
+    citySlug: "saarbruecken",
+    urlSlug: "ut-kinos-saarbruecken",
+    source_slug: "city-kinos-saarbruecken",
+    name: "UT-Kinos Saarbrücken",
+  },
+  {
+    id: "1058",
+    citySlug: "saarbruecken",
+    urlSlug: "passage-kinos-saarbruecken",
+    source_slug: "city-kinos-saarbruecken",
+    name: "Passage-Kinos Saarbrücken",
+  },
 ];
 
 const SHOWS_QUERY = `query Shows($cinemaId: ID!, $dates: [Date!]) {
