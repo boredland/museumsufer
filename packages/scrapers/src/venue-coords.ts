@@ -240,6 +240,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "rptu-campuskultur": [49.1898, 8.1144],
   suew: [49.198, 8.1192],
   "museum-wiesbaden": [50.0771, 8.24588],
+  "kunsthalle-mainz": [50.0155, 8.2587],
   "museum-reinhard-ernst": [50.0775, 8.2385],
 };
 
