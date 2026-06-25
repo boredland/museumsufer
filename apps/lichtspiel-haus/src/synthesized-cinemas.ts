@@ -102,6 +102,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
+    slug: "city-kinos-saarbruecken",
+    name: "Passage-Kinos Saarbrücken",
+    address: "",
+    lat: 49.234,
+    lon: 6.998,
+    city: "saarbruecken",
+    website_url: "https://www.kinoheld.de",
+  },
+  {
     slug: "citydome-darmstadt",
     name: "Citydome Darmstadt",
     address: "",

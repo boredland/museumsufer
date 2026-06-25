@@ -53,6 +53,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "drp-saarbruecken",
+    name: "Deutsche Radio Philharmonie",
+    address: "",
+    lat: 49.241,
+    lon: 7.024,
+    city: "saarbruecken",
+    website_url: "https://drp-orchester.reservix.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "enjoy-jazz",
     name: "Enjoy Jazz",
     address: "",
@@ -260,6 +270,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lon: 8.269,
     city: "mainz",
     website_url: "https://www.staatstheater-mainz.com",
+    ticketing_provider: null,
+  },
+  {
+    slug: "staatstheater-saarland",
+    name: "Saarländisches Staatstheater",
+    address: "",
+    lat: 49.234,
+    lon: 6.996,
+    city: "saarbruecken",
+    website_url: "https://www.staatstheater.saarland",
     ticketing_provider: null,
   },
   {

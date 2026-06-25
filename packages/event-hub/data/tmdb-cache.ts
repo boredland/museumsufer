@@ -20,6 +20,7 @@ export interface TmdbCacheEntry {
 
 export const TMDB_POSTER_CACHE: Record<string, TmdbCacheEntry | null> = {
   "\"wuthering heights\" - sturmhöhe|*": {"id":1316092,"poster":"/zuXjNG3o6as2au643nyXcdiKrfB.jpg","title":"“Wuthering Heights” - Sturmhöhe","title_en":"\"Wuthering Heights\"","overview":"Der Film, basierend auf dem gleichnamigen Roman von Emily Brontë aus dem Jahr 1847, erzählt die tragische Liebesgeschichte zwischen Cathy, einer wohlhabenden jungen Frau des 19. Jahrhunderts, und Heathcliff, einem gesellschaftlichen Außenseiter. Nachdem Cathy sich aus gesellschaftlichen Gründen für einen anderen Mann entscheidet, kehrt Heathcliff nach Jahren nach Wuthering Heights zurück, um sich seiner Vergangenheit zu stellen und um ihre Liebe zu kämpfen.","overview_en":"Tragedy strikes when Heathcliff falls in love with Catherine Earnshaw, a woman from a wealthy family in 18th-century England.","kind":"movie","genre_ids":[10749,18],"vote_average":6.621,"vote_count":973,"imdb_id":"tt32897959","rt_critic":58,"imdb_rating":6.2,"imdb_votes":57394,"rt_url":"https://www.rottentomatoes.com/m/wuthering_heights_2026"},
+  "05.08.2026 spotlight - die arthouse-sneak|2026": null,
   "08.07.2026 spotlight - die arthouse-sneak|2026": null,
   "10. übertrashungsnacht|*": null,
   "10.06.2026 - spotlight - die arthouse-sneak|2026": null,
