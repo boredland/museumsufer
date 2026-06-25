@@ -229,6 +229,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "naxos-hallenkonzerte": "Naxos Hallenkonzerte",
   "naxos-kino": "naxos.Kino",
   "neues-theater-hoechst": "Neues Theater Höchst",
+  "nhm-mainz": "Naturhistorisches Museum Mainz",
   "nippon-connection": "Nippon Connection",
   "normative-orders": "Forschungsverbund Normative Ordnungen",
   "ohnsorg-theater": "Ohnsorg-Theater",
