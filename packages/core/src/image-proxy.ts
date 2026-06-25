@@ -64,8 +64,11 @@ export function createImageProxy(opts: ImageProxyOptions): ImageProxy {
     let upstream: Response;
     try {
       if (width > 0) {
-        const wsrv = `https://wsrv.nl/?url=${encodeURIComponent(target.toString())}&w=${width}&output=webp&q=80&we`;
-        upstream = await fetch(wsrv, { headers: { "User-Agent": userAgent } });
+        const wsrv = `https://wsrv.nl/?url=${encodeURIComponent(target.toString())}&w=${width}&output=webp&q=80`;
+        upstream = await fetch(wsrv, {
+          headers: { "User-Agent": userAgent },
+          cf: { cacheTtl: 86400 * 30, cacheEverything: true },
+        });
       } else {
         upstream = await fetch(target.toString(), {
           headers: { "User-Agent": userAgent, Accept: "image/*" },
