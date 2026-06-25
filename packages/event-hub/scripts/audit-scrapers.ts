@@ -27,11 +27,33 @@ const isExhibition = (e: (typeof EVENTS)[number]) => e.labels?.some((l) => l.lab
 
 const totalBySlug = new Map<string, number>();
 const eventsBySlug = new Map<string, number>();
+// Map from config slug → set of child slugs that the eventApi fans out to
+// (e.g. museum-mmk-* → {zollamt-mmk-*, tower-mmk-*} via museum_slug_override).
+const childSlugsByConfig = new Map<string, Set<string>>();
 for (const e of EVENTS) {
   const slug = e.source_slug;
   if (!slug) continue;
   totalBySlug.set(slug, (totalBySlug.get(slug) ?? 0) + 1);
   if (!isExhibition(e)) eventsBySlug.set(slug, (eventsBySlug.get(slug) ?? 0) + 1);
+  // Detect fan-out: events whose source_event_id is prefixed with a config
+  // slug but landed on a different source_slug (museum_slug_override).
+  const pipeIdx = e.source_event_id?.indexOf("|") ?? -1;
+  if (pipeIdx > 0) {
+    const prefix = e.source_event_id.slice(0, pipeIdx);
+    if (prefix !== slug) {
+      let set = childSlugsByConfig.get(prefix);
+      if (!set) { set = new Set(); childSlugsByConfig.set(prefix, set); }
+      set.add(slug);
+    }
+  }
+}
+
+function eventCountIncludingChildren(slug: string): number {
+  let n = eventsBySlug.get(slug) ?? 0;
+  for (const child of childSlugsByConfig.get(slug) ?? []) {
+    n += eventsBySlug.get(child) ?? 0;
+  }
+  return n;
 }
 
 interface Suspect {
@@ -44,8 +66,9 @@ const suspects: Suspect[] = [];
 
 for (const [slug, cfg] of Object.entries(MUSEUMS)) {
   if (!cfg.eventApi || EXEMPT.has(slug)) continue;
-  if ((eventsBySlug.get(slug) ?? 0) === 0) {
-    const exhibitions = totalBySlug.get(slug) ?? 0;
+  if (eventCountIncludingChildren(slug) === 0) {
+    let exhibitions = totalBySlug.get(slug) ?? 0;
+    for (const child of childSlugsByConfig.get(slug) ?? []) exhibitions += totalBySlug.get(child) ?? 0;
     suspects.push({
       slug,
       kind: "museum-events",
