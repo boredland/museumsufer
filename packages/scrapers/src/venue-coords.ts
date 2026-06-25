@@ -241,6 +241,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   suew: [49.198, 8.1192],
   "museum-wiesbaden": [50.0771, 8.24588],
   "kunsthalle-mainz": [50.0155, 8.2587],
+  "dommuseum-mainz": [49.998, 8.274],
   "nhm-mainz": [50.003, 8.269],
   "museum-reinhard-ernst": [50.0775, 8.2385],
 };

@@ -36,6 +36,7 @@
     "./venues/eschborn-k": "./src/venues/eschborn-k.ts",
     "./venues/evangelische-akademie": "./src/venues/evangelische-akademie.ts",
     "./venues/fes-hessen": "./src/venues/fes-hessen.ts",
+    "./venues/dommuseum-mainz": "./src/venues/dommuseum-mainz.ts",
     "./venues/fgz-streitclub": "./src/venues/fgz-streitclub.ts",
     "./venues/filmforum-hoechst": "./src/venues/filmforum-hoechst.ts",
     "./venues/filmkreis-darmstadt": "./src/venues/filmkreis-darmstadt.ts",
