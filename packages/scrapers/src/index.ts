@@ -175,6 +175,7 @@ import { scrapeMutTheater } from "./venues/mut-theater";
 import { scrapeNaxos } from "./venues/naxos";
 import { scrapeNaxosKino } from "./venues/naxos-kino";
 import { scrapeNeuesTheaterHoechst } from "./venues/neues-theater-hoechst";
+import { scrapeNhmMainz } from "./venues/nhm-mainz";
 import { scrapeNipponConnection } from "./venues/nippon-connection";
 import { scrapeNormativeOrders } from "./venues/normative-orders";
 import { scrapeOhnsorgTheater } from "./venues/ohnsorg-theater";
@@ -391,6 +392,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "naxos-hallenkonzerte", run: (_ctx: ScraperContext) => scrapeNaxos() },
   { slug: "naxos-kino", run: (_ctx: ScraperContext) => scrapeNaxosKino() },
   { slug: "neues-theater-hoechst", run: (_ctx: ScraperContext) => scrapeNeuesTheaterHoechst() },
+  { slug: "nhm-mainz", run: (_ctx: ScraperContext) => scrapeNhmMainz() },
   { slug: "nippon-connection", run: (_ctx: ScraperContext) => scrapeNipponConnection() },
   { slug: "normative-orders", run: (_ctx: ScraperContext) => scrapeNormativeOrders() },
   { slug: "openbooks-frankfurt", run: (_ctx: ScraperContext) => scrapeOpenBooks() },

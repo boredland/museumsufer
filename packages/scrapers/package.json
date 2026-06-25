@@ -79,6 +79,7 @@
     "./venues/museum-wiesbaden": "./src/venues/museum-wiesbaden.ts",
     "./venues/museum-reinhard-ernst": "./src/venues/museum-reinhard-ernst.ts",
     "./venues/musikschule-frankfurt": "./src/venues/musikschule-frankfurt.ts",
+    "./venues/nhm-mainz": "./src/venues/nhm-mainz.ts",
     "./venues/naxos": "./src/venues/naxos.ts",
     "./venues/neues-theater-hoechst": "./src/venues/neues-theater-hoechst.ts",
     "./venues/nippon-connection": "./src/venues/nippon-connection.ts",
