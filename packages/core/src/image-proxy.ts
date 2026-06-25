@@ -7,22 +7,19 @@
  *
  * Strategy:
  *  - Request shape: `/img/<url-encoded upstream URL>?w=NN`.
- *  - With `?w=NN`: route through wsrv.nl for free resize + WebP
- *    transcode (capped at 2000px to block hostile upscale requests).
+ *  - With `?w=NN`: rewrite to `/cdn-cgi/image/width=NN,format=webp,quality=80/<upstream>`
+ *    so Cloudflare Image Resizing handles transform + cache at the edge.
  *  - Without `?w=`: fetch the upstream directly with a CF-side 7-day
  *    edge cache.
  *  - Hostname must appear in the allow-list. Off-list hosts get a 403.
- *  - Successful responses are cached on `caches.default` for a year
- *    (immutable) and re-served on subsequent hits.
+ *  - Successful non-resize responses are cached on `caches.default` for a year.
  *
  * `passthroughDisallowed` flips the behaviour of `imageProxyUrl` when
  * the caller asks for a URL that isn't in the allow-list:
  *  - `false` (default) → returns `undefined` so the caller can render
- *    a styled fallback (PosterCard pattern in lichtspiel-haus). This
- *    is also the safer default with a strict CSP `img-src` directive.
+ *    a styled fallback (PosterCard pattern in lichtspiel-haus).
  *  - `true` → returns the original URL unchanged so the renderer keeps
- *    embedding the off-host image (legacy konzert-haus/lehrhaus
- *    pattern; relies on permissive CSP).
+ *    embedding the off-host image (legacy konzert-haus/lehrhaus pattern).
  */
 
 export interface ImageProxyOptions {
@@ -64,11 +61,19 @@ export function createImageProxy(opts: ImageProxyOptions): ImageProxy {
     let upstream: Response;
     try {
       if (width > 0) {
-        const wsrv = `https://wsrv.nl/?url=${encodeURIComponent(target.toString())}&w=${width}&output=webp&q=80`;
-        upstream = await fetch(wsrv, {
+        // Try Cloudflare Image Resizing first (works when "Resize images
+        // from any origin" is enabled on the zone). Falls back to direct
+        // fetch if CF returns cf-not-resized (403) for external URLs.
+        const cfImg = `/cdn-cgi/image/width=${width},format=webp,quality=80/${target.toString()}`;
+        upstream = await fetch(new URL(cfImg, url).toString(), {
           headers: { "User-Agent": userAgent },
-          cf: { cacheTtl: 86400 * 30, cacheEverything: true },
         });
+        if (!upstream.ok) {
+          upstream = await fetch(target.toString(), {
+            headers: { "User-Agent": userAgent, Accept: "image/*" },
+            cf: { cacheTtl: 86400 * 7, cacheEverything: true },
+          });
+        }
       } else {
         upstream = await fetch(target.toString(), {
           headers: { "User-Agent": userAgent, Accept: "image/*" },
