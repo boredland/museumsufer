@@ -70,6 +70,29 @@ const CINEMAS: KinoheldCinema[] = [
   // Filmpalast Hofheim is also on kinoheld (id 3809) but doesn't publish
   // showtimes there — they use Cineamo for booking. Keep in mind for a
   // future Cineamo scraper.
+  // Wuppertaler Kinos — Rex + Cinema im Atelier (Lichtblick Cinema GmbH)
+  {
+    id: "1629",
+    citySlug: "wuppertal",
+    urlSlug: "rex-filmtheater-wuppertal",
+    source_slug: "rex-filmtheater-wuppertal",
+    name: "Rex Filmtheater Wuppertal",
+  },
+  {
+    id: "213",
+    citySlug: "wuppertal",
+    urlSlug: "cinema-wuppertal",
+    source_slug: "cinema-wuppertal",
+    name: "Cinema Wuppertal",
+  },
+  // Das Lumen — Solingen arthouse/OV series
+  {
+    id: "224",
+    citySlug: "solingen",
+    urlSlug: "das-lumen-filmtheater-solingen",
+    source_slug: "das-lumen-filmtheater-solingen",
+    name: "Das Lumen Filmtheater Solingen",
+  },
 ];
 
 const SHOWS_QUERY = `query Shows($cinemaId: ID!, $dates: [Date!]) {
