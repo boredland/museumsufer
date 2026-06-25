@@ -8,6 +8,9 @@ import {
   HEIDELBERG_BBOX,
   inBbox,
   LANDAU_BBOX,
+  REMSCHEID_BBOX,
+  SOLINGEN_BBOX,
+  WUPPERTAL_BBOX,
 } from "@museumsufer/core/cities";
 import { MUSEUMS } from "./_museums/config";
 
@@ -279,6 +282,9 @@ export {
   HEIDELBERG_BBOX,
   inBbox,
   LANDAU_BBOX,
+  REMSCHEID_BBOX,
+  SOLINGEN_BBOX,
+  WUPPERTAL_BBOX,
 };
 
 /** Frankfurt + Landau corridor bbox. Anything outside is dropped by the
@@ -292,5 +298,11 @@ export const GEOFENCE_BBOX: Bbox = {
 };
 
 export function withinGeofence(lat: number, lon: number): boolean {
-  return inBbox(lat, lon, GEOFENCE_BBOX) || inBbox(lat, lon, HAMBURG_BBOX);
+  return (
+    inBbox(lat, lon, GEOFENCE_BBOX) ||
+    inBbox(lat, lon, HAMBURG_BBOX) ||
+    inBbox(lat, lon, WUPPERTAL_BBOX) ||
+    inBbox(lat, lon, SOLINGEN_BBOX) ||
+    inBbox(lat, lon, REMSCHEID_BBOX)
+  );
 }

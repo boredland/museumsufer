@@ -23,14 +23,16 @@ export {
   HEIDELBERG_BBOX,
   inBbox,
   LANDAU_BBOX,
+  REMSCHEID_BBOX,
+  SOLINGEN_BBOX,
   VENUE_COORDS,
+  WUPPERTAL_BBOX,
   withinGeofence,
 } from "./venue-coords";
 
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeCineamo } from "./venues/_cineamo";
 import { scrapeKinoheld } from "./venues/_kinoheld";
-import { scrapeMeetup } from "./venues/_meetup";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
 import { scrapeAkademieWissenschaftenHamburg } from "./venues/akademie-der-wissenschaften-hamburg";
