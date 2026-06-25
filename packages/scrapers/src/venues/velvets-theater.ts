@@ -2,7 +2,7 @@ import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
-const BASE = "https://velvets-theater.de";
+const BASE = "https://www.velvets-theater.de";
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
 /**
@@ -31,16 +31,16 @@ export async function scrapeVelvetsTheater(): Promise<VenueScrapeResult> {
     const rawDateTime = decodeEntities(match[2].replace(/&nbsp;/g, " ").trim());
     const rest = match[3];
 
-    const title = decodeEntities(rawTitle.trim());
+    const title = decodeEntities(rawTitle).replace(/\s+/g, " ").trim();
 
-    // Parse "Sonntag, 06.09. 2026, 18:00 Uhr" or "Freitag 25.09. 2026, 20:00 Uhr"
-    const dtMatch = rawDateTime.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})[^\d]*(\d{1,2}:\d{2})/);
+    // Parse "Sonntag, 06.09. 2026, 18:00 Uhr" or "Freitag 25.09. 2026, 20:00 Uhr" or "18 Uhr" (no minutes)
+    const dtMatch = rawDateTime.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})[^\d]*(\d{1,2})(?::(\d{2}))?\s*Uhr/);
     if (!dtMatch) continue;
 
     const day = dtMatch[1].padStart(2, "0");
     const month = dtMatch[2].padStart(2, "0");
     const year = dtMatch[3];
-    const time = dtMatch[4];
+    const time = `${dtMatch[4].padStart(2, "0")}:${dtMatch[5] ?? "00"}`;
     const date = `${year}-${month}-${day}`;
 
     if (date < today) continue;
