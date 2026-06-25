@@ -661,7 +661,7 @@ function MuseumRow({
  * who didn't find anything in today's museum line-up.
  */
 function SiblingStrap({ tr, city }: { tr: Record<string, string>; city?: string }) {
-  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}/);
+  const parts = tr.siblingTemplate.split(/\{first\}|\{second\}|\{third\}|\{fourth\}/);
   return (
     <section class="sibling-strap">
       <hr class="sibling-strap__rule" />
@@ -679,6 +679,10 @@ function SiblingStrap({ tr, city }: { tr: Record<string, string>; city?: string 
           {tr.siblingLehrLabel}
         </a>
         {parts[3]}
+        <a href={cityUrl("lichtspiel.haus", city)} class="sibling-strap__link">
+          {tr.siblingCinemaLabel}
+        </a>
+        {parts[4]}
       </p>
     </section>
   );
