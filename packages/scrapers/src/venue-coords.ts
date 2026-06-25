@@ -255,6 +255,10 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "kammerspiele-wiesbaden": [50.077, 8.233],
   kuenstlerhaus43: [50.081, 8.239],
   "theater-im-pariser-hof": [50.0853, 8.2427],
+  // ─── Bergisches Städtedreieck cinemas (Kinoheld) ───────────────
+  "rex-filmtheater-wuppertal": [51.258, 7.148],
+  "cinema-wuppertal": [51.256, 7.155],
+  "das-lumen-filmtheater-solingen": [51.164, 7.082],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
