@@ -39,14 +39,13 @@ const EN_MONTHS: Record<string, string> = {
 
 const CARD_RE =
   /<div class="box grid-cell[^"]*"\s+data-tags="([^"]+)">\s*<a href="(\/kalender\/[^"]+)">([\s\S]*?)<\/a>\s*<\/div>/g;
-const DAY_RE = /<div class="date-daydate">(\d+)<\/div>/;
-const MONTH_RE = /<div class="date-month">([A-Za-z]+)<\/div>/;
 const TITLE_RE = /<strong>([\s\S]*?)<\/strong>/;
-const YEAR_RE = /<div class="date-year">(\d{4})<\/div>/;
 const TIME_RANGE_RE = /(\d{1,2})\.(\d{2})\s*(?:&ndash;|–|-)\s*(\d{1,2})\.(\d{2})\s*Uhr/i;
 const TIME_SINGLE_RE = /(\d{1,2})\.(\d{2})\s*Uhr/i;
 const PRICE_RE = /(\d+(?:[.,]\d{1,2})?)\s*Euro/gi;
 const TITLE_ADDITIONAL_RE = /<div class="title-additional">([\s\S]*?)<\/div>/;
+const DETAIL_DATE_RE =
+  /<div class="date">\s*(?:<div class="date-dayname">[^<]*<\/div>\s*)?<div class="date-daydate">(\d+)<\/div>\s*<div class="date-month">([A-Za-z]+)<\/div>\s*<div class="date-year">(\d{4})<\/div>/;
 
 export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
   const today = todayIso();
@@ -67,13 +66,6 @@ export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
     seen.add(detailUrl);
 
     const cardHtml = m[3];
-    const dayMatch = DAY_RE.exec(cardHtml);
-    const monthMatch = MONTH_RE.exec(cardHtml);
-    if (!dayMatch || !monthMatch) continue;
-
-    const mm = EN_MONTHS[monthMatch[1]];
-    if (!mm) continue;
-    const dd = dayMatch[1].padStart(2, "0");
 
     const titleMatch = TITLE_RE.exec(cardHtml);
     const title = titleMatch ? stripHtml(decodeEntities(titleMatch[1])).trim() : "";
@@ -86,12 +78,10 @@ export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
 
     await sleep(THROTTLE_MS);
     const detail = await fetchDetail(detailUrl);
-    if (!detail.year) continue;
+    if (!detail.date) continue;
+    if (detail.date < today) continue;
 
-    const date = `${detail.year}-${mm}-${dd}`;
-    if (date < today) continue;
-
-    const slug = slugFromPath(detailPath) ?? slugify(`eaf-${date}-${title}`);
+    const slug = slugFromPath(detailPath) ?? slugify(`eaf-${detail.date}-${title}`);
     const isMusic = tags.includes(MUSIC_TAG);
     const labels: ScrapedLabel[] = isMusic
       ? [
@@ -114,7 +104,7 @@ export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
       title,
       subtitle,
       description: null,
-      date,
+      date: detail.date,
       time: detail.time,
       end_time: detail.endTime,
       detail_url: detailUrl,
@@ -134,6 +124,7 @@ export async function scrapeEvangelischeAkademie(): Promise<VenueScrapeResult> {
 }
 
 interface DetailFields {
+  date: string | null;
   year: string | null;
   time: string | null;
   endTime: string | null;
@@ -142,14 +133,24 @@ interface DetailFields {
 }
 
 async function fetchDetail(url: string): Promise<DetailFields> {
+  const empty: DetailFields = { date: null, year: null, time: null, endTime: null, priceMin: null, priceMax: null };
   let html: string;
   try {
     html = await fetchText(url);
   } catch {
-    return { year: null, time: null, endTime: null, priceMin: null, priceMax: null };
+    return empty;
   }
 
-  const year = YEAR_RE.exec(html)?.[1] ?? null;
+  const dateMatch = DETAIL_DATE_RE.exec(html);
+  let date: string | null = null;
+  let year: string | null = null;
+  if (dateMatch) {
+    const mm = EN_MONTHS[dateMatch[2]];
+    if (mm) {
+      date = `${dateMatch[3]}-${mm}-${dateMatch[1].padStart(2, "0")}`;
+      year = dateMatch[3];
+    }
+  }
 
   const additionalRaw = TITLE_ADDITIONAL_RE.exec(html)?.[1] ?? "";
   const additional = decodeEntities(additionalRaw);
@@ -172,6 +173,7 @@ async function fetchDetail(url: string): Promise<DetailFields> {
   }
 
   return {
+    date,
     year,
     time,
     endTime,
