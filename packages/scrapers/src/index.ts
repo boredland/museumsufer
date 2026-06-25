@@ -167,6 +167,7 @@ import { scrapeMkgHamburg } from "./venues/mkg-hamburg";
 import { scrapeMonsunTheater } from "./venues/monsun-theater";
 import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
+import { scrapeMuseumRe } from "./venues/museum-reinhard-ernst";
 import { scrapeMuseumWiesbaden } from "./venues/museum-wiesbaden";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeMutTheater } from "./venues/mut-theater";
@@ -379,6 +380,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "mkg-hamburg", run: (ctx: ScraperContext) => scrapeMkgHamburg(ctx) },
   { slug: "museums-hamburg", run: (ctx: ScraperContext) => scrapeShmhMuseums(ctx) },
   { slug: "museum-wiesbaden", run: (_ctx: ScraperContext) => scrapeMuseumWiesbaden() },
+  { slug: "museum-reinhard-ernst", run: (_ctx: ScraperContext) => scrapeMuseumRe() },
   { slug: "sammlung-prinzhorn", run: (_ctx: ScraperContext) => scrapeSammlungPrinzhorn() },
   { slug: "staatstheater-darmstadt", run: (_ctx: ScraperContext) => scrapeStaatstheaterDarmstadt() },
   { slug: "stiftung-hg", run: (_ctx: ScraperContext) => scrapeStiftungHg() },

@@ -215,6 +215,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "mousonturm": "Künstler*innenhaus Mousonturm",
   "murnau-filmtheater": "Murnau-Filmtheater Wiesbaden",
   "museum-angewandte-kunst": "Museum Angewandte Kunst",
+  "museum-reinhard-ernst": "Museum Reinhard Ernst (mre)",
   "museum-der-arbeit": "Museum der Arbeit",
   "museum-fuer-hamburgische-geschichte": "Museum für Hamburgische Geschichte",
   "museum-fuer-kommunikation-frankfurt": "Museum für Kommunikation Frankfurt",

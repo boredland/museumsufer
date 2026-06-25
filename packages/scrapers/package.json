@@ -76,6 +76,7 @@
     "./venues/mousonturm": "./src/venues/mousonturm.ts",
     "./venues/murnau-filmtheater": "./src/venues/murnau-filmtheater.ts",
     "./venues/museum-wiesbaden": "./src/venues/museum-wiesbaden.ts",
+    "./venues/museum-reinhard-ernst": "./src/venues/museum-reinhard-ernst.ts",
     "./venues/musikschule-frankfurt": "./src/venues/musikschule-frankfurt.ts",
     "./venues/naxos": "./src/venues/naxos.ts",
     "./venues/neues-theater-hoechst": "./src/venues/neues-theater-hoechst.ts",
