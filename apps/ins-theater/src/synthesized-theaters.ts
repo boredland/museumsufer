@@ -113,6 +113,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "hessisches-staatstheater-wiesbaden",
+    name: "Hessisches Staatstheater Wiesbaden",
+    address: "",
+    lat: 50.0823,
+    lon: 8.2417,
+    city: "wiesbaden",
+    website_url: "https://www.staatstheater-wiesbaden.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "hfmdk",
     name: "Hochschule für Musik und Darstellende Kunst Frankfurt",
     address: "",
@@ -240,6 +250,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lon: 8.647,
     city: "darmstadt",
     website_url: "https://www.staatstheater-darmstadt.de",
+    ticketing_provider: null,
+  },
+  {
+    slug: "staatstheater-mainz",
+    name: "Staatstheater Mainz",
+    address: "",
+    lat: 50.001,
+    lon: 8.269,
+    city: "mainz",
+    website_url: "https://www.staatstheater-mainz.com",
     ticketing_provider: null,
   },
   {
