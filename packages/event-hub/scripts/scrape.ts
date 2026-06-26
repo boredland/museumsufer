@@ -31,22 +31,36 @@ async function main(): Promise<void> {
   const tmdbCache: Record<string, TmdbCacheEntry | null> = { ...TMDB_POSTER_CACHE };
   const beforeCacheJson = JSON.stringify(tmdbCache);
 
+  // Phase 1: scrape + merge (no enrichment) → write bundle immediately.
+  // This ensures the committed events.ts always reflects the latest scrape
+  // even if the enrichment pass (TMDb/DeepL/OMDb) times out in CI.
   const next = await runHub(previous, {
     log,
     proxy,
-    tmdbApiKey: process.env.TMDB_API_KEY,
-    tmdbCache,
-    deeplApiKeys: process.env.DEEPL_API_KEYS,
-    omdbApiKey: process.env.OMDB_API_KEY,
+    skipEnrichment: true,
   });
   await writeFile(resolve(root, "data/events.ts"), generateModule(next), "utf8");
   log(`wrote data/events.ts — ${next.events.length} events`);
   await writeFile(resolve(root, "data/venue-names.ts"), generateNamesModule(next.venueNames ?? {}), "utf8");
   log(`wrote data/venue-names.ts — ${Object.keys(next.venueNames ?? {}).length} venues`);
 
-  // Persist when anything changed — new entries (size diff) OR back-fills
-  // that mutated existing entries in place (overview / overview_en /
-  // kind). The JSON snapshot diff catches both.
+  // Phase 2: enrich (TMDb posters + DeepL + OMDb ratings). Mutates
+  // events in place and fills tmdbCache. Non-fatal on timeout — the
+  // bundle is already written; the cache persists partial results.
+  const { enrichFilmPosters } = await import("../src/tmdb");
+  await enrichFilmPosters(next.events, {
+    apiKey: process.env.TMDB_API_KEY,
+    cache: tmdbCache,
+    deeplApiKeys: process.env.DEEPL_API_KEYS,
+    omdbApiKey: process.env.OMDB_API_KEY,
+    log,
+  });
+
+  // Rewrite events.ts with enrichment data (poster URLs, descriptions, ratings).
+  await writeFile(resolve(root, "data/events.ts"), generateModule(next), "utf8");
+  log(`rewrote data/events.ts with enrichment`);
+
+  // Persist TMDb/OMDb cache when anything changed.
   if (JSON.stringify(tmdbCache) !== beforeCacheJson) {
     await writeFile(resolve(root, "data/tmdb-cache.ts"), generateTmdbCacheModule(tmdbCache), "utf8");
     log(`wrote data/tmdb-cache.ts — ${Object.keys(tmdbCache).length} entries`);

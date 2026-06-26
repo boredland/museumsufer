@@ -29,6 +29,9 @@ export interface RunOptions {
    *  follow-up OMDb lookup for every cached TMDb match that has an
    *  imdb_id, attaching Rotten Tomatoes critic % + IMDb rating. */
   omdbApiKey?: string;
+  /** Skip the TMDb/DeepL/OMDb enrichment pass. Used to write the
+   *  bundle before enrichment so a timeout doesn't lose the scrape. */
+  skipEnrichment?: boolean;
 }
 
 const DEFAULT_CONCURRENCY = 8;
@@ -126,7 +129,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
 
   tagNipponConnection(events);
 
-  if (opts.tmdbCache) {
+  if (opts.tmdbCache && !opts.skipEnrichment) {
     await enrichFilmPosters(events, {
       apiKey: opts.tmdbApiKey,
       cache: opts.tmdbCache,
