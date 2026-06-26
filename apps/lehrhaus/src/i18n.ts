@@ -311,6 +311,7 @@ const en: Translations = {
   categoryDescription: (cat, count) =>
     `${cat}s in Frankfurt. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
   languageBadge: (lang) => `in ${lang}`,
+  langSwitchAria: "Language",
   siblingTemplate: "Nothing for you? How about {first}, {second}, {third}, or {fourth} instead?",
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",

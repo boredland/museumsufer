@@ -344,6 +344,7 @@ const en: Translations = {
     `Concerts at ${venue}. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
   genreDescription: (genre, count) =>
     `${genre} concerts in Frankfurt and around. ${count} ${count === 1 ? "event" : "events"} in the next 60 days.`,
+  langSwitchAria: "Language",
   siblingTemplate: "Nothing for you? How about {first}, {second}, {third}, or {fourth} instead?",
   siblingTheaterLabel: "a play",
   siblingMuseumLabel: "a museum visit",
@@ -477,6 +478,7 @@ const fr: Translations = {
   venueDescription: (venue, count) => `Concerts à ${venue}. ${count} rendez-vous dans les 60 prochains jours.`,
   genreDescription: (genre, count) =>
     `Concerts de ${genre.toLowerCase()} à Francfort et alentour. ${count} rendez-vous dans les 60 prochains jours.`,
+  langSwitchAria: "Langue",
   siblingTemplate: "Rien pour toi ? Pourquoi pas {first}, {second}, {third} ou {fourth} à la place ?",
   siblingTheaterLabel: "une pièce",
   siblingMuseumLabel: "une visite au musée",
