@@ -1360,13 +1360,22 @@ function ClientBehaviors({ tr }: { tr: Translations }) {
  *  scale of the existing footer__links row. */
 function TmdbAttribution({ tr }: { tr: Translations }) {
   return (
-    <p class="footer__attribution">
-      {tr.tmdbAttributionLead}
-      <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">
-        TMDB
-      </a>
-      {tr.tmdbAttributionTail}
-    </p>
+    <>
+      <p class="footer__attribution">
+        {tr.tmdbAttributionLead}
+        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">
+          TMDB
+        </a>
+        {tr.tmdbAttributionTail}
+      </p>
+      <p class="footer__attribution">
+        {tr.omdbAttributionLead}
+        <a href="https://www.omdbapi.com/" target="_blank" rel="noopener">
+          OMDb API
+        </a>
+        {tr.omdbAttributionTail}
+      </p>
+    </>
   );
 }
 

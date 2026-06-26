@@ -150,6 +150,10 @@ export interface Translations {
   // main footer block.
   tmdbAttributionLead: string;
   tmdbAttributionTail: string;
+  // OMDb attribution — required by their API terms when using RT/IMDb
+  // ratings data. Rendered alongside the TMDb attribution in the footer.
+  omdbAttributionLead: string;
+  omdbAttributionTail: string;
   /** Shown above the synopsis on /film/:id when the visitor's locale
    *  is `en` but TMDb has no English overview, so the German cinema
    *  description is rendered as fallback. */
@@ -316,6 +320,8 @@ const de: Translations = {
   ],
   tmdbAttributionLead: "Filmplakate & -beschreibungen via ",
   tmdbAttributionTail: ". Dieses Produkt nutzt die TMDB-API, ist aber weder von TMDB unterstützt noch zertifiziert.",
+  omdbAttributionLead: "Bewertungen (Rotten Tomatoes, IMDb) via ",
+  omdbAttributionTail: ".",
   synopsisFallbackNotice: "Synopsis auf Deutsch — keine englische Übersetzung verfügbar.",
   synopsisAttribution: "Synopsis: TMDb.",
 };
@@ -475,6 +481,8 @@ const en: Translations = {
   ],
   tmdbAttributionLead: "Posters & synopses via ",
   tmdbAttributionTail: ". This product uses the TMDB API but is not endorsed or certified by TMDB.",
+  omdbAttributionLead: "Ratings (Rotten Tomatoes, IMDb) via ",
+  omdbAttributionTail: ".",
   synopsisFallbackNotice: "Synopsis in German — no English translation available.",
   synopsisAttribution: "Synopsis: TMDb.",
 };
