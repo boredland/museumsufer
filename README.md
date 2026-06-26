@@ -27,7 +27,7 @@ Daily exhibitions and events for ~40 Frankfurt Museumsufer museums, now extendin
 
 ### [`apps/ins-theater`](apps/ins-theater) → `{frankfurt,hamburg}.ins.theater`
 
-Hourly performance schedule for Frankfurt theaters — Schauspiel, Oper, Mousonturm, English Theatre, Komödie, Tigerpalast, the Reservix-fronted small houses, plus a dozen long-tail venues — alongside Hamburg houses (Ernst Deutsch Theater, Alma Hoppes Lustspielhaus, Centralkomitee, …). Each theater has its own scraper module under `src/scrapers/` (Reservix HTML, Tribe Events REST, MEC plugin, schema.org microdata, custom CMSes, …). Editorial Programmheft styling — Fraunces serif, JetBrains Mono numerals, single brick-red accent; the masthead carries a city-neutral "T." mark.
+Hourly performance schedule for Frankfurt theaters — Schauspiel, Oper, Mousonturm, English Theatre, Komödie, Tigerpalast, the Reservix-fronted small houses, plus a dozen long-tail venues — alongside Hamburg houses (Ernst Deutsch Theater, Alma Hoppes Lustspielhaus, Centralkomitee, …). Each theater has its own scraper module under `src/scrapers/` (Reservix HTML, Tribe Events REST, MEC plugin, schema.org microdata, custom CMSes, …). Editorial Programmheft styling — Fraunces serif, JetBrains Mono numerals, single brick-red accent; the masthead carries a city-neutral stage-door mark.
 
 - Scrape: hourly via the shared `scrape.yml` (theaters derive)
 - D1: `feedback` + `push_subscriptions`
@@ -90,6 +90,7 @@ bun run typecheck
 bun run lint
 bun scripts/regen-screenshots.ts --prod                 # manifest screenshots (per-city variants)
 bun scripts/regen-og-images.ts                          # OG raster from public/og-image.svg
+bun scripts/regen-icons.ts                              # PWA icon raster from public/favicon.svg
 gh workflow run scrape.yml                              # trigger hub scrape + per-app derives
 gh workflow run regen-assets.yml                        # screenshots + OG
 gh workflow run lighthouse.yml                          # CWV / a11y / SEO budgets
