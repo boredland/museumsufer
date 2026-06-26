@@ -259,6 +259,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "theater-im-pariser-hof": [50.0853, 8.2427],
   // ─── Norderstedt ──────────────────────────────────────────────
   "musicstar-norderstedt": [53.706, 9.986],
+  "sperrstunde-hamburg": [53.55, 9.99],
 
   // ─── Bergisches Städtedreieck cinemas (Kinoheld) ───────────────
   "rex-filmtheater-wuppertal": [51.258, 7.148],
