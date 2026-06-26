@@ -363,15 +363,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://taunale.de",
   },
   {
-    slug: "wdc2026-lauteschlagerstrasse-28a",
-    name: "Lauteschlägerstraße 28a",
-    address: "",
-    lat: 49.8778555,
-    lon: 8.6598921,
-    city: "darmstadt",
-    website_url: "https://wdc2026.org",
-  },
-  {
     slug: "wdc2026-scape-offenbach",
     name: "SCAPE° Offenbach",
     address: "",

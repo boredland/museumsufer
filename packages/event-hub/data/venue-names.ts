@@ -274,6 +274,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "senckenberg-naturmuseum": "Senckenberg Naturmuseum",
   "sigmund-freud-institut": "Sigmund-Freud-Institut Frankfurt",
   "speicherstadtmuseum": "Speicherstadtmuseum",
+  "sperrstunde-hamburg": "Sperrstunde Hamburg",
   "st-katharinen": "Kantorei St. Katharinen",
   "st-pauli-theater": "St. Pauli Theater",
   "staatstheater-darmstadt": "Staatstheater Darmstadt",
