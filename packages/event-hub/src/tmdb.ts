@@ -410,8 +410,8 @@ export async function enrichFilmPosters(
   // cache entry that has imdb_id but is missing the ratings.
   let omdbMatched = 0;
   let omdbFailed = 0;
-  const omdbKey = opts.omdbApiKey?.trim();
-  if (omdbKey) {
+  const omdbKeys = opts.omdbApiKey?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
+  if (omdbKeys.length > 0) {
     const pendingOmdb: Array<{ cacheKey: string; imdb_id: string }> = [];
     for (const [cacheKey, entry] of Object.entries(opts.cache)) {
       if (!entry?.imdb_id) continue;
@@ -435,7 +435,7 @@ export async function enrichFilmPosters(
       for (const p of pendingOmdb) {
         omdbQueue.add(async () => {
           try {
-            const extras = await fetchOmdb(p.imdb_id, omdbKey);
+            const extras = await fetchOmdb(p.imdb_id, omdbKeys);
             const entry = opts.cache[p.cacheKey];
             if (!entry) return;
             if (typeof extras.rt_critic === "number") entry.rt_critic = extras.rt_critic;

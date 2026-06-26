@@ -32,44 +32,63 @@ interface OmdbResponse {
   tomatoURL?: string | null;
 }
 
-/** Fetch RT + IMDb numbers for one IMDb id. Returns an empty object when
- *  OMDb has the film but no ratings, or when the API errors — the caller
- *  treats "no ratings found" the same as "lookup failed" (won't retry next
- *  run because the imdb_id is still cached). */
-export async function fetchOmdb(imdbId: string, apiKey: string): Promise<OmdbExtras> {
-  const params = new URLSearchParams({ i: imdbId, apikey: apiKey, tomatoes: "true" });
-  const res = await retryFetch(
-    `${OMDB_URL}?${params}`,
-    { headers: { Accept: "application/json" } },
-    { label: `omdb ${imdbId}` },
-  );
-  if (!res.ok) throw new Error(`omdb ${res.status} for ${imdbId}`);
-  const data = (await res.json()) as OmdbResponse;
-  if (data.Response !== "True") return {};
+/** Fetch RT + IMDb numbers for one IMDb id. Accepts one or more API keys;
+ *  rotates to the next key on 401 (invalid key) or 429 (rate-limited).
+ *  Returns an empty object when OMDb has the film but no ratings, or when
+ *  all keys are exhausted — the caller treats "no ratings found" the same
+ *  as "lookup failed" (won't retry next run because the imdb_id is still
+ *  cached). */
+export async function fetchOmdb(imdbId: string, apiKey: string | string[]): Promise<OmdbExtras> {
+  const keys = Array.isArray(apiKey) ? apiKey : [apiKey];
+  let lastError: Error | undefined;
 
-  const out: OmdbExtras = {};
-  // Rotten Tomatoes critic % comes through the Ratings array.
-  const rt = data.Ratings?.find((r) => r.Source === "Rotten Tomatoes");
-  if (rt) {
-    const m = rt.Value.match(/(\d+)\s*%/);
-    if (m) {
-      const n = Number(m[1]);
-      if (Number.isFinite(n) && n >= 0 && n <= 100) out.rt_critic = n;
+  for (const key of keys) {
+    const params = new URLSearchParams({ i: imdbId, apikey: key, tomatoes: "true" });
+    let res: Response;
+    try {
+      res = await retryFetch(
+        `${OMDB_URL}?${params}`,
+        { headers: { Accept: "application/json" } },
+        { label: `omdb ${imdbId}`, retries: 1, requestTimeout: 10_000 },
+      );
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      continue; // network/timeout → try next key
     }
+
+    if (res.status === 401 || res.status === 429) {
+      lastError = new Error(`omdb ${res.status} for ${imdbId} (key ${key.slice(0, 4)}…)`);
+      continue; // bad key or rate-limited → try next key
+    }
+
+    if (!res.ok) throw new Error(`omdb ${res.status} for ${imdbId}`);
+
+    const data = (await res.json()) as OmdbResponse;
+    if (data.Response !== "True") return {};
+
+    const out: OmdbExtras = {};
+    const rt = data.Ratings?.find((r) => r.Source === "Rotten Tomatoes");
+    if (rt) {
+      const m = rt.Value.match(/(\d+)\s*%/);
+      if (m) {
+        const n = Number(m[1]);
+        if (Number.isFinite(n) && n >= 0 && n <= 100) out.rt_critic = n;
+      }
+    }
+    if (data.imdbRating && data.imdbRating !== "N/A") {
+      const n = Number(data.imdbRating);
+      if (Number.isFinite(n) && n > 0 && n <= 10) out.imdb_rating = n;
+    }
+    if (data.imdbVotes && data.imdbVotes !== "N/A") {
+      const n = Number(data.imdbVotes.replace(/,/g, ""));
+      if (Number.isFinite(n) && n > 0) out.imdb_votes = n;
+    }
+    if (data.tomatoURL && data.tomatoURL !== "N/A" && data.tomatoURL.startsWith("https://www.rottentomatoes.com/")) {
+      out.rt_url = data.tomatoURL;
+    }
+    return out;
   }
-  // IMDb rating + vote count are top-level on the OMDb response.
-  if (data.imdbRating && data.imdbRating !== "N/A") {
-    const n = Number(data.imdbRating);
-    if (Number.isFinite(n) && n > 0 && n <= 10) out.imdb_rating = n;
-  }
-  if (data.imdbVotes && data.imdbVotes !== "N/A") {
-    const n = Number(data.imdbVotes.replace(/,/g, ""));
-    if (Number.isFinite(n) && n > 0) out.imdb_votes = n;
-  }
-  // tomatoURL: most of the other tomato* fields are deprecated to "N/A",
-  // but the URL still resolves to the canonical RT film page.
-  if (data.tomatoURL && data.tomatoURL !== "N/A" && data.tomatoURL.startsWith("https://www.rottentomatoes.com/")) {
-    out.rt_url = data.tomatoURL;
-  }
-  return out;
+
+  // All keys exhausted
+  throw lastError ?? new Error(`omdb: all keys exhausted for ${imdbId}`);
 }
