@@ -473,6 +473,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "thalia-theater",
+    name: "Thalia Theater",
+    address: "",
+    lat: 53.5521,
+    lon: 9.9986,
+    city: "hamburg",
+    website_url: "https://www.thalia-theater.de",
+    default_genre: "classical",
+  },
+  {
     slug: "theater-heidelberg",
     name: "Theater und Orchester Heidelberg",
     address: "",
