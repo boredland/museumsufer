@@ -156,15 +156,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.elbe-filmtheater.de",
   },
   {
-    slug: "eschborn-k",
-    name: "Eschborn K",
-    address: "",
-    lat: 50.1457,
-    lon: 8.571,
-    city: "frankfurt",
-    website_url: "https://eschborn-k.de",
-  },
-  {
     slug: "filmraum",
     name: "Filmraum",
     address: "",
