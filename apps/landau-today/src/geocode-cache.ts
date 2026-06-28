@@ -361,6 +361,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "verein für waldorfpädagogik landau e.v.|landau in der pfalz": [49.198283, 8.112344],
   "villa ufer|landau in der pfalz": [49.198283, 8.112344],
   "villa wieser|herxheim": [49.145756, 8.215382],
+  "villa wieser|herxheim bei landau": [49.145756, 8.215382],
   "visite ma tante|landau in der pfalz": [49.200054, 8.111539],
   "vor dem rathaus|": [49.198283, 8.112344],
   "vr bank (hauptstelle) waffenstr. 15, 76829 landau/pfalz|landau in der pfalz": [49.198283, 8.112344],
