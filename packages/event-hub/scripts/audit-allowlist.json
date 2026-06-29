@@ -40,5 +40,6 @@
   "garage-saarbruecken": "new scraper — Saarbrücken expansion; saarevent.com WordPress/WooCommerce",
   "city-kinos-saarbruecken": "new Kinoheld cinemas — UT-Kino + Passage-Kino; bundle not yet populated",
   "musicstar-norderstedt": "new scraper — harksheide.de only shows next 2-3 events; site has very few at a time",
-  "sperrstunde-hamburg": "new aggregator — sperrstunde.org covers ~80 Hamburg DIY/alternative venues; 60 events on front page"
+  "sperrstunde-hamburg": "new aggregator — sperrstunde.org covers ~80 Hamburg DIY/alternative venues; 60 events on front page",
+  "jazzkeller": "between programme months — live.html (Brizy CMS) shows May+June 2026, last dated show 27 Jun; July not yet published as of 29 Jun 2026. Parser verified: extracts all 15 June rows (dates/times/ticket links) when run against an earlier today."
 }
