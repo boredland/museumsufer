@@ -277,6 +277,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "pwv maikammer-alsterweiler e.v.|maikammer": [49.305216, 8.131629],
   "pwv maikammer/alsterweiler e.v.|neustadt an der weinstraße": [49.353606, 8.136025],
   "rathaus landau|landau in der pfalz": [49.198284, 8.11142],
+  "rathaus, markstr.50, ratssaal|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz landau|landau in der pfalz": [49.198375, 8.112367],
   "rathausplatz, vor der adler apotheke|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz|annweiler am trifels": [49.203052, 7.962358],
