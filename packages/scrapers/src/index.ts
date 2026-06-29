@@ -175,6 +175,7 @@ import { scrapeLutherkircheWiesbaden } from "./venues/lutherkirche-wiesbaden";
 import { scrapeMainaeppelhausLohrberg } from "./venues/mainaeppelhaus-lohrberg";
 import { scrapeMalsehn } from "./venues/malsehn";
 import { scrapeMampf } from "./venues/mampf";
+import { scrapeMarkkHamburg } from "./venues/markk-hamburg";
 import { scrapeMathildenhoehe } from "./venues/mathildenhoehe";
 import { scrapeMkgHamburg } from "./venues/mkg-hamburg";
 import { scrapeMonsunTheater } from "./venues/monsun-theater";
@@ -412,6 +413,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
   { slug: "deichtorhallen", run: (ctx: ScraperContext) => scrapeDeichtorhallen(ctx) },
   { slug: "mkg-hamburg", run: (ctx: ScraperContext) => scrapeMkgHamburg(ctx) },
+  { slug: "markk", run: (_ctx: ScraperContext) => scrapeMarkkHamburg() },
   { slug: "museums-hamburg", run: (ctx: ScraperContext) => scrapeShmhMuseums(ctx) },
   { slug: "museum-wiesbaden", run: (_ctx: ScraperContext) => scrapeMuseumWiesbaden() },
   { slug: "museum-reinhard-ernst", run: (_ctx: ScraperContext) => scrapeMuseumRe() },
@@ -609,6 +611,7 @@ export {
   scrapeMainaeppelhausLohrberg,
   scrapeMalsehn,
   scrapeMampf,
+  scrapeMarkkHamburg,
   scrapeMathildenhoehe,
   scrapeMkgHamburg,
   scrapeMonsunTheater,

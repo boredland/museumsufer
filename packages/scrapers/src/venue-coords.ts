@@ -120,6 +120,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "deichtorhallen-halle-aktuelle-kunst": [53.5471, 10.0068],
   "deichtorhallen-sammlung-falckenberg": [53.4565, 9.9882],
   "mkg-hamburg": [53.5511, 10.0094],
+  markk: [53.568, 9.9899],
   "altonaer-museum": [53.5489, 9.9344],
   "jenisch-haus": [53.5525, 9.8656],
   speicherstadtmuseum: [53.5452, 9.9918],
