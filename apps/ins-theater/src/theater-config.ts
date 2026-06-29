@@ -432,6 +432,67 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     description:
       "Hamburgs schwimmende Bühne im Nikolaifleet. Kabarett, Comedy und literarisches Theater an Bord eines historischen Frachtschiffs.",
   },
+  {
+    slug: "die-2te-heimat",
+    name: "Die 2te Heimat",
+    address: "Schützenstraße 21, 22761 Hamburg",
+    lat: 53.5637,
+    lon: 9.9088,
+    city: "hamburg",
+    website_url: "https://die2teheimat.de",
+    ticketing_provider: "reservix",
+    description:
+      "Theatersalon im Phoenixhof in Bahrenfeld. Boulevard, Musikkomödie und „Bühne & Pasta“-Dinnerabende in intimem Salonrahmen.",
+  },
+  {
+    slug: "galli-theater-hamburg",
+    name: "Galli Theater Hamburg",
+    address: "Gärtnerstraße 123, 20253 Hamburg",
+    lat: 53.5782,
+    lon: 9.9626,
+    city: "hamburg",
+    website_url: "https://galli-hamburg.de",
+    ticketing_provider: "custom",
+    description:
+      "Interaktives Märchen- und Mitspieltheater nach Johannes Galli, vorwiegend für Kinder. Ohne festes Haus — Aufführungen u. a. in der Kunstklinik Eppendorf, in Planten un Blomen und auf Open-Air-Bühnen im Hamburger Raum.",
+  },
+  {
+    slug: "steife-brise",
+    name: "Steife Brise",
+    address: "Haubachstraße 80, 22765 Hamburg",
+    lat: 53.5503,
+    lon: 9.9389,
+    city: "hamburg",
+    website_url: "https://steife-brise.de",
+    ticketing_provider: "custom",
+    description:
+      "Hamburgs Improvisationstheater seit 1992. Spontane Krimis, Seemannsgarn und Impro-Comedy an wechselnden Spielorten — vom Imperial Theater über die Cap San Diego bis zu Hafenbühnen.",
+  },
+  {
+    slug: "schmidts-tivoli",
+    name: "Schmidt Theater, Schmidts Tivoli & Schmidtchen",
+    address: "Spielbudenplatz 24–28, 20359 Hamburg",
+    lat: 53.5491,
+    lon: 9.9628,
+    city: "hamburg",
+    website_url: "https://www.tivoli.de",
+    ticketing_provider: "custom",
+    telephone: "+49 40 31778899",
+    description:
+      "Die drei Reeperbahn-Häuser von Schmidts Tivoli am Spielbudenplatz: modernes Volkstheater, Musicals, Revue und Comedy — vom Dauerbrenner „Heiße Ecke“ bis zu Gastspielen im kleinen Schmidtchen.",
+  },
+  {
+    slug: "theaterdeck",
+    name: "Theaterdeck Hamburg",
+    address: "Maurienstraße 19, 22305 Hamburg",
+    lat: 53.5876,
+    lon: 10.0436,
+    city: "hamburg",
+    website_url: "https://theaterdeck.de",
+    ticketing_provider: "custom",
+    description:
+      "Bühne des Theater Jugend Hamburg e.V. in der Barmbeker Zinnschmelze. Eigenproduktionen und inklusive Theaterarbeit von und mit Jugendlichen seit 1983.",
+  },
 ];
 
 // Curated entries win over any synthesised duplicates (the scraper

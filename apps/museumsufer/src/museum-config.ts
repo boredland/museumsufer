@@ -490,6 +490,13 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 53.5511,
     lng: 10.0094,
   },
+  markk: {
+    name: "Museum am Rothenbaum — Kulturen und Künste der Welt (MARKK)",
+    city: "hamburg",
+    website: "https://markk-hamburg.de",
+    lat: 53.568,
+    lng: 9.9899,
+  },
   "deichtorhallen-halle-aktuelle-kunst": {
     name: "Deichtorhallen — Halle für aktuelle Kunst",
     city: "hamburg",
