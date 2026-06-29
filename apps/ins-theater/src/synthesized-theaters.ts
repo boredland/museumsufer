@@ -3,16 +3,6 @@ import type { TheaterConfig } from "./theater-config";
 
 export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
   {
-    slug: "alleetheater",
-    name: "Allee Theater",
-    address: "",
-    lat: 53.5477,
-    lon: 9.9366,
-    city: "hamburg",
-    website_url: "https://alleetheater.eventim-inhouse.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "alma-hoppes-lustspielhaus",
     name: "Alma Hoppes Lustspielhaus",
     address: "",
