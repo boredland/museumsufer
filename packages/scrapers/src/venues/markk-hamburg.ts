@@ -7,10 +7,12 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  * three sections — Sonderausstellungen, Dauerausstellungen, Rückblick. We take
  * the current ones (everything before "Rückblick") and emit those with a
  * future end date as `museum:ausstellung`, matching the Hamburger Kunsthalle
- * scraper. The Veranstaltungen calendar is a separate JS widget — out of scope.
+ * scraper. Events come from `/veranstaltungen/`: its calendar has no API, so
+ * we parse the inline `var eventslist = [...]` array the JS template renders.
  */
 const BASE = "https://markk-hamburg.de";
 const AUSSTELLUNGEN_URL = `${BASE}/ausstellungen/`;
+const EVENTS_URL = `${BASE}/veranstaltungen/`;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 const MONTHS: Record<string, string> = {
@@ -26,6 +28,15 @@ const MONTHS: Record<string, string> = {
   oktober: "10",
   november: "11",
   dezember: "12",
+};
+
+// MARKK calendar category terms → museum:* labels. Only the unambiguous ones
+// are mapped; "kuenste"/"get-together"/"markk-in-motion" stay neutral.
+const TERM_LABEL: Record<string, string> = {
+  "wissen-diskurs": "museum:vortrag",
+  "meet-markk": "museum:fuehrung",
+  "telefonische-fuehrung": "museum:fuehrung",
+  "kinder-im-museum": "museum:familie",
 };
 
 export async function scrapeMarkkHamburg(): Promise<VenueScrapeResult> {
@@ -78,6 +89,36 @@ export async function scrapeMarkkHamburg(): Promise<VenueScrapeResult> {
       image_url: imageUrl ? decodeEntities(imageUrl) : null,
       labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
+  }
+
+  // Events: the /veranstaltungen/ calendar exposes no API — its underscore
+  // template is fed by an inline `var eventslist = [{date,title,terms}]` baked
+  // into the server-rendered page, so we parse that array directly.
+  const verRes = await fetch(EVENTS_URL, { headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" } });
+  if (verRes.ok) {
+    const list = (await verRes.text()).match(/eventslist\s*=\s*\[([\s\S]*?)\]\s*;/)?.[1] ?? "";
+    for (const e of list.matchAll(
+      /date:\s*"([0-9-]+)"[\s\S]*?title:\s*"((?:[^"\\]|\\.)*)"[\s\S]*?terms:\s*"([^"]*)"/g,
+    )) {
+      const date = e[1];
+      if (date < today) continue;
+      const title = stripHtml(decodeEntities(e[2].replace(/\\"/g, '"').replace(/\\\\/g, "\\")))
+        .replace(/\s+/g, " ")
+        .trim();
+      const terms = e[3].split(",").map((t) => t.trim());
+      if (!title || (terms.length === 1 && terms[0] === "schulangebot")) continue;
+      const label = terms.map((t) => TERM_LABEL[t]).find(Boolean) ?? "museum:veranstaltung";
+      const sourceEventId = `markk|event|${date}|${title}`;
+      if (seen.has(sourceEventId)) continue;
+      seen.add(sourceEventId);
+      events.push({
+        source_event_id: sourceEventId,
+        title,
+        date,
+        detail_url: EVENTS_URL,
+        labels: [{ label, confidence: 0.8, classifier: "scraper-hardcoded" }],
+      });
+    }
   }
 
   return { source_slug: "markk", display_name: "MARKK – Museum am Rothenbaum", events };
