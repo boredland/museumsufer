@@ -63,6 +63,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "congresshalle-saarbruecken",
+    name: "Congresshalle Saarbrücken",
+    address: "",
+    lat: 49.234,
+    lon: 6.996,
+    city: "saarbruecken",
+    website_url: "https://www.ccsaar.de",
+    default_genre: "classical",
+  },
+  {
     slug: "cotton-club",
     name: "Cotton Club",
     address: "",
