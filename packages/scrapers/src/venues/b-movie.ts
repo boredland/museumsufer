@@ -2,6 +2,10 @@ import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities, stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
+const PROGRAMM_URL = "https://www.b-movie.de/programm/";
+const KOMMEND_URL = `${PROGRAMM_URL}?programm=kommend`;
+const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
+
 /**
  * B-Movie — St. Pauli's long-running cult / repertory cinema. Its /programm
  * page is a day-grouped table: a date header (`tm-programm-datum` "03.06.")
@@ -9,9 +13,10 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  * (`tm-programm-uhrzeit`), a title linking to an on-page `#info-<id>` block,
  * and a type ("Film", occasionally a talk). The date carries no year, so it's
  * inferred against today.
+ *
+ * Near month-end the current programme may be entirely past; we also fetch
+ * the `?programm=kommend` preview (next month) and merge both.
  */
-const PROGRAMM_URL = "https://www.b-movie.de/programm/";
-const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
 // Walk the table in document order: a datum token sets the active date; a row
 // token (time → #info anchor + title → type) is a screening on that date.
@@ -20,52 +25,58 @@ const TOKEN_RE =
 
 export async function scrapeBMovie(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(PROGRAMM_URL, { headers: { "User-Agent": UA } });
-  if (!res.ok) throw new Error(`b-movie fetch failed: ${res.status}`);
-  const html = await res.text();
-
-  const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
-  let currentDate: string | null = null;
+  const events: CanonicalScrapedEvent[] = [];
 
-  for (const m of html.matchAll(TOKEN_RE)) {
-    if (m[1]) {
-      currentDate = parseDate(m[1], today);
-      continue;
+  for (const html of await fetchBoth()) {
+    let currentDate: string | null = null;
+
+    for (const m of html.matchAll(TOKEN_RE)) {
+      if (m[1]) {
+        currentDate = parseDate(m[1], today);
+        continue;
+      }
+      if (!currentDate) continue;
+      const time = (m[2] ?? "").trim();
+      const infoId = m[3];
+      const title = stripHtml(decodeEntities(m[4])).replace(/\s+/g, " ").trim();
+      const typ = stripHtml(decodeEntities(m[5] ?? "")).trim();
+      if (!title || !infoId) continue;
+      if (currentDate < today) continue;
+
+      const key = `${infoId}|${currentDate}|${time}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      events.push({
+        source_event_id: key,
+        title,
+        description: null,
+        date: currentDate,
+        time: /^\d{1,2}:\d{2}$/.test(time) ? time : null,
+        detail_url: `${PROGRAMM_URL}#${infoId}`,
+        ticket_url: `${PROGRAMM_URL}#${infoId}`,
+        image_url: null,
+        labels: [
+          typ && /gespräch|diskussion|vortrag|lesung/i.test(typ)
+            ? { label: "talk:vortrag", confidence: 0.6, classifier: "keyword:talk" }
+            : { label: "film:cinema", confidence: 0.9, classifier: "scraper-hardcoded" },
+        ],
+      });
     }
-    if (!currentDate) continue;
-    const time = (m[2] ?? "").trim();
-    const infoId = m[3];
-    const title = stripHtml(decodeEntities(m[4])).replace(/\s+/g, " ").trim();
-    const typ = stripHtml(decodeEntities(m[5] ?? "")).trim();
-    if (!title || !infoId) continue;
-    if (currentDate < today) continue;
-
-    // One screening per (day, time, film); the same film recurs across days.
-    const key = `${infoId}|${currentDate}|${time}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    events.push({
-      source_event_id: key,
-      title,
-      description: null,
-      date: currentDate,
-      time: /^\d{1,2}:\d{2}$/.test(time) ? time : null,
-      detail_url: `${PROGRAMM_URL}#${infoId}`,
-      ticket_url: `${PROGRAMM_URL}#${infoId}`,
-      image_url: null,
-      // B-Movie is a cinema; treat the rare non-film slot (talk/discussion) as
-      // cinema too rather than mis-routing it — its programme is film-centric.
-      labels: [
-        typ && /gespräch|diskussion|vortrag|lesung/i.test(typ)
-          ? { label: "talk:vortrag", confidence: 0.6, classifier: "keyword:talk" }
-          : { label: "film:cinema", confidence: 0.9, classifier: "scraper-hardcoded" },
-      ],
-    });
   }
 
   return { source_slug: "b-movie", display_name: "B-Movie", events };
+}
+
+/** Fetch the current programme and the next-month preview in parallel. */
+async function fetchBoth(): Promise<[string, string]> {
+  const [main, kommend] = await Promise.all([
+    fetch(PROGRAMM_URL, { headers: { "User-Agent": UA } }),
+    fetch(KOMMEND_URL, { headers: { "User-Agent": UA } }),
+  ]);
+  if (!main.ok) throw new Error(`b-movie fetch failed: ${main.status}`);
+  return [await main.text(), kommend.ok ? await kommend.text() : ""];
 }
 
 /** "03.06." (no year) → ISO date, inferring the year against `today`.
