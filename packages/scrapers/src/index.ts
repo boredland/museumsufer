@@ -125,6 +125,7 @@ import { scrapeHauptkircheStPetri } from "./venues/hauptkirche-st-petri";
 import { scrapeHausAmDom } from "./venues/haus-am-dom";
 import { scrapeHdkvHeidelberg } from "./venues/hdkv-heidelberg";
 import { scrapeHeidelbergerFruehling } from "./venues/heidelberger-fruehling";
+import { scrapeHeizkraftwerkHamburg } from "./venues/heizkraftwerk-hamburg";
 import { scrapeHessischesStaatsballett } from "./venues/hessisches-staatsballett";
 import { scrapeStaatstheaterWiesbaden } from "./venues/hessisches-staatstheater-wiesbaden";
 import { scrapeHfmdk } from "./venues/hfmdk";
@@ -154,6 +155,7 @@ import { scrapeKarlstorkino } from "./venues/karlstorkino";
 import { scrapeKellertheaterFrankfurt } from "./venues/kellertheater-frankfurt";
 import { scrapeKinoKoeppern } from "./venues/kino-koeppern";
 import { scrapeKirchenmusikDreikoenig } from "./venues/kirchenmusik-dreikoenig";
+import { scrapeKlabauterTheater } from "./venues/klabauter-theater";
 import { scrapeKoerberStiftung } from "./venues/koerber-stiftung";
 import { scrapeKomoedieFrankfurt } from "./venues/komoedie-frankfurt";
 import { scrapeKomoedieWinterhuderFaehrhaus } from "./venues/komoedie-winterhuder-faehrhaus";
@@ -350,6 +352,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "hansa-theater", run: (_ctx: ScraperContext) => scrapeHansaTheater() },
   { slug: "harburger-theater", run: (_ctx: ScraperContext) => scrapeHarburgerTheater() },
   { slug: "heidelberger-fruehling", run: (_ctx: ScraperContext) => scrapeHeidelbergerFruehling() },
+  { slug: "heizkraftwerk-hamburg", run: (_ctx: ScraperContext) => scrapeHeizkraftwerkHamburg() },
   { slug: "hdkv-heidelberg", run: (_ctx: ScraperContext) => scrapeHdkvHeidelberg() },
   { slug: "hlmd-darmstadt", run: (_ctx: ScraperContext) => scrapeHlmdDarmstadt() },
   { slug: "hohe-luft-schiff", run: (_ctx: ScraperContext) => scrapeHoheLuftschiff() },
@@ -380,6 +383,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "juedische-gemeinde-frankfurt", run: (_ctx: ScraperContext) => scrapeJuedischeGemeinde() },
   { slug: "karl-marx-buchhandlung", run: (_ctx: ScraperContext) => scrapeKarlMarxBuchhandlung() },
   { slug: "kellertheater-frankfurt", run: (_ctx: ScraperContext) => scrapeKellertheaterFrankfurt() },
+  { slug: "klabauter-theater", run: (_ctx: ScraperContext) => scrapeKlabauterTheater() },
   { slug: "kunsthalle-mainz", run: (_ctx: ScraperContext) => scrapeKunsthalleMainz() },
   { slug: "kino-koeppern", run: (_ctx: ScraperContext) => scrapeKinoKoeppern() },
   { slug: "kirchenmusik-dreikoenig", run: (_ctx: ScraperContext) => scrapeKirchenmusikDreikoenig() },
@@ -566,6 +570,7 @@ export {
   scrapeHausAmDom,
   scrapeHdkvHeidelberg,
   scrapeHeidelbergerFruehling,
+  scrapeHeizkraftwerkHamburg,
   scrapeHessischesStaatsballett,
   scrapeHfmdk,
   scrapeHlmdDarmstadt,
@@ -593,6 +598,7 @@ export {
   scrapeKellertheaterFrankfurt,
   scrapeKinoKoeppern,
   scrapeKirchenmusikDreikoenig,
+  scrapeKlabauterTheater,
   scrapeKoerberStiftung,
   scrapeKomoedieFrankfurt,
   scrapeKomoedieWinterhuderFaehrhaus,

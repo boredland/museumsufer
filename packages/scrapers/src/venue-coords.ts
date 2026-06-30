@@ -96,6 +96,8 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "steife-brise": [53.5503, 9.9389],
   "schmidts-tivoli": [53.5491, 9.9628],
   theaterdeck: [53.5876, 10.0436],
+  "klabauter-theater": [53.5537, 10.0719],
+  "heizkraftwerk-hamburg": [53.5667, 9.9362],
   "harburger-theater": [53.459, 9.9773],
   "ernst-deutsch-theater": [53.5695, 10.0266],
   "first-stage-theater": [53.5523, 9.9488],

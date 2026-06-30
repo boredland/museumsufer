@@ -493,6 +493,30 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     description:
       "Bühne des Theater Jugend Hamburg e.V. in der Barmbeker Zinnschmelze. Eigenproduktionen und inklusive Theaterarbeit von und mit Jugendlichen seit 1983.",
   },
+  {
+    slug: "klabauter-theater",
+    name: "Klabauter Theater",
+    address: "Beim Rauhen Hause 21, 22111 Hamburg",
+    lat: 53.5537,
+    lon: 10.0719,
+    city: "hamburg",
+    website_url: "https://klabauter-theater.de",
+    ticketing_provider: "custom",
+    description:
+      "Inklusives Profitheater der Stiftung Das Rauhe Haus in Hamburg-Horn. Ein Ensemble mit und ohne Behinderung spielt Eigenproduktionen, szenische Lesungen und Gastspiele bei Festivals wie der Hamburger Theaternacht.",
+  },
+  {
+    slug: "heizkraftwerk-hamburg",
+    name: "Theater Altes Heizkraftwerk",
+    address: "Isebekstraße 34, 22769 Hamburg",
+    lat: 53.5667,
+    lon: 9.9362,
+    city: "hamburg",
+    website_url: "https://www.theater-altes-heizkraftwerk.de",
+    ticketing_provider: "custom",
+    description:
+      "Freie Bühne in einem ehemaligen Heizkraftwerk in Eppendorf. Schauspiel zwischen Klassikern und Gegenwartsdramatik (Horváth, Genet) sowie Gastspiele und das Festival Fringefy; Karten über Eventim Light.",
+  },
 ];
 
 // Curated entries win over any synthesised duplicates (the scraper
