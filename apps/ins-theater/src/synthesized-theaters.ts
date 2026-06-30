@@ -333,6 +333,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-burgerhaus-dreieich",
+    name: "Bürgerhaus Dreieich",
+    address: "",
+    lat: 50.0231487,
+    lon: 8.688149,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-judisches-museum-frankfurt",
     name: "Jüdisches Museum Frankfurt",
     address: "",
