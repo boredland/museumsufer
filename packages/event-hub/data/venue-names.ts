@@ -322,6 +322,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-ada-kantine": "Ada Kantine",
   "wdc2026-ajoki-hanau": "AJOKI Hanau",
   "wdc2026-alte-brucke": "Alte Brücke",
+  "wdc2026-alte-feuerwache-orlen": "Alte Feuerwache Orlen",
   "wdc2026-alte-malzfabrik-1": "Alte Malzfabrik 1",
   "wdc2026-alte-schmelze": "Alte Schmelze",
   "wdc2026-altes-rathaus-in-kelkheim-munster": "Altes Rathaus in Kelkheim-Münster",
