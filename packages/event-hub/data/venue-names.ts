@@ -319,6 +319,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "volksbuehne-frankfurt": "Volksbühne im Großen Hirschgraben",
   "waggong": "Waggong e.V. — Kulturwerkstatt Germaniastraße",
   "wdc2026": "World Design Capital Frankfurt RheinMain 2026",
+  "wdc2026-2og-dondorf": "2og:dondorf",
   "wdc2026-ada-kantine": "Ada Kantine",
   "wdc2026-ajoki-hanau": "AJOKI Hanau",
   "wdc2026-alte-brucke": "Alte Brücke",
