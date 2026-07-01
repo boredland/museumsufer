@@ -48,6 +48,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://hafencity.premiumkino.de",
   },
   {
+    slug: "b-movie",
+    name: "B-Movie",
+    address: "",
+    lat: 53.5557,
+    lon: 9.9646,
+    city: "hamburg",
+    website_url: "https://www.b-movie.de",
+  },
+  {
     slug: "bad-vilbel-open-air-kino",
     name: "Open-Air-Kino Bad Vilbel",
     address: "",
@@ -192,6 +201,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kino-bergedorf.de",
   },
   {
+    slug: "haus-am-dom",
+    name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
+    address: "",
+    lat: 50.1107,
+    lon: 8.6826,
+    city: "frankfurt",
+    website_url: "https://hausamdom-frankfurt.de",
+  },
+  {
     slug: "historisches-museum-frankfurt",
     name: "Historisches Museum Frankfurt",
     address: "",
@@ -208,6 +226,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.6942,
     city: "frankfurt",
     website_url: "https://www.hugenottenhalle.de",
+  },
+  {
+    slug: "institut-francais-frankfurt",
+    name: "Institut français Frankfurt",
+    address: "",
+    lat: 50.1208,
+    lon: 8.6595,
+    city: "frankfurt",
+    website_url: "https://www.institutfrancais.de",
   },
   {
     slug: "kamera-heidelberg",

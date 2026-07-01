@@ -173,6 +173,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "world",
   },
   {
+    slug: "frankfurter-buergerstiftung",
+    name: "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
+    address: "",
+    lat: 50.1262,
+    lon: 8.6792,
+    city: "frankfurt",
+    website_url: "https://www.frankfurter-buergerstiftung.de",
+    default_genre: "classical",
+  },
+  {
     slug: "hafen-2-offenbach",
     name: "Hafen 2 Offenbach",
     address: "",
