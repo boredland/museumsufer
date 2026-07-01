@@ -41,5 +41,10 @@
   "city-kinos-saarbruecken": "new Kinoheld cinemas — UT-Kino + Passage-Kino; bundle not yet populated",
   "musicstar-norderstedt": "new scraper — harksheide.de only shows next 2-3 events; site has very few at a time",
   "sperrstunde-hamburg": "new aggregator — sperrstunde.org covers ~80 Hamburg DIY/alternative venues; 60 events on front page",
-  "jazzkeller": "between programme months — live.html (Brizy CMS) shows May+June 2026, last dated show 27 Jun; July not yet published as of 29 Jun 2026. Parser verified: extracts all 15 June rows (dates/times/ticket links) when run against an earlier today."
+  "jazzkeller": "between programme months — live.html (Brizy CMS) shows May+June 2026, last dated show 27 Jun; July not yet published as of 29 Jun 2026. Parser verified: extracts all 15 June rows (dates/times/ticket links) when run against an earlier today.",
+  "schauspiel-frankfurt": "seasonal — Sommerpause July–August 2026; new season starts 11 September 2026 with premieres of Schwejk, Antigone, Arturo Ui etc. Scrapers selectors verified against live markup.",
+  "hohe-luft-schiff": "seasonal — HoheLuftschiff site redesigned to Kirby CMS; spielplan page returns 'Leider passen...' (no events). Children's theater between seasons after WIR WOLLEN SPIELEN! festival (21–28 Jun 2026); programme resumes after Hamburg summer holidays.",
+  "koerber-stiftung": "seasonal — Körber-Stiftung summer pause; no events at KörberForum/KörberHaus in July 2026; Herbstprogramm announced from 13 August 2026.",
+  "kino-koeppern": "seasonal — Filmtheater Friedrichsdorf-Köppern in Sommerpause (summer break); homepage says 'Wir machen Sommerpause' as of July 2026. Parser verified working on past-season markup.",
+  "rls-hessen": "between programme months — Rosa-Luxemburg-Stiftung Hessen July programme not yet published at daily audit time (06:30 UTC); June events all past. Parser verified: extracts events correctly from teaser sections."
 }
