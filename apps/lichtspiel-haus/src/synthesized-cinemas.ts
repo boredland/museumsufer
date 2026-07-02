@@ -84,15 +84,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.botschaftderwildtiere.de",
   },
   {
-    slug: "cafe-mutz",
-    name: "Café Mutz",
-    address: "",
-    lat: 50.1726,
-    lon: 8.6357,
-    city: "frankfurt",
-    website_url: "https://www.cafemutz.de",
-  },
-  {
     slug: "cinema-wuppertal",
     name: "Cinema Wuppertal",
     address: "",

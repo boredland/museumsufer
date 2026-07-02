@@ -371,6 +371,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-dornbuschkirche": "Dornbuschkirche",
   "wdc2026-dz-bank-kunststiftung": "DZ BANK Kunststiftung",
   "wdc2026-ehemalige-akademie-der-arbeit": "Ehemalige Akademie der Arbeit",
+  "wdc2026-ehemalige-dondorf-druckerei-schirn-kunsthalle-frankfurt": "Ehemalige Dondorf Druckerei / Schirn Kunsthalle Frankfurt",
   "wdc2026-ehemalige-kunstbibliothek-auf-dem-kulturcampus": "Ehemalige Kunstbibliothek auf dem Kulturcampus",
   "wdc2026-eiserner-steg": "Eiserner Steg",
   "wdc2026-eschenheimer-tor": "Eschenheimer Tor",
