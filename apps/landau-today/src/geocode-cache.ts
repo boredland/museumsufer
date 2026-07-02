@@ -341,6 +341,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "stiftskirchenplatz|landau in der pfalz": [49.198283, 8.112344],
   "stiftskirche|landau in der pfalz": [49.196331, 8.112702],
   "stiftsplatz landau|": [49.196502, 8.11255],
+  "stiftung hambacher schloss|neustadt/weinstr.": [49.349567, 8.140389],
   "strieffler-haus der künste|landau in der pfalz": [49.198283, 8.112344],
   "strieffler-haus|landau in der pfalz": [49.198283, 8.112344],
   "städtische galerie villa streccius, südring 20|landau in der pfalz": [49.198283, 8.112344],
