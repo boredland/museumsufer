@@ -49,5 +49,7 @@
   "rls-hessen": "between programme months — Rosa-Luxemburg-Stiftung Hessen July programme not yet published at daily audit time (06:30 UTC); June events all past. Parser verified: extracts events correctly from teaser sections.",
   "cafe-mutz": "seasonal — FilmClub in Sommerpause after July 1, 2026 (last screening); August/September programme not yet published on cafemutz.de as of early July 2026. Parser verified: category-4 WP REST API returns no future posts.",
   "dig-frankfurt": "seasonal — summer pause; last listed event was 30 Jun 2026 ('Der lange Arm der Mullahs'); no upcoming events on frankfurt.deutsch-israelische-gesellschaft.de/termine/ as of July 2026. Tribe Events API returns empty.",
-  "deutsches-schauspielhaus": "seasonal — Sommerpause July 3 to August 17, 2026; new season (FREMDE SONNE etc.) starts 26 September 2026; Reservix subdomain deutsches-schauspielhaus-hamburg.reservix.de is verified but publishes no events between seasons."
+  "deutsches-schauspielhaus": "seasonal — Sommerpause July 3 to August 17, 2026; new season (FREMDE SONNE etc.) starts 26 September 2026; Reservix subdomain deutsches-schauspielhaus-hamburg.reservix.de is verified but publishes no events between seasons.",
+  "filmforum-hoechst": "seasonal — Filmforum Höchst is in Sommerpause; official programme calendar currently lists no dates after early July 2026.",
+  "forschungskolleg-humanwissenschaften": "seasonal — FKH archive/events currently shows no upcoming dates after 2 Jul 2026; next programme block not yet published on-site."
 }
