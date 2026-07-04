@@ -383,16 +383,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-marktplatz-oberursel",
-    name: "Marktplatz Oberursel",
-    address: "",
-    lat: 50.2025735,
-    lon: 8.576861,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-niddapark",
     name: "Niddapark",
     address: "",
