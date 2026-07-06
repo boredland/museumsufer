@@ -69,7 +69,11 @@ function parseEventLinks(html: string): string[] {
     const heading = stripHtml(decodeEntities(h2Match[1])).trim();
     if (!/^\d{1,2}\.\d{1,2}\.\d{2,4}$/.test(heading)) continue;
 
-    const after = html.slice(h2Match.index + h2Match[0].length, h2Match.index + h2Match[0].length + 800);
+    // The [weiter lesen] anchor sits at the tail of the teaser; slice up to the
+    // next date <h2> (or end) so a long teaser body can't push it out of range.
+    const teaserStart = h2Match.index + h2Match[0].length;
+    const nextH2 = html.indexOf("<h2", teaserStart);
+    const after = html.slice(teaserStart, nextH2 === -1 ? undefined : nextH2);
     const linkMatch = after.match(/<a\s+[^>]*href="([^"]+)"[^>]*>\[?weiter lesen\]?/i);
     if (!linkMatch) continue;
 
@@ -99,7 +103,7 @@ function parseEventDetail(html: string, detailUrl: string): CanonicalScrapedEven
   const date = parseGermanDate(dateText);
   if (!date || date < today) return null;
 
-  const time = extractTime(findMetaLine(bodyHtml ?? html, "Beginn"));
+  const time = extractTime(findMetaLine(bodyHtml ?? html, "Uhrzeit") ?? findMetaLine(bodyHtml ?? html, "Beginn"));
   const price = parsePrice(findMetaLine(bodyHtml ?? html, "Preis"));
 
   const slug = deriveSlug(detailUrl, title);

@@ -12,7 +12,7 @@ import {
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.club-voltaire.de";
-const LISTING_URL = `${BASE}/veranstaltungen/`;
+const LISTING_URL = `${BASE}/veranstaltungen/alle`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
 const TERMIN_RE = /<h4 class="termin">\s*([\s\S]*?)<\/h4>/;
@@ -28,8 +28,8 @@ const TICKET_RE =
   /href="(https?:\/\/[^"]*(?:rausgegangen|eventim|reservix|adticket|frankfurtticket|ra\.co|dice\.fm)[^"]+)"/i;
 
 /**
- * Club Voltaire publishes the full programme inline on /veranstaltungen/
- * — each event is a `<div class="inhalt">` block with the date in
+ * Club Voltaire publishes the full programme inline on /veranstaltungen/alle
+ * — each event is a `<div class="inhalt" …>` block with the date in
  * `<h4 class="termin">`, optional series in `<h4 class="reihe">`, room
  * in `<h5>`, title in `<h2>`, subtitle in `<h3>`, and description in
  * the leading `<p>` before the `<p class="quelle">` "last edited"
@@ -51,7 +51,7 @@ export async function scrapeClubVoltaire(): Promise<VenueScrapeResult> {
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  for (const block of html.split('<div class="inhalt">').slice(1)) {
+  for (const block of html.split(/<div class="inhalt"[^>]*>/).slice(1)) {
     const parsed = parseBlock(block);
     if (!parsed) continue;
     if (parsed.date < today || parsed.date > horizon) continue;
