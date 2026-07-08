@@ -473,6 +473,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "steife-brise",
+    name: "Steife Brise",
+    address: "",
+    lat: 53.5503,
+    lon: 9.9389,
+    city: "hamburg",
+    website_url: "https://steife-brise.de",
+    default_genre: "jazz",
+  },
+  {
     slug: "thalia-theater",
     name: "Thalia Theater",
     address: "",
