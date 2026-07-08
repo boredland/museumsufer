@@ -210,6 +210,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://hausamdom-frankfurt.de",
   },
   {
+    slug: "hdkv-heidelberg",
+    name: "Heidelberger Kunstverein",
+    address: "",
+    lat: 49.411,
+    lon: 8.705,
+    city: "heidelberg",
+    website_url: "https://www.hdkv.de",
+  },
+  {
     slug: "historisches-museum-frankfurt",
     name: "Historisches Museum Frankfurt",
     address: "",
@@ -382,11 +391,20 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   },
   {
     slug: "wdc2026-schader-stiftung",
-    name: "Schader Stiftung",
+    name: "Schader-Stiftung",
     address: "",
     lat: 49.8629686,
     lon: 8.6537628,
     city: "darmstadt",
+    website_url: "https://wdc2026.org",
+  },
+  {
+    slug: "wdc2026-weissfrauen-diakoniekirche-frankfurt",
+    name: "Weißfrauen Diakoniekirche Frankfurt",
+    address: "",
+    lat: 50.1072018,
+    lon: 8.670261,
+    city: "frankfurt",
     website_url: "https://wdc2026.org",
   },
   {
