@@ -433,6 +433,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-heussenstamm-galerie": "Heussenstamm-Galerie",
   "wdc2026-historisches-museum": "Historisches Museum",
   "wdc2026-hochschule-darmstadt-fachbereich-architektur": "Hochschule Darmstadt – Fachbereich Architektur",
+  "wdc2026-hochschule-fur-gestaltung-offenbach-am-main": "Hochschule für Gestaltung Offenbach am Main",
   "wdc2026-hochster-porzellan-manufaktur": "Höchster Porzellan-Manufaktur",
   "wdc2026-hofheimer-kreisstadtsommer": "Hofheimer Kreisstadtsommer",
   "wdc2026-hoppits-kindergarten": "Hoppits Kindergarten",

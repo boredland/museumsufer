@@ -163,6 +163,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "jazzinstitut-darmstadt",
+    name: "Jazzinstitut Darmstadt",
+    address: "",
+    lat: 49.8557,
+    lon: 8.656,
+    city: "darmstadt",
+    website_url: "https://www.jazzinstitut.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "karlstorbahnhof",
     name: "Karlstorbahnhof Heidelberg",
     address: "",
