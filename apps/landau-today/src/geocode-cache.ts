@@ -439,6 +439,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut leiling|schweigen-rechtenbach": [49.050889, 7.955201],
   "weingut leiner|ilbesheim": [49.182331, 8.05454],
   "weingut möwes gdbr|weyher/pfalz": [49.26729, 8.084679],
+  "weingut mühlhäuser|niederhorbach": [49.116074, 8.032866],
   "weingut nauerth-gnägy|schweigen-rechtenbach": [49.054561, 7.956034],
   "weingut phillip heinz|kapellen-drusweiler": [49.10314, 8.031469],
   "weingut rothhaas|birkweiler": [49.20483, 8.037022],
