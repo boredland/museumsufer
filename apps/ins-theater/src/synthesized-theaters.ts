@@ -23,6 +23,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "brotfabrik",
+    name: "Brotfabrik",
+    address: "",
+    lat: 50.1303,
+    lon: 8.6071,
+    city: "frankfurt",
+    website_url: "https://www.brotfabrik.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "centralkomitee",
     name: "Centralkomitee",
     address: "",
