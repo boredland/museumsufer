@@ -118,6 +118,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "galerie aparte kunst|landau in der pfalz": [49.198283, 8.112344],
   "galerie neumühle|edenkoben": [49.283253, 8.111971],
   "galerie rolfbilder in der naturheilpraxis bußalb|kapsweyer": [49.044688, 8.019927],
+  "gemeindebüro dernbach|dernbach": [50.456539, 7.788509],
   "gemeindepark|schweigen-rechtenbach": [49.054561, 7.956034],
   "gemeindesaal der stiftskirchengemeinde|landau in der pfalz": [49.198283, 8.112344],
   "gleichstellungssstelle der stadt landau|landau in der pfalz": [49.198283, 8.112344],
