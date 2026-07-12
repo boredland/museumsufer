@@ -532,14 +532,4 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     website_url: "https://wdc2026.org",
     default_genre: "classical",
   },
-  {
-    slug: "wdc2026-pavillon-wiesbaden",
-    name: "Pavillon Wiesbaden",
-    address: "",
-    lat: 50.0862869,
-    lon: 8.2418824,
-    city: "wiesbaden",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
 ];
