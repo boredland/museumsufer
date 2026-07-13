@@ -66,6 +66,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kultur-bad-vilbel.de",
   },
   {
+    slug: "boell-hessen",
+    name: "Heinrich-Böll-Stiftung Hessen",
+    address: "",
+    lat: 50.1056,
+    lon: 8.6517,
+    city: "frankfurt",
+    website_url: "https://www.boell-hessen.de",
+  },
+  {
     slug: "botschaft-der-wildtiere",
     name: "Botschaft der Wildtiere",
     address: "",
