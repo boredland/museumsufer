@@ -190,7 +190,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6334,
     city: "frankfurt",
     website_url: "https://www.gallustheater.de",
-    default_genre: "classical",
+    default_genre: "jazz",
   },
   {
     slug: "hafen-2-offenbach",
@@ -360,6 +360,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6918,
     city: "heidelberg",
     website_url: "https://karlstorbahnhof.reservix.de",
+    default_genre: "classical",
+  },
+  {
+    slug: "koerber-stiftung",
+    name: "Körber-Stiftung",
+    address: "",
+    lat: 50.131207,
+    lon: 8.683286,
+    city: "frankfurt",
+    website_url: "https://koerber-stiftung.de",
     default_genre: "classical",
   },
   {

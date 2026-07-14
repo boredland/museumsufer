@@ -353,6 +353,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "stadt edenkoben|edenkoben": [49.281878, 8.127382],
   "stadt landau in der pfalz|landau/ pfalz": [0, 0],
   "stadtbibliothek landau in der pfalz|landau in der pfalz": [49.198932, 8.122404],
+  "stadtbibliothek, heinrich-heine-platz 10, 76829 landau|landau in der pfalz": [49.198283, 8.112344],
   "stadtbibliothek|landau in der pfalz": [49.198932, 8.122404],
   "stadtgebiet landau|": [49.198283, 8.112344],
   "stadtleben landau in der pfalz gmbh|landau in der pfalz": [49.198283, 8.112344],
