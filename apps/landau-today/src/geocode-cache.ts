@@ -308,6 +308,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "rathausplatz, vor der adler apotheke|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz|annweiler am trifels": [49.203052, 7.962358],
   "rathausplatz|landau in der pfalz": [49.198375, 8.112367],
+  "ratssaal der verbandsgemeinde annweiler am trifels|annweiler am trifels": [49.202725, 7.968226],
   "reblandhalle außengelände|kirrweiler": [49.634729, 7.500757],
   "reichsburg trifels|annweiler": [49.196303, 7.978337],
   "reichsfeste trifels|annweiler am trifels": [49.202725, 7.968226],
