@@ -66,6 +66,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kultur-bad-vilbel.de",
   },
   {
+    slug: "blankeneser-kino",
+    name: "Blankeneser Kino",
+    address: "",
+    lat: 53.56,
+    lon: 9.812,
+    city: "hamburg",
+    website_url: "https://www.blankeneser-kino.de",
+  },
+  {
     slug: "boell-hessen",
     name: "Heinrich-Böll-Stiftung Hessen",
     address: "",

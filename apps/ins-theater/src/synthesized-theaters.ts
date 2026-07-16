@@ -343,6 +343,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-bruckenspielplatz-sachsenhausen",
+    name: "Brückenspielplatz Sachsenhausen",
+    address: "",
+    lat: 50.103814,
+    lon: 8.686782299999999,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-burgerhaus-dreieich",
     name: "Bürgerhaus Dreieich",
     address: "",
