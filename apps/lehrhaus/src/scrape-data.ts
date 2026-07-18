@@ -59,7 +59,6 @@ export const SCRAPE_DATA: ScrapeData = {
     {"name":"Städel Museum","slug":"staedel-museum","url":"https://www.staedelmuseum.de"},
     {"name":"Thalia Theater","slug":"thalia-theater","url":"https://www.thalia-theater.de"},
     {"name":"Theater und Orchester Heidelberg","slug":"theater-heidelberg","url":"https://www.theaterheidelberg.de"},
-    {"name":"TU Darmstadt – Öffentliche Vorträge","slug":"tu-darmstadt-vortraege","url":"https://www.tu-darmstadt.de"},
     {"name":"Ruperto Carola Ringvorlesung","slug":"uni-heidelberg-ringvorlesung","url":"https://www.uni-heidelberg.de"},
     {"name":"Universitätsklinikum Frankfurt","slug":"unimedizin-frankfurt","url":"https://www.unimedizin-ffm.de"},
     {"name":"Union International Club Frankfurt","slug":"union-club-frankfurt","url":"https://www.union-club.com"},
@@ -99,8 +98,6 @@ export const SCRAPE_DATA: ScrapeData = {
     {"name":"Weltkulturen Museum","slug":"weltkulturen-museum","url":"https://weltkulturenmuseum.de"}
   ],
   events: [
-    {"category":"Diskussion","city":"heidelberg","date":"2026-07-17","description":"Inklusives Theaterprojekt zu Gedenkkultur in Heidelberg im Anschluss Publikumsgespräch","detail_url":"https://www.theaterheidelberg.de/de/produktionen/19730-ein-platz-im-gedaechtnis","id":443978912,"source_name":"Theater und Orchester Heidelberg","source_slug":"theater-heidelberg","title":"Ein Platz im Gedächtnis"},
-    {"category":"Vortrag","city":"darmstadt","date":"2026-07-17","description":"Nina Gantert, TU München & Alexis Prévost, Universität Bonn","detail_url":"https://www.tu-darmstadt.de/universitaet/aktuelles_meldungen/veranstaltungen_6/veranstaltung_213312.de.jsp","id":3236412620,"source_name":"TU Darmstadt – Öffentliche Vorträge","source_slug":"tu-darmstadt-vortraege","time":"15:15","title":"Rhein-Main-Kolloquium Stochastik"},
     {"category":"Lesung","city":"frankfurt","date":"2026-07-18","description":"Auch in diesem Jahr beteiligen sich unsere Bibliotheken mit Büchertischen zu den Themen rund um LGQTBIA+ bzw. LSBTIQ. Hierzu beteiligen sich folgende Bibliotheken mit Bücher- und Medientischen:","detail_url":"https://frankfurt.de/service-und-rathaus/verwaltung/aemter-und-institutionen/stadtbuecherei/veranstaltungen/lesung/pride-month","id":1631922820,"source_name":"Stadtbücherei Frankfurt","source_slug":"stadtbuecherei-frankfurt","title":"PRIDE MONTH | FRANKFURT.DE - DAS OFFIZIELLE STADTPORTAL"},
     {"category":"Vortrag","city":"frankfurt","date":"2026-07-18","detail_url":"https://www.boell-hessen.de/bachwanderung-am-urselbach/","id":3991812050,"source_name":"Heinrich-Böll-Stiftung Hessen","source_slug":"boell-hessen","time":"14:00","title":"Bachwanderung am Urselbach – Nachholtermin"},
     {"category":"Diskussion","city":"frankfurt","date":"2026-07-18","description":"In dem Vortrag schauen Korolkov und Roidl zurück auf die Entstehung von display und geben einen Überblick über das vielfältige bisherige Programm.","detail_url":"https://wdc2026.org/de/events/vortrag-display-a-third-space-for-digital-experience","id":895597744,"image_url":"https://wdc2026.org/api/media/file/display%20Raumansicht%C2%A9%20Eda%20Temucin.jpg","source_name":"WDC-Hub im Museum Angewandte Kunst","source_slug":"wdc2026-wdc-hub-im-museum-angewandte-kunst","time":"16:00","title":"Ausstellung: dreams, ideas & prototypes"},
