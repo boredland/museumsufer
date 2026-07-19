@@ -572,14 +572,4 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     website_url: "https://wdc2026.org",
     default_genre: "classical",
   },
-  {
-    slug: "wdc2026-uzumumba-kiosk",
-    name: "UZUMUMBA Kiosk",
-    address: "",
-    lat: 50.0944498,
-    lon: 8.7623885,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
 ];
