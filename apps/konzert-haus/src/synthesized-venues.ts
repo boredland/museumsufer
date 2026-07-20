@@ -199,7 +199,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lat: 50.0972,
     lon: 8.7449,
     city: "frankfurt",
-    website_url: "https://hafen2.net",
+    website_url: "https://loveyourartist.com",
     default_genre: "experimental",
   },
   {
