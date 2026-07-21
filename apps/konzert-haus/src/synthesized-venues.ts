@@ -562,4 +562,14 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     website_url: "https://wdc2026.org",
     default_genre: "classical",
   },
+  {
+    slug: "wdc2026-robert-johnson",
+    name: "Robert Johnson",
+    address: "",
+    lat: 50.111633,
+    lon: 8.738901799999999,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    default_genre: "classical",
+  },
 ];

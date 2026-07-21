@@ -519,6 +519,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-rathausfoyer-offenbach": "Rathausfoyer Offenbach",
   "wdc2026-raum-fur-kulturelle-fragen": "Raum für kulturelle Fragen",
   "wdc2026-robert-blum-denkmal-in-petterweil": "Robert-Blum-Denkmal in Petterweil",
+  "wdc2026-robert-johnson": "Robert Johnson",
   "wdc2026-rudolf-steiner-schule": "Rudolf-Steiner Schule",
   "wdc2026-rushmoorpark": "Rushmoorpark",
   "wdc2026-s-bahn-haltestelle-marktplatz": "S-Bahn Haltestelle Marktplatz",
