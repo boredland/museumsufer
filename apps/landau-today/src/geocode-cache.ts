@@ -224,6 +224,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "logo landau|landau in der pfalz": [49.194348, 8.112587],
   "lunette 41|landau in der pfalz": [49.192412, 8.111581],
   "madenburg|eschbach": [49.166054, 8.014609],
+  "magazine|landau": [49.197636, 8.118868],
   "marienkapelle|kirrweiler": [49.303866, 8.166286],
   "marienkirche landau|landau in der pfalz": [49.193121, 8.115271],
   "marienkirche|landau": [49.193121, 8.115271],
