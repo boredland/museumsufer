@@ -367,6 +367,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-danzig-am-platz": "Danzig am Platz",
   "wdc2026-das-blumen": "das blumen",
   "wdc2026-designhaus-darmstadt": "Designhaus Darmstadt",
+  "wdc2026-deutsches-architekturmuseum-dam": "Deutsches Architekturmuseum (DAM)",
   "wdc2026-deutsches-ledermuseum": "Deutsches Ledermuseum",
   "wdc2026-dialogmuseum": "DIALOGMUSEUM",
   "wdc2026-domstudio": "DOMstudio",
