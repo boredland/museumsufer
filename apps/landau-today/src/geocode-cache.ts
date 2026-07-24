@@ -379,6 +379,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "städtische galerie villa streccius|landau": [49.198283, 8.112344],
   "städtische galerie villa streccius|landau in der pfalz": [49.198283, 8.112344],
   "suppe mag brot - suppenbar & café|landau in der pfalz": [49.198283, 8.112344],
+  "sängerhof|klingenmünster": [49.139546, 8.018758],
   "südstern e.v.|landau": [49.198283, 8.112344],
   "südstern-haus, weissenburger straße 30|landau in der pfalz": [49.198283, 8.112344],
   "taubensuhl|eußerthal": [49.248921, 7.96193],

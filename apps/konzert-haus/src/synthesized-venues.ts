@@ -400,7 +400,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.238,
     city: "wiesbaden",
     website_url: "https://lutherkirche-wiesbaden.reservix.de",
-    default_genre: "sacred",
+    default_genre: "classical",
   },
   {
     slug: "museum-angewandte-kunst",

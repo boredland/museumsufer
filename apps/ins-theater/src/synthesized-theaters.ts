@@ -233,16 +233,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "opernloft",
-    name: "Opernloft",
-    address: "",
-    lat: 53.5435,
-    lon: 9.9399,
-    city: "hamburg",
-    website_url: "https://opernloft.reservix.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "sperrstunde-hamburg",
     name: "Sperrstunde Hamburg",
     address: "",

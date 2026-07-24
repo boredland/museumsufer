@@ -237,15 +237,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "",
   },
   {
-    slug: "institut-francais-frankfurt",
-    name: "Institut français Frankfurt",
-    address: "",
-    lat: 50.1208,
-    lon: 8.6595,
-    city: "frankfurt",
-    website_url: "https://www.institutfrancais.de",
-  },
-  {
     slug: "kamera-heidelberg",
     name: "Die Kamera Heidelberg",
     address: "",
