@@ -219,15 +219,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://hausamdom-frankfurt.de",
   },
   {
-    slug: "hdkv-heidelberg",
-    name: "Heidelberger Kunstverein",
-    address: "",
-    lat: 49.411,
-    lon: 8.705,
-    city: "heidelberg",
-    website_url: "https://www.hdkv.de",
-  },
-  {
     slug: "historisches-museum-frankfurt",
     name: "Historisches Museum Frankfurt",
     address: "",
