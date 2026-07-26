@@ -363,16 +363,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-niddapark",
-    name: "Niddapark",
-    address: "",
-    lat: 50.1428523,
-    lon: 8.6424841,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-parfumerie-frankfurt",
     name: "Parfümerie Frankfurt",
     address: "",
