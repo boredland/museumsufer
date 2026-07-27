@@ -213,6 +213,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "literaturhaus-hamburg",
+    name: "Literaturhaus Hamburg",
+    address: "",
+    lat: 53.5649,
+    lon: 10.0135,
+    city: "hamburg",
+    website_url: "https://literaturhaus-hamburg.reservix.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "monsun-theater",
     name: "Monsun Theater",
     address: "",
