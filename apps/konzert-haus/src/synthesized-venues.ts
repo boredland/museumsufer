@@ -83,16 +83,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
-    slug: "deutsches-ledermuseum-of",
-    name: "Deutsches Ledermuseum Offenbach am Main",
-    address: "",
-    lat: 50.0984,
-    lon: 8.7587,
-    city: "frankfurt",
-    website_url: "https://www.ledermuseum.de",
-    default_genre: "classical",
-  },
-  {
     slug: "dfg-frankfurt",
     name: "Deutsch-Französische Gesellschaft Frankfurt",
     address: "",
