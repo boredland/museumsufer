@@ -390,15 +390,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://wdc2026.org",
   },
   {
-    slug: "wdc2026-weissfrauen-diakoniekirche-frankfurt",
-    name: "Weißfrauen Diakoniekirche Frankfurt",
-    address: "",
-    lat: 50.1072018,
-    lon: 8.670261,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-  },
-  {
     slug: "zeise-kinos",
     name: "Zeise Kinos",
     address: "",

@@ -416,6 +416,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "vr bank (hauptstelle) waffenstr. 15, 76829 landau/pfalz|landau in der pfalz": [49.198283, 8.112344],
   "waldgaststätte schützenhaus|maikammer": [49.305216, 8.131629],
   "waldstück queichwiesen (offenbach)|offenbach an der queich": [49.195993, 8.192833],
+  "wein- & sektgut immengarten hof|maikammer": [49.303623, 8.13616],
   "wein- und gästehaus spieß|kirrweiler": [49.301235, 8.162804],
   "wein- und gästehaus zöller|kirrweiler": [49.296496, 8.168844],
   "wein- und sektgut egon und thomas wambsganß|landau - dammheim": [49.217077, 8.146822],
