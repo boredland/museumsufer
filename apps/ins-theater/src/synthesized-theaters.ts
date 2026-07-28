@@ -353,6 +353,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-g10-projektraum",
+    name: "G10 Projektraum",
+    address: "",
+    lat: 49.8730604,
+    lon: 8.6494441,
+    city: "darmstadt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-judisches-museum-frankfurt",
     name: "Jüdisches Museum Frankfurt",
     address: "",
