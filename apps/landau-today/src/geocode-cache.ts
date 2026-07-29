@@ -98,6 +98,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "edenkoben|edenkoben": [49.282236, 8.128436],
   "edesheimer str.|rhodt unter rietburg": [49.268697, 8.112072],
   "edesheimer straße|rhodt unter rietburg": [49.269163, 8.110081],
+  "ehemalige gelände von fiat weiss landau|landau in der pfalz": [49.198283, 8.112344],
   "ehemaliges landesgartenschaugelände in landau|landau in der pfalz": [49.198283, 8.112344],
   "eiswerkstatt|schweigen-rechtenbach": [49.054561, 7.956034],
   "elmar-weiller-festhalle|herxheim": [49.144613, 8.216157],
