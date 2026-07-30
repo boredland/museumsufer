@@ -318,6 +318,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "protestantische kirche mörzheim|landau in der pfalz": [49.169145, 8.074417],
   "protestantische kirche nußdorf|landau in der pfalz": [49.198283, 8.112344],
   "protestantische pfarrkirche heuchelheim|heuchelheim-klingen": [49.142963, 8.054045],
+  "protestantisches gemeindehaus godramstein|landau in der pfalz": [49.198283, 8.112344],
   "pwv maikammer-alsterweiler e.v.|maikammer": [49.305216, 8.131629],
   "pwv maikammer/alsterweiler e.v.|neustadt an der weinstraße": [49.353606, 8.136025],
   "rathaus landau|landau in der pfalz": [49.198284, 8.11142],
