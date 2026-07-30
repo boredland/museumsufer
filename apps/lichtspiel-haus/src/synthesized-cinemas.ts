@@ -372,15 +372,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://taunale.de",
   },
   {
-    slug: "wdc2026-scape-offenbach",
-    name: "SCAPE° Offenbach",
-    address: "",
-    lat: 50.1050261,
-    lon: 8.7596802,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-  },
-  {
     slug: "wdc2026-schader-stiftung",
     name: "Schader-Stiftung",
     address: "",
