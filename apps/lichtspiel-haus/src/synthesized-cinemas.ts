@@ -372,6 +372,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://taunale.de",
   },
   {
+    slug: "wdc2026-alte-schmelze",
+    name: "Alte Schmelze",
+    address: "",
+    lat: 50.098081,
+    lon: 8.6465722,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+  },
+  {
     slug: "wdc2026-schader-stiftung",
     name: "Schader-Stiftung",
     address: "",

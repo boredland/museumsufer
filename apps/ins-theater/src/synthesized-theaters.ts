@@ -353,6 +353,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-das-blumen",
+    name: "das blumen",
+    address: "",
+    lat: 49.8691611,
+    lon: 8.6475405,
+    city: "darmstadt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-g10-projektraum",
     name: "G10 Projektraum",
     address: "",
