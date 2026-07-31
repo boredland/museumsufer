@@ -463,6 +463,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-kirchbergplatz-sossenheim": "Kirchbergplatz Sossenheim",
   "wdc2026-klingspor-museum": "Klingspor Museum",
   "wdc2026-kompass-frankfurt": "Kompass Frankfurt",
+  "wdc2026-konstablerwache": "Konstablerwache",
   "wdc2026-konzerthalle-bad-orb": "Konzerthalle Bad Orb",
   "wdc2026-kulturbunker-im-osthafen": "Kulturbunker im Osthafen",
   "wdc2026-kulturcampus-frankfurt": "Kulturcampus Frankfurt",
