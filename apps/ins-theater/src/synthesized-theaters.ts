@@ -283,16 +283,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "theater-heidelberg",
-    name: "Theater und Orchester Heidelberg",
-    address: "",
-    lat: 49.4128,
-    lon: 8.708,
-    city: "heidelberg",
-    website_url: "https://www.theaterheidelberg.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "theater-im-pariser-hof",
     name: "Theater im Pariser Hof",
     address: "",

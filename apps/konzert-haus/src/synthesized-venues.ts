@@ -403,6 +403,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "oper-frankfurt",
+    name: "Oper Frankfurt",
+    address: "",
+    lat: 50.1077,
+    lon: 8.6726,
+    city: "frankfurt",
+    website_url: "https://oper-frankfurt.de",
+    default_genre: "chamber",
+  },
+  {
     slug: "senckenberg-naturmuseum",
     name: "Senckenberg Naturmuseum",
     address: "",
