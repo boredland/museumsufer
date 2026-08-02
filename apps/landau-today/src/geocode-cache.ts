@@ -490,6 +490,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut rummel|hochstadt": [49.241666, 8.210996],
   "weingut schmitzer-julier|eschbach": [49.173791, 8.021108],
   "weingut scholler|birkweiler": [49.203706, 8.037622],
+  "weingut schäfer|edenkoben": [49.277821, 8.125956],
   "weingut siener - dr. wettstein|siebeldingen": [49.209861, 8.050691],
   "weingut silbernagel|ilbesheim bei landau": [49.18195, 8.052485],
   "weingut spiegel|großfischlingen": [49.26618, 8.177775],
