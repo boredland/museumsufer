@@ -457,6 +457,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-judisches-museum-frankfurt": "Jüdisches Museum Frankfurt",
   "wdc2026-jugendherberge-sachsenhausen": "Jugendherberge Sachsenhausen",
   "wdc2026-jugendtreff-darmstadt-ost": "Jugendtreff Darmstadt Ost",
+  "wdc2026-justus-liebig-haus": "Justus-Liebig-Haus",
   "wdc2026-karlsplatz": "Karlsplatz",
   "wdc2026-keinstil-gmbh": "keinstil.GmbH",
   "wdc2026-kiosk-bad-vilbel": "Kiosk Bad Vilbel",

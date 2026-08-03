@@ -493,16 +493,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "theater-heidelberg",
-    name: "Theater und Orchester Heidelberg",
-    address: "",
-    lat: 49.4128,
-    lon: 8.708,
-    city: "heidelberg",
-    website_url: "https://www.theaterheidelberg.de",
-    default_genre: "classical",
-  },
-  {
     slug: "theater-moller-haus",
     name: "Theater Moller Haus",
     address: "",
