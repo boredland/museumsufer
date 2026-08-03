@@ -136,6 +136,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "gemeindebüro dernbach|dernbach": [50.456539, 7.788509],
   "gemeindepark|schweigen-rechtenbach": [49.054561, 7.956034],
   "gemeindesaal der stiftskirchengemeinde|landau in der pfalz": [49.198283, 8.112344],
+  "generationenhof landau|landau in der pfalz": [49.198283, 8.112344],
   "gleichstellungssstelle der stadt landau|landau in der pfalz": [49.198283, 8.112344],
   "gloria kulturpalast|landau in der pfalz": [49.198828, 8.117435],
   "goethepark (konzertmuschel)|landau in der pfalz": [49.198283, 8.112344],
