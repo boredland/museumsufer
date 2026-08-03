@@ -560,6 +560,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-tokonoma-club": "Tokonoma Club",
   "wdc2026-turm-der-wasserburg": "Turm der Wasserburg",
   "wdc2026-uzumumba-kiosk": "UZUMUMBA Kiosk",
+  "wdc2026-verein-fur-internationale-waldkunst-e-v": "Verein für Internationale Waldkunst e.V.",
   "wdc2026-vhs-frankfurt-zentrale": "vhs Frankfurt Zentrale",
   "wdc2026-vhs-zentrum-west": "VHS – Zentrum West",
   "wdc2026-villa-grundergeist": "Villa Gründergeist",
