@@ -295,6 +295,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "ortsverwaltung mußbach|neustadt-mußbach": [49.369941, 8.169858],
   "ortsvorsteherbüro arzheim landau-arzheim|landau-arzheim": [49.19499, 8.05697],
   "ostpark, eingang an den holzterassen (ostbahnstraße)|landau in der pfalz": [49.198283, 8.112344],
+  "otto-hahn-gymnasium (innenhof)|landau in der pfalz": [49.198283, 8.112344],
   "otto-hahn-gymnasium|landau in der pfalz": [49.197817, 8.109903],
   "palatina events abfahrt|landau": [49.198283, 8.112344],
   "palatina events|landau": [49.198283, 8.112344],
