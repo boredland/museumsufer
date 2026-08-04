@@ -326,6 +326,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-alte-feuerwache-orlen": "Alte Feuerwache Orlen",
   "wdc2026-alte-malzfabrik-1": "Alte Malzfabrik 1",
   "wdc2026-alte-schmelze": "Alte Schmelze",
+  "wdc2026-alter-kurpark": "Alter Kurpark",
   "wdc2026-altes-rathaus-in-kelkheim-munster": "Altes Rathaus in Kelkheim-Münster",
   "wdc2026-am-markt": "Am Markt",
   "wdc2026-amt-fur-multikulturelle-angelegenheiten": "Amt für multikulturelle Angelegenheiten",
