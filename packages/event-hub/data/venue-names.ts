@@ -388,6 +388,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-evangelisches-gemeinde-haus": "Evangelisches Gemeinde Haus",
   "wdc2026-evangelisches-gemeindezentrum-walldorf": "Evangelisches Gemeindezentrum Walldorf",
   "wdc2026-fachzentrum-trauerseelsorge-st-michael": "Fachzentrum Trauerseelsorge St. Michael",
+  "wdc2026-familienakademie-der-kathinka-platzhoff-stiftung": "Familienakademie der Kathinka-Platzhoff-Stiftung",
   "wdc2026-familienakademie-kathinka-platzhoff-stiftung": "Familienakademie Kathinka-Platzhoff-Stiftung",
   "wdc2026-fein-frankfurt": "Fein Frankfurt",
   "wdc2026-feldberg": "Feldberg",

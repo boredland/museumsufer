@@ -201,15 +201,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kino-bergedorf.de",
   },
   {
-    slug: "haus-am-dom",
-    name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
-    address: "",
-    lat: 50.1107,
-    lon: 8.6826,
-    city: "frankfurt",
-    website_url: "https://hausamdom-frankfurt.de",
-  },
-  {
     slug: "historisches-museum-frankfurt",
     name: "Historisches Museum Frankfurt",
     address: "",

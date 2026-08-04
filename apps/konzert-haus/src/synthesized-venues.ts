@@ -533,6 +533,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "wdc2026-carree-darmstadt",
+    name: "Carree Darmstadt",
+    address: "",
+    lat: 49.8719898,
+    lon: 8.6524948,
+    city: "darmstadt",
+    website_url: "https://wdc2026.org",
+    default_genre: "classical",
+  },
+  {
     slug: "wdc2026-dornbuschkirche",
     name: "Dornbuschkirche",
     address: "",
