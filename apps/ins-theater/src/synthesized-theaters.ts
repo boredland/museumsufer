@@ -363,6 +363,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-hedwig-dohm-platz",
+    name: "Hedwig-Dohm-Platz",
+    address: "",
+    lat: 50.1187829,
+    lon: 8.8250673,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-judisches-museum-frankfurt",
     name: "Jüdisches Museum Frankfurt",
     address: "",
