@@ -343,6 +343,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-carree-darmstadt",
+    name: "Carree Darmstadt",
+    address: "",
+    lat: 49.8719898,
+    lon: 8.6524948,
+    city: "darmstadt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-das-blumen",
     name: "das blumen",
     address: "",

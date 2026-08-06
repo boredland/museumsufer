@@ -456,6 +456,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-hoppits-kindergarten": "Hoppits Kindergarten",
   "wdc2026-institut-fur-gebrauchsgrafik": "Institut für Gebrauchsgrafik",
   "wdc2026-instituto-cervantes": "Instituto Cervantes",
+  "wdc2026-internationale-waldkunstzentrum": "Internationale Waldkunstzentrum",
   "wdc2026-iu-internationale-hochschule-campus-frankfurt": "IU Internationale Hochschule, Campus Frankfurt",
   "wdc2026-japan-art-galerie-friedrich-muller": "Japan Art - Galerie Friedrich Müller",
   "wdc2026-johannes-gemeinde": "Johannes Gemeinde",
