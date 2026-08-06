@@ -532,6 +532,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-rathaus-romer": "Rathaus Römer",
   "wdc2026-rathausfoyer-offenbach": "Rathausfoyer Offenbach",
   "wdc2026-raum-fur-kulturelle-fragen": "Raum für kulturelle Fragen",
+  "wdc2026-rheingauviertel-rudesheimer-str-23-65197-wiesbaden": "Rheingauviertel, Rüdesheimer Str.23, 65197 Wiesbaden",
   "wdc2026-robert-blum-denkmal-in-petterweil": "Robert-Blum-Denkmal in Petterweil",
   "wdc2026-robert-johnson": "Robert Johnson",
   "wdc2026-rudolf-steiner-schule": "Rudolf-Steiner Schule",
