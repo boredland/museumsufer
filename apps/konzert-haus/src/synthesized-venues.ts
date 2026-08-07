@@ -83,6 +83,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "dai-heidelberg",
+    name: "DAI Heidelberg",
+    address: "",
+    lat: 49.409,
+    lon: 8.689,
+    city: "heidelberg",
+    website_url: "https://dai-heidelberg.reservix.de",
+    default_genre: "classical",
+  },
+  {
     slug: "dfg-frankfurt",
     name: "Deutsch-Französische Gesellschaft Frankfurt",
     address: "",
@@ -170,7 +180,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6334,
     city: "frankfurt",
     website_url: "https://www.gallustheater.de",
-    default_genre: "jazz",
+    default_genre: "classical",
   },
   {
     slug: "hafen-2-offenbach",
