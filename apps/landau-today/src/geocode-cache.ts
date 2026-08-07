@@ -462,6 +462,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut ackermann|ilbesheim": [49.179721, 8.050429],
   "weingut am fürstweg|heuchelheim": [49.760758, 10.568498],
   "weingut amselhof|knöringen": [49.237498, 8.144478],
+  "weingut anlag/nichterlein|rhodt unter rietburg": [49.270878, 8.106712],
   "weingut beck|oberotterbach": [49.068676, 7.979614],
   "weingut bernhard koch|hainfeld": [49.254795, 8.099683],
   "weingut bernhart|schweigen-rechtenbach": [49.051024, 7.954504],
