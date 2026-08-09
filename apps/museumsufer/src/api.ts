@@ -1,7 +1,7 @@
 import { buildIcsCalendar } from "@museumsufer/core";
 import { dateOffset, todayIso } from "./date";
-import { isDomainAllowed } from "./image-proxy";
 import type { Locale } from "./i18n";
+import { isDomainAllowed } from "./image-proxy";
 import { MUSEUMS } from "./museum-config";
 import {
   getAllMuseums,
