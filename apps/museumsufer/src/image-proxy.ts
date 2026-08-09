@@ -39,7 +39,7 @@ function shouldProxy(imageUrl: string): boolean {
 // third-party markup, so one venue moving its images to shared hosting
 // (`cdn.example.s3.amazonaws.com`, a `*.wordpress.com` tenant) would silently
 // turn the proxy into an open fetcher for that whole provider.
-function isDomainAllowed(hostname: string): boolean {
+export function isDomainAllowed(hostname: string): boolean {
   return staticAllowedDomains.has(hostname);
 }
 

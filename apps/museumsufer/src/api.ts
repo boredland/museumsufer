@@ -1,5 +1,6 @@
 import { buildIcsCalendar } from "@museumsufer/core";
 import { dateOffset, todayIso } from "./date";
+import { isDomainAllowed } from "./image-proxy";
 import type { Locale } from "./i18n";
 import { MUSEUMS } from "./museum-config";
 import {
@@ -21,6 +22,16 @@ function proxyImageUrl(url: string | null): string | null {
   if (!url?.startsWith("https://")) return null;
   const cleaned = url.split(/\s+/)[0].trim().replace(/&amp;/g, "&");
   if (!cleaned.startsWith("https://")) return null;
+  // Don't mint a /img/ URL the proxy will refuse. The allowlist is a snapshot
+  // of one scrape and hosts churn in and out between runs, so a feed cached by
+  // a reader would otherwise keep pointing at a URL that now 403s. Falling
+  // back to the origin URL keeps the image working, exactly as the other five
+  // apps do via createImageProxy's `passthroughDisallowed`.
+  try {
+    if (!isDomainAllowed(new URL(cleaned).hostname)) return cleaned;
+  } catch {
+    return null;
+  }
   return `/img/${encodeURIComponent(cleaned)}`;
 }
 
