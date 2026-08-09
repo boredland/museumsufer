@@ -64,13 +64,20 @@ const REQUEST_TIMEOUT_MS = 25_000;
  * Callers that pass their own `signal` (e.g. `retryFetch`, which manages
  * per-attempt timeouts) are left untouched.
  */
-function installFetchDeadline(ms: number): () => void {
+let fetchDeadlineInstalled = false;
+function installFetchDeadline(ms: number): void {
+  // Install once per process. `withTimeout` abandons a slow scraper without
+  // stopping it, so a scraper can still be running — and start new requests —
+  // after `queue.onIdle()` resolves. Restoring the original `fetch` at that
+  // point would hand those stragglers an unguarded fetch again, which is the
+  // exact leak this guards against. Installing permanently also makes the
+  // helper safe under nested or repeated `runHub` calls, where a save/restore
+  // pair would capture the already-patched fetch as the "original".
+  if (fetchDeadlineInstalled) return;
+  fetchDeadlineInstalled = true;
   const original = globalThis.fetch;
   globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
     original(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(ms) })) as typeof fetch;
-  return () => {
-    globalThis.fetch = original;
-  };
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
@@ -109,7 +116,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
   const geofenceDrops = new Map<string, number>();
-  const restoreFetch = installFetchDeadline(REQUEST_TIMEOUT_MS);
+  installFetchDeadline(REQUEST_TIMEOUT_MS);
   const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
     queue.add(async () => {
@@ -138,14 +145,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
       }
     });
   }
-  try {
-    await queue.onIdle();
-  } finally {
-    // Always restore, even if the queue rejects: a leaked patch would follow
-    // the process into the TMDb/DeepL/OMDb enrichment passes below and outlive
-    // this call entirely.
-    restoreFetch();
-  }
+  await queue.onIdle();
   for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
 
   // Prune past events that have not been re-confirmed this run, and drop
