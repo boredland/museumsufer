@@ -44,6 +44,35 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
  *  grace, exactly like any other transient failure. */
 const SCRAPER_TIMEOUT_MS = 90_000;
 
+/** Per-request ceiling applied to any scraper `fetch` that doesn't set its own
+ *  `signal`. Well under SCRAPER_TIMEOUT_MS so a single black-hole origin fails
+ *  its request and lets the scraper finish its remaining venues, rather than
+ *  burning the whole 90s budget. */
+const REQUEST_TIMEOUT_MS = 25_000;
+
+/**
+ * Give every un-signalled `fetch` a deadline for the duration of the scrape.
+ *
+ * `withTimeout` below only rejects its own wrapper promise — it cannot cancel
+ * work already in flight. A request to an origin that accepts the connection
+ * and never responds therefore stays open after the runner has already logged
+ * the scraper as timed out, holding a socket (and its response buffer) for the
+ * rest of the process. 173 of the 231 venue scrapers call bare `fetch` with no
+ * `signal`, so fixing this at the call sites would mean touching nearly every
+ * scraper; installing the default here covers all of them at once.
+ *
+ * Callers that pass their own `signal` (e.g. `retryFetch`, which manages
+ * per-attempt timeouts) are left untouched.
+ */
+function installFetchDeadline(ms: number): () => void {
+  const original = globalThis.fetch;
+  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+    original(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(ms) })) as typeof fetch;
+  return () => {
+    globalThis.fetch = original;
+  };
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`scraper timed out after ${ms}ms`)), ms);
@@ -80,6 +109,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
   const geofenceDrops = new Map<string, number>();
+  const restoreFetch = installFetchDeadline(REQUEST_TIMEOUT_MS);
   const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
     queue.add(async () => {
@@ -109,6 +139,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     });
   }
   await queue.onIdle();
+  restoreFetch();
   for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
 
   // Prune past events that have not been re-confirmed this run, and drop
