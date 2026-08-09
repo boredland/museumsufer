@@ -145,7 +145,11 @@ function parseKalenderHtml(html: string, today: string): KpnItem[] {
 
       const locationTitle = str(obj(it.location)?.title);
 
-      const productionId = Number.isFinite(Number(it.productionId)) ? Number(it.productionId) : null;
+      // Keep the original falsy-means-absent semantics (upstream omits the
+      // field rather than sending 0), but reject NaN/Infinity, which the old
+      // `? Number(x) : null` let through for values like "12abc" or {}.
+      const rawProductionId = it.productionId ? Number(it.productionId) : Number.NaN;
+      const productionId = Number.isFinite(rawProductionId) ? rawProductionId : null;
       const infoHtml = str(it.info);
       const info = infoHtml ? cleanText(infoHtml) : null;
 
