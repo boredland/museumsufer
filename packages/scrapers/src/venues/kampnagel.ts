@@ -121,39 +121,32 @@ function parseKalenderHtml(html: string, today: string): KpnItem[] {
       if (!Number.isFinite(id)) continue;
 
       // Parse date from eventStart.date
-      const eventStart = it.eventStart as Record<string, unknown> | null;
-      const rawDate = (eventStart?.date as string) ?? "";
-      const dateStr = rawDate.slice(0, 10); // "YYYY-MM-DD"
+      const eventStart = obj(it.eventStart);
+      const dateStr = (str(eventStart?.date) ?? "").slice(0, 10); // "YYYY-MM-DD"
       if (!dateStr || dateStr < today) continue;
 
-      const time = (it.time as string) ?? "";
-      const title = String(it.title ?? "").trim();
+      const time = str(it.time) ?? "";
+      const title = (str(it.title) ?? "").trim();
       if (!title) continue;
 
-      const subline = (it.subline as string | null) ?? null;
-      const topline = (it.topline as string | null) ?? null;
+      const subline = str(it.subline);
+      const topline = str(it.topline);
 
-      const href = (it.href as string) || `${BASE}/kalender`;
-      const ticketUrl = (it.ticketUrl as string | null) ?? null;
+      const href = str(it.href) || `${BASE}/kalender`;
+      const ticketUrl = str(it.ticketUrl);
 
       // Pick 800w image from srcset when available
-      const imageObj = it.image as Record<string, unknown> | null;
+      const imageObj = obj(it.image);
       let imageUrl: string | null = null;
       if (imageObj) {
-        const srcset = (imageObj.srcset as string) ?? "";
-        const m800 = srcset.match(/(\S+)\s+800w/);
-        if (m800) {
-          imageUrl = m800[1];
-        } else {
-          imageUrl = (imageObj.src as string | null) ?? null;
-        }
+        const m800 = (str(imageObj.srcset) ?? "").match(/(\S+)\s+800w/);
+        imageUrl = m800 ? m800[1] : str(imageObj.src);
       }
 
-      const locationObj = it.location as Record<string, unknown> | null;
-      const locationTitle = locationObj ? ((locationObj.title as string | null) ?? null) : null;
+      const locationTitle = str(obj(it.location)?.title);
 
-      const productionId = it.productionId ? Number(it.productionId) : null;
-      const infoHtml = (it.info as string | null) ?? null;
+      const productionId = Number.isFinite(Number(it.productionId)) ? Number(it.productionId) : null;
+      const infoHtml = str(it.info);
       const info = infoHtml ? cleanText(infoHtml) : null;
 
       out.push({
@@ -221,4 +214,21 @@ function buildWindowStarts(today: string, count: number): string[] {
 
 function cleanText(html: string): string {
   return stripHtml(decodeEntities(html)).replace(/\s+/g, " ").trim();
+}
+
+/** Narrow an untrusted JSON value to a string, or null.
+ *
+ *  Kampnagel's calendar payload is not a stable contract: `ticketUrl` has been
+ *  observed arriving as a link *object* (`{urlSuffix, target, title, …}`)
+ *  rather than a string. A `value as string` assertion cannot catch that — it
+ *  is erased at compile time — so the object flowed into the committed bundle
+ *  and broke `tsc` in every app consuming the field. Check at runtime instead. */
+function str(value: unknown): string | null {
+  return typeof value === "string" ? value : null;
+}
+
+function obj(value: unknown): Record<string, unknown> | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 }
