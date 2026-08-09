@@ -5,13 +5,20 @@ name: regen-assets
 # screenshotting the live custom domains so the committed assets
 # always reflect what real visitors see.
 #
-# Runs daily at 05:30 UTC (07:30 CEST / 06:30 CET) -- after the
-# scheduled scrape's first 07:00 UTC pass has had time to land on
+# Runs monthly on the 1st at 05:30 UTC (07:30 CEST / 06:30 CET) -- after
+# the scheduled scrape's first 07:00 UTC pass has had time to land on
 # the live workers -- and on manual workflow_dispatch.
+#
+# Monthly, not daily: these PNGs are binary, so git stores a full copy of
+# every one on each commit. The screenshots embed live dates and therefore
+# always differ, which made a daily refresh the single largest contributor
+# to repository size (~600 MB of the 817 MB pack, ~5.7 MB/day). They only
+# feed the PWA manifest's install prompt, where month-old art is fine.
+# Use workflow_dispatch after a visual redesign instead of waiting.
 
 on:
   schedule:
-    - cron: "30 5 * * *"
+    - cron: "30 5 1 * *"
   workflow_dispatch:
 
 permissions:
