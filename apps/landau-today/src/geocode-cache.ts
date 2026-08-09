@@ -70,6 +70,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "burg landeck|klingenmünster": [49.141025, 8.006176],
   "burgruine meistersel|ramberg in der pfalz": [0, 0],
   "bushaltestelle frantzplatz|maikammer": [49.304281, 8.13259],
+  "böchinger hütte|böchingen": [49.237325, 8.091403],
   "böhämmerhaus|bad bergzabern": [49.097065, 7.984633],
   "bücherknecht theaterstraße 11 landau|": [49.199302, 8.113713],
   "bücherknecht|landau in der pfalz": [49.199302, 8.113713],

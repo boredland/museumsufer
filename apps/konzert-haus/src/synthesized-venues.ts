@@ -480,7 +480,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6885,
     city: "frankfurt",
     website_url: "https://stalburg.de",
-    default_genre: "classical",
+    default_genre: "jazz",
   },
   {
     slug: "steife-brise",
