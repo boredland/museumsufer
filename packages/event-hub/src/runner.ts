@@ -70,7 +70,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export async function runHub(previous: EventHubData, opts: RunOptions = {}): Promise<EventHubData> {
   const now = opts.now ?? new Date();
   const log: Logger = opts.log ?? (() => undefined);
-  const nowIso = now.toISOString();
+  const today = now.toISOString().slice(0, 10);
   const ctx: ScraperContext = { proxy: opts.proxy ?? null };
   const previousById = new Map(previous.events.map((e) => [e.id, e]));
   const merged = new Map<string, CanonicalEvent>(previousById);
@@ -99,7 +99,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
             const id = makeId(result.source_slug, scraped.source_event_id);
             seenThisRun.add(id);
             const existing = merged.get(id);
-            merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, coords, nowIso));
+            merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, coords, today));
           }
         }
       } catch (err) {
@@ -114,8 +114,9 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   // Prune past events that have not been re-confirmed this run, and drop
   // future events that disappeared from their source more than TTL days
   // ago — without this, cancellations would linger until the date passes.
-  const today = nowIso.slice(0, 10);
-  const staleCutoff = new Date(now.getTime() - STALE_TTL_DAYS * MS_PER_DAY).toISOString();
+  // Day-granular to match `last_seen_at`; comparing a date against a full
+  // ISO timestamp would make same-day records sort below the cutoff.
+  const staleCutoff = new Date(now.getTime() - STALE_TTL_DAYS * MS_PER_DAY).toISOString().slice(0, 10);
   const events: CanonicalEvent[] = [];
   for (const ev of merged.values()) {
     if (seenThisRun.has(ev.id)) {
@@ -210,13 +211,13 @@ function mergeEvent(
   id: string,
   scraped: CanonicalScrapedEvent,
   coords: readonly [number, number],
-  nowIso: string,
+  today: string,
 ): CanonicalEvent {
   const scraperLabels: Label[] = scraped.labels.map((l) => ({ ...l }));
   const keywordLabels = keywordPass(scraped, scraperLabels);
   const finalLabels = mergeLabels(scraperLabels, keywordLabels);
 
-  const base = existing ?? { first_seen_at: nowIso };
+  const base = existing ?? { first_seen_at: today };
 
   return prune({
     id,
@@ -244,7 +245,7 @@ function mergeEvent(
     availability: scraped.availability ?? undefined,
     labels: finalLabels,
     first_seen_at: base.first_seen_at,
-    last_seen_at: nowIso,
+    last_seen_at: today,
   });
 }
 

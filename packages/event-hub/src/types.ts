@@ -75,6 +75,13 @@ export interface CanonicalEvent {
   imdb_rating?: number;
   imdb_votes?: number;
   labels: Label[];
+  /** Date (YYYY-MM-DD) the event was first and last confirmed by its source.
+   *  Deliberately day-granular, not a full ISO timestamp: `last_seen_at` is
+   *  rewritten for every event on every scrape, and at second precision that
+   *  re-serialised ~89% of the bundle's lines on each of the ~150 monthly
+   *  scrape commits — the dominant source of repository growth. Day
+   *  granularity keeps the line byte-identical between same-day runs while
+   *  still driving the STALE_TTL_DAYS cutoff, which only compares dates. */
   first_seen_at: string;
   last_seen_at: string;
 }
