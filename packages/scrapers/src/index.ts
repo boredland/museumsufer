@@ -400,7 +400,6 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "literaturhaus-hamburg", run: (_ctx: ScraperContext) => scrapeLiteraturhausHamburg() },
   { slug: "mainaeppelhaus-lohrberg", run: (_ctx: ScraperContext) => scrapeMainaeppelhausLohrberg() },
   { slug: "lutherkirche-wiesbaden", run: (_ctx: ScraperContext) => scrapeLutherkircheWiesbaden() },
-  { slug: "lutherkirche-wiesbaden", run: (_ctx: ScraperContext) => scrapeLutherkircheWiesbaden() },
   { slug: "malsehn", run: (_ctx: ScraperContext) => scrapeMalsehn() },
   { slug: "mampf", run: (_ctx: ScraperContext) => scrapeMampf() },
   { slug: "musicstar-norderstedt", run: (_ctx: ScraperContext) => scrapeMusicstarNorderstedt() },

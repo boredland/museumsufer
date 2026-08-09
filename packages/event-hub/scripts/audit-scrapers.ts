@@ -23,6 +23,12 @@ import allowlist from "./audit-allowlist.json" with { type: "json" };
 const EXHIBITION_LABEL = "museum:ausstellung";
 const EXEMPT = new Set(Object.keys(allowlist).filter((k) => !k.startsWith("_")));
 
+/** Fraction of audited scrapers that must come back empty before the run is
+ *  treated as a pipeline-wide failure rather than a set of quiet venues.
+ *  Chosen well above normal seasonal noise: the allowlist already absorbs the
+ *  handful of houses that legitimately go dark. */
+const MASS_FAILURE_RATIO = 0.5;
+
 const isExhibition = (e: (typeof EVENTS)[number]) => e.labels?.some((l) => l.label === EXHIBITION_LABEL);
 
 const totalBySlug = new Map<string, number>();
@@ -63,9 +69,14 @@ interface Suspect {
 }
 
 const suspects: Suspect[] = [];
+/** Every slug actually checked this run — the denominator for the mass-failure
+ *  ratio below. Excludes allowlisted slugs so growing the allowlist can never
+ *  push the ratio over the threshold on its own. */
+const auditedSlugs = new Set<string>();
 
 for (const [slug, cfg] of Object.entries(MUSEUMS)) {
   if (!cfg.eventApi || EXEMPT.has(slug)) continue;
+  auditedSlugs.add(slug);
   if (eventCountIncludingChildren(slug) === 0) {
     let exhibitions = totalBySlug.get(slug) ?? 0;
     for (const child of childSlugsByConfig.get(slug) ?? []) exhibitions += totalBySlug.get(child) ?? 0;
@@ -79,6 +90,7 @@ for (const [slug, cfg] of Object.entries(MUSEUMS)) {
 
 for (const { slug } of VENUE_SCRAPERS) {
   if (EXEMPT.has(slug)) continue;
+  auditedSlugs.add(slug);
   if ((totalBySlug.get(slug) ?? 0) === 0) {
     suspects.push({ slug, kind: "venue", detail: "venue scraper → 0 entries in bundle" });
   }
@@ -114,3 +126,21 @@ console.log(report);
 if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `suspects=${suspects.length}\n`);
 if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${report}\n`);
 writeFileSync(process.env.AUDIT_REPORT_PATH ?? "scraper-audit-report.md", report);
+
+// A handful of empty venues is normal (seasonal breaks, genuinely idle houses)
+// and is handled by the Copilot hand-off. A *large* fraction going quiet at
+// once is not a venue problem — it's an upstream shape change, a proxy outage,
+// or a broken shared helper. Exiting 0 in that case makes the workflow report
+// green precisely when the whole pipeline has stopped working, and the only
+// signal, the hand-off step, depends on a PAT nothing else monitors. Fail the
+// job so the run itself turns red.
+const auditedCount = auditedSlugs.size;
+const suspectRatio = auditedCount > 0 ? suspects.length / auditedCount : 0;
+if (suspectRatio >= MASS_FAILURE_RATIO) {
+  console.error(
+    `\naudit: ${suspects.length}/${auditedCount} scrapers (${Math.round(suspectRatio * 100)}%) produced no events — ` +
+      `at or above the ${Math.round(MASS_FAILURE_RATIO * 100)}% mass-failure threshold. ` +
+      `This is far more likely a pipeline-wide break than that many venues going dark at once.`,
+  );
+  process.exit(1);
+}

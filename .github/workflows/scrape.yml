@@ -57,6 +57,7 @@ jobs:
         run: bun scripts/scrape.ts
 
       - name: Derive museumsufer
+        id: derive-museumsufer
         working-directory: apps/museumsufer
         # museumsufer.de is the only upstream not routed through the hub —
         # a transient 5xx there shouldn't block the other apps' commit.
@@ -108,6 +109,18 @@ jobs:
             apps/museumsufer/src/scrape-data.ts \
             apps/lichtspiel-haus/src/scrape-data.ts \
             apps/lichtspiel-haus/src/synthesized-cinemas.ts
+
+      # `continue-on-error` above keeps a transient museumsufer.de outage from
+      # blocking the other apps' commit, but it also means a PERMANENT break
+      # there — moved endpoint, changed markup — is invisible: the job stays
+      # green and the bundle silently goes stale until someone notices the site
+      # has stopped updating. Surface it in the run summary so a repeated
+      # failure is visible without failing the job.
+      - name: Flag museumsufer derive failure
+        if: steps.derive-museumsufer.outcome == 'failure'
+        run: |
+          echo "::warning title=museumsufer derive failed::apps/museumsufer/scripts/scrape.ts failed; its bundle is stale for this run. Transient upstream errors are expected, but repeated failures mean the scraper is broken."
+          echo "⚠️ **museumsufer derive failed** — bundle not refreshed this run." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Report failure to Copilot
         if: failure()

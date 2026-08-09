@@ -35,8 +35,12 @@ jobs:
           AUDIT_REPORT_PATH: ${{ runner.temp }}/scraper-audit-report.md
         run: bun packages/event-hub/scripts/audit-scrapers.ts
 
+      # `always()` because the audit step now exits non-zero on mass failure
+      # (see MASS_FAILURE_RATIO). Without it a step failure would halt the job
+      # and suppress this hand-off in exactly the situation that most needs
+      # investigating. The suspects gate still skips the no-findings case.
       - name: Hand findings to Copilot
-        if: steps.audit.outputs.suspects != '0'
+        if: always() && steps.audit.outputs.suspects != '0'
         env:
           # A user PAT with Copilot enabled — the default GITHUB_TOKEN cannot
           # assign the coding agent. Fine-grained: read metadata, read/write
