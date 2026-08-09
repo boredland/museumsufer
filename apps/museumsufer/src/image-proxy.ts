@@ -31,12 +31,16 @@ function shouldProxy(imageUrl: string): boolean {
   }
 }
 
+// Exact match only. The allowlist is derived from the very image_urls it
+// gates, so every legitimate host is already in the set verbatim and the old
+// `hostname.endsWith("." + d)` fallback admitted nothing extra — it only
+// widened the proxy to every subdomain of every host a scraper had ever
+// emitted. That is attacker-reachable in principle: hosts arrive from scraped
+// third-party markup, so one venue moving its images to shared hosting
+// (`cdn.example.s3.amazonaws.com`, a `*.wordpress.com` tenant) would silently
+// turn the proxy into an open fetcher for that whole provider.
 function isDomainAllowed(hostname: string): boolean {
-  if (staticAllowedDomains.has(hostname)) return true;
-  for (const d of staticAllowedDomains) {
-    if (hostname.endsWith(`.${d}`)) return true;
-  }
-  return false;
+  return staticAllowedDomains.has(hostname);
 }
 
 export async function handleImageProxy(request: Request, env: Env): Promise<Response | null> {
