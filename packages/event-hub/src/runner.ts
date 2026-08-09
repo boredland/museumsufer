@@ -138,8 +138,14 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
       }
     });
   }
-  await queue.onIdle();
-  restoreFetch();
+  try {
+    await queue.onIdle();
+  } finally {
+    // Always restore, even if the queue rejects: a leaked patch would follow
+    // the process into the TMDb/DeepL/OMDb enrichment passes below and outlive
+    // this call entirely.
+    restoreFetch();
+  }
   for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
 
   // Prune past events that have not been re-confirmed this run, and drop
