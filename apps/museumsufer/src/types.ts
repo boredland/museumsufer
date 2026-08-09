@@ -89,4 +89,6 @@ export interface Event {
   museum_name?: string;
   museum_slug?: string;
   translated?: boolean;
+  /** Ticket availability when the museum advertises it; absent means unknown. */
+  availability?: "sold_out" | "few_left";
 }

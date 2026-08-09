@@ -1153,6 +1153,15 @@ dialog::backdrop {
   letter-spacing: -0.01em;
 }
 
+.card-avail {
+  font-family: var(--font-mono); font-weight: 500;
+  font-size: 0.625rem;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.card-avail--sold-out { color: var(--color-accent); }
+.card-avail--few-left { color: var(--color-text-secondary); }
+
 .card-description {
   margin-top: 0.375rem; padding-top: 0.375rem;
   font-size: 0.75rem; line-height: 1.6;

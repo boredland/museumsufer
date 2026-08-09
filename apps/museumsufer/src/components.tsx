@@ -259,6 +259,21 @@ function EventTag({ category, tr }: { category: string | null; tr: Record<string
   );
 }
 
+function AvailabilityBadge({
+  availability,
+  tr,
+}: {
+  availability: "sold_out" | "few_left" | undefined;
+  tr: Record<string, string>;
+}) {
+  if (!availability) return null;
+  return (
+    <span class={`card-avail card-avail--${availability.replace("_", "-")}`}>
+      {availability === "sold_out" ? tr.soldOut : tr.fewLeft}
+    </span>
+  );
+}
+
 function EndingBadge({
   endDate,
   todayIso,
@@ -508,6 +523,7 @@ function EventCard({
             <NavButton slug={ev.museum_slug} name={ev.museum_name || ""} tr={tr} />
             <CalendarDropdown ev={ev} tr={tr} />
             <EventTag category={ev.category ?? null} tr={tr} />
+            <AvailabilityBadge availability={ev.availability} tr={tr} />
             {ev.price && <span class="card-price">{ev.price}</span>}
             <ReportButton type="event" title={ev.title} museum={ev.museum_name || ""} url={linkUrl} tr={tr} />
             <ShareButton

@@ -186,6 +186,7 @@ function buildScrapeData(input: {
       ...(ev.image_url ? { image_url: ev.image_url } : {}),
       ...(price ? { price } : {}),
       ...(category ? { category } : {}),
+      ...(ev.availability ? { availability: ev.availability } : {}),
     });
   }
   const events = deduplicateEvents(deduplicateByTitle(eventsRaw)).sort(

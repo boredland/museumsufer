@@ -1402,6 +1402,34 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
 
 const ARCHAEOLOGISCHES_CANCELLED = /\b(?:muss\s+leider\s+entfallen|entfällt|entfallen|abgesagt|fällt\s+aus)\b/i;
 const ARCHAEOLOGISCHES_SOLDOUT = /\b(?:bereits\s+ausgebucht|ausgebucht|sold\s+out)\b/i;
+const ARCHAEOLOGISCHES_FEW_LEFT = /\bnur\s+noch\s+wenige\s+(?:Plätze|Karten)\b/i;
+
+// The day heading appears either as one <strong>5 | SONNTAG</strong> or split
+// across two (<strong>4&nbsp;</strong><strong>| SAMSTAG</strong>), and the weekday
+// is not reliably upper-cased. A heading the pattern misses stays inside the day
+// block, where the event regex below turns "23" and "| SAMSTAG" into events of
+// their own. Capture-free on purpose: the same pattern feeds String.split, which
+// would otherwise interleave captured groups into the day blocks.
+const ARCHAEOLOGISCHES_DAY_HEADER =
+  /<strong>\s*(\d{1,2})\s*(?:&nbsp;|\s)*(?:<\/strong>\s*<strong>)?\s*\|\s*[A-Za-zÄÖÜäöüß]+\s*<\/strong>/;
+
+/** True when a <strong> carries nothing but booking-status notes. Such a note
+ *  annotates a showing rather than naming one, so emitting it as an event of its
+ *  own is what produced title-less entries like "(ausgebucht)". */
+function archaeologischesStatusOnly(title: string): boolean {
+  return !title
+    .replace(ARCHAEOLOGISCHES_CANCELLED, "")
+    .replace(ARCHAEOLOGISCHES_SOLDOUT, "")
+    .replace(ARCHAEOLOGISCHES_FEW_LEFT, "")
+    .replace(/[\s()[\],.:;!?–—-]/g, "");
+}
+
+function parseArchaeologischesTime(range: string | undefined): { time: string | null; end_time: string | null } {
+  if (!range) return { time: null, end_time: null };
+  const parts = range.split(/[-–]/).map((t) => t.trim().replace(".", ":"));
+  const withMinutes = (t: string | undefined): string | null => (t ? (t.includes(":") ? t : `${t}:00`) : null);
+  return { time: withMinutes(parts[0]), end_time: withMinutes(parts[1]) };
+}
 
 async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
@@ -1437,20 +1465,17 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
     const yearMatch = body.match(/<p[^>]*>\s*<strong>\s*(\d{4})\s*<\/strong>\s*<\/p>/);
     const panelYear = yearMatch ? yearMatch[1] : String(inferYear(monthNum, "01"));
 
-    const dayBlocks = body.split(/<strong>\s*\d{1,2}\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/);
-    const dayHeaders = body.match(/<strong>\s*(\d{1,2})\s*(?:&nbsp;| )\s*\|\s*[A-Z]+\s*<\/strong>/g);
-
-    if (!dayHeaders) continue;
+    // Each day owns the markup between its own heading and the next one.
+    const dayHeaders = [...body.matchAll(new RegExp(ARCHAEOLOGISCHES_DAY_HEADER.source, "g"))];
 
     for (let i = 0; i < dayHeaders.length; i++) {
       const header = dayHeaders[i];
-      const dayMatch = header.match(/(\d{1,2})/);
-      if (!dayMatch) continue;
-      const day = dayMatch[1].padStart(2, "0");
+      const day = header[1].padStart(2, "0");
       const date = `${panelYear}-${monthNum}-${day}`;
       if (date < today) continue;
 
-      const block = dayBlocks[i + 1];
+      const blockStart = (header.index ?? 0) + header[0].length;
+      const block = body.slice(blockStart, dayHeaders[i + 1]?.index ?? body.length);
       if (!block) continue;
 
       // Inner [\s\S]*? lets us capture titles that contain <em>, <span>, or
@@ -1458,60 +1483,65 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
       const eventRe =
         /(?:(\d{1,2}(?:[:.]\d{2})?(?:\s*[-–]\s*\d{1,2}(?:[:.]\d{2})?)?)\s*Uhr)?\s*(?:&nbsp;|\s)*?(?:<em>([^<]*)<\/em>)?\s*(?:<br \/>)?\s*<strong>([\s\S]*?)<\/strong>/g;
 
+      // Status notes are written both before the title ("14 Uhr (ausgebucht)
+      // <em>Führung</em><br /><strong>Kasematten</strong>") and after it
+      // ("<strong>Kasematten ausgebucht</strong>"), so a pending note carries
+      // forward onto the next real title and a trailing one lands on the
+      // previous event.
       let lastIndexThisDay = -1;
-      let evMatch;
+      let pendingCancelled = false;
+      let pendingAvailability: "sold_out" | "few_left" | null = null;
+      let evMatch: RegExpExecArray | null;
       while ((evMatch = eventRe.exec(block)) !== null) {
-        const [, timeRange, category, rawTitle] = evMatch;
+        const [, timeRange, rawCategory, rawTitle] = evMatch;
         const cleanTitle = stripHtml(rawTitle).trim();
         if (!cleanTitle) continue;
 
         const cancelled = ARCHAEOLOGISCHES_CANCELLED.test(cleanTitle);
-        const soldOut = ARCHAEOLOGISCHES_SOLDOUT.test(cleanTitle);
+        const availability: "sold_out" | "few_left" | null = ARCHAEOLOGISCHES_SOLDOUT.test(cleanTitle)
+          ? "sold_out"
+          : ARCHAEOLOGISCHES_FEW_LEFT.test(cleanTitle)
+            ? "few_left"
+            : null;
 
-        // A trailing <strong> that contains nothing but a status note ("muss
-        // leider entfallen", "ausgebucht") refers to the prior event in the
-        // same day rather than introducing a new one.
-        const statusOnly = !timeRange && !category && (cancelled || soldOut) && cleanTitle.length < 40;
-        if (statusOnly) {
-          if (lastIndexThisDay >= 0) {
-            if (cancelled) {
-              events.splice(lastIndexThisDay, 1);
-              lastIndexThisDay = -1;
-            } else if (soldOut && !events[lastIndexThisDay].title.includes("ausgebucht")) {
-              events[lastIndexThisDay].title = `${events[lastIndexThisDay].title} (ausgebucht)`;
-            }
+        if (archaeologischesStatusOnly(cleanTitle)) {
+          // A note that opens a showing ("14 Uhr (ausgebucht) …") arrives with a
+          // time of its own; one that closes it annotates the event just pushed.
+          if (timeRange || lastIndexThisDay < 0) {
+            pendingCancelled ||= cancelled;
+            pendingAvailability ??= availability;
+          } else if (cancelled) {
+            events.splice(lastIndexThisDay, 1);
+            lastIndexThisDay = -1;
+          } else if (availability) {
+            events[lastIndexThisDay].availability ??= availability;
           }
           continue;
         }
 
-        if (cancelled) continue;
-
-        let time = null;
-        let endTime = null;
-        if (timeRange) {
-          const times = timeRange.split(/[-–]/).map((t) => t.trim().replace(".", ":"));
-          time = times[0];
-          if (times[1]) endTime = times[1];
-          if (time && !time.includes(":")) time += ":00";
-          if (endTime && !endTime.includes(":")) endTime += ":00";
+        if (cancelled || pendingCancelled) {
+          pendingCancelled = false;
+          pendingAvailability = null;
+          continue;
         }
 
-        const finalTitle = soldOut
-          ? `${cleanTitle.replace(ARCHAEOLOGISCHES_SOLDOUT, "").trim()} (ausgebucht)`
-          : cleanTitle;
+        const { time, end_time } = parseArchaeologischesTime(timeRange);
+        const category = rawCategory ? stripHtml(rawCategory).trim() : null;
 
         events.push({
-          title: finalTitle,
+          title: cleanTitle.replace(ARCHAEOLOGISCHES_SOLDOUT, "").replace(ARCHAEOLOGISCHES_FEW_LEFT, "").trim(),
           date,
           time: nullIfMidnight(time),
-          end_time: nullIfMidnight(endTime),
+          end_time: nullIfMidnight(end_time),
           end_date: null,
           description: null,
           detail_url: null,
           image_url: null,
-          category: category ? stripHtml(category).trim() : null,
+          category: category || null,
           price: null,
+          availability: availability ?? pendingAvailability,
         });
+        pendingAvailability = null;
         lastIndexThisDay = events.length - 1;
       }
     }
