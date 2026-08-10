@@ -403,6 +403,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-marcobrunner-strasse-65197-wiesbaden",
+    name: "Marcobrunner Straße, 65197 Wiesbaden",
+    address: "",
+    lat: 50.0762218,
+    lon: 8.2252728,
+    city: "wiesbaden",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-parfumerie-frankfurt",
     name: "Parfümerie Frankfurt",
     address: "",
