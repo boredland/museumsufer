@@ -30,6 +30,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "altes rathaus|bad bergzabern": [49.097749, 8.056681],
   "altes schlößchen - ludwig schneider gmbh|st. martin": [49.299556, 8.103121],
   "am café monogan, theaterstraße 15|landau in der pfalz": [49.198283, 8.112344],
+  "an 44 40 a, 76829 landau in der pfalz|landau in der pfalz": [49.19891, 8.090316],
   "aparte kunst galerie|landau in der pfalz": [49.198283, 8.112344],
   "aparte kunst|landau in der pfalz": [49.198283, 8.112344],
   "artgalerie am schloss|bad bergzabern": [49.102969, 7.998011],

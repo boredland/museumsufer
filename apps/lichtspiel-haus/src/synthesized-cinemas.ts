@@ -48,15 +48,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://hafencity.premiumkino.de",
   },
   {
-    slug: "bad-vilbel-open-air-kino",
-    name: "Open-Air-Kino Bad Vilbel",
-    address: "",
-    lat: 50.1935,
-    lon: 8.7497,
-    city: "frankfurt",
-    website_url: "https://www.kultur-bad-vilbel.de",
-  },
-  {
     slug: "blankeneser-kino",
     name: "Blankeneser Kino",
     address: "",
@@ -226,6 +217,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.714,
     city: "heidelberg",
     website_url: "https://www.karlstorkino.de",
+  },
+  {
+    slug: "koerber-stiftung",
+    name: "Körber-Stiftung",
+    address: "",
+    lat: 53.487019,
+    lon: 10.208363,
+    city: "hamburg",
+    website_url: "https://koerber-stiftung.de",
   },
   {
     slug: "koralle-lichtspiele",
