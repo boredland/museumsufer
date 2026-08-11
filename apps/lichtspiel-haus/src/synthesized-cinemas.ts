@@ -102,6 +102,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinopolis.de",
   },
   {
+    slug: "club-voltaire",
+    name: "Club Voltaire Frankfurt",
+    address: "",
+    lat: 50.1151,
+    lon: 8.674,
+    city: "frankfurt",
+    website_url: "https://www.club-voltaire.de",
+  },
+  {
     slug: "das-lumen-filmtheater-solingen",
     name: "Das Lumen Filmtheater Solingen",
     address: "",
