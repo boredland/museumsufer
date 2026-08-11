@@ -379,6 +379,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-dyckerhoff-ag-amoneburg": "Dyckerhoff AG - Amöneburg",
   "wdc2026-dz-bank-kunststiftung": "DZ BANK Kunststiftung",
   "wdc2026-ecke-liebig-und-senefelderstrasse-in-offenbach": "Ecke Liebig- und Senefelderstraße in Offenbach",
+  "wdc2026-ecke-schafer-und-herrmannstrasse": "Ecke Schäfer- und Herrmannstraße",
   "wdc2026-ehemalige-akademie-der-arbeit": "Ehemalige Akademie der Arbeit",
   "wdc2026-ehemalige-dondorf-druckerei-schirn-kunsthalle-frankfurt": "Ehemalige Dondorf Druckerei / Schirn Kunsthalle Frankfurt",
   "wdc2026-ehemalige-kunstbibliothek-auf-dem-kulturcampus": "Ehemalige Kunstbibliothek auf dem Kulturcampus",

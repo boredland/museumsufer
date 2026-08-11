@@ -170,6 +170,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "hof der bischöflichen amtskellerei|landau-arzheim": [49.19499, 8.05697],
   "hofgemeinschaft josefshof|völkersweiler": [49.168728, 7.931913],
   "hohenstaufensaal|annweiler am trifels": [49.203384, 7.966311],
+  "holzappel e.v. - völkersweiler|völkersweiler": [49.168728, 7.931913],
   "hotel-restaurant winzerhof|st. martin": [49.299556, 8.103121],
   "i-punkt|edenkoben": [49.281923, 8.127323],
   "im hinterhof des jostwegs 8-10|landau in der pfalz": [49.198283, 8.112344],
