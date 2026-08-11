@@ -321,6 +321,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "parkplatz zwiesel|annweiler am trifels": [49.242332, 7.898255],
   "pfalz lamas|annweiler": [49.19583, 7.969378],
   "pfalzklinikum klingenmünster|klingenmünster": [49.150386, 8.014519],
+  "pfarrei mariä himmelfahrt|landau in der pfalz": [49.198283, 8.112344],
   "pfarrgarten kirrweiler|kirrweiler": [49.300469, 8.165365],
   "pfarrkirche heilig kreuz (augustinerkirche)|landau in der pfalz": [49.198283, 8.112344],
   "pfarrkirche kreuzerhöhung|kirrweiler": [49.634702, 7.500711],
