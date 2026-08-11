@@ -345,6 +345,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "rathaus leinsweiler|leinsweiler": [49.182617, 8.053663],
   "rathaus, markstr.50, ratssaal|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz landau|landau in der pfalz": [49.198375, 8.112367],
+  "rathausplatz oder im foyer des rathauses|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz, vor der adler apotheke|landau in der pfalz": [49.198283, 8.112344],
   "rathausplatz|annweiler am trifels": [49.203052, 7.962358],
   "rathausplatz|landau in der pfalz": [49.198375, 8.112367],
