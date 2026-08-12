@@ -9,15 +9,23 @@ const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Geck
 const HEADERS = { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" };
 
 /**
- * Haus am Dom — TYPO3+Solr. The listing paginates via `tx_solr[page]`.
- * Each event detail page tags itself with one or more
- * `news-categories-item-link` titles (Konzert/Film/Theater/Vortrag/…) —
+ * Haus am Dom — TYPO3+Solr. Each event detail page tags itself with one or
+ * more `news-categories-item-link` titles (Konzert/Film/Theater/Vortrag/…) —
  * we keep all events and emit appropriate labels per category.
+ *
+ * The site no longer answers `tx_solr[…]` in the query string: any request
+ * carrying one is torn down mid-response (HTTP/2 PROTOCOL_ERROR, surfacing as
+ * a 502 through the proxy). Pagination is the "Mehr Veranstaltungen laden"
+ * form instead — a POST to /programm with the page number and the date/pid
+ * filters as hidden fields. Page 1 is the plain GET.
  */
+const LISTING_URL = `${BASE}/programm`;
 
-function listingUrl(page: number, today: string): string {
-  const dateFilter = `date%3A${today.replace(/-/g, "")}-202709000000`;
-  return `${BASE}/programm?tx_solr%5Bfilter%5D%5B1%5D=%28pid%3A6645+OR+pid%3A6647+OR+pid%3A6646%29&tx_solr%5Bfilter%5D%5B2%5D=${dateFilter}&tx_solr%5Bpage%5D=${page}&content=11235`;
+function listingBody(page: number, today: string): URLSearchParams {
+  const body = new URLSearchParams({ "tx_solr[page]": String(page) });
+  body.append("tx_solr[filter][]", `date:${today.replace(/-/g, "")}-202709000000`);
+  body.append("tx_solr[filter][]", "(pid:6645 OR pid:6647 OR pid:6646)");
+  return body;
 }
 
 const CARD_RE =
@@ -34,8 +42,10 @@ export async function scrapeHausAmDom(proxy: ProxyConfig | null = null): Promise
   const cards: Array<{ url: string; date: string }> = [];
   const seenUrls = new Set<string>();
 
-  for (let page = 1; page <= 20; page++) {
-    const html = await fetchHtml(listingUrl(page, today), proxy);
+  // ~26 pages of 6 cards cover the published season; the load-more check ends
+  // the walk earlier in quieter months.
+  for (let page = 1; page <= 40; page++) {
+    const html = await fetchHtml(LISTING_URL, proxy, page === 1 ? null : listingBody(page, today));
     let foundNew = false;
 
     for (const m of html.matchAll(CARD_RE)) {
@@ -160,13 +170,16 @@ function labelsFromCategories(
   return labels;
 }
 
-async function fetchHtml(url: string, proxy: ProxyConfig | null): Promise<string> {
+async function fetchHtml(url: string, proxy: ProxyConfig | null, body: URLSearchParams | null = null): Promise<string> {
   // The Solr-backed listing endpoint frequently throttles GH Actions IPs
   // with 503; routing through fetch-proxy (Cloudflare worker) gives us a
   // different egress IP. Retry once with backoff in case the proxy itself
   // returns a transient error.
+  const init: RequestInit = body
+    ? { method: "POST", headers: { ...HEADERS, "Content-Type": "application/x-www-form-urlencoded" }, body }
+    : { headers: HEADERS };
   for (let attempt = 0; attempt < 2; attempt++) {
-    const res = await proxyFetch(url, proxy, { headers: HEADERS });
+    const res = await proxyFetch(url, proxy, init);
     if (res.ok) return res.text();
     if (res.status >= 500 && res.status < 600 && attempt === 0) {
       await new Promise((r) => setTimeout(r, 5000));

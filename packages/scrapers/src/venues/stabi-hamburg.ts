@@ -5,6 +5,24 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const API_URL = "https://blog.sub.uni-hamburg.de/index.php?rest_route=/wp/v2/posts&categories=9&per_page=100";
 
+const DE_MONTHS: Record<string, string> = {
+  januar: "01",
+  februar: "02",
+  märz: "03",
+  april: "04",
+  mai: "05",
+  juni: "06",
+  juli: "07",
+  august: "08",
+  september: "09",
+  oktober: "10",
+  november: "11",
+  dezember: "12",
+};
+
+/** Exhibition posts open with their run: "28. August bis 25. Oktober 2026, Ausstellungsraum." */
+const EXHIBITION_RUN_RE = /(\d{1,2})\.\s*([A-Za-zä]+)\s+bis\s+(\d{1,2})\.\s*([A-Za-zä]+)\s+(\d{4})/i;
+
 interface WPPost {
   id: number;
   date: string;
@@ -31,11 +49,20 @@ export async function scrapeStabiHamburg(): Promise<VenueScrapeResult> {
   for (const post of posts) {
     const title = decodeEntities(post.title.rendered).trim();
 
-    // Skip exhibitions or general program flyers
-    if (/^ausstellung:|sommerprogramm|veranstaltungsflyer/i.test(title)) continue;
+    // Monthly flyer posts announce a PDF, not a dated event.
+    if (/sommerprogramm|veranstaltungsflyer/i.test(title)) continue;
 
     const excerpt = decodeEntities(post.excerpt.rendered);
     const content = decodeEntities(post.content.rendered);
+
+    // Exhibition posts carry a run, not a start time — and their body also
+    // mentions the vernissage, which the event parser below would otherwise
+    // mistake for the exhibition itself.
+    if (/^ausstellung:/i.test(title)) {
+      const exhibition = parseExhibition(post, title, content, today);
+      if (exhibition) events.push(exhibition);
+      continue;
+    }
 
     // Try to parse date, time from content/excerpt
     const parsed = parseEventDateTime(title, content || excerpt, post.date);
@@ -74,13 +101,45 @@ export async function scrapeStabiHamburg(): Promise<VenueScrapeResult> {
   };
 }
 
+/** Exhibitions run for weeks; emit one entry spanning the run so the bundle
+ *  can show it alongside the dated talks. */
+function parseExhibition(post: WPPost, title: string, content: string, today: string): CanonicalScrapedEvent | null {
+  const run = stripHtml(content).match(EXHIBITION_RUN_RE);
+  if (!run) return null;
+  const startMonth = DE_MONTHS[run[2].toLowerCase()];
+  const endMonth = DE_MONTHS[run[4].toLowerCase()];
+  if (!startMonth || !endMonth) return null;
+
+  const year = run[5];
+  // A run crossing New Year prints only the end year; the start is the year before.
+  const startYear = startMonth > endMonth ? String(Number(year) - 1) : year;
+  const start = `${startYear}-${startMonth}-${run[1].padStart(2, "0")}`;
+  const end = `${year}-${endMonth}-${run[3].padStart(2, "0")}`;
+  if (end < today) return null;
+
+  return {
+    source_event_id: String(post.id),
+    title: title
+      .replace(/^Ausstellung:\s*/i, "")
+      .replace(/\s*\([\d.–\-\s]+\)\s*$/, "")
+      .trim(),
+    date: start,
+    end_date: end,
+    description: stripHtml(content).trim().slice(0, 600) || null,
+    detail_url: post.link,
+    labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
+  };
+}
+
 function parseEventDateTime(title: string, text: string, postDateStr: string) {
   const cleanText = stripHtml(text).trim();
 
   // Look for: "Dienstag, 16.6., 18 Uhr, Vortragsraum"
   // or "Montag, 29.6., 17.30 Uhr bis 19.30 Uhr, Vortragsraum"
+  // The blog writes minutes with either separator ("17.30 Uhr", "18:30 Uhr")
+  // and sometimes drops the comma after the day ("Donnerstag, 4.6. 19 Uhr").
   const timeRegex =
-    /(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*(\d{1,2})\.(\d{1,2})\.,\s*(\d{1,2}(?:\.\d{2})?)\s*Uhr(?:\s*(?:bis|-)\s*(\d{1,2}(?:\.\d{2})?)\s*Uhr)?/i;
+    /(?:Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag),\s*(\d{1,2})\.(\d{1,2})\.,?\s*(\d{1,2}(?:[.:]\d{2})?)\s*Uhr(?:\s*(?:bis|-)\s*(\d{1,2}(?:[.:]\d{2})?)\s*Uhr)?/i;
   const match = cleanText.match(timeRegex);
 
   let day = 0;

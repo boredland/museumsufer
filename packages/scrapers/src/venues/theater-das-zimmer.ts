@@ -6,6 +6,11 @@ const SPIELPLAN_URL = "https://www.theater-das-zimmer.de/termine/";
 
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
+/** The origin renders /termine/ in roughly a minute (sometimes worse), far
+ *  past the runner's 25s default, so the scraper asks for its own budget —
+ *  kept under the 90s per-scraper ceiling. */
+const REQUEST_TIMEOUT_MS = 80_000;
+
 /**
  * Theater das Zimmer — Germany's smallest private theater (40 seats).
  * Uses All-in-One Event Calendar (ai1ec) for WordPress.
@@ -18,6 +23,7 @@ export async function scrapeTheaterDasZimmer(): Promise<VenueScrapeResult> {
         "User-Agent": UA,
         Accept: "text/html,application/xhtml+xml,application/xml;q=0.9",
       },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (!res.ok) throw new Error(`Theater das Zimmer fetch failed: ${res.status}`);
     html = await res.text();
@@ -53,19 +59,22 @@ function parseEvents(html: string): CanonicalScrapedEvent[] {
   // Split on ai1ec-event-container blocks
   const blocks = html.split(/class="ai1ec-event-container/i);
 
+  // The popup prints the month abbreviated with a trailing dot ("Aug. 13 um
+  // 18:00"); März/Mai/Juni/Juli are short enough to appear unabbreviated.
   const GERMAN_MONTHS: Record<string, string> = {
-    Januar: "01",
-    Februar: "02",
-    März: "03",
-    April: "04",
-    Mai: "05",
-    Juni: "06",
-    Juli: "07",
-    August: "08",
-    September: "09",
-    Oktober: "10",
-    November: "11",
-    Dezember: "12",
+    jan: "01",
+    feb: "02",
+    mär: "03",
+    maer: "03",
+    apr: "04",
+    mai: "05",
+    jun: "06",
+    jul: "07",
+    aug: "08",
+    sep: "09",
+    okt: "10",
+    nov: "11",
+    dez: "12",
   };
 
   for (let i = 1; i < blocks.length; i++) {
@@ -77,13 +86,14 @@ function parseEvents(html: string): CanonicalScrapedEvent[] {
     if (!title) continue;
 
     // Full date+time from popup "MonName DAY um HH:MM"
-    const popupTimeMatch = block.match(/class="ai1ec-event-time">\s*(\w+)\s+(\d{1,2})\s+um\s+(\d{2}:\d{2})/i);
+    const popupTimeMatch = block.match(
+      /class="ai1ec-event-time">\s*([A-Za-zÄÖÜäöü]+)\.?\s+(\d{1,2})\s+um\s+(\d{2}:\d{2})/i,
+    );
     if (!popupTimeMatch) continue;
 
-    const monthName = popupTimeMatch[1];
     const dayStr = popupTimeMatch[2].padStart(2, "0");
     const time = popupTimeMatch[3];
-    const monthNum = GERMAN_MONTHS[monthName];
+    const monthNum = GERMAN_MONTHS[popupTimeMatch[1].slice(0, 3).toLowerCase()];
     if (!monthNum) continue;
 
     // Year: infer from today — if month+day < today assume next year

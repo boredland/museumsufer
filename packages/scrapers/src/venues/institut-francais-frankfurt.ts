@@ -9,10 +9,37 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
  * The listing is a national portal filtered to /de/frankfurt-am-main/ —
  * cards from other cities (Berlin, Hamburg, …) appear under different URLs
  * and never link to /de/frankfurt-m/event/ so the href filter is enough.
+ *
+ * Bare, the page renders zero teasers: the view's exposed date filter has no
+ * default, and the site's own JS fills it in on load. The two params are also
+ * inverted upstream — `field_date_start_value` carries the *upper* bound and
+ * `field_date_end_value` the lower — so we pass them the way the site's
+ * `setForMonth()` does, widened to a rolling window.
  */
 const BASE = "https://www.institutfrancais.de";
-const LIST_URL = `${BASE}/de/frankfurt-am-main/veranstaltungen-frankfurt-am-main`;
+const LIST_PATH = `${BASE}/de/frankfurt-am-main/veranstaltungen-frankfurt-am-main`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
+
+/** How far ahead to ask for; the house books at most a season in advance. */
+const WINDOW_MONTHS = 12;
+const MAX_PAGES = 10;
+
+/** Drupal wants unpadded `YYYY/M/D`. */
+function filterDate(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${y}/${Number(m)}/${Number(d)}`;
+}
+
+function listingUrl(today: string, page: number): string {
+  const until = new Date(`${today}T00:00:00Z`);
+  until.setUTCMonth(until.getUTCMonth() + WINDOW_MONTHS);
+  const params = new URLSearchParams({
+    field_date_start_value: filterDate(until.toISOString().slice(0, 10)),
+    field_date_end_value: filterDate(today),
+    page: String(page),
+  });
+  return `${LIST_PATH}?${params}`;
+}
 
 const TEASER_RE =
   /<a\s+class="teaser"\s+href="(\/de\/frankfurt-m\/event\/[^"]+)"[^>]*>([\s\S]*?)<\/a>(?=\s*(?:<a\s+class="teaser"|<\/div>))/g;
@@ -48,16 +75,30 @@ interface ParsedDate {
 }
 
 export async function scrapeInstitutFrancaisFrankfurt(): Promise<VenueScrapeResult> {
-  const res = await fetch(LIST_URL, {
-    headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
-  });
-  if (!res.ok) throw new Error(`institut-francais-frankfurt fetch failed: ${res.status}`);
-  const html = await res.text();
-
   const today = todayIso();
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const html = await fetchListing(today, page);
+    const before = events.length;
+    collectTeasers(html, today, seen, events);
+    // The infinite-scroll pager only advertises a next page while one exists.
+    if (events.length === before || !/rel="next"/.test(html)) break;
+  }
+
+  return { source_slug: "institut-francais-frankfurt", display_name: "Institut français Frankfurt", events };
+}
+
+async function fetchListing(today: string, page: number): Promise<string> {
+  const res = await fetch(listingUrl(today, page), {
+    headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
+  });
+  if (!res.ok) throw new Error(`institut-francais-frankfurt fetch failed: ${res.status}`);
+  return res.text();
+}
+
+function collectTeasers(html: string, today: string, seen: Set<string>, events: CanonicalScrapedEvent[]): void {
   for (const m of html.matchAll(TEASER_RE)) {
     const href = decodeEntities(m[1]);
     const body = m[2];
@@ -99,8 +140,6 @@ export async function scrapeInstitutFrancaisFrankfurt(): Promise<VenueScrapeResu
       labels: labelsForKind(kindRaw),
     });
   }
-
-  return { source_slug: "institut-francais-frankfurt", display_name: "Institut français Frankfurt", events };
 }
 
 function parseDate(text: string): ParsedDate | null {
