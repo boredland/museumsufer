@@ -77,7 +77,7 @@ Scrapers that need to bypass datacenter-IP blocks, broken TLS chains, or Cloudfl
 - Tailwind v4 (museums) / hand-rolled lightningcss (everyone else)
 - [Bun](https://bun.sh) for tooling — installs, scripts, the scrape pipeline (`bun:sqlite`-free, pure-function)
 - Turborepo workspaces
-- GitHub Actions: hourly hub scrape (`scrape.yml`), daily scraper-health audit that hands under-delivering scrapers to the Copilot coding agent (`scraper-audit.yml`), nightly Lighthouse + SEO budget enforcement (`lighthouse.yml`), daily manifest-screenshot + OG-image regen against prod (`regen-assets.yml`)
+- GitHub Actions: hourly hub scrape (`scrape.yml`), daily scraper-health audit that files under-delivering scrapers as a tracking issue (`scraper-audit.yml`), nightly Lighthouse + SEO budget enforcement (`lighthouse.yml`), daily manifest-screenshot + OG-image regen against prod (`regen-assets.yml`)
 - Cloudflare git integration for deploys
 
 ## Common commands

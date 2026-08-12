@@ -1,11 +1,13 @@
 /**
- * Shared helpers for handing an issue to the GitHub Copilot coding agent.
+ * Shared `gh` CLI helpers for the workflows that file issues.
  *
- * Assignment goes through the documented REST agent-assignment body rather
- * than the GraphQL suggestedActors query, which unreliably omits the bot for
- * fine-grained PATs even when assignment works. Requires a user PAT in
- * GH_TOKEN with Contents + Pull requests + Actions write (not just Issues) —
- * assigning the agent creates a branch/PR, so an Issues-only token gets 403.
+ * `assignCopilot` hands an issue to the Copilot coding agent — only the scrape
+ * failure handler still does that. Assignment goes through the documented REST
+ * agent-assignment body rather than the GraphQL suggestedActors query, which
+ * unreliably omits the bot for fine-grained PATs even when assignment works.
+ * It requires a user PAT in GH_TOKEN with Contents + Pull requests + Actions
+ * write (not just Issues) — assigning the agent creates a branch/PR, so an
+ * Issues-only token gets 403.
  */
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";

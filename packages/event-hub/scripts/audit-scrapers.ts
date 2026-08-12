@@ -128,12 +128,11 @@ if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMM
 writeFileSync(process.env.AUDIT_REPORT_PATH ?? "scraper-audit-report.md", report);
 
 // A handful of empty venues is normal (seasonal breaks, genuinely idle houses)
-// and is handled by the Copilot hand-off. A *large* fraction going quiet at
+// and is handled by the tracking issue. A *large* fraction going quiet at
 // once is not a venue problem — it's an upstream shape change, a proxy outage,
 // or a broken shared helper. Exiting 0 in that case makes the workflow report
-// green precisely when the whole pipeline has stopped working, and the only
-// signal, the hand-off step, depends on a PAT nothing else monitors. Fail the
-// job so the run itself turns red.
+// green precisely when the whole pipeline has stopped working. Fail the job so
+// the run itself turns red.
 const auditedCount = auditedSlugs.size;
 const suspectRatio = auditedCount > 0 ? suspects.length / auditedCount : 0;
 if (suspectRatio >= MASS_FAILURE_RATIO) {

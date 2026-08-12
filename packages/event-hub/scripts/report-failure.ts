@@ -12,7 +12,7 @@
  * Contents/Pull-requests/Actions write that Copilot assignment needs.
  */
 import { writeFileSync } from "node:fs";
-import { assignCopilot, ensureLabel, gh } from "./lib/copilot";
+import { assignCopilot, ensureLabel, gh } from "./lib/github";
 
 const LABEL = "scrape-failure";
 

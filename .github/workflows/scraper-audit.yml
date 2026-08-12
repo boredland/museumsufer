@@ -15,7 +15,7 @@ concurrency:
 
 # Audits the committed events bundle for scrapers that under-deliver (the
 # juedisches/fdh/caricatura failure mode), and — only when it finds any —
-# assigns the GitHub Copilot coding agent an issue to investigate and fix.
+# files a single tracking issue for a human to pick up.
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -37,14 +37,11 @@ jobs:
 
       # `always()` because the audit step now exits non-zero on mass failure
       # (see MASS_FAILURE_RATIO). Without it a step failure would halt the job
-      # and suppress this hand-off in exactly the situation that most needs
+      # and suppress the report in exactly the situation that most needs
       # investigating. The suspects gate still skips the no-findings case.
-      - name: Hand findings to Copilot
+      - name: File findings as an issue
         if: always() && steps.audit.outputs.suspects != '0'
         env:
-          # A user PAT with Copilot enabled — the default GITHUB_TOKEN cannot
-          # assign the coding agent. Fine-grained: read metadata, read/write
-          # issues + pull requests + contents + actions.
-          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           AUDIT_REPORT_PATH: ${{ runner.temp }}/scraper-audit-report.md
-        run: bun packages/event-hub/scripts/assign-copilot.ts
+        run: bun packages/event-hub/scripts/open-audit-issue.ts
