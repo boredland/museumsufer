@@ -1,6 +1,5 @@
 /**
- * Opens (or refreshes) a GitHub issue when the scrape workflow fails and hands
- * it to the Copilot coding agent.
+ * Opens (or refreshes) a GitHub issue when the scrape workflow fails.
  *
  * Runs as the scrape job's `if: failure()` step. It pulls the failed run's
  * metadata and failed-step logs, distils them into a digest (root-cause error
@@ -8,19 +7,17 @@
  * open `scrape-failure` issue so back-to-back failures comment rather than
  * pile up new issues.
  *
- * Requires a user PAT in GH_TOKEN with Actions read (to fetch logs) plus the
- * Contents/Pull-requests/Actions write that Copilot assignment needs.
+ * The built-in GITHUB_TOKEN is enough: filing an issue and reading the run's
+ * own logs need only `issues: write` + `actions: read`.
  */
 import { writeFileSync } from "node:fs";
-import { assignCopilot, ensureLabel, gh } from "./lib/github";
+import { ensureLabel, gh } from "./lib/github";
 
 const LABEL = "scrape-failure";
 
-const [owner, repo] = (process.env.GITHUB_REPOSITORY ?? "").split("/");
 const runId = process.env.GITHUB_RUN_ID;
-if (!owner || !repo) throw new Error("GITHUB_REPOSITORY (owner/repo) is not set");
 if (!runId) throw new Error("GITHUB_RUN_ID is not set");
-if (!process.env.GH_TOKEN && !process.env.GITHUB_TOKEN) throw new Error("GH_TOKEN (a user PAT) is required");
+if (!process.env.GH_TOKEN && !process.env.GITHUB_TOKEN) throw new Error("GH_TOKEN is required");
 
 interface RunStep {
   name: string;
@@ -76,7 +73,7 @@ const body = [
   fence(tail.join("\n")),
   "",
   "---",
-  "_Opened automatically by the scrape workflow's failure handler and assigned to Copilot. Closing this issue stops the reminder until the next failure._",
+  "_Opened automatically by the scrape workflow's failure handler. Closing this issue stops the reminder until the next failure._",
 ].join("\n");
 
 ensureLabel(LABEL, "D93F0B", "Automated scrape workflow failure reports");
@@ -97,22 +94,7 @@ if (open.length > 0) {
 const bodyFile = "/tmp/scrape-failure-body.md";
 writeFileSync(bodyFile, body);
 const issueUrl = gh(["issue", "create", "--title", title, "--label", LABEL, "--body-file", bodyFile]);
-const number = issueUrl.split("/").pop();
-if (!number) throw new Error(`could not parse issue number from ${issueUrl}`);
-
-try {
-  if (assignCopilot(owner, repo, number)) {
-    console.log(`Created ${issueUrl} and assigned the Copilot coding agent.`);
-  } else {
-    console.error(
-      `Created ${issueUrl} but the Copilot coding agent did not stick as an assignee — assign it manually or confirm the agent is enabled for the repo.`,
-    );
-  }
-} catch (e) {
-  console.error(
-    `Created ${issueUrl} but assigning the Copilot agent failed (likely the PAT lacks Contents/Pull-requests/Actions write):\n${(e as Error).message}`,
-  );
-}
+console.log(`Created ${issueUrl}.`);
 
 function safeFailedLog(id: string): string {
   try {

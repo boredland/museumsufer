@@ -8,6 +8,8 @@ on:
 permissions:
   contents: write
   issues: write
+  # report-failure.ts reads this run's own failed-step logs.
+  actions: read
 
 concurrency:
   group: scrape
@@ -122,11 +124,8 @@ jobs:
           echo "::warning title=museumsufer derive failed::apps/museumsufer/scripts/scrape.ts failed; its bundle is stale for this run. Transient upstream errors are expected, but repeated failures mean the scraper is broken."
           echo "⚠️ **museumsufer derive failed** — bundle not refreshed this run." >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Report failure to Copilot
+      - name: Report failure as an issue
         if: failure()
         env:
-          # A user PAT with Copilot enabled — the default GITHUB_TOKEN cannot
-          # assign the coding agent. Fine-grained: read metadata + actions,
-          # read/write issues + pull requests + contents.
-          GH_TOKEN: ${{ secrets.COPILOT_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bun packages/event-hub/scripts/report-failure.ts
