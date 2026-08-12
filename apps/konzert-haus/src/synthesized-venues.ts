@@ -603,6 +603,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "wdc2026-senefelder-park",
+    name: "Senefelder Park",
+    address: "",
+    lat: 50.0965122,
+    lon: 8.7653759,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    default_genre: "classical",
+  },
+  {
     slug: "wdc2026-wdc-hub-im-museum-angewandte-kunst",
     name: "WDC-Hub im Museum Angewandte Kunst",
     address: "",
