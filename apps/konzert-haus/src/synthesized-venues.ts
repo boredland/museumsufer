@@ -253,6 +253,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "sacred",
   },
   {
+    slug: "haus-am-dom",
+    name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
+    address: "",
+    lat: 50.1107,
+    lon: 8.6826,
+    city: "frankfurt",
+    website_url: "https://hausamdom-frankfurt.de",
+    default_genre: "classical",
+  },
+  {
     slug: "heidelberger-fruehling",
     name: "Heidelberger Frühling",
     address: "",
@@ -500,6 +510,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 9.9986,
     city: "hamburg",
     website_url: "https://www.thalia-theater.de",
+    default_genre: "classical",
+  },
+  {
+    slug: "theater-heidelberg",
+    name: "Theater und Orchester Heidelberg",
+    address: "",
+    lat: 49.4128,
+    lon: 8.708,
+    city: "heidelberg",
+    website_url: "https://www.theaterheidelberg.de",
     default_genre: "classical",
   },
   {
