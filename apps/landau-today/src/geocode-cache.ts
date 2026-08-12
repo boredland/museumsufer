@@ -81,6 +81,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "café zur krummbeere|landau/pfalz": [49.192464, 8.134193],
   "chawwerusch theater|herxheim bei landau": [49.146226, 8.214196],
   "christines weinbegleitungen|hainfeld": [49.257501, 8.101102],
+  "cocktailbar bargage|landau in der pfalz": [49.198283, 8.112344],
   "consulat des weins|st. martin": [49.298332, 8.108727],
   "culmann's traumgarten|billigheim-ingenheim": [49.1367, 8.09056],
   "danziger platz|landau in der pfalz": [49.207209, 8.142793],
