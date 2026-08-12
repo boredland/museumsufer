@@ -313,6 +313,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "theater-das-zimmer",
+    name: "Theater das Zimmer",
+    address: "",
+    lat: 53.5524,
+    lon: 10.0822,
+    city: "hamburg",
+    website_url: "https://www.theater-das-zimmer.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "theater-heidelberg",
     name: "Theater und Orchester Heidelberg",
     address: "",
