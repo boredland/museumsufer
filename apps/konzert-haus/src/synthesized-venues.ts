@@ -33,16 +33,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
-    slug: "cafe-mutz",
-    name: "Café Mutz",
-    address: "",
-    lat: 50.1726,
-    lon: 8.6357,
-    city: "frankfurt",
-    website_url: "https://www.cafemutz.de",
-    default_genre: "world",
-  },
-  {
     slug: "centralkomitee",
     name: "Centralkomitee",
     address: "",
@@ -170,6 +160,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6792,
     city: "frankfurt",
     website_url: "https://www.frankfurter-buergerstiftung.de",
+    default_genre: "classical",
+  },
+  {
+    slug: "galli-theater",
+    name: "Galli Theater Frankfurt",
+    address: "",
+    lat: 50.1116,
+    lon: 8.6841,
+    city: "frankfurt",
+    website_url: "https://galli-frankfurt.de",
     default_genre: "classical",
   },
   {
