@@ -278,6 +278,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "naturfreundehaus kiesbuckel|albersweiler": [49.234514, 8.031474],
   "naturmöbelhaus heinrich|kapellen-drusweiler": [49.10314, 8.031469],
   "neuer messplatz / alfred-nobel-platz|landau in der pfalz": [49.198283, 8.112344],
+  "neues messegelände|landau in der pfalz": [49.198283, 8.112344],
   "neues rathaus|landau in der pfalz": [49.198283, 8.112344],
   "neustadt a.d. w.|neustadt a.d. w.": [54.103852, 10.807912],
   "obertorplatz, ecke reiterstr./xylanderstr.|landau in der pfalz": [49.198283, 8.112344],
