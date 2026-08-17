@@ -463,16 +463,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-wiese-ssg-langen",
-    name: "Wiese / SSG Langen",
-    address: "",
-    lat: 49.9851147,
-    lon: 8.663149599999999,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "zimmertheater-heidelberg",
     name: "Zimmertheater Heidelberg",
     address: "",
