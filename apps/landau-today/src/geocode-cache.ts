@@ -168,6 +168,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "haus der jugend|landau in der pfalz": [49.198283, 8.112344],
   "haus des gastes|bad bergzabern": [49.098341, 7.990439],
   "haus zum maulbeerbaum eg|landau in der pfalz": [49.198283, 8.112344],
+  "haus zum maulbeerbaum, marktstraße 92|landau in der pfalz": [49.195946, 8.111794],
   "haus zum maulbeerbaum|landau in der pfalz": [49.195946, 8.111794],
   "heiner-geißler-saal|bad bergzabern": [49.102808, 7.999127],
   "heussler wein und destillate|rhodt unter rietburg": [49.270878, 8.106712],
