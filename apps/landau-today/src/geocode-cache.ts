@@ -9,6 +9,7 @@
  * couldn't resolve so we don't keep retrying.
  */
 export const GEOCODE_CACHE: Record<string, [number, number]> = {
+  "\"das waldhaus\" in maikammer|maikammer": [49.305216, 8.131629],
   "60+ smart ins internet das projekt der digital-botschafter landau|landau in der pfalz": [49.198283, 8.112344],
   "67163 wissembourg|wissembourg": [0, 0],
   "76857 waldhambach|waldhambach": [49.165879, 7.986101],
