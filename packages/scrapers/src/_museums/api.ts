@@ -136,8 +136,6 @@ export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Prom
       return fetchFdhExhibitions(config.endpoint);
     case "dff":
       return fetchDffExhibitions(config.endpoint);
-    case "archaeologisches":
-      return fetchArchaeologischesExhibitions(config.endpoint);
     case "dam-tribe":
       return fetchDamTribeExhibitions(config.endpoint);
     case "mfk":
@@ -1400,154 +1398,111 @@ async function fetchDffKino(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-const ARCHAEOLOGISCHES_CANCELLED = /\b(?:muss\s+leider\s+entfallen|entfällt|entfallen|abgesagt|fällt\s+aus)\b/i;
-const ARCHAEOLOGISCHES_SOLDOUT = /\b(?:bereits\s+ausgebucht|ausgebucht|sold\s+out)\b/i;
-const ARCHAEOLOGISCHES_FEW_LEFT = /\bnur\s+noch\s+wenige\s+(?:Plätze|Karten)\b/i;
+const ARCHAEOLOGISCHES_ORIGIN = "https://www.archaeologisches-museum-frankfurt.de";
 
-// The day heading appears either as one <strong>5 | SONNTAG</strong> or split
-// across two (<strong>4&nbsp;</strong><strong>| SAMSTAG</strong>), and the weekday
-// is not reliably upper-cased. A heading the pattern misses stays inside the day
-// block, where the event regex below turns "23" and "| SAMSTAG" into events of
-// their own. Capture-free on purpose: the same pattern feeds String.split, which
-// would otherwise interleave captured groups into the day blocks.
-const ARCHAEOLOGISCHES_DAY_HEADER =
-  /<strong>\s*(\d{1,2})\s*(?:&nbsp;|\s)*(?:<\/strong>\s*<strong>)?\s*\|\s*[A-Za-zÄÖÜäöüß]+\s*<\/strong>/;
+/** The listing renders one masonry card per event; the card carries the date,
+ *  the category tag, the title and the teaser image, and links to a detail page
+ *  that adds the exact time and the price. */
+const ARCHAEOLOGISCHES_CARD = /<a href="(\/veranstaltungen\/[^"]+)"\s+class="amf-grid__item-link"[\s\S]*?<\/a>/g;
 
-/** True when a <strong> carries nothing but booking-status notes. Such a note
- *  annotates a showing rather than naming one, so emitting it as an event of its
- *  own is what produced title-less entries like "(ausgebucht)". */
-function archaeologischesStatusOnly(title: string): boolean {
-  return !title
-    .replace(ARCHAEOLOGISCHES_CANCELLED, "")
-    .replace(ARCHAEOLOGISCHES_SOLDOUT, "")
-    .replace(ARCHAEOLOGISCHES_FEW_LEFT, "")
-    .replace(/[\s()[\],.:;!?–—-]/g, "");
+/** The AMF's own category tags, mapped onto our EventType buckets. Their
+ *  house formats ("ARCHÆOkids", "Satourday") name the audience rather than the
+ *  format, so the keyword classifier would mis-file them; the tags that carry
+ *  no format meaning at all ("Museumsuferfest", "franconofurd Sommer") map to
+ *  null and fall through to classifyEvent on title + description. */
+const ARCHAEOLOGISCHES_CATEGORY_MAP: Record<string, string> = {
+  führung: "Führung",
+  sonntagsführung: "Führung",
+  "archæokids frankfurt": "Familie",
+  satourday: "Familie",
+  workshop: "Workshop",
+  vortrag: "Vortrag",
+  konzert: "Konzert",
+  kino: "Film",
+  vorführung: "Film",
+};
+
+function parseArchaeologischesCardDate(text: string): string | null {
+  const m = text.match(/(\d{1,2})\.\s*([A-Za-zÄÖÜäöü]+)\s+(\d{4})/);
+  if (!m) return null;
+  const month = GERMAN_MONTHS[m[2].toLowerCase()];
+  if (!month) return null;
+  return `${m[3]}-${month}-${m[1].padStart(2, "0")}`;
 }
 
-function parseArchaeologischesTime(range: string | undefined): { time: string | null; end_time: string | null } {
-  if (!range) return { time: null, end_time: null };
-  const parts = range.split(/[-–]/).map((t) => t.trim().replace(".", ":"));
-  const withMinutes = (t: string | undefined): string | null => (t ? (t.includes(":") ? t : `${t}:00`) : null);
-  return { time: withMinutes(parts[0]), end_time: withMinutes(parts[1]) };
+/** Detail pages state the runtime as "19:30 Uhr" or "10:00 – 18:00 Uhr". */
+function parseArchaeologischesHours(text: string | undefined): { time: string | null; end_time: string | null } {
+  if (!text) return { time: null, end_time: null };
+  const range = text.match(/(\d{1,2}:\d{2})\s*[–-]\s*(\d{1,2}:\d{2})/);
+  if (range) return { time: range[1], end_time: range[2] };
+  const single = text.match(/(\d{1,2}:\d{2})/);
+  return { time: single ? single[1] : null, end_time: null };
 }
 
+/**
+ * The museum relaunched on a Wagtail site in 2026; the old Joomla accordion
+ * calendar at /index.php/de/kalender now 404s. The listing gives us the full
+ * upcoming programme in one request, so we fetch every card's detail page for
+ * the time, price and teaser text rather than parsing a month accordion.
+ */
 async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
   const html = await res.text();
 
-  const events: ApiEvent[] = [];
   const today = todayIso();
-
-  // Split by panels (months)
-  const panelRe = /<div class="sppb-panel[^"]*">([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g;
-  let panelMatch;
-
-  while ((panelMatch = panelRe.exec(html)) !== null) {
-    const panel = panelMatch[1];
-    const monthMatch =
-      panel.match(/<span[^>]*\bclass="sppb-panel-title"[^>]*\baria-label="([^"]+)"/) ||
-      panel.match(/<span[^>]*\bclass="sppb-panel-title"[^>]*>\s*([^<]+?)\s*</);
-    if (!monthMatch) continue;
-
-    const monthParts = monthMatch[1].trim().split(" ");
-    const monthName = monthParts[0].toLowerCase();
-    const monthNum = GERMAN_MONTHS[monthName];
-    if (!monthNum) continue;
-
-    const bodyMatch = panel.match(/<div class="sppb-panel-body">([\s\S]*?)<\/div>/);
-    if (!bodyMatch) continue;
-    const body = bodyMatch[1];
-
-    // The calendar is a rolling 12 months in Jan–Dec order, so the year jumps
-    // mid-list. Each panel body opens with <p><strong>YYYY</strong></p>; trust
-    // it instead of inferring from today's date.
-    const yearMatch = body.match(/<p[^>]*>\s*<strong>\s*(\d{4})\s*<\/strong>\s*<\/p>/);
-    const panelYear = yearMatch ? yearMatch[1] : String(inferYear(monthNum, "01"));
-
-    // Each day owns the markup between its own heading and the next one.
-    const dayHeaders = [...body.matchAll(new RegExp(ARCHAEOLOGISCHES_DAY_HEADER.source, "g"))];
-
-    for (let i = 0; i < dayHeaders.length; i++) {
-      const header = dayHeaders[i];
-      const day = header[1].padStart(2, "0");
-      const date = `${panelYear}-${monthNum}-${day}`;
-      if (date < today) continue;
-
-      const blockStart = (header.index ?? 0) + header[0].length;
-      const block = body.slice(blockStart, dayHeaders[i + 1]?.index ?? body.length);
-      if (!block) continue;
-
-      // Inner [\s\S]*? lets us capture titles that contain <em>, <span>, or
-      // status notes like <span style="...">ausgebucht</span>.
-      const eventRe =
-        /(?:(\d{1,2}(?:[:.]\d{2})?(?:\s*[-–]\s*\d{1,2}(?:[:.]\d{2})?)?)\s*Uhr)?\s*(?:&nbsp;|\s)*?(?:<em>([^<]*)<\/em>)?\s*(?:<br \/>)?\s*<strong>([\s\S]*?)<\/strong>/g;
-
-      // Status notes are written both before the title ("14 Uhr (ausgebucht)
-      // <em>Führung</em><br /><strong>Kasematten</strong>") and after it
-      // ("<strong>Kasematten ausgebucht</strong>"), so a pending note carries
-      // forward onto the next real title and a trailing one lands on the
-      // previous event.
-      let lastIndexThisDay = -1;
-      let pendingCancelled = false;
-      let pendingAvailability: "sold_out" | "few_left" | null = null;
-      let evMatch: RegExpExecArray | null;
-      while ((evMatch = eventRe.exec(block)) !== null) {
-        const [, timeRange, rawCategory, rawTitle] = evMatch;
-        const cleanTitle = stripHtml(rawTitle).trim();
-        if (!cleanTitle) continue;
-
-        const cancelled = ARCHAEOLOGISCHES_CANCELLED.test(cleanTitle);
-        const availability: "sold_out" | "few_left" | null = ARCHAEOLOGISCHES_SOLDOUT.test(cleanTitle)
-          ? "sold_out"
-          : ARCHAEOLOGISCHES_FEW_LEFT.test(cleanTitle)
-            ? "few_left"
-            : null;
-
-        if (archaeologischesStatusOnly(cleanTitle)) {
-          // A note that opens a showing ("14 Uhr (ausgebucht) …") arrives with a
-          // time of its own; one that closes it annotates the event just pushed.
-          if (timeRange || lastIndexThisDay < 0) {
-            pendingCancelled ||= cancelled;
-            pendingAvailability ??= availability;
-          } else if (cancelled) {
-            events.splice(lastIndexThisDay, 1);
-            lastIndexThisDay = -1;
-          } else if (availability) {
-            events[lastIndexThisDay].availability ??= availability;
-          }
-          continue;
-        }
-
-        if (cancelled || pendingCancelled) {
-          pendingCancelled = false;
-          pendingAvailability = null;
-          continue;
-        }
-
-        const { time, end_time } = parseArchaeologischesTime(timeRange);
-        const category = rawCategory ? stripHtml(rawCategory).trim() : null;
-
-        events.push({
-          title: cleanTitle.replace(ARCHAEOLOGISCHES_SOLDOUT, "").replace(ARCHAEOLOGISCHES_FEW_LEFT, "").trim(),
-          date,
-          time: nullIfMidnight(time),
-          end_time: nullIfMidnight(end_time),
-          end_date: null,
-          description: null,
-          detail_url: null,
-          image_url: null,
-          category: category || null,
-          price: null,
-          availability: availability ?? pendingAvailability,
-        });
-        pendingAvailability = null;
-        lastIndexThisDay = events.length - 1;
-      }
-    }
+  const cards: Array<{ url: string; date: string; title: string; image_url: string | null; category: string | null }> =
+    [];
+  for (const match of html.matchAll(ARCHAEOLOGISCHES_CARD)) {
+    const card = match[0];
+    const title = stripHtml(card.match(/amf-grid__item-title">([\s\S]*?)<\/h3>/)?.[1] ?? "");
+    const date = parseArchaeologischesCardDate(card.match(/amf-grid__item-category">([^<]*)<\/p>/)?.[1] ?? "");
+    if (!title || !date || date < today) continue;
+    const tag = stripHtml(card.match(/<span class="amf-tag">([^<]*)<\/span>/)?.[1] ?? "").toLowerCase();
+    cards.push({
+      url: `${ARCHAEOLOGISCHES_ORIGIN}${match[1]}`,
+      date,
+      title,
+      image_url: normalizeUrl(card.match(/<img src="([^"]+)"/)?.[1], ARCHAEOLOGISCHES_ORIGIN),
+      category: ARCHAEOLOGISCHES_CATEGORY_MAP[tag] ?? null,
+    });
   }
+  if (cards.length === 0) return [];
 
-  return events;
+  const details = await Promise.all(
+    cards.map(async (card) => {
+      try {
+        const r = await fetch(card.url, { headers: { "User-Agent": USER_AGENT } });
+        return r.ok ? await r.text() : null;
+      } catch {
+        return null;
+      }
+    }),
+  );
+
+  return cards.map((card, i): ApiEvent => {
+    const detail = details[i];
+    const info = detail?.match(/<div class="amf-event-info">([\s\S]*?)<\/div>/)?.[1];
+    const { time, end_time } = parseArchaeologischesHours(info?.match(/amf-event-info__hours">([^<]*)</)?.[1]);
+    const price = stripHtml(info?.match(/amf-event-info__price">([^<]*)</)?.[1] ?? "") || null;
+    // The body's first text block is the subtitle ("Liederabend", "Frankfurts
+    // Untergrund erleben") followed by the teaser copy — richer than the
+    // card, and the only description the site offers.
+    const body = detail?.match(/<div class="amf-text">([\s\S]*?)<\/div>/)?.[1];
+
+    return {
+      title: card.title,
+      date: card.date,
+      time: nullIfMidnight(time),
+      end_time: nullIfMidnight(end_time),
+      end_date: null,
+      description: body ? truncateHtml(body) : null,
+      detail_url: card.url,
+      image_url: card.image_url,
+      price,
+      category: card.category,
+    };
+  });
 }
 
 // The Wollheim Memorial has no events feed of its own; their guided tours are
@@ -3736,86 +3691,6 @@ async function fetchDffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       .replace(/\s*-\s*DFF\.FILM\s*$/i, "")
       .trim();
     if (!title) continue;
-
-    const ogImage = detail.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/)?.[1] ?? null;
-    out.push({
-      title,
-      start_date,
-      end_date,
-      description: null,
-      detail_url: url,
-      image_url: ogImage,
-    });
-  }
-  return out;
-}
-
-async function fetchArchaeologischesExhibitions(endpoint: string): Promise<ApiExhibition[]> {
-  const origin = new URL(endpoint).origin;
-  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
-  const html = await res.text();
-
-  // Listing page links to /index.php/de/ausstellungen/{slug} — drop archive,
-  // dauerausstellung, and self-references; the slug list is short, so fetch
-  // all and filter by detected runtime.
-  const links = new Set<string>();
-  for (const m of html.matchAll(/href="(\/index\.php\/de\/ausstellungen\/[a-z0-9-]+)"/g)) {
-    const path = m[1];
-    if (/\/(archiv|dauerausstellung|sonderausstellung)/.test(path)) continue;
-    links.add(`${origin}${path}`);
-  }
-  if (links.size === 0) return [];
-
-  const today = todayIso();
-  const detailHtmls = await Promise.all(
-    [...links].map(async (url) => {
-      try {
-        const r = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
-        return r.ok ? { url, html: await r.text() } : null;
-      } catch {
-        return null;
-      }
-    }),
-  );
-
-  const out: ApiExhibition[] = [];
-  for (const entry of detailHtmls) {
-    if (!entry) continue;
-    const { url, html: detail } = entry;
-
-    // Most exhibition pages render the title in <h1 itemprop="headline">,
-    // but some (e.g. dagmar-schuldt-…) drop the h1 entirely and only keep
-    // <title>. Fall through to that.
-    const title =
-      detail
-        .match(/<h1[^>]*itemprop="headline"[^>]*>([\s\S]*?)<\/h1>/)?.[1]
-        ?.replace(/<[^>]+>/g, "")
-        .replace(/\s+/g, " ")
-        .trim() ||
-      detail
-        .match(/<title>([^<]+)<\/title>/)?.[1]
-        ?.replace(/\s+\|\s+Archäologisches Museum.*$/, "")
-        .trim();
-    if (!title) continue;
-
-    const bodyText = detail
-      .match(/<div[^>]+itemprop="articleBody"[^>]*>([\s\S]*?)<\/div>/)?.[1]
-      ?.replace(/<[^>]+>/g, " ")
-      .replace(/&nbsp;|&[a-z]+;/gi, " ")
-      .replace(/\s+/g, " ");
-    if (!bodyText) continue;
-
-    const range = bodyText.match(
-      /(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})\s*[–-]\s*(\d{1,2})\.\s+([A-Za-zÄÖÜäöü]+)\s+(\d{4})/,
-    );
-    if (!range) continue;
-    const sm = GERMAN_MONTHS[range[2].toLowerCase()];
-    const em = GERMAN_MONTHS[range[5].toLowerCase()];
-    if (!sm || !em) continue;
-    const start_date = `${range[3]}-${sm}-${range[1].padStart(2, "0")}`;
-    const end_date = `${range[6]}-${em}-${range[4].padStart(2, "0")}`;
-    if (end_date < today) continue;
 
     const ogImage = detail.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/)?.[1] ?? null;
     out.push({

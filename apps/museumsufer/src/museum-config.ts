@@ -17,7 +17,6 @@ export type ExhibitionApiType =
   | "fkv"
   | "fdh"
   | "dff"
-  | "archaeologisches"
   | "dam-tribe"
   | "mfk";
 
@@ -54,11 +53,6 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1073,
     lng: 8.6832,
     rmvStopLid: "A=1@O=Frankfurt (Main) Elisabethenstraße@X=8688119@Y=50105882@U=80@L=3000905@",
-    exhibitionUrl: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen/",
-    exhibitionApi: {
-      type: "archaeologisches",
-      endpoint: "https://archaeologisches-museum-frankfurt.de/index.php/de/ausstellungen",
-    },
   },
   "bibelhaus-erlebnismuseum": {
     lat: 50.1044,
