@@ -409,7 +409,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lat: 50.1056,
     lon: 8.68,
     city: "frankfurt",
-    website_url: "",
+    website_url: "https://www.museumangewandtekunst.de",
     default_genre: "classical",
   },
   {
