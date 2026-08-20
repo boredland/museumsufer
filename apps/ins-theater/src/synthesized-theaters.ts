@@ -143,6 +143,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "hfmdk",
+    name: "Hochschule für Musik und Darstellende Kunst Frankfurt",
+    address: "",
+    lat: 50.1232,
+    lon: 8.6749,
+    city: "frankfurt",
+    website_url: "https://www.hfmdk-frankfurt.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "hohe-luft-schiff",
     name: "HoheLuftschiff",
     address: "",
