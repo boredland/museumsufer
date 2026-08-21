@@ -279,7 +279,7 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lat: 53.55,
     lon: 9.99,
     city: "hamburg",
-    website_url: "https://das-gaengeviertel.info",
+    website_url: "https://www.lichthof-theater.de",
     ticketing_provider: null,
   },
   {

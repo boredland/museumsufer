@@ -13,6 +13,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "archaeologisches-museum-frankfurt",
+    name: "Archäologisches Museum Frankfurt",
+    address: "",
+    lat: 50.1073,
+    lon: 8.6832,
+    city: "frankfurt",
+    website_url: "https://www.archaeologisches-museum-frankfurt.de",
+    default_genre: "classical",
+  },
+  {
     slug: "bach-wiesbaden",
     name: "Wiesbadener Bachwochen",
     address: "",
