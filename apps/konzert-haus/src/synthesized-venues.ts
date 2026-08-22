@@ -220,7 +220,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 9.9842,
     city: "hamburg",
     website_url: "https://staeitsch-shop.comfortticket.de",
-    default_genre: "world",
+    default_genre: "classical",
   },
   {
     slug: "hauptkirche-st-jacobi",
