@@ -1667,7 +1667,7 @@ export const SCRAPE_DATA: ScrapeData = {
     {"date":"2026-08-23","id":1386978660,"provider_event_id":"2026-08-23-p2088","show_id":2203592235,"status":"unknown","time":"20:00","venue_room":"Kleines Haus"},
     {"date":"2026-08-23","id":2483522892,"provider_event_id":"2635102","show_id":2506754640,"status":"unknown","time":"20:00","venue_room":"kmh"},
     {"date":"2026-08-23","id":1957802418,"price_min":0,"provider_event_id":"38141","show_id":2875916348,"status":"unknown","time":"20:00","venue_room":"Tbilisser Platz"},
-    {"date":"2026-08-23","id":1119247389,"price_max":20,"price_min":1,"provider_event_id":"romeo-und-julia|2026-08-23|20:15|Grüneburgpark","show_id":3528642187,"status":"available","ticket_url":"https://www.diedramatischebuehne.de/veranstaltungen/romeo-und-julian-2/","time":"20:15","venue_room":"Grüneburgpark"},
+    {"date":"2026-08-23","id":1119247389,"provider_event_id":"romeo-und-julia|2026-08-23|20:15|Grüneburgpark","show_id":3528642187,"status":"available","ticket_url":"https://www.diedramatischebuehne.de/veranstaltungen/romeo-und-julian-2/","time":"20:15","venue_room":"Grüneburgpark"},
     {"date":"2026-08-23","id":954198600,"provider_event_id":"2633818","show_id":1506794025,"status":"unknown","time":"21:00","venue_room":"k1"},
     {"date":"2026-08-23","id":2793214796,"provider_event_id":"2807562","show_id":3183862528,"status":"available","ticket_url":"https://shop.kampnagel.de/de/buyingflow/tickets/16741","time":"21:15","venue_room":"Vorhalle"},
     {"date":"2026-08-23","id":3205109020,"provider_event_id":"2834218","show_id":3183862528,"status":"available","ticket_url":"https://shop.kampnagel.de/de/buyingflow/tickets/16741","time":"22:15","venue_room":"Vorhalle"},
