@@ -292,6 +292,126 @@ export const CLIENT_SCRIPT = `
       if (sortByDistance && userPos) { injectDistanceBadges(); injectReachability(); }
     });
 
+    /**
+     * The transit + calendar menus exist once per document; the card only
+     * carries a slug / event data on its trigger button. Fill the shared
+     * menu's hrefs from whichever trigger opened it. Listening on the
+     * document (not per button) means htmx swaps need no rebinding.
+     */
+    function navUrlsFor(slug, name) {
+      var geo = MUSEUM_GEO[slug];
+      if (!geo) return null;
+      var lat = geo[0], lng = geo[1];
+      var zid = encodeURIComponent('A=2@O=' + name + '@X=' + Math.round(lng * 1e6) + '@Y=' + Math.round(lat * 1e6) + '@');
+      return {
+        'rmv-app': 'https://www.rmv.de/go/?ZID=' + zid,
+        'rmv-web': 'https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=' + zid,
+        google: 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng,
+        apple: 'https://maps.apple.com/?daddr=' + lat + ',' + lng + '&dirflg=r'
+      };
+    }
+
+    function endHour(time) {
+      return String((parseInt(time.split(':')[0], 10) + 1) % 24).padStart(2, '0');
+    }
+
+    /** Mirrors buildGoogle/Outlook/YahooCalendarUrl in @museumsufer/core. */
+    function calUrlsFor(d) {
+      var compact = d.date.replace(/-/g, '');
+      var endCompact = (d.endDate || d.date).replace(/-/g, '');
+      var desc = (d.description || '') + (d.url ? '\\n' + d.url : '');
+      var gStart, gEnd, oStart, oEnd, yStart, yDur;
+      if (d.time) {
+        gStart = compact + 'T' + d.time.replace(':', '') + '00';
+        gEnd = d.endTime
+          ? endCompact + 'T' + d.endTime.replace(':', '') + '00'
+          : compact + 'T' + endHour(d.time) + d.time.split(':')[1] + '00';
+        oStart = d.date + 'T' + d.time + ':00';
+        oEnd = d.endTime
+          ? (d.endDate || d.date) + 'T' + d.endTime + ':00'
+          : d.date + 'T' + endHour(d.time) + ':' + d.time.split(':')[1] + ':00';
+        yStart = gStart;
+        if (d.endTime) {
+          var sm = parseInt(d.time.split(':')[0], 10) * 60 + parseInt(d.time.split(':')[1], 10);
+          var em = parseInt(d.endTime.split(':')[0], 10) * 60 + parseInt(d.endTime.split(':')[1], 10);
+          var diff = em > sm ? em - sm : 60;
+          yDur = String(Math.floor(diff / 60)).padStart(2, '0') + String(diff % 60).padStart(2, '0');
+        } else {
+          yDur = '0100';
+        }
+      } else {
+        gStart = gEnd = yStart = compact;
+        oStart = oEnd = d.date;
+        yDur = 'allday';
+      }
+
+      var g = new URLSearchParams({
+        action: 'TEMPLATE', text: d.title, dates: gStart + '/' + gEnd,
+        location: d.venue || '', details: desc
+      });
+      if (d.time) g.set('ctz', 'Europe/Berlin');
+
+      var o = new URLSearchParams({
+        path: '/calendar/action/compose', rru: 'addevent', subject: d.title,
+        startdt: oStart, enddt: oEnd, location: d.venue || '', body: desc
+      });
+
+      var y = new URLSearchParams({
+        v: '60', title: d.title, st: yStart, dur: yDur,
+        in_loc: d.venue || '', desc: desc
+      });
+
+      return {
+        google: 'https://calendar.google.com/calendar/render?' + g.toString(),
+        outlook: 'https://outlook.live.com/calendar/0/action/compose?' + o.toString(),
+        yahoo: 'https://calendar.yahoo.com/?' + y.toString(),
+        ics: '/event/' + d.id + '/feed.ics'
+      };
+    }
+
+    var lastPopoverTrigger = null;
+    document.addEventListener('click', function(e) {
+      var t = e.target.closest('[popovertarget="nav-shared"], [popovertarget="cal-shared"]');
+      if (t) lastPopoverTrigger = t;
+    }, true);
+
+    function fillSharedPopover(pop) {
+      var btn = lastPopoverTrigger;
+      if (!btn) return;
+      if (pop.id === 'nav-shared') {
+        var urls = navUrlsFor(btn.dataset.navSlug, btn.dataset.navName || '');
+        if (!urls) return;
+        pop.querySelectorAll('a[data-nav]').forEach(function(a) {
+          a.href = urls[a.dataset.nav];
+          a.target = '_blank';
+          a.rel = 'noopener';
+        });
+        return;
+      }
+      // The description lives in the card, not in a data-attribute — repeating
+      // it per trigger is what made the old inline menus so large.
+      var card = btn.closest('[data-item-id]');
+      var descEl = card && card.querySelector('.card-description');
+      var urls2 = calUrlsFor({
+        id: btn.dataset.calId,
+        date: btn.dataset.calDate,
+        time: btn.dataset.calTime || null,
+        endTime: btn.dataset.calEndTime || null,
+        endDate: btn.dataset.calEndDate || null,
+        title: btn.dataset.calTitle || '',
+        venue: btn.dataset.calVenue || '',
+        url: btn.dataset.calUrl || '',
+        description: descEl ? descEl.textContent.trim() : ''
+      });
+      pop.querySelectorAll('a[data-cal]').forEach(function(a) { a.href = urls2[a.dataset.cal]; });
+    }
+
+    document.addEventListener('beforetoggle', function(e) {
+      if (e.newState !== 'open') return;
+      var pop = e.target;
+      if (pop.id === 'nav-shared' || pop.id === 'cal-shared') fillSharedPopover(pop);
+    }, true);
+
     function persistSectionState(el) {
       var key = el.dataset.section;
       try { localStorage.setItem('section-' + key, el.open ? 'open' : 'closed'); } catch {}
@@ -314,7 +434,7 @@ export const CLIENT_SCRIPT = `
         var slug = el.dataset.museumSlug;
         var min = travelMin(slug);
         if (min === null) return;
-        var navBtn = el.querySelector('button[popovertarget^="nav-"]');
+        var navBtn = el.querySelector('button[popovertarget="nav-shared"]');
         if (navBtn && !navBtn.dataset.distanced) {
           navBtn.dataset.distanced = '1';
           navBtn.innerHTML = pinSvg + ' ' + min + ' ' + escHtml(T.minWalk);

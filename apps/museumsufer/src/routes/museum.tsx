@@ -2,7 +2,7 @@ import { cityMeta, cityName } from "@museumsufer/core";
 import { Footer } from "@museumsufer/core/footer";
 import { Hono } from "hono";
 import { raw } from "hono/html";
-import { NavButton, ReportButton, ShareButton } from "../components";
+import { NavButton, ReportButton, ShareButton, SharedNavPopover } from "../components";
 import { dateOffset, todayIso } from "../date";
 import { buildLangParam, ContactDialog, Masthead, renderHtmlHead } from "../frontend";
 import { detectLocale, getTranslations, type Locale, localizeTranslations } from "../i18n";
@@ -405,6 +405,8 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
               ]}
             />
           </div>
+
+          <SharedNavPopover />
 
           <ContactDialog tr={tr} />
 

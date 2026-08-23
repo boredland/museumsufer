@@ -21,7 +21,7 @@ import { ThemeToggle } from "@museumsufer/core/theme-toggle";
 import { type FaqLocale, joinNames, rankVenuesByEventCount } from "@museumsufer/core/venue-faq";
 import { raw } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
-import { ContentBody, MuseumsSection } from "./components";
+import { ContentBody, MuseumsSection, SharedCalendarPopover, SharedNavPopover } from "./components";
 import { berlinNow, todayIso } from "./date";
 import {
   DEFAULT_LOCALE,
@@ -762,6 +762,9 @@ export function renderPage(
               ]}
             />
           </div>
+
+          <SharedNavPopover />
+          <SharedCalendarPopover />
 
           <ContactDialog tr={tr} turnstileSiteKey={turnstileSiteKey} />
           <DigestDialog tr={tr} />

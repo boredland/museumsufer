@@ -9,6 +9,7 @@ export * from "./classify";
 // the barrel eagerly. Apps import from "@museumsufer/core/calendar-popover".
 export * from "./contact-handler";
 export * from "./date";
+export * from "./edge-cache";
 export * from "./escape";
 export * from "./faq";
 export * from "./feedback-email";

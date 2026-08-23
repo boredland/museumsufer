@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { handleContactRequest, securityHeaders } from "@museumsufer/core";
+import { edgeCache, handleContactRequest, securityHeaders } from "@museumsufer/core";
 import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -27,7 +27,7 @@ import imprintRoute from "./routes/imprint";
 import museumRoute from "./routes/museum";
 import ogRoute from "./routes/og";
 import pushRoute from "./routes/push";
-import staticRoute from "./routes/static";
+import staticRoute, { CLIENT_BUNDLE_VERSION } from "./routes/static";
 import { formatDateFull } from "./shared";
 import { translateFields } from "./translate";
 import type { Env, Event, Exhibition, MuseumInfo } from "./types";
@@ -99,6 +99,27 @@ app.use(
     ],
     allowMethods: ["GET", "POST", "OPTIONS"],
     maxAge: 600,
+  }),
+);
+
+// Edge cache for the rendered HTML. Serialising these pages is what actually
+// costs CPU (~34 ns/byte, ~27 ms for the homepage), and a Worker on a custom
+// domain never populates the edge cache from response headers alone — the
+// `s-maxage` we send only ever reached the browser. The Cache API ignores
+// `Vary`, so locale, city and the Berlin "today" are folded into the key.
+app.use(
+  "*",
+  edgeCache({
+    paths: ["/", "/museum", "/partial/content"],
+    ttl: 1800,
+    // The rendered HTML embeds the hashed client-bundle URL, so cache entries
+    // must not outlive the bundle they point at.
+    version: CLIENT_BUNDLE_VERSION,
+    key: (c) => ({
+      lang: detectLocale(c.req.raw),
+      city: c.get("city") ?? "frankfurt",
+      day: todayIso(),
+    }),
   }),
 );
 
@@ -408,9 +429,13 @@ function renderMarkdown(data: InitialData, locale: Locale, museums: Record<strin
   return lines.join("\n");
 }
 
-// Catch-all route with query validation
+// Homepage. Deliberately an exact-path route, NOT a catch-all: `app.get("*")`
+// answered every unmatched URL with a full ~720 KB render, so vulnerability
+// scanners probing /wp-login.php and friends each cost a complete page build
+// (~24% of this zone's 200-responses). Unmatched paths now fall through to
+// app.notFound() below.
 app.get(
-  "*",
+  "/",
   zValidator("query", dayQuery, (result, _c) => {
     if (!result.success) {
       console.warn("Query validation failed:", result.error);
@@ -484,6 +509,17 @@ app.get(
     );
   },
 );
+
+app.notFound((c) => {
+  const locale = detectLocale(c.req.raw);
+  const tr = localizeTranslations(getTranslations(locale), c.get("city") ?? "frankfurt", locale);
+  const home = locale === "de" ? "/" : `/?lang=${locale}`;
+  return c.html(
+    `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>404</title><link rel="stylesheet" href="/styles.css"></head><body><main style="max-width:32rem;margin:6rem auto;padding:0 1rem;text-align:center"><p>${tr.noResults}</p><p style="margin-top:2rem"><a href="${home}">${tr.pageTitle}</a></p></main></body></html>`,
+    404,
+    { "Cache-Control": "public, max-age=3600" },
+  );
+});
 
 // Scraping moved to .github/workflows/scrape.yml (museums job) — no
 // SCRAPE_SECRET / /scrape/* routes. The scheduled() handler is back, but

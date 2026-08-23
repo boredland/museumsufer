@@ -1,7 +1,7 @@
 import { buildUtm, cityUrl, dateFormatter } from "@museumsufer/core";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
-import { buildCalendarUrl, buildOutlookUrl, buildYahooUrl, formatDateShort } from "./shared";
+import { formatDateShort } from "./shared";
 import type { Event, Exhibition, MuseumInfo } from "./types";
 
 function Icon({ id, class: cls }: { id: string; class: string }) {
@@ -103,24 +103,17 @@ function TranslatedBadge({ translated }: { translated?: boolean }) {
   );
 }
 
-function navUrls(name: string, lat: number, lng: number) {
-  const zid = `A=2@O=${name}@X=${Math.round(lng * 1e6)}@Y=${Math.round(lat * 1e6)}@`;
-  return {
-    rmvApp: `https://www.rmv.de/go/?ZID=${encodeURIComponent(zid)}`,
-    rmvWeb: `https://www.rmv.de/c/de/fahrplan/verbindungssuche-hinweise/fahrplanauskunft?language=de_DE&context=TP&start=1&ZID=${encodeURIComponent(zid)}`,
-    google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
-    apple: `https://maps.apple.com/?daddr=${lat},${lng}&dirflg=r`,
-  };
-}
-
 const positionPopover = `var p=document.getElementById(this.getAttribute('popovertarget'));var r=this.getBoundingClientRect();p.style.top=(r.bottom+4)+'px';p.style.left=Math.max(8,Math.min(r.right-180,innerWidth-188))+'px'`;
 
-/** Navigation button for museums — opens popover menu with RMV, Google Maps, and Apple Maps links */
+/**
+ * Transit trigger. Every card used to inline its own copy of the 4-link menu,
+ * so a day with 73 cards shipped 119 near-identical popovers (~155 KB, 21% of
+ * the page) and reused DOM ids across cards. The menu now lives once per
+ * document as `SharedNavPopover`; the slug rides on the button and the client
+ * fills the hrefs from `MUSEUM_GEO` when the popover opens.
+ */
 export function NavButton({ slug, name, tr }: { slug: string | undefined; name: string; tr: Record<string, string> }) {
   if (!slug || !MUSEUM_LOCATIONS[slug]) return null;
-  const m = MUSEUM_LOCATIONS[slug];
-  const urls = navUrls(name, m.lat, m.lng);
-  const popId = `nav-${slug}`;
   return (
     <span class="popover-wrap">
       <button
@@ -129,42 +122,75 @@ export function NavButton({ slug, name, tr }: { slug: string | undefined; name: 
         aria-label={tr.navigate}
         title={tr.navigate}
         aria-haspopup="menu"
-        popovertarget={popId}
+        popovertarget="nav-shared"
+        data-nav-slug={slug}
+        data-nav-name={name}
         onclick={positionPopover}
       >
         <Icon id="i-navigate" class="icon-btn__icon" />
       </button>
-      <div id={popId} popover="auto" role="menu" class="nav-popover">
-        <a
-          href={urls.rmvApp}
-          target="_blank"
-          rel="noopener"
-          role="menuitem"
-          class="nav-popover__link nav-popover__link--rmv-app"
-        >
-          <Icon id="i-rmv" class="nav-popover__icon" />
-          RMV
-        </a>
-        <a
-          href={urls.rmvWeb}
-          target="_blank"
-          rel="noopener"
-          role="menuitem"
-          class="nav-popover__link nav-popover__link--rmv-web"
-        >
-          <Icon id="i-rmv" class="nav-popover__icon" />
-          RMV
-        </a>
-        <a href={urls.google} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
-          <Icon id="i-gmaps" class="nav-popover__icon" />
-          Google Maps
-        </a>
-        <a href={urls.apple} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
-          <Icon id="i-apple" class="nav-popover__icon" />
-          Apple Maps
-        </a>
-      </div>
     </span>
+  );
+}
+
+/**
+ * The single transit menu for the whole document. Hrefs are placeholders —
+ * `fillSharedPopover` in the client script rewrites them from the triggering
+ * button's slug before the popover paints.
+ */
+export function SharedNavPopover() {
+  return (
+    <div id="nav-shared" popover="auto" role="menu" class="nav-popover">
+      {/* biome-ignore-start lint/a11y/useValidAnchor: href set by client JS from the trigger's slug */}
+      <a href="#" data-nav="rmv-app" role="menuitem" class="nav-popover__link nav-popover__link--rmv-app">
+        <Icon id="i-rmv" class="nav-popover__icon" />
+        RMV
+      </a>
+      <a href="#" data-nav="rmv-web" role="menuitem" class="nav-popover__link nav-popover__link--rmv-web">
+        <Icon id="i-rmv" class="nav-popover__icon" />
+        RMV
+      </a>
+      <a href="#" data-nav="google" role="menuitem" class="nav-popover__link">
+        <Icon id="i-gmaps" class="nav-popover__icon" />
+        Google Maps
+      </a>
+      <a href="#" data-nav="apple" role="menuitem" class="nav-popover__link">
+        <Icon id="i-apple" class="nav-popover__icon" />
+        Apple Maps
+      </a>
+      {/* biome-ignore-end lint/a11y/useValidAnchor: href set by client JS from the trigger's slug */}
+    </div>
+  );
+}
+
+/**
+ * The single "add to calendar" menu. Same rationale as SharedNavPopover: the
+ * per-event copies were 16 × ~2.8 KB of identical structure differing only in
+ * their target URLs, which the client now derives from the event id.
+ */
+export function SharedCalendarPopover() {
+  return (
+    <div id="cal-shared" popover="auto" role="menu" class="nav-popover">
+      {/* biome-ignore-start lint/a11y/useValidAnchor: href set by client JS from the trigger's event data */}
+      <a href="#" data-cal="google" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+        <Icon id="i-cal-google" class="nav-popover__icon" />
+        Google
+      </a>
+      <a href="#" data-cal="outlook" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+        <Icon id="i-cal-outlook" class="nav-popover__icon" />
+        Outlook
+      </a>
+      <a href="#" data-cal="yahoo" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+        <Icon id="i-cal-yahoo" class="nav-popover__icon" />
+        Yahoo
+      </a>
+      <hr class="nav-popover__divider" />
+      <a href="#" data-cal="ics" download="event.ics" role="menuitem" class="nav-popover__link">
+        <Icon id="i-cal-ics" class="nav-popover__icon" />
+        .ics (Apple, Proton, ...)
+      </a>
+      {/* biome-ignore-end lint/a11y/useValidAnchor: href set by client JS from the trigger's event data */}
+    </div>
   );
 }
 
@@ -407,24 +433,6 @@ function ExhibitionCard({
 }
 
 function CalendarDropdown({ ev, tr }: { ev: Event; tr: Record<string, string> }) {
-  // CalendarEvent (in @museumsufer/core) uses `string | null` semantics.
-  // Our optional Event fields land as `string | undefined` after stripping;
-  // coerce here so the helper signatures stay narrow.
-  const calEv = {
-    date: ev.date,
-    time: ev.time ?? null,
-    end_time: ev.end_time ?? null,
-    end_date: ev.end_date ?? null,
-    title: ev.title,
-    description: ev.description ?? null,
-    detail_url: ev.detail_url ?? null,
-  };
-  const googleUrl = buildCalendarUrl(calEv);
-  const outlookUrl = buildOutlookUrl(calEv);
-  const yahooUrl = buildYahooUrl(calEv);
-  const icsUrl = `/event/${ev.id}/feed.ics`;
-
-  const popId = `cal-${ev.id}`;
   return (
     <span class="popover-wrap">
       <button
@@ -433,30 +441,19 @@ function CalendarDropdown({ ev, tr }: { ev: Event; tr: Record<string, string> })
         aria-label={tr.addToCalendar}
         title={tr.addToCalendar}
         aria-haspopup="menu"
-        popovertarget={popId}
+        popovertarget="cal-shared"
+        data-cal-id={ev.id}
+        data-cal-date={ev.date}
+        data-cal-time={ev.time ?? ""}
+        data-cal-end-time={ev.end_time ?? ""}
+        data-cal-end-date={ev.end_date ?? ""}
+        data-cal-title={ev.title}
+        data-cal-venue={ev.museum_name ?? ""}
+        data-cal-url={ev.detail_url ?? ""}
         onclick={positionPopover}
       >
         <Icon id="i-event" class="icon-btn__icon" />
       </button>
-      <div id={popId} popover="auto" role="menu" class="nav-popover">
-        <a href={googleUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
-          <Icon id="i-cal-google" class="nav-popover__icon" />
-          Google
-        </a>
-        <a href={outlookUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
-          <Icon id="i-cal-outlook" class="nav-popover__icon" />
-          Outlook
-        </a>
-        <a href={yahooUrl} target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
-          <Icon id="i-cal-yahoo" class="nav-popover__icon" />
-          Yahoo
-        </a>
-        <hr class="nav-popover__divider" />
-        <a href={icsUrl} download="event.ics" role="menuitem" class="nav-popover__link">
-          <Icon id="i-cal-ics" class="nav-popover__icon" />
-          .ics (Apple, Proton, ...)
-        </a>
-      </div>
     </span>
   );
 }

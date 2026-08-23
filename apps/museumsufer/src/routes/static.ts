@@ -6,7 +6,7 @@ import { MUSEUMS } from "../museum-config";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import type { Env } from "../types";
 
-const CLIENT_BUNDLE_VERSION = fnv1a(CLIENT_SCRIPT);
+export const CLIENT_BUNDLE_VERSION = fnv1a(CLIENT_SCRIPT);
 export const CLIENT_BUNDLE_HREF = `/client-${CLIENT_BUNDLE_VERSION}.js`;
 
 /** Frankfurt keeps the SEO-primary museumsufer.app host + Museumsufer brand;
