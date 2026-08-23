@@ -353,16 +353,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "kampnagel",
-    name: "Kampnagel",
-    address: "",
-    lat: 53.5833,
-    lon: 10.0218,
-    city: "hamburg",
-    website_url: "https://kampnagel.de",
-    default_genre: "classical",
-  },
-  {
     slug: "karlstorbahnhof",
     name: "Karlstorbahnhof Heidelberg",
     address: "",
@@ -500,16 +490,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6885,
     city: "frankfurt",
     website_url: "https://stalburg.de",
-    default_genre: "jazz",
-  },
-  {
-    slug: "steife-brise",
-    name: "Steife Brise",
-    address: "",
-    lat: 53.5503,
-    lon: 9.9389,
-    city: "hamburg",
-    website_url: "https://steife-brise.de",
     default_genre: "jazz",
   },
   {
