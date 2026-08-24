@@ -57,6 +57,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://hafencity.premiumkino.de",
   },
   {
+    slug: "b-movie",
+    name: "B-Movie",
+    address: "",
+    lat: 53.5557,
+    lon: 9.9646,
+    city: "hamburg",
+    website_url: "https://www.b-movie.de",
+  },
+  {
     slug: "blankeneser-kino",
     name: "Blankeneser Kino",
     address: "",

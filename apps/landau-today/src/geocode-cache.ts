@@ -376,6 +376,8 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "protestantisches gemeindehaus godramstein|landau in der pfalz": [49.198283, 8.112344],
   "pwv maikammer-alsterweiler e.v.|maikammer": [49.305216, 8.131629],
   "pwv maikammer/alsterweiler e.v.|neustadt an der weinstraße": [49.353606, 8.136025],
+  "quartiersbüro im horst|landau in der pfalz": [49.198283, 8.112344],
+  "raiffeisenstraße 2|kapellen-drusweiler": [49.104638, 8.031389],
   "rathaus landau|landau in der pfalz": [49.198284, 8.11142],
   "rathaus leinsweiler|leinsweiler": [49.182617, 8.053663],
   "rathaus, markstr.50, ratssaal|landau in der pfalz": [49.198283, 8.112344],

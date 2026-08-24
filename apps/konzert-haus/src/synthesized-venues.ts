@@ -563,16 +563,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "wdc2026-dornbuschkirche",
-    name: "Dornbuschkirche",
-    address: "",
-    lat: 50.1404544,
-    lon: 8.6733902,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
-  {
     slug: "wdc2026-platz-vor-der-philippuskirche",
     name: "Platz vor der Philippuskirche",
     address: "",
