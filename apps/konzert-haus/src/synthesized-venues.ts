@@ -103,6 +103,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "dramatische-buehne",
+    name: "Die Dramatische Bühne",
+    address: "",
+    lat: 50.1109,
+    lon: 8.6821,
+    city: "frankfurt",
+    website_url: "https://www.diedramatischebuehne.de",
+    default_genre: "classical",
+  },
+  {
     slug: "drp-saarbruecken",
     name: "Deutsche Radio Philharmonie",
     address: "",
