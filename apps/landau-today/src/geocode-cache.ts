@@ -479,6 +479,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "universum theater landau|landau in der pfalz": [49.198283, 8.112344],
   "unterdorfstr. 20|oberotterbach": [49.070771, 7.972784],
   "ursam natur- und lebenspfade e.v.|landau in der pfalz": [49.198283, 8.112344],
+  "veranstaltungsgesellschaft ld süw|landau": [49.198283, 8.112344],
   "verbandsgemeindeverwaltung landau-land|landau in der pfalz": [49.197504, 8.107791],
   "verbandsgemeinde|annweiler am trifels": [49.202725, 7.968226],
   "verein für waldorfpädagogik landau e.v.|landau in der pfalz": [49.198283, 8.112344],
