@@ -53,6 +53,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "dr-hochs-konservatorium",
+    name: "Dr. Hoch's Konservatorium",
+    address: "",
+    lat: 50.1115,
+    lon: 8.7016,
+    city: "frankfurt",
+    website_url: "https://www.dr-hochs.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "drp-saarbruecken",
     name: "Deutsche Radio Philharmonie",
     address: "",
