@@ -464,6 +464,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "tasty wine tours|hainfeld": [49.257501, 8.101102],
   "tasty wine tours|rhodt unter rietburg": [49.270878, 8.106712],
   "taubensuhl|eußerthal": [49.248921, 7.96193],
+  "thomas-nast-park|landau in der pfalz": [49.198283, 8.112344],
   "tierheim landau, rodenweg 1|": [49.198283, 8.112344],
   "toms näschtl|landau in der pfalz": [49.207634, 8.121735],
   "torwandschießen|landau in der pfalz": [49.198283, 8.112344],
