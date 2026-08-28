@@ -368,6 +368,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "pfälzerwald-verein roschbach|roschbach": [49.245686, 8.118526],
   "pop-up store|bad bergzabern": [49.102808, 7.999127],
   "poststr. 23|edenkoben": [49.281117, 8.1222],
+  "praxis neumayer für physiotherapie|edenkoben": [49.282236, 8.128436],
   "prot kirchengemeinde annweiler|annweiler am trifels": [49.202725, 7.968226],
   "prot. stiftskirche landau|landau in der pfalz": [49.198283, 8.112344],
   "protestantische kirche gleiszellen|gleiszellen-gleishorbach": [49.129925, 8.007752],
