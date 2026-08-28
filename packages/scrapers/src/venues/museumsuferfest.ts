@@ -6,6 +6,55 @@ const BASE = "https://www.museumsuferfest.de";
 const SITEMAP_INDEX = `${BASE}/sitemap.xml`;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 const DETAIL_CONCURRENCY = 8;
+const FESTIVAL_SLUG = "museumsuferfest";
+
+/** Festival venue name → the museum's own hub slug.
+ *
+ *  Fanning the programme out per museum is what makes it dedupe: the
+ *  museumsufer app keys both of its dedup passes on `museum_id`, resolved from
+ *  `source_slug`, so festival events filed under one festival-wide slug would
+ *  never be compared against the same event scraped from the museum's own site
+ *  (and, since that slug is not in the museum directory, would be dropped
+ *  outright).
+ *
+ *  Venue coordinates are the museum's festival *booth* on the riverbank, not
+ *  its building, so they sit up to a few hundred metres from the museum's
+ *  config coordinates — the Geldmuseum's booth is 4.7 km from its Ginnheim
+ *  premises. That offset is expected and not a mismapping.
+ *
+ *  Stages, open-air spots and non-museum venues (`… Bühne`, Holbeinsteg,
+ *  Drachenbootwettkämpfe) have no museum to belong to and stay under the
+ *  festival's own slug. */
+const MUSEUM_SLUG_BY_VENUE: Record<string, string> = {
+  "Archäologisches Museum Frankfurt": "archaeologisches-museum-frankfurt",
+  "Bibelhaus Erlebnis Museum": "bibelhaus-erlebnismuseum",
+  "Caricatura Museum Frankfurt": "caricatura-museum-frankfurt",
+  "DFF – Deutsches Filminstitut & Filmmuseum": "dff-deutsches-filminstitut-filmmuseum",
+  "Deutsches Architekturmuseum": "deutsches-architekturmuseum",
+  "Deutsches Romantik Museum": "deutsches-romantik-museum",
+  "Deutsches Romantik-Museum": "deutsches-romantik-museum",
+  "Dommuseum Frankfurt": "dommuseum-frankfurt",
+  "Fotografie Forum Frankfurt": "fotografie-forum-frankfurt",
+  "Frankfurter Goethe-Haus": "frankfurter-goethe-haus",
+  "Frankfurter Kunstverein": "frankfurter-kunstverein",
+  "Geldmuseum auf dem Museumsuferfest": "geldmuseum-der-deutschen-bundesbank",
+  "Historisches Museum Frankfurt": "historisches-museum-frankfurt",
+  "Ikonenmuseum Frankfurt": "ikonenmuseum-frankfurt",
+  "Institut für Stadtgeschichte": "institut-fuer-stadtgeschichte",
+  "Institut für Stadtgeschichte / Karmeliterkloster": "institut-fuer-stadtgeschichte",
+  "Junges Museum Frankfurt": "junges-museum-frankfurt",
+  "Jüdisches Museum Frankfurt": "juedisches-museum-frankfurt",
+  "Liebieghaus Skulpturensammlung": "liebieghaus-skulpturensammlung",
+  "MGGU - Museum Giersch der Goethe-Universität": "museum-giersch-der-goethe-universitaet",
+  "MOMEM - Museum of Modern Electronic Music": "momem-museum-of-modern-electronic-music",
+  "Museum Angewandte Kunst": "museum-angewandte-kunst",
+  "Museum Judengasse": "juedisches-museum-museum-judengasse-frankfurt",
+  "Museum für Kommunikation": "museum-fuer-kommunikation-frankfurt",
+  "Städel Museum": "staedel-museum",
+  "Struwwelpeter Museum": "struwwelpeter-museum",
+  "TOWER MMK – MUSEUM MMK FÜR MODERNE KUNST": "tower-mmk-museum-mmk-fuer-moderne-kunst",
+  "Weltkulturen Museum": "weltkulturen-museum",
+};
 
 /**
  * Museumsuferfest — Frankfurt's museum-embankment festival, three days at the
@@ -21,27 +70,45 @@ const DETAIL_CONCURRENCY = 8;
  * expose only ~52 events between them. The `ndsdestinationdataevent` sitemap is
  * the authoritative index and lists all ~355, so we drive off that instead.
  */
-export async function scrapeMuseumsuferfest(): Promise<VenueScrapeResult> {
+export async function scrapeMuseumsuferfest(): Promise<VenueScrapeResult[]> {
   const urls = await fetchEventUrls();
   const today = todayIso();
 
   const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
-  const events: CanonicalScrapedEvent[] = [];
+  const parsed: Array<{ slug: string; event: CanonicalScrapedEvent }> = [];
   for (const url of urls) {
     queue.add(async () => {
-      const event = await fetchEvent(url, today);
-      if (event) events.push(event);
+      const hit = await fetchEvent(url, today);
+      if (hit) parsed.push(hit);
     });
   }
   await queue.onIdle();
 
-  events.sort(
-    (a, b) =>
-      a.date.localeCompare(b.date) ||
-      (a.time ?? "").localeCompare(b.time ?? "") ||
-      a.source_event_id.localeCompare(b.source_event_id),
-  );
-  return { source_slug: "museumsuferfest", display_name: "Museumsuferfest", events };
+  const bySlug = new Map<string, CanonicalScrapedEvent[]>();
+  for (const { slug, event } of parsed) {
+    const bucket = bySlug.get(slug);
+    if (bucket) bucket.push(event);
+    else bySlug.set(slug, [event]);
+  }
+
+  const results: VenueScrapeResult[] = [];
+  for (const [slug, events] of bySlug) {
+    events.sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) ||
+        (a.time ?? "").localeCompare(b.time ?? "") ||
+        a.source_event_id.localeCompare(b.source_event_id),
+    );
+    results.push({
+      source_slug: slug,
+      // Only the festival's own bucket names itself; a museum's bucket must not
+      // relabel that museum's venue name in the hub.
+      ...(slug === FESTIVAL_SLUG ? { display_name: "Museumsuferfest" } : {}),
+      events,
+    });
+  }
+  results.sort((a, b) => a.source_slug.localeCompare(b.source_slug));
+  return results;
 }
 
 /** The sitemap index points at a dedicated event sitemap whose cHash changes
@@ -61,7 +128,7 @@ async function fetchEventUrls(): Promise<string[]> {
   return [...urls];
 }
 
-async function fetchEvent(url: string, today: string): Promise<CanonicalScrapedEvent | null> {
+async function fetchEvent(url: string, today: string): Promise<{ slug: string; event: CanonicalScrapedEvent } | null> {
   const html = await fetchText(url);
   if (!html) return null;
 
@@ -73,10 +140,11 @@ async function fetchEvent(url: string, today: string): Promise<CanonicalScrapedE
   if (!start || start.date < today) return null;
 
   const place = event.location?.[0];
+  const venueName = place?.name?.trim() || null;
   const title = stripHtml(event.name).trim();
   const description = event.description ? stripHtml(event.description).trim() || null : null;
 
-  return {
+  const canonical: CanonicalScrapedEvent = {
     // The festival reuses one page per recurring slot, so the id needs the
     // occurrence: identifier alone collapses a run into a single event.
     source_event_id: `${event.identifier?.[0] ?? url}|${start.date}|${start.time ?? ""}`,
@@ -90,14 +158,15 @@ async function fetchEvent(url: string, today: string): Promise<CanonicalScrapedE
     end_time: end && end.date === start.date && end.time !== start.time ? end.time : null,
     detail_url: url,
     image_url: event.image?.[0]?.url ?? null,
-    // Upstream pads organizer and place names with a leading space.
+    // Upstream pads the organizer name with a leading space.
     performers: event.organizer?.[0]?.name?.trim() || null,
-    venue_room: place?.name?.trim() || null,
+    venue_room: venueName,
     city: place?.address?.addressLocality ?? null,
     lat: place?.geo?.latitude ?? null,
     lon: place?.geo?.longitude ?? null,
     labels: labelsFor(event.keywords),
   };
+  return { slug: (venueName && MUSEUM_SLUG_BY_VENUE[venueName]) || FESTIVAL_SLUG, event: canonical };
 }
 
 interface LdPlace {

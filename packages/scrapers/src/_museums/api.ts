@@ -3995,16 +3995,18 @@ async function fetchJungesMuseumExhibitions(endpoint: string): Promise<ApiExhibi
     if (!title) continue;
     const body = m[3];
 
-    let start_date: string | null = null;
-    let end_date: string | null = null;
+    // The listing mixes real exhibitions with permanent nav pages (/chronik,
+    // /digitales, /familienspuren) and past anniversary pages whose only <span>
+    // is prose. Without a parseable run, a row is not an exhibition: emitting it
+    // anyway gave it a null start_date, which toCanonicalExhibition pins to the
+    // unix epoch and the app then renders as a "1. Jan." entry.
     const dateSpan = body.match(
       /<span>\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\s+bis\s+(\d{1,2})\.(\d{1,2})\.(\d{4})\s*<\/span>/,
     );
-    if (dateSpan) {
-      start_date = `${dateSpan[3]}-${dateSpan[2].padStart(2, "0")}-${dateSpan[1].padStart(2, "0")}`;
-      end_date = `${dateSpan[6]}-${dateSpan[5].padStart(2, "0")}-${dateSpan[4].padStart(2, "0")}`;
-      if (end_date < today) continue;
-    }
+    if (!dateSpan) continue;
+    const start_date = `${dateSpan[3]}-${dateSpan[2].padStart(2, "0")}-${dateSpan[1].padStart(2, "0")}`;
+    const end_date = `${dateSpan[6]}-${dateSpan[5].padStart(2, "0")}-${dateSpan[4].padStart(2, "0")}`;
+    if (end_date < today) continue;
 
     const desc = body
       .replace(/<span>[\s\S]*?<\/span>/g, "")
