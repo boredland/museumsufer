@@ -1056,8 +1056,9 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
 }
 
 /* Row synopsis — TMDb overview when matched, cinema description otherwise.
- * Three-line clamp so a 4-paragraph TMDb dump doesn't dominate the row;
- * the /film/:id detail page shows the full text. */
+ * Collapsed to three lines so a 4-paragraph TMDb dump doesn't dominate the
+ * row; unlike a bare clamp the overflow is reachable in place via the shared
+ * .clamped disclosure. The /film/:id page still shows the full text. */
 .prog-entry__description {
   margin: 0 0 0.55rem;
   font-family: var(--serif);
@@ -1067,11 +1068,38 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   color: var(--celluloid-soft);
   max-width: 64ch;
   text-wrap: pretty;
+}
+
+/* Shared clamped-text disclosure (@museumsufer/core/clamped-text). The text
+ * lives in the <summary>, so it stays readable while collapsed; the marker is
+ * suppressed and replaced by the .clamped__more affordance. Text too short to
+ * overflow renders as .clamped-plain instead, with no control. */
+.clamped, .clamped-plain { display: block; }
+.clamped > .clamped__summary {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+.clamped > .clamped__summary::-webkit-details-marker { display: none; }
+.clamped:not([open]) .clamped__text {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: var(--clamp-lines, 3);
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.clamped__more {
+  display: inline-block;
+  margin-top: 0.15rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+.clamped__more::after { content: " →"; }
+.clamped[open] .clamped__more::after { content: " ↑"; }
+.clamped > .clamped__summary:hover .clamped__more { color: var(--brass-bright); }
+.clamped > .clamped__summary:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
 
 /* Score badges (TMDb / RT / IMDb) sit immediately after the showtime
  * hero. All three share the same brass-bordered mono-caps register as

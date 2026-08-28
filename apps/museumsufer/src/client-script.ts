@@ -389,9 +389,12 @@ export const CLIENT_SCRIPT = `
         return;
       }
       // The description lives in the card, not in a data-attribute — repeating
-      // it per trigger is what made the old inline menus so large.
+      // it per trigger is what made the old inline menus so large. Prefer the
+      // inner .clamped__text node: on a clamped description the wrapper also
+      // contains the "Mehr" affordance, which must not leak into the calendar
+      // entry.
       var card = btn.closest('[data-item-id]');
-      var descEl = card && card.querySelector('.card-description');
+      var descEl = card && (card.querySelector('.clamped__text') || card.querySelector('.card-description'));
       var urls2 = calUrlsFor({
         id: btn.dataset.calId,
         date: btn.dataset.calDate,

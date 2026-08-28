@@ -1162,6 +1162,12 @@ dialog::backdrop {
 .card-avail--sold-out { color: var(--color-accent); }
 .card-avail--few-left { color: var(--color-text-secondary); }
 
+/* Card synopsis. Shared clamped-text disclosure
+ * (@museumsufer/core/clamped-text): the text lives in the <summary>, so a
+ * short description reads without interaction and only a long one grows a
+ * "Mehr" control. Text too short to overflow renders as .clamped-plain with no
+ * control at all. Replaces the old .card-disclosure, which hid every
+ * description — including one-liners — behind a "Details" toggle. */
 .card-description {
   margin-top: 0.375rem; padding-top: 0.375rem;
   font-size: 0.75rem; line-height: 1.6;
@@ -1169,18 +1175,31 @@ dialog::backdrop {
   border-top: 1px solid var(--color-border-light);
   font-family: var(--font-display); font-style: italic;
 }
-
-.card-disclosure {
-  margin-top: 0.25rem;
-}
-.card-disclosure__summary {
-  display: inline-flex; align-items: center;
-  font-size: 0.75rem;
-  color: var(--color-text-tertiary);
+.clamped, .clamped-plain { display: block; }
+.clamped > .clamped__summary {
+  display: block;
   cursor: pointer;
+  list-style: none;
+}
+.clamped > .clamped__summary::-webkit-details-marker { display: none; }
+.clamped:not([open]) .clamped__text {
+  display: -webkit-box;
+  -webkit-line-clamp: var(--clamp-lines, 3);
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.clamped__more {
+  display: inline-block;
+  margin-top: 0.25rem;
+  font-family: var(--font-sans); font-style: normal;
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
   transition: color 0.15s ease;
 }
-.card-disclosure__summary:hover { color: var(--color-river); }
+.clamped__more::after { content: " ›"; }
+.clamped[open] .clamped__more::after { content: " ‹"; }
+.clamped > .clamped__summary:hover .clamped__more { color: var(--color-river); }
+.clamped > .clamped__summary:focus-visible { outline: 2px solid var(--color-river); outline-offset: 3px; }
 
 /* Translated badge (DeepL) */
 .translated-badge {

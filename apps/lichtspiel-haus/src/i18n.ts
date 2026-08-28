@@ -27,6 +27,8 @@ export interface Translations {
   pastNote: (n: number) => string;
   /** "Mit", "Featuring" — Q&A guests, live accompaniment, etc. */
   creditsLabel: string;
+  /** Read-more control on a clamped synopsis. */
+  moreLabel: string;
   empty: string;
   ticketsAction: string;
   freeEntry: string;
@@ -173,6 +175,7 @@ const de: Translations = {
   emptyHint: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   pastNote: (n) => `${n} Vorstellung${n === 1 ? "" : "en"} heute bereits begonnen — verborgen.`,
   creditsLabel: "Mit",
+  moreLabel: "Mehr",
   empty: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   ticketsAction: "Karten",
   freeEntry: "Eintritt frei",
@@ -335,6 +338,7 @@ const en: Translations = {
   emptyHint: "Check back tomorrow or change the date above.",
   pastNote: (n) => `${n} screening${n === 1 ? "" : "s"} already started today — hidden.`,
   creditsLabel: "With",
+  moreLabel: "More",
   empty: "Check back tomorrow or change the date above.",
   ticketsAction: "Tickets",
   freeEntry: "Free entry",

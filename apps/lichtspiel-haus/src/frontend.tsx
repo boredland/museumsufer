@@ -25,6 +25,7 @@ import {
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { CitySwitch } from "@museumsufer/core/cityswitch";
+import { ClampedText } from "@museumsufer/core/clamped-text";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
 import { DigestDialog as SharedDigestDialog } from "@museumsufer/core/digest-dialog";
 import { buildDigestDialogScript } from "@museumsufer/core/digest-dialog-script";
@@ -660,7 +661,9 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
           )}
         </h3>
         {subtitle ? <p class="prog-entry__subtitle">{subtitle}</p> : null}
-        {showDescription ? <p class="prog-entry__description">{description}</p> : null}
+        {showDescription ? (
+          <ClampedText text={description} moreLabel={tr.moreLabel} class="prog-entry__description" />
+        ) : null}
         {genres.length > 0 ? (
           <ul class="prog-entry__genres" aria-label="Genres">
             {genres.map((g) => (

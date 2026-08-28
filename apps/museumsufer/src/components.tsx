@@ -1,4 +1,5 @@
 import { buildUtm, cityUrl, dateFormatter } from "@museumsufer/core";
+import { ClampedText } from "@museumsufer/core/clamped-text";
 import { dateLocale, type Locale } from "./i18n";
 import { getMuseumLocations, MUSEUMS } from "./museum-config";
 import { formatDateShort } from "./shared";
@@ -418,13 +419,7 @@ function ExhibitionCard({
             />
           </div>
           {ex.description && (
-            <details class="card-disclosure" open={hero}>
-              <summary class="card-disclosure__summary">
-                <span aria-hidden="true" class="disclosure-icon" />
-                {tr.details}
-              </summary>
-              <div class="card-description">{ex.description}</div>
-            </details>
+            <ClampedText text={ex.description} moreLabel={tr.moreLabel} lines={hero ? 6 : 3} class="card-description" />
           )}
         </div>
       </article>
@@ -533,13 +528,7 @@ function EventCard({
             />
           </div>
           {ev.description && (
-            <details class="card-disclosure" open={hero}>
-              <summary class="card-disclosure__summary">
-                <span aria-hidden="true" class="disclosure-icon" />
-                {tr.details}
-              </summary>
-              <div class="card-description">{ev.description}</div>
-            </details>
+            <ClampedText text={ev.description} moreLabel={tr.moreLabel} lines={hero ? 6 : 3} class="card-description" />
           )}
         </div>
       </article>

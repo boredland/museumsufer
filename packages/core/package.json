@@ -16,6 +16,7 @@
     "./cities": "./src/cities.ts",
     "./cityswitch": "./src/cityswitch.tsx",
     "./city-routing": "./src/city-routing.ts",
+    "./clamped-text": "./src/clamped-text.tsx",
     "./contact-dialog": "./src/contact-dialog.tsx",
     "./date": "./src/date.ts",
     "./digest-dialog": "./src/digest-dialog.tsx",
