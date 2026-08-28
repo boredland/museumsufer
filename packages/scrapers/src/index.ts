@@ -183,6 +183,7 @@ import { scrapeMousonturm } from "./venues/mousonturm";
 import { scrapeMurnauFilmtheater } from "./venues/murnau-filmtheater";
 import { scrapeMuseumRe } from "./venues/museum-reinhard-ernst";
 import { scrapeMuseumWiesbaden } from "./venues/museum-wiesbaden";
+import { scrapeMuseumsuferfest } from "./venues/museumsuferfest";
 import { scrapeMusicstarNorderstedt } from "./venues/musicstar-norderstedt";
 import { scrapeMusikschuleFrankfurt } from "./venues/musikschule-frankfurt";
 import { scrapeMutTheater } from "./venues/mut-theater";
@@ -410,6 +411,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "cineamo-frankfurt-region", run: (_ctx: ScraperContext) => scrapeCineamo() },
   { slug: "kinoheld-frankfurt-region", run: (_ctx: ScraperContext) => scrapeKinoheld() },
   { slug: "museums-frankfurt", run: (ctx: ScraperContext) => scrapeMuseumsFrankfurt(ctx) },
+  { slug: "museumsuferfest", run: (_ctx: ScraperContext) => scrapeMuseumsuferfest() },
   { slug: "deichtorhallen", run: (ctx: ScraperContext) => scrapeDeichtorhallen(ctx) },
   { slug: "mkg-hamburg", run: (ctx: ScraperContext) => scrapeMkgHamburg(ctx) },
   { slug: "markk", run: (_ctx: ScraperContext) => scrapeMarkkHamburg() },
@@ -617,6 +619,7 @@ export {
   scrapeMousonturm,
   scrapeMurnauFilmtheater,
   scrapeMuseumsFrankfurt,
+  scrapeMuseumsuferfest,
   scrapeMusikschuleFrankfurt,
   scrapeMutTheater,
   scrapeNaxos,

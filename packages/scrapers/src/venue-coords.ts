@@ -143,6 +143,9 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "lichtmess-kino": [53.5556, 9.935],
   "monsun-theater": [53.5492, 9.9272],
   mousonturm: [50.1183, 8.7019],
+  // Fallback only — festival events carry their venue's own JSON-LD geo.
+  // Römerberg, the fest's civic centre point.
+  museumsuferfest: [50.1106, 8.6816],
   "neues-theater-hoechst": [50.1014, 8.5443],
   "ohnsorg-theater": [53.5528, 10.0075],
   "oper-frankfurt": [50.1077, 8.6726],
