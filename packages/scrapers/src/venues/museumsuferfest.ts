@@ -136,7 +136,9 @@ async function fetchEvent(url: string, today: string): Promise<{ slug: string; e
   if (!event?.name || !event.startDate) return null;
 
   const start = splitIsoDateTime(event.startDate);
-  const end = event.endDate ? splitIsoDateTime(event.endDate) : null;
+  // Midnight means "no time given" for a start, but it is a real clock time for
+  // an end — a set running 22:30–00:00 ends at midnight, it is not untimed.
+  const end = event.endDate ? splitIsoDateTime(event.endDate, { midnightIsTime: true }) : null;
   if (!start || start.date < today) return null;
 
   const place = event.location?.[0];
@@ -152,10 +154,12 @@ async function fetchEvent(url: string, today: string): Promise<{ slug: string; e
     description,
     date: start.date,
     time: start.time,
-    // Upstream sets endDate on every event, usually the same day; only a real
-    // span is a multi-day event.
-    end_date: end && end.date !== start.date ? end.date : null,
-    end_time: end && end.date === start.date && end.time !== start.time ? end.time : null,
+    // Upstream sets endDate on every event, usually the same day. A club set
+    // that starts at 22:30 and ends at 02:00 rolls the date without being a
+    // multi-day event, so treat a span that ends by early morning as one late
+    // night: keep its end_time and leave end_date null.
+    end_date: end && end.date !== start.date && !isOvernight(start, end) ? end.date : null,
+    end_time: end && (end.date === start.date || isOvernight(start, end)) && end.time !== start.time ? end.time : null,
     detail_url: url,
     image_url: event.image?.[0]?.url ?? null,
     // Upstream pads the organizer name with a leading space.
@@ -238,10 +242,24 @@ function labelsFor(keywords: string | string[] | undefined): ScrapedLabel[] {
 /** JSON-LD dates are local ISO with an offset ("2026-08-29T15:00:00+02:00");
  *  the wall-clock part is what the festival advertises, so read it directly
  *  rather than going through Date and back out via UTC. */
-function splitIsoDateTime(value: string): { date: string; time: string | null } | null {
+function splitIsoDateTime(value: string, opts?: { midnightIsTime?: boolean }): Stamp | null {
   const m = value.match(/^(\d{4}-\d{2}-\d{2})(?:T(\d{2}:\d{2}))?/);
   if (!m) return null;
-  return { date: m[1], time: m[2] === "00:00" ? null : (m[2] ?? null) };
+  const time = m[2] === "00:00" && !opts?.midnightIsTime ? null : (m[2] ?? null);
+  return { date: m[1], time };
+}
+
+type Stamp = { date: string; time: string | null };
+
+/** True when the span is one late night rather than a multi-day run: it ends
+ *  on the following calendar day, at an hour that is still "tonight" (the
+ *  festival's latest sets end around 03:00). */
+function isOvernight(start: Stamp, end: Stamp): boolean {
+  if (!end.time) return false;
+  const next = new Date(`${start.date}T00:00:00Z`);
+  next.setUTCDate(next.getUTCDate() + 1);
+  if (end.date !== next.toISOString().slice(0, 10)) return false;
+  return end.time <= "06:00";
 }
 
 async function fetchText(url: string): Promise<string | null> {

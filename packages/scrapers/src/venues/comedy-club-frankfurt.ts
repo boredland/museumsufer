@@ -32,24 +32,33 @@ export async function scrapeComedyClubFrankfurt(): Promise<VenueScrapeResult> {
 
   const today = todayIso();
   const events: CanonicalScrapedEvent[] = [];
-  const seen = new Set<number>();
 
+  // An event appears once per carousel it is featured in, and React dedupes
+  // repeated fields across those copies into flight reference tokens ("$4f"),
+  // so a later copy can carry `ticket_details: "$4f"` and a `$`-token
+  // description instead of the real values. Keep the richest copy per event
+  // rather than the first one seen, which would depend on emission order.
+  const bestById = new Map<number, FlightEvent>();
   for (const raw of extractEventObjects(flight)) {
     if (raw.location?.trim() !== VENUE_STREET) continue;
+    const existing = bestById.get(raw.eventId);
+    if (!existing || resolvedFieldCount(raw) > resolvedFieldCount(existing)) bestById.set(raw.eventId, raw);
+  }
+
+  for (const raw of bestById.values()) {
     const when = parseDuration(raw.duration);
     if (!when || when.date < today) continue;
-    // The payload repeats an event once per carousel it appears in.
-    if (seen.has(raw.eventId)) continue;
-    seen.add(raw.eventId);
 
     const title = raw.title.trim();
-    const ticket = raw.ticket_details?.find((t) => t.active) ?? raw.ticket_details?.[0];
-    const prices = (raw.ticket_details ?? []).map((t) => t.price).filter((p): p is number => typeof p === "number");
+    const tickets = Array.isArray(raw.ticket_details) ? raw.ticket_details : [];
+    const ticket = tickets.find((t) => t.active) ?? tickets[0];
+    const prices = tickets.map((t) => t.price).filter((p): p is number => typeof p === "number");
+    const description = isFlightRef(raw.description) ? null : raw.description?.replace(/\s+/g, " ").trim() || null;
 
     events.push({
       source_event_id: String(raw.eventId),
       title,
-      description: raw.description?.replace(/\s+/g, " ").trim() || null,
+      description,
       date: when.date,
       time: when.time,
       end_time: when.endTime,
@@ -83,13 +92,27 @@ interface TicketDetail {
 interface FlightEvent {
   eventId: number;
   title: string;
+  /** A flight reference token ("$4a") when React deduped this field. */
   description?: string | null;
   /** JSON-encoded `["YYYY-MM-DD HH:MM:SS", "YYYY-MM-DD HH:MM:SS"]`. */
   duration: string;
   location?: string | null;
   city?: string | null;
   imageUrl?: string | null;
-  ticket_details?: TicketDetail[];
+  /** Either the real array or a flight reference token. */
+  ticket_details?: TicketDetail[] | string;
+}
+
+/** React replaces a field it has already serialised elsewhere in the payload
+ *  with a back-reference like `$4f`. Such a value is a pointer, not content. */
+function isFlightRef(value: unknown): boolean {
+  return typeof value === "string" && /^\$[0-9a-f]+$/i.test(value);
+}
+
+/** How many of the fields we care about are real values rather than
+ *  back-references, used to pick the richest copy of a repeated event. */
+function resolvedFieldCount(e: FlightEvent): number {
+  return (Array.isArray(e.ticket_details) ? 1 : 0) + (e.description && !isFlightRef(e.description) ? 1 : 0);
 }
 
 /** Next.js streams the RSC payload as a sequence of `self.__next_f.push` calls

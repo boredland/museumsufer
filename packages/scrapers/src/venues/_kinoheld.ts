@@ -183,9 +183,22 @@ export async function scrapeKinoheld(): Promise<VenueScrapeResult[]> {
 
 async function scrapeCinema(cinema: KinoheldCinema, dates: string[]): Promise<VenueScrapeResult> {
   const events: CanonicalScrapedEvent[] = [];
+  let failures = 0;
   for (let i = 0; i < dates.length; i += MAX_DATES_PER_QUERY) {
-    events.push(...(await fetchShows(cinema, dates.slice(i, i + MAX_DATES_PER_QUERY))));
+    // Losing one 3-day window to a transient upstream error must not discard
+    // the windows that already succeeded — that would turn a blip into an
+    // empty programme for the whole horizon.
+    try {
+      events.push(...(await fetchShows(cinema, dates.slice(i, i + MAX_DATES_PER_QUERY))));
+    } catch (err) {
+      failures++;
+      console.warn(`kinoheld ${cinema.source_slug} ${dates[i]}+: ${err instanceof Error ? err.message : String(err)}`);
+    }
   }
+  // Every window failing is a real outage, not a blip: surface it so the
+  // aggregator logs the cinema instead of silently reporting zero shows.
+  if (failures > 0 && events.length === 0)
+    throw new Error(`kinoheld ${cinema.source_slug}: all ${failures} windows failed`);
   return { source_slug: cinema.source_slug, display_name: cinema.name, events };
 }
 
