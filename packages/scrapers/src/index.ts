@@ -63,6 +63,7 @@ import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeCentralstationDarmstadt } from "./venues/centralstation-darmstadt";
 import { scrapeCitydomeDarmstadt } from "./venues/citydome-darmstadt";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
+import { scrapeComedyClubFrankfurt } from "./venues/comedy-club-frankfurt";
 import { scrapeCongresshalleSaarbruecken } from "./venues/congresshalle-saarbruecken";
 import { scrapeCottonClub } from "./venues/cotton-club";
 import { scrapeCrespoFoundation } from "./venues/crespo-foundation";
@@ -289,6 +290,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "citydome-darmstadt", run: (_ctx: ScraperContext) => scrapeCitydomeDarmstadt() },
   { slug: "centralstation-darmstadt", run: (_ctx: ScraperContext) => scrapeCentralstationDarmstadt() },
   { slug: "club-voltaire", run: (_ctx: ScraperContext) => scrapeClubVoltaire() },
+  { slug: "comedy-club-frankfurt", run: (_ctx: ScraperContext) => scrapeComedyClubFrankfurt() },
   { slug: "cotton-club", run: (_ctx: ScraperContext) => scrapeCottonClub() },
   { slug: "congresshalle-saarbruecken", run: (_ctx: ScraperContext) => scrapeCongresshalleSaarbruecken() },
   { slug: "crespo-foundation", run: (_ctx: ScraperContext) => scrapeCrespoFoundation() },
@@ -512,6 +514,7 @@ export {
   scrapeCentralstationDarmstadt,
   scrapeCitydomeDarmstadt,
   scrapeClubVoltaire,
+  scrapeComedyClubFrankfurt,
   scrapeCrespoFoundation,
   scrapeDaiHeidelberg,
   scrapeDeichtorhallen,
