@@ -40,6 +40,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "city-kinos-saarbruecken": "Passage-Kinos Saarbrücken",
   "citydome-darmstadt": "Citydome Darmstadt",
   "club-voltaire": "Club Voltaire Frankfurt",
+  "comedy-club-frankfurt": "Comedy Club Frankfurt",
   "congresshalle-saarbruecken": "Congresshalle Saarbrücken",
   "cotton-club": "Cotton Club",
   "crespo-foundation": "Crespo Foundation",
