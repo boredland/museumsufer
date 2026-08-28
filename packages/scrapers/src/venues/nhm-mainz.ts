@@ -80,7 +80,7 @@ export async function scrapeNhmMainz(): Promise<VenueScrapeResult> {
     const cleanDescription = stripHtml(description).replace(/\s+/g, " ").trim() || null;
 
     events.push({
-      source_event_id: String(content.id ?? `${title}|${date}`),
+      source_event_id: `${content.id ?? title}|${date}|${time ?? ""}`,
       title: decodeXmlEntities(title),
       description: cleanDescription,
       date,

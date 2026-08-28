@@ -75,7 +75,7 @@ function parse(html: string): VenueScrapeResult {
     seen.add(dedup);
 
     events.push({
-      source_event_id: slug,
+      source_event_id: dedup,
       title,
       subtitle,
       description: subtitle,

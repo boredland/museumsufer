@@ -100,7 +100,11 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
   }
 
   return {
-    source_event_id: `${scrapedSlug}|event|${ev.detail_url ?? `${title}|${ev.date}|${ev.time ?? ""}`}`,
+    // The detail_url alone is not unique: ticketing backends (ticketfritz,
+    // gomus) link every occurrence of a recurring guided tour to one series
+    // template URL, so a date+time qualifier is required or the runner's
+    // id-keyed merge collapses the whole series into a single event.
+    source_event_id: `${scrapedSlug}|event|${ev.detail_url ?? title}|${ev.date}|${ev.time ?? ""}`,
     title,
     description,
     date: ev.date,

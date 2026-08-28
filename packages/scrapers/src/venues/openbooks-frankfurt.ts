@@ -16,7 +16,12 @@ const LINK_RE = /href="(https:\/\/www\.openbooks-frankfurt\.de\/termin\/[^"?#]+)
 
 export async function scrapeOpenBooks(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const html = await fetchText(LISTING_URL);
+  // Open Books runs for one week around the Buchmesse; outside the season the
+  // festival takes /programm/ down entirely and only /archiv/ remains. A 404
+  // here is the off-season, not a breakage, so report no events rather than
+  // failing the scraper.
+  const html = await fetchText(LISTING_URL).catch(() => null);
+  if (html === null) return { source_slug: "openbooks-frankfurt", display_name: "OPEN BOOKS Frankfurt", events: [] };
 
   const days = new Set<string>();
   for (const m of html.matchAll(DAYTITLE_RE)) {

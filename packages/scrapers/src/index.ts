@@ -436,7 +436,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "oper-frankfurt-konzerte", run: (_ctx: ScraperContext) => scrapeOperFrankfurtKonzerte() },
   { slug: "orfeos-erben", run: (_ctx: ScraperContext) => scrapeOrfeosErben() },
   { slug: "papageno-musiktheater", run: (_ctx: ScraperContext) => scrapePapagenoMusiktheater() },
-  { slug: "pfalz-de", run: (_ctx: ScraperContext) => scrapePfalzDe() },
+  { slug: "pfalz-de", run: (ctx: ScraperContext) => scrapePfalzDe(ctx.proxy) },
   { slug: "polytechnische-gesellschaft", run: (_ctx: ScraperContext) => scrapePolytechnische() },
   { slug: "programmkino-rex", run: (_ctx: ScraperContext) => scrapeProgrammkinoRex() },
   { slug: "pupille", run: (_ctx: ScraperContext) => scrapePupille() },

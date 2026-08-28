@@ -183,7 +183,7 @@ function toCanonical(ics: IcsEvent, card?: HtmlCard): CanonicalScrapedEvent {
   const labels = buildLabels(ics.summary, description, card?.katid);
 
   return {
-    source_event_id: card?.fid ?? ics.uid,
+    source_event_id: `${card?.fid ?? ics.uid}|${start.date}|${start.time ?? ""}`,
     title: ics.summary.trim(),
     description,
     date: start.date,
@@ -208,7 +208,7 @@ function htmlOnlyEvent(card: HtmlCard): CanonicalScrapedEvent | null {
   if (!dt) return null;
   const labels = buildLabels(card.title, null, card.katid);
   return {
-    source_event_id: card.fid,
+    source_event_id: `${card.fid}|${dt.start}`,
     title: card.title,
     description: null,
     date: dt.start,

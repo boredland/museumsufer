@@ -1147,12 +1147,8 @@ async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
         const date = `${dm[3]}-${dm[2]}-${dm[1]}`;
         if (date < today) continue;
 
-        const tm = timeStr.match(/(\d{1,2}(?:[.:]\d{2})?)\s*Uhr/);
-        let time: string | null = null;
-        if (tm) {
-          const raw = tm[1].replace(".", ":");
-          time = raw.includes(":") ? raw : `${raw}:00`;
-        }
+        const tm = timeStr.match(/(\d{1,2})(?:[.:](\d{2}))?\s*Uhr/);
+        const time = tm ? `${tm[1].padStart(2, "0")}:${tm[2] ?? "00"}` : null;
 
         events.push({
           title,

@@ -85,7 +85,7 @@ export async function scrapeAlteOper(): Promise<VenueScrapeResult> {
       const genre = classifyMusic(title, finalSubtitle, headline, "classical");
 
       events.push({
-        source_event_id: raw.slug,
+        source_event_id: dedup,
         title,
         subtitle: finalSubtitle,
         description,

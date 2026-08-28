@@ -37,6 +37,11 @@ interface ParsedDetail {
   imageUrl: string | null;
 }
 
+/** Detail fan-out stops here so the scraper returns before the hub's 90s
+ *  per-scraper timeout discards the whole result. Kept well below that: the
+ *  listing fetch precedes the budget and the queue still has to drain. */
+const DETAIL_BUDGET_MS = 55_000;
+
 export async function scrapeHalle02(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const posts = await fetchProgramList();
@@ -60,14 +65,21 @@ export async function scrapeHalle02(): Promise<VenueScrapeResult> {
     toFetch.push(post);
   }
 
+  // The event date exists only on the rendered detail page (the REST payload
+  // carries a stub `content`), so ~110 fetches at ~4.4s each are unavoidable
+  // and the run sits close to the hub's 90s kill. Stop fetching at the budget
+  // and keep whatever resolved: a partial programme beats the zero events a
+  // timeout produces.
+  const budget = AbortSignal.timeout(DETAIL_BUDGET_MS);
   const queue = new PQueue({ concurrency: 20 });
   const detailResults = await Promise.all(
     toFetch.map((post) =>
       queue.add(async () => {
+        if (budget.aborted) return null;
         try {
           const r = await fetch(post.link, {
             headers: { "User-Agent": UA },
-            signal: AbortSignal.timeout(20000),
+            signal: AbortSignal.any([budget, AbortSignal.timeout(20000)]),
           });
           if (!r.ok) return null;
           const parsed = parseDetail(await r.text(), post);

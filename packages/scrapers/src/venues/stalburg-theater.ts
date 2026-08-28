@@ -56,7 +56,7 @@ export async function scrapeStalburgTheater(): Promise<VenueScrapeResult> {
 
   const imageBySlug = await enrichWithDetailPages(parsed);
   const events: CanonicalScrapedEvent[] = parsed.map((p) => ({
-    source_event_id: p.providerEventId ?? `${p.slug}|${p.date}|${p.time ?? ""}`,
+    source_event_id: `${p.providerEventId ?? p.slug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`,
     title: p.title,
     subtitle: p.subtitle,
     description: p.subtitle,

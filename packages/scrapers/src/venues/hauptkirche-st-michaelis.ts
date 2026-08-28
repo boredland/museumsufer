@@ -48,8 +48,7 @@ export async function scrapeHauptkircheStMichaelis(): Promise<VenueScrapeResult>
     const ticketMatch = row.match(/href="([^"]+)"[^>]*class="ticket-link"/i);
     const ticket_url = ticketMatch ? decodeEntities(ticketMatch[1]) : null;
 
-    // Source Event ID
-    const source_event_id = `${slugify(title)}|${date}`;
+    const source_event_id = `${slugify(title)}|${date}|${time || ""}`;
 
     events.push({
       source_event_id,

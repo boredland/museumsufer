@@ -53,7 +53,7 @@ export async function scrapeOperFrankfurt(): Promise<VenueScrapeResult> {
   const events: CanonicalScrapedEvent[] = perfs.map((p) => {
     const e = enrichBySlug.get(p.showSlug) ?? { description: null, image: null, priceEuro: null };
     return {
-      source_event_id: p.providerEventId ?? `${p.showSlug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`,
+      source_event_id: `${p.providerEventId ?? p.showSlug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`,
       title: p.title,
       subtitle: p.composer,
       description: e.description ?? p.composer,

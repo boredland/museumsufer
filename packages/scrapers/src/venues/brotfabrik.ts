@@ -9,6 +9,7 @@ import {
   todayIso,
   truncate,
 } from "@museumsufer/core";
+import PQueue from "p-queue";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.brotfabrik.de";
@@ -24,6 +25,10 @@ const AJAX_URL = `${BASE}/wp-admin/admin-ajax.php`;
 const FROM_HEADER = "jonas@bgdlabs.com (museumsufer event-hub crawler)";
 const THROTTLE_MS = 200;
 const MAX_MONTHS = 6;
+/** Detail pages are fetched one per event across a six-month horizon; serially
+ *  that exceeds the runner's 90s per-scraper budget, so bound the fan-out
+ *  instead of pausing between every request. */
+const DETAIL_CONCURRENCY = 6;
 
 /**
  * Kulturprojekt 21 e.V. (brotfabrik.de) runs the concerts. The mixed-genre
@@ -138,7 +143,7 @@ function parseEventBlock(block: string): ParsedEvent | null {
   const labels = pickLabels(title, subtitle, eventTypes, description);
 
   const event: CanonicalScrapedEvent = {
-    source_event_id: slug,
+    source_event_id: `${slug}|${dt.date}|${dt.time ?? ""}`,
     title,
     subtitle,
     description,
@@ -284,14 +289,17 @@ async function fetchNextMonth(currentMonth: number, currentYear: number): Promis
 }
 
 async function enrichWithDetails(events: CanonicalScrapedEvent[]): Promise<void> {
+  const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
   for (const ev of events) {
     if (!ev.detail_url) continue;
-    await sleep(THROTTLE_MS);
-    const detail = await fetchDetail(ev.detail_url);
-    if (detail.ticketUrl) ev.ticket_url = detail.ticketUrl;
-    if (detail.priceMin != null) ev.price_min = detail.priceMin;
-    if (detail.priceMax != null) ev.price_max = detail.priceMax;
+    queue.add(async () => {
+      const detail = await fetchDetail(ev.detail_url!);
+      if (detail.ticketUrl) ev.ticket_url = detail.ticketUrl;
+      if (detail.priceMin != null) ev.price_min = detail.priceMin;
+      if (detail.priceMax != null) ev.price_max = detail.priceMax;
+    });
   }
+  await queue.onIdle();
 }
 
 interface DetailFields {

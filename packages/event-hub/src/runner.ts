@@ -116,6 +116,11 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const venueNames: Record<string, string> = { ...(previous.venueNames ?? {}) };
 
   const geofenceDrops = new Map<string, number>();
+  // Two scraped events colliding on one id is always a scraper bug: the merge
+  // below is id-keyed, so the second silently overwrites the first and the
+  // event is lost before it ever reaches the bundle. Count them per source so
+  // the run reports the loss instead of hiding it.
+  const idCollisions = new Map<string, number>();
   installFetchDeadline(REQUEST_TIMEOUT_MS);
   const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
@@ -134,6 +139,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
               continue;
             }
             const id = makeId(result.source_slug, scraped.source_event_id);
+            if (seenThisRun.has(id)) idCollisions.set(label, (idCollisions.get(label) ?? 0) + 1);
             seenThisRun.add(id);
             const existing = merged.get(id);
             merged.set(id, mergeEvent(existing, result.source_slug, id, scraped, coords, today));
@@ -147,6 +153,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   }
   await queue.onIdle();
   for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
+  for (const [label, n] of idCollisions) log(`${label}: ${n} events LOST to duplicate source_event_id`);
 
   // Prune past events that have not been re-confirmed this run, and drop
   // future events that disappeared from their source more than TTL days

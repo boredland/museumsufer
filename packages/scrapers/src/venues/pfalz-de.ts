@@ -1,6 +1,7 @@
 import { classifyLandauByText } from "@museumsufer/classify";
 import { decodeEntities, stripHtml, todayIso, truncate } from "@museumsufer/core";
 import PQueue from "p-queue";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 /**
@@ -26,10 +27,14 @@ const SITEMAP_URL = "https://www.pfalz.de/sitemap.xml";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 const OCCURRENCE_HORIZON_DAYS = 30;
 const FETCH_CONCURRENCY = 6;
-const OVERALL_BUDGET_MS = 6 * 60 * 1000;
-// pfalz.de's sitemap consistently takes 1–3 min cold; the previous 20s cap
-// failed often enough that the scraper returned zero events on most runs.
-const SITEMAP_TIMEOUT_MS = 4 * 60 * 1000;
+// Both budgets must stay under the hub's 90s per-scraper timeout, or the run
+// is killed before the partial-result path below can return anything.
+const OVERALL_BUDGET_MS = 70_000;
+// pfalz.de refuses direct datacenter/residential fetches (the connection is
+// dropped, not refused, so it presents as a hang) — everything here goes
+// through the fetch proxy, where the 3.6 MB sitemap returns in well under a
+// second. The cap only guards against the proxy itself stalling.
+const SITEMAP_TIMEOUT_MS = 30_000;
 
 /** Slug-keyword filter — first cheap pass against the sitemap. Names
  *  normalised to ASCII so we hit umlaut variants too. The corridor covers
@@ -138,25 +143,19 @@ interface DetailPage {
   description?: string;
 }
 
-export async function scrapePfalzDe(): Promise<VenueScrapeResult> {
-  const budget = AbortSignal.timeout(OVERALL_BUDGET_MS);
-  const events = await Promise.race([
-    scrapeInner(budget),
-    new Promise<CanonicalScrapedEvent[]>((resolve) => {
-      budget.addEventListener("abort", () => {
-        console.warn(`pfalz-de: overall budget of ${OVERALL_BUDGET_MS}ms exhausted, returning partial`);
-        resolve([]);
-      });
-    }),
-  ]);
+export async function scrapePfalzDe(proxy: ProxyConfig | null = null): Promise<VenueScrapeResult> {
+  // The budget aborts in-flight and queued detail fetches; scrapeInner then
+  // returns whatever it had already parsed. Racing an abort handler against it
+  // would discard exactly that partial result.
+  const events = await scrapeInner(AbortSignal.timeout(OVERALL_BUDGET_MS), proxy);
   return { source_slug: SOURCE_SLUG, display_name: "Pfalz Tourismus", events };
 }
 
-async function scrapeInner(budget: AbortSignal): Promise<CanonicalScrapedEvent[]> {
-  const candidates = await fetchSitemapUrls();
-  if (candidates.length === 0 || budget.aborted) return [];
+async function scrapeInner(budget: AbortSignal, proxy: ProxyConfig | null): Promise<CanonicalScrapedEvent[]> {
+  const candidates = await fetchSitemapUrls(proxy);
+  if (candidates.length === 0) return [];
 
-  const detailPages = await fetchAllDetailPages(candidates, budget);
+  const detailPages = await fetchAllDetailPages(candidates, budget, proxy);
   const today = todayIso();
   const horizon = addDaysIso(today, OCCURRENCE_HORIZON_DAYS);
 
@@ -170,9 +169,9 @@ async function scrapeInner(budget: AbortSignal): Promise<CanonicalScrapedEvent[]
   return events;
 }
 
-async function fetchSitemapUrls(): Promise<string[]> {
+async function fetchSitemapUrls(proxy: ProxyConfig | null): Promise<string[]> {
   try {
-    const xml = await fetchTextWithTimeout(SITEMAP_URL, SITEMAP_TIMEOUT_MS);
+    const xml = await fetchTextWithTimeout(SITEMAP_URL, SITEMAP_TIMEOUT_MS, proxy);
     if (xml == null) return [];
     const seen = new Set<string>();
     for (const m of xml.matchAll(/<loc>(https:\/\/www\.pfalz\.de\/de\/veranstaltung\/[^<"]+)<\/loc>/g)) {
@@ -192,14 +191,18 @@ function matchesSlugKeyword(slug: string): boolean {
   return SLUG_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-async function fetchAllDetailPages(urls: string[], budget: AbortSignal): Promise<DetailPage[]> {
+async function fetchAllDetailPages(
+  urls: string[],
+  budget: AbortSignal,
+  proxy: ProxyConfig | null,
+): Promise<DetailPage[]> {
   const queue = new PQueue({ concurrency: FETCH_CONCURRENCY });
   const out: DetailPage[] = [];
   for (const url of urls) {
     queue.add(async () => {
       if (budget.aborted) return;
       try {
-        const html = await fetchTextWithTimeout(url, 8_000);
+        const html = await fetchTextWithTimeout(url, 15_000, proxy);
         if (html == null) return;
         const page = parseDetail(url, html);
         if (page) out.push(page);
@@ -328,11 +331,11 @@ function decode(s: string | undefined): string | undefined {
  *  socket can't stall the whole pipeline. Bun's default fetch has no
  *  per-request timeout, and clearing the timer before awaiting
  *  `res.text()` would re-expose the body stream to indefinite hangs. */
-async function fetchTextWithTimeout(url: string, timeoutMs: number): Promise<string | null> {
+async function fetchTextWithTimeout(url: string, timeoutMs: number, proxy: ProxyConfig | null): Promise<string | null> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const res = await fetch(url, {
+    const res = await proxyFetch(url, proxy, {
       headers: { "User-Agent": UA },
       signal: ctrl.signal,
     });

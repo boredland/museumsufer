@@ -137,7 +137,20 @@ interface CineamoResponse {
  */
 export async function scrapeCineamo(): Promise<VenueScrapeResult[]> {
   const today = todayIso();
-  return Promise.all(CINEMAS.map((cinema) => scrapeCinema(cinema, today)));
+  // A single cinema's 5xx must not zero the whole platform: settle per cinema
+  // and let the healthy ones through.
+  const settled = await Promise.allSettled(CINEMAS.map((cinema) => scrapeCinema(cinema, today)));
+  const results: VenueScrapeResult[] = [];
+  for (const [i, outcome] of settled.entries()) {
+    if (outcome.status === "fulfilled") {
+      results.push(outcome.value);
+      continue;
+    }
+    const cinema = CINEMAS[i];
+    console.warn(`cineamo ${cinema.source_slug}: ${outcome.reason}`);
+    results.push({ source_slug: cinema.source_slug, display_name: cinema.name, events: [] });
+  }
+  return results;
 }
 
 async function scrapeCinema(cinema: CineamoCinema, today: string): Promise<VenueScrapeResult> {

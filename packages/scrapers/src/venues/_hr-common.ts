@@ -88,7 +88,7 @@ export async function scrapeHrVenue(cfg: HrVenueConfig): Promise<VenueScrapeResu
     const genre = classifyMusic(card.title, subtitle, description, cfg.defaultGenre);
 
     events.push({
-      source_event_id: `${cfg.slugPrefix}-${card.eventId}`,
+      source_event_id: `${cfg.slugPrefix}-${card.eventId}|${card.date}|${card.time ?? ""}`,
       title: card.title,
       subtitle,
       description,

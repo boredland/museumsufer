@@ -95,6 +95,12 @@ for (const { slug } of VENUE_SCRAPERS) {
     suspects.push({ slug, kind: "venue", detail: "venue scraper → 0 entries in bundle" });
   }
 }
+// An allowlisted slug that is delivering again has outlived its exemption. It
+// still counts as monitored nowhere, so a later breakage would be invisible —
+// surface it so the entry gets removed rather than quietly suppressing checks.
+const revived = [...EXEMPT]
+  .filter((slug) => eventCountIncludingChildren(slug) > 0)
+  .sort((a, b) => a.localeCompare(b));
 
 const lines: string[] = [];
 lines.push("## Scraper health audit");
@@ -109,6 +115,21 @@ if (suspects.length === 0) {
   lines.push("| Scraper | Kind | Finding |");
   lines.push("| --- | --- | --- |");
   for (const s of suspects) lines.push(`| \`${s.slug}\` | ${s.kind} | ${s.detail} |`);
+}
+if (revived.length > 0) {
+  lines.push("");
+  lines.push(`### ${revived.length} allowlisted scraper(s) are delivering again`);
+  lines.push("");
+  lines.push(
+    "These slugs are exempt from the check above but produced events this run, so nothing would report them breaking later. Remove them from `audit-allowlist.json`.",
+  );
+  lines.push("");
+  lines.push("| Scraper | Events |");
+  lines.push("| --- | --- |");
+  for (const slug of revived) lines.push(`| \`${slug}\` | ${eventCountIncludingChildren(slug)} |`);
+  lines.push("");
+}
+if (suspects.length > 0) {
   lines.push("");
   lines.push("### What to do");
   lines.push(

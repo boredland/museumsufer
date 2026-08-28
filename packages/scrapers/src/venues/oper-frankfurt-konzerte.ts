@@ -87,7 +87,7 @@ export async function scrapeOperFrankfurtKonzerte(): Promise<VenueScrapeResult> 
       const description = detail?.description ?? null;
       const genre = classifyMusic(r.title, r.subtitle, description, r.fallbackGenre);
       events.push({
-        source_event_id: r.slug,
+        source_event_id: `${r.slug}|${r.date}|${r.time ?? ""}|${r.venueRoom ?? ""}`,
         title: r.title,
         subtitle: r.subtitle,
         description: description ? truncate(description, 800) : null,

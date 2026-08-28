@@ -152,6 +152,10 @@ interface KinoheldShow {
 
 const HORIZON_DAYS = 28;
 
+/** Upstream rejects `shows(dates:)` with more than three entries, so the
+ *  horizon is requested in chunks of this size rather than one batch. */
+const MAX_DATES_PER_QUERY = 3;
+
 /**
  * Generic kinoheld.de GraphQL scraper. The `shows(cinemaId, dates)` query
  * returns one entry per screening; we batch the next ~4 weeks into a single
@@ -161,11 +165,31 @@ const HORIZON_DAYS = 28;
  */
 export async function scrapeKinoheld(): Promise<VenueScrapeResult[]> {
   const dates = Array.from({ length: HORIZON_DAYS }, (_, i) => dateOffset(i));
-  const results = await Promise.all(CINEMAS.map((cinema) => scrapeCinema(cinema, dates)));
+  // One cinema's outage (or a slug kinoheld dropped) must not take the whole
+  // aggregator down with it: settle per cinema and keep the rest.
+  const settled = await Promise.allSettled(CINEMAS.map((cinema) => scrapeCinema(cinema, dates)));
+  const results: VenueScrapeResult[] = [];
+  for (const [i, outcome] of settled.entries()) {
+    if (outcome.status === "fulfilled") {
+      results.push(outcome.value);
+      continue;
+    }
+    const cinema = CINEMAS[i];
+    console.warn(`kinoheld ${cinema.source_slug}: ${outcome.reason}`);
+    results.push({ source_slug: cinema.source_slug, display_name: cinema.name, events: [] });
+  }
   return results;
 }
 
 async function scrapeCinema(cinema: KinoheldCinema, dates: string[]): Promise<VenueScrapeResult> {
+  const events: CanonicalScrapedEvent[] = [];
+  for (let i = 0; i < dates.length; i += MAX_DATES_PER_QUERY) {
+    events.push(...(await fetchShows(cinema, dates.slice(i, i + MAX_DATES_PER_QUERY))));
+  }
+  return { source_slug: cinema.source_slug, display_name: cinema.name, events };
+}
+
+async function fetchShows(cinema: KinoheldCinema, dates: string[]): Promise<CanonicalScrapedEvent[]> {
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -210,5 +234,5 @@ async function scrapeCinema(cinema: KinoheldCinema, dates: string[]): Promise<Ve
     });
   }
 
-  return { source_slug: cinema.source_slug, display_name: cinema.name, events };
+  return events;
 }

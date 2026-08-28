@@ -73,7 +73,7 @@ export async function scrapeMousonturm(): Promise<VenueScrapeResult> {
       const parsed = parseEntry(article, date);
       if (!parsed) continue;
 
-      const dedup = `${parsed.source_event_id}|${parsed.date}|${parsed.time ?? ""}|${parsed.venue_room ?? ""}`;
+      const dedup = parsed.source_event_id;
       if (seen.has(dedup)) continue;
       seen.add(dedup);
 
@@ -107,7 +107,9 @@ function parseEntry(article: string, date: string): CanonicalScrapedEvent | null
   const labels = labelsFromTags(tags, title, subtitle);
 
   return {
-    source_event_id: sourceEventId,
+    // The numeric id in the URL identifies the production, not the
+    // performance: a run of the same piece repeats it on every date.
+    source_event_id: `${sourceEventId}|${date}|${time ?? ""}|${venueRoom ?? ""}`,
     title,
     subtitle,
     description: subtitle,
