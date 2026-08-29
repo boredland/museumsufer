@@ -25,7 +25,9 @@ const app = new Hono<AppEnv>();
 
 app.onError((err, c) => {
   console.error("Unhandled error:", err);
-  return c.json({ error: "Internal server error" }, 500);
+  // `no-store`: a 500 with no Cache-Control takes a heuristic TTL under Workers
+  // Cache, which would keep serving the error long after the cause is fixed.
+  return c.json({ error: "Internal server error" }, 500, { "Cache-Control": "no-store" });
 });
 
 // 'unsafe-inline' is unavoidable while theme FOUC + HTMX lifecycle
@@ -75,7 +77,9 @@ app.use("*", async (c, next) => {
   );
 });
 
-app.get("/healthz", (c) => c.json({ ok: true }));
+// `no-store` so this keeps answering from the Worker: a cached liveness probe
+// reports health the origin may no longer have.
+app.get("/healthz", (c) => c.json({ ok: true }, { headers: { "Cache-Control": "no-store" } }));
 
 app.get("/img/*", async (c) => (await handleImageProxy(c.req.raw)) ?? c.notFound());
 

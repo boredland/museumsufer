@@ -118,7 +118,9 @@ export async function handlePushUnsubscribeRequest(request: Request, env: PushEn
  */
 export async function handlePushMeRequest(request: Request, env: PushEnv): Promise<Response> {
   const endpoint = new URL(request.url).searchParams.get("endpoint");
-  if (!endpoint) return Response.json({ schedules: [], filters: null });
+  if (!endpoint) {
+    return Response.json({ schedules: [], filters: null }, { headers: { "Cache-Control": "no-store" } });
+  }
   const rows = await env.DB.prepare(
     `SELECT schedule, filters_json FROM push_subscriptions WHERE endpoint = ?1 AND failed_at IS NULL`,
   )
@@ -126,10 +128,16 @@ export async function handlePushMeRequest(request: Request, env: PushEnv): Promi
     .all<{ schedule: PushSchedule; filters_json: string | null }>();
   const results = rows.results ?? [];
   const filters = results.find((r) => r.filters_json)?.filters_json ?? null;
-  return Response.json({
-    schedules: results.map((r) => r.schedule),
-    filters: filters ? safeParseJson(filters) : null,
-  });
+  // `no-store`: this is per-subscriber state behind a shared Workers Cache.
+  // Without it the response falls back to heuristic freshness (2h for a 200)
+  // and the modal would keep showing schedules the user just changed.
+  return Response.json(
+    {
+      schedules: results.map((r) => r.schedule),
+      filters: filters ? safeParseJson(filters) : null,
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 function safeParseJson(s: string): Record<string, unknown> | null {

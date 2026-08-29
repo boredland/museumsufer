@@ -159,9 +159,12 @@ app.onError((err, c) => {
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const homeHref = locale === "fr" ? "/?lang=fr" : "/";
+  // `no-store`: a 500 with no Cache-Control takes a heuristic TTL under Workers
+  // Cache, which would keep serving the error long after the cause is fixed.
   return c.html(
     `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${tr.err500Title}</title><link rel="stylesheet" href="/styles.css" /></head><body><main style="max-width:32rem;margin:6rem auto;padding:0 1rem"><h1 style="font-family:'Bodoni Moda',serif;font-style:italic">${tr.err500Body}</h1><p><a href="${homeHref}">${tr.err500Back}</a></p></main></body></html>`,
     500,
+    { "Cache-Control": "no-store" },
   );
 });
 
@@ -169,9 +172,13 @@ app.notFound((c) => {
   const locale = detectLocale(c.req.raw);
   const tr = getTranslations(locale);
   const homeHref = locale === "fr" ? "/?lang=fr" : "/";
+  // `Vary` because the body is locale-dependent, and an explicit TTL because a
+  // response with no Cache-Control would otherwise take the heuristic 404 TTL
+  // and serve one locale's page to another.
   return c.html(
     `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><title>${tr.err404Title}</title><link rel="stylesheet" href="/styles.css" /></head><body><header class="masthead"><h1><a href="${homeHref}">Landau<span class="ampersand">&amp;</span>heute</a></h1></header><main style="max-width:32rem;margin:4rem auto;padding:0 1rem;text-align:center"><p style="font-family:'Bodoni Moda',serif;font-style:italic;font-size:1.25rem">${tr.err404Body}</p><p style="margin-top:2rem"><a href="${homeHref}" style="border-bottom:1px solid currentColor">${tr.err404Back}</a></p></main></body></html>`,
     404,
+    { "Cache-Control": "public, max-age=60", Vary: "Accept-Language" },
   );
 });
 

@@ -3,6 +3,15 @@
   "name": "museumsufer",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
+  // Workers Cache: serve repeat GETs from the edge without invoking the Worker.
+  // Every route already sets an explicit Cache-Control; anything that must not
+  // be cached (/healthz, /api/push/me) says `no-store` at the handler, because
+  // a response with no Cache-Control falls back to a 2h heuristic TTL instead
+  // of staying uncached. Deploys invalidate the cache, which is what we want:
+  // the scrape workflow pushes fresh data and CF redeploys on push.
+  "cache": {
+    "enabled": true
+  },
   "routes": [
     { "pattern": "museumsufer.app", "custom_domain": true },
     { "pattern": "frankfurt.ins.museum", "custom_domain": true },

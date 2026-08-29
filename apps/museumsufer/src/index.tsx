@@ -47,7 +47,9 @@ const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 // Error middleware
 app.onError((err, c) => {
   console.error("Unhandled error:", err);
-  return c.json({ error: "Internal server error" }, 500);
+  // `no-store`: a 500 with no Cache-Control takes a heuristic TTL under Workers
+  // Cache, which would keep serving the error long after the cause is fixed.
+  return c.json({ error: "Internal server error" }, 500, { "Cache-Control": "no-store" });
 });
 
 // Host → city. museumsufer.app stays the SEO-primary Frankfurt canonical
@@ -517,7 +519,9 @@ app.notFound((c) => {
   return c.html(
     `<!doctype html><html lang="${locale}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>404</title><link rel="stylesheet" href="/styles.css"></head><body><main style="max-width:32rem;margin:6rem auto;padding:0 1rem;text-align:center"><p>${tr.noResults}</p><p style="margin-top:2rem"><a href="${home}">${tr.pageTitle}</a></p></main></body></html>`,
     404,
-    { "Cache-Control": "public, max-age=3600" },
+    // Vary: the body is rendered per locale, so without it one visitor's
+    // language would be served to the next from the shared cache.
+    { "Cache-Control": "public, max-age=3600", Vary: "Accept-Language" },
   );
 });
 
