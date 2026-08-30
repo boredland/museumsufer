@@ -93,6 +93,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "deutsches-romantik-museum",
+    name: "Deutsches Romantik-Museum / Freies Deutsches Hochstift",
+    address: "",
+    lat: 50.1118,
+    lon: 8.6776,
+    city: "frankfurt",
+    website_url: "https://www.museumsuferfest.de",
+    default_genre: "classical",
+  },
+  {
     slug: "dfg-frankfurt",
     name: "Deutsch-Französische Gesellschaft Frankfurt",
     address: "",
