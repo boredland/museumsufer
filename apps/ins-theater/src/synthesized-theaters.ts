@@ -463,16 +463,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-kulturcampus-frankfurt",
-    name: "Kulturcampus Frankfurt",
-    address: "",
-    lat: 50.1187565,
-    lon: 8.6528367,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-kulturort-walhalla",
     name: "Kulturort Walhalla",
     address: "",

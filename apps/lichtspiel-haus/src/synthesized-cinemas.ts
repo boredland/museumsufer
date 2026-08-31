@@ -201,6 +201,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
+    slug: "hafen-2-offenbach",
+    name: "Hafen 2 Offenbach",
+    address: "",
+    lat: 50.0972,
+    lon: 8.7449,
+    city: "frankfurt",
+    website_url: "https://hafen2.net",
+  },
+  {
     slug: "hansa-filmstudio",
     name: "Hansa-Filmstudio",
     address: "",
@@ -291,15 +300,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.metropoliskino.de",
   },
   {
-    slug: "museumsuferfest",
-    name: "Museumsuferfest",
-    address: "",
-    lat: 50.10553124857251,
-    lon: 8.673748970031738,
-    city: "frankfurt",
-    website_url: "https://www.museumsuferfest.de",
-  },
-  {
     slug: "passage-kino-hamburg",
     name: "Passage Kino Hamburg",
     address: "",
@@ -383,15 +383,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   {
     slug: "zeise-kinos",
     name: "Zeise Kinos",
-    address: "",
-    lat: 53.552,
-    lon: 9.933,
-    city: "hamburg",
-    website_url: "https://www.zeise.de",
-  },
-  {
-    slug: "zeise-open-air",
-    name: "Zeise Open Air",
     address: "",
     lat: 53.552,
     lon: 9.933,
