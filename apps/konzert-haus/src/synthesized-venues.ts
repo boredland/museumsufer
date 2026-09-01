@@ -103,6 +103,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "dommuseum-frankfurt",
+    name: "Dommuseum Frankfurt",
+    address: "",
+    lat: 50.1114,
+    lon: 8.6855,
+    city: "frankfurt",
+    website_url: "",
+    default_genre: "classical",
+  },
+  {
     slug: "dramatische-buehne",
     name: "Die Dramatische Bühne",
     address: "",
