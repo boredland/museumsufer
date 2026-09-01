@@ -21,15 +21,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.abaton.de",
   },
   {
-    slug: "alabama-kino",
-    name: "Alabama Kino",
-    address: "",
-    lat: 53.5833,
-    lon: 10.0218,
-    city: "hamburg",
-    website_url: "https://kinotickets.express",
-  },
-  {
     slug: "alsterdorf-sommerkino",
     name: "Sommerkino Alsterdorf",
     address: "",

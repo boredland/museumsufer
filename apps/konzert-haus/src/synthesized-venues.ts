@@ -453,6 +453,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "st-pauli-theater",
+    name: "St. Pauli Theater",
+    address: "",
+    lat: 53.5491,
+    lon: 9.963,
+    city: "hamburg",
+    website_url: "https://www.st-pauli-theater.de",
+    default_genre: "classical",
+  },
+  {
     slug: "staatstheater-darmstadt",
     name: "Staatstheater Darmstadt",
     address: "",
