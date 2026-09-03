@@ -353,16 +353,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
-    slug: "juedische-gemeinde-frankfurt",
-    name: "Jüdische Gemeinde Frankfurt",
-    address: "",
-    lat: 50.1167,
-    lon: 8.6712,
-    city: "frankfurt",
-    website_url: "https://jg-ffm.de",
-    default_genre: "classical",
-  },
-  {
     slug: "juedisches-museum-frankfurt",
     name: "Jüdisches Museum Frankfurt",
     address: "",
