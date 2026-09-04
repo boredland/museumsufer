@@ -493,6 +493,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "taeter-theater",
+    name: "Taeter Theater Heidelberg",
+    address: "",
+    lat: 49.407,
+    lon: 8.683,
+    city: "heidelberg",
+    website_url: "https://www.taeter-theater.de",
+    default_genre: "classical",
+  },
+  {
     slug: "thalia-theater",
     name: "Thalia Theater",
     address: "",
