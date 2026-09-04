@@ -443,16 +443,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "senckenberg-naturmuseum",
-    name: "Senckenberg Naturmuseum",
-    address: "",
-    lat: 50.1175,
-    lon: 8.6522,
-    city: "frankfurt",
-    website_url: "https://museumfrankfurt.senckenberg.de",
-    default_genre: "classical",
-  },
-  {
     slug: "st-pauli-theater",
     name: "St. Pauli Theater",
     address: "",
