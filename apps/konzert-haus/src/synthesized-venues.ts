@@ -200,7 +200,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6334,
     city: "frankfurt",
     website_url: "https://www.gallustheater.de",
-    default_genre: "classical",
+    default_genre: "jazz",
   },
   {
     slug: "hafen-2-offenbach",
