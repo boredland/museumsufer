@@ -103,16 +103,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "dommuseum-frankfurt",
-    name: "Dommuseum Frankfurt",
-    address: "",
-    lat: 50.1114,
-    lon: 8.6855,
-    city: "frankfurt",
-    website_url: "",
-    default_genre: "classical",
-  },
-  {
     slug: "dramatische-buehne",
     name: "Die Dramatische Bühne",
     address: "",
@@ -219,7 +209,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lat: 50.0972,
     lon: 8.7449,
     city: "frankfurt",
-    website_url: "https://hafen2.net",
+    website_url: "https://loveyourartist.com",
     default_genre: "experimental",
   },
   {
@@ -440,16 +430,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.672,
     city: "heidelberg",
     website_url: "https://www.sammlung-prinzhorn.de",
-    default_genre: "classical",
-  },
-  {
-    slug: "st-pauli-theater",
-    name: "St. Pauli Theater",
-    address: "",
-    lat: 53.5491,
-    lon: 9.963,
-    city: "hamburg",
-    website_url: "https://www.st-pauli-theater.de",
     default_genre: "classical",
   },
   {
