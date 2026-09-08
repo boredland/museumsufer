@@ -403,6 +403,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "museum-angewandte-kunst",
+    name: "Museum Angewandte Kunst",
+    address: "",
+    lat: 50.1056,
+    lon: 8.68,
+    city: "frankfurt",
+    website_url: "",
+    default_genre: "classical",
+  },
+  {
     slug: "ohnsorg-theater",
     name: "Ohnsorg-Theater",
     address: "",
