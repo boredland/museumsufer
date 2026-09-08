@@ -362,13 +362,4 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     city: "darmstadt",
     website_url: "https://wdc2026.org",
   },
-  {
-    slug: "zeise-kinos",
-    name: "Zeise Kinos",
-    address: "",
-    lat: 53.552,
-    lon: 9.933,
-    city: "hamburg",
-    website_url: "https://www.zeise.de",
-  },
 ];
