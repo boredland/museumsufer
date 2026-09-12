@@ -522,6 +522,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "verbandsgemeindeverwaltung landau-land|landau in der pfalz": [49.197504, 8.107791],
   "verbandsgemeinde|annweiler am trifels": [49.202725, 7.968226],
   "verein für waldorfpädagogik landau e.v.|landau in der pfalz": [49.198283, 8.112344],
+  "verein partnerschaft faire welt e.v.|landau in der pfalz": [49.198283, 8.112344],
   "verein südliche weinstrasse annweiler am trifels e.v.|annweiler am trifels": [49.202725, 7.968226],
   "verein südliche weinstrasse annweiler am trifels|annweiler": [49.202725, 7.968226],
   "villa ufer|landau in der pfalz": [49.198283, 8.112344],
