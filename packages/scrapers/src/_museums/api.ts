@@ -1518,17 +1518,20 @@ async function fetchFritzBauerWollheim(endpoint: string): Promise<ApiEvent[]> {
   let m: RegExpExecArray | null = blockRe.exec(html);
   while (m !== null) {
     const block = m[1];
-    const titleMatch = block.match(/<a\s+title="([^"]+)"[^>]+href="([^"]+)"/);
-    if (!titleMatch || !/wollheim\s*[-\s]\s*memorial/i.test(titleMatch[1])) {
+    const titleMatch = block.match(/<a class="stretched-link _heading-link" href="([^"]+)">([\s\S]*?)<\/a>/);
+    if (!titleMatch || !/wollheim\s*[-\s]\s*memorial/i.test(titleMatch[2])) {
       m = blockRe.exec(html);
       continue;
     }
-    const title = titleMatch[1].trim();
-    const detailUrl = titleMatch[2].startsWith("http")
-      ? titleMatch[2]
-      : `https://www.fritz-bauer-institut.de${titleMatch[2]}`;
+    const title = stripHtml(titleMatch[2]).replace(/\s+/g, " ").trim();
+    const detailUrl = titleMatch[1].startsWith("http")
+      ? titleMatch[1]
+      : `https://www.fritz-bauer-institut.de${titleMatch[1]}`;
 
-    const dateRaw = block.match(/class="_event-date"[^>]*>([\s\S]*?)<\/h3>/)?.[1] ?? "";
+    // "Sa. 19<br><small>September 2026</small><br><small>15:00</small>" — the
+    // weekday prefix and the <small> wrappers collapse into one line once the
+    // tags are stripped, which is what the date regex below reads.
+    const dateRaw = block.match(/<p class="_event-date[^"]*">([\s\S]*?)<\/p>/)?.[1] ?? "";
     const dateText = stripHtml(dateRaw).replace(/\s+/g, " ").trim();
     const dateParts = dateText.match(/(\d{1,2})\s+(\w+)\s+(\d{4})(?:\s+(\d{1,2}:\d{2}))?/);
     if (!dateParts) {
@@ -1547,7 +1550,7 @@ async function fetchFritzBauerWollheim(endpoint: string): Promise<ApiEvent[]> {
       continue;
     }
 
-    const subtitle = block.match(/<h3 class="mt-0"><small>([^<]+)<\/small>/)?.[1]?.trim() || null;
+    const subtitle = block.match(/<p class="h3 mt-0"><small>([^<]+)<\/small>/)?.[1]?.trim() || null;
     const descMatch = block.match(/<div class="collapse"[^>]*>[\s\S]*?<p>([\s\S]*?)<\/p>/);
 
     events.push({

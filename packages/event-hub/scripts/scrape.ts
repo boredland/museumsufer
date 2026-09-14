@@ -26,7 +26,10 @@ async function main(): Promise<void> {
   const proxy = process.env.FETCH_PROXY_URL
     ? { url: process.env.FETCH_PROXY_URL, token: process.env.FETCH_PROXY_TOKEN }
     : null;
-  if (proxy) log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
+  if (proxy) {
+    log(`fetch-proxy configured: ${new URL(proxy.url).host}`);
+    await assertProxyReachable(proxy);
+  }
 
   const tmdbCache: Record<string, TmdbCacheEntry | null> = { ...TMDB_POSTER_CACHE };
   const beforeCacheJson = JSON.stringify(tmdbCache);
@@ -136,6 +139,31 @@ function summariseLabels(data: EventHubData): void {
   }
   const rows = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]);
   for (const [label, n] of rows) log(`  ${label.padEnd(28)} ${n}`);
+}
+
+/**
+ * A configured-but-dead proxy is indistinguishable, per scraper, from a venue
+ * with nothing on: every proxied fetch throws and the scraper logs zero events.
+ * That is how a stale FETCH_PROXY_URL quietly took out nine venues (frankfurt.de,
+ * hausamdom, pfalz.de, wdc2026, bibelhaus, …) for weeks while the run stayed
+ * green. Probe it once up front and fail loudly instead: an unreachable proxy is
+ * a configuration error, not a quiet day at the venues.
+ */
+async function assertProxyReachable(proxy: { url: string; token?: string }): Promise<void> {
+  const probe = `${proxy.url}?url=${encodeURIComponent("https://example.com/")}`;
+  const headers: Record<string, string> = {};
+  if (proxy.token) headers.Authorization = `Bearer ${proxy.token}`;
+  try {
+    const res = await fetch(probe, { headers, signal: AbortSignal.timeout(30_000) });
+    if (!res.ok) throw new Error(`probe returned HTTP ${res.status}`);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `fetch-proxy ${new URL(proxy.url).host} is unreachable (${msg}). ` +
+        "Every proxied scraper would emit zero events; refusing to write a bundle that looks like a quiet day.",
+    );
+  }
+  log("fetch-proxy probe ok");
 }
 
 function log(msg: string): void {

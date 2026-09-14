@@ -30,10 +30,10 @@ const FETCH_CONCURRENCY = 6;
 // Both budgets must stay under the hub's 90s per-scraper timeout, or the run
 // is killed before the partial-result path below can return anything.
 const OVERALL_BUDGET_MS = 70_000;
-// pfalz.de refuses direct datacenter/residential fetches (the connection is
-// dropped, not refused, so it presents as a hang) — everything here goes
-// through the fetch proxy, where the 3.6 MB sitemap returns in well under a
-// second. The cap only guards against the proxy itself stalling.
+// Neither transport is reliably available: pfalz.de drops some direct fetches
+// (a hang, not a refusal), while the fetch proxy currently 502s on this origin.
+// So the sitemap fetch doubles as a transport probe — see resolveTransport —
+// and the cap guards against whichever side stalls.
 const SITEMAP_TIMEOUT_MS = 30_000;
 
 /** Slug-keyword filter — first cheap pass against the sitemap. Names
@@ -152,10 +152,11 @@ export async function scrapePfalzDe(proxy: ProxyConfig | null = null): Promise<V
 }
 
 async function scrapeInner(budget: AbortSignal, proxy: ProxyConfig | null): Promise<CanonicalScrapedEvent[]> {
-  const candidates = await fetchSitemapUrls(proxy);
-  if (candidates.length === 0) return [];
+  const resolved = await resolveTransport(proxy);
+  if (!resolved) return [];
+  const { candidates, transport } = resolved;
 
-  const detailPages = await fetchAllDetailPages(candidates, budget, proxy);
+  const detailPages = await fetchAllDetailPages(candidates, budget, transport);
   const today = todayIso();
   const horizon = addDaysIso(today, OCCURRENCE_HORIZON_DAYS);
 
@@ -167,6 +168,35 @@ async function scrapeInner(budget: AbortSignal, proxy: ProxyConfig | null): Prom
     }
   }
   return events;
+}
+
+/**
+ * Fetch the sitemap over both transports at once and keep whichever answers
+ * first — that one then serves the ~50 detail fetches.
+ *
+ * Both are unreliable in different ways: direct fetches hang (the origin drops
+ * the connection rather than refusing it) and the fetch proxy currently 502s on
+ * this origin, and which one is failing changes between runs. Trying them in
+ * series means the bad one burns its full 30s timeout before the good one
+ * starts, which can exhaust OVERALL_BUDGET_MS on its own; racing costs one
+ * extra request and bounds the wait at the faster transport.
+ */
+async function resolveTransport(
+  proxy: ProxyConfig | null,
+): Promise<{ candidates: string[]; transport: ProxyConfig | null } | null> {
+  const attempts: Array<ProxyConfig | null> = proxy ? [proxy, null] : [null];
+  const races = attempts.map(async (transport) => {
+    const candidates = await fetchSitemapUrls(transport);
+    // Reject so Promise.any skips this transport and waits for the other.
+    if (candidates.length === 0) throw new Error("empty sitemap");
+    return { candidates, transport };
+  });
+  try {
+    return await Promise.any(races);
+  } catch {
+    console.warn("pfalz-de: sitemap unavailable via proxy and direct");
+    return null;
+  }
 }
 
 async function fetchSitemapUrls(proxy: ProxyConfig | null): Promise<string[]> {
