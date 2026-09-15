@@ -180,7 +180,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 50.0972,
     lon: 8.7449,
     city: "frankfurt",
-    website_url: "https://hafen2.net",
+    website_url: "https://loveyourartist.com",
   },
   {
     slug: "hansa-filmstudio",
@@ -361,5 +361,14 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.6537628,
     city: "darmstadt",
     website_url: "https://wdc2026.org",
+  },
+  {
+    slug: "zeise-kinos",
+    name: "Zeise Kinos",
+    address: "",
+    lat: 53.552,
+    lon: 9.933,
+    city: "hamburg",
+    website_url: "https://www.zeise.de",
   },
 ];

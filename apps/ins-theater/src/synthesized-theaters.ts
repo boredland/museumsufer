@@ -283,6 +283,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "sperrstunde-hamburg",
+    name: "Sperrstunde Hamburg",
+    address: "",
+    lat: 53.55,
+    lon: 9.99,
+    city: "hamburg",
+    website_url: "https://www.instagram.com",
+    ticketing_provider: null,
+  },
+  {
     slug: "staatstheater-darmstadt",
     name: "Staatstheater Darmstadt",
     address: "",
