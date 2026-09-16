@@ -335,6 +335,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-amt-fur-multikulturelle-angelegenheiten": "Amt für multikulturelle Angelegenheiten",
   "wdc2026-andless-gmbh": "andless Gmbh",
   "wdc2026-andre-stocker-design": "andré stocker design",
+  "wdc2026-apfelmarkt-florsheim": "Apfelmarkt Flörsheim",
   "wdc2026-atelierhaus-lew-1": "Atelierhaus LEW 1",
   "wdc2026-atzelbergplatz": "Atzelbergplatz",
   "wdc2026-auf-dem-sossenheimer-kirchberg": "Auf dem Sossenheimer Kirchberg",

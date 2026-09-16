@@ -293,6 +293,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "historisches-museum-frankfurt",
+    name: "Historisches Museum Frankfurt",
+    address: "",
+    lat: 50.1092,
+    lon: 8.6819,
+    city: "frankfurt",
+    website_url: "https://historisches-museum-frankfurt.ticketfritz.de",
+    default_genre: "classical",
+  },
+  {
     slug: "hugenottenhalle",
     name: "Hugenottenhalle",
     address: "",
@@ -570,6 +580,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6809897,
     city: "frankfurt",
     website_url: "https://wdc2026.org",
+    default_genre: "classical",
+  },
+  {
+    slug: "weltkulturen-museum",
+    name: "Weltkulturen Museum",
+    address: "",
+    lat: 50.1042,
+    lon: 8.6779,
+    city: "frankfurt",
+    website_url: "https://weltkulturenmuseum.de",
     default_genre: "classical",
   },
 ];
