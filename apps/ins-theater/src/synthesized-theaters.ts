@@ -453,16 +453,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-kulturort-walhalla",
-    name: "Kulturort Walhalla",
-    address: "",
-    lat: 50.082193,
-    lon: 8.237574,
-    city: "wiesbaden",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-parfumerie-frankfurt",
     name: "Parfümerie Frankfurt",
     address: "",

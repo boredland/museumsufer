@@ -572,6 +572,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weinerlebnispfad nußdorf|landau-nußdorf": [49.22205, 8.115768],
   "weingut  scherr|hainfeld": [49.25639, 8.09781],
   "weingut & brennerei christmann|st. martin": [49.297774, 8.109715],
+  "weingut & weinhotel fritz walter|niederhorbach": [49.116054, 8.032786],
   "weingut ackermann|ilbesheim": [49.179721, 8.050429],
   "weingut am fürstweg|heuchelheim": [49.760758, 10.568498],
   "weingut amselhof|knöringen": [49.237498, 8.144478],
