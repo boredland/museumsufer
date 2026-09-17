@@ -513,6 +513,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-werkraum-wiesbaden",
+    name: "WerkRaum Wiesbaden",
+    address: "",
+    lat: 50.083194898207495,
+    lon: 8.23954203121508,
+    city: "wiesbaden",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "zimmertheater-heidelberg",
     name: "Zimmertheater Heidelberg",
     address: "",
