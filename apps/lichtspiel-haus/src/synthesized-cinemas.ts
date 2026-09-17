@@ -237,15 +237,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.karlstorkino.de",
   },
   {
-    slug: "koerber-stiftung",
-    name: "Körber-Stiftung",
-    address: "",
-    lat: 53.543438,
-    lon: 9.984136,
-    city: "hamburg",
-    website_url: "https://koerber-stiftung.de",
-  },
-  {
     slug: "koralle-lichtspiele",
     name: "Koralle Lichtspiele",
     address: "",

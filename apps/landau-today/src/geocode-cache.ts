@@ -205,6 +205,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "hofgemeinschaft josefshof|völkersweiler": [49.168728, 7.931913],
   "hohenstaufensaal|annweiler am trifels": [49.203384, 7.966311],
   "holzappel e.v. - völkersweiler|völkersweiler": [49.168728, 7.931913],
+  "hospiz bethesda landau|landau in der pfalz": [49.206499, 8.104907],
   "hotel-restaurant winzerhof|st. martin": [49.299556, 8.103121],
   "i-punkt kirrweiler|kirrweiler": [49.302004, 8.165108],
   "i-punkt|edenkoben": [49.281923, 8.127323],
