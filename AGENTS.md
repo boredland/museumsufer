@@ -27,36 +27,45 @@ placeholder (the SDK just wants a non-empty string).
 
 ```ts
 import OpenAI from "openai";
-const client = new OpenAI({ baseURL: process.env.AI_PROXY_URL, apiKey: "unused" });
+const client = new OpenAI({
+  baseURL: `${process.env.AI_PROXY_URL}/v1`,
+  apiKey: process.env.AI_PROXY_TOKEN,
+});
 const res = await client.chat.completions.create({
   model: "gemini-2.5-flash",
   messages: [{ role: "user", content: "…" }],
 });
 ```
 
-Or plain `fetch` (no SDK): `POST ${AI_PROXY_URL}/chat/completions` with
+Or plain `fetch` (no SDK): `POST ${AI_PROXY_URL}/v1/chat/completions` with
+`Authorization: Bearer $AI_PROXY_TOKEN` and
 `{ model, messages, response_format }`. Set a normal Chrome `User-Agent` on
 hand-rolled requests — the proxy is Cloudflare-fronted and 403s
 (`error code: 1010`, "browser banned") on a default Bun/undici UA. The `openai`
 SDK already sends an acceptable UA.
 
-**Auth — `AI_PROXY_URL`, stored both ways:** an **Actions variable** (dev) and an
-**Actions secret** (CI), same as the fetch proxy. Never hardcode the URL in source.
-Locally:
+**Auth — `AI_PROXY_URL` + `AI_PROXY_TOKEN`, each stored both ways:** an **Actions
+variable** (dev) and an **Actions secret** (CI), same as the fetch proxy. Never
+hardcode either in source. `AI_PROXY_URL` is a **bare host** and the token travels
+as `Authorization: Bearer` — the predecessor (`ai-proxy.jonas-strassel.de`) baked
+its secret into the URL path, which is why callers here passed `apiKey: "unused"`.
+That proxy is retired; the path form no longer authenticates anything. Locally:
 
 ```sh
 export AI_PROXY_URL=$(gh variable get AI_PROXY_URL)
+export AI_PROXY_TOKEN=$(gh variable get AI_PROXY_TOKEN)
 ```
 
-**Models.** Catalog is dynamic — `GET $AI_PROXY_URL/models` (`owned_by` is
-`gemini`/`mistral`/`github`). Prefer the **flash / flash-lite** Gemini models
+**Models.** Catalog is dynamic — `GET $AI_PROXY_URL/models` or `/v1/models`
+(`owned_by` is `gemini` or `anthropic`; the `mistral`/`github` families the old
+proxy fronted are gone, so code written against either targets nothing). Prefer the **flash / flash-lite** Gemini models
 (`gemini-2.5-flash`, `gemini-flash-latest`, `gemini-flash-lite-latest`) — fast,
 cheap. The `openai/*` Copilot models occasionally 502 (`AiGatewayError`); retry, or
 prefer Gemini/Mistral if you need zero flakes.
 
 **Search grounding — native Gemini path, not the OpenAI surface.** The
 OpenAI-compat `/chat/completions` cannot ground (a `google_search` tool shape 400s).
-Use `POST $AI_PROXY_URL/v1beta/models/<model>:generateContent` with a Gemini-native
+Use `POST $AI_PROXY_URL/v1beta/models/<model>:generateContent` (bearer auth) with a Gemini-native
 body (`contents`/`parts`) and `"tools": [{"google_search": {}}]`; the response
 carries `candidates[0].groundingMetadata` (`webSearchQueries`, `groundingChunks`
 with source URLs) to verify answers are sourced, not invented.

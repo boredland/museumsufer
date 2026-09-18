@@ -69,8 +69,11 @@ export async function sourceTextHash(text: string): Promise<string> {
 }
 
 export interface ProgrammeToEventsOptions {
-  /** URL of the AI proxy (OpenAI-compatible; token baked into the path). */
+  /** Base URL of the AI proxy (OpenAI-compatible). A bare host: the token is sent
+   *  as `Authorization: Bearer`, not baked into the path. */
   aiProxyUrl: string;
+  /** Bearer token for the proxy. */
+  aiProxyToken?: string;
   model?: string;
   /** Venue-specific extraction hints appended to the system prompt. */
   prompt?: string;
@@ -124,9 +127,13 @@ async function callLlm(text: string, opts: ProgrammeToEventsOptions): Promise<un
     ],
     response_format: { type: "json_object" },
   };
-  const res = await fetch(`${opts.aiProxyUrl.replace(/\/$/, "")}/chat/completions`, {
+  const res = await fetch(`${opts.aiProxyUrl.replace(/\/$/, "")}/v1/chat/completions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "User-Agent": CHROME_UA },
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": CHROME_UA,
+      ...(opts.aiProxyToken ? { Authorization: `Bearer ${opts.aiProxyToken}` } : {}),
+    },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(120_000),
   });
