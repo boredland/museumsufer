@@ -453,16 +453,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "staatstheater-saarland",
-    name: "Saarländisches Staatstheater",
-    address: "",
-    lat: 49.234,
-    lon: 6.996,
-    city: "saarbruecken",
-    website_url: "https://www.staatstheater.saarland",
-    default_genre: "classical",
-  },
-  {
     slug: "stalburg-theater",
     name: "Stalburg Theater",
     address: "",

@@ -313,16 +313,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "staatstheater-saarland",
-    name: "Saarländisches Staatstheater",
-    address: "",
-    lat: 49.234,
-    lon: 6.996,
-    city: "saarbruecken",
-    website_url: "https://www.staatstheater.saarland",
-    ticketing_provider: null,
-  },
-  {
     slug: "taeter-theater",
     name: "Taeter Theater Heidelberg",
     address: "",

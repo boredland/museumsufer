@@ -93,15 +93,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinopolis.de",
   },
   {
-    slug: "club-voltaire",
-    name: "Club Voltaire Frankfurt",
-    address: "",
-    lat: 50.1151,
-    lon: 8.674,
-    city: "frankfurt",
-    website_url: "https://www.club-voltaire.de",
-  },
-  {
     slug: "das-lumen-filmtheater-solingen",
     name: "Das Lumen Filmtheater Solingen",
     address: "",
@@ -334,15 +325,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.957,
     city: "hamburg",
     website_url: "https://www.studio-kino.de",
-  },
-  {
-    slug: "wdc2026-carree-darmstadt",
-    name: "Carree Darmstadt",
-    address: "",
-    lat: 49.8719898,
-    lon: 8.6524948,
-    city: "darmstadt",
-    website_url: "https://wdc2026.org",
   },
   {
     slug: "wdc2026-schader-stiftung",
