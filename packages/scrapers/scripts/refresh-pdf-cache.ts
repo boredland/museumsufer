@@ -10,6 +10,7 @@
  * when the hash (or schema `version`) differs from the committed entry.
  *
  *   export AI_PROXY_URL=$(gh variable get AI_PROXY_URL)
+ *   export AI_PROXY_TOKEN=$(gh variable get AI_PROXY_TOKEN)
  *   bun packages/scrapers/scripts/refresh-pdf-cache.ts            # top up changed PDFs
  *   bun packages/scrapers/scripts/refresh-pdf-cache.ts --force    # re-extract all
  *   bun packages/scrapers/scripts/refresh-pdf-cache.ts --dry-run  # don't write
@@ -61,6 +62,11 @@ async function main(): Promise<void> {
     err("AI_PROXY_URL not set — run: export AI_PROXY_URL=$(gh variable get AI_PROXY_URL)");
     process.exit(1);
   }
+  const aiProxyToken = process.env.AI_PROXY_TOKEN;
+  if (!aiProxyToken) {
+    err("AI_PROXY_TOKEN not set — run: export AI_PROXY_TOKEN=$(gh variable get AI_PROXY_TOKEN)");
+    process.exit(1);
+  }
   const model = process.env.AI_PROXY_MODEL;
   const force = process.argv.includes("--force");
   const dryRun = process.argv.includes("--dry-run");
@@ -78,7 +84,7 @@ async function main(): Promise<void> {
         continue;
       }
       err(`${v.tag}: extracting via ${new URL(aiProxyUrl).host} (${model ?? "gemini-2.5-flash"}) …`);
-      const events = await eventsFromText(text, { aiProxyUrl, model, prompt: v.prompt });
+      const events = await eventsFromText(text, { aiProxyUrl, aiProxyToken, model, prompt: v.prompt });
       cache[v.tag] = { hash, version: v.version, events };
       changed = true;
       err(`${v.tag}: ${events.length} events extracted`);
