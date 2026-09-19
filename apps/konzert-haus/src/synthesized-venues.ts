@@ -543,16 +543,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
-    slug: "wdc2026-freitagskuche",
-    name: "Freitagsküche",
-    address: "",
-    lat: 50.1085549,
-    lon: 8.658872,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    default_genre: "classical",
-  },
-  {
     slug: "wdc2026-scape-offenbach",
     name: "SCAPE° Offenbach",
     address: "",
