@@ -165,15 +165,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
-    slug: "hafen-2-offenbach",
-    name: "Hafen 2 Offenbach",
-    address: "",
-    lat: 50.0972,
-    lon: 8.7449,
-    city: "frankfurt",
-    website_url: "https://loveyourartist.com",
-  },
-  {
     slug: "hansa-filmstudio",
     name: "Hansa-Filmstudio",
     address: "",
@@ -199,6 +190,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.6819,
     city: "frankfurt",
     website_url: "",
+  },
+  {
+    slug: "hlmd-darmstadt",
+    name: "Hessisches Landesmuseum Darmstadt",
+    address: "",
+    lat: 49.873,
+    lon: 8.65,
+    city: "darmstadt",
+    website_url: "https://www.hlmd.de",
   },
   {
     slug: "juedisches-museum-frankfurt",

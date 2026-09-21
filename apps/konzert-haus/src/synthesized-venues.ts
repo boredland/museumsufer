@@ -209,7 +209,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lat: 50.0972,
     lon: 8.7449,
     city: "frankfurt",
-    website_url: "https://loveyourartist.com",
+    website_url: "https://hafen2.net",
     default_genre: "experimental",
   },
   {
@@ -231,6 +231,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "hamburg",
     website_url: "https://staeitsch-shop.comfortticket.de",
     default_genre: "world",
+  },
+  {
+    slug: "hamburgische-staatsoper",
+    name: "Hamburgische Staatsoper",
+    address: "",
+    lat: 53.5567,
+    lon: 9.9889,
+    city: "hamburg",
+    website_url: "https://www.staatsoper-hamburg.de",
+    default_genre: "classical",
   },
   {
     slug: "harburger-theater",
