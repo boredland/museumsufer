@@ -210,6 +210,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.juedischesmuseum.de",
   },
   {
+    slug: "kahh",
+    name: "Katholische Akademie Hamburg",
+    address: "",
+    lat: 53.5478,
+    lon: 9.9806,
+    city: "hamburg",
+    website_url: "https://www.kahh.de",
+  },
+  {
     slug: "kamera-heidelberg",
     name: "Die Kamera Heidelberg",
     address: "",

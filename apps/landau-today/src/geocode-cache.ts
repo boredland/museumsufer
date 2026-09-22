@@ -247,6 +247,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "katholische pfarrkirche \"kreuzerhöhung\"|kirrweiler": [49.634729, 7.500757],
   "kelterhalle weingut siener-dr. wettstein|siebeldingen": [49.209861, 8.050691],
   "kerweplatz am dorfgemeinschaftshaus|bornheim": [50.762791, 6.989051],
+  "khg, moltkestraße 9 in landau|landau in der pfalz": [49.198283, 8.112344],
   "kinder- und jugendfarm landau e.v.|landau in der pfalz": [49.198283, 8.112344],
   "kirchplatz von st. albert|landau in der pfalz": [49.198283, 8.112344],
   "klanghof impflingen|impflingen": [49.163067, 8.111615],
