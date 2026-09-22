@@ -443,6 +443,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "mut-theater",
+    name: "MUT! Theater",
+    address: "",
+    lat: 53.5622,
+    lon: 9.9608,
+    city: "hamburg",
+    website_url: "https://muttheater.de",
+    default_genre: "classical",
+  },
+  {
     slug: "ohnsorg-theater",
     name: "Ohnsorg-Theater",
     address: "",
@@ -450,16 +460,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 10.0075,
     city: "hamburg",
     website_url: "https://ohnsorgtheater.reservix.de",
-    default_genre: "classical",
-  },
-  {
-    slug: "oper-frankfurt",
-    name: "Oper Frankfurt",
-    address: "",
-    lat: 50.1077,
-    lon: 8.6726,
-    city: "frankfurt",
-    website_url: "https://oper-frankfurt.de",
     default_genre: "classical",
   },
   {
