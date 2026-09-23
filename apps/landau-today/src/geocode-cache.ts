@@ -198,6 +198,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "haus der jugend - jugendförderung|landau in der pfalz": [49.198283, 8.112344],
   "haus der jugend|landau in der pfalz": [49.198283, 8.112344],
   "haus des gastes|bad bergzabern": [49.098341, 7.990439],
+  "haus des sehens|landau in der pfalz": [49.19448, 8.112674],
   "haus mandelblüte|neustadt-gimmeldingen": [49.373003, 8.163296],
   "haus zum maulbeerbaum eg|landau in der pfalz": [49.198283, 8.112344],
   "haus zum maulbeerbaum, marktstraße 92|landau in der pfalz": [49.195946, 8.111794],

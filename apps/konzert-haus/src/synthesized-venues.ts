@@ -333,6 +333,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "hohe-luft-schiff",
+    name: "HoheLuftschiff",
+    address: "",
+    lat: 53.5794,
+    lon: 9.9723,
+    city: "hamburg",
+    website_url: "https://hoheluftschiff.de",
+    default_genre: "classical",
+  },
+  {
     slug: "hugenottenhalle",
     name: "Hugenottenhalle",
     address: "",
@@ -550,7 +560,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6817,
     city: "frankfurt",
     website_url: "https://volksbuehne.net",
-    default_genre: "jazz",
+    default_genre: "classical",
   },
   {
     slug: "wdc2026-scape-offenbach",
