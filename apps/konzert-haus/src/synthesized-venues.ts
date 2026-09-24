@@ -873,6 +873,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "cinestar-remscheid",
+    name: "CineStar Remscheid",
+    address: "",
+    lat: 51.1776,
+    lon: 7.1994,
+    city: "remscheid",
+    website_url: "https://www.wuppertal-live.de",
+    default_genre: "classical",
+  },
+  {
     slug: "congresshalle-saarbruecken",
     name: "Congresshalle Saarbrücken",
     address: "",
