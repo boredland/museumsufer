@@ -287,7 +287,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "kino-achteinhalb": [49.233, 6.997],
   "camera-zwo": [49.235, 7.0],
   "city-kinos-saarbruecken": [49.234, 6.998],
-  "kulturbesitz-saarbruecken": [49.233, 6.994],
+  saarlandmuseum: [49.2303, 6.9984],
   "historisches-museum-saar": [49.234, 6.996],
   "studio-30-saarbruecken": [49.232, 6.995],
   "kuba-saarbruecken": [49.241, 7.024],
@@ -299,6 +299,16 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "ut-kinos-saarbruecken": [49.234, 6.998],
   "passage-kinos-saarbruecken": [49.234, 6.998],
   "cinestar-remscheid": [51.1776, 7.1994],
+  "roentgen-museum": [51.1936, 7.2597],
+  "von-der-heydt-museum": [51.2574, 7.1466],
+  "bergisch-skulpturenpark-waldfrieden": [51.2514, 7.1704],
+  "bergisch-museum-fur-fruhindustrialisierung": [51.266, 7.1899],
+  "bergisch-engels-haus": [51.2664, 7.1907],
+  "bergisch-begegnungsstatte-alte-synagoge": [51.2593, 7.144],
+  "bergisch-kunstmuseum-solingen": [51.2035, 7.0736],
+  "bergisch-zentrum-fur-verfolgte-kunste": [51.2035, 7.0736],
+  "bergisch-deutsches-klingenmuseum": [51.2097, 7.0724],
+  "bergisch-lvr-industriemuseum-solingen-gesenkschmiede-hendrichs": [51.1708, 7.0379],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

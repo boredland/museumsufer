@@ -32,7 +32,7 @@ export interface MuseumConfig {
   website?: string;
   abbreviation?: string;
   group?: string;
-  /** City slug (CitySlug: "frankfurt" / "hamburg" / "darmstadt" / "heidelberg"). Absent ≡ "frankfurt". */
+  /** City slug (a CitySlug in @museumsufer/core/cities). Absent ≡ "frankfurt". */
   city?: string;
   lat: number;
   lng: number;
@@ -601,6 +601,128 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     website: "https://www.deutsches-apotheken-museum.de",
     lat: 49.4106,
     lng: 8.7155,
+  },
+
+  // ── Mainz ─────────────────────────────────────────────────────────────
+  "kunsthalle-mainz": {
+    name: "Kunsthalle Mainz",
+    city: "mainz",
+    website: "https://www.kunsthalle-mainz.de",
+    lat: 50.0155,
+    lng: 8.2587,
+  },
+  "dommuseum-mainz": {
+    name: "Dom- und Diözesanmuseum Mainz",
+    city: "mainz",
+    website: "https://www.dommuseum-mainz.de",
+    lat: 49.998,
+    lng: 8.274,
+  },
+  "nhm-mainz": {
+    name: "Naturhistorisches Museum Mainz",
+    city: "mainz",
+    website: "https://www.mainz.de/microsite/naturhistorisches-museum/",
+    lat: 50.003,
+    lng: 8.269,
+  },
+
+  // ── Wiesbaden ─────────────────────────────────────────────────────────
+  "museum-wiesbaden": {
+    name: "Museum Wiesbaden",
+    city: "wiesbaden",
+    website: "https://museum-wiesbaden.de",
+    lat: 50.0771,
+    lng: 8.2459,
+  },
+  "museum-reinhard-ernst": {
+    name: "Museum Reinhard Ernst",
+    city: "wiesbaden",
+    website: "https://www.museum-re.de",
+    lat: 50.0775,
+    lng: 8.2385,
+  },
+
+  // ── Saarbrücken ───────────────────────────────────────────────────────
+  saarlandmuseum: {
+    name: "Saarlandmuseum",
+    city: "saarbruecken",
+    website: "https://www.kulturbesitz.de",
+    lat: 49.2303,
+    lng: 6.9984,
+  },
+
+  // ── Wuppertal / Solingen / Remscheid ──────────────────────────────────
+  // `bergisch-*` slugs are the wuppertal-live.de portal's per-venue slugs;
+  // bergisch-live tags their events for this app (MUSEUM_VENUES there).
+  "von-der-heydt-museum": {
+    name: "Von der Heydt-Museum",
+    city: "wuppertal",
+    website: "https://von-der-heydt-museum.de",
+    lat: 51.2574,
+    lng: 7.1466,
+  },
+  "bergisch-skulpturenpark-waldfrieden": {
+    name: "Skulpturenpark Waldfrieden",
+    city: "wuppertal",
+    website: "https://skulpturenpark-waldfrieden.de",
+    lat: 51.2514,
+    lng: 7.1704,
+  },
+  "bergisch-museum-fur-fruhindustrialisierung": {
+    name: "Museum für Frühindustrialisierung",
+    city: "wuppertal",
+    website: "https://www.mi-wuppertal.de",
+    lat: 51.266,
+    lng: 7.1899,
+  },
+  "bergisch-engels-haus": {
+    name: "Engels-Haus",
+    city: "wuppertal",
+    website: "https://www.mi-wuppertal.de",
+    lat: 51.2664,
+    lng: 7.1907,
+  },
+  "bergisch-begegnungsstatte-alte-synagoge": {
+    name: "Begegnungsstätte Alte Synagoge",
+    city: "wuppertal",
+    website: "https://www.alte-synagoge-wuppertal.de",
+    lat: 51.2593,
+    lng: 7.144,
+  },
+  "bergisch-kunstmuseum-solingen": {
+    name: "Kunstmuseum Solingen",
+    city: "solingen",
+    website: "https://kunstmuseum-solingen.de",
+    lat: 51.2035,
+    lng: 7.0736,
+  },
+  "bergisch-zentrum-fur-verfolgte-kunste": {
+    name: "Zentrum für verfolgte Künste",
+    city: "solingen",
+    website: "https://www.verfolgte-kuenste.com",
+    lat: 51.2035,
+    lng: 7.0736,
+  },
+  "bergisch-deutsches-klingenmuseum": {
+    name: "Deutsches Klingenmuseum",
+    city: "solingen",
+    website: "https://www.klingenmuseum.de",
+    lat: 51.2097,
+    lng: 7.0724,
+  },
+  "bergisch-lvr-industriemuseum-solingen-gesenkschmiede-hendrichs": {
+    name: "LVR-Industriemuseum Gesenkschmiede Hendrichs",
+    city: "solingen",
+    website: "https://industriemuseum.lvr.de",
+    lat: 51.1708,
+    lng: 7.0379,
+  },
+  "roentgen-museum": {
+    name: "Deutsches Röntgen-Museum",
+    city: "remscheid",
+    website: "https://roentgenmuseum.de",
+    lat: 51.1936,
+    lng: 7.2597,
   },
 };
 

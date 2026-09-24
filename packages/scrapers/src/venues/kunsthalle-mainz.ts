@@ -8,8 +8,8 @@ const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
  * Kunsthalle Mainz — contemporary art institution in Mainz. Its site is
  * powered by Sanity CMS; we query the public API for published events,
  * expand each event's `singleEventTimes` into individual dated entries,
- * and map event categories to labels. Images are Sanity asset refs
- * resolved to CDN URLs.
+ * and map event categories to labels. Exhibitions are their own document
+ * type with a `timeRange`. Images are Sanity asset refs resolved to CDN URLs.
  */
 export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
   const today = todayIso();
@@ -20,10 +20,10 @@ export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
     headers: { "User-Agent": UA, Accept: "application/json" },
   });
   if (!res.ok) throw new Error(`kunsthalle-mainz fetch failed: ${res.status}`);
-  const body = (await res.json()) as SanityQueryResult;
+  const body = (await res.json()) as SanityQueryResult<SanityEvent>;
   const rawEvents: SanityEvent[] = body.result ?? [];
 
-  const events: CanonicalScrapedEvent[] = [];
+  const events: CanonicalScrapedEvent[] = await fetchExhibitions(today);
   const seen = new Set<string>();
 
   for (const ev of rawEvents) {
@@ -60,6 +60,38 @@ export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
   }
 
   return { source_slug: "kunsthalle-mainz", display_name: "Kunsthalle Mainz", events };
+}
+
+/** Exhibitions still running today. Their `/de/exhibitions/<slug>` pages
+ *  are client-rendered from the same slug, so the link is stable. */
+async function fetchExhibitions(today: string): Promise<CanonicalScrapedEvent[]> {
+  const q = encodeURIComponent(
+    `*[_type == "exhibition" && timeRange.end >= "${today}"]{_id, title, slug, timeRange, introImage}`,
+  );
+  const res = await fetch(`${API_BASE}?query=${q}`, {
+    headers: { "User-Agent": UA, Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`kunsthalle-mainz exhibitions fetch failed: ${res.status}`);
+  const body = (await res.json()) as SanityQueryResult<SanityExhibition>;
+
+  const out: CanonicalScrapedEvent[] = [];
+  for (const ex of body.result ?? []) {
+    const title = ex.title?.de?.trim();
+    const start = ex.timeRange?.start;
+    const slug = ex.slug?.current;
+    if (!title || !start || !slug) continue;
+    const end = ex.timeRange?.end ?? null;
+    out.push({
+      source_event_id: `exhibition|${ex._id}`,
+      title,
+      date: start,
+      end_date: end && end !== start ? end : null,
+      detail_url: `https://www.kunsthalle-mainz.de/de/exhibitions/${encodeURIComponent(slug)}`,
+      image_url: buildImageUrl(ex.introImage?.de),
+      labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
+    });
+  }
+  return out;
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────
@@ -113,8 +145,16 @@ function buildLabels(
 
 // ─── Sanity API types ────────────────────────────────────────────────────
 
-interface SanityQueryResult {
-  result?: SanityEvent[];
+interface SanityQueryResult<T> {
+  result?: T[];
+}
+
+interface SanityExhibition {
+  _id: string;
+  title?: { de?: string } | null;
+  slug?: { current?: string } | null;
+  timeRange?: { start?: string; end?: string } | null;
+  introImage?: { de?: SanityImageRef } | null;
 }
 
 interface SanityEvent {

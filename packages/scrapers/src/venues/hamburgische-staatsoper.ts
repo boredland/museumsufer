@@ -28,9 +28,15 @@ export async function scrapeHamburgischeStaatsoper(): Promise<VenueScrapeResult>
   const perfs = parseCalendar(html, today);
   const imageBySlug = await enrichImages(perfs);
 
-  const events: CanonicalScrapedEvent[] = perfs.map((p) => {
+  // The calendar repeats a performance that sits in two sections (Ballett +
+  // Junges Forum); one listing is one performance.
+  const seen = new Set<string>();
+  const events: CanonicalScrapedEvent[] = perfs.flatMap((p) => {
+    const id = `${p.showSlug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`;
+    if (seen.has(id)) return [];
+    seen.add(id);
     return {
-      source_event_id: `${p.showSlug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`,
+      source_event_id: id,
       title: p.title,
       subtitle: p.subtitle,
       description: p.subtitle,

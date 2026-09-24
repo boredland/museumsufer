@@ -5,6 +5,11 @@ import { MUSEUMS, museumDisplayName } from "../_museums/config";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
 
 const CONCURRENCY = 5;
+/** One museum's fetches must not spend the orchestrator's whole run budget
+ *  (the hub abandons it at 90s). An origin that stops answering (Dommuseum,
+ *  which also fetches one ICS per event) otherwise holds a queue slot for
+ *  minutes, and the other museums time out behind it. */
+const TASK_TIMEOUT_MS = 45_000;
 
 /**
  * Frankfurt-museums orchestrator — one entry in VENUE_SCRAPERS that fans
@@ -17,13 +22,13 @@ const CONCURRENCY = 5;
  */
 export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<VenueScrapeResult[]> {
   const byMuseum = new Map<string, CanonicalScrapedEvent[]>();
-  const queue = new PQueue({ concurrency: CONCURRENCY });
+  const queue = new PQueue({ concurrency: CONCURRENCY, timeout: TASK_TIMEOUT_MS });
 
   for (const [slug, config] of Object.entries(MUSEUMS)) {
     const proxy = config.proxy && ctx.proxy ? { url: ctx.proxy.url, token: ctx.proxy.token } : undefined;
 
     if (config.eventApi) {
-      queue.add(async () => {
+      enqueue(queue, `events ${slug}`, async () => {
         try {
           const events = await fetchEventsFromApi(config.eventApi!, proxy);
           for (const ev of events) {
@@ -38,7 +43,7 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
     }
 
     if (config.exhibitionApi) {
-      queue.add(async () => {
+      enqueue(queue, `exhibitions ${slug}`, async () => {
         try {
           const exhibitions = await fetchExhibitionsFromApi(config.exhibitionApi!);
           for (const ex of exhibitions) {
@@ -77,6 +82,16 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
   }
   results.sort((a, b) => a.source_slug.localeCompare(b.source_slug));
   return results;
+}
+
+/** Queue a museum fetch. A task that hits TASK_TIMEOUT_MS rejects its
+ *  `add()` promise, which nothing else awaits; catch it here so the timeout
+ *  is logged like any other per-museum failure instead of surfacing as an
+ *  unhandled rejection. */
+function enqueue(queue: PQueue, label: string, task: () => Promise<void>): void {
+  queue.add(task).catch((err: unknown) => {
+    console.warn(`museums-frankfurt ${label}: ${err instanceof Error ? err.message : String(err)}`);
+  });
 }
 
 function appendTo(byMuseum: Map<string, CanonicalScrapedEvent[]>, slug: string, event: CanonicalScrapedEvent): void {

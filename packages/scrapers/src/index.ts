@@ -213,8 +213,10 @@ import { scrapePupille } from "./venues/pupille";
 import { scrapeRheingauFestival } from "./venues/rheingau-festival";
 import { scrapeRlsHessen } from "./venues/rls-hessen";
 import { scrapeRoemerberggespraeche } from "./venues/roemerberggespraeche";
+import { scrapeRoentgenMuseum } from "./venues/roentgen-museum";
 import { scrapeRomanfabrik } from "./venues/romanfabrik";
 import { scrapeRptuCampuskultur } from "./venues/rptu-campuskultur";
+import { scrapeSaarlandmuseum } from "./venues/saarlandmuseum";
 import { scrapeSammlungPrinzhorn } from "./venues/sammlung-prinzhorn";
 import { scrapeSavoyFilmtheater } from "./venues/savoy-filmtheater";
 import { scrapeSchauspielFrankfurt } from "./venues/schauspiel-frankfurt";
@@ -255,6 +257,7 @@ import { scrapeUnimedizinFrankfurt } from "./venues/unimedizin-frankfurt";
 import { scrapeUnionClubFrankfurt } from "./venues/union-club-frankfurt";
 import { scrapeVelvetsTheater } from "./venues/velvets-theater";
 import { scrapeVolksbuehneFrankfurt } from "./venues/volksbuehne-frankfurt";
+import { scrapeVonDerHeydtMuseum } from "./venues/von-der-heydt-museum";
 import { scrapeWaggong } from "./venues/waggong";
 import { scrapeYpsilonBuchladen } from "./venues/ypsilon-buchladen";
 import { scrapeZeiseOpenAir } from "./venues/zeise-open-air";
@@ -285,6 +288,9 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
   { slug: "bergisch-live", run: (_ctx: ScraperContext) => scrapeBergischLive() },
   { slug: "cinestar-remscheid", run: (_ctx: ScraperContext) => scrapeCinestarRemscheid() },
+  { slug: "roentgen-museum", run: (_ctx: ScraperContext) => scrapeRoentgenMuseum() },
+  { slug: "saarlandmuseum", run: (_ctx: ScraperContext) => scrapeSaarlandmuseum() },
+  { slug: "von-der-heydt-museum", run: (_ctx: ScraperContext) => scrapeVonDerHeydtMuseum() },
   { slug: "bessunger-knabenschule", run: (_ctx: ScraperContext) => scrapeBessungerKnabenschule() },
   { slug: "botschaft-der-wildtiere", run: (_ctx: ScraperContext) => scrapeBotschaftDerWildtiere() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -660,8 +666,10 @@ export {
   scrapeRheingauFestival,
   scrapeRlsHessen,
   scrapeRoemerberggespraeche,
+  scrapeRoentgenMuseum,
   scrapeRomanfabrik,
   scrapeRptuCampuskultur,
+  scrapeSaarlandmuseum,
   scrapeSammlungPrinzhorn,
   scrapeSavoyFilmtheater,
   scrapeSchauspielFrankfurt,
@@ -698,6 +706,7 @@ export {
   scrapeUnimedizinFrankfurt,
   scrapeUnionClubFrankfurt,
   scrapeVolksbuehneFrankfurt,
+  scrapeVonDerHeydtMuseum,
   scrapeWaggong,
   scrapeWdc2026,
   scrapeYpsilonBuchladen,

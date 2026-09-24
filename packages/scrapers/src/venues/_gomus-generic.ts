@@ -248,7 +248,9 @@ export async function scrapeGomusMuseum(
   return results;
 }
 
-function labelsForEvent(type: EventType | null, title: string, description: string | null): ScrapedLabel[] {
+/** Hub labels for a museum-hosted event of the given classified type; the
+ *  museum app keys its category off the `museum:*` label. */
+export function labelsForEvent(type: EventType | null, title: string, description: string | null): ScrapedLabel[] {
   if (type === "Vortrag") {
     const sub = classifyTalk(title, description).toLowerCase();
     return [

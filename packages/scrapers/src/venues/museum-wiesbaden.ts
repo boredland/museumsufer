@@ -3,6 +3,8 @@ import { stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const API_URL = "https://muwi.gomus.de/api/v4/events";
+const EXHIBITIONS_URL = "https://muwi.gomus.de/api/v4/exhibitions";
+const SITE = "https://museum-wiesbaden.de";
 const DETAIL_BASE = "https://museum-wiesbaden.de/kalender";
 const TICKET_BASE = "https://muwi-shop.gomus.de/#/product/event";
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
@@ -14,6 +16,9 @@ const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
  * into one dated entry, and skip anything before today. The API returns
  * bare datetime strings ("2026-06-26 14:00:00") in Europe/Berlin. No
  * pagination needed — the full catalogue fits under 200 items.
+ *
+ * Exhibitions come from /api/v4/exhibitions; only those with a time frame
+ * are listed (the undated ones are the permanent collection displays).
  */
 export async function scrapeMuseumWiesbaden(): Promise<VenueScrapeResult> {
   const today = todayIso();
@@ -22,7 +27,7 @@ export async function scrapeMuseumWiesbaden(): Promise<VenueScrapeResult> {
   const body = (await res.json()) as GoMusEventsResponse;
   const eventList = body.events ?? [];
 
-  const results: CanonicalScrapedEvent[] = [];
+  const results: CanonicalScrapedEvent[] = await fetchExhibitions(today);
   const seen = new Set<string>();
 
   for (const ev of eventList) {
@@ -78,6 +83,36 @@ export async function scrapeMuseumWiesbaden(): Promise<VenueScrapeResult> {
   return { source_slug: "museum-wiesbaden", display_name: "Museum Wiesbaden", events: results };
 }
 
+async function fetchExhibitions(today: string): Promise<CanonicalScrapedEvent[]> {
+  const res = await fetch(`${EXHIBITIONS_URL}?per_page=100`, { headers: { "User-Agent": UA } });
+  if (!res.ok) throw new Error(`museum-wiesbaden exhibitions fetch failed: ${res.status}`);
+  const body = (await res.json()) as { exhibitions?: GoMusExhibition[] };
+
+  const out: CanonicalScrapedEvent[] = [];
+  for (const ex of body.exhibitions ?? []) {
+    const frame = ex.time_frames?.[0];
+    const start = frame?.start_at?.slice(0, 10);
+    const end = frame?.end_at?.slice(0, 10) ?? null;
+    if (!start || (end && end < today)) continue;
+    const title = (ex.title ?? "").trim();
+    if (!title) continue;
+    // The shop's exhibition page is a JS shell; the description links the
+    // museum's own page for the show, which is the better detail link.
+    const page = ex.description?.match(/https?:\/\/museum-wiesbaden\.de\/[a-z0-9-]+/)?.[0];
+    out.push({
+      source_event_id: `exhibition|${ex.id}`,
+      title,
+      description: ex.description ? stripHtml(ex.description).trim().slice(0, 2000) || null : null,
+      date: start,
+      end_date: end && end !== start ? end : null,
+      detail_url: page ?? `${SITE}/ausstellungen`,
+      image_url: ex.picture?.detail ?? ex.picture?.original ?? null,
+      labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
+    });
+  }
+  return out;
+}
+
 // ─── helpers ────────────────────────────────────────────────────────────
 
 /** Parse a GoMus upcoming bookings datetime like "2026-06-26 14:00:00"
@@ -111,7 +146,16 @@ function buildLabels(
 
 interface GoMusPicture {
   original?: string;
+  detail?: string;
   teaser_3x2?: string;
+}
+
+interface GoMusExhibition {
+  id: number;
+  title: string | null;
+  description: string | null;
+  picture?: GoMusPicture | null;
+  time_frames?: Array<{ start_at?: string; end_at?: string }> | null;
 }
 
 interface GoMusCategory {

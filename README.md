@@ -6,7 +6,7 @@ Five of the six are multi-city culture verticals (museums, theater, concerts, le
 
 ## Cities
 
-Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt**, **Hamburg**, **Darmstadt** and **Heidelberg**.
+Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt**, **Hamburg**, **Darmstadt**, **Heidelberg**, **Mainz**, **Wiesbaden**, **Saarbrücken**, **Wuppertal**, **Solingen** and **Remscheid**.
 
 - **Hosts** — each city is served at `<city>.<apex>` (e.g. `frankfurt.konzert.haus` / `hamburg.konzert.haus`). The bare apex (`konzert.haus`) 302-redirects to the nearest city by Cloudflare edge geolocation (`cityMiddleware({ apexBehavior: "geo" })` in `packages/core/src/city-routing.ts`). `museumsufer.app` is an SEO-primary alias host pinned to Frankfurt (resolved without a redirect).
 - **Switcher** — the masthead `CitySwitch` (`packages/core/src/cityswitch.tsx`) lists only the cities a vertical actually has data for (`supportedCities`, derived per bundle), and degrades to a plain locality label when a vertical covers a single city.
@@ -18,7 +18,7 @@ Hamburg coverage is rolling out vertical by vertical — live in museums, theate
 
 ## Apps
 
-### [`apps/museumsufer`](apps/museumsufer) → [museumsufer.app](https://museumsufer.app) · `{frankfurt,hamburg}.ins.museum`
+### [`apps/museumsufer`](apps/museumsufer) → [museumsufer.app](https://museumsufer.app) · `<city>.ins.museum`
 
 Daily exhibitions and events for ~40 Frankfurt Museumsufer museums, now extending to Hamburg (Hamburger Kunsthalle, Museum für Kunst und Gewerbe, Deichtorhallen, SHMH houses, …). Aggregates from museumsufer.de + per-museum APIs (15+ deterministic parsers in `api-scrapers.ts`: Tribe Events, TYPO3 calendarize, schema.org Event microdata, WP REST + ACF, RSS, Kirby CMS, …). DeepL EN/FR translation runs in the same scrape pipeline; the cache rides in the bundle. Image proxy with edge caching, distance sorting via RMV, fuzzy search, PWA.
 

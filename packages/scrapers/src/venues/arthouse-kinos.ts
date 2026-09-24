@@ -63,6 +63,7 @@ async function scrapeSite(site: ScrapeSite, today: string): Promise<VenueScrapeR
 
   const byCinema = new Map<string, CanonicalScrapedEvent[]>();
   for (const c of Object.values(site.cinemas)) byCinema.set(c.slug, []);
+  const seenShows = new Set<string>();
 
   for (const tileMatch of html.matchAll(TILE_RE)) {
     const tile = tileMatch[0];
@@ -88,6 +89,10 @@ async function scrapeSite(site: ScrapeSite, today: string): Promise<VenueScrapeR
     const showtimes = parseShowtimes(tile, colDates);
     for (const s of showtimes) {
       if (s.date < today) continue;
+      // A show id is one booking; the site occasionally lists it under two
+      // film tiles (a retitled duplicate), and the first tile wins.
+      if (seenShows.has(s.showid)) continue;
+      seenShows.add(s.showid);
       const cinema = site.cinemas[s.cinemaPath];
       if (!cinema) continue;
       const bucket = byCinema.get(cinema.slug);

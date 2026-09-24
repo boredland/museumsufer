@@ -93,7 +93,8 @@ export async function scrapeJuedischeGemeinde(): Promise<VenueScrapeResult> {
     }
 
     out.push({
-      source_event_id: String(e.id),
+      // A recurring series reuses one post id for every date.
+      source_event_id: `${e.id}|${date}`,
       title: e.title,
       date,
       time,
