@@ -444,15 +444,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.studio-kino.de",
   },
   {
-    slug: "wdc2026-schader-stiftung",
-    name: "Schader-Stiftung",
-    address: "",
-    lat: 49.8629686,
-    lon: 8.6537628,
-    city: "darmstadt",
-    website_url: "https://wdc2026.org",
-  },
-  {
     slug: "zeise-kinos",
     name: "Zeise Kinos",
     address: "",

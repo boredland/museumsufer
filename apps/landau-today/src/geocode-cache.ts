@@ -169,6 +169,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "galerie neumühle|edenkoben": [49.283253, 8.111971],
   "galerie rolfbilder in der naturheilpraxis bußalb|kapsweyer": [49.044688, 8.019927],
   "gasthof zum lam|gleiszellen - gleishorbach": [49.124931, 8.006573],
+  "gemeinde dierbach|dierbach": [49.082432, 8.0662],
   "gemeinde kapellen-drusweiler|kapellen-drusweiler": [49.10314, 8.031469],
   "gemeinde niederhorbach|niederhorbach": [49.116054, 8.032786],
   "gemeinde oberhausen|oberhausen": [48.719562, 11.11353],
