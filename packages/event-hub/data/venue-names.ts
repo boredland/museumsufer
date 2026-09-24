@@ -384,6 +384,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-deutsches-architekturmuseum-dam": "Deutsches Architekturmuseum (DAM)",
   "wdc2026-deutsches-ledermuseum": "Deutsches Ledermuseum",
   "wdc2026-dialogmuseum": "DIALOGMUSEUM",
+  "wdc2026-die-kooperative-eg": "Die Kooperative eG",
   "wdc2026-domstudio": "DOMstudio",
   "wdc2026-dorfgemeinschaftshaus-brachttal-schlierbach": "Dorfgemeinschaftshaus Brachttal/Schlierbach",
   "wdc2026-dornbuschkirche": "Dornbuschkirche",
