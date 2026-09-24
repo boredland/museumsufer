@@ -9,6 +9,7 @@
     "until": "2027-08-01"
   },
   "arthouse-kinos-frankfurt": { "reason": "aggregator — emits per-cinema child slugs" },
+  "bergisch-live": { "reason": "aggregator — fans out to per-venue bergisch-* child slugs" },
   "bad-vilbel-open-air-kino": {
     "reason": "seasonal — summer open-air cinema in the Freibad; the oak-26 season ran 22 Jul – 9 Aug 2026 and is over. Parser verified against the live Gatsby page-data: all 15 oak-26 films and their dates still parse, they are simply all past.",
     "until": "2027-07-15"

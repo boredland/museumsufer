@@ -51,6 +51,7 @@ import { scrapeBachWiesbaden } from "./venues/bach-wiesbaden";
 import { scrapeBadHomburgSchloss } from "./venues/bad-homburg-schloss";
 import { scrapeBadSoden } from "./venues/bad-soden";
 import { scrapeBadVilbelOpenAirKino } from "./venues/bad-vilbel-open-air-kino";
+import { scrapeBergischLive } from "./venues/bergisch-live";
 import { scrapeBessungerKnabenschule } from "./venues/bessunger-knabenschule";
 import { scrapeBnaiBrithFrankfurt } from "./venues/bnai-brith-frankfurt";
 import { scrapeBoellHessen } from "./venues/boell-hessen";
@@ -281,6 +282,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "bad-homburger-schlosskonzerte", run: (_ctx: ScraperContext) => scrapeBadHomburgSchloss() },
   { slug: "bad-vilbel-open-air-kino", run: (_ctx: ScraperContext) => scrapeBadVilbelOpenAirKino() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
+  { slug: "bergisch-live", run: (_ctx: ScraperContext) => scrapeBergischLive() },
   { slug: "bessunger-knabenschule", run: (_ctx: ScraperContext) => scrapeBessungerKnabenschule() },
   { slug: "botschaft-der-wildtiere", run: (_ctx: ScraperContext) => scrapeBotschaftDerWildtiere() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -512,6 +514,7 @@ export {
   scrapeBadHomburgSchloss,
   scrapeBadSoden,
   scrapeBadVilbelOpenAirKino,
+  scrapeBergischLive,
   scrapeBessungerKnabenschule,
   scrapeBnaiBrithFrankfurt,
   scrapeBoellHessen,
