@@ -26,9 +26,11 @@ async function main(): Promise<void> {
     if (ev.date < today) continue;
     const city = cityOf(ev);
     if (!city) continue;
-    for (const c of citiesOf(ev)) presentCities.add(c);
     const category = pickCategory(ev);
     if (!category) continue;
+    // Only cities with events this vertical shows: the switcher links every
+    // supported city, so a cinema-only city here would be a dead link.
+    for (const c of citiesOf(ev)) presentCities.add(c);
 
     if (!sourcesBySlug.has(ev.source_slug) && !orphanUrls.has(ev.source_slug) && ev.detail_url) {
       orphanUrls.set(ev.source_slug, originOf(ev.detail_url));

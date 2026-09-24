@@ -30,9 +30,11 @@ async function main(): Promise<void> {
     if (ev.date < today) continue;
     const evCities = citiesOf(ev);
     if (evCities.length === 0) continue;
-    for (const c of evCities) presentCities.add(c);
     const genre = pickGenre(ev);
     if (!genre) continue;
+    // Only cities with events this vertical shows: the switcher links every
+    // supported city, so a theater-only city here would be a dead link.
+    for (const c of evCities) presentCities.add(c);
 
     const canonicalTitleHash = fnv1aInt(ev.title.toLowerCase().replace(/[^a-z0-9]+/g, ""));
     const id = fnv1aInt(`${ev.source_slug}|${ev.date}|${ev.time ?? ""}|${ev.venue_room ?? ""}|${canonicalTitleHash}`);

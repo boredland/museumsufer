@@ -37,8 +37,10 @@ async function main(): Promise<void> {
     if (ev.date < today) continue;
     const city = cityOf(ev);
     if (!city) continue;
-    for (const c of citiesOf(ev)) presentCities.add(c);
     if (!hasStageLabel(ev)) continue;
+    // Only cities with events this vertical shows: the switcher links every
+    // supported city, so a cinema-only city here would be a dead link.
+    for (const c of citiesOf(ev)) presentCities.add(c);
     const showSlug = deriveShowSlug(ev);
     const showId = fnv1aInt(`${ev.source_slug}|${showSlug}`);
 

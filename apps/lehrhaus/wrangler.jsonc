@@ -22,6 +22,7 @@
     { "pattern": "heidelberg.lehr.salon", "custom_domain": true },
     { "pattern": "mainz.lehr.salon", "custom_domain": true },
     { "pattern": "wiesbaden.lehr.salon", "custom_domain": true },
+    { "pattern": "saarbruecken.lehr.salon", "custom_domain": true },
     { "pattern": "lehr.salon", "custom_domain": true }
   ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action
