@@ -31,6 +31,8 @@
     { "pattern": "mainz.lichtspiel.haus", "custom_domain": true },
     { "pattern": "wiesbaden.lichtspiel.haus", "custom_domain": true },
     { "pattern": "saarbruecken.lichtspiel.haus", "custom_domain": true },
+    { "pattern": "wuppertal.lichtspiel.haus", "custom_domain": true },
+    { "pattern": "solingen.lichtspiel.haus", "custom_domain": true },
     { "pattern": "lichtspiel.haus", "custom_domain": true }
   ],
   // Scraping happens in .github/workflows/scrape.yml — the GH Action
