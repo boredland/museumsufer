@@ -242,6 +242,28 @@ export const CURATED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.filmkreis.tu-darmstadt.de",
     tagline: "Studierendenkino an der TU Darmstadt.",
   },
+  {
+    slug: "bergisch-cobra",
+    name: "Kino im COBRA",
+    short_name: "COBRA",
+    address: "Merscheider Straße 77–79, 42699 Solingen",
+    lat: 51.1629,
+    lon: 7.0185,
+    city: "solingen",
+    website_url: "https://cobra-solingen.de/kino/",
+    tagline: "Kulturzentrum mit Kino in Solingen-Merscheid.",
+  },
+  {
+    slug: "cinestar-remscheid",
+    name: "CineStar Remscheid",
+    short_name: "CineStar",
+    address: "Willy-Brandt-Platz 2, 42859 Remscheid",
+    lat: 51.1776,
+    lon: 7.1994,
+    city: "remscheid",
+    website_url: "https://www.cinestar.de/kino-remscheid",
+    tagline: "Originalfassungen, Opern- und Konzertübertragungen.",
+  },
 ];
 
 export const CINEMAS: CinemaConfig[] = [...CURATED_CINEMAS, ...SYNTHESIZED_CINEMAS];

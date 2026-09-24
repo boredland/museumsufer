@@ -298,6 +298,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "literaturarchiv-saar": [49.254, 7.044],
   "ut-kinos-saarbruecken": [49.234, 6.998],
   "passage-kinos-saarbruecken": [49.234, 6.998],
+  "cinestar-remscheid": [51.1776, 7.1994],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the

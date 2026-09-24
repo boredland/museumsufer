@@ -62,6 +62,7 @@ import { scrapeCafeMutz } from "./venues/cafe-mutz";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeCentralstationDarmstadt } from "./venues/centralstation-darmstadt";
+import { scrapeCinestarRemscheid } from "./venues/cinestar-remscheid";
 import { scrapeCitydomeDarmstadt } from "./venues/citydome-darmstadt";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
 import { scrapeComedyClubFrankfurt } from "./venues/comedy-club-frankfurt";
@@ -283,6 +284,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "bad-vilbel-open-air-kino", run: (_ctx: ScraperContext) => scrapeBadVilbelOpenAirKino() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
   { slug: "bergisch-live", run: (_ctx: ScraperContext) => scrapeBergischLive() },
+  { slug: "cinestar-remscheid", run: (_ctx: ScraperContext) => scrapeCinestarRemscheid() },
   { slug: "bessunger-knabenschule", run: (_ctx: ScraperContext) => scrapeBessungerKnabenschule() },
   { slug: "botschaft-der-wildtiere", run: (_ctx: ScraperContext) => scrapeBotschaftDerWildtiere() },
   { slug: "bad-soden", run: (_ctx: ScraperContext) => scrapeBadSoden() },
@@ -523,6 +525,7 @@ export {
   scrapeCaligariWiesbaden,
   scrapeCentralkomitee,
   scrapeCentralstationDarmstadt,
+  scrapeCinestarRemscheid,
   scrapeCitydomeDarmstadt,
   scrapeClubVoltaire,
   scrapeComedyClubFrankfurt,
