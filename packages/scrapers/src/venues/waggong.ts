@@ -5,25 +5,28 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 /**
  * Waggong e.V. — Kulturwerkstatt Germaniastraße. Hosts amateur and youth
  * ensembles (Big Band, Jazz Ladies, Djembe-Ensemble, …) plus Werkstattkonzerte
- * at the Brotfabrik. Low volume: typically 2–4 announced concerts at a time.
+ * at the Brotfabrik. Low volume: typically a handful of announced dates.
  *
- * Structure: WordPress + TablePress. Each event is one <tr> with two cells —
- * column-1 carries Title (in <strong>), image, and date+time; column-2 is the
- * description. Date appears as either "DD.MM.YYYY" or "D. MonthName YYYY".
+ * Structure: Kirby CMS teaser grid under "Kommende Events". Each event is a
+ * `<div class="event info teaser-item">` with `p.date` ("DD.MM.YYYY"),
+ * `h2.heading`, a `div.content` blurb, and a "Mehr Info" detail link. The
+ * site moved off WordPress + TablePress in 2026; the old /konzerte-events/
+ * URL now redirects here.
  */
 
-const URL = "https://waggong.de/konzerte-events/";
+const URL = "https://waggong.de/sessions-konzerte";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
-const ROW_RE = /<tr[^>]*class="[^"]*row-\d+[^"]*"[^>]*>([\s\S]+?)<\/tr>/g;
-const COL1_RE = /<td[^>]*class="[^"]*column-1[^"]*"[^>]*>([\s\S]+?)<\/td>/;
-const COL2_RE = /<td[^>]*class="[^"]*column-2[^"]*"[^>]*>([\s\S]+?)<\/td>/;
-const TITLE_RE = /<strong[^>]*>([\s\S]+?)<\/strong>/;
+const ITEM_SPLIT = '<div class="event info teaser-item">';
+const DATE_P_RE = /<p\s+class="date">([\s\S]*?)<\/p>/;
+const HEADING_RE = /<h2\s+class="heading">([\s\S]*?)<\/h2>/;
+const CONTENT_RE = /<div\s+class="content">([\s\S]*?)<\/div>/;
+const LINK_RE = /<p\s+class="link--more">\s*<a\s+href="([^"]+)"/;
 const IMG_RE = /<img[^>]+src="([^"]+)"/;
 
 const DATE_NUMERIC_RE = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
 const DATE_WRITTEN_RE = /(\d{1,2})\.\s*([A-Za-zäöüÄÖÜ]+)\s+(\d{4})/;
-const TIME_RE = /(?:ab\s+)?(\d{1,2})[:.](\d{2})|ab\s+(\d{1,2})\s*Uhr/i;
+const TIME_RE = /(?:ab\s+)?(\d{1,2})[:.](\d{2})\s*Uhr|(?:ab\s+)?(\d{1,2})\s*Uhr/i;
 
 export async function scrapeWaggong(): Promise<VenueScrapeResult> {
   const html = await fetchText(URL);
@@ -31,22 +34,18 @@ export async function scrapeWaggong(): Promise<VenueScrapeResult> {
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  for (const rowMatch of html.matchAll(ROW_RE)) {
-    const row = rowMatch[1];
-    const col1 = row.match(COL1_RE)?.[1];
-    if (!col1) continue;
-
-    const title = clean(col1.match(TITLE_RE)?.[1] ?? "");
+  for (const item of html.split(ITEM_SPLIT).slice(1)) {
+    const title = clean(item.match(HEADING_RE)?.[1] ?? "");
     if (!title) continue;
 
-    const col1Text = clean(col1);
-    const date = parseDate(col1Text);
+    const date = parseDate(clean(item.match(DATE_P_RE)?.[1] ?? ""));
     if (!date) continue;
     if (date < today) continue;
 
-    const time = parseTime(col1Text);
-    const description = clean(row.match(COL2_RE)?.[1] ?? "").slice(0, 500) || null;
-    const image = col1.match(IMG_RE)?.[1];
+    const description = clean(item.match(CONTENT_RE)?.[1] ?? "").slice(0, 500) || null;
+    const time = description ? parseTime(description) : null;
+    const image = item.match(IMG_RE)?.[1];
+    const detailUrl = item.match(LINK_RE)?.[1] ?? URL;
 
     const slug = `waggong-${slugify(title)}-${date}`;
     if (seen.has(slug)) continue;
@@ -61,7 +60,7 @@ export async function scrapeWaggong(): Promise<VenueScrapeResult> {
       date,
       time,
       end_time: null,
-      detail_url: URL,
+      detail_url: detailUrl,
       ticket_url: null,
       image_url: image ?? null,
       labels: [{ label: `music:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" }],

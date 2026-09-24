@@ -2,7 +2,9 @@ name: scrape
 
 on:
   schedule:
-    - cron: "0 7-19 * * *" # hourly 09–21 CEST (07–19 UTC)
+    # Off the top of the hour: GitHub delays and drops scheduled runs queued
+    # at :00 under load — "0 7-19" fired ~3 times a day instead of 13.
+    - cron: "23 7-19 * * *" # hourly 09–21 CEST (07–19 UTC)
   workflow_dispatch:
 
 permissions:

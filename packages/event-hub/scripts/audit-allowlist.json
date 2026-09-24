@@ -1,50 +1,147 @@
 {
-  "_comment": "Scraper slugs the daily audit should NOT flag as broken when they emit zero events. Two kinds: aggregators that emit child slugs under different names, and venues that are legitimately empty between seasons (verified by hand). Add a slug here only after confirming the source genuinely has no upcoming events.",
-  "alabama-kino": "closed for rebuilding — the cinema shut on 31 Aug 2026 for the ~2-year Kampnagel refurbishment and reopens with two screens (notice on alabama-kino.de). Its kinotickets.express listing renders \"Keine Vorstellungen\" for every date filter; parser verified against that live page.",
-  "alsterdorf-sommerkino": "seasonal — open-air summer cinema on Alsterdorfer Markt; the 2026 season ran 14 Aug – 11 Sep and is over. Parser verified live: it still extracts all 5 2026 screenings with titles and times, they are simply all past.",
-  "arthouse-kinos-frankfurt": "aggregator — emits per-cinema child slugs",
-  "bad-vilbel-open-air-kino": "seasonal — summer open-air cinema in the Freibad; the oak-26 season ran 22 Jul – 9 Aug 2026 and is over. Parser verified against the live Gatsby page-data: all 15 oak-26 films and their dates still parse, they are simply all past.",
-  "bnai-brith-frankfurt": "network-unreachable — site returns HTTP 503 service unavailable",
-  "buergeruniversitaet": "semester break — the Goethe-Uni Tribe API still filters by category, but the Vorträge/Diskussionen/Podiumsgespräch/Science-Talk categories hold exactly one event after 1 Aug 2026 (Kinder-Uni, 7 Sep), now past; the winter-term programme is not yet published. Verified live against each category id.",
-  "cafe-mutz": "seasonal — FilmClub in Sommerpause after July 1, 2026 (last screening); August/September programme not yet published on cafemutz.de as of early July 2026. Parser verified: category-4 WP REST API returns no future posts.",
-  "caricatura-museum-frankfurt": "between programmes — /veranstaltungen renders the museum's own marker (\"Veranstaltungskalender — Zur Zeit sind keine Veranstaltungen geplant.\") and carries no dated rows at all; the Katharina Greve show (27 Jun 2026 – 17 Jan 2027) is an exhibition and still reaches the bundle through the exhibition API.",
-  "cineamo-frankfurt-region": "aggregator — emits per-cinema child slugs",
-  "deichtorhallen": "aggregator — fans out to child slugs: deichtorhallen-phoxxi, deichtorhallen-halle-aktuelle-kunst, deichtorhallen-sammlung-falckenberg",
-  "deutsches-apotheken-museum": "sporadic — the Heidelberg museum lists public events one at a time; /fuehrungen/oeffentliche-veranstaltungen currently carries a single teaser (Workshop Duftmedizin, 08.08.2026) which is now past. Parser verified against the live listing + detail markup ('Datum: Samstag, 08. August 2026' parses to 2026-08-08).",
-  "deutsches-schauspielhaus": "seasonal — Sommerpause July 3 to August 17, 2026; new season (FREMDE SONNE etc.) starts 26 September 2026; Reservix subdomain deutsches-schauspielhaus-hamburg.reservix.de is verified but publishes no events between seasons.",
-  "dig-frankfurt": "seasonal — summer pause; last listed event was 30 Jun 2026 ('Der lange Arm der Mullahs'); no upcoming events on frankfurt.deutsch-israelische-gesellschaft.de/termine/ as of July 2026. Tribe Events API returns empty.",
-  "fes-hessen": "seasonal — Landesbüro Hessen only occasionally hosts events in Frankfurt; current listing (Jun 2026) has events in Hanau, Steinbach, Wiesbaden etc. but none in Frankfurt",
-  "fgz-streitclub": "between editions — the StreitClub runs a handful of evenings a year at the English Theatre; #19 was 7 Sep 2026 and the next date is unannounced. Parser verified against the live RSS feed: all 9 dated items still parse.",
-  "forschungskolleg-humanwissenschaften": "seasonal — FKH archive/events currently shows no upcoming dates after 2 Jul 2026; next programme block not yet published on-site.",
-  "freiluftkino-frankfurt": "seasonal — open-air cinema, no programme outside the summer season (verified live: 0 events)",
-  "hamburger-puppentheater": "seasonal — in Sommerpause (summer break); new season starts September 2026; website confirms next programme announced late summer",
-  "hamburger-studienbibliothek": "sporadic — small critical-theory library (studienbibliothek.org); avant-garde 'Bibliothekskonzerte' + occasional talks published only as prose in the index news feed, extracted via the AI proxy into html-events-cache.ts (refresh-html-cache.ts). Latest listed event was 22 Jun 2026; often empty between events.",
-  "hamburgmusik": "aggregator — fans out to child slugs: elbphilharmonie, laeiszhalle",
-  "hansa-theater": "seasonal — Varieté season runs October to May; dark/empty during summer",
-  "harburger-theater": "verified live: source lists no upcoming events",
-  "imd-darmstadt": "biennial — Darmstädter Ferienkurse run in odd years (last 2025, next 10–24 Jul 2027); the festival/programm pages still show the 2025 edition and carry no ztix booking links, so there are no upcoming ticketed events between editions. The shared ztix parser is verified against the other Darmstadt venues.",
-  "jazz-palmengarten": "seasonal — Palmengarten summer jazz series, silent off-season (verified live: 0 events)",
-  "jazzkeller": "between programme months — live.html (Brizy CMS) shows May+June 2026, last dated show 27 Jun; July not yet published as of 29 Jun 2026. Parser verified: extracts all 15 June rows (dates/times/ticket links) when run against an earlier today.",
-  "karl-marx-buchhandlung": "seasonal — bookshop often has no events booked beyond the next few weeks",
-  "kinoheld-frankfurt-region": "aggregator — emits per-cinema child slugs",
-  "lichtmess-kino": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows).",
-  "lichtwark-theater": "seasonal — theater between seasons/summer pause (May 5 to mid-August)",
-  "mampf": "aggregator — emits per-venue child slugs",
-  "mathildenhoehe": "between exhibitions — both /ausstellungen/aktuell/ and /ausstellungen/vorschau/ render the empty marker ('Es sind derzeit keine Ausstellungen in dieser Kategorie eingetragen') as of 24 Jun 2026; the site lists no current or upcoming exhibitions. Parser verified — it keys off that marker and the <article> list.",
-  "meetup": "aggregator — emits meetup-* child slugs",
-  "museums-frankfurt": "aggregator — fans out to the per-museum slugs",
-  "museums-hamburg": "aggregator — fans out to child slugs: altonaer-museum, jenisch-haus, speicherstadtmuseum, museum-der-arbeit, deutsches-hafenmuseum, museum-fuer-hamburgische-geschichte",
-  "museumsuferfest": "annual — the festival ran 28–30 Aug 2026; its ndsdestinationdataevent sitemap still lists only that edition, so every parsed event is past. The scraper fans out to the riverside museums' own slugs during the festival.",
-  "nippon-connection": "seasonal — annual late-May/early-June film festival; empty between editions (2026 edition ran 2–7 Jun)",
-  "openbooks-frankfurt": "seasonal — annual October festival; empty the rest of the year",
-  "orfeos-erben": "verified live: source lists no upcoming events",
-  "roemerberggespraeche": "seasonal — lecture series runs ~twice a year; empty between editions",
-  "schauspiel-frankfurt": "seasonal — Sommerpause July–August 2026; new season starts 11 September 2026 with premieres of Schwejk, Antigone, Arturo Ui etc. Scrapers selectors verified against live markup.",
-  "stiftung-hg": "aggregator — emits krankenhaus-nordwest + hospital-zum-heiligen-geist",
-  "taunale-oberursel": "annual — TAUNALE Taunus Filmfest ran 5–9 Aug 2026 (gcal CTA 'dates=20260805/20260810'); the scraper deliberately emits nothing once an edition has ended, until the next edition's dates are published.",
-  "theater-fuer-kinder": "seasonal — TLS cert invalid on own site, Reservix subdomain returns generic page; venue between seasons as of June 2026",
-  "uni-heidelberg-ringvorlesung": "between semesters — the Ruperto Carola series ran Sommersemester 2026 (11 May – 20 Jul); the Wintersemester 2026/27 programme is not yet on the landing page. Parser verified: it still extracts all 8 SoSe date blocks with titles from the live page.",
-  "wdc2026": "aggregator — fans out to wdc2026-* child slugs",
-  "ypsilon-buchladen": "seasonal — bookshop reading programme between seasons; last events were May 2026, next programme expected late summer 2026",
-  "zeise-open-air": "seasonal — the Altona Rathaus courtyard open-air ran 1 Jul – 30 Aug 2026; the /openairprogramm page keeps the intro copy but drops the screening rows off-season (verified live: 0 view-grouping-header / tagesprogramm blocks). The indoor Zeise programme is covered separately via Cineamo (zeise-kinos)."
+  "_comment": "Scraper slugs the daily audit should NOT flag as broken when they emit zero events. Two kinds: aggregators that emit child slugs under different names (no `until`), and venues that are legitimately empty between seasons (verified by hand). Every non-aggregator entry carries `until` (YYYY-MM-DD): the date by which the reason stops being true — the next season, semester or edition — or, for undated reasons, a recheck deadline. Past that date the exemption lapses and the audit flags the slug again, so a stale 'Sommerpause' can't hide a broken parser. Add a slug here only after confirming the source genuinely has no upcoming events.",
+  "alabama-kino": {
+    "reason": "closed for rebuilding — the cinema shut on 31 Aug 2026 for the ~2-year Kampnagel refurbishment and reopens with two screens (notice on alabama-kino.de). Its kinotickets.express listing renders \"Keine Vorstellungen\" for every date filter; parser verified against that live page.",
+    "until": "2028-09-01"
+  },
+  "alsterdorf-sommerkino": {
+    "reason": "seasonal — open-air summer cinema on Alsterdorfer Markt; the 2026 season ran 14 Aug – 11 Sep and is over. Parser verified live: it still extracts all 5 2026 screenings with titles and times, they are simply all past.",
+    "until": "2027-08-01"
+  },
+  "arthouse-kinos-frankfurt": { "reason": "aggregator — emits per-cinema child slugs" },
+  "bad-vilbel-open-air-kino": {
+    "reason": "seasonal — summer open-air cinema in the Freibad; the oak-26 season ran 22 Jul – 9 Aug 2026 and is over. Parser verified against the live Gatsby page-data: all 15 oak-26 films and their dates still parse, they are simply all past.",
+    "until": "2027-07-15"
+  },
+  "bnai-brith-frankfurt": {
+    "reason": "network-unreachable — site returns HTTP 503 service unavailable",
+    "until": "2026-10-24"
+  },
+  "buergeruniversitaet": {
+    "reason": "semester break — the Goethe-Uni Tribe API still filters by category, but the Vorträge/Diskussionen/Podiumsgespräch/Science-Talk categories hold exactly one event after 1 Aug 2026 (Kinder-Uni, 7 Sep), now past; the winter-term programme is not yet published. Verified live against each category id.",
+    "until": "2026-10-31"
+  },
+  "cafe-mutz": {
+    "reason": "seasonal — FilmClub in Sommerpause after July 1, 2026 (last screening); category-4 WP REST API still returns no future posts as of 24 Sep 2026.",
+    "until": "2026-10-15"
+  },
+  "cineamo-frankfurt-region": { "reason": "aggregator — emits per-cinema child slugs" },
+  "deichtorhallen": {
+    "reason": "aggregator — fans out to child slugs: deichtorhallen-phoxxi, deichtorhallen-halle-aktuelle-kunst, deichtorhallen-sammlung-falckenberg"
+  },
+  "deutsches-apotheken-museum": {
+    "reason": "sporadic — the Heidelberg museum lists public events one at a time; /fuehrungen/oeffentliche-veranstaltungen carried a single teaser (Workshop Duftmedizin, 08.08.2026) which is now past. Parser verified against the live listing + detail markup ('Datum: Samstag, 08. August 2026' parses to 2026-08-08).",
+    "until": "2026-11-30"
+  },
+  "dig-frankfurt": {
+    "reason": "seasonal — summer pause; last listed event was 30 Jun 2026 ('Der lange Arm der Mullahs'); the Tribe Events API still returns no upcoming events as of 24 Sep 2026.",
+    "until": "2026-10-31"
+  },
+  "fes-hessen": {
+    "reason": "sporadic — Landesbüro Hessen only occasionally hosts events in Frankfurt; the listing (Jun 2026) had events in Hanau, Steinbach, Wiesbaden etc. but none in Frankfurt",
+    "until": "2026-11-30"
+  },
+  "fgz-streitclub": {
+    "reason": "between editions — the StreitClub runs a handful of evenings a year at the English Theatre; #19 was 7 Sep 2026 and the next date is unannounced. Parser verified against the live RSS feed: all 9 dated items still parse.",
+    "until": "2026-12-31"
+  },
+  "forschungskolleg-humanwissenschaften": {
+    "reason": "between programme blocks — FKH archive/events showed no upcoming dates after 2 Jul 2026; on 24 Sep 2026 the site answered HTTP 500.",
+    "until": "2026-10-31"
+  },
+  "freiluftkino-frankfurt": {
+    "reason": "seasonal — open-air cinema, no programme outside the summer season (verified live: 0 events)",
+    "until": "2027-06-01"
+  },
+  "hamburger-puppentheater": {
+    "reason": "seasonal — Sommerpause; the new season was due to start in September 2026, so a zero after that means the Reservix source needs rechecking.",
+    "until": "2026-09-30"
+  },
+  "hamburger-studienbibliothek": {
+    "reason": "sporadic — small critical-theory library (studienbibliothek.org); avant-garde 'Bibliothekskonzerte' + occasional talks published only as prose in the index news feed, extracted via the AI proxy into html-events-cache.ts (refresh-html-cache.ts). Latest listed event was 22 Jun 2026; often empty between events.",
+    "until": "2026-12-31"
+  },
+  "hamburgmusik": { "reason": "aggregator — fans out to child slugs: elbphilharmonie, laeiszhalle" },
+  "imd-darmstadt": {
+    "reason": "biennial — Darmstädter Ferienkurse run in odd years (last 2025, next 10–24 Jul 2027); the festival/programm pages still show the 2025 edition and carry no ztix booking links, so there are no upcoming ticketed events between editions. The shared ztix parser is verified against the other Darmstadt venues.",
+    "until": "2027-07-01"
+  },
+  "jazz-palmengarten": {
+    "reason": "seasonal — Palmengarten summer jazz series, silent off-season (verified live: 0 events)",
+    "until": "2027-06-01"
+  },
+  "jazzkeller": {
+    "reason": "stale source — live.html (Brizy CMS) still shows 'SEASON SPRING 2026' with the last dated show in June as of 24 Sep 2026; nothing newer is published there.",
+    "until": "2026-10-24"
+  },
+  "karl-marx-buchhandlung": {
+    "reason": "sporadic — bookshop often has no events booked beyond the next few weeks",
+    "until": "2026-10-31"
+  },
+  "kinoheld-frankfurt-region": { "reason": "aggregator — emits per-cinema child slugs" },
+  "landinsicht-buchladen": {
+    "reason": "network-unreachable — the bookshop's site answers HTTP 500 to every request (24 Sep 2026)",
+    "until": "2026-10-24"
+  },
+  "lichtmess-kino": {
+    "reason": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows).",
+    "until": "2026-09-30"
+  },
+  "mampf": { "reason": "aggregator — emits per-venue child slugs" },
+  "mathildenhoehe": {
+    "reason": "between exhibitions — both /ausstellungen/aktuell/ and /ausstellungen/vorschau/ render the empty marker ('Es sind derzeit keine Ausstellungen in dieser Kategorie eingetragen') as of 24 Jun 2026; the site lists no current or upcoming exhibitions. Parser verified — it keys off that marker and the <article> list.",
+    "until": "2026-10-31"
+  },
+  "meetup": { "reason": "aggregator — emits meetup-* child slugs" },
+  "museums-frankfurt": { "reason": "aggregator — fans out to the per-museum slugs" },
+  "museums-hamburg": {
+    "reason": "aggregator — fans out to child slugs: altonaer-museum, jenisch-haus, speicherstadtmuseum, museum-der-arbeit, deutsches-hafenmuseum, museum-fuer-hamburgische-geschichte"
+  },
+  "museumsuferfest": {
+    "reason": "annual — the festival ran 28–30 Aug 2026; its ndsdestinationdataevent sitemap still lists only that edition, so every parsed event is past. The scraper fans out to the riverside museums' own slugs during the festival.",
+    "until": "2027-08-15"
+  },
+  "nippon-connection": {
+    "reason": "seasonal — annual late-May/early-June film festival; empty between editions (2026 edition ran 2–7 Jun)",
+    "until": "2027-05-15"
+  },
+  "openbooks-frankfurt": {
+    "reason": "seasonal — annual October festival; empty the rest of the year",
+    "until": "2026-10-10"
+  },
+  "orfeos-erben": { "reason": "verified live: source lists no upcoming events", "until": "2026-11-30" },
+  "pupille": {
+    "reason": "semester break — the Uni-Kino's /api/screenings/semester feed ends with the 10 Sep 2026 screening; the winter-semester programme is not yet published.",
+    "until": "2026-10-20"
+  },
+  "roemerberggespraeche": {
+    "reason": "seasonal — lecture series runs ~twice a year; empty between editions",
+    "until": "2026-11-30"
+  },
+  "stiftung-hg": { "reason": "aggregator — emits krankenhaus-nordwest + hospital-zum-heiligen-geist" },
+  "taunale-oberursel": {
+    "reason": "annual — TAUNALE Taunus Filmfest ran 5–9 Aug 2026 (gcal CTA 'dates=20260805/20260810'); the scraper deliberately emits nothing once an edition has ended, until the next edition's dates are published.",
+    "until": "2027-08-01"
+  },
+  "theater-fuer-kinder": {
+    "reason": "unreachable — TLS cert invalid on own site, Reservix subdomain returns a generic page",
+    "until": "2026-10-24"
+  },
+  "tu-darmstadt-vortraege": {
+    "reason": "sporadic — the central calendar only shows ~two weeks ahead and the scraper keeps only lecture-keyword items; on 24 Sep 2026 its 15 listed items (disputations, workshops, a guest talk) contained none. Parser verified: all 15 items parse.",
+    "until": "2026-10-24"
+  },
+  "uni-heidelberg-ringvorlesung": {
+    "reason": "between semesters — the Ruperto Carola series ran Sommersemester 2026 (11 May – 20 Jul); the Wintersemester 2026/27 programme is not yet on the landing page. Parser verified: it still extracts all 8 SoSe date blocks with titles from the live page.",
+    "until": "2026-10-31"
+  },
+  "wdc2026": { "reason": "aggregator — fans out to wdc2026-* child slugs" },
+  "ypsilon-buchladen": {
+    "reason": "seasonal — bookshop reading programme between seasons; last events were May 2026, next programme was expected late summer 2026",
+    "until": "2026-09-30"
+  },
+  "zeise-open-air": {
+    "reason": "seasonal — the Altona Rathaus courtyard open-air ran 1 Jul – 30 Aug 2026; the /openairprogramm page keeps the intro copy but drops the screening rows off-season (verified live: 0 view-grouping-header / tagesprogramm blocks). The indoor Zeise programme is covered separately via Cineamo (zeise-kinos).",
+    "until": "2027-07-01"
+  }
 }

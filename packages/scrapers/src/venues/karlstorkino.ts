@@ -1,5 +1,6 @@
 import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.karlstorkino.de";
@@ -29,10 +30,14 @@ interface ParsedRow {
  * Karlstorkino (Südstadt) row carries a Cinetixx booking link with a stable
  * showId. We parse the table, carry the current day forward for multi-row
  * days, and emit one event per future showId.
+ *
+ * Routed through FETCH_PROXY when configured: the site answers in ~0.2s
+ * from residential IPs but stalls past the request deadline from GitHub's
+ * runners in most scheduled runs.
  */
-export async function scrapeKarlstorkino(): Promise<VenueScrapeResult> {
+export async function scrapeKarlstorkino(proxy: ProxyConfig | null): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(BASE, { headers: { "User-Agent": UA } });
+  const res = await proxyFetch(BASE, proxy, { headers: { "User-Agent": UA } });
   if (!res.ok) throw new Error(`karlstorkino fetch failed: ${res.status}`);
   const html = await res.text();
 

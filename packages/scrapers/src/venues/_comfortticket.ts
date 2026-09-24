@@ -27,6 +27,9 @@ export interface ComfortTicketScrapeOptions {
   sourceSlug: string;
   displayName: string;
   host: string;
+  /** Matches the performance's location label by prefix: the shop appends
+   *  a room ("LichtwarkTheater im KörberHaus"), and an exact match silently
+   *  dropped every row once it did. */
   venueFilter?: string | null;
   defaultLabel?: string;
 }
@@ -86,8 +89,7 @@ export async function scrapeComfortTicketVenue(opts: ComfortTicketScrapeOptions)
     const locationMatch = block.match(LOCATION_RE);
     const location = locationMatch ? cleanText(locationMatch[1]) : "";
 
-    // Filter by location if specified
-    if (opts.venueFilter && location !== opts.venueFilter) continue;
+    if (opts.venueFilter && !location.startsWith(opts.venueFilter)) continue;
 
     const titleMatch = block.match(TITLE_RE);
     const title = titleMatch ? cleanText(titleMatch[1]) : "";

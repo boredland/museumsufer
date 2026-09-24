@@ -5,7 +5,6 @@ import { resolveStageLabels } from "./_stage-labels";
 
 const BASE = "https://www.staatstheater.saarland";
 const KALENDARIUM_URL = `${BASE}/kalendarium/`;
-const SPIELZEIT_URL = `${BASE}/spielzeit-2026-27/kalendarium/`;
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
 const LAT = 49.234;
@@ -13,12 +12,13 @@ const LON = 6.996;
 
 /**
  * Saarländisches Staatstheater Saarbrücken — multi-genre house (opera,
- * drama, ballet, concerts, puppet theatre). The schedule lives on two
- * TYPO3-powered Kalendarium pages:
- *   • `/kalendarium/` — current season tail (remaining dates)
- *   • `/spielzeit-2026-27/kalendarium/` — next season
+ * drama, ballet, concerts, puppet theatre). The TYPO3 `/kalendarium/` page
+ * carries the whole running season (429 dated rows through June 2027 at the
+ * 2026/27 start). A per-season `/spielzeit-YYYY-YY/kalendarium/` URL only
+ * exists while the next season is in presale and 404s otherwise, so it is
+ * not fetched — hard-coding one took the scraper down for the whole season.
  *
- * Both render server-side `<div class="date-item …" data-month="MM-YYYY">`
+ * The page renders server-side `<div class="date-item …" data-month="MM-YYYY">`
  * blocks with `.timetableDate`, `.timetableTime`, `.timetableTitle h2 a`,
  * `.timetableSpielstaette`, `.timetableTicket a.ticketLink`, and an ICS
  * link carrying the `termin` id. Cancelled performances carry a `danger`
@@ -27,21 +27,14 @@ const LON = 6.996;
  */
 export async function scrapeStaatstheaterSaarland(): Promise<VenueScrapeResult> {
   const today = todayIso();
-
-  const [currentHtml, spielzeitHtml] = await Promise.all([
-    fetchPage(KALENDARIUM_URL),
-    fetchPage(SPIELZEIT_URL),
-  ]);
+  const html = await fetchPage(KALENDARIUM_URL);
 
   const seen = new Set<string>();
   const events: CanonicalScrapedEvent[] = [];
-
-  for (const html of [currentHtml, spielzeitHtml]) {
-    for (const ev of parseKalendarium(html, today)) {
-      if (!seen.has(ev.source_event_id)) {
-        seen.add(ev.source_event_id);
-        events.push(ev);
-      }
+  for (const ev of parseKalendarium(html, today)) {
+    if (!seen.has(ev.source_event_id)) {
+      seen.add(ev.source_event_id);
+      events.push(ev);
     }
   }
 
@@ -88,17 +81,14 @@ function parseKalendarium(html: string, today: string): CanonicalScrapedEvent[] 
     const timeRaw = extractFirst(block, /timetableTime">([\s\S]*?)<\/div>/);
     const time = parseStartTime(timeRaw);
 
-    const titleMatch = block.match(
-      /timetableTitle">\s*<h2>\s*<a\s+href="([^"]*)">\s*([\s\S]*?)\s*<\/a>/,
-    );
+    const titleMatch = block.match(/timetableTitle">\s*<h2>\s*<a\s+href="([^"]*)">\s*([\s\S]*?)\s*<\/a>/);
     if (!titleMatch) continue;
     const detailPath = titleMatch[1];
     const title = stripHtml(titleMatch[2]);
     if (!title) continue;
 
     const subtitle =
-      extractFirst(block, /<h3>([\s\S]*?)<\/h3>/) ||
-      extractFirst(block, /timetableshortTeaser">([\s\S]*?)<\/span>/);
+      extractFirst(block, /<h3>([\s\S]*?)<\/h3>/) || extractFirst(block, /timetableshortTeaser">([\s\S]*?)<\/span>/);
 
     const venue =
       extractFirst(block, /timetableSpielstaette">\s*<a[^>]*>([\s\S]*?)<\/a>/) ||
@@ -109,7 +99,11 @@ function parseKalendarium(html: string, today: string): CanonicalScrapedEvent[] 
 
     const terminMatch = block.match(/termin(?:%5D|])=(\d+)/);
     const terminId =
-      terminMatch?.[1] ?? `${date}-${title.slice(0, 30).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+      terminMatch?.[1] ??
+      `${date}-${title
+        .slice(0, 30)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")}`;
 
     const detailUrl = detailPath.startsWith("http") ? detailPath : `${BASE}${detailPath}`;
 

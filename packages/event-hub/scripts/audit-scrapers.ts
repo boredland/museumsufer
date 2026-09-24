@@ -9,19 +9,33 @@
  *   - a registered venue scraper with zero bundle entries at all.
  *
  * Aggregators (which emit differently-named child slugs) and verified-empty
- * seasonal venues are exempted via audit-allowlist.json.
+ * seasonal venues are exempted via audit-allowlist.json. A seasonal entry's
+ * `until` date bounds the exemption: once it passes, the slug is audited
+ * again, and still-empty ones are reported as expired exemptions.
  *
  * Run locally: `bun packages/event-hub/scripts/audit-scrapers.ts`
  * In CI it also writes `suspects=<n>` to $GITHUB_OUTPUT, the report to
  * $GITHUB_STEP_SUMMARY, and a copy to $AUDIT_REPORT_PATH for the assign step.
  */
 import { appendFileSync, writeFileSync } from "node:fs";
+import { todayIso } from "@museumsufer/core/date";
 import { MUSEUMS, VENUE_SCRAPERS } from "@museumsufer/scrapers";
 import { EVENTS } from "../data/events";
 import allowlist from "./audit-allowlist.json" with { type: "json" };
 
 const EXHIBITION_LABEL = "museum:ausstellung";
-const EXEMPT = new Set(Object.keys(allowlist).filter((k) => !k.startsWith("_")));
+
+interface AllowlistEntry {
+  reason: string;
+  until?: string;
+}
+
+const today = todayIso();
+const ALLOWLIST = Object.entries(allowlist as Record<string, AllowlistEntry | string>).filter(
+  (entry): entry is [string, AllowlistEntry] => !entry[0].startsWith("_") && typeof entry[1] === "object",
+);
+const EXEMPT = new Set(ALLOWLIST.filter(([, e]) => !e.until || e.until >= today).map(([slug]) => slug));
+const EXPIRED = new Map(ALLOWLIST.filter(([, e]) => e.until && e.until < today));
 
 /** Fraction of audited scrapers that must come back empty before the run is
  *  treated as a pipeline-wide failure rather than a set of quiet venues.
@@ -92,7 +106,14 @@ for (const { slug } of VENUE_SCRAPERS) {
   if (EXEMPT.has(slug)) continue;
   auditedSlugs.add(slug);
   if ((totalBySlug.get(slug) ?? 0) === 0) {
-    suspects.push({ slug, kind: "venue", detail: "venue scraper → 0 entries in bundle" });
+    const lapsed = EXPIRED.get(slug);
+    suspects.push({
+      slug,
+      kind: "venue",
+      detail: lapsed
+        ? `venue scraper → 0 entries in bundle; allowlist exemption expired ${lapsed.until} ("${lapsed.reason}")`
+        : "venue scraper → 0 entries in bundle",
+    });
   }
 }
 // An allowlisted slug that is delivering again has outlived its exemption. It
@@ -133,7 +154,7 @@ if (suspects.length > 0) {
   lines.push("");
   lines.push("### What to do");
   lines.push(
-    "For each scraper above: read its parser, fetch the live endpoint, and determine whether the source actually lists upcoming events (after today) that the scraper fails to extract. If broken, fix the parser and add a brief note; if the venue is genuinely/seasonally empty, add the slug to `packages/event-hub/scripts/audit-allowlist.json` with a one-line reason instead of changing code.",
+    "For each scraper above: read its parser, fetch the live endpoint, and determine whether the source actually lists upcoming events (after today) that the scraper fails to extract. If broken, fix the parser and add a brief note; if the venue is genuinely/seasonally empty, add (or refresh) its entry in `packages/event-hub/scripts/audit-allowlist.json` as `{ \"reason\": …, \"until\": \"YYYY-MM-DD\" }` — `until` being the date the reason stops holding (next season/semester/edition) — instead of changing code.",
   );
   lines.push("");
   lines.push(

@@ -10,6 +10,7 @@ import {
   truncate,
 } from "@museumsufer/core";
 import PQueue from "p-queue";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.brotfabrik.de";
@@ -66,13 +67,16 @@ interface MonthAjax {
   content: string;
 }
 
-export async function scrapeBrotfabrik(): Promise<VenueScrapeResult> {
+/** Routed through FETCH_PROXY when configured: from GitHub's runners the
+ *  site stalled so often that the scraper blew its 90s budget in 7 of 9
+ *  scheduled runs, while the same requests finish in ~25s from elsewhere. */
+export async function scrapeBrotfabrik(proxy: ProxyConfig | null): Promise<VenueScrapeResult> {
   const today = todayIso();
   const horizon = dateOffset(90);
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  const initialHtml = await fetchText(PROGRAM_URL);
+  const initialHtml = await fetchText(PROGRAM_URL, proxy);
   const { month, year } = readCalendarPosition(initialHtml);
 
   let html = extractListHtml(initialHtml);
@@ -99,14 +103,14 @@ export async function scrapeBrotfabrik(): Promise<VenueScrapeResult> {
     if (pastHorizon) break;
 
     await sleep(THROTTLE_MS);
-    const next = await fetchNextMonth(cMonth, cYear);
+    const next = await fetchNextMonth(cMonth, cYear, proxy);
     if (!next || next.status !== "GOOD" || !next.content) break;
     html = next.content;
     cMonth = next.month;
     cYear = next.year;
   }
 
-  await enrichWithDetails(events);
+  await enrichWithDetails(events, proxy);
   return { source_slug: "brotfabrik", display_name: "Brotfabrik", events };
 }
 
@@ -227,7 +231,11 @@ function extractListHtml(html: string): string {
   return end > start ? html.slice(start, end) : html.slice(start);
 }
 
-async function fetchNextMonth(currentMonth: number, currentYear: number): Promise<MonthAjax | null> {
+async function fetchNextMonth(
+  currentMonth: number,
+  currentYear: number,
+  proxy: ProxyConfig | null,
+): Promise<MonthAjax | null> {
   const body = new URLSearchParams();
   body.set("action", "the_ajax_hook");
   body.set("direction", "next");
@@ -272,7 +280,7 @@ async function fetchNextMonth(currentMonth: number, currentYear: number): Promis
   };
   for (const [k, v] of Object.entries(evodata)) body.set(`evodata[${k}]`, v);
 
-  const res = await fetch(AJAX_URL, {
+  const res = await proxyFetch(AJAX_URL, proxy, {
     method: "POST",
     headers: {
       "User-Agent": BROWSER_UA,
@@ -288,12 +296,12 @@ async function fetchNextMonth(currentMonth: number, currentYear: number): Promis
   return (await res.json()) as MonthAjax;
 }
 
-async function enrichWithDetails(events: CanonicalScrapedEvent[]): Promise<void> {
+async function enrichWithDetails(events: CanonicalScrapedEvent[], proxy: ProxyConfig | null): Promise<void> {
   const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
   for (const ev of events) {
     if (!ev.detail_url) continue;
     queue.add(async () => {
-      const detail = await fetchDetail(ev.detail_url!);
+      const detail = await fetchDetail(ev.detail_url!, proxy);
       if (detail.ticketUrl) ev.ticket_url = detail.ticketUrl;
       if (detail.priceMin != null) ev.price_min = detail.priceMin;
       if (detail.priceMax != null) ev.price_max = detail.priceMax;
@@ -308,10 +316,10 @@ interface DetailFields {
   priceMax: number | null;
 }
 
-async function fetchDetail(url: string): Promise<DetailFields> {
+async function fetchDetail(url: string, proxy: ProxyConfig | null): Promise<DetailFields> {
   let html: string;
   try {
-    html = await fetchText(url);
+    html = await fetchText(url, proxy);
   } catch {
     return { ticketUrl: null, priceMin: null, priceMax: null };
   }
@@ -347,8 +355,8 @@ function collectPrices(html: string): number[] {
   return prices;
 }
 
-async function fetchText(url: string): Promise<string> {
-  const res = await fetch(url, {
+async function fetchText(url: string, proxy: ProxyConfig | null): Promise<string> {
+  const res = await proxyFetch(url, proxy, {
     headers: {
       "User-Agent": BROWSER_UA,
       From: FROM_HEADER,

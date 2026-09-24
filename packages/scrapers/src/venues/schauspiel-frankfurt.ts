@@ -192,10 +192,13 @@ function parseBlock(block: string): RawPerf | null {
 
   const venueRoom = textOf(block, /<div\s+class="performance__location"[^>]*>([\s\S]*?)<\/div>/);
 
-  const titleLink = match1(block, /<h3[^>]*class="headline__headline"[^>]*>\s*<a\s+href="([^"]+)"/);
+  // The heading is an <h2 class="headline__headline --like-h3"> since the
+  // 2026/27 relaunch (previously a bare <h3>); accept either level and
+  // modifier classes.
+  const titleLink = match1(block, /<h[23][^>]*class="headline__headline[^"]*"[^>]*>\s*<a\s+href="([^"]+)"/);
   const titleText = textOf(
     block,
-    /<h3[^>]*class="headline__headline"[^>]*>[\s\S]*?<span\s+itemprop="name"[^>]*>([\s\S]*?)<\/span>/,
+    /<h[23][^>]*class="headline__headline[^"]*"[^>]*>[\s\S]*?<span\s+itemprop="name"[^>]*>([\s\S]*?)<\/span>/,
   );
   if (!titleLink || !titleText) return null;
 

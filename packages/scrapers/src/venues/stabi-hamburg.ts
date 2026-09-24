@@ -1,9 +1,13 @@
 import { detectTalkLanguage } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities, stripHtml } from "@museumsufer/core/html";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
-const API_URL = "https://blog.sub.uni-hamburg.de/index.php?rest_route=/wp/v2/posts&categories=9&per_page=100";
+// `_fields` trims the payload from ~1.5 MB to ~0.6 MB and the server's
+// response time from ~2.7 s to ~0.9 s; the parser reads nothing else.
+const API_URL =
+  "https://blog.sub.uni-hamburg.de/index.php?rest_route=/wp/v2/posts&categories=9&per_page=100&_fields=id,date,link,title,content,excerpt";
 
 const DE_MONTHS: Record<string, string> = {
   januar: "01",
@@ -37,10 +41,13 @@ interface WPPost {
  * Ossietzky (SUB), Von-Melle-Park. Its event posts live in the WordPress blog
  * under category 9. NOT the Hamburger Studienbibliothek (studienbibliothek.org),
  * which is a separate critical-theory library scraped in `hamburger-studienbibliothek.ts`.
+ *
+ * Routed through FETCH_PROXY when configured: from GitHub's runners the API
+ * hit the request deadline in about half of scheduled runs.
  */
-export async function scrapeStabiHamburg(): Promise<VenueScrapeResult> {
+export async function scrapeStabiHamburg(proxy: ProxyConfig | null): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(API_URL);
+  const res = await proxyFetch(API_URL, proxy);
   if (!res.ok) throw new Error(`stabi-hamburg fetch failed: ${res.status}`);
   const posts = (await res.json()) as WPPost[];
 
