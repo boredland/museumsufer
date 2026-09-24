@@ -3,6 +3,8 @@
   "name": "lichtspiel-haus",
   "main": "src/index.tsx",
   "compatibility_date": "2025-04-01",
+  // ctx.exports powers the host-keyed cache gateway (src/index.tsx).
+  "compatibility_flags": ["enable_ctx_exports"],
   // Workers Cache: serve repeat GETs from the edge without invoking the Worker.
   // Every route already sets an explicit Cache-Control; anything that must not
   // be cached (/healthz, /api/push/me) says `no-store` at the handler, because
@@ -11,6 +13,12 @@
   // the scrape workflow pushes fresh data and CF redeploys on push.
   "cache": {
     "enabled": true
+  },
+  // The default entrypoint is the gateway and must run on every request; the
+  // HostCache entrypoint it forwards to is the one cached, keyed by host.
+  "exports": {
+    "default": { "type": "worker", "cache": { "enabled": false } },
+    "HostCache": { "type": "worker", "cache": { "enabled": true } }
   },
   // Apex lichtspiel.haus → frankfurt.lichtspiel.haus 301 is handled in
   // src/index.tsx. City is parsed from the subdomain so each new city

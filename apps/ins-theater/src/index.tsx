@@ -1,5 +1,6 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
 import { cityMiddleware } from "@museumsufer/core/city-routing";
+import { hostKeyedCache } from "@museumsufer/core/host-cache";
 import { Hono } from "hono";
 import { getDatesWithPerformances, getPerformancesForDate } from "./db";
 import { dispatchDigest, scheduleForNow } from "./digest";
@@ -141,8 +142,14 @@ app.route("/api/docs", docsRoutes);
 // digest based on the local Europe/Berlin hour and ignores the off-cycle
 // firing.
 
+// Workers Cache is shared across every domain bound to this Worker, so the
+// cache entry has to carry the host — see @museumsufer/core/host-cache. The
+// bare apex geo-redirects per visitor and must never be cached.
+const hostCache = hostKeyedCache(app.fetch, { uncachedHosts: ["ins.theater"] });
+export const HostCache = hostCache.HostCache;
+
 export default {
-  fetch: app.fetch,
+  fetch: hostCache.fetch,
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     const schedule = scheduleForNow(new Date());
     if (!schedule) return;
