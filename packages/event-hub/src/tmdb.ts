@@ -17,10 +17,10 @@
  *
  * Skipped silently when TMDB_API_KEY is unset.
  */
+import { type DeeplConfig, translateText } from "@museumsufer/core/deepl";
 import { retryFetch } from "@museumsufer/core/retry-fetch";
 import PQueue from "p-queue";
 import type { TmdbCacheEntry } from "../data/tmdb-cache";
-import { translateBatch } from "./deepl";
 import { fetchOmdb } from "./omdb";
 import type { CanonicalEvent } from "./types";
 
@@ -68,10 +68,9 @@ export interface EnrichOptions {
   /** Concurrent in-flight TMDb requests. TMDb's published limit is ~50
    *  req/s; we keep well below that to be polite. */
   concurrency?: number;
-  /** DeepL API keys (comma-separated) for German→English fallback when
-   *  TMDb has a German overview but no English one. Multiple keys allow
-   *  free-tier quota failover. */
-  deeplApiKeys?: string;
+  /** DeepL proxy for the German→English fallback when TMDb has a German
+   *  overview but no English one. */
+  deepl?: DeeplConfig | null;
   /** OMDb API key (free tier, 1000 req/day) for Rotten Tomatoes critic
    *  % + IMDb rating + IMDb vote count. Skipped silently when unset. */
   omdbApiKey?: string;
@@ -376,29 +375,24 @@ export async function enrichFilmPosters(
 
   // Pass 2b: DeepL DE→EN fallback for cache entries that have a German
   // overview but no English one. Typical for older European arthouse
-  // titles and operas. Batched so a handful of films cost a single API
-  // call rather than one per row.
+  // titles and operas. The result lands in the committed cache, so each
+  // overview is translated once.
   let translated = 0;
-  if (opts.deeplApiKeys?.trim()) {
-    const needsTranslation: Array<{ key: string; text: string }> = [];
-    for (const [key, entry] of Object.entries(opts.cache)) {
-      if (!entry) continue;
-      if (entry.overview && !entry.overview_en) needsTranslation.push({ key, text: entry.overview });
+  if (opts.deepl) {
+    const needsTranslation: Array<{ entry: TmdbCacheEntry; text: string }> = [];
+    for (const entry of Object.values(opts.cache)) {
+      if (entry?.overview && !entry.overview_en) needsTranslation.push({ entry, text: entry.overview });
+    }
+    for (const { entry, text } of needsTranslation) {
+      try {
+        entry.overview_en = await translateText(opts.deepl, text, "EN");
+        translated++;
+      } catch (e) {
+        log(`tmdb: deepl failed — ${e instanceof Error ? e.message : String(e)}`);
+        break;
+      }
     }
     if (needsTranslation.length > 0) {
-      const results = await translateBatch(
-        needsTranslation.map((x) => x.text),
-        { apiKeys: opts.deeplApiKeys, log },
-      );
-      for (let i = 0; i < needsTranslation.length; i++) {
-        const t = results[i];
-        if (!t) continue;
-        const entry = opts.cache[needsTranslation[i].key];
-        if (entry) {
-          entry.overview_en = t;
-          translated++;
-        }
-      }
       log(`tmdb: deepl filled overview_en for ${translated}/${needsTranslation.length} entries`);
     }
   }

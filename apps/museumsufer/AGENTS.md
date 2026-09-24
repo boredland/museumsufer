@@ -26,9 +26,11 @@ integration redeploys. Every read path filters the in-memory bundle.
 - **Museum directory** — a frozen snapshot in `src/frozen-museum-meta.ts`
   (captured from the live bundle, ~2026-05-25) plus manual additions in
   `src/museum-config.ts`. **museumsufer.de is no longer scraped.**
-- **Translation** — DeepL DE→EN/FR runs in the derive step (`src/translate.ts`,
-  `translateEvents()`); the cache rides in the committed bundle. At request
-  time the worker only *reads* the pre-computed translations.
+- **Translation** — DE→EN/FR via the DeepL proxy runs in the derive step
+  (`scripts/translate.ts`, `translateTexts()`), after the bundle is built so
+  only texts that reach it are translated; the cache rides in the committed
+  bundle. At request time the worker only *reads* the pre-computed
+  translations (`src/translate.ts`).
 - **The actual museum scrapers** live in the monorepo's `packages/scrapers/`,
   not in this app — see "Museum API parsers" below.
 
@@ -38,7 +40,7 @@ integration redeploys. Every read path filters the in-memory bundle.
 - **Database:** Cloudflare D1 — only `likes` (anonymous like counts) and
   `push_subscriptions`. The old `museums` / `events` / `exhibitions` /
   `translations` tables were dropped in migration `0012`.
-- **Translation:** DeepL API Free with bundle-cached translations (no Workers AI)
+- **Translation:** DeepL via the self-hosted proxy (`@museumsufer/core/deepl`), bundle-cached (no Workers AI)
 - **Date handling:** `@museumsufer/core/date` (dayjs + Europe/Berlin)
 - **Search:** uFuzzy (client-side fuzzy search, vendored at `public/uFuzzy.iife.min.js`)
 - **Framework:** [Hono](https://hono.dev) v4 with `@hono/zod-validator`
@@ -51,14 +53,14 @@ integration redeploys. Every read path filters the in-memory bundle.
 | File | Purpose |
 |---|---|
 | `src/index.tsx` | Hono app + middleware + routes (incl. the live JSON API and `/api/transit`); `scheduled()` dispatches push digests only. |
-| `scripts/scrape.ts` | The GH-Action derive step: hub `EVENTS` → bbox + `museum:*` filter → DeepL → `src/scrape-data.ts`. |
+| `scripts/scrape.ts` | The GH-Action derive step: hub `EVENTS` → bbox + `museum:*` filter → build bundle → DeepL → `src/scrape-data.ts`. |
 | `src/scrape-data.ts` | **Auto-generated** bundle of museums + events + exhibitions + translations. |
 | `src/frozen-museum-meta.ts` | Frozen museum directory snapshot — the canonical source of museum metadata. |
 | `src/museum-config.ts` | Per-museum coords, RMV stop LIDs, flags, manual additions, Wikipedia overrides. |
 | `src/queries.ts` | In-memory query layer over `SCRAPE_DATA` (date filters, joins, past-event pruning). |
 | `src/api.ts` | `proxyImages`, `fetchDayData`, `getMuseumMap`, RSS/ICS feed builders, `markTranslated`. |
 | `src/scraper.ts` | Pure-function directory assembler (frozen meta + manual museums). No network. |
-| `src/translate.ts` | Two faces: `translateFields()` (worker, reads bundle) + `translateEvents()` (derive step, calls DeepL). |
+| `src/translate.ts` | `translateFields()` — request-time lookup into the bundled translations. The derive-step DeepL call lives in `scripts/translate.ts`. |
 | `src/image-proxy.ts` | Edge-cached `/img/*` proxy; allowlist derived from every `image_url` in the bundle. |
 | `src/frontend.tsx` / `src/components.tsx` / `src/client-script.ts` | SSR page, cards, and the hashed client bundle. |
 | `src/routes/*` | `static`, `feeds`, `museum`, `og`, `push`, `imprint`, `docs`. |
@@ -167,7 +169,7 @@ referenced live in `@museumsufer/core` (`date.ts`, `html.ts`).
 
 ## QA: checking a scraper
 
-1. **Run the hub locally:** `bun packages/event-hub/scripts/scrape.ts` (set `TMDB_API_KEY` / `DEEPL_API_KEYS` if you want enrichment), or `gh workflow run scrape.yml`.
+1. **Run the hub locally:** `bun packages/event-hub/scripts/scrape.ts` (set `TMDB_API_KEY` / `DEEPL_URL` + `DEEPL_TOKEN` if you want enrichment), or `gh workflow run scrape.yml`.
 2. **Re-derive this app:** `bun run -F @museumsufer/museumsufer scrape`.
 3. **Spot-check the bundle:** `grep -c "your-museum-slug" apps/museumsufer/src/scrape-data.ts`.
 4. **Inspect by label:** `bun --cwd packages/event-hub query --source <slug>`.

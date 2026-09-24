@@ -46,7 +46,7 @@ only remaining D1 table is `likes` (request-time user writes).
 - **Runtime:** Cloudflare Workers (TypeScript)
 - **Framework:** [Hono](https://hono.dev) with Zod validation
 - **Database:** Cloudflare D1 (only `likes` now — scraped data lives in `src/scrape-data.ts`)
-- **Translation:** DeepL via the GH-Action scrape; cache rides in the bundled module
+- **Translation:** DeepL via the self-hosted proxy in the GH-Action scrape; cache rides in the bundled module
 - **Frontend:** Server-rendered JSX (Hono), Tailwind CSS, htmx, uFuzzy (client-side fuzzy search)
 - **Tooling:** [Bun](https://bun.sh) (replaces npm/tsx)
 
@@ -92,9 +92,9 @@ bun run -F @museumsufer/museumsufer dev
 
 # Run a one-shot scrape locally and regenerate src/scrape-data.ts:
 bun run -F @museumsufer/museumsufer scrape
-# (DeepL translations skipped unless DEEPL_API_KEYS is set in your shell)
+# (translations skipped unless DEEPL_URL + DEEPL_TOKEN are set in your shell)
 ```
 
 The GitHub Action runs the same `scripts/scrape.ts` daily — there's no
 longer a `SCRAPE_SECRET` to manage. Required GH Actions secrets:
-`DEEPL_API_KEYS`, `FETCH_PROXY_URL`, `FETCH_PROXY_TOKEN`.
+`DEEPL_URL`, `DEEPL_TOKEN`, `FETCH_PROXY_URL`, `FETCH_PROXY_TOKEN`.

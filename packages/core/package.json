@@ -19,6 +19,7 @@
     "./clamped-text": "./src/clamped-text.tsx",
     "./contact-dialog": "./src/contact-dialog.tsx",
     "./date": "./src/date.ts",
+    "./deepl": "./src/deepl.ts",
     "./digest-dialog": "./src/digest-dialog.tsx",
     "./digest-dialog-script": "./src/digest-dialog-script.ts",
     "./edge-cache": "./src/edge-cache.ts",

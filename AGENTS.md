@@ -74,3 +74,28 @@ with source URLs) to verify answers are sourced, not invented.
 (see the determinism rule above). Use it to produce a reviewed, committed artifact
 (e.g. a PDF-programme cache keyed by content hash), then have the scrape read only
 that committed file.
+
+## Translation (DeepL proxy)
+
+DE→EN/FR goes through a self-hosted proxy fronting real DeepL
+(`packages/core/src/deepl.ts`, `translateText()`). `POST $DEEPL_URL/translate`
+with `Authorization: Bearer $DEEPL_TOKEN` and
+`{ text, source_lang: "DE", target_lang }`; the translation is in `data`. One
+string per request — an array body 400s. Codes are bare uppercase (`EN`, `FR`;
+`EN-US` 400s). It's one small proxy shared with other projects: the client
+spaces calls 250 ms apart, and the proxy still 429s after roughly 80–100
+requests per run. The translator stops at the first persistent 429 and keeps
+what it got, so a large backlog fills in over several scheduled runs.
+
+Callers: the museumsufer derive step (`apps/museumsufer/scripts/translate.ts`)
+and the TMDb `overview_en` fallback (`packages/event-hub/src/tmdb.ts`). Both
+write to committed caches, so a rerun on unchanged text makes no calls.
+
+**Auth — `DEEPL_URL` + `DEEPL_TOKEN`**, stored as an **Actions variable**
+(dev) and an **Actions secret** (CI), same as the proxies above. Never hardcode
+either. Locally:
+
+```sh
+export DEEPL_URL=$(gh variable get DEEPL_URL)
+export DEEPL_TOKEN=$(gh variable get DEEPL_TOKEN)
+```

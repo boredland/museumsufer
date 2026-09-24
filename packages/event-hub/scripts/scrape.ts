@@ -54,7 +54,10 @@ async function main(): Promise<void> {
   await enrichFilmPosters(next.events, {
     apiKey: process.env.TMDB_API_KEY,
     cache: tmdbCache,
-    deeplApiKeys: process.env.DEEPL_API_KEYS,
+    deepl:
+      process.env.DEEPL_URL && process.env.DEEPL_TOKEN
+        ? { url: process.env.DEEPL_URL, token: process.env.DEEPL_TOKEN }
+        : null,
     omdbApiKey: process.env.OMDB_API_KEY,
     log,
   });

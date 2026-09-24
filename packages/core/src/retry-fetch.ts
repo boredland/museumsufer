@@ -2,8 +2,7 @@
  * `fetch` wrapped in p-retry: retries on network errors and on transient
  * HTTP responses (5xx, 408, 429). Non-retryable non-ok responses (4xx
  * other than the two above) are returned as-is so callers keep control
- * of their own error semantics — DeepL's per-key 403/456 fallthrough,
- * for example, must not be eaten by the retry layer.
+ * of their own error semantics.
  *
  * Retryable status codes:
  *   - 5xx — origin / gateway failure (incl. Cloudflare 520-526)

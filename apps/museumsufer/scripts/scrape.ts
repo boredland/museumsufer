@@ -8,8 +8,8 @@ import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityOf, EVENTS } from "@museumsufer/event-hub";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
-import { translateEvents } from "../src/translate";
-import type { Event, Exhibition, Museum, ScrapeData, Translation } from "../src/types";
+import type { Event, Exhibition, Museum, ScrapeData } from "../src/types";
+import { translateTexts } from "./translate";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -43,22 +43,26 @@ log(
 
 const allExhibitions = [...directory.exhibitions, ...hubExhibitions];
 
-const translations = await stage("translateEvents", () =>
-  translateEvents({
-    events: hubEvents,
-    exhibitions: allExhibitions,
-    museums: [...museumsBySlug.values()],
-    existing: previous.translations,
-    apiKeys: process.env.DEEPL_API_KEYS,
-  }),
-);
-
 const data = buildScrapeData({
   museums: [...museumsBySlug.values()],
   exhibitions: allExhibitions,
   events: hubEvents,
-  translations,
 });
+
+// Translate after building: only texts that survive the horizon, dedup and
+// closure filters reach the bundle, and translations for anything else would
+// be pruned below and re-bought on every run.
+const livingTexts = collectLivingTexts(data);
+const deepl =
+  process.env.DEEPL_URL && process.env.DEEPL_TOKEN
+    ? { url: process.env.DEEPL_URL, token: process.env.DEEPL_TOKEN }
+    : null;
+const translations = await stage("translateTexts", () =>
+  translateTexts({ texts: livingTexts, existing: previous.translations, deepl }),
+);
+data.translations = translations
+  .filter((t) => livingTexts.has(t.source_text))
+  .sort((a, b) => a.source_hash.localeCompare(b.source_hash) || a.target_lang.localeCompare(b.target_lang));
 
 await writeFile(dataPath, generateModule(data), "utf8");
 log(
@@ -115,7 +119,6 @@ function buildScrapeData(input: {
   museums: ParsedMuseum[];
   exhibitions: ParsedExhibition[];
   events: CanonicalEvent[];
-  translations: Translation[];
 }): ScrapeData {
   const museumIdBySlug = new Map<string, number>();
   const museums: Museum[] = input.museums
@@ -197,22 +200,22 @@ function buildScrapeData(input: {
       a.title.localeCompare(b.title),
   );
 
-  const livingTexts = new Set<string>();
-  for (const m of museums) if (m.description) livingTexts.add(m.description);
-  for (const ex of exhibitions) {
-    if (ex.title) livingTexts.add(ex.title);
-    if (ex.description) livingTexts.add(ex.description);
-  }
-  for (const ev of events) {
-    if (ev.title) livingTexts.add(ev.title);
-    if (ev.description) livingTexts.add(ev.description);
-  }
-  const translations = input.translations
-    .filter((t) => livingTexts.has(t.source_text))
-    .sort((a, b) => a.source_hash.localeCompare(b.source_hash) || a.target_lang.localeCompare(b.target_lang));
-
   const supportedCities = Object.keys(CITIES).filter((c) => input.museums.some((m) => servesCity(m.city, c)));
-  return { museums, exhibitions, events, translations, supportedCities };
+  return { museums, exhibitions, events, translations: [], supportedCities };
+}
+
+function collectLivingTexts(data: ScrapeData): Set<string> {
+  const texts = new Set<string>();
+  for (const m of data.museums) if (m.description) texts.add(m.description);
+  for (const ex of data.exhibitions) {
+    if (ex.title) texts.add(ex.title);
+    if (ex.description) texts.add(ex.description);
+  }
+  for (const ev of data.events) {
+    if (ev.title) texts.add(ev.title);
+    if (ev.description) texts.add(ev.description);
+  }
+  return texts;
 }
 
 function normalizeForDedup(title: string): string {

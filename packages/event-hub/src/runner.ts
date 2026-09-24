@@ -1,4 +1,5 @@
 import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
+import type { DeeplConfig } from "@museumsufer/core/deepl";
 import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
 import { coordinatesFor, VENUE_SCRAPERS, withinGeofence } from "@museumsufer/scrapers";
@@ -20,11 +21,11 @@ export interface RunOptions {
    *  is responsible for loading + persisting it; the runner mutates it in
    *  place. */
   tmdbCache?: TmdbCache;
-  /** Optional DeepL API key(s), comma-separated. When set, TMDb cache
-   *  entries with a German overview but no English one get translated
-   *  DE→EN as a fallback so apps still have bilingual descriptions for
-   *  older European arthouse titles TMDb hasn't translated. */
-  deeplApiKeys?: string;
+  /** Optional DeepL proxy. When set, TMDb cache entries with a German
+   *  overview but no English one get translated DE→EN as a fallback so
+   *  apps still have bilingual descriptions for older European arthouse
+   *  titles TMDb hasn't translated. */
+  deepl?: DeeplConfig | null;
   /** Optional OMDb API key (free tier). When set, the runner does a
    *  follow-up OMDb lookup for every cached TMDb match that has an
    *  imdb_id, attaching Rotten Tomatoes critic % + IMDb rating. */
@@ -178,7 +179,7 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     await enrichFilmPosters(events, {
       apiKey: opts.tmdbApiKey,
       cache: opts.tmdbCache,
-      deeplApiKeys: opts.deeplApiKeys,
+      deepl: opts.deepl,
       omdbApiKey: opts.omdbApiKey,
       log,
     });
