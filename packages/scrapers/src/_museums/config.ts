@@ -163,6 +163,9 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.1114,
     lng: 8.6855,
     rmvStopLid: "A=1@O=Frankfurt (Main) Dom/Römer@X=8684092@Y=50110862@U=80@L=3000003@",
+    // Stopped answering direct requests (connect timeout) in 2026-09; the
+    // fetch proxy reaches it in under a second.
+    proxy: true,
     exhibitionUrl: "https://dommuseum-frankfurt.de/",
     eventApi: { type: "dommuseum", endpoint: "https://dommuseum-frankfurt.de/besuchen/kalender" },
   },
@@ -380,6 +383,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 50.2267,
     lng: 8.6124,
     rmvStopLid: "A=1@O=Bad Homburg v.d.H. Markt@X=8612097@Y=50228890@U=80@L=3002349@",
+    // Times out from GitHub's runners in most runs; fast via the fetch proxy.
+    proxy: true,
     exhibitionUrl: "https://kunst-und-natur.de/museum-sinclair-haus/ausstellungen/",
     exhibitionApi: {
       type: "sinclair-kunst-natur",

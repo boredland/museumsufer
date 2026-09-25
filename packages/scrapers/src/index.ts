@@ -498,7 +498,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "tu-darmstadt-vortraege", run: (_ctx: ScraperContext) => scrapeTuDarmstadtVortraege() },
   { slug: "tip-darmstadt", run: (_ctx: ScraperContext) => scrapeTipDarmstadt() },
   { slug: "unimedizin-frankfurt", run: (ctx: ScraperContext) => scrapeUnimedizinFrankfurt(ctx.proxy) },
-  { slug: "union-club-frankfurt", run: (_ctx: ScraperContext) => scrapeUnionClubFrankfurt() },
+  { slug: "union-club-frankfurt", run: (ctx: ScraperContext) => scrapeUnionClubFrankfurt(ctx.proxy) },
   { slug: "velvets-theater", run: (_ctx: ScraperContext) => scrapeVelvetsTheater() },
   { slug: "volksbuehne-frankfurt", run: (_ctx: ScraperContext) => scrapeVolksbuehneFrankfurt() },
   { slug: "waggong", run: (_ctx: ScraperContext) => scrapeWaggong() },

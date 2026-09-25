@@ -34,10 +34,6 @@
     "reason": "sporadic — the Heidelberg museum lists public events one at a time; /fuehrungen/oeffentliche-veranstaltungen carried a single teaser (Workshop Duftmedizin, 08.08.2026) which is now past. Parser verified against the live listing + detail markup ('Datum: Samstag, 08. August 2026' parses to 2026-08-08).",
     "until": "2026-11-30"
   },
-  "dig-frankfurt": {
-    "reason": "seasonal — summer pause; last listed event was 30 Jun 2026 ('Der lange Arm der Mullahs'); the Tribe Events API still returns no upcoming events as of 24 Sep 2026.",
-    "until": "2026-10-31"
-  },
   "fes-hessen": {
     "reason": "sporadic — Landesbüro Hessen only occasionally hosts events in Frankfurt; the listing (Jun 2026) had events in Hanau, Steinbach, Wiesbaden etc. but none in Frankfurt",
     "until": "2026-11-30"

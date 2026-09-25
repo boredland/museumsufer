@@ -102,7 +102,10 @@ export interface ExhibitionApiConfig {
   endpoint: string;
 }
 
-export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Promise<ApiExhibition[]> {
+export async function fetchExhibitionsFromApi(
+  config: ExhibitionApiConfig,
+  proxy?: ProxyConfig,
+): Promise<ApiExhibition[]> {
   switch (config.type) {
     case "mmk-cms":
       return fetchMmkExhibitions(config.endpoint);
@@ -147,7 +150,7 @@ export async function fetchExhibitionsFromApi(config: ExhibitionApiConfig): Prom
     case "momem-wp":
       return fetchMomemExhibitions(config.endpoint);
     case "sinclair-kunst-natur":
-      return fetchSinclairExhibitions(config.endpoint);
+      return fetchSinclairExhibitions(config.endpoint, proxy);
     case "stadtgeschichte-ffm-html":
       return fetchStadtgeschichteExhibitions(config.endpoint);
     case "ikonenmuseum-press":
@@ -180,7 +183,7 @@ export async function fetchEventsFromApi(config: EventApiConfig, proxy?: ProxyCo
     case "stadtgeschichte-html":
       return fetchStadtgeschichteHtml(config.endpoint);
     case "dommuseum":
-      return fetchDommuseum(config.endpoint);
+      return fetchDommuseum(config.endpoint, proxy);
     case "ledermuseum":
       return fetchLedermuseum(config.endpoint);
     case "bibelhaus":
@@ -745,9 +748,10 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
   return events;
 }
 
-async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
+async function fetchDommuseum(endpoint: string, proxy?: ProxyConfig): Promise<ApiEvent[]> {
   const ua = { "User-Agent": USER_AGENT };
-  const res = await fetch(endpoint, { headers: ua });
+  const get = (url: string) => (proxy ? proxyFetch(url, proxy) : fetch(url, { headers: ua }));
+  const res = await get(endpoint);
   if (!res.ok) return [];
   const html = await res.text();
 
@@ -766,7 +770,7 @@ async function fetchDommuseum(endpoint: string): Promise<ApiEvent[]> {
 
     const icsUrl = `https://dommuseum-frankfurt.de${icsMatch[1].replace(/&amp;/g, "&")}`;
     try {
-      const icsRes = await fetch(icsUrl, { headers: ua });
+      const icsRes = await get(icsUrl);
       if (!icsRes.ok) continue;
       const ics = await icsRes.text();
 
@@ -4082,8 +4086,10 @@ async function fetchMomemExhibitions(endpoint: string): Promise<ApiExhibition[]>
 // with .m-teaser-exhibition__title and .m-teaser-exhibition__date as
 // siblings. Sections are "Aktuell", "Vorschau", and "Rückblick" — we
 // cut at "Rückblick" so past exhibitions don't bleed in.
-async function fetchSinclairExhibitions(endpoint: string): Promise<ApiExhibition[]> {
-  const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
+async function fetchSinclairExhibitions(endpoint: string, proxy?: ProxyConfig): Promise<ApiExhibition[]> {
+  const res = proxy
+    ? await proxyFetch(endpoint, proxy)
+    : await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
   if (!res.ok) return [];
   const fullHtml = await res.text();
   // The page sprinkles "Rückblick" both in a sidebar menu and as the

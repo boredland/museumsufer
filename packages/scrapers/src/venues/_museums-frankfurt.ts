@@ -31,10 +31,15 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
       enqueue(queue, `events ${slug}`, async () => {
         try {
           const events = await fetchEventsFromApi(config.eventApi!, proxy);
+          // Calendars list one occurrence twice when it sits in two of their
+          // categories (Liebieghaus, Goethe-Haus, MAK); same id is same event.
+          const seen = new Set<string>();
           for (const ev of events) {
             const targetSlug = ev.museum_slug_override || slug;
             const canonical = toCanonicalEvent(ev, slug);
-            if (canonical) appendTo(byMuseum, targetSlug, canonical);
+            if (!canonical || seen.has(`${targetSlug}|${canonical.source_event_id}`)) continue;
+            seen.add(`${targetSlug}|${canonical.source_event_id}`);
+            appendTo(byMuseum, targetSlug, canonical);
           }
         } catch (err) {
           console.warn(`museums-frankfurt events ${slug}: ${err instanceof Error ? err.message : String(err)}`);
@@ -45,7 +50,7 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
     if (config.exhibitionApi) {
       enqueue(queue, `exhibitions ${slug}`, async () => {
         try {
-          const exhibitions = await fetchExhibitionsFromApi(config.exhibitionApi!);
+          const exhibitions = await fetchExhibitionsFromApi(config.exhibitionApi!, proxy);
           for (const ex of exhibitions) {
             const targetSlug = ex.museum_slug_override || slug;
             const canonical = toCanonicalExhibition(ex, slug);

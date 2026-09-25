@@ -1,5 +1,6 @@
 import { classifyEvent, classifyTalk, eventTypeToLabel } from "@museumsufer/classify";
 import { decodeEntities, normalizeUrl, stripHtml, todayIso } from "@museumsufer/core";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 /**
@@ -27,8 +28,11 @@ const EVENT_ID_RE = /tx_sfeventmgt_pievent%5Bevent%5D=(\d+)/;
 const DETAIL_URL_RE = /<a\s+href="(\/event-details[^"]+)"/i;
 const REGISTER_URL_RE = /<a\s+href="(\/event-registration[^"]+)"/i;
 
-export async function scrapeUnionClubFrankfurt(): Promise<VenueScrapeResult> {
-  const res = await fetch(LIST_URL, {
+/** Routed through FETCH_PROXY when configured: from GitHub's runners the
+ *  page began hanging past the 25s request deadline (2026-09-24) while it
+ *  answers in ~0.2s from elsewhere, directly or via the proxy. */
+export async function scrapeUnionClubFrankfurt(proxy: ProxyConfig | null): Promise<VenueScrapeResult> {
+  const res = await proxyFetch(LIST_URL, proxy, {
     headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
   });
   if (!res.ok) throw new Error(`union-club-frankfurt fetch failed: ${res.status}`);

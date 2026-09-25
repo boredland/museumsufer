@@ -26,7 +26,12 @@ export async function translateTexts(opts: {
 
   for (const lang of TARGETS) {
     const langLower = lang.toLowerCase();
-    const missing = [...sourceTexts].filter(([hash]) => !merged.has(`${hash}|${langLower}`));
+    // The proxy's quota runs out mid-run and the rest waits for the next
+    // one, so spend it shortest-first: titles are what the page shows, and
+    // one description costs as much as dozens of them.
+    const missing = [...sourceTexts]
+      .filter(([hash]) => !merged.has(`${hash}|${langLower}`))
+      .sort(([ha, a], [hb, b]) => a.length - b.length || ha.localeCompare(hb));
     if (missing.length === 0) {
       logOk("deepl", langLower, "0 new strings (cache hit)");
       continue;

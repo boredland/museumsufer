@@ -1,4 +1,5 @@
 import { type Locale as CoreLocale, detectLocale as coreDetect, dateLocale } from "@museumsufer/core";
+import { cityName } from "@museumsufer/core/cities";
 
 export type Locale = Extract<CoreLocale, "de" | "en" | "fr">;
 export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
@@ -668,12 +669,6 @@ function genericOverrides(locale: Locale, name: string, host: string): Translati
  */
 export function localizeTranslations(tr: Translations, city: string, locale: Locale): Translations {
   if (!city || city === "frankfurt") return tr;
-  const name = CITY_NAMES[city]?.[locale] ?? city;
   const host = `${city}.ins.museum`;
-  return { ...tr, ...genericOverrides(locale, name, host) };
+  return { ...tr, ...genericOverrides(locale, cityName(city, locale), host) };
 }
-
-/** Localized display names for the cities this app can serve. */
-const CITY_NAMES: Record<string, Record<Locale, string>> = {
-  hamburg: { de: "Hamburg", en: "Hamburg", fr: "Hambourg" },
-};

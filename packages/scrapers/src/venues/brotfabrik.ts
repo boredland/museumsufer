@@ -26,10 +26,16 @@ const AJAX_URL = `${BASE}/wp-admin/admin-ajax.php`;
 const FROM_HEADER = "jonas@bgdlabs.com (museumsufer event-hub crawler)";
 const THROTTLE_MS = 200;
 const MAX_MONTHS = 6;
+const MONTH_ATTEMPTS = 3;
 /** Detail pages are fetched one per event across a six-month horizon; serially
  *  that exceeds the runner's 90s per-scraper budget, so bound the fan-out
  *  instead of pausing between every request. */
 const DETAIL_CONCURRENCY = 6;
+/** Detail pages only add ticket link and price, and each takes 5-10s even
+ *  through the fetch proxy (~70 pages → ~110s, past the runner's 90s cap,
+ *  which then discards the whole scrape). Enrich what fits in this budget
+ *  and keep the listing either way. */
+const DETAIL_BUDGET_MS = 40_000;
 
 /**
  * Kulturprojekt 21 e.V. (brotfabrik.de) runs the concerts. The mixed-genre
@@ -280,28 +286,40 @@ async function fetchNextMonth(
   };
   for (const [k, v] of Object.entries(evodata)) body.set(`evodata[${k}]`, v);
 
-  const res = await proxyFetch(AJAX_URL, proxy, {
-    method: "POST",
-    headers: {
-      "User-Agent": BROWSER_UA,
-      From: FROM_HEADER,
-      "X-Requested-With": "XMLHttpRequest",
-      "Content-Type": "application/x-www-form-urlencoded",
-      Accept: "application/json",
-      "Accept-Language": "de-DE,de;q=0.9",
-    },
-    body: body.toString(),
-  });
-  if (!res.ok) return null;
-  return (await res.json()) as MonthAjax;
+  // A failed month ends the walk, which silently cuts the programme down to
+  // the current month (5 events instead of ~70), so a transient proxy or
+  // origin error gets retried before giving up.
+  for (let attempt = 1; ; attempt++) {
+    const res = await proxyFetch(AJAX_URL, proxy, {
+      method: "POST",
+      headers: {
+        "User-Agent": BROWSER_UA,
+        From: FROM_HEADER,
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "application/json",
+        "Accept-Language": "de-DE,de;q=0.9",
+      },
+      body: body.toString(),
+    }).catch((err: unknown) => err as Error);
+    if (!(res instanceof Error) && res.ok) return (await res.json()) as MonthAjax;
+    const why = res instanceof Error ? res.message : String(res.status);
+    if (attempt >= MONTH_ATTEMPTS) {
+      console.warn(`brotfabrik: month after ${currentYear}-${currentMonth} failed (${why}); stopping there`);
+      return null;
+    }
+    await sleep(THROTTLE_MS * 5 * attempt);
+  }
 }
 
 async function enrichWithDetails(events: CanonicalScrapedEvent[], proxy: ProxyConfig | null): Promise<void> {
   const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
+  const deadline = AbortSignal.timeout(DETAIL_BUDGET_MS);
   for (const ev of events) {
     if (!ev.detail_url) continue;
     queue.add(async () => {
-      const detail = await fetchDetail(ev.detail_url!, proxy);
+      if (deadline.aborted) return;
+      const detail = await fetchDetail(ev.detail_url!, proxy, deadline);
       if (detail.ticketUrl) ev.ticket_url = detail.ticketUrl;
       if (detail.priceMin != null) ev.price_min = detail.priceMin;
       if (detail.priceMax != null) ev.price_max = detail.priceMax;
@@ -316,10 +334,10 @@ interface DetailFields {
   priceMax: number | null;
 }
 
-async function fetchDetail(url: string, proxy: ProxyConfig | null): Promise<DetailFields> {
+async function fetchDetail(url: string, proxy: ProxyConfig | null, signal: AbortSignal): Promise<DetailFields> {
   let html: string;
   try {
-    html = await fetchText(url, proxy);
+    html = await fetchText(url, proxy, signal);
   } catch {
     return { ticketUrl: null, priceMin: null, priceMax: null };
   }
@@ -355,8 +373,9 @@ function collectPrices(html: string): number[] {
   return prices;
 }
 
-async function fetchText(url: string, proxy: ProxyConfig | null): Promise<string> {
+async function fetchText(url: string, proxy: ProxyConfig | null, signal?: AbortSignal): Promise<string> {
   const res = await proxyFetch(url, proxy, {
+    signal,
     headers: {
       "User-Agent": BROWSER_UA,
       From: FROM_HEADER,
