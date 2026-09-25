@@ -640,6 +640,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut nauerth-gnägy|schweigen-rechtenbach": [49.054561, 7.956034],
   "weingut pfaffmann gdbr|böbingen": [49.28421, 8.237221],
   "weingut phillip heinz|kapellen-drusweiler": [49.10314, 8.031469],
+  "weingut rinck-wüst gbr|heuchelheim-klingen": [49.142963, 8.054045],
   "weingut rothhaas|birkweiler": [49.20483, 8.037022],
   "weingut rummel|hochstadt": [49.241666, 8.210996],
   "weingut schmitzer-julier|eschbach": [49.173791, 8.021108],
