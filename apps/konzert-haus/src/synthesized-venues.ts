@@ -893,6 +893,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "crespo-foundation",
+    name: "Crespo Foundation",
+    address: "",
+    lat: 50.1095,
+    lon: 8.6774,
+    city: "frankfurt",
+    website_url: "https://www.crespo-foundation.de",
+    default_genre: "classical",
+  },
+  {
     slug: "dai-heidelberg",
     name: "DAI Heidelberg",
     address: "",
