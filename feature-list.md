@@ -235,6 +235,17 @@ Scrapers route through an **external** fetch proxy (no longer an in-repo app)
 when an upstream blocks datacenter IPs, serves a broken TLS chain, or gates
 content behind a Cloudflare challenge / JS render.
 
+- **Direct first, proxy as escalation** (`packages/event-hub/src/fetch.ts`, same
+  order as intensive-dance's LLM scraper): during the hub's scraper phase every
+  plain `fetch` goes direct with the scraper's own UA; a refusal
+  (401/403/429/451/454, 502-504, Cloudflare 52x/530) or a failed connection
+  retries once via the proxy with `auto=1`. A host the proxy rescued goes
+  proxy-first for the rest of the run; one that fails both routes goes direct
+  only. 404/410, requests carrying their own `Authorization` or stream body,
+  and callers with their own `signal` never escalate. The run log lists rescued
+  hosts (`fetch: N host(s) answered only via the proxy`).
+- For a host known to need the proxy from the first request, keep `proxyFetch` /
+  `proxy: true` and say why in the scraper's docstring.
 - Set `proxy: true` on the upstream config; the scrape job reads `FETCH_PROXY_URL`
   + `FETCH_PROXY_TOKEN` from the env (`scrape.yml` injects them from GH Secrets in
   CI; locally hydrate from the matching GH Actions variables).

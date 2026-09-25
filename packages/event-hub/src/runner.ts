@@ -4,6 +4,7 @@ import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
 import { coordinatesFor, VENUE_SCRAPERS, withinGeofence } from "@museumsufer/scrapers";
 import PQueue from "p-queue";
+import { installScrapeFetch, openEscalation } from "./fetch";
 import { enrichFilmPosters, type TmdbCache } from "./tmdb";
 import type { CanonicalEvent, EventHubData, Label } from "./types";
 
@@ -51,36 +52,6 @@ const SCRAPER_TIMEOUT_MS = 90_000;
  *  burning the whole 90s budget. */
 const REQUEST_TIMEOUT_MS = 25_000;
 
-/**
- * Give every un-signalled `fetch` a deadline for the duration of the scrape.
- *
- * `withTimeout` below only rejects its own wrapper promise — it cannot cancel
- * work already in flight. A request to an origin that accepts the connection
- * and never responds therefore stays open after the runner has already logged
- * the scraper as timed out, holding a socket (and its response buffer) for the
- * rest of the process. 173 of the 231 venue scrapers call bare `fetch` with no
- * `signal`, so fixing this at the call sites would mean touching nearly every
- * scraper; installing the default here covers all of them at once.
- *
- * Callers that pass their own `signal` (e.g. `retryFetch`, which manages
- * per-attempt timeouts) are left untouched.
- */
-let fetchDeadlineInstalled = false;
-function installFetchDeadline(ms: number): void {
-  // Install once per process. `withTimeout` abandons a slow scraper without
-  // stopping it, so a scraper can still be running — and start new requests —
-  // after `queue.onIdle()` resolves. Restoring the original `fetch` at that
-  // point would hand those stragglers an unguarded fetch again, which is the
-  // exact leak this guards against. Installing permanently also makes the
-  // helper safe under nested or repeated `runHub` calls, where a save/restore
-  // pair would capture the already-patched fetch as the "original".
-  if (fetchDeadlineInstalled) return;
-  fetchDeadlineInstalled = true;
-  const original = globalThis.fetch;
-  globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
-    original(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(ms) })) as typeof fetch;
-}
-
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error(`scraper timed out after ${ms}ms`)), ms);
@@ -122,7 +93,12 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   // event is lost before it ever reaches the bundle. Count them per source so
   // the run reports the loss instead of hiding it.
   const idCollisions = new Map<string, number>();
-  installFetchDeadline(REQUEST_TIMEOUT_MS);
+  // Every un-signalled `fetch` gets a deadline: `withTimeout` below only
+  // rejects its own wrapper, so without one a black-hole origin holds its
+  // socket for the rest of the process. During the scraper phase a refused
+  // or failed request also escalates to the fetch proxy (see ./fetch).
+  installScrapeFetch(REQUEST_TIMEOUT_MS);
+  const closeEscalation = openEscalation(ctx.proxy);
   const queue = new PQueue({ concurrency: opts.concurrency ?? DEFAULT_CONCURRENCY });
   for (const { slug, run } of VENUE_SCRAPERS) {
     queue.add(async () => {
@@ -153,6 +129,11 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
     });
   }
   await queue.onIdle();
+  const rescued = closeEscalation();
+  if (rescued.size > 0) {
+    const hosts = [...rescued].sort((a, b) => a[0].localeCompare(b[0])).map(([h, n]) => `${h} (${n})`);
+    log(`fetch: ${hosts.length} host(s) answered only via the proxy: ${hosts.join(", ")}`);
+  }
   for (const [label, n] of geofenceDrops) log(`${label}: ${n} events dropped (no coords / outside geofence)`);
   for (const [label, n] of idCollisions) log(`${label}: ${n} events LOST to duplicate source_event_id`);
 

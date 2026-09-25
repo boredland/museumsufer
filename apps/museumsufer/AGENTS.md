@@ -112,10 +112,10 @@ Five parsers route one upstream feed to sibling venue slugs via
 
 ### Fetch proxy (`FETCH_PROXY_URL` + `FETCH_PROXY_TOKEN`)
 
-Route a fetch through the proxy when a source blocks the runner's datacenter IP,
-serves a broken TLS chain, or gates content behind a Cloudflare challenge / JS
-render. Mark the source `proxy: true` (only `bibelhaus` uses it on the museum
-side today); the deployed proxy escalates
+The hub already escalates a refused or failed direct fetch to the proxy on its
+own (`packages/event-hub/src/fetch.ts`). Mark a source `proxy: true` only when
+its host needs the proxy from the first request (`bibelhaus`, `dommuseum-frankfurt`,
+`museum-sinclair-haus-bad-homburg` today); the deployed proxy escalates
 `plain fetch → FlareSolverr (Cloudflare) → stealth Chromium render`. Useful
 query params: `auto=1`, `render=1` + `wait=<ms>`, `format=md`, `block=0`. Full
 spec at `$FETCH_PROXY_URL/docs`. The values live in GitHub as **Actions secrets**
