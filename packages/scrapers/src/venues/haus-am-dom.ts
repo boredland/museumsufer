@@ -1,6 +1,7 @@
 import { classifyDance, classifyMusic, classifyTalk, detectTalkLanguage } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
+import PQueue from "p-queue";
 import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
@@ -37,8 +38,23 @@ const TIME_RE = /(\d{1,2})[:.](\d{2})\s*Uhr/;
 const CATEGORY_RE = /<a[^>]*class="news-categories-item-link"[^>]*title="([^"]+)"/g;
 const LOAD_MORE_RE = /class="[^"]*loadMoreResults[^"]*"/;
 
+/** The host (web-vision, shared with the Dommuseum) cuts off addresses that
+ *  hit it hard: every egress we use lost access on 25 Sep 2026 after this
+ *  scraper had been requesting all ~105 detail pages at once, several times a
+ *  day. A few at a time keeps us under that. */
+const DETAIL_CONCURRENCY = 3;
+/** The slower detail walk must not push the scrape past the runner's 90s cap,
+ *  which would discard every event. Pages that don't fit are skipped; their
+ *  events keep last run's copy under the stale-TTL until a later run gets
+ *  them. */
+const SCRAPE_BUDGET_MS = 80_000;
+/** Our own signal replaces the hub's per-request deadline, so restate it:
+ *  one hung page must not hold a slot for the whole budget. */
+const DETAIL_TIMEOUT_MS = 20_000;
+
 export async function scrapeHausAmDom(proxy: ProxyConfig | null = null): Promise<VenueScrapeResult> {
   const today = todayIso();
+  const budget = AbortSignal.timeout(SCRAPE_BUDGET_MS);
   const cards: Array<{ url: string; date: string }> = [];
   const seenUrls = new Set<string>();
 
@@ -68,8 +84,12 @@ export async function scrapeHausAmDom(proxy: ProxyConfig | null = null): Promise
     if (!foundNew) break;
   }
 
-  const results = await Promise.all(cards.map(({ url, date }) => fetchDetail(url, date, proxy)));
-  const events = results.filter((e): e is CanonicalScrapedEvent => e !== null);
+  const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
+  const results = await Promise.all(
+    cards.map(({ url, date }) => queue.add(() => fetchDetail(url, date, proxy, budget))),
+  );
+  if (budget.aborted) console.warn(`haus-am-dom: scrape budget hit, some of ${cards.length} detail pages skipped`);
+  const events = results.filter((e): e is CanonicalScrapedEvent => e != null);
   return { source_slug: "haus-am-dom", display_name: "Haus am Dom – Kath. Akademie Rabanus Maurus", events };
 }
 
@@ -77,9 +97,11 @@ async function fetchDetail(
   url: string,
   date: string,
   proxy: ProxyConfig | null,
+  signal: AbortSignal,
 ): Promise<CanonicalScrapedEvent | null> {
+  if (signal.aborted) return null;
   try {
-    const html = await fetchHtml(url, proxy);
+    const html = await fetchHtml(url, proxy, null, AbortSignal.any([signal, AbortSignal.timeout(DETAIL_TIMEOUT_MS)]));
     return parseDetail(html, date, url);
   } catch {
     return null;
@@ -170,14 +192,18 @@ function labelsFromCategories(
   return labels;
 }
 
-async function fetchHtml(url: string, proxy: ProxyConfig | null, body: URLSearchParams | null = null): Promise<string> {
+async function fetchHtml(
+  url: string,
+  proxy: ProxyConfig | null,
+  body: URLSearchParams | null = null,
+  signal?: AbortSignal,
+): Promise<string> {
   // The Solr-backed listing endpoint frequently throttles GH Actions IPs
-  // with 503; routing through fetch-proxy (Cloudflare worker) gives us a
-  // different egress IP. Retry once with backoff in case the proxy itself
+  // with 503; routing through the fetch proxy gives us a different egress IP. Retry once with backoff in case the proxy itself
   // returns a transient error.
   const init: RequestInit = body
-    ? { method: "POST", headers: { ...HEADERS, "Content-Type": "application/x-www-form-urlencoded" }, body }
-    : { headers: HEADERS };
+    ? { method: "POST", headers: { ...HEADERS, "Content-Type": "application/x-www-form-urlencoded" }, body, signal }
+    : { headers: HEADERS, signal };
   for (let attempt = 0; attempt < 2; attempt++) {
     const res = await proxyFetch(url, proxy, init);
     if (res.ok) return res.text();
