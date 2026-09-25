@@ -9,7 +9,8 @@ const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 const THROTTLE_MS = 300;
 
 const DAYTITLE_RE = /data-day="(\d{8})"/g;
-const ARTICLE_RE = /<article\s+data-day=(\d{8})[^>]*>([\s\S]*?)<\/article>/g;
+// The attribute value is quoted since the 2026 edition; the 2025 site had it bare.
+const ARTICLE_RE = /<article\s+data-day="?(\d{8})"?[^>]*>([\s\S]*?)<\/article>/g;
 const TIME_RE = /<time[^>]*>([^<]+)<\/time>/;
 const TITLE_RE = /<h2[^>]*>([\s\S]*?)<\/h2>/;
 const LINK_RE = /href="(https:\/\/www\.openbooks-frankfurt\.de\/termin\/[^"?#]+)"/;

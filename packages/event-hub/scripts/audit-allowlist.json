@@ -15,16 +15,12 @@
     "until": "2027-07-15"
   },
   "bnai-brith-frankfurt": {
-    "reason": "network-unreachable — site returns HTTP 503 service unavailable",
+    "reason": "between programmes — the site is back up (was HTTP 503); on 25 Sep 2026 /de/aktivitaeten/aktueller-terminkalender renders the calendar's intro text but no dated entries.",
     "until": "2026-10-24"
   },
   "buergeruniversitaet": {
     "reason": "semester break — the Goethe-Uni Tribe API still filters by category, but the Vorträge/Diskussionen/Podiumsgespräch/Science-Talk categories hold exactly one event after 1 Aug 2026 (Kinder-Uni, 7 Sep), now past; the winter-term programme is not yet published. Verified live against each category id.",
     "until": "2026-10-31"
-  },
-  "cafe-mutz": {
-    "reason": "seasonal — FilmClub in Sommerpause after July 1, 2026 (last screening); category-4 WP REST API still returns no future posts as of 24 Sep 2026.",
-    "until": "2026-10-15"
   },
   "cineamo-frankfurt-region": { "reason": "aggregator — emits per-cinema child slugs" },
   "deichtorhallen": {
@@ -42,17 +38,13 @@
     "reason": "between editions — the StreitClub runs a handful of evenings a year at the English Theatre; #19 was 7 Sep 2026 and the next date is unannounced. Parser verified against the live RSS feed: all 9 dated items still parse.",
     "until": "2026-12-31"
   },
-  "forschungskolleg-humanwissenschaften": {
-    "reason": "between programme blocks — FKH archive/events showed no upcoming dates after 2 Jul 2026; on 24 Sep 2026 the site answered HTTP 500.",
+  "frankfurter-kunstverein": {
+    "reason": "between event programmes — on 25 Sep 2026 /current-events/ lists a single tile, the 24 Sep Direktorinnenführung (past); the 3 current exhibitions still come through. Parser verified against that tile.",
     "until": "2026-10-31"
   },
   "freiluftkino-frankfurt": {
     "reason": "seasonal — open-air cinema, no programme outside the summer season (verified live: 0 events)",
     "until": "2027-06-01"
-  },
-  "hamburger-puppentheater": {
-    "reason": "seasonal — Sommerpause; the new season was due to start in September 2026, so a zero after that means the Reservix source needs rechecking.",
-    "until": "2026-09-30"
   },
   "hamburger-studienbibliothek": {
     "reason": "sporadic — small critical-theory library (studienbibliothek.org); avant-garde 'Bibliothekskonzerte' + occasional talks published only as prose in the index news feed, extracted via the AI proxy into html-events-cache.ts (refresh-html-cache.ts). Latest listed event was 22 Jun 2026; often empty between events.",
@@ -77,12 +69,8 @@
   },
   "kinoheld-frankfurt-region": { "reason": "aggregator — emits per-cinema child slugs" },
   "landinsicht-buchladen": {
-    "reason": "network-unreachable — the bookshop's site answers HTTP 500 to every request (24 Sep 2026)",
+    "reason": "between programmes — the site is back up (was HTTP 500); on 25 Sep 2026 /aktuelles/ and the homepage list only the September readings (15 and 16 Sep), both past; nothing for October yet.",
     "until": "2026-10-24"
-  },
-  "lichtmess-kino": {
-    "reason": "seasonal — small volunteer arthouse between programmes; /programm lists nothing after 12 Jun 2026 (parser verified working on the past rows).",
-    "until": "2026-09-30"
   },
   "mampf": { "reason": "aggregator — emits per-venue child slugs" },
   "mathildenhoehe": {
@@ -102,14 +90,14 @@
     "reason": "seasonal — annual late-May/early-June film festival; empty between editions (2026 edition ran 2–7 Jun)",
     "until": "2027-05-15"
   },
-  "openbooks-frankfurt": {
-    "reason": "seasonal — annual October festival; empty the rest of the year",
-    "until": "2026-10-10"
-  },
   "orfeos-erben": { "reason": "verified live: source lists no upcoming events", "until": "2026-11-30" },
   "pupille": {
     "reason": "semester break — the Uni-Kino's /api/screenings/semester feed ends with the 10 Sep 2026 screening; the winter-semester programme is not yet published.",
     "until": "2026-10-20"
+  },
+  "rls-hessen": {
+    "reason": "no Frankfurt dates — on 25 Sep 2026 /aktuelle-veranstaltungen lists 7 events; the only upcoming one (28 Sep, 'Links und Christ - geht das?') is in Wetzlar, which the Frankfurt filter correctly drops.",
+    "until": "2026-10-31"
   },
   "roemerberggespraeche": {
     "reason": "seasonal — lecture series runs ~twice a year; empty between editions",
@@ -133,10 +121,6 @@
     "until": "2026-10-31"
   },
   "wdc2026": { "reason": "aggregator — fans out to wdc2026-* child slugs" },
-  "ypsilon-buchladen": {
-    "reason": "seasonal — bookshop reading programme between seasons; last events were May 2026, next programme was expected late summer 2026",
-    "until": "2026-09-30"
-  },
   "zeise-open-air": {
     "reason": "seasonal — the Altona Rathaus courtyard open-air ran 1 Jul – 30 Aug 2026; the /openairprogramm page keeps the intro copy but drops the screening rows off-season (verified live: 0 view-grouping-header / tagesprogramm blocks). The indoor Zeise programme is covered separately via Cineamo (zeise-kinos).",
     "until": "2027-07-01"

@@ -6,39 +6,40 @@ import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
  * Lichtmeß Kino — a small volunteer-run arthouse/repertory cinema in Altona.
  * Its WP `film` post type carries no showtimes via REST (ACF isn't exposed),
  * so we parse the rendered /programm page: each screening is a `program-list`
- * row with a `program-list__date` block ("03.06.<br>19.30 Uhr"), a
- * `program-list__title`, and a link to the film's /film/<slug> page. The date
- * has no year (inferred against today); posters are left to the hub's TMDb
- * enrichment.
+ * row whose `program-list__date` block carries `<time datetime="YYYY-MM-DD
+ * HH:MM">`, then a link to the film's /film/<slug> page and its
+ * `program-list__title`. Posters are left to the hub's TMDb enrichment.
+ *
+ * The page shows one month; `?month=<M>-<YYYY>` selects another. We read the
+ * current and the next month, since the current one runs out by its end.
  */
 const PROGRAMM_URL = "https://lichtmess-kino.de/programm/";
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 
-// date (+ optional time) → … → /film/<slug> → title. The `__date` block always
-// precedes the film link + title within the same list element.
-const ROW_RE =
-  /program-list__date">\s*(\d{1,2})\.(\d{1,2})\.\s*(?:<br[^>]*>\s*(\d{1,2})[.:](\d{2})\s*Uhr)?[\s\S]{0,500}?\/film\/([a-z0-9-]+)\/?"[\s\S]{0,200}?program-list__title[^"]*">([^<]+)</gi;
+const ROW_RE = /<li class="program-list__el[\s\S]*?<\/li>/g;
+const DATETIME_RE = /<time datetime="(\d{4}-\d{2}-\d{2})(?:\s+(\d{2}:\d{2}))?"/;
+const FILM_RE = /\/film\/([a-z0-9-]+)\/?"/;
+const TITLE_RE = /program-list__title[^"]*">([^<]+)</;
 
 export async function scrapeLichtmessKino(): Promise<VenueScrapeResult> {
   const today = todayIso();
-  const res = await fetch(PROGRAMM_URL, { headers: { "User-Agent": UA } });
-  if (!res.ok) throw new Error(`lichtmess-kino fetch failed: ${res.status}`);
-  const html = await res.text();
+  const y = Number(today.slice(0, 4));
+  const m = Number(today.slice(5, 7));
+  const next = m === 12 ? `1-${y + 1}` : `${m + 1}-${y}`;
+  const pages = await Promise.all([PROGRAMM_URL, `${PROGRAMM_URL}?month=${next}`].map(fetchPage));
+  const html = pages.join("\n");
 
   const events: CanonicalScrapedEvent[] = [];
   const seen = new Set<string>();
 
-  for (const m of html.matchAll(ROW_RE)) {
-    const dd = m[1].padStart(2, "0");
-    const mm = m[2].padStart(2, "0");
-    const time = m[3] ? `${m[3].padStart(2, "0")}:${m[4]}` : null;
-    const slug = m[5];
-    const title = stripHtml(decodeEntities(m[6])).replace(/\s+/g, " ").trim();
-    if (!title) continue;
-
-    const curYear = parseInt(today.slice(0, 4), 10);
-    const monthsBehind = Number(today.slice(5, 7)) - Number(mm);
-    const date = `${monthsBehind > 6 ? curYear + 1 : curYear}-${mm}-${dd}`;
+  for (const [row] of html.matchAll(ROW_RE)) {
+    const when = row.match(DATETIME_RE);
+    const slug = row.match(FILM_RE)?.[1];
+    const title = stripHtml(decodeEntities(row.match(TITLE_RE)?.[1] ?? ""))
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!when || !slug || !title) continue;
+    const [, date, time = null] = when;
     if (date < today) continue;
 
     const key = `${slug}|${date}|${time ?? ""}`;
@@ -60,4 +61,10 @@ export async function scrapeLichtmessKino(): Promise<VenueScrapeResult> {
   }
 
   return { source_slug: "lichtmess-kino", display_name: "Lichtmeß Kino", events };
+}
+
+async function fetchPage(url: string): Promise<string> {
+  const res = await fetch(url, { headers: { "User-Agent": UA } });
+  if (!res.ok) throw new Error(`lichtmess-kino fetch failed: ${res.status} ${url}`);
+  return res.text();
 }

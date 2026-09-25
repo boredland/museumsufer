@@ -10,9 +10,11 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
  * emit each post with a `music:*`, `film:*` or `talk:*` label and let the
  * downstream apps pick.
  *
- * Unlike most WP feeds the event date isn't in the post title — it opens the
- * body as a German numeric date line, e.g. "Mi, 17.06.2026 – 19:30 Uhr" or
- * "Doppelkonzert am 24. und 25.06.2026 – 19:00 Uhr" (two performances).
+ * Since the autumn 2026 programme the date leads the post title without a
+ * year — "Mi, 30. Sept – FilmClub »Gelbe Briefe«", "Mi + Do, 4. u. 5. Nov:
+ * Anna Liebst singt" — and the body only carries "Beginn: 19 Uhr". Earlier
+ * posts opened the body with a numeric date line ("Mi, 17.06.2026 – 19:30
+ * Uhr", "Doppelkonzert am 24. und 25.06.2026"), still read as the fallback.
  */
 const API_URL =
   "https://www.cafemutz.de/wp-json/wp/v2/posts?categories=4&per_page=50&_fields=id,slug,link,title,excerpt,content";
@@ -24,9 +26,29 @@ const DATE_RE = /(\d{1,2})\.(\d{1,2})\.(\d{4})/;
 // the trailing month + year. Captures the bare day list and the full date.
 const MULTI_DAY_RE = /((?:\d{1,2}\.\s*(?:und|,|&|\/|\bbis\b)\s*)+)(\d{1,2})\.(\d{1,2})\.(\d{4})/i;
 const TIME_RE = /(\d{1,2})[:.](\d{2})\s*Uhr/;
+/** Title prefix: weekday(s), then "30. Sept" / "4. u. 5. Nov", then "–" or ":". */
+const TITLE_DATE_RE =
+  /^[A-Za-z]{2}(?:\s*[+&]\s*[A-Za-z]{2})?,\s*((?:\d{1,2}\.\s*(?:u\.|und|&|,)?\s*)+)([A-Za-zä]{3,})\.?\s*[–:-]\s*/;
+/** "Beginn: 19 Uhr" / "Beginn: 19:30 Uhr". */
+const BEGIN_RE = /Beginn:?\s*(\d{1,2})(?:[:.](\d{2}))?\s*Uhr/;
+const MONTH_PREFIX: Record<string, string> = {
+  jan: "01",
+  feb: "02",
+  mär: "03",
+  mar: "03",
+  apr: "04",
+  mai: "05",
+  jun: "06",
+  jul: "07",
+  aug: "08",
+  sep: "09",
+  okt: "10",
+  nov: "11",
+  dez: "12",
+};
 
 const FILM_RE = /\bfilm(?:club)?\b|\bkino\b/i;
-const MUSIC_HINT_RE = /\bkonzert|musik|weltmusik|band|chor|live\b/i;
+const MUSIC_HINT_RE = /\bkonzert|musik|weltmusik|band|chor|live\b|\bfolk\b|jazz|singt\b/i;
 // classifyTalk doesn't recognise "Lesebühne"; tag reading formats explicitly.
 const LESUNG_RE = /lese(?:b[üu]hne|ung)|\blesung\b|poetry|poetry\s*slam|literatur/i;
 
@@ -47,16 +69,22 @@ export async function scrapeCafeMutz(): Promise<VenueScrapeResult> {
   const events: CanonicalScrapedEvent[] = [];
 
   for (const post of posts) {
-    const title = stripHtml(decodeEntities(post.title.rendered)).replace(/\s+/g, " ").trim();
-    if (!title) continue;
+    const fullTitle = stripHtml(decodeEntities(post.title.rendered)).replace(/\s+/g, " ").trim();
+    if (!fullTitle) continue;
 
-    // The date opens the body; excerpt usually carries it, content is the fallback.
     const body = `${stripHtml(decodeEntities(post.excerpt.rendered))} ${stripHtml(decodeEntities(post.content.rendered))}`;
-    const dates = parseDates(body);
-    if (dates.length === 0) continue; // intro / undated posts (e.g. "Kultur im Mutz")
+    const fromTitle = parseTitleDates(fullTitle, today);
+    const title = fromTitle ? fullTitle.slice(fromTitle.prefixLength).trim() : fullTitle;
+    const dates = fromTitle?.dates ?? parseDates(body);
+    if (dates.length === 0 || !title) continue; // intro / undated posts (e.g. "Kultur im Mutz")
 
-    const timeMatch = TIME_RE.exec(body);
-    const time = timeMatch ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}` : null;
+    const begin = BEGIN_RE.exec(body);
+    const timeMatch = begin ? null : TIME_RE.exec(body);
+    const time = begin
+      ? `${begin[1].padStart(2, "0")}:${begin[2] ?? "00"}`
+      : timeMatch
+        ? `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`
+        : null;
 
     const description = stripHtml(decodeEntities(post.excerpt.rendered)).replace(/\s+/g, " ").trim() || null;
     const labels = classify(title, description);
@@ -79,6 +107,19 @@ export async function scrapeCafeMutz(): Promise<VenueScrapeResult> {
   }
 
   return { source_slug: "cafe-mutz", display_name: "Café Mutz", events };
+}
+
+/** Dates from a "Mi, 30. Sept – …" title. The title has no year: the event
+ *  is taken to fall within the next ~10 months, so a month more than two
+ *  months behind today rolls into next year. */
+function parseTitleDates(title: string, today: string): { dates: string[]; prefixLength: number } | null {
+  const m = TITLE_DATE_RE.exec(title);
+  const month = m ? MONTH_PREFIX[m[2].slice(0, 3).toLowerCase()] : undefined;
+  if (!m || !month) return null;
+  const thisYear = Number(today.slice(0, 4));
+  const year = Number(month) < Number(today.slice(5, 7)) - 2 ? thisYear + 1 : thisYear;
+  const days = [...new Set(m[1].match(/\d{1,2}/g) ?? [])];
+  return { dates: days.map((d) => `${year}-${month}-${d.padStart(2, "0")}`), prefixLength: m[0].length };
 }
 
 /** All event dates a post refers to, ISO `YYYY-MM-DD`, in document order. */

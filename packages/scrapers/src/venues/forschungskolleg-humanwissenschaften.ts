@@ -3,60 +3,62 @@ import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
+/**
+ * Forschungskolleg Humanwissenschaften, Bad Homburg (Goethe-Universität +
+ * Werner Reimers Stiftung). The 2026 relaunch lists upcoming events as cards
+ * on /events: `<a href="/events/<slug>">` around a `startdate` field, the
+ * series in `category`, an `<h2>` title and a speaker `teaser`. The card has
+ * the day only; the start time (or, for workshops, the end date) is in the
+ * event page's `field startdate`, so each page is fetched.
+ */
 const BASE = "https://www.forschungskolleg-humanwissenschaften.de";
-const LISTING_URL = `${BASE}/index.php/archive/events`;
+const LISTING_URL = `${BASE}/events`;
 const UA = "museumsufer event-hub crawler / contact: jonas@bgdlabs.com";
 const HEADERS = { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" };
 
-const ROW_RE = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
-const DATE_RE = /(\d{2})\.(\d{2})\.(\d{4})\s*<br[^>]*>\s*(\d{1,2}):(\d{2})\s*Uhr/;
-const LINK_RE = /<a[^>]+href="(\/index\.php\/archive\/events\/\d+[^"]*)"[^>]*>([\s\S]*?)<\/a>/;
-const ROW_DIVS_RE = /<div[^>]*>([\s\S]*?)<\/div>/g;
-const ORG_RE = /<em[^>]*>([\s\S]*?)<\/em>/;
+const CARD_RE = /<a href="(\/events\/[^"]+)">\s*<div class="card[\s\S]*?<\/a>/g;
+/** First day of the card's "17.11.2026" or "15.10.2026 &mdash; 17.10.2026". */
+const CARD_DATE_RE = /class="field startdate">\s*<p[^>]*>\s*(\d{2})\.(\d{2})\.(\d{4})/;
+const CATEGORY_RE = /class="field category">\s*<p>([\s\S]*?)<\/p>/;
+const TITLE_RE = /class="field title">\s*<h2>([\s\S]*?)<\/h2>/;
+const TEASER_RE = /class="field teaser">([\s\S]*?)<\/div>/;
+/** The detail page's "Termin" value: "Dienstag<br>17.11.2026<br>18:30 Uhr" or
+ *  "Donnerstag, 15.10.2026 —<br>Samstag, 17.10.2026". */
+const TERMIN_RE = /class="field startdate">[\s\S]*?<div class="value">([\s\S]*?)<\/div>/;
 
 export async function scrapeForschungskollegHumanwissenschaften(): Promise<VenueScrapeResult> {
   const html = await fetchHtml(LISTING_URL);
   const today = todayIso();
   const events: CanonicalScrapedEvent[] = [];
-  const seen = new Set<string>();
 
-  for (const m of html.matchAll(ROW_RE)) {
-    const row = m[1];
-    const dateMatch = row.match(DATE_RE);
-    if (!dateMatch) continue;
-    const [, dd, mm, yyyy, hh, mi] = dateMatch;
-    const date = `${yyyy}-${mm}-${dd}`;
+  for (const [card, path] of html.matchAll(CARD_RE)) {
+    const day = card.match(CARD_DATE_RE);
+    const title = stripQuotes(cleanText(card.match(TITLE_RE)?.[1] ?? ""));
+    if (!day || !title || /^FÄLLT AUS!?/i.test(title)) continue;
+    const date = `${day[3]}-${day[2]}-${day[1]}`;
     if (date < today) continue;
 
-    const linkMatch = row.match(LINK_RE);
-    if (!linkMatch) continue;
-    const detailUrl = `${BASE}${linkMatch[1]}`;
-    const titleRaw = cleanText(linkMatch[2]);
-    if (!titleRaw) continue;
-    if (/^FÄLLT AUS!?/i.test(titleRaw)) continue;
-    const title = stripQuotes(titleRaw);
-    if (seen.has(detailUrl)) continue;
-    seen.add(detailUrl);
-
-    const titleStripped = stripQuotes(title);
-    const divs = [...row.matchAll(ROW_DIVS_RE)].map((d) => cleanText(d[1])).filter(Boolean);
-    const descParts = divs
-      .filter((s) => !stripQuotes(s).includes(titleStripped))
-      .filter((s) => !/^\d{1,2}\.\d{1,2}\.\d{4}\b/.test(s));
-    const organizer = cleanText(row.match(ORG_RE)?.[1] ?? "");
-    if (organizer && !descParts.some((p) => p.includes(organizer))) descParts.push(organizer);
-    const description = descParts.join(" — ").slice(0, 600) || null;
-
-    const idMatch = linkMatch[1].match(/\/events\/(\d+)/);
-    const sourceEventId = idMatch ? `fkh-${idMatch[1]}` : detailUrl;
+    const detailUrl = `${BASE}${path}`;
+    const termin = cleanText((await fetchHtml(detailUrl)).match(TERMIN_RE)?.[1]?.replace(/<br\s*\/?>/gi, " ") ?? "");
+    const time = termin.match(/(\d{1,2}):(\d{2})\s*Uhr/);
+    const endDay = [...termin.matchAll(/(\d{2})\.(\d{2})\.(\d{4})/g)].at(1);
+    const series = cleanText(card.match(CATEGORY_RE)?.[1]?.replace(/<br\s*\/?>/gi, " · ") ?? "").replace(
+      /\s*·\s*$/,
+      "",
+    );
+    const speaker = cleanText(card.match(TEASER_RE)?.[1] ?? "");
+    const description = [speaker, series].filter(Boolean).join(" — ") || null;
 
     events.push({
-      source_event_id: sourceEventId,
+      source_event_id: `fkh-${path.slice("/events/".length)}`,
       title,
+      subtitle: series || null,
       date,
-      time: `${hh.padStart(2, "0")}:${mi}`,
+      end_date: endDay ? `${endDay[3]}-${endDay[2]}-${endDay[1]}` : null,
+      time: time ? `${time[1].padStart(2, "0")}:${time[2]}` : null,
       detail_url: detailUrl,
       description,
+      performers: speaker || null,
       language: detectEnglish(title) ? "en" : null,
       labels: [
         {
