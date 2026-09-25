@@ -729,6 +729,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-max-planck-institut-fur-empirische-asthetik": "Max-Planck-Institut für empirische Ästhetik",
   "wdc2026-mayhaus": "mayhaus",
   "wdc2026-mediathek-eltville": "Mediathek Eltville",
+  "wdc2026-messe-frankfurt": "Messe Frankfurt",
   "wdc2026-messe-offenbach": "Messe Offenbach",
   "wdc2026-metzlerpark-frankfurt": "Metzlerpark Frankfurt",
   "wdc2026-mfa-material-fur-alle": "MFA – Material für Alle",
