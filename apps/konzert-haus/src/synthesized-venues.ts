@@ -833,6 +833,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "jazz",
   },
   {
+    slug: "cafe-mutz",
+    name: "Café Mutz",
+    address: "",
+    lat: 50.1726,
+    lon: 8.6357,
+    city: "frankfurt",
+    website_url: "https://www.cafemutz.de",
+    default_genre: "world",
+  },
+  {
     slug: "centralkomitee",
     name: "Centralkomitee",
     address: "",

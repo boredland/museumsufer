@@ -174,6 +174,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.botschaftderwildtiere.de",
   },
   {
+    slug: "cafe-mutz",
+    name: "Café Mutz",
+    address: "",
+    lat: 50.1726,
+    lon: 8.6357,
+    city: "frankfurt",
+    website_url: "https://www.cafemutz.de",
+  },
+  {
     slug: "cinema-wuppertal",
     name: "Cinema Wuppertal",
     address: "",
@@ -352,6 +361,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 10.147,
     city: "hamburg",
     website_url: "https://www.koralle-volksdorf.de",
+  },
+  {
+    slug: "lichtmess-kino",
+    name: "Lichtmeß Kino",
+    address: "",
+    lat: 53.5556,
+    lon: 9.935,
+    city: "hamburg",
+    website_url: "https://lichtmess-kino.de",
   },
   {
     slug: "magazin-filmkunsttheater",
