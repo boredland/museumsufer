@@ -123,16 +123,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "bergisch-boda-weinhaus",
-    name: "Boda Weinhaus",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "classical",
-  },
-  {
     slug: "bergisch-brennscheidt-forum",
     name: "Brennscheidt-Forum",
     address: "",
@@ -231,16 +221,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "wuppertal",
     website_url: "https://www.wuppertal-live.de",
     default_genre: "classical",
-  },
-  {
-    slug: "bergisch-denkerschmette",
-    name: "Denkerschmette",
-    address: "",
-    lat: 51.178,
-    lon: 7.193,
-    city: "remscheid",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "jazz",
   },
   {
     slug: "bergisch-die-borse",
@@ -420,7 +400,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 7.085,
     city: "solingen",
     website_url: "https://www.wuppertal-live.de",
-    default_genre: "classical",
+    default_genre: "experimental",
   },
   {
     slug: "bergisch-historische-stadthalle-wuppertal",
@@ -515,16 +495,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
   {
     slug: "bergisch-kubis-musik-cafe",
     name: "Kubis Musik-Café",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "world",
-  },
-  {
-    slug: "bergisch-kulturschmiede",
-    name: "Kulturschmiede",
     address: "",
     lat: 51.256,
     lon: 7.15,
@@ -1120,7 +1090,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6826,
     city: "frankfurt",
     website_url: "https://hausamdom-frankfurt.de",
-    default_genre: "classical",
+    default_genre: "jazz",
   },
   {
     slug: "heidelberger-fruehling",
