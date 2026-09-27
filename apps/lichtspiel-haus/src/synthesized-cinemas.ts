@@ -282,6 +282,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
+    slug: "hafen-2-offenbach",
+    name: "Hafen 2 Offenbach",
+    address: "",
+    lat: 50.0972,
+    lon: 8.7449,
+    city: "frankfurt",
+    website_url: "https://hafen2.net",
+  },
+  {
     slug: "hansa-filmstudio",
     name: "Hansa-Filmstudio",
     address: "",
