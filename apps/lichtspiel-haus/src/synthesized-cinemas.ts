@@ -129,15 +129,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-pina-bausch-zentrum",
-    name: "Pina Bausch Zentrum",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-stadtbibliothek-solingen",
     name: "Stadtbibliothek Solingen",
     address: "",
@@ -253,6 +244,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.849,
     city: "hamburg",
     website_url: "https://www.elbe-filmtheater.de",
+  },
+  {
+    slug: "elbphilharmonie",
+    name: "Elbphilharmonie Hamburg",
+    address: "",
+    lat: 53.5414,
+    lon: 9.9842,
+    city: "hamburg",
+    website_url: "https://www.elbphilharmonie.de",
   },
   {
     slug: "eschborn-k",
