@@ -426,15 +426,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
-    slug: "sammlung-prinzhorn",
-    name: "Sammlung Prinzhorn",
-    address: "",
-    lat: 49.418,
-    lon: 8.672,
-    city: "heidelberg",
-    website_url: "https://www.sammlung-prinzhorn.de",
-  },
-  {
     slug: "savoy-filmtheater",
     name: "Savoy Filmtheater",
     address: "",
