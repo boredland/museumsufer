@@ -573,6 +573,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "bergisch-piano-faust",
+    name: "Piano Faust",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    default_genre: "jazz",
+  },
+  {
     slug: "bergisch-pina-bausch-zentrum",
     name: "Pina Bausch Zentrum",
     address: "",

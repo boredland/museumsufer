@@ -683,6 +683,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "heidelberger-fruehling",
+    name: "Heidelberger Frühling",
+    address: "",
+    lat: 49.4122,
+    lon: 8.71,
+    city: "heidelberg",
+    website_url: "https://www.heidelberger-fruehling.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "hessisches-staatstheater-wiesbaden",
     name: "Hessisches Staatstheater Wiesbaden",
     address: "",
@@ -889,7 +899,7 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lat: 49.4128,
     lon: 8.708,
     city: "heidelberg",
-    website_url: "https://www.theaterheidelberg.de",
+    website_url: "",
     ticketing_provider: null,
   },
   {

@@ -306,7 +306,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 50.1092,
     lon: 8.6819,
     city: "frankfurt",
-    website_url: "",
+    website_url: "https://filmforum-hoechst.com",
   },
   {
     slug: "hlmd-darmstadt",
@@ -397,6 +397,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.9889,
     city: "hamburg",
     website_url: "https://www.metropoliskino.de",
+  },
+  {
+    slug: "mousonturm",
+    name: "Künstler*innenhaus Mousonturm",
+    address: "",
+    lat: 50.1183,
+    lon: 8.7019,
+    city: "frankfurt",
+    website_url: "https://www.mousonturm.de",
   },
   {
     slug: "passage-kino-hamburg",
