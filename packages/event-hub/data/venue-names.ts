@@ -34,6 +34,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-bahnhof-blo": "Bahnhof Blo",
   "bergisch-bandfabrik": "Bandfabrik",
   "bergisch-barmen": "Barmen",
+  "bergisch-barmer-bahnhof": "Barmer Bahnhof",
   "bergisch-basilika-st-laurentius": "Basilika St. Laurentius",
   "bergisch-begegnungsstatte-alte-synagoge": "Begegnungsstätte Alte Synagoge",
   "bergisch-beratungsstelle-fur-drogenprobleme-e-v": "Beratungsstelle für Drogenprobleme e.V.",
