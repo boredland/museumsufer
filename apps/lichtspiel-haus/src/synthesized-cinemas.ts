@@ -237,15 +237,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.elbe-filmtheater.de",
   },
   {
-    slug: "elbphilharmonie",
-    name: "Elbphilharmonie Hamburg",
-    address: "",
-    lat: 53.5414,
-    lon: 9.9842,
-    city: "hamburg",
-    website_url: "https://www.elbphilharmonie.de",
-  },
-  {
     slug: "eschborn-k",
     name: "Eschborn K",
     address: "",
@@ -316,6 +307,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.65,
     city: "darmstadt",
     website_url: "https://www.hlmd.de",
+  },
+  {
+    slug: "hugenottenhalle",
+    name: "Hugenottenhalle",
+    address: "",
+    lat: 50.0494,
+    lon: 8.6942,
+    city: "frankfurt",
+    website_url: "https://www.hugenottenhalle.de",
   },
   {
     slug: "juedisches-museum-frankfurt",
