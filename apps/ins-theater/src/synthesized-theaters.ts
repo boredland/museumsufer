@@ -859,7 +859,7 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lat: 53.55,
     lon: 9.99,
     city: "hamburg",
-    website_url: "https://mcewen.eu",
+    website_url: "https://www.instagram.com",
     ticketing_provider: null,
   },
   {
