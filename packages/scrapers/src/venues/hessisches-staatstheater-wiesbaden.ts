@@ -1,9 +1,11 @@
-import { toBerlinDate, toBerlinTime, todayIso } from "@museumsufer/core/date";
+import { todayIso } from "@museumsufer/core/date";
 import { decodeEntities, stripHtml } from "@museumsufer/core/html";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
-const API_URL = "https://hsw-6a25.kxcdn.com/api/schedule";
 const BASE = "https://www.staatstheater-wiesbaden.de";
+// The site's KeyCDN mirror (hsw-6a25.kxcdn.com) caches for 30 days and was
+// seen serving a stale, empty schedule; origin is always current.
+const API_URL = `${BASE}/api/schedule`;
 const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 
 /**
@@ -11,7 +13,8 @@ const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
  * `/api/schedule` endpoint returns a JSON object with a `schedule` HTML
  * string containing `<div itemtype="http://schema.org/Event">` blocks
  * for every performance over ~3 months. Each block carries:
- * - `<meta itemprop="startDate" content="YYYY-MM-DDTHH:MM:SS">`
+ * - `<meta itemprop="startDate" content="YYYY-MM-DDTHH:MM:SS">` (Berlin
+ *   wall-clock, no offset — `new Date()` would read it in the host's zone)
  * - `<span itemprop="name">TITLE</span>` inside `<h4 class="performance__title">`
  * - `performance__stage`, `performance__category`, `performance__age`
  * - `performance__authorcomposer` (subtitle/credits)
@@ -35,21 +38,13 @@ export async function scrapeStaatstheaterWiesbaden(): Promise<VenueScrapeResult>
     const block = match[0];
     const perfId = match[1];
 
-    const startDateMatch = block.match(/<meta\s+itemprop="startDate"\s+content="([^"]+)"/);
-    if (!startDateMatch) continue;
-    const startRaw = startDateMatch[1];
-    const startDate = new Date(startRaw);
-    if (isNaN(startDate.getTime())) continue;
-    const date = toBerlinDate(startDate);
+    const startMatch = block.match(/<meta\s+itemprop="startDate"\s+content="(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+    if (!startMatch) continue;
+    const [, date, time] = startMatch;
     if (date < today) continue;
-    const time = toBerlinTime(startDate);
 
-    const endDateMatch = block.match(/<meta\s+itemprop="endDate"\s+content="([^"]+)"/);
-    let endTime: string | null = null;
-    if (endDateMatch) {
-      const endDate = new Date(endDateMatch[1]);
-      if (!isNaN(endDate.getTime())) endTime = toBerlinTime(endDate);
-    }
+    const endMatch = block.match(/<meta\s+itemprop="endDate"\s+content="\d{4}-\d{2}-\d{2}T(\d{2}:\d{2})/);
+    const endTime = endMatch ? endMatch[1] : null;
 
     const titleMatch = block.match(
       /<h4\s+class="performance__title"[^>]*>\s*<a[^>]*>\s*<span\s+itemprop="name">([^<]+)<\/span>/,
