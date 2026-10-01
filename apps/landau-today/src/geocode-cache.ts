@@ -480,6 +480,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "schulhof nußdorf|landau-nußdorf": [49.22205, 8.115768],
   "sekt - und weingut fath|landau - dammheim": [49.220794, 8.147643],
   "sekt- und weingut wilhelmshof|siebeldingen": [49.20868, 8.051216],
+  "seminarraum beim seniorenbüro, waffenstr. 5 landau|landau in der pfalz": [49.198283, 8.112344],
   "seminarraum beim seniorenbüro, waffenstr. 5|landau in der pfalz": [49.198283, 8.112344],
   "seminarraum|": [49.198283, 8.112344],
   "seniorenbüro landau waffenstr. 5|landau in der pfalz": [49.198283, 8.112344],

@@ -433,6 +433,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "bergisch-schutzenplatz-remscheid",
+    name: "Schützenplatz Remscheid",
+    address: "",
+    lat: 51.178,
+    lon: 7.193,
+    city: "remscheid",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-sophienkirche",
     name: "Sophienkirche",
     address: "",

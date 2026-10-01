@@ -75,15 +75,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-haus-der-begegnung-mehrgenerationenhaus",
-    name: "Haus der Begegnung / Mehrgenerationenhaus",
-    address: "",
-    lat: 51.171,
-    lon: 7.085,
-    city: "solingen",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-kubis-musik-cafe",
     name: "Kubis Musik-Café",
     address: "",
