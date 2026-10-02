@@ -200,6 +200,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-stadtsparkasse-solingen-hauptstelle": "Stadtsparkasse Solingen - Hauptstelle",
   "bergisch-stadtsparkasse-wuppertal-ronsdorf": "Stadtsparkasse Wuppertal Ronsdorf",
   "bergisch-stadtteilbibliothek-barmen": "Stadtteilbibliothek Barmen",
+  "bergisch-stadtteilbibliothek-oberbarmen": "Stadtteilbibliothek Oberbarmen",
   "bergisch-stadtteilbibliothek-ronsdorf": "Stadtteilbibliothek Ronsdorf",
   "bergisch-stadtteilzentrum-heckinghausen": "Stadtteilzentrum Heckinghausen",
   "bergisch-stadtteilzentrum-wiki": "Stadtteilzentrum Wiki",

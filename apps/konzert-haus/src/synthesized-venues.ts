@@ -513,6 +513,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "world",
   },
   {
+    slug: "bergisch-kulturschmiede",
+    name: "Kulturschmiede",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    default_genre: "world",
+  },
+  {
     slug: "bergisch-kulturzentrum-immanuel-immanuelskirche",
     name: "Kulturzentrum Immanuel - Immanuelskirche",
     address: "",
@@ -611,16 +621,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "wuppertal",
     website_url: "https://www.wuppertal-live.de",
     default_genre: "classical",
-  },
-  {
-    slug: "bergisch-piano-faust",
-    name: "Piano Faust",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "jazz",
   },
   {
     slug: "bergisch-pina-bausch-zentrum",
@@ -1010,7 +1010,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6334,
     city: "frankfurt",
     website_url: "https://www.gallustheater.de",
-    default_genre: "jazz",
+    default_genre: "world",
   },
   {
     slug: "hafen-2-offenbach",

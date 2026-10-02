@@ -563,16 +563,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-zentrum-fur-verfolgte-kunste",
-    name: "Zentrum für verfolgte Künste",
-    address: "",
-    lat: 51.2035,
-    lon: 7.0736,
-    city: "solingen",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-zum-kohlerliesel",
     name: "Zum Köhlerliesel",
     address: "",
@@ -640,16 +630,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lon: 6.996,
     city: "saarbruecken",
     website_url: "https://www.ccsaar.de",
-    ticketing_provider: null,
-  },
-  {
-    slug: "dr-hochs-konservatorium",
-    name: "Dr. Hoch's Konservatorium",
-    address: "",
-    lat: 50.1115,
-    lon: 8.7016,
-    city: "frankfurt",
-    website_url: "https://www.dr-hochs.de",
     ticketing_provider: null,
   },
   {
