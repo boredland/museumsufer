@@ -93,16 +93,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-cafe-lieber",
-    name: "Café Lieber",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-carnaper-platz",
     name: "Carnaper Platz",
     address: "",
@@ -889,7 +879,7 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lat: 53.55,
     lon: 9.99,
     city: "hamburg",
-    website_url: "https://www.instagram.com",
+    website_url: "https://cloud.systemli.org",
     ticketing_provider: null,
   },
   {
