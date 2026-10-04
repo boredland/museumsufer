@@ -879,7 +879,7 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lat: 53.55,
     lon: 9.99,
     city: "hamburg",
-    website_url: "https://cloud.systemli.org",
+    website_url: "https://mcewen.eu",
     ticketing_provider: null,
   },
   {

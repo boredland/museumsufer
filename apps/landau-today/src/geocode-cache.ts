@@ -576,6 +576,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "villa ufer|landau in der pfalz": [49.198283, 8.112344],
   "villa wieser|herxheim": [49.145756, 8.215382],
   "villa wieser|herxheim bei landau": [49.145756, 8.215382],
+  "vinification ludwigshöhe|edenkoben": [49.282236, 8.128436],
   "vinothek geisser|schweigen-rechtenbach": [49.054561, 7.956034],
   "vinothek par-terre|landau": [49.187071, 8.119084],
   "visite ma tante|landau in der pfalz": [49.200054, 8.111539],
