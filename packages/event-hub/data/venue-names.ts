@@ -803,6 +803,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-rheingauviertel-rudesheimer-str-23-65197-wiesbaden": "Rheingauviertel, Rüdesheimer Str.23, 65197 Wiesbaden",
   "wdc2026-robert-blum-denkmal-in-petterweil": "Robert-Blum-Denkmal in Petterweil",
   "wdc2026-robert-johnson": "Robert Johnson",
+  "wdc2026-romerhallen": "Römerhallen",
   "wdc2026-rudolf-steiner-schule": "Rudolf-Steiner Schule",
   "wdc2026-rushmoorpark": "Rushmoorpark",
   "wdc2026-s-bahn-haltestelle-marktplatz": "S-Bahn Haltestelle Marktplatz",
