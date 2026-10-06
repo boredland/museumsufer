@@ -699,6 +699,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "wollmesheimer höhe|landau in der pfalz": [49.192773, 8.094036],
   "wstr-spaziergang|neustadt": [49.353606, 8.136025],
   "yoga bewegt im lazarettgarten|landau in der pfalz": [49.198283, 8.112344],
+  "yoga bewegt, lazarettgarten 21|landau in der pfalz": [49.198283, 8.112344],
   "yoga4you|landau in der pfalz": [49.198283, 8.112344],
   "zoo landau, hindenburgstraße 12|": [49.198283, 8.112344],
   "zoo landau|landau in der pfalz": [49.190433, 8.13046],
