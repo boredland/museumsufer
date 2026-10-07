@@ -333,6 +333,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "bergisch-nachbarschaftsheim-wuppertal",
+    name: "Nachbarschaftsheim Wuppertal",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-niederlandisch-reformierte-gemeinde",
     name: "Niederländisch-reformierte Gemeinde",
     address: "",
@@ -445,6 +455,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
   {
     slug: "bergisch-sophienkirche",
     name: "Sophienkirche",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
+    slug: "bergisch-studio-double-c",
+    name: "Studio Double C",
     address: "",
     lat: 51.256,
     lon: 7.15,
