@@ -162,6 +162,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "freibad landau|landau in der pfalz": [49.197493, 8.104778],
   "freigeist-mosterei|schweigen-rechtenbach": [49.054561, 7.956034],
   "freiwillige feuerwehr annweiler am trifels|annweiler am trifels": [49.203815, 7.967896],
+  "freiwillige feuerwehr landau, haardtstraße 4, 76829 landau in der pfalz|landau in der pfalz": [49.198283, 8.112344],
   "freiwillige feuerwehr offenbach an der queich|offenbach an der queich": [49.19978, 8.192056],
   "freiwillige feuerwehr waldhambach|waldhambach": [49.166413, 7.988084],
   "freizeitcenter bornheim|bornheim": [49.214595, 8.168842],
