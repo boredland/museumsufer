@@ -33,16 +33,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "sacred",
   },
   {
-    slug: "bergisch-allee-center",
-    name: "Allee Center",
-    address: "",
-    lat: 51.178,
-    lon: 7.193,
-    city: "remscheid",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "jazz",
-  },
-  {
     slug: "bergisch-alte-schlosserei",
     name: "Alte Schlosserei",
     address: "",
@@ -505,16 +495,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
   {
     slug: "bergisch-kubis-musik-cafe",
     name: "Kubis Musik-Café",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "world",
-  },
-  {
-    slug: "bergisch-kulturschmiede",
-    name: "Kulturschmiede",
     address: "",
     lat: 51.256,
     lon: 7.15,
