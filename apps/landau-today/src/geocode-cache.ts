@@ -592,6 +592,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "villastr. 65|edenkoben": [49.278096, 8.087094],
   "vinification ludwigshöhe|edenkoben": [49.282236, 8.128436],
   "vinothek geisser|schweigen-rechtenbach": [49.054561, 7.956034],
+  "vinothek julius kimmle gmbh und co kg|kapellen-drusweiler": [49.10314, 8.031469],
   "vinothek par-terre|landau": [49.187071, 8.119084],
   "visite ma tante|landau in der pfalz": [49.200054, 8.111539],
   "volkshochschule landau|landau in der pfalz": [49.196803, 8.125096],
