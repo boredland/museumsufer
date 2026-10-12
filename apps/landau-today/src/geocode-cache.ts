@@ -353,6 +353,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "neues messegelände|landau in der pfalz": [49.198283, 8.112344],
   "neues rathaus|landau in der pfalz": [49.198283, 8.112344],
   "neustadt a.d. w.|neustadt a.d. w.": [54.103852, 10.807912],
+  "neustadter straße 8 (ecke nordring/ neustadter straße), landau/pfalz|landau in der pfalz": [49.198283, 8.112344],
   "niedergasse 5|kleinfischlingen": [49.2635, 8.189066],
   "obertorplatz, ecke reiterstr./xylanderstr.|landau in der pfalz": [49.198283, 8.112344],
   "offenbach an der queich|offenbach an der queich": [49.195993, 8.192833],

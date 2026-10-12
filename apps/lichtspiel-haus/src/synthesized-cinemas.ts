@@ -264,15 +264,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kino-bergedorf.de",
   },
   {
-    slug: "haus-am-dom",
-    name: "Haus am Dom – Kath. Akademie Rabanus Maurus",
-    address: "",
-    lat: 50.1107,
-    lon: 8.6826,
-    city: "frankfurt",
-    website_url: "https://hausamdom-frankfurt.de",
-  },
-  {
     slug: "historisches-museum-frankfurt",
     name: "Historisches Museum Frankfurt",
     address: "",
@@ -451,6 +442,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.957,
     city: "hamburg",
     website_url: "https://www.studio-kino.de",
+  },
+  {
+    slug: "taunale-oberursel",
+    name: "TAUNALE – Taunus Filmfest Oberursel",
+    address: "",
+    lat: 50.2004,
+    lon: 8.5765,
+    city: "frankfurt",
+    website_url: "https://taunale.de",
   },
   {
     slug: "zeise-kinos",

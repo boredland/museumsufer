@@ -93,6 +93,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-edith-sonnenschein-bestattungen": "Edith Sonnenschein Bestattungen",
   "bergisch-elberfeld": "Elberfeld",
   "bergisch-engels-haus": "Engels-Haus",
+  "bergisch-erich-fried-gesamtschule-ronsdorf": "Erich-Fried-Gesamtschule Ronsdorf",
   "bergisch-erloserkirche-barmen": "Erlöserkirche Barmen",
   "bergisch-ev-freikirchliche-gemeinde-vohwinkel": "Ev. Freikirchliche Gemeinde Vohwinkel",
   "bergisch-ev-gemeindehaus-luttringhausen": "Ev. Gemeindehaus Lüttringhausen",
