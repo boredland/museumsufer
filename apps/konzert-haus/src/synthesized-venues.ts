@@ -103,16 +103,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "bergisch-bergische-universitat-campus-grifflenberg",
-    name: "Bergische Universität - Campus Grifflenberg",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "classical",
-  },
-  {
     slug: "bergisch-bildungs-und-kulturzentrum-frau-leben-freiheit",
     name: "Bildungs- und Kulturzentrum Frau Leben Freiheit",
     address: "",
