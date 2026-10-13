@@ -84,6 +84,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-loch",
+    name: "Loch",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "bergisch-max-leven-zentrum-solingen",
     name: "Max-Leven-Zentrum Solingen",
     address: "",

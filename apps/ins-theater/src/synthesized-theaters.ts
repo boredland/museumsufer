@@ -1033,6 +1033,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "wdc2026-stadtbucherei-hofheim",
+    name: "Stadtbücherei Hofheim",
+    address: "",
+    lat: 50.0867137,
+    lon: 8.4475868,
+    city: "frankfurt",
+    website_url: "https://wdc2026.org",
+    ticketing_provider: null,
+  },
+  {
     slug: "wdc2026-stadtbucherei-idstein",
     name: "Stadtbücherei Idstein",
     address: "",
