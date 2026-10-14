@@ -282,15 +282,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://filmforum-hoechst.com",
   },
   {
-    slug: "hlmd-darmstadt",
-    name: "Hessisches Landesmuseum Darmstadt",
-    address: "",
-    lat: 49.873,
-    lon: 8.65,
-    city: "darmstadt",
-    website_url: "https://www.hlmd.de",
-  },
-  {
     slug: "hugenottenhalle",
     name: "Hugenottenhalle",
     address: "",
