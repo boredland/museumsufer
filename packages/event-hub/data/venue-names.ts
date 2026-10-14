@@ -823,6 +823,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-pavillon-wiesbaden": "Pavillon Wiesbaden",
   "wdc2026-petruswiesen": "Petruswiesen",
   "wdc2026-platz-vor-der-philippuskirche": "Platz vor der Philippuskirche",
+  "wdc2026-produktionshaus-naxos": "Produktionshaus Naxos",
   "wdc2026-quartier-eigenheim-komponistenviertel": "Quartier Eigenheim / Komponistenviertel",
   "wdc2026-quartiermanagement-senefelderquartier-offenbach": "Quartiermanagement Senefelderquartier Offenbach",
   "wdc2026-radraum": "radraum",
