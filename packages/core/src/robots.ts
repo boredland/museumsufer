@@ -3,9 +3,24 @@
  * directives are owned by Cloudflare's AI Audit "Managed robots.txt" feature
  * (per-zone toggle), which prepends a `# BEGIN Cloudflare Managed content`
  * block before this body. Duplicating per-bot rules here would contradict
- * that block — so we contribute only sitemap discovery and the llms.txt
- * pointer, which CF doesn't emit.
+ * that block — so we contribute only sitemap discovery, the llms.txt
+ * pointer (which CF doesn't emit) and the SEO-tool crawler opt-out.
  */
+
+/** SEO-tool and backlink-index crawlers. They bring no visitors but each
+ *  page they walk is a billed Worker render; in Oct 2026 SemrushBot alone was
+ *  ~half of lichtspiel.haus traffic. All of them honour robots.txt. */
+export const BLOCKED_CRAWLERS = [
+  "SemrushBot",
+  "AhrefsBot",
+  "DotBot",
+  "MJ12bot",
+  "DataForSeoBot",
+  "PetalBot",
+  "QlyzeBot",
+  "Barkrowler",
+];
+
 export interface RobotsTxtOptions {
   siteUrl: string;
   /** Path of the llms.txt file (defaults to `/llms.txt`). Set to null to omit. */
@@ -28,6 +43,8 @@ export function buildRobotsTxt(opts: RobotsTxtOptions): string {
     for (const path of opts.disallow) lines.push(`Disallow: ${path}`);
     lines.push("");
   }
+  for (const bot of BLOCKED_CRAWLERS) lines.push(`User-agent: ${bot}`);
+  lines.push("Disallow: /", "");
   lines.push(`Sitemap: ${opts.siteUrl}${sitemap}`);
   if (llmsTxt) lines.push(`# LLMs: ${opts.siteUrl}${llmsTxt}`);
   lines.push("");
