@@ -769,6 +769,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-kulturzentrum-schlachthof": "Kulturzentrum Schlachthof",
   "wdc2026-kunst-und-kulturstiftung-opelvillen-russelsheim": "Kunst- und Kulturstiftung Opelvillen Rüsselsheim",
   "wdc2026-kunstforum-der-tu-darmstadt": "Kunstforum der TU Darmstadt",
+  "wdc2026-kunsthaus-wiesbaden": "Kunsthaus Wiesbaden",
   "wdc2026-kunstler-innenhaus-mousonturm": "Künstler*innenhaus Mousonturm",
   "wdc2026-kunstraum-e14": "Kunstraum E14",
   "wdc2026-kunstverein-offenbach-e-v": "Kunstverein Offenbach e. V.",
