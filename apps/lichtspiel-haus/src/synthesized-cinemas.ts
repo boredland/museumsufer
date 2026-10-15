@@ -192,15 +192,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
-    slug: "deutsches-architekturmuseum",
-    name: "Deutsches Architekturmuseum (DAM)",
-    address: "",
-    lat: 50.1049,
-    lon: 8.6715,
-    city: "frankfurt",
-    website_url: "https://dam-online.de",
-  },
-  {
     slug: "deutsches-ledermuseum-of",
     name: "Deutsches Ledermuseum Offenbach am Main",
     address: "",
