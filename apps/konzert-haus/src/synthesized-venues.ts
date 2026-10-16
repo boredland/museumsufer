@@ -1093,6 +1093,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "harburger-theater",
+    name: "Harburger Theater",
+    address: "",
+    lat: 53.459,
+    lon: 9.9773,
+    city: "hamburg",
+    website_url: "https://staeitsch-shop.comfortticket.de",
+    default_genre: "classical",
+  },
+  {
     slug: "hauptkirche-st-jacobi",
     name: "Hauptkirche St. Jacobi",
     address: "",
