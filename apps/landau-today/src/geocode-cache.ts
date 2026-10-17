@@ -550,6 +550,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "städtische galerie villa streccius|landau": [49.198283, 8.112344],
   "städtische galerie villa streccius|landau in der pfalz": [49.198283, 8.112344],
   "suppe mag brot - suppenbar & café|landau in der pfalz": [49.198283, 8.112344],
+  "sv herta 1920 e.v. kirrweiler|kirrweiler": [49.634729, 7.500757],
   "sv herta 1920 kirrweiler e.v.|kirrweiler": [49.634729, 7.500757],
   "sängerhof|klingenmünster": [49.139546, 8.018758],
   "säälchen böchingen|böchingen": [49.237325, 8.091403],
