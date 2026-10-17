@@ -1393,6 +1393,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "theater-alte-bruecke",
+    name: "Theater Alte Brücke",
+    address: "",
+    lat: 50.1078,
+    lon: 8.6874,
+    city: "frankfurt",
+    website_url: "https://www.theater-alte-bruecke.de",
+    default_genre: "classical",
+  },
+  {
     slug: "theater-heidelberg",
     name: "Theater und Orchester Heidelberg",
     address: "",
