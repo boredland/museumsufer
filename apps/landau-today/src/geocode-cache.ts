@@ -429,6 +429,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "pfarrei mariä himmelfahrt|landau in der pfalz": [49.198283, 8.112344],
   "pfarrgarten kirrweiler|kirrweiler": [49.300469, 8.165365],
   "pfarrgemeindesaal heilig kreuz|landau in der pfalz": [49.198283, 8.112344],
+  "pfarrheim st. albert|landau in der pfalz": [49.198283, 8.112344],
   "pfarrkirche heilig kreuz (augustinerkirche)|landau in der pfalz": [49.198283, 8.112344],
   "pfarrkirche kreuzerhöhung|kirrweiler": [49.634702, 7.500711],
   "pfarrkirche st. martin|st. martin": [49.300437, 8.102512],
