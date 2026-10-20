@@ -148,6 +148,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "eingang fort|landau in der pfalz": [49.198283, 8.112344],
   "eiswerkstatt|schweigen-rechtenbach": [49.054561, 7.956034],
   "elmar-weiller-festhalle|herxheim": [49.144613, 8.216157],
+  "evangelische kirche dernbach|dernbach": [50.456539, 7.788509],
   "evangelische martinskirche leinsweiler|leinsweiler": [49.182507, 8.020491],
   "evangelische stadtmission|bad bergzabern": [49.103511, 7.998221],
   "evangelische studierendengemeinde, husarengasse 5|landau in der pfalz": [49.198283, 8.112344],
