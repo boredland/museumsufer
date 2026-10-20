@@ -710,6 +710,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-gemeindezentrum-nieder-beerbach": "Gemeindezentrum Nieder-Beerbach",
   "wdc2026-gemuseheldinnen-e-v-und-stadtfarm": "GemüseheldInnen e.V. und Stadtfarm",
   "wdc2026-georg-voigt-strasse-14": "Georg-Voigt-Straße 14",
+  "wdc2026-gesundheitskiosk-wiesbaden": "Gesundheitskiosk Wiesbaden",
   "wdc2026-gewerberaum-am-romerberg-ostzeile": "Gewerberaum am Römerberg Ostzeile",
   "wdc2026-goethe-universitat-frankfurt-campus-westend": "Goethe-Universität Frankfurt – Campus Westend",
   "wdc2026-goetheplatz-frankfurt": "Goetheplatz Frankfurt",
