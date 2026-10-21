@@ -57,15 +57,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-bergische-universitat-asta-ebene-me-04",
-    name: "Bergische Universität - AStA-Ebene - ME.04",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-bergische-universitat-campus-grifflenberg",
     name: "Bergische Universität - Campus Grifflenberg",
     address: "",
