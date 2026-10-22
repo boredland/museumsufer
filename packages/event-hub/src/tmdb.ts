@@ -200,11 +200,20 @@ function titleWords(s: string | undefined): Set<string> {
  *  "RBO 2026/27: Der Nussknacker (The Royal Ballet)" beats some other
  *  production titled just "Der Nussknacker". */
 function bestFallbackHit(results: TmdbMovieResult[], venueTitle: string): TmdbMovieResult | undefined {
-  const venue = titleWords(venueTitle);
+  const venue = [...titleWords(venueTitle)];
+  // Venues spell the same word in German or English ("The Royal Ballett"
+  // vs TMDb's "Royal Ballet"), so a word also counts when one form is the
+  // other plus at most two letters.
+  const inVenue = (w: string): boolean =>
+    venue.some((v) => {
+      if (v === w) return true;
+      const [short, long] = v.length < w.length ? [v, w] : [w, v];
+      return short.length >= 4 && long.length - short.length <= 2 && long.startsWith(short);
+    });
   const sharedIfContained = (s: string | undefined): number => {
     const hit = titleWords(s);
     let shared = 0;
-    for (const t of hit) if (venue.has(t)) shared++;
+    for (const t of hit) if (inVenue(t)) shared++;
     return shared * 2 > hit.size ? shared : 0;
   };
   let best: TmdbMovieResult | undefined;
