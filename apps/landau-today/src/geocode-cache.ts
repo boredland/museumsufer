@@ -233,6 +233,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "hohenstaufensaal|annweiler am trifels": [49.203384, 7.966311],
   "holzappel e.v. - völkersweiler|völkersweiler": [49.168728, 7.931913],
   "hospiz bethesda landau|landau in der pfalz": [49.206499, 8.104907],
+  "hotel schloss edesheim|edesheim": [49.262645, 8.1325],
   "hotel-restaurant winzerhof|st. martin": [49.299556, 8.103121],
   "hotel-ristorante la corona|maikammer": [49.305216, 8.131629],
   "i-punkt kirrweiler|kirrweiler": [49.302004, 8.165108],
