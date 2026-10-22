@@ -159,11 +159,7 @@ function hasFilmCinemaLabel(ev: CanonicalEvent): boolean {
   return false;
 }
 
-async function searchTmdbMovie(
-  title: string,
-  year: number | undefined,
-  apiKey: string,
-): Promise<TmdbMovieResult | null> {
+async function searchTmdbMovie(title: string, year: number | undefined, apiKey: string): Promise<TmdbMovieResult[]> {
   const params = new URLSearchParams({
     query: title,
     api_key: apiKey,
@@ -178,7 +174,50 @@ async function searchTmdbMovie(
   );
   if (!res.ok) throw new Error(`tmdb movie ${res.status} for "${title}"`);
   const data = (await res.json()) as TmdbSearchResponse<TmdbMovieResult>;
-  return data.results?.[0] ?? null;
+  return data.results ?? [];
+}
+
+const TITLE_STOPWORDS = new Set(
+  "der die das den dem des ein eine einen einer eines und oder im am an auf aus bei mit nach von vom zu zum zur für über the a of and or in on at to for with from by la le les el il lo de del di du et y".split(
+    " ",
+  ),
+);
+
+/** Content words of a title: accent- and case-folded, stopwords and pure
+ *  numbers dropped so "der" or "2026" never count as shared evidence. */
+function titleWords(s: string | undefined): Set<string> {
+  if (!s) return new Set();
+  const folded = s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().replace(/ß/g, "ss");
+  return new Set(folded.split(/[^\p{L}\p{N}]+/u).filter((t) => /\p{L}/u.test(t) && !TITLE_STOPWORDS.has(t)));
+}
+
+/** A fallback query is only a fragment of the venue title ("Der Nussknacker"
+ *  out of "Royal Opera & Ballet Live 2026/27: Der Nussknacker"), so TMDb's
+ *  top hit for it is often a different work sharing the fragment — Barbie in
+ *  the Nutcracker. Accept a hit only when more than half of its title's words
+ *  appear in the venue title ("Barbie in Der Nussknacker" has 1 of 2, so no
+ *  poster beats a wrong one), then prefer the hit sharing the most words, so
+ *  "RBO 2026/27: Der Nussknacker (The Royal Ballet)" beats some other
+ *  production titled just "Der Nussknacker". */
+function bestFallbackHit(results: TmdbMovieResult[], venueTitle: string): TmdbMovieResult | undefined {
+  const venue = titleWords(venueTitle);
+  const sharedIfContained = (s: string | undefined): number => {
+    const hit = titleWords(s);
+    let shared = 0;
+    for (const t of hit) if (venue.has(t)) shared++;
+    return shared * 2 > hit.size ? shared : 0;
+  };
+  let best: TmdbMovieResult | undefined;
+  let bestShared = 0;
+  for (const r of results) {
+    const shared = Math.max(sharedIfContained(r.title), sharedIfContained(r.original_title));
+    // Strict `>` keeps TMDb's popularity order on ties.
+    if (shared > bestShared) {
+      best = r;
+      bestShared = shared;
+    }
+  }
+  return best;
 }
 
 async function searchTmdbTv(title: string, year: number | undefined, apiKey: string): Promise<TmdbTvResult | null> {
@@ -278,10 +317,12 @@ async function toEntry(
  *  Stops at the first hit. */
 async function fetchTmdb(title: string, year: number | undefined, apiKey: string): Promise<TmdbCacheEntry | null> {
   const candidates = [title, ...candidateFallbacks(title)];
-  // First pass: movie search across every candidate.
-  for (const c of candidates) {
-    let hit = await searchTmdbMovie(c, year, apiKey);
-    if (!hit && year) hit = await searchTmdbMovie(c, undefined, apiKey);
+  // First pass: movie search across every candidate. The full title is
+  // specific enough to trust TMDb's top hit; fallback fragments are not.
+  for (const [i, c] of candidates.entries()) {
+    const pick = (results: TmdbMovieResult[]) => (i === 0 ? results[0] : bestFallbackHit(results, title));
+    let hit = pick(await searchTmdbMovie(c, year, apiKey));
+    if (!hit && year) hit = pick(await searchTmdbMovie(c, undefined, apiKey));
     if (hit) return toEntry(hit, "movie", apiKey);
   }
   // Last resort: TV search on the original title (covers MET Opera HD
@@ -404,7 +445,11 @@ export async function enrichFilmPosters(
   // cache entry that has imdb_id but is missing the ratings.
   let omdbMatched = 0;
   let omdbFailed = 0;
-  const omdbKeys = opts.omdbApiKey?.split(",").map((k) => k.trim()).filter(Boolean) ?? [];
+  const omdbKeys =
+    opts.omdbApiKey
+      ?.split(",")
+      .map((k) => k.trim())
+      .filter(Boolean) ?? [];
   if (omdbKeys.length > 0) {
     const pendingOmdb: Array<{ cacheKey: string; imdb_id: string }> = [];
     for (const [cacheKey, entry] of Object.entries(opts.cache)) {
