@@ -126,6 +126,9 @@ function normaliseTitle(title: string): string {
   return t;
 }
 
+/** Broadcast season label: "2026/27" in "RBO Live 2026/27: Tosca". */
+const SEASON_RE = /\b(?:19|20)\d{2}\/\d{2}\b/;
+
 /** Fallback extractors that take a normalised title and yield candidates
  *  to retry when the original search returned nothing. Order matters —
  *  most-specific first. */
@@ -133,11 +136,19 @@ function* candidateFallbacks(title: string): Generator<string> {
   // Inner-quoted segment: "Kino4Kids „Zirkuskind"" → "Zirkuskind"
   const inner = title.match(INNER_QUOTED_RE);
   if (inner) yield inner[1].trim();
+  // Live-broadcast series carry a season ("Royal Opera & Ballet Live
+  // 2026/27: Der Nussknacker"). TMDb lists each season's production as its
+  // own entry, and only a query naming the season finds this one rather
+  // than an older staging.
+  const season = title.match(SEASON_RE)?.[0];
   // Tail after the last colon — German cinema-house series prefix
   const colon = title.lastIndexOf(":");
   if (colon !== -1) {
     const tail = title.slice(colon + 1).trim();
-    if (tail.length >= 3 && tail.length < title.length) yield tail;
+    if (tail.length >= 3 && tail.length < title.length) {
+      if (season && !tail.includes(season)) yield `${season} ${tail}`;
+      yield tail;
+    }
   }
   // Tail after the last hyphen/en-dash/em-dash. Last resort, only fires
   // after the colon-tail above already missed. "Alpen Film Festival 2026
@@ -198,9 +209,23 @@ function titleWords(s: string | undefined): Set<string> {
  *  appear in the venue title ("Barbie in Der Nussknacker" has 1 of 2, so no
  *  poster beats a wrong one), then prefer the hit sharing the most words, so
  *  "RBO 2026/27: Der Nussknacker (The Royal Ballet)" beats some other
- *  production titled just "Der Nussknacker". */
+ *  production titled just "Der Nussknacker". When the venue title names a
+ *  season, the hit must name the same one, or its start year ("Berliner
+ *  Philharmoniker: Silvesterkonzert 2026" for 2026/27): "Royal Opera House
+ *  2021/22: Schwanensee" is an older staging, and an unlabelled "Tosca" or
+ *  "Der Nussknacker" is some other film of the work. */
 function bestFallbackHit(results: TmdbMovieResult[], venueTitle: string): TmdbMovieResult | undefined {
   const venue = [...titleWords(venueTitle)];
+  const venueSeason = venueTitle.match(SEASON_RE)?.[0];
+  const sameSeason = (r: TmdbMovieResult): boolean => {
+    if (!venueSeason) return true;
+    const startYear = new RegExp(`\\b${venueSeason.slice(0, 4)}\\b`);
+    return [r.title, r.original_title].some((s) => {
+      if (!s) return false;
+      const season = s.match(SEASON_RE)?.[0];
+      return season ? season === venueSeason : startYear.test(s);
+    });
+  };
   // Venues spell the same word in German or English ("The Royal Ballett"
   // vs TMDb's "Royal Ballet"), so a word also counts when one form is the
   // other plus at most two letters.
@@ -219,6 +244,7 @@ function bestFallbackHit(results: TmdbMovieResult[], venueTitle: string): TmdbMo
   let best: TmdbMovieResult | undefined;
   let bestShared = 0;
   for (const r of results) {
+    if (!sameSeason(r)) continue;
     const shared = Math.max(sharedIfContained(r.title), sharedIfContained(r.original_title));
     // Strict `>` keeps TMDb's popularity order on ties.
     if (shared > bestShared) {
