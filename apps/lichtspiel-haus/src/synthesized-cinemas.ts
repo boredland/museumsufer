@@ -66,15 +66,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-botanischer-garten-wuppertal-elisenturm",
-    name: "Botanischer Garten Wuppertal / Elisenturm",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-cinemaxx-wuppertal",
     name: "CinemaxX Wuppertal",
     address: "",
@@ -122,15 +113,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   {
     slug: "bergisch-medienprojekt-wuppertal",
     name: "Medienprojekt Wuppertal",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
-    slug: "bergisch-orangerie-im-botanischen-garten",
-    name: "Orangerie im Botanischen Garten",
     address: "",
     lat: 51.256,
     lon: 7.15,
