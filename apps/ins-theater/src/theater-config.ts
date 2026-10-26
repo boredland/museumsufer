@@ -527,7 +527,7 @@ export const CURATED_THEATERS: TheaterConfig[] = [
     website_url: "https://kellertheater.de",
     ticketing_provider: "custom",
     description:
-      "Amateurbühne im Keller der Laeiszhalle am Johannes-Brahms-Platz. Krimiklassiker, Komödien, Kinderstücke und Lesungen des Ensembles, ganzjährig außer in der Sommerpause.",
+      "Bühne im Keller vom Brahms-Kontor am Johannes-Brahms-Platz. Klassiker, Krimi, Komödien, Kinderstücke und Lesungen, ganzjährig Freitags, Sonnabends und Sonntags, außer in der Sommerpause.",
   },
   {
     slug: "theater-marschnerstrasse",
