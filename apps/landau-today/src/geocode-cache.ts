@@ -355,6 +355,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "matthäuskirche landau|landau in der pfalz": [49.198283, 8.112344],
   "max-slevogt-gymnasium, hindenburgstraße 2, raum 040 a altbau|landau in der pfalz": [49.198283, 8.112344],
   "max-slevogt-gymnasium|landau/pfalz": [49.2014, 8.111135],
+  "mehrgenerationenhaus am danziger platz in landau|landau in der pfalz": [49.198283, 8.112344],
   "mensa der montessorischule, dörrenbergstraße 1|landau in der pfalz": [49.198283, 8.112344],
   "mio landau|landau in der pfalz": [49.194717, 8.112677],
   "mittelmühle hainfeld|hainfeld": [49.256913, 8.088769],
