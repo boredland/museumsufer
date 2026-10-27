@@ -137,6 +137,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-gemarker-kirche": "Gemarker Kirche",
   "bergisch-gesamtschule-uellendahl-katernberg": "Gesamtschule Uellendahl-Katernberg",
   "bergisch-geschwister-scholl-platz": "Geschwister-Scholl-Platz",
+  "bergisch-glaserne-werkstatt": "Gläserne Werkstatt",
   "bergisch-glucksbuchladen": "Glücksbuchladen",
   "bergisch-grafrath-museum": "Gräfrath-Museum",
   "bergisch-haases-papiertheater": "Haases Papiertheater",
