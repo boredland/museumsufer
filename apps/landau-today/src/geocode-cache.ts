@@ -258,6 +258,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "jugendstil-festhalle landau (kleiner saal)|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil-festhalle landau (konzertgarten)|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil-festhalle landau in der pfalz|landau in der pfalz": [49.195785, 8.120557],
+  "jugendstil-festhalle, großer saal|": [49.198283, 8.112344],
   "jugendstil-festhalle, kleiner saal|landau in der pfalz": [49.198283, 8.112344],
   "jugendstil-festhalle|landau in der pfalz": [49.195785, 8.120557],
   "jugendstil-festhalle|landau/pfalz": [49.195785, 8.120557],
