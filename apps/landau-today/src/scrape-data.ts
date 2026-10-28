@@ -481,5 +481,5 @@ export const SCRAPE_DATA: ScrapeData = {
     {"category":"konzert","city":"Landau in der Pfalz","date":"2027-11-12","description":"Raus aus den Kellern, rauf auf die Bühne!","detail_url":"https://kulturnetz-landau.de/veranstaltung/offene-buehne-pomr/","id":3787508782,"image_url":"https://kulturnetz-landau.de/media/c/images/events/DSCF6321-1/ce50dcefd377a034e51c5a7828e7808f.jpeg","lat":49.196059,"lng":8.106565,"source":"kulturnetz-landau","source_uid":"offene-buehne-pomr","time":"20:00","title":"Offene Bühne","venue":"Haus am Westbahnhof"},
     {"category":"konzert","city":"Landau in der Pfalz","date":"2027-12-10","description":"Raus aus den Kellern, rauf auf die Bühne!","detail_url":"https://kulturnetz-landau.de/veranstaltung/offene-buehne-ngz3/","id":4194924736,"image_url":"https://kulturnetz-landau.de/media/c/images/events/fef26d11a0cc385929c1e6cf5ac207da_65vb3Tx/cb1ef09a46a9f81dc4e4b518d1d05450.jpg","lat":49.198283,"lng":8.112344,"source":"kulturnetz-landau","source_uid":"offene-buehne-ngz3","time":"20:00","title":"Offene Bühne","venue":"Das Haus (Südstern e.V.)"}
   ],
-  generatedAt: "2026-10-28T14:16:32.881Z",
+  generatedAt: "2026-10-28T19:46:38.986Z",
 };
