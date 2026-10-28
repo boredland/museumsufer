@@ -66,6 +66,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-burgerbahnhof-vohwinkel",
+    name: "BürgerBahnhof Vohwinkel",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "bergisch-cinemaxx-wuppertal",
     name: "CinemaxX Wuppertal",
     address: "",
