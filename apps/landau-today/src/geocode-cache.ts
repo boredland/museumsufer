@@ -9,6 +9,7 @@
  * couldn't resolve so we don't keep retrying.
  */
 export const GEOCODE_CACHE: Record<string, [number, number]> = {
+  "\"alte kellerei\"|st. martin": [49.299556, 8.103121],
   "\"das waldhaus\" in maikammer|maikammer": [49.305216, 8.131629],
   "\"kunstzentrum hochstadt 142\"|hochstadt": [49.241666, 8.210996],
   "60+ smart ins internet das projekt der digital-botschafter landau|landau in der pfalz": [49.198283, 8.112344],
@@ -275,6 +276,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "katharinenkapelle|landau": [49.199235, 8.112627],
   "katharinenkapelle|landau in der pfalz": [49.199235, 8.112627],
   "katholische kirche st. stephanus|albersweiler": [49.218951, 8.029965],
+  "katholische kirche st.sebastian|schweigen-rechtenbach": [49.054561, 7.956034],
   "katholische kirche|göcklingen": [49.1611, 8.0396],
   "katholische pfarrkirche \"kreuzerhöhung\"|kirrweiler": [49.634729, 7.500757],
   "kelterhalle weingut siener-dr. wettstein|siebeldingen": [49.209861, 8.050691],
@@ -334,6 +336,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "landjugend kirrweiler|kirrweiler": [49.634729, 7.500757],
   "laurentiusgarten göcklingen|göcklingen": [49.161549, 8.042512],
   "le petit atelier|landau in der pfalz": [49.198283, 8.112344],
+  "lederstrump-brunnen, edenkoben|edenkoben": [49.282236, 8.128436],
   "leinsweiler hof hotel-betriebs-gmbh|leinsweiler": [49.182507, 8.020491],
   "lgs skatepark|landau in der pfalz": [49.198283, 8.112344],
   "linkes zentrum \"kätche brunner\"|landau in der pfalz": [49.198283, 8.112344],
@@ -423,6 +426,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "ortsverwaltung geinsheim|neustadt-geinsheim": [49.304655, 8.255975],
   "ortsverwaltung haardt|neustadt-haardt": [49.367186, 8.139155],
   "ortsverwaltung mußbach|neustadt-mußbach": [49.369941, 8.169858],
+  "ortsvinothek weinkammer maikammer|maikammer": [49.305216, 8.131629],
   "ortsvinothek weinkammer|maikammer": [49.305216, 8.131629],
   "ortsvorsteherbüro arzheim landau-arzheim|landau-arzheim": [49.19499, 8.05697],
   "ostpark, eingang an den holzterassen (ostbahnstraße)|landau in der pfalz": [49.198283, 8.112344],
@@ -558,6 +562,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "stadtbücherei, heinrich-heine-platz 10|landau in der pfalz": [49.198283, 8.112344],
   "stadtgebiet landau|": [49.198283, 8.112344],
   "stadtleben landau in der pfalz gmbh|landau in der pfalz": [49.198283, 8.112344],
+  "stadtleben landau in der pfalz|landau in der pfalz": [49.198283, 8.112344],
   "stadtteilbüro landau-süd|landau in der pfalz": [49.198283, 8.112344],
   "stiftkirche|landau in der pfalz": [49.198283, 8.112344],
   "stiftskirche - marktstraße 93|landau in der pfalz": [49.198283, 8.112344],
@@ -657,6 +662,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "wein- und sekthaus schreieck|maikammer": [49.30713, 8.127736],
   "wein- und steinlehrpfad st. martin|st.martin": [49.299556, 8.103121],
   "wein-erlebnistouren - brigitta heyl|neustadt": [49.353606, 8.136025],
+  "wein-erlebnistouren brigitta heyl|neustadt an der weinstrasse": [49.353606, 8.136025],
   "weindorf auf dem alten meßplatz|landau in der pfalz": [49.198283, 8.112344],
   "weindorf landau wollmesheim|landau-wollmesheim": [49.181409, 8.086063],
   "weinerlebnispfad nußdorf|landau in der pfalz": [49.198283, 8.112344],
