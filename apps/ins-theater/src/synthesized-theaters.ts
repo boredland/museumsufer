@@ -733,6 +733,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "harburger-theater",
+    name: "Harburger Theater",
+    address: "",
+    lat: 53.459,
+    lon: 9.9773,
+    city: "hamburg",
+    website_url: "https://staeitsch-shop.comfortticket.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "heidelberger-fruehling",
     name: "Heidelberger Frühling",
     address: "",
