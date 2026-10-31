@@ -120,15 +120,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-max-leven-zentrum-solingen",
-    name: "Max-Leven-Zentrum Solingen",
-    address: "",
-    lat: 51.171,
-    lon: 7.085,
-    city: "solingen",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-medienprojekt-wuppertal",
     name: "Medienprojekt Wuppertal",
     address: "",
@@ -216,7 +207,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 51.164,
     lon: 7.082,
     city: "solingen",
-    website_url: "https://www.kinoheld.de",
+    website_url: "https://www.wuppertal-live.de",
   },
   {
     slug: "dfg-frankfurt",
