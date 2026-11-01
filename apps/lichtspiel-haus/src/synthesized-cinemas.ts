@@ -207,7 +207,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 51.164,
     lon: 7.082,
     city: "solingen",
-    website_url: "https://www.wuppertal-live.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "dfg-frankfurt",
