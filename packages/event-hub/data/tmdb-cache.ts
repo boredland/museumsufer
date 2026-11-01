@@ -1148,6 +1148,7 @@ export const TMDB_POSTER_CACHE: Record<string, TmdbCacheEntry | null> = {
   "doppelprogramm: dog movie/puppygirl of, keine angabe|2023": null,
   "doppelprogramm: no let them die & wagu dagaran , keine angabe|2024": null,
   "doppelter herzschlag , keine angabe|2013": null,
+  "double feature dune & dune: part two|*": {"id":693134,"poster":"/zYLP7Uiqz6XqoiQLAu4XQ6DRUMz.jpg","title":"Dune: Part Two","title_en":"Dune: Part Two","overview":"Paul Atreides begibt sich mithilfe von Chani und den Fremen auf einen Rachefeldzug gegen die Verschwörer, die seine Familie vernichtet haben. Der junge Paul steht vor der Wahl zwischen der Liebe seines Lebens und dem Schicksal des gesamten Universums. Mit allen Mitteln aber muss er versuchen, eine schreckliche Zukunft zu verhindern – eine Zukunft, die niemand außer ihm vorhersehen kann.","overview_en":"Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the known universe, Paul endeavors to prevent a terrible future only he can foresee.","kind":"movie","genre_ids":[878,12],"vote_average":8.144,"vote_count":8877,"imdb_id":"tt15239678","rt_critic":92,"rt_url":"https://www.rottentomatoes.com/m/dune_part_two","imdb_rating":8.4,"imdb_votes":797737},
   "double feature dune 1&2|*": null,
   "double feature spider-man: no way home & brand new day|2026": null,
   "double feature – \"lauf des lebens\"|2026": null,
