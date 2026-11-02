@@ -343,16 +343,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-niederlandisch-reformierte-gemeinde",
-    name: "Niederländisch-reformierte Gemeinde",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-nonna-di-mia",
     name: "Nonna di Mia",
     address: "",
