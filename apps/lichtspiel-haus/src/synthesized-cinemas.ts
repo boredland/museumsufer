@@ -381,15 +381,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.metropoliskino.de",
   },
   {
-    slug: "mousonturm",
-    name: "Künstler*innenhaus Mousonturm",
-    address: "",
-    lat: 50.1183,
-    lon: 8.7019,
-    city: "frankfurt",
-    website_url: "https://www.mousonturm.de",
-  },
-  {
     slug: "passage-kino-hamburg",
     name: "Passage Kino Hamburg",
     address: "",

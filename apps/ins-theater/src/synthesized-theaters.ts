@@ -43,16 +43,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-bergische-vhs-elberfeld",
-    name: "Bergische VHS - Elberfeld",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-burgerbahnhof-vohwinkel",
     name: "BürgerBahnhof Vohwinkel",
     address: "",
