@@ -111,6 +111,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-kulturschmiede",
+    name: "Kulturschmiede",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "bergisch-loch",
     name: "Loch",
     address: "",
@@ -442,6 +451,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.5765,
     city: "frankfurt",
     website_url: "https://taunale.de",
+  },
+  {
+    slug: "wdc2026-ludwigsplatz",
+    name: "Ludwigsplatz",
+    address: "",
+    lat: 49.8708149,
+    lon: 8.6540728,
+    city: "darmstadt",
+    website_url: "https://wdc2026.org",
   },
   {
     slug: "zeise-kinos",
