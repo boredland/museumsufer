@@ -473,6 +473,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "bergisch-tanzschule-wieber",
+    name: "Tanzschule Wieber",
+    address: "",
+    lat: 51.178,
+    lon: 7.193,
+    city: "remscheid",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-teo-otto-theater",
     name: "Teo Otto Theater",
     address: "",

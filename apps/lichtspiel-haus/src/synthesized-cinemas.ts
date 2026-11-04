@@ -291,15 +291,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://filmforum-hoechst.com",
   },
   {
-    slug: "hugenottenhalle",
-    name: "Hugenottenhalle",
-    address: "",
-    lat: 50.0494,
-    lon: 8.6942,
-    city: "frankfurt",
-    website_url: "https://www.hugenottenhalle.de",
-  },
-  {
     slug: "institut-francais-frankfurt",
     name: "Institut français Frankfurt",
     address: "",
@@ -451,15 +442,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.5765,
     city: "frankfurt",
     website_url: "https://taunale.de",
-  },
-  {
-    slug: "wdc2026-ludwigsplatz",
-    name: "Ludwigsplatz",
-    address: "",
-    lat: 49.8708149,
-    lon: 8.6540728,
-    city: "darmstadt",
-    website_url: "https://wdc2026.org",
   },
   {
     slug: "zeise-kinos",
