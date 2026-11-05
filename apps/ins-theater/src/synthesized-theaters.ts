@@ -1093,16 +1093,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-zoogesellschaftshaus",
-    name: "Zoogesellschaftshaus",
-    address: "",
-    lat: 50.1158416,
-    lon: 8.699598,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "zimmertheater-heidelberg",
     name: "Zimmertheater Heidelberg",
     address: "",

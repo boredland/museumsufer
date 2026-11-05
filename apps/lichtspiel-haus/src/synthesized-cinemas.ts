@@ -291,13 +291,13 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://filmforum-hoechst.com",
   },
   {
-    slug: "institut-francais-frankfurt",
-    name: "Institut français Frankfurt",
+    slug: "hugenottenhalle",
+    name: "Hugenottenhalle",
     address: "",
-    lat: 50.1208,
-    lon: 8.6595,
+    lat: 50.0494,
+    lon: 8.6942,
     city: "frankfurt",
-    website_url: "https://www.institutfrancais.de",
+    website_url: "https://www.hugenottenhalle.de",
   },
   {
     slug: "juedisches-museum-frankfurt",

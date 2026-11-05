@@ -29,6 +29,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-alte-glaserei": "Alte Glaserei",
   "bergisch-alte-papierfabrik": "Alte Papierfabrik",
   "bergisch-alte-schlosserei": "Alte Schlosserei",
+  "bergisch-alter-bahnhof-solingen-schalterhalle": "Alter Bahnhof Solingen - Schalterhalle",
   "bergisch-alter-markt-solingen": "Alter Markt Solingen",
   "bergisch-anr-rechtsanwalte-im-historischen-preussischen-postamt": "ANR-Rechtsanwälte - im historischen preußischen Postamt",
   "bergisch-arrenberg": "Arrenberg",
