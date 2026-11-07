@@ -381,6 +381,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.metropoliskino.de",
   },
   {
+    slug: "museum-fuer-kommunikation-frankfurt",
+    name: "Museum für Kommunikation Frankfurt",
+    address: "",
+    lat: 50.1038,
+    lon: 8.6702,
+    city: "frankfurt",
+    website_url: "https://www.mfk-frankfurt.de",
+  },
+  {
     slug: "passage-kino-hamburg",
     name: "Passage Kino Hamburg",
     address: "",

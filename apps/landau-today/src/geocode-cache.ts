@@ -169,6 +169,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "fluggelände fmc offenbach|offenbach": [50.1055, 8.76107],
   "forschungsstation der rptu|eußerthal": [49.241548, 7.972228],
   "forstamt haardt, westring 6|landau in der pfalz": [49.198944, 8.108505],
+  "forstamt haardt|landau in der pfalz": [49.198944, 8.108505],
   "foyer des ewl, georg-friedrich-denzel-straße 1|": [49.198283, 8.112344],
   "foyer des rathauses vor dem bürgerbüro|landau in der pfalz": [49.198283, 8.112344],
   "frank-loebsches haus (innenhof)|landau in der pfalz": [49.198283, 8.112344],
