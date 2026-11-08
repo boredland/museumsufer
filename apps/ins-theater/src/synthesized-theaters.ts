@@ -13,16 +13,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-allee-arkaden",
-    name: "Allee Arkaden",
-    address: "",
-    lat: 51.178,
-    lon: 7.193,
-    city: "remscheid",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-bandfabrik",
     name: "Bandfabrik",
     address: "",
