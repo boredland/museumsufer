@@ -393,6 +393,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "mörzheim|": [49.167358, 8.075369],
   "naturfreundehaus kiesbuckel|albersweiler": [49.234514, 8.031474],
   "naturmöbelhaus heinrich|kapellen-drusweiler": [49.10314, 8.031469],
+  "netto marken-discount|annweiler am trifels": [49.212062, 7.981488],
   "neuer messplatz / alfred-nobel-platz|landau in der pfalz": [49.198283, 8.112344],
   "neues messegelände|landau in der pfalz": [49.198283, 8.112344],
   "neues rathaus|landau in der pfalz": [49.198283, 8.112344],
