@@ -29,6 +29,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "alter bahnhof offenbach|offenbach an der queich": [49.195993, 8.192833],
   "alter kaufhaus, foyer|landau in der pfalz": [0, 0],
   "alter messplatz|landau in der pfalz": [49.201643, 8.109603],
+  "alter meßplatz in landau|": [49.201643, 8.109603],
   "alter meßplatz|landau in der pfalz": [49.201643, 8.109603],
   "alter schulhof|offenbach an der queich": [49.195993, 8.192833],
   "altes kaufhaus (foyer)|landau in der pfalz": [49.198283, 8.112344],

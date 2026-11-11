@@ -1003,16 +1003,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-ludwigsplatz",
-    name: "Ludwigsplatz",
-    address: "",
-    lat: 49.8708149,
-    lon: 8.6540728,
-    city: "darmstadt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-staatstheater-darmstadt",
     name: "Staatstheater Darmstadt",
     address: "",
