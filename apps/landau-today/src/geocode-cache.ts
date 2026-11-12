@@ -493,6 +493,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "prot kirchengemeinde annweiler|annweiler am trifels": [49.202725, 7.968226],
   "prot. kirchengemeinde|maikammer": [49.305216, 8.131629],
   "prot. kirche|freimersheim": [49.2683, 8.223612],
+  "prot. pfarramt gimmeldingen- königsbach|neustadt an der weinstraße": [49.353606, 8.136025],
   "prot. stiftskirche landau|landau in der pfalz": [49.198283, 8.112344],
   "protestantische kirche gleiszellen|gleiszellen-gleishorbach": [49.129925, 8.007752],
   "protestantische kirche godramstein|landau in der pfalz": [49.198283, 8.112344],
