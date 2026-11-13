@@ -993,16 +993,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "wdc2026-frankfurt-lab",
-    name: "Frankfurt LAB",
-    address: "",
-    lat: 50.103469,
-    lon: 8.6193694,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
-    ticketing_provider: null,
-  },
-  {
     slug: "wdc2026-staatstheater-darmstadt",
     name: "Staatstheater Darmstadt",
     address: "",

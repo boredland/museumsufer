@@ -165,6 +165,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-wuppertal-diverse-orte",
+    name: "Wuppertal (diverse Orte)",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "blankeneser-kino",
     name: "Blankeneser Kino",
     address: "",

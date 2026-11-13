@@ -130,6 +130,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "dorfgemeinschaftshaus arzheim|landau in der pfalz": [49.198283, 8.112344],
   "dorfgemeinschaftshaus bornheim|bornheim": [49.220822, 8.167342],
   "dorfgemeinschaftshaus edelhof|kirrweiler": [49.634729, 7.500757],
+  "dorfgemeinschaftshaus godramstein|landau in der pfalz": [49.209388, 8.07534],
   "dorfgemeinschaftshaus hochstadt|hochstadt": [49.240976, 8.219513],
   "dorfgemeinschaftshaus ilbesheim|ilbesheim": [49.182988, 8.050588],
   "dorfgemeinschaftshaus kinck`sche mühle|landau- godramstein": [49.21552, 8.07935],
