@@ -803,16 +803,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "lichtwark-theater",
-    name: "LichtwarkTheater",
-    address: "",
-    lat: 53.4851,
-    lon: 10.2285,
-    city: "hamburg",
-    website_url: "https://staeitsch-shop.comfortticket.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "literaturhaus-darmstadt",
     name: "Literaturhaus Darmstadt",
     address: "",
@@ -970,16 +960,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     lon: 7.1466,
     city: "wuppertal",
     website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
-    slug: "wdc2026-alte-schlosserei-offenbach",
-    name: "Alte Schlosserei Offenbach",
-    address: "",
-    lat: 50.11096329999999,
-    lon: 8.744746,
-    city: "frankfurt",
-    website_url: "https://wdc2026.org",
     ticketing_provider: null,
   },
   {

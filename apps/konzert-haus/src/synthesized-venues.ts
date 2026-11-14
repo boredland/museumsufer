@@ -300,7 +300,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 7.085,
     city: "solingen",
     website_url: "https://www.wuppertal-live.de",
-    default_genre: "jazz",
+    default_genre: "world",
   },
   {
     slug: "bergisch-ev-stadtkirche-am-fronhof",
@@ -455,16 +455,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
   {
     slug: "bergisch-insel",
     name: "INSEL",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "jazz",
-  },
-  {
-    slug: "bergisch-internationales-begegnungszentrum-der-caritas",
-    name: "Internationales Begegnungszentrum der Caritas",
     address: "",
     lat: 51.256,
     lon: 7.15,
@@ -1079,7 +1069,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lat: 50.0972,
     lon: 8.7449,
     city: "frankfurt",
-    website_url: "https://www.eventim.de",
+    website_url: "https://loveyourartist.com",
     default_genre: "experimental",
   },
   {
