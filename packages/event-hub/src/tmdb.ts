@@ -35,7 +35,7 @@ const DEEPL_ES_BUDGET = 20;
  *  unbounded loop through the shared proxy does not stop at its ~80-100 request quota,
  *  it crawls on 429 backoff and can exhaust the CI job's timeout. A count keeps the
  *  output deterministic; the backlog drains over successive runs. */
-const DEEPL_EN_BUDGET = 60;
+const DEEPL_EN_BUDGET = 40;
 
 interface TmdbMovieResult {
   id: number;

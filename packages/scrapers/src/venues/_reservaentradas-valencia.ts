@@ -1,5 +1,6 @@
 import { dateOffset, todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import { clipDescription, decodeHtml as decode, FILM_CINEMA_LABEL } from "./_valencia-cinema";
 
 const BASE = "https://www.reservaentradas.com";
@@ -40,8 +41,8 @@ const CINEMAS: ReservaCinema[] = [
   },
 ];
 
-async function fetchText(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(20_000) });
+async function fetchText(url: string, proxy: ProxyConfig | null = null): Promise<string> {
+  const res = await proxyFetch(url, proxy, { headers: { "User-Agent": UA }, signal: AbortSignal.timeout(20_000) });
   if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
   return res.text();
 }
@@ -182,14 +183,22 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
   return out;
 }
 
-async function scrapeCinema(cinema: ReservaCinema): Promise<VenueScrapeResult> {
+async function scrapeCinema(cinema: ReservaCinema, proxy: ProxyConfig | null): Promise<VenueScrapeResult> {
   const lastDate = dateOffset(HORIZON_DAYS);
   const today = todayIso();
-  const cinemaHtml = await fetchText(`${BASE}/cine/valencia/${cinema.key}`);
-  const films = filmLinks(cinemaHtml, cinema.key);
+  const cinemaUrl = `${BASE}/cine/valencia/${cinema.key}`;
+  // From GitHub's datacenter IPs the platform answers 200 with a page that has no film
+  // links (the hub only escalates 403/5xx to the proxy), so an empty listing is retried
+  // through the fetch proxy before it counts as an outage.
+  let via: ProxyConfig | null = null;
+  let films = filmLinks(await fetchText(cinemaUrl), cinema.key);
+  if (films.length === 0 && proxy) {
+    via = proxy;
+    films = filmLinks(await fetchText(cinemaUrl, proxy), cinema.key);
+  }
   if (films.length === 0) throw new Error(`reservaentradas ${cinema.source_slug}: no film links on the cinema page`);
   const settled = await mapLimit(films, CONCURRENCY, async (url) =>
-    parseFilmPage(await fetchText(url), cinema, url, lastDate, today),
+    parseFilmPage(await fetchText(url, via), cinema, url, lastDate, today),
   );
   const events: CanonicalScrapedEvent[] = [];
   let failures = 0;
@@ -218,8 +227,8 @@ async function scrapeCinema(cinema: ReservaCinema): Promise<VenueScrapeResult> {
  * events age out via the hub's stale TTL) instead of being reported as empty;
  * all of them failing throws.
  */
-export async function scrapeReservaentradasValencia(): Promise<VenueScrapeResult[]> {
-  const settled = await Promise.allSettled(CINEMAS.map(scrapeCinema));
+export async function scrapeReservaentradasValencia(proxy: ProxyConfig | null = null): Promise<VenueScrapeResult[]> {
+  const settled = await Promise.allSettled(CINEMAS.map((cinema) => scrapeCinema(cinema, proxy)));
   const results: VenueScrapeResult[] = [];
   for (const [i, outcome] of settled.entries()) {
     if (outcome.status === "fulfilled") results.push(outcome.value);

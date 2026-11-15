@@ -16,7 +16,7 @@ const TARGETS: Record<SourceLang, readonly string[]> = {
  *  skipping every other derive and the commit. A count (never a time budget) keeps the
  *  output deterministic; the shortest-first order means titles land first and the
  *  backlog drains over successive runs. */
-const MAX_TRANSLATIONS_PER_RUN = 80;
+const MAX_TRANSLATIONS_PER_RUN = 60;
 
 type Translate = (config: DeeplConfig, text: string, targetLang: string, sourceLang: string) => Promise<string>;
 

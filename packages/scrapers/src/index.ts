@@ -360,7 +360,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "filmforum-hoechst", run: (_ctx: ScraperContext) => scrapeFilmforumHoechst() },
   { slug: "filmoteca-valencia", run: (_ctx: ScraperContext) => scrapeFilmotecaValencia() },
   { slug: "ocine-aqua-valencia", run: (_ctx: ScraperContext) => scrapeOcineAquaValencia() },
-  { slug: "reservaentradas-valencia", run: (_ctx: ScraperContext) => scrapeReservaentradasValencia() },
+  { slug: "reservaentradas-valencia", run: (ctx: ScraperContext) => scrapeReservaentradasValencia(ctx.proxy) },
   { slug: "conocevalencia-cinemas-valencia", run: (_ctx: ScraperContext) => scrapeConocevalenciaCinemas() },
   { slug: "palau-de-la-musica-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLaMusicaValencia() },
   { slug: "palau-de-les-arts-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLesArtsValencia() },
