@@ -125,7 +125,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
       ]}
       icons={{ svg: "/favicon.svg", png192: "/icon-192.png", appleTouch: "/icon-192.png" }}
       alternates={[
-        { rel: "alternate", type: "application/rss+xml", title: "Museumsufer Frankfurt", href: "/feed.xml" },
+        { rel: "alternate", type: "application/rss+xml", title: ogSiteName, href: "/feed.xml" },
       ]}
       inlineCss={INLINE_CSS}
       fontsHref={null}

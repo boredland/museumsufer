@@ -1278,7 +1278,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   {
     name: "get_screenings",
     description:
-      "Get cinema screenings on a specific date in Frankfurt (and neighbouring venues). Returns titles, times, cinemas, version (OmU/OmeU/DF), format (35mm/DCP), prices, and ticket links.",
+      "Get cinema screenings on a specific date in this site's city (and neighbouring venues). Returns titles, times, cinemas, version (OmU/OmeU/DF), format (35mm/DCP), prices, and ticket links.",
     inputSchema: {
       type: "object",
       properties: {
@@ -1295,7 +1295,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   },
   {
     name: "get_cinemas",
-    description: "Get all cinemas with slug, name, address, and website.",
+    description: "Get the cinemas of this site's city with slug, name, address, and website.",
     inputSchema: { type: "object", properties: {} },
     executeBody: `return fetch('/api/cinemas').then(function(r) { return r.json(); });`,
   },

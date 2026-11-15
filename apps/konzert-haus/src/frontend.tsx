@@ -860,7 +860,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   {
     name: "get_events",
     description:
-      "Get concerts on a specific date in Frankfurt (and neighbouring venues). Returns titles, times, venues, genres, prices, and ticket links.",
+      "Get concerts on a specific date in this site's city (and neighbouring venues). Returns titles, times, venues, genres, prices, and ticket links.",
     inputSchema: {
       type: "object",
       properties: {
@@ -877,7 +877,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   },
   {
     name: "get_venues",
-    description: "Get all configured concert venues with slug, name, address, and website.",
+    description: "Get the concert venues of this site's city with slug, name, address, and website.",
     inputSchema: { type: "object", properties: {} },
     executeBody: `return fetch('/api/venues').then(function(r) { return r.json(); });`,
   },
