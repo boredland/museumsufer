@@ -11,7 +11,8 @@ import type { Env } from "../types";
  *  locale lives on the bare path, the others behind `?lang=`. */
 function hreflangLinks(url: string): string {
   const links = SUPPORTED_LOCALES.map(
-    (l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${l === DEFAULT_LOCALE ? url : `${url}?lang=${l}`}"/>`,
+    (l) =>
+      `    <xhtml:link rel="alternate" hreflang="${l}" href="${l === DEFAULT_LOCALE ? url : `${url}?lang=${l}`}"/>`,
   );
   links.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${url}"/>`);
   return links.join("\n");

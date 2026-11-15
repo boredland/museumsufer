@@ -507,7 +507,8 @@ const es: Translations = {
   emptyDirection: "Sala a oscuras",
   emptyTodayAfterPast: "Hoy ya no quedan más sesiones.",
   emptyHint: "Vuelva a consultar mañana o cambie la fecha de arriba.",
-  pastNote: (n) => `${n === 1 ? "1 sesión" : `${n} sesiones`} de hoy ya ${n === 1 ? "ha" : "han"} empezado — oculta${n === 1 ? "" : "s"}.`,
+  pastNote: (n) =>
+    `${n === 1 ? "1 sesión" : `${n} sesiones`} de hoy ya ${n === 1 ? "ha" : "han"} empezado — oculta${n === 1 ? "" : "s"}.`,
   dayMore: (n) => `${n === 1 ? "1 sesión" : `${n} sesiones`} más este día`,
   creditsLabel: "Con",
   moreLabel: "Más",
@@ -533,8 +534,7 @@ const es: Translations = {
     "Notificaciones push directas al dispositivo, sin correo ni cuenta. Se pueden cancelar en cualquier momento.",
   digestIosHint:
     "<strong>iPhone:</strong> pulsar «Compartir» y «Añadir a pantalla de inicio». Después hay que abrir la web desde el icono: solo así funcionan las notificaciones push.",
-  digestUnsupported:
-    "El navegador no admite notificaciones push. Pruebe con Safari (macOS), Chrome, Firefox o Edge.",
+  digestUnsupported: "El navegador no admite notificaciones push. Pruebe con Safari (macOS), Chrome, Firefox o Edge.",
   digestUnsubAll: "Cancelar todas",
   digestSave: "Guardar",
   digestUnsubscribeBtn: "Cancelar suscripción",

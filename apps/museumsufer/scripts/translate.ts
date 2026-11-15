@@ -95,7 +95,8 @@ export async function translateTexts(opts: {
   );
   const deferred = Math.max(0, jobs.length - MAX_TRANSLATIONS_PER_RUN);
   jobs.length = Math.min(jobs.length, MAX_TRANSLATIONS_PER_RUN);
-  if (deferred > 0) logOk("deepl", "-", `${deferred} translations deferred to later runs (cap ${MAX_TRANSLATIONS_PER_RUN}/run)`);
+  if (deferred > 0)
+    logOk("deepl", "-", `${deferred} translations deferred to later runs (cap ${MAX_TRANSLATIONS_PER_RUN}/run)`);
 
   const total = new Map<string, number>();
   const done = new Map<string, number>();

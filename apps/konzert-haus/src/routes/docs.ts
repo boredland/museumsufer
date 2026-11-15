@@ -26,7 +26,8 @@ const spec = {
       get: {
         tags: ["Events"],
         summary: "Events for a date",
-        description: "Returns `{date, count, events}` for the given day. Defaults to the host's city. Optional filters: venue, genre, city.",
+        description:
+          "Returns `{date, count, events}` for the given day. Defaults to the host's city. Optional filters: venue, genre, city.",
         operationId: "getDay",
         parameters: [
           {
@@ -37,7 +38,12 @@ const spec = {
           },
           { name: "venue", in: "query", schema: { type: "string" }, description: "Venue slug" },
           { name: "genre", in: "query", schema: { type: "string" }, description: "Genre key" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+          {
+            name: "city",
+            in: "query",
+            schema: { type: "string" },
+            description: "City key (defaults to the host's city)",
+          },
         ],
         responses: { "200": { description: "Day events" } },
       },
@@ -54,7 +60,12 @@ const spec = {
           { name: "to", in: "query", schema: { type: "string" }, description: "Range end (defaults today+60)" },
           { name: "venue", in: "query", schema: { type: "string" }, description: "Venue slug" },
           { name: "genre", in: "query", schema: { type: "string" }, description: "Genre key" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+          {
+            name: "city",
+            in: "query",
+            schema: { type: "string" },
+            description: "City key (defaults to the host's city)",
+          },
         ],
         responses: { "200": { description: "Event list" } },
       },

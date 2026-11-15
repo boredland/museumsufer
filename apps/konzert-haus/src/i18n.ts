@@ -567,8 +567,7 @@ const es: Translations = {
     "Notificaciones push directamente en tu dispositivo — sin correo electrónico ni cuenta. Puedes cancelar cuando quieras.",
   digestIosHint:
     "<strong>iPhone:</strong> toca «Compartir» y después «Añadir a la pantalla de inicio». Abre la web desde el icono: solo así funcionan las notificaciones push.",
-  digestUnsupported:
-    "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
+  digestUnsupported: "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
   digestUnsubAll: "Cancelar todas las suscripciones",
   digestSave: "Guardar",
   digestUnsubscribeBtn: "Cancelar suscripción",

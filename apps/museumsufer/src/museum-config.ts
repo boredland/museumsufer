@@ -807,7 +807,8 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
   "la-nau": {
     name: "Centre Cultural La Nau",
     city: "valencia",
-    website: "https://www.uv.es/uvweb/cultura/es/centros-programacion-cultural/centre-cultural-nau/programacion-cultural-1285873394161.html",
+    website:
+      "https://www.uv.es/uvweb/cultura/es/centros-programacion-cultural/centre-cultural-nau/programacion-cultural-1285873394161.html",
     lat: 39.4717,
     lng: -0.3726,
   },

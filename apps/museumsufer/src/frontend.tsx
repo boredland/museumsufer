@@ -124,9 +124,7 @@ export function renderHtmlHead(options: HtmlHeadOptions) {
         { content: "#14110e", media: "(prefers-color-scheme: dark)" },
       ]}
       icons={{ svg: "/favicon.svg", png192: "/icon-192.png", appleTouch: "/icon-192.png" }}
-      alternates={[
-        { rel: "alternate", type: "application/rss+xml", title: ogSiteName, href: "/feed.xml" },
-      ]}
+      alternates={[{ rel: "alternate", type: "application/rss+xml", title: ogSiteName, href: "/feed.xml" }]}
       inlineCss={INLINE_CSS}
       fontsHref={null}
       preconnect={[
@@ -555,9 +553,12 @@ export function renderPage(
   const appUrl = isFrankfurt ? "https://museumsufer.app" : `https://${city}.ins.museum`;
   const brand = isFrankfurt ? "Museumsufer Frankfurt" : `${cityName(city, locale, "short")} · ins.museum`;
   const museumsListName = isFrankfurt
-    ? { de: "Museumsufer-Museen", en: "Museumsufer museums", fr: "Musées du Museumsufer", es: "Museos del Museumsufer" }[
-        locale
-      ]
+    ? {
+        de: "Museumsufer-Museen",
+        en: "Museumsufer museums",
+        fr: "Musées du Museumsufer",
+        es: "Museos del Museumsufer",
+      }[locale]
     : {
         de: `Museen in ${cityName(city, locale, "full")}`,
         en: `${cityName(city, locale, "short")} museums`,

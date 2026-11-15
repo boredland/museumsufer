@@ -71,7 +71,15 @@ const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: ReadonlyArray<string
   },
   {
     genre: "chamber",
-    needles: ["kammerkonzert", "kammermusik", "liederabend", "chanson", "streichquartett", "klaviertrio", "klavierquartett"],
+    needles: [
+      "kammerkonzert",
+      "kammermusik",
+      "liederabend",
+      "chanson",
+      "streichquartett",
+      "klaviertrio",
+      "klavierquartett",
+    ],
   },
   {
     genre: "classical",

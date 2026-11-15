@@ -759,8 +759,7 @@ const es: Translations = {
   digestSchedWeeklyDesc: "La semana que viene",
   digestIosHint:
     "En iPhone/iPad: pulsa «Compartir» y luego «Añadir a pantalla de inicio». Después abre la página desde el nuevo icono: las notificaciones push solo funcionan en modo independiente.",
-  digestUnsupported:
-    "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
+  digestUnsupported: "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
   digestSubscribe: "Suscribirse",
   digestSave: "Guardar",
   digestUnsubAll: "Darse de baja de todo",
