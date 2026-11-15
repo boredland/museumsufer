@@ -9,7 +9,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.5606,
     lon: 9.9602,
     city: "hamburg",
-    website_url: "https://www.3001-kino.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "abaton-kino",
@@ -18,7 +18,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.567,
     lon: 9.985,
     city: "hamburg",
-    website_url: "https://www.abaton.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "archaeologisches-museum-frankfurt",
@@ -171,7 +171,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.56,
     lon: 9.812,
     city: "hamburg",
-    website_url: "https://www.blankeneser-kino.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "botschaft-der-wildtiere",
@@ -243,7 +243,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.581,
     lon: 9.849,
     city: "hamburg",
-    website_url: "https://www.elbe-filmtheater.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "eschborn-k",
@@ -261,7 +261,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.5798,
     lon: 9.9426,
     city: "hamburg",
-    website_url: "https://www.filmraum.com",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "gloria-gloriette-heidelberg",
@@ -288,7 +288,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.485,
     lon: 10.218,
     city: "hamburg",
-    website_url: "https://www.kino-bergedorf.de",
+    website_url: "https://kinotickets.express",
   },
   {
     slug: "historisches-museum-frankfurt",
@@ -297,7 +297,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 50.1092,
     lon: 8.6819,
     city: "frankfurt",
-    website_url: "https://filmforum-hoechst.com",
+    website_url: "https://historisches-museum-frankfurt.de",
   },
   {
     slug: "hugenottenhalle",
@@ -307,6 +307,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 8.6942,
     city: "frankfurt",
     website_url: "https://www.hugenottenhalle.de",
+  },
+  {
+    slug: "institut-francais-frankfurt",
+    name: "Institut français Frankfurt",
+    address: "",
+    lat: 50.1208,
+    lon: 8.6595,
+    city: "frankfurt",
+    website_url: "https://www.institutfrancais.de",
   },
   {
     slug: "juedisches-museum-frankfurt",
@@ -351,7 +360,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.663,
     lon: 10.147,
     city: "hamburg",
-    website_url: "https://www.koralle-volksdorf.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "lichtmess-kino",
@@ -387,7 +396,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.5563,
     lon: 9.9889,
     city: "hamburg",
-    website_url: "https://www.metropoliskino.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "museum-fuer-kommunikation-frankfurt",
@@ -405,7 +414,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.553,
     lon: 9.991,
     city: "hamburg",
-    website_url: "https://www.passagekino.de",
+    website_url: "https://www.das-passage.de",
   },
   {
     slug: "rex-filmtheater-wuppertal",
@@ -432,7 +441,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.561,
     lon: 9.963,
     city: "hamburg",
-    website_url: "https://schanzenkino73.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "senckenberg-naturmuseum",
@@ -450,7 +459,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.556,
     lon: 9.957,
     city: "hamburg",
-    website_url: "https://www.studio-kino.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "taunale-oberursel",
