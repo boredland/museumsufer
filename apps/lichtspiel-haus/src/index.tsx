@@ -158,7 +158,6 @@ app.get("/partial/content", (c) => {
   const cinema = c.req.query("kino") || c.req.query("cinema") || null;
   const series = c.req.query("reihe") || c.req.query("series") || null;
   const range = parseRange(c.req.query("range") ?? undefined);
-  const uncapped = c.req.query("all") === "1";
   const city = c.get("city") ?? "frankfurt";
   const screenings = range
     ? getScreeningsInRange(date, endOfRange(date, range), { city, cinema, series })
@@ -166,7 +165,7 @@ app.get("/partial/content", (c) => {
   const locale = detectLocale(c.req.raw);
   const tr = localizeTranslations(getTranslations(locale), city, locale);
   const appUrl = cityUrl("lichtspiel.haus", city);
-  return c.html(renderProgrammePartial(date, screenings, tr, locale, city, range, appUrl, uncapped), {
+  return c.html(renderProgrammePartial(date, screenings, tr, locale, city, range, appUrl), {
     headers: {
       "Cache-Control": "public, max-age=300, s-maxage=900",
       "Content-Language": locale,

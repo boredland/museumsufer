@@ -888,14 +888,58 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   border-color: var(--brass-bright);
 }
 
-/* Week view: a day with more screenings than the cap ends in one link to that day's full list. */
-.day-more {
-  list-style: none;
-  padding: 1.25rem 0 1.5rem;
-  text-align: center;
-  border-bottom: 0.5px solid var(--rule);
+/* Week view: one card per film per day. The showings sit under the synopsis as a list of rows
+   (time, cinema, version/format, actions) instead of a full poster-and-synopsis card each. */
+.prog-entry--film .prog-entry__showings {
+  display: block;
+  grid-column: 2;
 }
-.day-more .range-pill { display: inline-block; }
+.showings {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.showing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 0.5px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--celluloid-soft);
+  font-variant-numeric: tabular-nums;
+}
+.showing:first-child { border-top: 0; }
+.showing__time {
+  font-family: var(--display);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  font-weight: 500;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--celluloid);
+  letter-spacing: -0.02em;
+  min-width: 3.1rem;
+}
+.showing__cinema {
+  color: var(--brass);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.showing__cinema:hover { color: var(--brass-bright); border-color: var(--brass-bright); }
+.showing__tags { color: var(--celluloid-quiet); }
+.showing__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+.prog-entry--film .prog-entry__actions { margin-left: 0; margin-top: 0.4rem; width: 100%; justify-content: flex-end; }
 
 /* Week-view header line — single-line range label in place of the big
  * day-of-month numeral the day view uses. */

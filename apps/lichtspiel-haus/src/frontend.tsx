@@ -393,9 +393,6 @@ export interface ScreeningRowOptions {
    *  English TMDb overview (when present) or the German cinema description. */
   locale: Locale;
   appUrl?: string;
-  /** Skip the row's ScreeningEvent JSON-LD. The week overview lists up to ~2,000 rows that all have a
-   *  /film/:id page carrying the same structured data; repeating ~1.2 KB of it per row was 15% of the page. */
-  omitJsonLd?: boolean;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -626,13 +623,11 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
       data-search={searchHay}
       data-seen-key={s.seen_key ?? ""}
     >
-      {opts.omitJsonLd ? null : (
-        <script
-          type="application/ld+json"
-          data-id={String(s.id)}
-          dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s, opts.locale)) }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        data-id={String(s.id)}
+        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s, opts.locale)) }}
+      />
       <a class="prog-entry__poster-link" href={filmHref} aria-label={displayTitle}>
         <PosterCard title={displayTitle} imageUrl={s.image_url} />
       </a>
@@ -805,18 +800,12 @@ export function DateGroupedScreenings({
   tr,
   hideCinema,
   appUrl,
-  hiddenByDay,
-  omitJsonLd,
 }: {
   screenings: DayScreening[];
   locale: Locale;
   tr: Translations;
   hideCinema?: boolean;
   appUrl?: string;
-  /** Days the week view cut short, with how many screenings each lost. */
-  hiddenByDay?: ReadonlyMap<string, number>;
-  /** Passed to every row; the week overview sets it. */
-  omitJsonLd?: boolean;
 }) {
   if (screenings.length === 0) return null;
   const dl = dateLocale(locale);
@@ -827,8 +816,6 @@ export function DateGroupedScreenings({
       {screenings.map((s, i) => {
         const prev = i > 0 ? screenings[i - 1].date : null;
         const isNewDay = s.date !== prev;
-        const endsDay = i === screenings.length - 1 || screenings[i + 1].date !== s.date;
-        const hidden = endsDay ? (hiddenByDay?.get(s.date) ?? 0) : 0;
         return (
           <>
             {isNewDay ? (
@@ -836,20 +823,7 @@ export function DateGroupedScreenings({
                 <time dateTime={s.date}>{dayHeader.format(new Date(`${s.date}T12:00:00Z`))}</time>
               </li>
             ) : null}
-            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl, omitJsonLd }} tr={tr} />
-            {hidden > 0 ? (
-              <li class="day-more" key={`more-${s.date}`}>
-                <a
-                  class="range-pill"
-                  href={`/tag/${s.date}${langSuffix(locale)}`}
-                  hx-get={`/partial/content?date=${s.date}${langSuffix(locale, "&")}`}
-                  hx-target="#programme-content"
-                  hx-push-url={`/tag/${s.date}${langSuffix(locale)}`}
-                >
-                  {tr.dayMore(hidden)}
-                </a>
-              </li>
-            ) : null}
+            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl }} tr={tr} />
           </>
         );
       })}
@@ -1157,32 +1131,20 @@ if ('serviceWorker' in navigator) {
       updateSeenBanner();
     }
     window.__lhApplySearch = applySearch;
-    // The week view caps each day, but search only matches rows that are in the DOM. So the first
-    // time a query is typed on a capped page, fetch the uncapped week (all=1). htmx reads a verb's
-    // URL once at init, so editing the pill's hx-get does nothing; htmx:configRequest runs on every
-    // request and can add the parameter. From the day view the week pill does the swap; on an
-    // already-capped week there is no pill to click, so ask htmx directly.
-    var wantAll = false, fetchingAll = false;
-    document.body.addEventListener('htmx:configRequest', function(e){
-      if (wantAll && e.detail && e.detail.verb === 'get') { e.detail.parameters['all'] = '1'; wantAll = false; }
-    });
-    document.body.addEventListener('htmx:afterSwap', function(e){
-      if (e.detail && e.detail.target && e.detail.target.id === 'programme-content') fetchingAll = false;
-    });
-    function ensureSearchable(){
+    // The week view is one card per film per day with every showing inside it, so search always has
+    // every row in the page. Typing on the day view still jumps to the week view for more matches:
+    // the inactive week pill is an htmx-wired anchor, and the afterSwap handler below re-runs
+    // applySearch() once the new rows are in the DOM.
+    function maybePromoteToWeekView(){
       var input = document.querySelector('.js-search');
-      if (!input || !input.value.trim() || fetchingAll) return;
+      if (!input || !input.value.trim()) return;
       var weekPill = document.querySelector('.range-pill[data-range="7"]');
-      if (!weekPill) return;
-      var active = weekPill.classList.contains('range-pill--active');
-      if (active && !document.querySelector('.day-more')) return;
-      fetchingAll = true; wantAll = true;
-      if (!active) { weekPill.click(); return; }
-      htmx.ajax('GET', weekPill.getAttribute('hx-get'), { target: '#programme-content', swap: 'innerHTML' });
+      if (!weekPill || weekPill.classList.contains('range-pill--active')) return;
+      weekPill.click();
     }
     document.addEventListener('input', function(e){
       if (e.target && e.target.classList && e.target.classList.contains('js-search')) {
-        ensureSearchable();
+        maybePromoteToWeekView();
         applySearch();
       }
     });
@@ -1579,59 +1541,234 @@ function filterPastForToday(date: string, screenings: DayScreening[]): DayScreen
   });
 }
 
-/** The week view lists every screening of every day on one page. Frankfurt tops out near 70 a
- *  day, but Valencia's multiplexes run ~370 a day, which made the 7-day page 16 MB of HTML.
- *  A day over the cap keeps one showing of every film first (the middle one of its day, so the
- *  sample isn't all matinees), then spends the remaining slots on evenly spaced extra showings.
- *  Dropping showings is fine; dropping a film would read as "not playing". The day then ends in
- *  a link to the uncapped single-day view. A day with more films than the cap keeps them all. */
-const WEEK_VIEW_DAY_CAP = 60;
+/** Showings of one film on one day, in time order. Used by the week view: a multiplex shows the
+ *  same film a dozen times a day across a dozen cinemas, and one full card per showing made
+ *  Valencia's week 16 MB of HTML. One card per film per day with a chip per showing keeps every
+ *  film and every showing and repeats the poster, synopsis and scores once. */
+interface FilmDay {
+  date: string;
+  key: string;
+  showings: DayScreening[];
+}
 
 function filmKey(s: DayScreening): string {
   return s.seen_key || s.title_de || s.title;
 }
 
-function capDay(list: DayScreening[], cap: number): DayScreening[] {
-  const films = new Map<string, DayScreening[]>();
-  for (const s of list) {
-    const rows = films.get(filmKey(s));
-    if (rows) rows.push(s);
-    else films.set(filmKey(s), [s]);
+function groupByFilmDay(screenings: DayScreening[]): FilmDay[] {
+  const groups = new Map<string, FilmDay>();
+  for (const s of screenings) {
+    const key = filmKey(s);
+    const id = `${s.date}|${key}`;
+    const g = groups.get(id);
+    if (g) g.showings.push(s);
+    else groups.set(id, { date: s.date, key, showings: [s] });
   }
-  const kept = new Set<DayScreening>();
-  for (const rows of films.values()) kept.add(rows[Math.floor(rows.length / 2)]);
-  const rest = list.filter((s) => !kept.has(s));
-  const extra = Math.min(cap - kept.size, rest.length);
-  for (let i = 0; i < extra; i++) kept.add(rest[Math.floor((i * rest.length) / extra)]);
-  return list.filter((s) => kept.has(s));
+  // Input is date-then-time ordered, so groups come out by date and by each film's first showing.
+  return [...groups.values()];
 }
 
-function capPerDay(screenings: DayScreening[], cap: number) {
-  const byDay = new Map<string, DayScreening[]>();
-  for (const s of screenings) {
-    const list = byDay.get(s.date);
-    if (list) list.push(s);
-    else byDay.set(s.date, [s]);
-  }
-  const shown: DayScreening[] = [];
-  const hiddenByDay = new Map<string, number>();
-  for (const [date, list] of byDay) {
-    if (list.length <= cap) {
-      shown.push(...list);
-      continue;
-    }
-    const out = capDay(list, cap);
-    shown.push(...out);
-    // The link opens the single-day view, which hides showings that already started today, so
-    // count only the hidden rows it would actually list.
-    const kept = new Set(out);
-    const upcomingHidden = filterPastForToday(
-      date,
-      list.filter((s) => !kept.has(s)),
-    ).length;
-    if (upcomingHidden > 0) hiddenByDay.set(date, upcomingHidden);
-  }
-  return { shown, hiddenByDay };
+/** The week view's card: the film's poster, title, scores, genres and synopsis once, then one chip per
+ *  showing (time, cinema, version/format, tickets, calendar, report). Keeps .prog-entry so search, the
+ *  seen toggle and the date deep links work as on a day row: data-search merges every showing's
+ *  cinema, data-seen-key is the film's, and each chip carries id="screening-<id>" for #hash jumps. */
+function WeekFilmCard({
+  fd,
+  index,
+  locale,
+  tr,
+  appUrl,
+}: {
+  fd: FilmDay;
+  index: number;
+  locale: Locale;
+  tr: Translations;
+  appUrl?: string;
+}) {
+  const first = fd.showings[0];
+  const displayTitle =
+    locale === "de"
+      ? (first.title_de ?? stripVersionChrome(first.title))
+      : (first.title_en ?? first.title_de ?? stripVersionChrome(first.title));
+  const description = screeningDescription(first, locale);
+  const showDescription = description && description !== first.subtitle;
+  const genres = first.tmdb_genre_ids?.length ? genreNames(first.tmdb_genre_ids, locale) : [];
+  const filmHref = `/film/${first.id}${langSuffix(locale)}`;
+  const searchHay = [
+    displayTitle,
+    first.title,
+    first.title_en,
+    first.subtitle,
+    first.credits,
+    first.series?.name,
+    ...genres,
+    ...fd.showings.flatMap((s) => [s.cinema.name, s.cinema.short_name, s.version, s.format]),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return (
+    <li
+      class="prog-entry prog-entry--film"
+      id={`film-${first.id}`}
+      style={`--i:${index}`}
+      data-search={searchHay}
+      data-seen-key={first.seen_key ?? ""}
+    >
+      <a class="prog-entry__poster-link" href={filmHref} aria-label={displayTitle}>
+        <PosterCard title={displayTitle} imageUrl={first.image_url} />
+      </a>
+      <header class="prog-entry__head">
+        <ScoreBadges s={first} />
+        <h3 class="prog-entry__work">
+          <a href={filmHref}>{displayTitle}</a>
+        </h3>
+        {first.subtitle ? <p class="prog-entry__subtitle">{first.subtitle}</p> : null}
+        {showDescription ? (
+          <ClampedText text={description} moreLabel={tr.moreLabel} class="prog-entry__description" />
+        ) : null}
+        {genres.length > 0 ? (
+          <ul class="prog-entry__genres" aria-label="Genres">
+            {genres.map((g) => (
+              <li key={g} class="prog-entry__genre">
+                {g}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {first.series ? (
+          <p class="prog-entry__series">
+            <a href={`/reihe/${first.series.slug}${langSuffix(locale)}`}>{first.series.name}</a>
+          </p>
+        ) : null}
+      </header>
+      <div class="prog-entry__meta prog-entry__showings">
+        <ul class="showings" aria-label={tr.showingsLabel}>
+          {fd.showings.map((s) => (
+            <ShowingChip key={s.id} s={s} locale={locale} tr={tr} appUrl={appUrl} />
+          ))}
+        </ul>
+        <span class="prog-entry__actions">
+          {first.seen_key ? (
+            <button
+              type="button"
+              class="icon-btn icon-btn--seen"
+              data-seen-toggle
+              aria-pressed="false"
+              aria-label={tr.markSeen}
+              title={tr.markSeen}
+            >
+              <SvgIcon id="i-check" />
+            </button>
+          ) : null}
+        </span>
+      </div>
+    </li>
+  );
+}
+
+/** One showing inside a week-view card: start time, cinema, version/format, and the same
+ *  calendar, report and ticket actions a day row has. */
+function ShowingChip({
+  s,
+  locale,
+  tr,
+  appUrl,
+}: {
+  s: DayScreening;
+  locale: Locale;
+  tr: Translations;
+  appUrl?: string;
+}) {
+  const base = appUrl ?? cityUrl("lichtspiel.haus", s.cinema.city);
+  const screeningUtm = buildUtm(cityHost("lichtspiel.haus", s.cinema.city));
+  const isFree =
+    (s.price_min === 0 && (s.price_max == null || s.price_max === 0)) || (s.price_min == null && s.price_max === 0);
+  const room = s.venue_room && s.venue_room !== s.cinema.name ? s.venue_room : null;
+  const tags = [s.version, s.format].filter(Boolean).join(" · ");
+  const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
+  return (
+    <li class="showing" id={`screening-${s.id}`}>
+      <time class="showing__time" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
+        {s.time ?? "—"}
+      </time>
+      <a class="showing__cinema" href={`/kino/${s.cinema_slug}${langSuffix(locale)}`}>
+        {s.cinema.short_name ?? s.cinema.name}
+      </a>
+      {room || tags ? <span class="showing__tags">{[room, tags].filter(Boolean).join(" · ")}</span> : null}
+      {s.availability ? (
+        <span class={`prog-entry__avail prog-entry__avail--${s.availability.replace("_", "-")}`}>
+          {s.availability === "sold_out" ? tr.soldOut : tr.fewLeft}
+        </span>
+      ) : null}
+      <span class="showing__actions">
+        <button
+          type="button"
+          class="icon-btn"
+          data-popover-target="cal-shared"
+          data-cal-target={`/film/${s.id}`}
+          popovertarget="cal-shared"
+          aria-haspopup="menu"
+          aria-label={tr.toCalendar}
+          title={tr.toCalendar}
+        >
+          <SvgIcon id="i-cal" />
+        </button>
+        <button
+          type="button"
+          class="icon-btn"
+          data-report-regarding={reportRegarding}
+          data-report-context={`${base}/film/${s.id}`}
+          aria-label={tr.reportScreening}
+          title={tr.reportScreening}
+        >
+          <SvgIcon id="i-report" />
+        </button>
+        {s.ticket_url && !isFree ? (
+          <a class="action" href={screeningUtm(s.ticket_url, "karten")} target="_blank" rel="noopener">
+            <span class="action__note" aria-hidden="true">
+              ◉
+            </span>
+            <span>{tr.ticketsAction}</span>
+          </a>
+        ) : null}
+      </span>
+    </li>
+  );
+}
+
+/** Week overview: day headers, then one card per film for that day. */
+function WeekFilmCards({
+  filmDays,
+  locale,
+  tr,
+  appUrl,
+}: {
+  filmDays: FilmDay[];
+  locale: Locale;
+  tr: Translations;
+  appUrl?: string;
+}) {
+  const dayHeader = dateFormatter(dateLocale(locale), {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  });
+  return (
+    <ol class="screenings">
+      {filmDays.map((fd, i) => (
+        <>
+          {i === 0 || filmDays[i - 1].date !== fd.date ? (
+            <li class="day-header" key={`day-${fd.date}`} aria-hidden="false">
+              <time dateTime={fd.date}>{dayHeader.format(new Date(`${fd.date}T12:00:00Z`))}</time>
+            </li>
+          ) : null}
+          <WeekFilmCard key={`${fd.date}|${fd.key}`} fd={fd} index={i} locale={locale} tr={tr} appUrl={appUrl} />
+        </>
+      ))}
+    </ol>
+  );
 }
 
 export function ProgrammePartial({
@@ -1642,7 +1779,6 @@ export function ProgrammePartial({
   range = null,
   city,
   appUrl,
-  uncapped = false,
 }: {
   date: string;
   screenings: DayScreening[];
@@ -1651,8 +1787,6 @@ export function ProgrammePartial({
   range?: number | null;
   city: string;
   appUrl?: string;
-  /** Skip the per-day cap; the search box asks for this so it can match every row. */
-  uncapped?: boolean;
 }) {
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
@@ -1663,7 +1797,7 @@ export function ProgrammePartial({
   // earlier screenings — they're still future from tomorrow onward) and
   // render via the shared date-grouped helper.
   if (range) {
-    const capped = capPerDay(screenings, uncapped ? Number.POSITIVE_INFINITY : WEEK_VIEW_DAY_CAP);
+    const filmDays = groupByFilmDay(screenings);
     const endIso = (() => {
       const d = new Date(`${date}T00:00:00Z`);
       d.setUTCDate(d.getUTCDate() + range - 1);
@@ -1694,14 +1828,7 @@ export function ProgrammePartial({
             <p class="empty__hint">{tr.emptyHint}</p>
           </div>
         ) : (
-          <DateGroupedScreenings
-            screenings={capped.shown}
-            locale={locale}
-            tr={tr}
-            appUrl={appUrl}
-            hiddenByDay={capped.hiddenByDay}
-            omitJsonLd
-          />
+          <WeekFilmCards filmDays={filmDays} locale={locale} tr={tr} appUrl={appUrl} />
         )}
         <SiblingStrap tr={tr} city={city} />
       </>
@@ -1800,7 +1927,6 @@ export function renderProgrammePartial(
   city: string = "frankfurt",
   range: number | null = null,
   appUrl?: string,
-  uncapped = false,
 ): HtmlEscapedString {
   return (
     <ProgrammePartial
@@ -1811,7 +1937,6 @@ export function renderProgrammePartial(
       city={city}
       range={range}
       appUrl={appUrl}
-      uncapped={uncapped}
     />
   ) as unknown as HtmlEscapedString;
 }

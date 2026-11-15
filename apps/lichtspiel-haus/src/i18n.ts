@@ -27,8 +27,8 @@ export interface Translations {
   emptyTodayAfterPast: string;
   emptyHint: string;
   pastNote: (n: number) => string;
-  /** Link under a capped day in the week view: how many screenings the cap left out. */
-  dayMore: (n: number) => string;
+  /** Accessible name of the list of showings inside a week-view film card. */
+  showingsLabel: string;
   /** "Mit", "Featuring" — Q&A guests, live accompaniment, etc. */
   creditsLabel: string;
   /** Read-more control on a clamped synopsis. */
@@ -179,7 +179,7 @@ const de: Translations = {
   emptyTodayAfterPast: "Heute keine kommenden Vorstellungen mehr.",
   emptyHint: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   pastNote: (n) => `${n} Vorstellung${n === 1 ? "" : "en"} heute bereits begonnen — verborgen.`,
-  dayMore: (n) => `${n} weitere Vorstellung${n === 1 ? "" : "en"} an diesem Tag`,
+  showingsLabel: "Vorstellungen",
   creditsLabel: "Mit",
   moreLabel: "Mehr",
   empty: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
@@ -344,7 +344,7 @@ const en: Translations = {
   emptyTodayAfterPast: "No more upcoming screenings today.",
   emptyHint: "Check back tomorrow or change the date above.",
   pastNote: (n) => `${n} screening${n === 1 ? "" : "s"} already started today — hidden.`,
-  dayMore: (n) => `${n} more screening${n === 1 ? "" : "s"} this day`,
+  showingsLabel: "Showings",
   creditsLabel: "With",
   moreLabel: "More",
   empty: "Check back tomorrow or change the date above.",
@@ -509,7 +509,7 @@ const es: Translations = {
   emptyHint: "Vuelva a consultar mañana o cambie la fecha de arriba.",
   pastNote: (n) =>
     `${n === 1 ? "1 sesión" : `${n} sesiones`} de hoy ya ${n === 1 ? "ha" : "han"} empezado — oculta${n === 1 ? "" : "s"}.`,
-  dayMore: (n) => `${n === 1 ? "1 sesión" : `${n} sesiones`} más este día`,
+  showingsLabel: "Sesiones",
   creditsLabel: "Con",
   moreLabel: "Más",
   empty: "Vuelva a consultar mañana o cambie la fecha de arriba.",
