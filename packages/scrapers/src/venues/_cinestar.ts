@@ -1,22 +1,52 @@
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 /**
- * CineStar Remscheid — the city's only cinema. The CineStar site's own JSON
- * API (`/api/cinema/<id>/show/`) returns every film with its showtimes, each
+ * CineStar cinemas. The CineStar site's own JSON API
+ * (`/api/cinema/<id>/show/`) returns every film with its showtimes, each
  * tagged with Vista attributes: language (`OV`, `OMU`, `LANG_xx`) and event
  * type (`ET_SONDERVORSTELLUNG`, `ET_EVENT`, `ET_PREVIEW`, `ET_SNEAK`).
+ * `/api/cinema/` lists every house with its API id and Vista cinema number.
  *
  * The regular programme is mainstream first-run, which the cinema app
  * doesn't carry; we keep original-language and special screenings (Met
  * opera and ballet broadcasts, concert films, OmU releases, film clubs).
  */
-const API_URL = "https://www.cinestar.de/api/cinema/55/show/";
+const API_BASE = "https://www.cinestar.de/api/cinema";
 const SITE = "https://www.cinestar.de";
-/** Vista web-ticketing; `cinemaId` is the cinema's number, not its API id. */
-const TICKET_URL = "https://webticketing3.cinestar.de/?cinemaId=70000&movieSessionId=";
+/** Vista web-ticketing. */
+const TICKET_BASE = "https://webticketing3.cinestar.de/";
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 const KEEP_ATTRIBUTES = new Set(["OV", "OMU", "ET_SONDERVORSTELLUNG", "ET_EVENT", "ET_PREVIEW", "ET_SNEAK"]);
+
+interface CinestarCinema {
+  /** Id in CineStar's own API (`/api/cinema/<apiId>/show/`). */
+  apiId: number;
+  /** Vista's cinema number, used by web-ticketing; not the API id. */
+  cinemaNumber: number;
+  /** Path of the cinema's page on cinestar.de, also the prefix of its film links. */
+  sitePath: string;
+  source_slug: string;
+  name: string;
+}
+
+const REMSCHEID: CinestarCinema = {
+  apiId: 55,
+  cinemaNumber: 70000,
+  sitePath: "kino-remscheid",
+  source_slug: "cinestar-remscheid",
+  name: "CineStar Remscheid",
+};
+
+/** Closed after a fire on 7/8 Oct 2026; CineStar expects to reopen end of Jan 2027 at the earliest.
+ *  Until then the API lists only the few already-scheduled 2027 broadcasts. */
+const METROPOLIS: CinestarCinema = {
+  apiId: 20,
+  cinemaNumber: 43377,
+  sitePath: "kino-frankfurt-main-metropolis",
+  source_slug: "cinestar-metropolis",
+  name: "CineStar Metropolis Frankfurt",
+};
 
 interface CinestarShowtime {
   id: number;
@@ -34,10 +64,13 @@ interface CinestarMovie {
   showtimes: CinestarShowtime[];
 }
 
-export async function scrapeCinestarRemscheid(): Promise<VenueScrapeResult> {
-  const res = await fetch(API_URL, { headers: { "User-Agent": UA, Accept: "application/json" } });
-  if (!res.ok) throw new Error(`cinestar-remscheid fetch failed: ${res.status}`);
+async function scrapeCinestar(cinema: CinestarCinema): Promise<VenueScrapeResult> {
+  const res = await fetch(`${API_BASE}/${cinema.apiId}/show/`, {
+    headers: { "User-Agent": UA, Accept: "application/json" },
+  });
+  if (!res.ok) throw new Error(`${cinema.source_slug} fetch failed: ${res.status}`);
   const movies = (await res.json()) as CinestarMovie[];
+  const ticketUrl = `${TICKET_BASE}?cinemaId=${cinema.cinemaNumber}&movieSessionId=`;
 
   const events: CanonicalScrapedEvent[] = [];
   for (const movie of movies) {
@@ -58,13 +91,16 @@ export async function scrapeCinestarRemscheid(): Promise<VenueScrapeResult> {
         subtitle: version,
         date,
         time,
-        detail_url: movie.detailLink ? `${SITE}${movie.detailLink}` : `${SITE}/kino-remscheid`,
-        ticket_url: `${TICKET_URL}${show.systemId}`,
+        detail_url: movie.detailLink ? `${SITE}${movie.detailLink}` : `${SITE}/${cinema.sitePath}`,
+        ticket_url: `${ticketUrl}${show.systemId}`,
         image_url: movie.poster,
         language: language === "de" ? null : language,
         labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
       });
     }
   }
-  return { source_slug: "cinestar-remscheid", display_name: "CineStar Remscheid", events };
+  return { source_slug: cinema.source_slug, display_name: cinema.name, events };
 }
+
+export const scrapeCinestarRemscheid = () => scrapeCinestar(REMSCHEID);
+export const scrapeCinestarMetropolis = () => scrapeCinestar(METROPOLIS);

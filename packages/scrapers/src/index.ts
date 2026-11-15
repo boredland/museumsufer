@@ -34,6 +34,7 @@ export {
 
 import type { ScraperContext, VenueScraper } from "./types";
 import { scrapeCineamo } from "./venues/_cineamo";
+import { scrapeCinestarMetropolis, scrapeCinestarRemscheid } from "./venues/_cinestar";
 import { scrapeKinoheld } from "./venues/_kinoheld";
 import { scrapeMuseumsFrankfurt } from "./venues/_museums-frankfurt";
 import { scrapeStiftungHg } from "./venues/_stiftung-hg";
@@ -64,7 +65,6 @@ import { scrapeCafeMutz } from "./venues/cafe-mutz";
 import { scrapeCaligariWiesbaden } from "./venues/caligari-wiesbaden";
 import { scrapeCentralkomitee } from "./venues/centralkomitee";
 import { scrapeCentralstationDarmstadt } from "./venues/centralstation-darmstadt";
-import { scrapeCinestarRemscheid } from "./venues/cinestar-remscheid";
 import { scrapeCitydomeDarmstadt } from "./venues/citydome-darmstadt";
 import { scrapeClubVoltaire } from "./venues/club-voltaire";
 import { scrapeComedyClubFrankfurt } from "./venues/comedy-club-frankfurt";
@@ -312,6 +312,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "bad-vilbel-open-air-kino", run: (_ctx: ScraperContext) => scrapeBadVilbelOpenAirKino() },
   { slug: "b-movie", run: (_ctx: ScraperContext) => scrapeBMovie() },
   { slug: "bergisch-live", run: (_ctx: ScraperContext) => scrapeBergischLive() },
+  { slug: "cinestar-metropolis", run: (_ctx: ScraperContext) => scrapeCinestarMetropolis() },
   { slug: "cinestar-remscheid", run: (_ctx: ScraperContext) => scrapeCinestarRemscheid() },
   { slug: "roentgen-museum", run: (_ctx: ScraperContext) => scrapeRoentgenMuseum() },
   { slug: "saarlandmuseum", run: (_ctx: ScraperContext) => scrapeSaarlandmuseum() },
@@ -579,6 +580,7 @@ export {
   scrapeCaligariWiesbaden,
   scrapeCentralkomitee,
   scrapeCentralstationDarmstadt,
+  scrapeCinestarMetropolis,
   scrapeCinestarRemscheid,
   scrapeCitydomeDarmstadt,
   scrapeClubVoltaire,

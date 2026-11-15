@@ -72,6 +72,18 @@ export const CURATED_CINEMAS: CinemaConfig[] = [
     tagline: "Kino, Restaurant und Bar im Bockenheim.",
   },
   {
+    slug: "cinestar-metropolis",
+    name: "CineStar Metropolis Frankfurt",
+    short_name: "CineStar Metropolis",
+    address: "Eschenheimer Anlage 40, 60318 Frankfurt am Main",
+    lat: 50.118,
+    lon: 8.679,
+    city: "frankfurt",
+    website_url: "https://www.cinestar.de/kino-frankfurt-main-metropolis",
+    tagline:
+      "Multiplex am Eschenheimer Turm. Wegen Brandschaden geschlossen, Wiedereröffnung frühestens Ende Januar 2027.",
+  },
+  {
     slug: "dff-deutsches-filminstitut-filmmuseum",
     name: "DFF — Deutsches Filminstitut & Filmmuseum",
     short_name: "DFF Filmmuseum",

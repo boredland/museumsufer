@@ -300,6 +300,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "literaturarchiv-saar": [49.254, 7.044],
   "ut-kinos-saarbruecken": [49.234, 6.998],
   "passage-kinos-saarbruecken": [49.234, 6.998],
+  "cinestar-metropolis": [50.118, 8.679],
   "cinestar-remscheid": [51.1776, 7.1994],
   "roentgen-museum": [51.1936, 7.2597],
   "von-der-heydt-museum": [51.2574, 7.1466],
