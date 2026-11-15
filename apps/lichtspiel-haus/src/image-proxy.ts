@@ -60,6 +60,15 @@ const ALLOWED_HOSTS = new Set([
   "cinestudiodor.reservaentradas.com",
   "centreculturalbenetusserelmoli.reservaentradas.com",
   "ivc.gva.es",
+  // Bergisch cinemas, Darmstadt's Filmkreis and a few Frankfurt museum cinemas: each serves real
+  // JPEG/WebP images (checked) and was rendering the text placeholder because it was off-list.
+  "www.cinestar.de",
+  "www.wuppertal-live.de",
+  "filmkreis.de",
+  "res.cloudinary.com",
+  "historisches-museum-frankfurt.de",
+  "www.juedischesmuseum.de",
+  "www.archaeologisches-museum-frankfurt.de",
 ]);
 
 // Off-list hosts get `undefined` (not the raw URL) so PosterCard
