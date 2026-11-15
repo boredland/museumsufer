@@ -129,7 +129,7 @@ app.get("/robots.txt", (c) =>
       siteUrl: appUrlFor(c.get("city") ?? "frankfurt"),
       // Block JSON endpoints from organic indexing -- developers reach
       // them via /api/docs, but Googlebot shouldn't index raw JSON.
-      disallow: ["/api/day", "/api/events", "/api/venues", "/api/genres"],
+      disallow: ["/api/day", "/api/events", "/api/venues"],
     }),
     { headers: { "Cache-Control": "public, max-age=86400" } },
   ),
