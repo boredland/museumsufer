@@ -1,4 +1,4 @@
-import { cityHost, cityMeta, cityName, cityUrl, dateOffset, todayIso } from "@museumsufer/core";
+import { cityMeta, cityUrl, dateOffset, todayIso } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";

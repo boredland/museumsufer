@@ -1,7 +1,6 @@
-import { cityHost, cityMeta, cityName, cityUrl } from "@museumsufer/core";
+import { cityUrl } from "@museumsufer/core";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
-import { localizeTranslations } from "../i18n";
 import type { Env } from "../types";
 
 const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
@@ -28,7 +27,8 @@ const spec = {
       get: {
         tags: ["Screenings"],
         summary: "Screenings for a date",
-        description: "Returns `{date, count, screenings}` for the given day. Defaults to the host's city. Optional filters: cinema, series, city.",
+        description:
+          "Returns `{date, count, screenings}` for the given day. Defaults to the host's city. Optional filters: cinema, series, city.",
         operationId: "getDay",
         parameters: [
           {
@@ -39,7 +39,12 @@ const spec = {
           },
           { name: "cinema", in: "query", schema: { type: "string" }, description: "Cinema slug" },
           { name: "series", in: "query", schema: { type: "string" }, description: "Series slug" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+          {
+            name: "city",
+            in: "query",
+            schema: { type: "string" },
+            description: "City key (defaults to the host's city)",
+          },
         ],
         responses: { "200": { description: "Day screenings" } },
       },
@@ -56,7 +61,12 @@ const spec = {
           { name: "to", in: "query", schema: { type: "string" }, description: "Range end (defaults today+60)" },
           { name: "cinema", in: "query", schema: { type: "string" }, description: "Cinema slug" },
           { name: "series", in: "query", schema: { type: "string" }, description: "Series slug" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+          {
+            name: "city",
+            in: "query",
+            schema: { type: "string" },
+            description: "City key (defaults to the host's city)",
+          },
         ],
         responses: { "200": { description: "Screening list" } },
       },
@@ -94,7 +104,12 @@ const spec = {
         description: "Series with screenings in the host's city. Pass `city` to override.",
         operationId: "getSeries",
         parameters: [
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+          {
+            name: "city",
+            in: "query",
+            schema: { type: "string" },
+            description: "City key (defaults to the host's city)",
+          },
         ],
         responses: { "200": { description: "Series list" } },
       },

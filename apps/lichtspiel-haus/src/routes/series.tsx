@@ -1,4 +1,4 @@
-import { cityHost, cityMeta, cityName, cityUrl, todayIso } from "@museumsufer/core";
+import { cityMeta, cityName, cityUrl, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getAllSeries, getSeriesScreenings } from "../db";

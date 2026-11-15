@@ -8,7 +8,6 @@ import {
   type CalendarEvent,
   cityHost,
   cityMeta,
-  cityName,
   cityUrl,
   dateOffset,
   type IcsEventInput,
@@ -21,7 +20,6 @@ import { Hono } from "hono";
 import { type DayScreening, getCinemaBySlug, getScreeningById, getScreeningsInRange, getSeriesScreenings } from "../db";
 import { localizeText } from "../i18n";
 import type { Env } from "../types";
-import { REPO_URL } from "./static";
 
 const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
