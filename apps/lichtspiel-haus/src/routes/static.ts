@@ -63,10 +63,12 @@ function llmsFor(city: string): string {
   const appUrl = cityUrl("lichtspiel.haus", city);
   const tz = cityMeta(city).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
   const cityCinemas = CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city));
+  // localizeTranslations reads every field of the object; a partial one threw for each non-default city (llms.txt was a 500 there).
   const tr = localizeTranslations(
     {
+      ...getTranslations("de"),
       homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${cityCinemas.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
-    } as any,
+    },
     city,
     "de",
   );
