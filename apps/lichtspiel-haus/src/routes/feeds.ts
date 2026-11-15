@@ -14,7 +14,7 @@ import {
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayScreening, getCinemaBySlug, getScreeningById, getScreeningsInRange, getSeriesScreenings } from "../db";
-import { getTranslations, localizeTranslations } from "../i18n";
+import { localizeText } from "../i18n";
 import type { Env } from "../types";
 import { REPO_URL } from "./static";
 
@@ -143,13 +143,10 @@ function buildRss(
 ): string {
   // Feeds carry no ?lang negotiation; the city's own language is the default.
   const lang = cityMeta(city).country === "ES" ? "es" : "de";
-  const tr = localizeTranslations(
-    {
-      homeDescription:
-        lang === "es"
-          ? "Cartelera de cine en Fráncfort y alrededores — los próximos 14 días"
-          : "Kinoprogramm in Frankfurt und Umgebung — die nächsten 14 Tage",
-    } as any,
+  const description = localizeText(
+    lang === "es"
+      ? "Cartelera de cine en Fráncfort y alrededores — los próximos 14 días"
+      : "Kinoprogramm in Frankfurt und Umgebung — die nächsten 14 Tage",
     city,
     lang,
   );
@@ -176,7 +173,7 @@ function buildRss(
     title: "lichtspiel.haus",
     link: appUrl,
     selfLink: `${appUrl}/feed.rss`,
-    description: tr.homeDescription,
+    description,
     language: lang,
     items,
   });

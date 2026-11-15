@@ -14,7 +14,7 @@ import {
 import { Hono } from "hono";
 import { CINEMAS } from "../cinema-config";
 import { getAllSeries, getScreeningsInRange } from "../db";
-import { getTranslations, localizeTranslations } from "../i18n";
+import { localizeText } from "../i18n";
 import type { Env } from "../types";
 
 const REPO_URL = "https://github.com/boredland/museumsufer";
@@ -26,20 +26,17 @@ function manifestFor(city: string): string {
   // Spanish cities get a Spanish install description; German is the default
   // for every German city.
   const lang = cityMeta(city).country === "ES" ? "es" : "de";
-  const tr = localizeTranslations(
-    {
-      homeDescription:
-        lang === "es"
-          ? "Cartelera de cine en Fráncfort y alrededores: cine de autor, de repertorio, ciclos y festivales."
-          : "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
-    } as any,
+  const description = localizeText(
+    lang === "es"
+      ? "Cartelera de cine en Fráncfort y alrededores: cine de autor, de repertorio, ciclos y festivales."
+      : "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
     city,
     lang,
   );
   const manifest = buildManifest({
     name: "lichtspiel.haus",
     shortName: "lichtspiel.haus",
-    description: tr.homeDescription,
+    description,
     themeColor: "#0E0B07",
     backgroundColor: "#0E0B07",
     lang,
@@ -63,12 +60,8 @@ function llmsFor(city: string): string {
   const appUrl = cityUrl("lichtspiel.haus", city);
   const tz = cityMeta(city).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
   const cityCinemas = CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city));
-  // localizeTranslations reads every field of the object; a partial one threw for each non-default city (llms.txt was a 500 there).
-  const tr = localizeTranslations(
-    {
-      ...getTranslations("de"),
-      homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${cityCinemas.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
-    },
+  const homeDescription = localizeText(
+    `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${cityCinemas.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
     city,
     "de",
   );
@@ -82,7 +75,7 @@ function llmsFor(city: string): string {
   const seriesLines = series.map((s) => `- ${s.slug}: ${s.name}`).join("\n");
   const txt = `# lichtspiel.haus
 
-> ${tr.homeDescription}
+> ${homeDescription}
 
 Source: ${REPO_URL}
 License: Application code MIT. Screening data aggregated from public cinema sources.

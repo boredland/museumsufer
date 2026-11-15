@@ -674,6 +674,12 @@ const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
   ],
 };
 
+/** Localize one Frankfurt-authored string for `city`. For builders (manifest, feeds, llms.txt) that
+ *  carry a single sentence and so cannot go through localizeTranslations, which needs the whole table. */
+export function localizeText(text: string, city: string, locale: Locale): string {
+  return cityMeta(city).slug === DEFAULT_CITY ? text : localizeCityText(text, city, locale, APEX, REGION_SUB[locale]);
+}
+
 /**
  * City-specific "Why this site?" FAQ answer. The base copy names individual
  * Frankfurt cinemas, which plain name-substitution can't transpose — each city
