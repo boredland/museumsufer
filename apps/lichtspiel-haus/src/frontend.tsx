@@ -1404,10 +1404,12 @@ export function IconSprite() {
  *  ClientBehaviors, so the script travels with the menu. The links point at /film/:id/cal/<vendor>,
  *  which redirects to the core URL builders. */
 export function CalendarMenu({ tr }: { tr: Translations }) {
+  // The icon sits in an aria-hidden span next to a text label, so a <title> would only add a stray
+  // "i-gcal" hover tooltip for sighted users.
   const icon = (id: string, size: number) => (
     <span class="nav-popover__icon" aria-hidden="true">
-      <svg width={size} height={size} role="presentation">
-        <title>{id}</title>
+      {/* biome-ignore lint/a11y/noSvgWithoutTitle: decorative, labelled by the adjacent text */}
+      <svg width={size} height={size}>
         <use href={`#${id}`} />
       </svg>
     </span>
