@@ -1,5 +1,6 @@
 import { decodeEntities, stripHtml, todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
+import { resolveStageLabels } from "./_stage-labels";
 
 /**
  * Congress Centrum Saar — Congresshalle + Saarlandhalle Saarbrücken.
@@ -20,7 +21,12 @@ import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../
  *
  * Categories are the venue's own, so they label better than a keyword guess:
  * the hall hosts trade fairs and sport alongside concerts, and the previous
- * blanket `music:classical` mislabelled all of them.
+ * blanket `music:classical` mislabelled all of them. A card that carries only
+ * categories we do not map (Messe, Tagungen, Sport, Bälle) is filed by the
+ * venue as non-programme and gets `event:venue`. A card with NO category at
+ * all (touring shows the venue never tagged) falls back to the shared stage
+ * resolver on the title alone: the teaser is excluded because party blurbs
+ * ("voller Musik, Tanz") would read as concerts.
  */
 const BASE = "https://www.ccsaar.de";
 const LIST_URL = `${BASE}/events/`;
@@ -118,7 +124,7 @@ export async function scrapeCongresshalleSaarbruecken(): Promise<VenueScrapeResu
         detail_url: detailUrl,
         venue_room: card.match(LOCATION_RE)?.[1]?.trim() ?? null,
         raw_category: categories.join(", ") || null,
-        labels: labelsFor(categories),
+        labels: labelsFor(categories, title),
       });
     }
 
@@ -136,7 +142,7 @@ function parseDate(raw: string): string | null {
   return `${m[3]}-${month}-${m[1].padStart(2, "0")}`;
 }
 
-function labelsFor(categories: string[]): ScrapedLabel[] {
+function labelsFor(categories: string[], title: string): ScrapedLabel[] {
   const labels: ScrapedLabel[] = [];
   const seen = new Set<string>();
   for (const c of categories) {
@@ -145,5 +151,13 @@ function labelsFor(categories: string[]): ScrapedLabel[] {
     seen.add(label);
     labels.push({ label, confidence: 1.0, classifier: "upstream-category" });
   }
-  return labels;
+  if (labels.length > 0) return labels;
+  if (categories.length > 0) return [{ label: "event:venue", confidence: 0.5, classifier: "upstream-category" }];
+
+  return resolveStageLabels({
+    title,
+    defaultLabel: "event:venue",
+    classifier: "scraper-hardcoded",
+    confidence: 0.8,
+  }).map((l) => (l.label === "event:venue" ? { ...l, confidence: 0.5 } : l));
 }
