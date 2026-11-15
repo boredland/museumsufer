@@ -1541,7 +1541,11 @@ function capPerDay(screenings: DayScreening[], cap: number) {
     }
     const out = capDay(list, cap);
     shown.push(...out);
-    if (out.length < list.length) hiddenByDay.set(date, list.length - out.length);
+    // The link opens the single-day view, which hides showings that already started today, so
+    // count only the hidden rows it would actually list.
+    const kept = new Set(out);
+    const upcomingHidden = filterPastForToday(date, list.filter((s) => !kept.has(s))).length;
+    if (upcomingHidden > 0) hiddenByDay.set(date, upcomingHidden);
   }
   return { shown, hiddenByDay };
 }
