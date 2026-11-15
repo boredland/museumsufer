@@ -1497,10 +1497,30 @@ function filterPastForToday(date: string, screenings: DayScreening[]): DayScreen
 
 /** The week view lists every screening of every day on one page. Frankfurt tops out near 70 a
  *  day, but Valencia's multiplexes run ~370 a day, which made the 7-day page 16 MB of HTML.
- *  A day over the cap keeps evenly spaced rows of its time-sorted list, so the sample still runs
- *  from the first matinee to the last night show across most cinemas (keeping the first N would
- *  end every day at teatime). It then ends in a link to the uncapped single-day view. */
+ *  A day over the cap keeps one showing of every film first (the middle one of its day, so the
+ *  sample isn't all matinees), then spends the remaining slots on evenly spaced extra showings.
+ *  Dropping showings is fine; dropping a film would read as "not playing". The day then ends in
+ *  a link to the uncapped single-day view. A day with more films than the cap keeps them all. */
 const WEEK_VIEW_DAY_CAP = 60;
+
+function filmKey(s: DayScreening): string {
+  return s.seen_key || s.title_de || s.title;
+}
+
+function capDay(list: DayScreening[], cap: number): DayScreening[] {
+  const films = new Map<string, DayScreening[]>();
+  for (const s of list) {
+    const rows = films.get(filmKey(s));
+    if (rows) rows.push(s);
+    else films.set(filmKey(s), [s]);
+  }
+  const kept = new Set<DayScreening>();
+  for (const rows of films.values()) kept.add(rows[Math.floor(rows.length / 2)]);
+  const rest = list.filter((s) => !kept.has(s));
+  const extra = Math.min(cap - kept.size, rest.length);
+  for (let i = 0; i < extra; i++) kept.add(rest[Math.floor((i * rest.length) / extra)]);
+  return list.filter((s) => kept.has(s));
+}
 
 function capPerDay(screenings: DayScreening[], cap: number) {
   const byDay = new Map<string, DayScreening[]>();
@@ -1516,8 +1536,9 @@ function capPerDay(screenings: DayScreening[], cap: number) {
       shown.push(...list);
       continue;
     }
-    for (let i = 0; i < cap; i++) shown.push(list[Math.floor((i * list.length) / cap)]);
-    hiddenByDay.set(date, list.length - cap);
+    const out = capDay(list, cap);
+    shown.push(...out);
+    if (out.length < list.length) hiddenByDay.set(date, list.length - out.length);
   }
   return { shown, hiddenByDay };
 }
