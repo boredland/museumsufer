@@ -19,7 +19,8 @@ const ITEM_RE =
   /<div class="el-content uk-panel uk-margin-top">([\s\S]*?)<\/div>\s*(?=<div class="el-content uk-panel uk-margin-top">|<\/div>\s*<\/div>\s*<div data-tag=|<\/div>\s*<div class="uk-grid)/g;
 const H4_RE = /<h4>([\s\S]*?)<\/h4>/g;
 const IMG_RE = /<img[^>]+src="(\/images\/Bilder_Terminkalender\/(\d{8})_[^"]+)"/i;
-const FIRST_BODY_P_RE = /<\/h4>\s*<p[^>]*>([\s\S]*?)<\/p>/i;
+const IMG_ALL_RE = /<img[^>]+src="(\/images\/Bilder_Terminkalender\/\d{8}_[^"]+)"/gi;
+
 const ANMELDEN_LINK_RE = /<a[^>]+href="(https?:\/\/forms\.gle\/[^"]+)"/i;
 
 const MONTHS_DE: Record<string, number> = {
@@ -52,23 +53,35 @@ export async function scrapeBnaiBrithFrankfurt(): Promise<VenueScrapeResult> {
   for (const m of html.matchAll(ITEM_RE)) {
     const block = m[1];
     const headings = [...block.matchAll(H4_RE)].map((h) => stripHtml(decodeEntities(h[1])).trim());
-    if (headings.length < 2) continue;
-
-    const parsed = parseDateLine(headings[0]);
+    const parsed = headings[0] ? parseDateLine(headings[0]) : null;
     if (!parsed) continue;
+
+    // Two layouts: date + title as two h4s (older entries), or one date h4
+    // followed by the title as the first bold paragraph (current entries).
+    const afterH4 = block.slice(block.search(/<\/h4>/i) + 5);
+    const boldTitle = afterH4.match(/<p[^>]*>\s*<strong>([\s\S]*?)<\/strong>\s*<\/p>/i);
+    const title = headings[1] || (boldTitle ? stripHtml(decodeEntities(boldTitle[1])).replace(/\s+/g, " ").trim() : "");
+    // A dated block without a title means the markup drifted; returning [] would hide it.
+    if (!title) throw new Error(`bnai-brith-frankfurt: dated block "${headings[0]}" has no recognisable title`);
     if (parsed.date < today) continue;
 
-    const title = headings[1];
-    if (!title) continue;
-
+    // Sponsor logos share the YYYYMMDD prefix; prefer the first non-logo image
+    // for display, but keep the first match's date prefix as the stable id.
     const imgMatch = block.match(IMG_RE);
-    const imageUrl = imgMatch ? normalizeUrl(imgMatch[1], BASE) : null;
+    const imgs = [...block.matchAll(IMG_ALL_RE)];
+    const display = imgs.find((i) => !/logo/i.test(i[1])) ?? imgs[0];
+    const imageUrl = display ? normalizeUrl(display[1], BASE) : null;
     const sourceEventId = imgMatch ? imgMatch[2] : `${parsed.date}|${title}`;
+
     if (seen.has(sourceEventId)) continue;
     seen.add(sourceEventId);
 
-    const intro = block.match(FIRST_BODY_P_RE)?.[1];
-    const description = intro ? stripHtml(decodeEntities(intro)).trim() || null : null;
+    // Skip the salutation ("Liebe Schwestern und Brüder…") and the title paragraph.
+    const paragraphs = [...afterH4.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)]
+      .map((p) => stripHtml(decodeEntities(p[1])).replace(/\s+/g, " ").trim())
+      .filter((p) => p && p !== title && !/^Liebe\b/.test(p));
+    const description = paragraphs[0] ?? null;
+
     const ticketUrl = block.match(ANMELDEN_LINK_RE)?.[1] ?? null;
 
     events.push({

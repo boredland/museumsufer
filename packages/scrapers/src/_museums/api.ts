@@ -80,6 +80,11 @@ export interface ApiEvent {
   series?: string | null;
   /** Ticket availability when the source advertises it; absent means unknown. */
   availability?: "sold_out" | "few_left" | null;
+  /** Link shown when the upstream has no per-event page (calendar accordion,
+   *  programme-only entry). Kept apart from `detail_url` because the event id is
+   *  derived from `detail_url ?? title`; folding this into it would re-key every
+   *  event that currently has none. */
+  fallback_url?: string | null;
 }
 
 export interface EventApiConfig {
@@ -95,6 +100,8 @@ export interface ApiExhibition {
   detail_url: string | null;
   image_url: string | null;
   museum_slug_override?: string;
+  /** See ApiEvent.fallback_url. */
+  fallback_url?: string | null;
 }
 
 export interface ExhibitionApiConfig {
@@ -227,7 +234,7 @@ async function fetchTribeEvents(endpoint: string): Promise<ApiEvent[]> {
   const today = todayIso();
   const url = `${endpoint}?per_page=50&start_date=${today}`;
   const res = await fetch(url);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { events?: TribeEvent[] };
   if (!data.events) return [];
 
@@ -342,8 +349,11 @@ async function fetchHistorisches(endpoint: string): Promise<ApiEvent[]> {
         time: nullIfMidnight(timeMatch?.[1] || null),
         end_time: endTime,
         end_date: endDate,
-        description: truncateHtml(ev.summary || ""),
+        description: truncateHtml(ev.summary || ev.body || ""),
         detail_url: ev.url || null,
+        // Calendar entries without a page of their own (recurring workshops,
+        // registration-only talks) still carry the programme-listing share link.
+        fallback_url: ev.shareUrl || null,
         image_url: ev.image || null,
         price,
         museum_slug_override: locationSlug,
@@ -362,6 +372,7 @@ interface HistorischesEvent {
   summary?: string;
   body?: string;
   url?: string;
+  shareUrl?: string;
   image?: string;
   isFree?: boolean;
 }
@@ -401,7 +412,7 @@ function mapJuedischesCategory(raw: string | undefined): string | null {
 
 async function fetchJuedisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const wrapper = (await res.json()) as { items?: JuedischesItem[] };
   const items = wrapper.items || [];
 
@@ -466,7 +477,7 @@ interface JuedischesItem {
 
 async function fetchStaedel(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { events?: StaedelEvent[]; aliases?: Record<string, string> };
   if (!data.events) return [];
 
@@ -633,7 +644,7 @@ async function fetchMyCalendar(endpoint: string): Promise<ApiEvent[]> {
   const weekAhead = dateOffset(30);
   const url = `${endpoint}?from=${today}&to=${weekAhead}`;
   const res = await fetch(url);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as Record<string, MyCalendarEvent[]>;
   if (typeof data !== "object" || Array.isArray(data)) return [];
 
@@ -699,7 +710,7 @@ async function fetchLiebieghaus(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
     headers: { "User-Agent": USER_AGENT },
   });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const events: ApiEvent[] = [];
@@ -752,7 +763,7 @@ async function fetchDommuseum(endpoint: string, proxy?: ProxyConfig): Promise<Ap
   const ua = { "User-Agent": USER_AGENT };
   const get = (url: string) => (proxy ? proxyFetch(url, proxy) : fetch(url, { headers: ua }));
   const res = await get(endpoint);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const events: ApiEvent[] = [];
@@ -821,7 +832,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, {
     headers: { "User-Agent": USER_AGENT },
   });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const events: ApiEvent[] = [];
@@ -865,6 +876,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
 
     const subMatch = block.match(/class="mak-event-subheading">([^<]+)/);
     const linkMatch = block.match(/href="(\/de\/veranstaltungen\/[^"]+)"/);
+    const accordionId = block.match(/id="(mak-event-\d+)-button"/)?.[1] ?? null;
     const accordionMatch = block.match(/class="mak-accordion-content[^"]*"[^>]*>([\s\S]*?)$/);
     const accordionText = accordionMatch ? truncateHtml(accordionMatch[1]) : null;
 
@@ -890,6 +902,8 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
       end_date: null,
       description,
       detail_url: linkMatch ? `https://www.museumangewandtekunst.de${linkMatch[1]}` : null,
+      // The calendar is one accordion page; the button id anchors to this event.
+      fallback_url: `${endpoint}${accordionId ? `#${accordionId}-button` : ""}`,
       image_url: null,
       price,
       ...(isIkonenmuseum && { museum_slug_override: "ikonenmuseum-frankfurt" }),
@@ -904,7 +918,7 @@ async function fetchMak(endpoint: string): Promise<ApiEvent[]> {
 // 8.6.2026 Lutz-Kleinhans concert appeared on the calendar but never in the feed).
 async function fetchStadtgeschichteHtml(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const events: ApiEvent[] = [];
@@ -928,15 +942,22 @@ async function fetchStadtgeschichteHtml(endpoint: string): Promise<ApiEvent[]> {
     const date = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
     if (date < todayIso()) continue;
 
-    const timeMatch = dateText.match(/(\d{1,2}:\d{2})\s*Uhr/i);
-    const endTimeMatch = dateText.match(/\d{1,2}:\d{2}\s*Uhr\s*bis\s*(\d{1,2}:\d{2})\s*Uhr/i);
+    // "16 Uhr" and "17:30 Uhr" both occur; the hour-only form was silently untimed.
+    const clock = (h: string, m?: string): string => `${h.padStart(2, "0")}:${m ?? "00"}`;
+    const timeMatch = dateText.match(/(\d{1,2})(?::(\d{2}))?\s*Uhr/i);
+    const endTimeMatch = dateText.match(/\d{1,2}(?::\d{2})?\s*Uhr\s*bis\s*(\d{1,2})(?::(\d{2}))?\s*Uhr/i);
 
     const titleParts = stripHtml(titleMatch[1]).split(/\s+/).filter(Boolean).join(" ");
     const subtitle = subtitleMatch ? subtitleMatch[1].trim() : null;
-    const title = subtitle ? `${subtitle}: ${titleParts}` : titleParts;
+    const title =
+      subtitle && !titleParts.toLowerCase().startsWith(subtitle.toLowerCase())
+        ? `${subtitle}: ${titleParts}`
+        : titleParts;
 
+    // The tile's date line is already the event's date/time; repeating it in the
+    // description only pushed the real summary out of the card.
     const summary = summaryMatch ? stripHtml(summaryMatch[1]) : "";
-    const description = truncateHtml(`${dateText} ${summary}`.trim());
+    const description = truncateHtml(summary);
 
     const image_url = imgMatch ? normalizeUrl(imgMatch[1], "https://www.stadtgeschichte-ffm.de") : null;
     const detail_url = linkMatch ? normalizeUrl(linkMatch[1], "https://www.stadtgeschichte-ffm.de") : null;
@@ -944,8 +965,8 @@ async function fetchStadtgeschichteHtml(endpoint: string): Promise<ApiEvent[]> {
     events.push({
       title,
       date,
-      time: nullIfMidnight(timeMatch ? timeMatch[1] : null),
-      end_time: nullIfMidnight(endTimeMatch ? endTimeMatch[1] : null),
+      time: timeMatch ? nullIfMidnight(clock(timeMatch[1], timeMatch[2])) : null,
+      end_time: endTimeMatch ? nullIfMidnight(clock(endTimeMatch[1], endTimeMatch[2])) : null,
       end_date: null,
       description,
       detail_url,
@@ -960,7 +981,7 @@ async function fetchStadtgeschichteHtml(endpoint: string): Promise<ApiEvent[]> {
 
 async function fetchLedermuseum(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1008,7 +1029,7 @@ async function fetchBibelhaus(endpoint: string, proxy?: ProxyConfig): Promise<Ap
   const res = proxy
     ? await proxyFetch(endpoint, proxy)
     : await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1062,7 +1083,7 @@ async function fetchBibelhaus(endpoint: string, proxy?: ProxyConfig): Promise<Ap
 
 async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1112,7 +1133,7 @@ async function fetchFkv(endpoint: string): Promise<ApiEvent[]> {
 async function fetchFdh(endpoint: string): Promise<ApiEvent[]> {
   const baseUrl = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1222,13 +1243,16 @@ function languageFromCountry(country: string | undefined): string | null {
   return (first && COUNTRY_TO_LANGUAGE[first]) || null;
 }
 
-/** The DFF appends the audience-facing version to the listing title
- *  ("KOKUHO (OmeU)"). We already parse that into its own `version` field
- *  downstream, so strip the parenthetical chrome from the title — but only
- *  when it's a known version marker, never a title that just ends in
- *  parentheses (e.g. "(500) Days of Summer"). */
+/** The DFF's Cinetixx feed bakes the audience-facing version and the FSK rating
+ *  into the listing title ("CLÉO DE 5 À 7 OmeU, keine Angabe (OmeU)", "ZIRKUSKIND D,
+ *  ab 0", "LUDWIG II. (OmU)"). The version is parsed into its own field downstream
+ *  and the rating is not programme, so strip both — but only the known marker
+ *  shapes, never a title that just ends in parentheses ("(500) Days of Summer"). */
 function stripVersionSuffix(title: string): string {
-  return title.replace(/\s*\((?:Om[a-zäöü]*U|OV|DF|stumm)\)\s*$/i, "").trim();
+  return title
+    .replace(/\s*\((?:Om[a-zäöü]*U|OV|DF|stumm)\)\s*$/i, "")
+    .replace(/\s+(?:D|OV|Om[a-zäöü]*U|engl\.\s*OmU),\s*(?:ab\s+\d+|keine Angabe|FSK folgt)\s*$/i, "")
+    .trim();
 }
 
 /** The DFF listing tags every screening's film series in a free-text
@@ -1447,7 +1471,7 @@ function parseArchaeologischesHours(text: string | undefined): { time: string | 
  */
 async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1511,7 +1535,7 @@ async function fetchArchaeologisches(endpoint: string): Promise<ApiEvent[]> {
 // "Wollheim Memorial".
 async function fetchFritzBauerWollheim(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
   const today = todayIso();
   const events: ApiEvent[] = [];
@@ -1620,7 +1644,7 @@ function extractTimeRange(text: string): { time: string | null; end_time: string
 
 async function fetchExperiminta(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const xml = await res.text();
 
   const today = todayIso();
@@ -1709,7 +1733,7 @@ function parseCaricaturaBadgeDate(badge: string): string | null {
 async function fetchCaricatura(endpoint: string): Promise<ApiEvent[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1809,7 +1833,7 @@ function parseWeltkulturenDate(text: string): { date: string | null; time: strin
 async function fetchWeltkulturen(endpoint: string): Promise<ApiEvent[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -1916,7 +1940,7 @@ function splitJsonLdDate(raw: string): { date: string; time: string | null } | n
 
 async function fetchEventon(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
   const today = todayIso();
 
@@ -1978,7 +2002,7 @@ const BUERGERSTIFTUNG_CATEGORY_MAP: Record<string, string> = {
 async function fetchBuergerstiftung(endpoint: string): Promise<ApiEvent[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2100,7 +2124,7 @@ function parseSchirnDate(raw: string): SchirnDate | null {
 
 async function fetchSchirn(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2197,7 +2221,7 @@ function mmkTimeFromString(raw: string | undefined | null | false): string | nul
 
 async function fetchMmk(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { items?: MmkItem[] };
   const items = data.items ?? [];
   const today = todayIso();
@@ -2270,7 +2294,7 @@ const GIERSCH_CATEGORY_MAP: Record<string, string> = {
 
 async function fetchGiersch(endpoint: string): Promise<ApiEvent[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2420,7 +2444,7 @@ function parseFffTime(rest: string): { time: string | null; end_time: string | n
 async function fetchFff(endpoint: string): Promise<ApiEvent[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2482,6 +2506,11 @@ async function fetchFff(endpoint: string): Promise<ApiEvent[]> {
       .trim();
     const hrefMatch = body.match(/<a\s+href="([^"]+)"/);
     const detailUrl = hrefMatch ? normalizeUrl(hrefMatch[1], origin) : null;
+    // The card stays on the page, dated, after the workshop is postponed with no new date.
+    if (description && /muss verschoben werden|fällt aus|abgesagt/i.test(description)) {
+      m = blockRe.exec(html);
+      continue;
+    }
 
     const key = `${id}::${parsed.date}`;
     if (seen.has(key)) {
@@ -2498,6 +2527,8 @@ async function fetchFff(endpoint: string): Promise<ApiEvent[]> {
       end_date: parsed.end_date,
       description: description ? truncateHtml(description) : null,
       detail_url: detailUrl,
+      // Cards without an <a> still have a page: /aktuell/prd.<id>/ redirects to it.
+      fallback_url: `${origin}/aktuell/prd.${id}/`,
       image_url: null,
       price: null,
       category: classifyFff(categoryLine) || classifyEvent(title, description ?? null) || null,
@@ -2513,7 +2544,7 @@ interface MmkExhibitionItem extends MmkItem {
 
 async function fetchMmkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { items_upcoming?: MmkExhibitionItem[] };
   const items = data.items_upcoming ?? [];
   const today = todayIso();
@@ -2658,6 +2689,7 @@ async function fetchWeltkulturenExhibitions(endpoint: string): Promise<ApiExhibi
   const today = todayIso();
   const out: ApiExhibition[] = [];
   const seen = new Set<string>();
+  const seenTitles = new Set<string>();
 
   const starts = [...html.matchAll(/class="panel-item[^"]*"/g)];
   for (let i = 0; i < starts.length; i++) {
@@ -2676,6 +2708,10 @@ async function fetchWeltkulturenExhibitions(endpoint: string): Promise<ApiExhibi
       .replace(/\s+/g, " ")
       .trim();
     if (!title) continue;
+    // A show on the "current" page keeps a twin on /vorschau/ (also an `_en` copy)
+    // under a different URL; the first (current) entry is the canonical one.
+    if (seenTitles.has(title)) continue;
+    seenTitles.add(title);
 
     const dateLine = block.match(/<span\s*class="date">\s*([^<]+)/)?.[1]?.trim() ?? "";
     const dateMatch = dateLine.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})\s*bis\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
@@ -2824,7 +2860,7 @@ function parseGierschRange(text: string): GierschRange | null {
 
 async function fetchGierschExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2897,7 +2933,7 @@ async function fetchGierschExhibitions(endpoint: string): Promise<ApiExhibition[
 async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -2981,6 +3017,7 @@ async function fetchFffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
       end_date,
       description: description ? truncateHtml(description) : null,
       detail_url: detailUrl,
+      fallback_url: `${origin}/aktuell/prd.${id}/`,
       image_url: null,
     });
     m = blockRe.exec(html);
@@ -2999,7 +3036,7 @@ async function fetchStaedelExhibitions(endpoint: string): Promise<ApiExhibition[
   // each detail page carries a JSON-LD <script @type="Event"> with
   // startDate/endDate, which is the cleanest source.
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { exhibitions?: StaedelExhibition[]; aliases?: Record<string, string> };
   const items = data.exhibitions ?? [];
   if (items.length === 0) return [];
@@ -3057,7 +3094,7 @@ async function fetchStaedelExhibitions(endpoint: string): Promise<ApiExhibition[
 async function fetchLiebieghausExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3122,7 +3159,7 @@ async function fetchLiebieghausExhibitions(endpoint: string): Promise<ApiExhibit
 
 async function fetchHistorischesExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint);
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const data = (await res.json()) as { events?: HistorischesEvent[] };
   const events = data.events ?? [];
   if (events.length === 0) return [];
@@ -3171,7 +3208,7 @@ interface SenckenbergExhibition {
 
 async function fetchSenckenbergExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const items = (await res.json()) as SenckenbergExhibition[];
   if (!Array.isArray(items)) return [];
 
@@ -3239,7 +3276,7 @@ async function fetchSenckenbergExhibitions(endpoint: string): Promise<ApiExhibit
 async function fetchJuedischesExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3353,7 +3390,7 @@ function parseMakRange(text: string): MakRange | null {
 async function fetchMakExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3443,7 +3480,7 @@ function parseLedermuseumDates(text: string): LedermuseumDates | null {
 
 async function fetchLedermuseumExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3514,7 +3551,7 @@ async function fetchLedermuseumExhibitions(endpoint: string): Promise<ApiExhibit
 
 async function fetchFkvExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3570,7 +3607,7 @@ async function fetchFkvExhibitions(endpoint: string): Promise<ApiExhibition[]> {
 async function fetchFdhExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const origin = new URL(endpoint).origin;
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3644,7 +3681,7 @@ async function fetchFdhExhibitions(endpoint: string): Promise<ApiExhibition[]> {
 
 async function fetchDffExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   // Walk all /ausstellung/{slug}/ links, dedupe, drop the dauerausstellung
@@ -3718,7 +3755,7 @@ const DAM_ON_TOUR_RE = /^DAM\s+on\s+tour\b/i;
 
 async function fetchDamTribeExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3807,7 +3844,7 @@ function parseMfkDate(text: string): MfkRange | null {
 
 async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
 
   const today = todayIso();
@@ -3885,7 +3922,7 @@ async function fetchMfkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
 // which gets the same treatment.
 async function fetchOffenbachSiteparkExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const fullHtml = await res.text();
 
   const cutoffMarkers = [/Vergangene\s+Ausstellungen/i, /Ausstellungsarchiv/i, /Kooperationen/i];
@@ -3985,7 +4022,7 @@ async function fetchOffenbachSiteparkExhibitions(endpoint: string): Promise<ApiE
 // them so visitors still see the always-on exhibitions.
 async function fetchJungesMuseumExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
   const origin = new URL(endpoint).origin;
   const today = todayIso();
@@ -4046,7 +4083,7 @@ async function fetchJungesMuseumExhibitions(endpoint: string): Promise<ApiExhibi
 // like a range.
 async function fetchMomemExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
   const today = todayIso();
   const out: ApiExhibition[] = [];
@@ -4090,7 +4127,7 @@ async function fetchSinclairExhibitions(endpoint: string, proxy?: ProxyConfig): 
   const res = proxy
     ? await proxyFetch(endpoint, proxy)
     : await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const fullHtml = await res.text();
   // The page sprinkles "Rückblick" both in a sidebar menu and as the
   // header for the past-exhibitions block. Cut at the *last* one so
@@ -4140,7 +4177,7 @@ async function fetchSinclairExhibitions(endpoint: string, proxy?: ProxyConfig): 
 // the permanent ones too.
 async function fetchStadtgeschichteExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const html = await res.text();
   const origin = new URL(endpoint).origin;
   const today = todayIso();
@@ -4198,7 +4235,7 @@ async function fetchStadtgeschichteExhibitions(endpoint: string): Promise<ApiExh
 // Skip the "Kalender" section that lists single-day events.
 async function fetchIkonenmuseumExhibitions(endpoint: string): Promise<ApiExhibition[]> {
   const res = await fetch(endpoint, { headers: { "User-Agent": USER_AGENT } });
-  if (!res.ok) return [];
+  if (!res.ok) throw new Error(`museum upstream ${res.status}: ${res.url}`);
   const fullHtml = await res.text();
   const origin = new URL(endpoint).origin;
   const calendarIdx = fullHtml.search(/<h2[^>]*class="kicker"[^>]*>\s*Kalender/i);

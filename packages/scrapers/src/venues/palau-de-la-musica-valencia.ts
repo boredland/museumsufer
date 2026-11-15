@@ -13,8 +13,9 @@ const SERIES_GENRE: Record<string, "chamber" | "classical"> = {
   "banda-municipal-de-val-egrave-ncia": "classical",
   "el-palau-amb-les-bandes": "classical",
 };
-/** Film festival screenings are not concerts. */
+/** Film festival screenings, training days and the Sabina pop tribute are not in scope. */
 const SKIP_SERIES = /\bmostra-cinema-del-mediterrani\b/;
+const SKIP_TITLE = /periscopio|mostra365|cine culpable|sabineando|\bvisuals\b/i;
 
 /**
  * Palau de la Música de València. /programacio-i-vendes/ renders the whole
@@ -51,8 +52,14 @@ function parseCard(block: string, today: string): CanonicalScrapedEvent | null {
   const lines = esSpan
     .split(/<br\s*\/?>|<\/p>|<\/strong>/i)
     .map((l) => cleanText(l))
-    .filter(Boolean);
-  if (lines.length === 0) return null;
+    .filter(Boolean)
+    // "<strong>ALBA VENTURA</strong>, piano" splits into a name and a bare ", piano".
+    .reduce<string[]>((acc, l) => {
+      if (/^[,;]/.test(l) && acc.length > 0) acc[acc.length - 1] = `${acc[acc.length - 1]}${l}`;
+      else acc.push(l);
+      return acc;
+    }, []);
+  if (lines.length === 0 || SKIP_TITLE.test(lines.join(" "))) return null;
 
   const ticket = block.match(/href="((?:https?:)?\/\/tickets\.palauvalencia\.com[^"]+)"/)?.[1];
   const ticketUrl = ticket ? decodeEntities(ticket.startsWith("//") ? `https:${ticket}` : ticket) : null;
@@ -66,7 +73,7 @@ function parseCard(block: string, today: string): CanonicalScrapedEvent | null {
     description: null,
     date: iso,
     time: time ? time.padStart(5, "0") : null,
-    detail_url: `${BASE}/event?id=${id}`,
+    detail_url: `${BASE}/event/?id=${id}`,
     ticket_url: ticketUrl,
     image_url: block.match(/<img[^>]+src="([^"]+)"[^>]*card-img-top/)?.[1] ?? null,
     language: "es",

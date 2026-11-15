@@ -42,8 +42,7 @@ export async function scrapeStalburgTheater(): Promise<VenueScrapeResult> {
   const parsed: ParsedEvent[] = [];
 
   for (const path of monthPaths) {
-    const html = path === "" ? initialHtml : await fetchHtml(`${BASE}${path}`).catch(() => null);
-    if (!html) continue;
+    const html = path === "" ? initialHtml : await fetchHtml(`${BASE}${path}`);
 
     for (const event of parseEvents(html)) {
       if (event.date < today) continue;
@@ -54,6 +53,7 @@ export async function scrapeStalburgTheater(): Promise<VenueScrapeResult> {
     }
   }
 
+  if (parsed.length === 0) throw new Error("stalburg: no upcoming events parsed from /programm/");
   const imageBySlug = await enrichWithDetailPages(parsed);
   const events: CanonicalScrapedEvent[] = parsed.map((p) => ({
     source_event_id: `${p.providerEventId ?? p.slug}|${p.date}|${p.time ?? ""}|${p.venueRoom ?? ""}`,

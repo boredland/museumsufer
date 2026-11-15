@@ -1,3 +1,5 @@
+import { looksLikeNonProgramme } from "./format";
+
 /**
  * Coarse event-type classifier — Führung / Workshop / Vortrag / Konzert /
  * Vernissage / Familie / Film — driven by title+description keyword match.
@@ -7,6 +9,8 @@
 export type EventType = "Führung" | "Workshop" | "Vortrag" | "Konzert" | "Vernissage" | "Familie" | "Film";
 
 export function classifyEvent(title: string, description?: string | null): EventType | null {
+  // A quiz or advice hour whose description mentions "Musik" or "Film" is not a concert or screening.
+  if (looksLikeNonProgramme(title)) return null;
   const haystack = `${title.toLowerCase()} ${(description || "").toLowerCase()}`;
 
   // Film check first — "Vorführung" / "Dokumentarfilm" / "Filmreihe" would

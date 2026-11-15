@@ -58,31 +58,40 @@ function isAggregator(s: Screening): boolean {
   return AGGREGATOR_CINEMA_SLUGS.has(s.cinema_slug);
 }
 
-/**
- * Collapses duplicate screenings that the same physical screening surfaces under
- * via multiple cinemas (aggregators re-list direct-cinema programs). Prefers
- * direct sources; among same-tier candidates, keeps the entry with the
- * richest field coverage.
- */
-export function dedupScreenings(screenings: Screening[]): Screening[] {
+function richest(bucket: Screening[]): Screening {
+  return bucket.reduce((best, cur) => (richness(cur) > richness(best) ? cur : best));
+}
+
+function groupBy(screenings: Screening[], key: (s: Screening) => string): Map<string, Screening[]> {
   const groups = new Map<string, Screening[]>();
   for (const s of screenings) {
-    const key = matchKey(s);
-    const bucket = groups.get(key);
+    const k = key(s);
+    const bucket = groups.get(k);
     if (bucket) bucket.push(s);
-    else groups.set(key, [s]);
+    else groups.set(k, [s]);
   }
+  return groups;
+}
+
+/**
+ * Collapses duplicate listings of one screening. Two cinemas showing the same
+ * film at the same time are two real screenings, so direct listings only merge
+ * within a single cinema (e.g. "OV: Backrooms" re-listing "Backrooms"). An
+ * aggregator copy is dropped only when some direct listing matches its
+ * date, time and film; among same-tier candidates the richest entry wins.
+ */
+export function dedupScreenings(screenings: Screening[]): Screening[] {
+  const direct = screenings.filter((s) => !isAggregator(s));
+  const aggregated = screenings.filter(isAggregator);
 
   const out: Screening[] = [];
-  for (const bucket of groups.values()) {
-    if (bucket.length === 1) {
-      out.push(bucket[0]);
-      continue;
-    }
-    const direct = bucket.filter((s) => !isAggregator(s));
-    const candidates = direct.length > 0 ? direct : bucket;
-    const winner = candidates.reduce((best, cur) => (richness(cur) > richness(best) ? cur : best));
-    out.push(winner);
+  for (const bucket of groupBy(direct, (s) => `${s.cinema_slug}|${matchKey(s)}`).values()) {
+    out.push(richest(bucket));
+  }
+
+  const directKeys = new Set(direct.map(matchKey));
+  for (const bucket of groupBy(aggregated, matchKey).values()) {
+    if (!directKeys.has(matchKey(bucket[0]))) out.push(richest(bucket));
   }
   return out;
 }

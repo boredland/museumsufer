@@ -13,6 +13,7 @@ import { stringifyRecord } from "@museumsufer/core/bundle-writer";
 import { EVENTS as PREVIOUS_EVENTS } from "../data/events";
 import { TMDB_POSTER_CACHE, type TmdbCacheEntry } from "../data/tmdb-cache";
 import { VENUE_NAMES as PREVIOUS_VENUE_NAMES } from "../data/venue-names";
+import { HALLE02_DETAIL_CACHE, halle02CacheSnapshot, serializeHalle02Cache } from "@museumsufer/scrapers";
 import { runHub } from "../src/runner";
 import type { EventHubData } from "../src/types";
 
@@ -46,6 +47,18 @@ async function main(): Promise<void> {
   log(`wrote data/events.ts — ${next.events.length} events`);
   await writeFile(resolve(root, "data/venue-names.ts"), generateNamesModule(next.venueNames ?? {}), "utf8");
   log(`wrote data/venue-names.ts — ${Object.keys(next.venueNames ?? {}).length} venues`);
+
+  // halle02's detail pages cost ~5 s each, so the scraper keeps a committed cache
+  // (TMDb-cache pattern). Its live fetches are written back here, after a scrape
+  // that completed; a failed halle02 run leaves the snapshot null and the file alone.
+  const halle02Next = halle02CacheSnapshot();
+  if (halle02Next) {
+    const text = serializeHalle02Cache(halle02Next);
+    if (text !== serializeHalle02Cache(HALLE02_DETAIL_CACHE)) {
+      await writeFile(resolve(root, "../scrapers/src/data/halle02-detail-cache.ts"), text, "utf8");
+      log(`wrote halle02-detail-cache.ts — ${Object.keys(halle02Next).length} entries`);
+    }
+  }
 
   // Phase 2: enrich (TMDb posters + DeepL + OMDb ratings). Mutates
   // events in place and fills tmdbCache. Non-fatal on timeout — the

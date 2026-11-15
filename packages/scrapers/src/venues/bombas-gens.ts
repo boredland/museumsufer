@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { absolute, addDaysIso, clean, EXHIBITION_LABEL, eventLabels, fetchText, numericDates, OPEN_ENDED_DAYS, parseDateSpan, VALENCIA } from "./_valencia";
+import { absolute, addDaysIso, clean, EXHIBITION_LABEL, eventLabels, expectFound, fetchText, numericDates, OPEN_ENDED_DAYS, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Bombas Gens Centre d'Arts Digitals. The `/es/activitats/` agenda is an
@@ -17,7 +17,7 @@ export async function scrapeBombasGens(): Promise<VenueScrapeResult> {
   const html = await fetchText(`${BASE}/es/activitats/`);
   const events: CanonicalScrapedEvent[] = [];
 
-  for (const card of html.split('data-elementor-type="loop-item"').slice(1)) {
+  for (const card of expectFound(html.split('data-elementor-type="loop-item"').slice(1), "bombasgens.com/es/activitats")) {
     const link = card.match(/<h2[^>]*><a href="([^"]+)">([\s\S]*?)<\/a><\/h2>/);
     if (!link) continue;
     const url = absolute(BASE, link[1]);
@@ -49,8 +49,8 @@ export async function scrapeBombasGens(): Promise<VenueScrapeResult> {
       detail_url: url,
       image_url: img ? absolute(BASE, img) : null,
       labels: isExhibition ? [EXHIBITION_LABEL] : eventLabels(title),
-      lat: 39.4896,
-      lon: -0.3917,
+      lat: 39.4855,
+      lon: -0.3851,
       ...VALENCIA,
     });
   }

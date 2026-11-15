@@ -1,4 +1,11 @@
-import { classifyDance, classifyMusic, classifyTalk, looksLikeMusic } from "@museumsufer/classify";
+import {
+  classifyDance,
+  classifyMusic,
+  classifyTalk,
+  isWorkshopTitle,
+  looksLikeMusic,
+  looksLikeNonProgramme,
+} from "@museumsufer/classify";
 import type { ScrapedLabel } from "../types";
 
 /**
@@ -28,10 +35,16 @@ export interface StageLabelOptions {
   confidence?: number;
 }
 
+/** Fallback must not mint a concert for a reading, slam or comedy night that merely sits in a music hall. */
+const NOT_A_CONCERT_RE = /\b(?:lesung|roman|buch|autor(?:in)?|poetry|slam|comedy|kabarett|stand-?up|vortrag|wissenschaft)\b/i;
+
 export function resolveStageLabels(opts: StageLabelOptions): ScrapedLabel[] {
   const haystack = `${opts.title} ${opts.subtitle ?? ""} ${opts.hint ?? ""}`.toLowerCase();
   const classifier = opts.classifier ?? "upstream-tag";
   const confidence = opts.confidence ?? 0.9;
+  // Quiz/bingo/karaoke/advice hours and "Workshop: …" sessions are calendar entries, not performances.
+  if (looksLikeNonProgramme(opts.title)) return [{ label: "event:venue", confidence: 0.5, classifier }];
+  if (isWorkshopTitle(opts.title)) return [{ label: "talk:workshop", confidence: 0.7, classifier }];
   const labels: ScrapedLabel[] = [];
 
   if (/konzert|musik\b/.test(haystack) || looksLikeMusic(opts.title, opts.subtitle ?? opts.hint ?? null)) {
@@ -56,7 +69,9 @@ export function resolveStageLabels(opts: StageLabelOptions): ScrapedLabel[] {
   }
 
   if (labels.length === 0) {
-    labels.push({ label: opts.defaultLabel ?? "stage:theater", confidence, classifier });
+    const fallback = opts.defaultLabel ?? "stage:theater";
+    const concertFallback = fallback.startsWith("music:") && NOT_A_CONCERT_RE.test(haystack);
+    labels.push({ label: concertFallback ? "event:venue" : fallback, confidence, classifier });
   }
   return labels;
 }

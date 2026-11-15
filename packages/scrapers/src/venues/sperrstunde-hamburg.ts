@@ -1,3 +1,4 @@
+import { looksLikeNonProgramme } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -121,33 +122,33 @@ export async function scrapeSperrstunde(): Promise<VenueScrapeResult> {
   return { source_slug: "sperrstunde-hamburg", display_name: "Sperrstunde Hamburg", events };
 }
 
-function labelsFromCategories(
-  categories: string[],
-  title: string,
-): Array<{ label: string; confidence: number; classifier: "scraper-hardcoded" }> {
-  const labels: Array<{ label: string; confidence: number; classifier: "scraper-hardcoded" }> = [];
-  const t = title.toLowerCase();
+type SperrLabel = { label: string; confidence: number; classifier: "scraper-hardcoded" };
 
-  if (categories.includes("konzert") || categories.includes("party") || t.includes("live")) {
-    labels.push({ label: "music:rock", confidence: 0.7, classifier: "scraper-hardcoded" });
-  }
-  if (categories.includes("film")) {
-    labels.push({ label: "cinema:arthaus", confidence: 0.7, classifier: "scraper-hardcoded" });
-  }
-  if (categories.includes("theater")) {
-    labels.push({ label: "stage:theater", confidence: 0.7, classifier: "scraper-hardcoded" });
+/**
+ * Only an explicit `Konzert` / `Party` category earns a music label; the old
+ * fallback stamped `music:rock` on every uncategorised entry (advice hours,
+ * exhibitions, regulars' tables) and on any title containing "live"
+ * ("Live-Podcast"). `music:club` marks parties without claiming a genre.
+ */
+function labelsFromCategories(categories: string[], title: string): SperrLabel[] {
+  const labels: SperrLabel[] = [];
+  const add = (label: string): void => {
+    labels.push({ label, confidence: 0.7, classifier: "scraper-hardcoded" });
+  };
+  const nonProgramme = looksLikeNonProgramme(title);
+
+  if (!nonProgramme) {
+    if (categories.includes("konzert")) add("music:rock");
+    else if (categories.includes("party")) add("music:club");
+    if (categories.includes("film")) add("cinema:arthaus");
+    if (categories.includes("theater")) add("stage:theater");
   }
   if (categories.includes("lesung") || categories.includes("vortrag") || categories.includes("diskussion")) {
-    labels.push({ label: "talk:reading", confidence: 0.7, classifier: "scraper-hardcoded" });
+    add("talk:reading");
   }
-  if (categories.includes("workshop") || categories.includes("diy")) {
-    labels.push({ label: "talk:workshop", confidence: 0.7, classifier: "scraper-hardcoded" });
-  }
+  if (categories.includes("workshop") || categories.includes("diy")) add("talk:workshop");
 
-  // Fallback
-  if (labels.length === 0) {
-    labels.push({ label: "music:rock", confidence: 0.5, classifier: "scraper-hardcoded" });
-  }
+  if (labels.length === 0) labels.push({ label: "event:venue", confidence: 0.5, classifier: "scraper-hardcoded" });
   return labels;
 }
 

@@ -1,4 +1,5 @@
 import { decodeEntities, stripHtml } from "@museumsufer/core";
+import { type ProxyConfig, proxyFetch } from "../proxy";
 import type { ScrapedLabel } from "../types";
 
 /**
@@ -44,13 +45,21 @@ export function clean(html: string): string {
   return decodeEntities(stripHtml(html)).replace(/\s+/g, " ").trim();
 }
 
-export async function fetchText(url: string): Promise<string> {
-  const res = await fetch(url, {
+/** `proxy` is for hosts whose TLS chain fails from CI (cac.es); everything else fetches directly. */
+export async function fetchText(url: string, proxy: ProxyConfig | null = null): Promise<string> {
+  const res = await proxyFetch(url, proxy, {
     headers: { "User-Agent": UA, "Accept-Language": "es-ES,es;q=0.9" },
     signal: AbortSignal.timeout(30_000),
   });
   if (!res.ok) throw new Error(`${url}: ${res.status}`);
   return res.text();
+}
+
+/** A listing that parses to zero items means the markup changed or the upstream is down;
+ *  throwing keeps that from looking like an empty venue. */
+export function expectFound<T>(items: T[], what: string): T[] {
+  if (items.length === 0) throw new Error(`${what}: no items found, markup changed or upstream down`);
+  return items;
 }
 
 export function absolute(base: string, href: string): string {
@@ -66,12 +75,12 @@ export const EXHIBITION_LABEL: ScrapedLabel = {
 /** Spanish/Valencian counterpart of the German event keyword classifier. Order
  *  matters: a "taller infantil" is a workshop, a "concierto familiar" a concert. */
 const EVENT_RULES: Array<[RegExp, string]> = [
-  [/visita|recorregut|recorrido|itinerari|ruta\b|portes obertes|puertas abiertas/i, "museum:fuehrung"],
-  [/taller|workshop|obrador/i, "museum:workshop"],
   [/inaugurac|inauguraci/i, "museum:vernissage"],
-  [/concierto|concert|m[uú]sica|m[uú]sic|jazz|recital|cor\b|coral/i, "museum:konzert"],
-  [/cine|pel[·.]?l[ií]cula|proyecci|projecci|documental|filmoteca/i, "museum:film"],
-  [/conferencia|confer[eè]ncia|charla|xerrada|conversa|presentaci|curso|curs\b|jornada|seminario|mesa redonda|di[aà]leg/i, "museum:vortrag"],
+  [/visita|recorregut|recorrido|itinerari|\bruta\b|portes obertes|puertas abiertas/i, "museum:fuehrung"],
+  [/taller|workshop|obrador/i, "museum:workshop"],
+  [/concierto|concert|m[uú]sica|m[uú]sic|jazz|recital|\bcor\b|coral/i, "museum:konzert"],
+  [/\bcine(?:ma|s)?\b|pel[·.]?l[ií]cula|proyecci|projecci|documental|filmoteca/i, "museum:film"],
+  [/conferencia|confer[eè]ncia|charla|xerrada|conversa|\bpresentaci|\bcurso|\bcurs\b|jornada|seminario|mesa redonda|di[aà]leg|divulgativ/i, "museum:vortrag"],
   [/infantil|familiar|famil[ií]a|cuentacuentos|contacontes|ni[ñn]os|xiquets|escolar|beb[eé]s/i, "museum:familie"],
 ];
 

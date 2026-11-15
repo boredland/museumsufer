@@ -35,8 +35,12 @@ export async function scrapeKarlMarxBuchhandlung(): Promise<VenueScrapeResult> {
 
   const today = todayIso();
   const futures: { id: string; detailUrl: string; date: string; titleRaw: string; classes: string }[] = [];
+  const articles = [...html.matchAll(ARTICLE_RE)];
+  // The category page always carries archived posts; none at all means the
+  // theme or URL changed, not a quiet programme.
+  if (articles.length === 0) throw new Error("karl-marx-buchhandlung: no <article> entries on the category page");
 
-  for (const m of html.matchAll(ARTICLE_RE)) {
+  for (const m of articles) {
     const id = m[1];
     const classes = m[2];
     const detailUrl = m[3];

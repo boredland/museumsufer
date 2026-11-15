@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { absolute, clean, EXHIBITION_LABEL, eventLabels, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
+import { absolute, clean, EXHIBITION_LABEL, eventLabels, expectFound, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Jardí Botànic de la Universitat de València. The home page lists the upcoming
@@ -15,7 +15,7 @@ export async function scrapeJardiBotanic(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const html = await fetchText(`${BASE}/`);
   const events: CanonicalScrapedEvent[] = [];
-  for (const block of html.split('<div class="event ').slice(1)) {
+  for (const block of expectFound(html.split('<div class="event ').slice(1), "jardibotanic.org agenda")) {
     const head = block.match(/<h3><strong><b>([\s\S]*?)<\/b><\/strong>([\s\S]*?)<\/h3>/);
     const link = block.match(/<a href="(\/\?apid=agenda-33&(?:amp;)?id=\d+)">/)?.[1];
     const dates = block.match(/<p><strong>DIE?S?:?\s*<\/strong>([\s\S]*?)<\/p>|<p><strong>DIA\s*:\s*<\/strong>([\s\S]*?)<\/p>|<p><strong>DATES?:<\/strong>([\s\S]*?)<\/p>/);

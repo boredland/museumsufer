@@ -1,3 +1,4 @@
+import { looksLikeNonProgramme } from "@museumsufer/classify";
 import { toBerlinDate, toBerlinTime, todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -12,7 +13,16 @@ interface CineamoCinema {
   name: string;
   /** Public-facing site for fallback detail URLs. */
   websiteBase: string;
+  /** The platform re-issues showing ids every day or two for this cinema, so a
+   *  key built from room+start+title replaces the upstream id. Without it every
+   *  re-issue leaves a ghost event (dead ticket link) in the hub for the 14-day
+   *  stale TTL. */
+  stableIds?: boolean;
 }
+
+/** Live-performance slams Zeise hosts between screenings. "Shortfilm Slam" is a
+ *  film programme and deliberately does not match. */
+const STAGE_SLAM_RE = /\b(?:poetry|singer)\s+slam\b/i;
 
 const CINEMAS: CineamoCinema[] = [
   {
@@ -74,6 +84,7 @@ const CINEMAS: CineamoCinema[] = [
     source_slug: "zeise-kinos",
     name: "Zeise Kinos",
     websiteBase: "https://www.zeise.de",
+    stableIds: true,
   },
   {
     id: 967,
@@ -112,6 +123,7 @@ interface CineamoShowing {
   id: number;
   name: string;
   startDatetime: string;
+  cinemaRoomId?: number | null;
   endDatetime: string | null;
   state: string;
   language: string | null;
@@ -182,16 +194,24 @@ async function scrapeCinema(cinema: CineamoCinema, today: string): Promise<Venue
     const subtitle = dub.length ? dub.join(" · ") : null;
 
     events.push({
-      source_event_id: String(show.id),
+      source_event_id: cinema.stableIds
+        ? `${show.cinemaRoomId ?? ""}|${show.startDatetime}|${show.name}`
+        : String(show.id),
       title: show.name,
       subtitle,
       date,
       time,
       end_time: endTime && endTime !== time ? endTime : null,
-      detail_url: `${cinema.websiteBase}/de/film/${show.cineamoMovieId ?? show.movieId ?? ""}`,
+      // The cinema sites have no per-film page at /de/film/<cineamoMovieId> (404
+      // on every cinema probed), so link the booking page, else the cinema site.
+      detail_url: show.onlineTicketUrl ?? cinema.websiteBase,
       ticket_url: show.onlineTicketUrl,
       image_url: show.imageUrl,
-      labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
+      // Quiz nights and Zeise's live slams are listed as showings but are not films.
+      labels:
+        looksLikeNonProgramme(show.name) || STAGE_SLAM_RE.test(show.name)
+          ? [{ label: "event:venue", confidence: 0.5, classifier: "scraper-hardcoded" }]
+          : [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }
 

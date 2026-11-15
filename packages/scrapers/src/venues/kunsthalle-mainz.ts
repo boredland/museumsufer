@@ -1,3 +1,4 @@
+import { classifyTalk } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -14,7 +15,7 @@ const UA = "Mozilla/5.0 (compatible; Museumsufer/1.0)";
 export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const q = encodeURIComponent(
-    '*[_type == "event" && isPublished == true]{_id, title, eventCategory, singleEventTimes, image, text}',
+    '*[_type == "event" && isPublished == true]{_id, title, subtitle, eventCategory, singleEventTimes, image, text}',
   );
   const res = await fetch(`${API_BASE}?query=${q}`, {
     headers: { "User-Agent": UA, Accept: "application/json" },
@@ -30,7 +31,9 @@ export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
     const title = ev.title?.de?.trim();
     if (!title) continue;
 
-    const description = extractText(ev.text?.de);
+    const subtitle = ev.subtitle?.de?.trim() || null;
+    const body = extractText(ev.text?.de);
+    const description = subtitle && body ? `${subtitle}. ${body}` : (subtitle ?? body);
     const categoryName = ev.eventCategory ?? null;
     const imageUrl = buildImageUrl(ev.image);
 
@@ -52,7 +55,9 @@ export async function scrapeKunsthalleMainz(): Promise<VenueScrapeResult> {
         date: t.date,
         time: t.startTime || null,
         end_time: endTime,
-        detail_url: null,
+        // The programme page is client-rendered; `?event=<id>` opens that event's
+        // detail dialog, which is the only per-event deep link the site has.
+        detail_url: `https://www.kunsthalle-mainz.de/de/programme/events?event=${ev._id}`,
         image_url: imageUrl,
         labels: buildLabels(title, categoryName),
       });
@@ -126,17 +131,28 @@ function buildLabels(
     { label: "museum:event", confidence: 0.95, classifier: "scraper-hardcoded" },
   ];
   const t = title.toLowerCase();
-  if (t.includes("führung") || t.includes("rundgang") || category === "guided-tours") {
+  if (t.includes("führung") || t.includes("rundgang") || t.includes("rundgänge") || category === "guided-tours") {
     labels.push({ label: "museum:fuehrung", confidence: 0.8, classifier: "scraper-hardcoded" });
   }
-  if (t.includes("vortrag") || t.includes("gespräch") || t.includes("diskussion") || category === "talks") {
-    labels.push({ label: "talk:lecture", confidence: 0.7, classifier: "scraper-hardcoded" });
+  if (
+    t.includes("vortrag") ||
+    t.includes("gespräch") ||
+    t.includes("diskussion") ||
+    /\btalk\b/.test(t) ||
+    category === "talks"
+  ) {
+    // `talk:lecture` is not a format lehrhaus knows; classifyTalk picks one it does.
+    labels.push({
+      label: `talk:${classifyTalk(title).toLowerCase()}`,
+      confidence: 0.7,
+      classifier: "scraper-hardcoded",
+    });
   }
   if (
     t.includes("workshop") ||
     t.includes("werkstatt") ||
-    category === "workshops" ||
-    category === "children-and-young-people"
+    t.startsWith("kurs:") ||
+    category === "workshops-and-courses"
   ) {
     labels.push({ label: "museum:workshop", confidence: 0.7, classifier: "scraper-hardcoded" });
   }
@@ -160,6 +176,7 @@ interface SanityExhibition {
 interface SanityEvent {
   _id: string;
   title?: { de?: string; en?: string } | null;
+  subtitle?: { de?: string } | null;
   eventCategory?: string | null;
   singleEventTimes?: SanityEventTime[] | null;
   image?: SanityImageRef | null;

@@ -22,6 +22,7 @@ export function scrapeCentralstationDarmstadt(): Promise<VenueScrapeResult> {
     city: "darmstadt",
     lat: 49.8728,
     lon: 8.6519,
-    defaultLabel: "music:classical",
+    // A club/cabaret/reading venue: an unmatched title is a pop or club night, not classical (konzert-haus only shows genre labels).
+    defaultLabel: "music:pop",
   });
 }

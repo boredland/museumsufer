@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { clean, EXHIBITION_LABEL, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
+import { clean, EXHIBITION_LABEL, expectFound, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Centre del Carme Cultura Contemporània (CCCC), run by the Consorci de Museus.
@@ -15,7 +15,7 @@ const BASE = "https://www.consorcimuseus.gva.es";
 export async function scrapeCentreDelCarme(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const home = await fetchText(`${BASE}/`);
-  const urls = [...new Set([...home.matchAll(/href="(https:\/\/www\.consorcimuseus\.gva\.es\/exposicion\/[^"]+)"/g)].map((m) => m[1]))];
+  const urls = expectFound([...new Set([...home.matchAll(/href="(https:\/\/www\.consorcimuseus\.gva\.es\/exposicion\/[^"]+)"/g)].map((m) => m[1]))], "consorcimuseus.gva.es home slider");
   const events: CanonicalScrapedEvent[] = [];
   for (const url of urls) {
     const html = await fetchText(`${url}?lang=es`);
@@ -37,8 +37,8 @@ export async function scrapeCentreDelCarme(): Promise<VenueScrapeResult> {
       image_url: html.match(/og:image" content="([^"]+)"/)?.[1] ?? null,
       venue_room: place.split(".").slice(1).join(".").replace(/\s+Artista:.*$/, "").replace(/\.$/, "").trim() || null,
       labels: [EXHIBITION_LABEL],
-      lat: 39.4786,
-      lon: -0.3812,
+      lat: 39.4799,
+      lon: -0.3787,
       ...VALENCIA,
     });
   }

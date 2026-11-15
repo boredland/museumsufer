@@ -1,5 +1,6 @@
-import { dateOffset } from "@museumsufer/core/date";
+import { dateOffset, todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import { clipDescription, FILM_CINEMA_LABEL } from "./_valencia-cinema";
 
 const BASE = "https://tickets.ocinepremiumaqua.es";
 const HORIZON_DAYS = 28;
@@ -14,6 +15,7 @@ interface Session {
   hora: string;
   nomSala?: string | null;
   disponibles?: number | null;
+  totals?: number | null;
 }
 
 interface SubFilm {
@@ -37,6 +39,14 @@ interface FilmDetail {
 
 interface ListFilm {
   id: number;
+}
+
+function addMinutes(time: string, minutes: number): string | null {
+  const [h, m] = time.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  // A show running past midnight has no sensible same-day end time.
+  if (total >= 24 * 60) return null;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
 async function json<T>(url: string, init?: RequestInit): Promise<T> {
@@ -82,40 +92,57 @@ export async function scrapeOcineAquaValencia(): Promise<VenueScrapeResult> {
   // Fetch order depends on completion timing; sort so the committed bundle stays byte-stable.
   details.sort((a, b) => a.id - b.id);
 
+  const today = todayIso();
   const events: CanonicalScrapedEvent[] = [];
   for (const film of details) {
-    const variants: Array<{ titol: string; formats: string[]; sessions: Session[] }> = (film.subPelicules ?? []).map((s) => ({
-      titol: s.titol,
+    // Sessions hang off the per-format sub-film (2D, ATMOS, 4D…); the ticketing SPA deep-links to that id.
+    const variants: Array<{ id: number; formats: string[]; sessions: Session[] }> = (film.subPelicules ?? []).map((s) => ({
+      id: s.id,
       formats: s.propietatsDesc ?? [],
       sessions: s.sessions ?? [],
     }));
-    if (film.sessions?.length) variants.push({ titol: film.titol, formats: [], sessions: film.sessions });
+    if (film.sessions?.length) variants.push({ id: film.id, formats: [], sessions: film.sessions });
 
+    const description = clipDescription((film.sinopsis ?? "").replace(/\s+/g, " "));
+    const runtime = film.durada && Number(film.durada) > 0 ? Number(film.durada) : null;
     for (const variant of variants) {
+      const link = `${BASE}/#/DetallPelicula/${variant.id}`;
+      const vose = variant.formats.some((f) => /VOSE/i.test(f));
+      const original = !vose && variant.formats.some((f) => /\bVO\b|original/i.test(f));
+      const catalan = variant.formats.some((f) => /Catal/i.test(f));
+      const basque = variant.formats.some((f) => /Euskera/i.test(f));
       for (const s of variant.sessions) {
-        if (!s.data || s.data > lastDate) continue;
+        if (!s.data || s.data < today || s.data > lastDate) continue;
         const flags = variant.formats.filter((f) => f && f !== "2D");
+        const time = s.hora.slice(0, 5);
+        const total = s.totals ?? 0;
         events.push({
           source_event_id: `ocine-aqua-valencia-${s.planificacio}`,
           title: film.titol,
-          subtitle: [...flags, film.durada && film.durada !== "0" ? `${film.durada} min` : null].filter(Boolean).join(" · ") || null,
-          description: film.sinopsis ? film.sinopsis.slice(0, 600) : null,
+          subtitle: [...flags, runtime ? `${runtime} min` : null].filter(Boolean).join(" · ") || null,
+          description,
           date: s.data,
-          time: s.hora.slice(0, 5),
-          detail_url: `${BASE}/`,
-          ticket_url: `${BASE}/`,
+          time,
+          end_time: runtime ? addMinutes(time, runtime) : null,
+          detail_url: link,
+          ticket_url: link,
+          // Sessions without a version property are the dubbed Spanish run; VO/VOSE keep an unnamed original track.
+          language: vose || original || basque ? null : catalan ? "ca" : "es",
           performers: film.director ?? null,
-          venue_room: s.nomSala ?? null,
+          venue_room: s.nomSala ? s.nomSala.replace(/^SALA\s+/i, "Sala ") : null,
           city: "valencia",
           lat: LAT,
           lon: LON,
           raw_category: film.genereComercial ?? null,
-          availability: s.disponibles === 0 ? "sold_out" : null,
-          labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
+          availability:
+            s.disponibles === 0 ? "sold_out" : s.disponibles != null && total > 0 && s.disponibles <= Math.max(5, Math.floor(total * 0.1)) ? "few_left" : null,
+          labels: [FILM_CINEMA_LABEL],
         });
       }
     }
   }
+  if (events.length === 0) throw new Error("ocine-aqua-valencia: films listed but no upcoming sessions");
+  events.sort((a, b) => a.date.localeCompare(b.date) || a.time!.localeCompare(b.time!) || a.source_event_id.localeCompare(b.source_event_id));
 
   return { source_slug: "ocine-aqua-valencia", display_name: "Ocine Premium Aqua", events };
 }

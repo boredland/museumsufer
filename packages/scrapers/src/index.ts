@@ -3,6 +3,8 @@ import { scrapeWdc2026 } from "./venues/_wdc2026";
 export { MUSEUM_SLUGS, MUSEUMS } from "./_museums/config";
 export { type ProxyConfig, proxyFetch } from "./proxy";
 export { THEATER_SLUGS } from "./theater-slugs";
+export { HALLE02_DETAIL_CACHE } from "./data/halle02-detail-cache";
+export { halle02CacheSnapshot, serializeHalle02Cache } from "./venues/halle02";
 export type {
   CanonicalScrapedEvent,
   ClassifierName,
@@ -100,8 +102,11 @@ import { scrapeFilmforumHoechst } from "./venues/filmforum-hoechst";
 import { scrapeFilmotecaValencia } from "./venues/filmoteca-valencia";
 import { scrapeOcineAquaValencia } from "./venues/ocine-aqua-valencia";
 import { scrapeReservaentradasValencia } from "./venues/_reservaentradas-valencia";
+import { scrapeConocevalenciaCinemas } from "./venues/_conocevalencia-cinemas";
 import { scrapePalauDeLaMusicaValencia } from "./venues/palau-de-la-musica-valencia";
 import { scrapePalauDeLesArtsValencia } from "./venues/palau-de-les-arts-valencia";
+import { scrapeFundacionBancajaConciertos } from "./venues/fundacion-bancaja-conciertos";
+import { scrapeUniversitatValenciaConcerts } from "./venues/universitat-valencia-concerts";
 import { scrapeBombasGens } from "./venues/bombas-gens";
 import { scrapeCentreDelCarme } from "./venues/centre-del-carme";
 import { scrapeFundacionBancaja } from "./venues/fundacion-bancaja";
@@ -112,6 +117,9 @@ import { scrapeMuvim } from "./venues/muvim";
 import { scrapeFindeValenciaConciertos } from "./venues/findevalencia-conciertos";
 import { scrapeJazzValencia } from "./venues/jazz-valencia";
 import { scrapeCahh } from "./venues/cahh";
+import { scrapeLaNau } from "./venues/la-nau";
+import { scrapeLetno } from "./venues/letno";
+import { scrapeMuseuDeLesCiencies } from "./venues/museu-de-les-ciencies";
 import { scrapeMuseoDeLaSeda } from "./venues/museo-de-la-seda";
 import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeFirstStageTheater } from "./venues/first-stage-theater";
@@ -353,8 +361,11 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "filmoteca-valencia", run: (_ctx: ScraperContext) => scrapeFilmotecaValencia() },
   { slug: "ocine-aqua-valencia", run: (_ctx: ScraperContext) => scrapeOcineAquaValencia() },
   { slug: "reservaentradas-valencia", run: (_ctx: ScraperContext) => scrapeReservaentradasValencia() },
+  { slug: "conocevalencia-cinemas-valencia", run: (_ctx: ScraperContext) => scrapeConocevalenciaCinemas() },
   { slug: "palau-de-la-musica-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLaMusicaValencia() },
   { slug: "palau-de-les-arts-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLesArtsValencia() },
+  { slug: "universitat-valencia-concerts", run: (_ctx: ScraperContext) => scrapeUniversitatValenciaConcerts() },
+  { slug: "fundacion-bancaja-conciertos", run: (_ctx: ScraperContext) => scrapeFundacionBancajaConciertos() },
   { slug: "ivam", run: (_ctx: ScraperContext) => scrapeIvam() },
   { slug: "muvim", run: (_ctx: ScraperContext) => scrapeMuvim() },
   { slug: "centre-del-carme", run: (_ctx: ScraperContext) => scrapeCentreDelCarme() },
@@ -365,6 +376,9 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "jazz-valencia", run: (_ctx: ScraperContext) => scrapeJazzValencia() },
   { slug: "findevalencia-conciertos", run: (_ctx: ScraperContext) => scrapeFindeValenciaConciertos() },
   { slug: "cahh", run: (_ctx: ScraperContext) => scrapeCahh() },
+  { slug: "la-nau", run: (_ctx: ScraperContext) => scrapeLaNau() },
+  { slug: "letno", run: (_ctx: ScraperContext) => scrapeLetno() },
+  { slug: "museu-de-les-ciencies", run: (ctx: ScraperContext) => scrapeMuseuDeLesCiencies(ctx) },
   { slug: "museo-de-la-seda", run: (_ctx: ScraperContext) => scrapeMuseoDeLaSeda() },
   { slug: "filmkreis-darmstadt", run: (_ctx: ScraperContext) => scrapeFilmkreisDarmstadt() },
   { slug: "first-stage-theater", run: (ctx: ScraperContext) => scrapeFirstStageTheater(ctx) },

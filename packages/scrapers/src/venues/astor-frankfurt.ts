@@ -25,6 +25,8 @@ interface AstorPerformance {
   reservable?: boolean | null;
   filterIds?: string[] | null;
   language?: string | null;
+  /** Premiumkino's "few seats left" flag; absent/null otherwise. */
+  seatCountLow?: boolean | null;
 }
 
 interface AstorFilterItem {
@@ -91,6 +93,7 @@ export async function scrapeAstorFrankfurt(): Promise<VenueScrapeResult> {
       // do, omit the field so the lichtspiel-haus Caligari intertitle
       // fallback renders instead of a broken velvet rectangle.
       image_url: null,
+      availability: perf.seatCountLow ? "few_left" : null,
       labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }

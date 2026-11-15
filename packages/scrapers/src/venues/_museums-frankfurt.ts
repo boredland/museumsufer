@@ -1,7 +1,7 @@
 import { classifyEvent, classifyTalk, type EventType, eventTypeToLabel } from "@museumsufer/classify";
 import PQueue from "p-queue";
 import { type ApiEvent, type ApiExhibition, fetchEventsFromApi, fetchExhibitionsFromApi } from "../_museums/api";
-import { MUSEUMS, museumDisplayName } from "../_museums/config";
+import { MUSEUMS, type MuseumConfig, museumDisplayName } from "../_museums/config";
 import type { CanonicalScrapedEvent, ScrapedLabel, ScraperContext, VenueScrapeResult } from "../types";
 
 const CONCURRENCY = 5;
@@ -36,7 +36,7 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
           const seen = new Set<string>();
           for (const ev of events) {
             const targetSlug = ev.museum_slug_override || slug;
-            const canonical = toCanonicalEvent(ev, slug);
+            const canonical = toCanonicalEvent(ev, slug, programmePage(MUSEUMS[targetSlug]));
             if (!canonical || seen.has(`${targetSlug}|${canonical.source_event_id}`)) continue;
             seen.add(`${targetSlug}|${canonical.source_event_id}`);
             appendTo(byMuseum, targetSlug, canonical);
@@ -53,7 +53,7 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
           const exhibitions = await fetchExhibitionsFromApi(config.exhibitionApi!, proxy);
           for (const ex of exhibitions) {
             const targetSlug = ex.museum_slug_override || slug;
-            const canonical = toCanonicalExhibition(ex, slug);
+            const canonical = toCanonicalExhibition(ex, slug, programmePage(MUSEUMS[targetSlug]));
             if (canonical) appendTo(byMuseum, targetSlug, canonical);
           }
         } catch (err) {
@@ -74,6 +74,7 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
             image_url: ex.image_url ?? null,
           },
           slug,
+          programmePage(config),
         );
         if (canonical) appendTo(byMuseum, slug, canonical);
       }
@@ -83,7 +84,11 @@ export async function scrapeMuseumsFrankfurt(ctx: ScraperContext): Promise<Venue
 
   const results: VenueScrapeResult[] = [];
   for (const [sourceSlug, events] of byMuseum) {
-    results.push({ source_slug: sourceSlug, display_name: museumDisplayName(sourceSlug), events });
+    results.push({
+      source_slug: sourceSlug,
+      display_name: museumDisplayName(sourceSlug),
+      events: dropTwins(sourceSlug, events),
+    });
   }
   results.sort((a, b) => a.source_slug.localeCompare(b.source_slug));
   return results;
@@ -99,6 +104,27 @@ function enqueue(queue: PQueue, label: string, task: () => Promise<void>): void 
   });
 }
 
+/** The same multi-day show reaches a museum through two feeds: the museum's own
+ *  exhibition page and the shared calendar of another (Damals 1410 via the
+ *  Historisches Museum API and junges-museum-frankfurt.de), or a Tribe event that
+ *  the exhibition page also lists (DAM Preis). Keep one per title+run: the
+ *  exhibition entry, then the one scraped by the museum's own source, then the
+ *  lowest id. Sorting first keeps the pick independent of fetch completion order. */
+function dropTwins(sourceSlug: string, events: CanonicalScrapedEvent[]): CanonicalScrapedEvent[] {
+  const rank = (e: CanonicalScrapedEvent): number =>
+    (e.labels.some((l) => l.label === "museum:ausstellung") ? 0 : 2) +
+    (e.source_event_id.startsWith(`${sourceSlug}|`) ? 0 : 1);
+  const sorted = [...events].sort((a, b) => a.source_event_id.localeCompare(b.source_event_id));
+  const best = new Map<string, CanonicalScrapedEvent>();
+  for (const e of sorted) {
+    if (!e.end_date) continue;
+    const key = `${e.title.toLowerCase()}|${e.date}|${e.end_date}`;
+    const kept = best.get(key);
+    if (!kept || rank(e) < rank(kept)) best.set(key, e);
+  }
+  return sorted.filter((e) => !e.end_date || best.get(`${e.title.toLowerCase()}|${e.date}|${e.end_date}`) === e);
+}
+
 function appendTo(byMuseum: Map<string, CanonicalScrapedEvent[]>, slug: string, event: CanonicalScrapedEvent): void {
   let bucket = byMuseum.get(slug);
   if (!bucket) {
@@ -108,9 +134,14 @@ function appendTo(byMuseum: Map<string, CanonicalScrapedEvent[]>, slug: string, 
   bucket.push(event);
 }
 
-function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEvent | null {
+function toCanonicalEvent(
+  ev: ApiEvent,
+  scrapedSlug: string,
+  programmeUrl: string | null,
+): CanonicalScrapedEvent | null {
   if (!ev.title || !ev.date) return null;
-  const title = cleanTitle(ev.title);
+  const rawTitle = cleanTitle(ev.title);
+  const title = deshout(rawTitle);
   const description = ev.description ? cleanTitle(ev.description) : null;
   const eventType = ev.category && isEventType(ev.category) ? ev.category : (classifyEvent(title, description) ?? null);
 
@@ -124,14 +155,14 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
     // gomus) link every occurrence of a recurring guided tour to one series
     // template URL, so a date+time qualifier is required or the runner's
     // id-keyed merge collapses the whole series into a single event.
-    source_event_id: `${scrapedSlug}|event|${ev.detail_url ?? title}|${ev.date}|${ev.time ?? ""}`,
+    source_event_id: `${scrapedSlug}|event|${ev.detail_url ?? rawTitle}|${ev.date}|${ev.time ?? ""}`,
     title,
     description,
     date: ev.date,
     time: ev.time,
     end_date: ev.end_date && ev.end_date !== ev.date ? ev.end_date : null,
     end_time: ev.end_time,
-    detail_url: ev.detail_url,
+    detail_url: ev.detail_url ?? ev.fallback_url ?? programmeUrl,
     ticket_url: ev.detail_url,
     image_url: ev.image_url,
     language: ev.language ?? null,
@@ -141,9 +172,14 @@ function toCanonicalEvent(ev: ApiEvent, scrapedSlug: string): CanonicalScrapedEv
   };
 }
 
-function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): CanonicalScrapedEvent | null {
+function toCanonicalExhibition(
+  ex: ApiExhibition,
+  scrapedSlug: string,
+  programmeUrl: string | null,
+): CanonicalScrapedEvent | null {
   if (!ex.title) return null;
-  const title = cleanTitle(ex.title);
+  const rawTitle = cleanTitle(ex.title);
+  const title = deshout(rawTitle);
   const description = ex.description ? cleanTitle(ex.description) : null;
   // Evergreen / Dauerausstellung entries arrive with no dates from the
   // junges-museum-drupal and stadtgeschichte-ffm-html scrapers (and
@@ -153,14 +189,14 @@ function toCanonicalExhibition(ex: ApiExhibition, scrapedSlug: string): Canonica
   const startDate = ex.start_date ?? "1970-01-01";
 
   return {
-    source_event_id: `${scrapedSlug}|exhibition|${ex.detail_url ?? `${title}|${startDate}`}`,
+    source_event_id: `${scrapedSlug}|exhibition|${ex.detail_url ?? `${rawTitle}|${startDate}`}`,
     title,
     description,
     date: startDate,
     time: null,
     end_date: ex.end_date && ex.end_date !== startDate ? ex.end_date : null,
     end_time: null,
-    detail_url: ex.detail_url,
+    detail_url: ex.detail_url ?? ex.fallback_url ?? programmeUrl,
     ticket_url: null,
     image_url: ex.image_url,
     labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
@@ -196,6 +232,12 @@ function labelsForEvent(type: EventType | null, title: string, description: stri
   return [{ label: mapped, confidence: 0.85, classifier: "keyword:event" }];
 }
 
+/** Last-resort link for an entry whose upstream has no page of its own: the
+ *  museum's programme page, so the event is never unlinkable. */
+function programmePage(config: MuseumConfig | undefined): string | null {
+  return config?.exhibitionUrl ?? config?.website ?? null;
+}
+
 function isEventType(value: string): value is EventType {
   return (
     value === "Vortrag" ||
@@ -205,6 +247,21 @@ function isEventType(value: string): value is EventType {
     value === "Vernissage" ||
     value === "Familie" ||
     value === "Film"
+  );
+}
+
+/** Several museums publish their programme in capitals ("UNSERE GESCHICHTEN AUF
+ *  LEDER GESCHRIEBEN"), which renders as shouting in the apps. Title-case such
+ *  titles word by word; vowel-less words up to four letters ("MMK", "FFF", "DFF")
+ *  and roman numerals ("LUDWIG II.") are kept. The event id is built from the raw
+ *  title, so this never moves an id. */
+function deshout(title: string): string {
+  const letters = title.replace(/[^A-Za-zÄÖÜäöüß]/g, "");
+  if (letters.length < 4 || letters !== letters.toUpperCase()) return title;
+  return title.replace(/[A-Za-zÄÖÜäöüß]+/g, (word) =>
+    /^[IVX]+$/.test(word) || (word.length <= 4 && !/[AEIOUÄÖÜY]/.test(word))
+      ? word
+      : word[0] + word.slice(1).toLowerCase(),
   );
 }
 

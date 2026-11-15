@@ -1,3 +1,4 @@
+import { looksLikeNonProgramme } from "@museumsufer/classify";
 import { todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -25,6 +26,8 @@ interface AstorPerformance {
   reservable?: boolean | null;
   filterIds?: string[] | null;
   language?: string | null;
+  /** Premiumkino's "few seats left" flag; absent/null otherwise. */
+  seatCountLow?: boolean | null;
 }
 
 interface AstorFilterItem {
@@ -80,7 +83,11 @@ export async function scrapeSavoyFilmtheater(): Promise<VenueScrapeResult> {
       detail_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
       ticket_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
       image_url: null,
-      labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
+      availability: perf.seatCountLow ? "few_left" : null,
+      // Savoy's Monkey-Quiz nights are listed as screenings but are not films.
+      labels: looksLikeNonProgramme(movie.name)
+        ? [{ label: "event:venue", confidence: 0.5, classifier: "scraper-hardcoded" }]
+        : [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }
 

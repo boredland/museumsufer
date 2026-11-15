@@ -19,19 +19,21 @@ export type VlcGenre = "classical" | "jazz" | "sacred" | "world" | "experimental
 
 // konzert-haus keeps only events with a `music:*` label, and the German keyword
 // rules in @museumsufer/classify do not fire on Spanish, so genre words are
-// mapped here. Order matters: first matching bucket wins.
+// mapped here. Order matters: first matching bucket wins. Every alternative is
+// anchored to a whole word and avoids tokens that occur in ordinary prose or
+// in pop/rock lineups ("house", "banda", "folk", "world", "duo", "balls").
 const BUCKETS: ReadonlyArray<{ genre: VlcGenre; re: RegExp }> = [
-  { genre: "sacred", re: /\b(sacr[oa]s?|misa|requiem|gospel|villancicos?|stabat|te deum|oratorio|espiritual)\b/ },
+  { genre: "sacred", re: /\b(sacr[oa]s?|misa|requiem|gospel|villancicos?|stabat|te deum|oratorio|espiritual|pasion segun)\b/ },
   { genre: "jazz", re: /\b(jazz|swing|big ?band|bebop|manouche|jam session)\b/ },
-  { genre: "experimental", re: /\b(electronic[oa]s?|techno|ambient|experimental|noise|dj set|house|synth)\b/ },
+  { genre: "experimental", re: /\b(electronic[oa]s?|electroacustic[oa]s?|techno|ambient|experimental|noise|dj set)\b/ },
   {
     genre: "world",
-    re: /\b(flamenc[oa]s?|salsa|reggae|reggaeton|latin[oa]?s?|cumbia|afrobeat|folk|fado|tango|rumba|bossa|musica tradicional|tradicional|world|valencianes|balls)\b/,
+    re: /\b(flamenc[oa]s?|salsa|reggae|reggaeton|latin[oa]?s?|cumbia|afrobeat|fado|tango|rumba|bossa|musica tradicional|musicas? del mundo|world music|danzas? tradicionales?)\b/,
   },
-  { genre: "chamber", re: /\b(camara|cambra|cuarteto|quinteto|sexteto|duo|recital|lied|lieder|solistas?)\b/ },
+  { genre: "chamber", re: /\b(camara|cambra|cuarteto|quinteto|sexteto|trio|duo de \w+|lied|lieder)\b/ },
   {
     genre: "classical",
-    re: /\b(orquest[ar]a|sinfon\w*|simfon\w*|opera|filarmon\w*|sonata|concierto para|concert per a|barroc[oa]?|banda sinfonica|bandas?|coro|cor|cantata|ensemble|philharmonic|symphony|orchestra|vivaldi|bach|beethoven|mozart|chopin|brahms|schubert|haydn|handel|haendel|rakhmaninov|rajmaninov|cuatro estaciones|musica antigua|renacimiento)\b/,
+    re: /\b(orquest[ar]a|sinfon\w*|simfon\w*|opera|filarmon\w*|sonata|concierto para|concert per a|barroc[oa]?|banda (?:sinfonica|simfonica|municipal)|coros?|coral|cors|cor (?:de|jove|infantil)|orfeo|orfeon|cantata|ensemble|philharmonic|symphony|orchestra|vivaldi|bach|beethoven|mozart|chopin|brahms|schubert|haydn|handel|haendel|rakhmaninov|rajmaninov|cuatro estaciones|musica antigua|renacimiento)\b/,
   },
 ];
 

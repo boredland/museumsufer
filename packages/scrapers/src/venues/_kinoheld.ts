@@ -1,4 +1,5 @@
-import { dateOffset } from "@museumsufer/core/date";
+import { looksLikeNonProgramme } from "@museumsufer/classify";
+import { todayIso } from "@museumsufer/core/date";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const GRAPHQL_URL = "https://next-live.kinoheld.de/graphql";
@@ -19,13 +20,6 @@ interface KinoheldCinema {
 
 const CINEMAS: KinoheldCinema[] = [
   {
-    id: "903",
-    citySlug: "moerfelden-walldorf",
-    urlSlug: "lichtblick",
-    source_slug: "lichtblick-moerfelden",
-    name: "Lichtblick Kinotreff Mörfelden-Walldorf",
-  },
-  {
     id: "1323",
     citySlug: "bad-vilbel",
     urlSlug: "kino-alte-muehle",
@@ -45,13 +39,6 @@ const CINEMAS: KinoheldCinema[] = [
     urlSlug: "kino-kelkheim",
     source_slug: "kino-kelkheim",
     name: "Kino Kelkheim",
-  },
-  {
-    id: "14",
-    citySlug: "hamburg",
-    urlSlug: "hansa-filmstudio-bergedorf-hamburg",
-    source_slug: "hansa-filmstudio-bergedorf",
-    name: "Hansa-Filmstudio Bergedorf",
   },
   {
     id: "597",
@@ -110,8 +97,8 @@ const CINEMAS: KinoheldCinema[] = [
   },
 ];
 
-const SHOWS_QUERY = `query Shows($cinemaId: ID!, $dates: [Date!]) {
-  shows(cinemaId: $cinemaId, dates: $dates) {
+const SHOWS_QUERY = `query Shows($cinemaId: ID!, $limit: Int!) {
+  shows(cinemaId: $cinemaId, limit: $limit) {
     data {
       id
       beginning
@@ -150,63 +137,41 @@ interface KinoheldShow {
   flags: ShowFlag[] | null;
 }
 
-const HORIZON_DAYS = 28;
-
-/** Upstream rejects `shows(dates:)` with more than three entries, so the
- *  horizon is requested in chunks of this size rather than one batch. */
-const MAX_DATES_PER_QUERY = 3;
+/** Upstream caps `limit` at 500. Without `dates` the query returns every future
+ *  show in date order (Das Lumen lists ~12 weeks ahead, Rex Wuppertal ~14), which
+ *  the old 28-day dated windows silently cut off. */
+const SHOW_LIMIT = 500;
 
 /**
- * Generic kinoheld.de GraphQL scraper. The `shows(cinemaId, dates)` query
- * returns one entry per screening; we batch the next ~4 weeks into a single
- * request per cinema. Covers the small Frankfurt-region, Hamburg, and
- * Heidelberg (Gloria & Gloriette, Die Kamera) cinemas that publish through
- * the kinoheld widget.
+ * Generic kinoheld.de GraphQL scraper. The `shows(cinemaId)` query returns one
+ * entry per screening for the cinema's whole published programme. Covers the
+ * small Frankfurt-region, Heidelberg (Gloria & Gloriette, Die Kamera),
+ * Wuppertal, Solingen and Saarbrücken cinemas that publish through the
+ * kinoheld widget.
  */
 export async function scrapeKinoheld(): Promise<VenueScrapeResult[]> {
-  const dates = Array.from({ length: HORIZON_DAYS }, (_, i) => dateOffset(i));
+  const today = todayIso();
   // One cinema's outage (or a slug kinoheld dropped) must not take the whole
   // aggregator down with it: settle per cinema and keep the rest.
-  const settled = await Promise.allSettled(CINEMAS.map((cinema) => scrapeCinema(cinema, dates)));
+  const settled = await Promise.allSettled(CINEMAS.map((cinema) => fetchShows(cinema, today)));
   const results: VenueScrapeResult[] = [];
   for (const [i, outcome] of settled.entries()) {
+    const cinema = CINEMAS[i];
     if (outcome.status === "fulfilled") {
-      results.push(outcome.value);
+      results.push({ source_slug: cinema.source_slug, display_name: cinema.name, events: outcome.value });
       continue;
     }
-    const cinema = CINEMAS[i];
     console.warn(`kinoheld ${cinema.source_slug}: ${outcome.reason}`);
     results.push({ source_slug: cinema.source_slug, display_name: cinema.name, events: [] });
   }
   return results;
 }
 
-async function scrapeCinema(cinema: KinoheldCinema, dates: string[]): Promise<VenueScrapeResult> {
-  const events: CanonicalScrapedEvent[] = [];
-  let failures = 0;
-  for (let i = 0; i < dates.length; i += MAX_DATES_PER_QUERY) {
-    // Losing one 3-day window to a transient upstream error must not discard
-    // the windows that already succeeded — that would turn a blip into an
-    // empty programme for the whole horizon.
-    try {
-      events.push(...(await fetchShows(cinema, dates.slice(i, i + MAX_DATES_PER_QUERY))));
-    } catch (err) {
-      failures++;
-      console.warn(`kinoheld ${cinema.source_slug} ${dates[i]}+: ${err instanceof Error ? err.message : String(err)}`);
-    }
-  }
-  // Every window failing is a real outage, not a blip: surface it so the
-  // aggregator logs the cinema instead of silently reporting zero shows.
-  if (failures > 0 && events.length === 0)
-    throw new Error(`kinoheld ${cinema.source_slug}: all ${failures} windows failed`);
-  return { source_slug: cinema.source_slug, display_name: cinema.name, events };
-}
-
-async function fetchShows(cinema: KinoheldCinema, dates: string[]): Promise<CanonicalScrapedEvent[]> {
+async function fetchShows(cinema: KinoheldCinema, today: string): Promise<CanonicalScrapedEvent[]> {
   const res = await fetch(GRAPHQL_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify({ query: SHOWS_QUERY, variables: { cinemaId: cinema.id, dates } }),
+    body: JSON.stringify({ query: SHOWS_QUERY, variables: { cinemaId: cinema.id, limit: SHOW_LIMIT } }),
   });
   if (!res.ok) throw new Error(`kinoheld fetch failed: ${res.status} for ${cinema.source_slug}`);
   const json = (await res.json()) as {
@@ -215,12 +180,15 @@ async function fetchShows(cinema: KinoheldCinema, dates: string[]): Promise<Cano
   };
   if (json.errors) throw new Error(`kinoheld graphql errors for ${cinema.source_slug}: ${JSON.stringify(json.errors)}`);
   const shows = json.data?.shows?.data ?? [];
+  // A full page means the programme was cut off; fail rather than publish a
+  // silently truncated schedule.
+  if (shows.length >= SHOW_LIMIT) throw new Error(`kinoheld ${cinema.source_slug}: hit the ${SHOW_LIMIT}-show cap`);
 
   const events: CanonicalScrapedEvent[] = [];
   for (const show of shows) {
     if (!show.movie || !show.beginning) continue;
     const [date, timeFull] = show.beginning.split("T");
-    if (!date) continue;
+    if (!date || date < today) continue;
     const time = timeFull ? timeFull.slice(0, 5) : null;
 
     const flagNames = (show.flags ?? []).map((f) => f.name).filter((n): n is string => !!n);
@@ -243,7 +211,9 @@ async function fetchShows(cinema: KinoheldCinema, dates: string[]): Promise<Cano
       time,
       detail_url,
       ticket_url,
-      labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
+      labels: looksLikeNonProgramme(show.movie.title)
+        ? [{ label: "event:venue", confidence: 0.5, classifier: "scraper-hardcoded" }]
+        : [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }
 

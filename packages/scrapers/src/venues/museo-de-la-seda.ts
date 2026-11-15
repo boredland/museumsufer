@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { absolute, clean, EXHIBITION_LABEL, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
+import { absolute, clean, EXHIBITION_LABEL, expectFound, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Museo y Colegio del Arte Mayor de la Seda. `/exposiciones-temporales/` is a
@@ -15,10 +15,10 @@ export async function scrapeMuseoDeLaSeda(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const list = await fetchText(`${BASE}/exposiciones-temporales/`);
   const events: CanonicalScrapedEvent[] = [];
-  for (const entry of list.split('<h3><a href="').slice(1)) {
+  for (const entry of expectFound(list.split('<h3><a href="').slice(1), "museodelasedavalencia.com/exposiciones-temporales")) {
     const url = entry.slice(0, entry.indexOf('"'));
     const html = await fetchText(url);
-    const text = clean(html.slice(html.indexOf("news_single_title")));
+    const text = clean(html.slice(html.indexOf("</h1>", html.indexOf("news_single_title")) + 5));
     const until = text.match(/hasta el (\d{1,2} de [a-zé]+ de \d{4})/i)?.[1];
     const end = until ? parseDateSpan(until, today)?.start : null;
     const opened = html.match(/article:published_time" content="(\d{4}-\d{2}-\d{2})/)?.[1];
@@ -33,8 +33,8 @@ export async function scrapeMuseoDeLaSeda(): Promise<VenueScrapeResult> {
       detail_url: absolute(BASE, url),
       image_url: html.match(/og:image" content="([^"]+)"/)?.[1] ?? null,
       labels: [EXHIBITION_LABEL],
-      lat: 39.4731,
-      lon: -0.3788,
+      lat: 39.4707,
+      lon: -0.3811,
       ...VALENCIA,
     });
   }

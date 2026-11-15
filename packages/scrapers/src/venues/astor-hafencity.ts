@@ -25,6 +25,8 @@ interface AstorPerformance {
   reservable?: boolean | null;
   filterIds?: string[] | null;
   language?: string | null;
+  /** Premiumkino's "few seats left" flag; absent/null otherwise. */
+  seatCountLow?: boolean | null;
 }
 
 interface AstorFilterItem {
@@ -80,6 +82,7 @@ export async function scrapeAstorHafencity(): Promise<VenueScrapeResult> {
       detail_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
       ticket_url: `${SITE_BASE}/vorstellung/${perf.slug}/0/0/${perf.id}`,
       image_url: null,
+      availability: perf.seatCountLow ? "few_left" : null,
       labels: [{ label: "film:cinema", confidence: 0.95, classifier: "scraper-hardcoded" }],
     });
   }

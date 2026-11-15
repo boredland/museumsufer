@@ -62,7 +62,7 @@ function parseCalendar(html: string, today: string): CanonicalScrapedEvent[] {
     }
     if (!date || date < today) continue;
 
-    const detailHref = extractFirst(block, /<a\s+href="(\/de\/produktionen\/[^"]+)"\s+class="calendar-item__title"/i);
+    const detailHref = extractFirst(block, /<a\s+href="(\/de\/programm\/[^"]+)"\s+class="calendar-item__title"/i);
     const title = cleanText(extractFirst(block, /class="calendar-item__title"[^>]*>\s*<span>([\s\S]*?)<\/span>/i));
     if (!title) continue;
 
@@ -129,10 +129,13 @@ function parseTimeLine(line: string): { startTime: string | null; endTime: strin
 }
 
 function extractAvailability(block: string): "sold_out" | "few_left" | null {
-  // The ticket button's status line is the only availability signal now:
-  // "Ausverkauft" / "↗ Letzte Tickets ↗" / "↗ Tickets ↗".
+  // The ticket button's status line is the main availability signal:
+  // "Ausverkauft" / "↗ Letzte Tickets ↗" / "↗ Tickets ↗". Workshops and other
+  // un-ticketed dates have no status line and say so in the info text instead
+  // ("Dieser Termin ist ausgebucht.").
   const status = cleanText(extractFirst(block, /class="activity-ticket__status">([\s\S]*?)<\/div>/i));
-  if (/ausverkauft/i.test(status)) return "sold_out";
+  const info = cleanText(extractFirst(block, /class="activity-ticket__info">([\s\S]*?)<\/div>/i));
+  if (/ausverkauft/i.test(status) || /ausgebucht/i.test(info)) return "sold_out";
   if (/letzte tickets|wenige restkarten/i.test(status)) return "few_left";
   return null;
 }

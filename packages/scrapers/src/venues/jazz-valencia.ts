@@ -5,14 +5,19 @@ import { cleanText, fetchVlc, mapPool, musicLabel } from "./_valencia-music";
 const BASE = "https://www.jazzvalencia.com";
 const MAX_SITEMAPS = 8;
 
-/** Hand-looked-up coordinates for venues jazzvalencia.com lists inside the
- *  city. Venues not listed here still emit, pooled under `jazz-valencia`
- *  without coordinates, rather than getting a guessed pin. */
-const VENUES: Record<string, { lat: number; lon: number }> = {
-  LOOM: { lat: 39.4611, lon: -0.3676 },
-  "La Vitti": { lat: 39.4758, lon: -0.3508 },
-  "CIM Benimaclet": { lat: 39.4853, lon: -0.3603 },
-  "La Rambleta": { lat: 39.4474, lon: -0.3925 },
+/** Hand-looked-up coordinates (Nominatim, once) for the Valencia-city venues
+ *  jazzvalencia.com lists, keyed by slugified venue name. An event whose venue
+ *  is not listed is dropped rather than pinned to a guessed spot. */
+const VENUES: Record<string, { name: string; lat: number; lon: number }> = {
+  loom: { name: "LOOM", lat: 39.4611, lon: -0.3676 },
+  "la-vitti": { name: "La Vitti", lat: 39.4757, lon: -0.3508 },
+  "cim-benimaclet": { name: "CIM Benimaclet", lat: 39.4853, lon: -0.3603 },
+  "la-rambleta": { name: "La Rambleta", lat: 39.4474, lon: -0.3925 },
+  "jimmy-glass-jazz-bar": { name: "Jimmy Glass Jazz Bar", lat: 39.4776, lon: -0.3793 },
+  "cafe-mercedes": { name: "Café Mercedes", lat: 39.4621, lon: -0.3754 },
+  "burning-house": { name: "Burning House", lat: 39.472, lon: -0.3257 },
+  "ca-revolta": { name: "Ca Revolta", lat: 39.4748, lon: -0.3811 },
+  "auditorio-de-la-unio-de-tres-forques": { name: "Auditorio de la Unió de Tres Forques", lat: 39.4658, lon: -0.3981 },
 };
 const CITY_RE = /^(val[eè]ncia)$/i;
 
@@ -49,26 +54,27 @@ export async function scrapeJazzValencia(): Promise<VenueScrapeResult[]> {
     }
   }
 
+  let failed = 0;
   const parsed = await mapPool(urls, 6, async (url) => {
     try {
       return parseDetail(url, await fetchVlc(url), today);
     } catch {
+      failed++;
       return null;
     }
   });
+  if (urls.length > 0 && failed > urls.length / 2) throw new Error(`jazz-valencia: ${failed}/${urls.length} detail fetches failed`);
 
   const bySlug = new Map<string, VenueScrapeResult>();
   const seen = new Set<string>();
   for (const item of parsed) {
-    if (!item || seen.has(item.event.source_event_id)) continue;
+    const venue = item ? VENUES[slugify(item.venue)] : undefined;
+    if (!item || !venue || seen.has(item.event.source_event_id)) continue;
     seen.add(item.event.source_event_id);
-    const known = item.venue in VENUES;
-    const slug = known ? `jazz-valencia-${slugify(item.venue)}` : "jazz-valencia";
-    const res = bySlug.get(slug) ?? {
-      source_slug: slug,
-      display_name: known ? item.venue : "Jazz Valencia",
-      events: [],
-    };
+    item.event.lat = venue.lat;
+    item.event.lon = venue.lon;
+    const slug = `jazz-valencia-${slugify(item.venue)}`;
+    const res = bySlug.get(slug) ?? { source_slug: slug, display_name: venue.name, events: [] };
     res.events.push(item.event);
     bySlug.set(slug, res);
   }
@@ -85,7 +91,10 @@ function parseDetail(url: string, html: string, today: string): { venue: string;
   if (!CITY_RE.test(ev.location?.address?.addressLocality?.trim() ?? "")) return null;
 
   const price = Number.parseFloat(ev.offers?.price ?? "");
-  const coords = VENUES[venue];
+  // EventON fills endDate with 23:50/23:59 when the promoter gives none, and
+  // post-midnight ends ("01:50") sort before the start; neither is a real end.
+  const endTime = ev.endDate?.match(/T(\d{2}:\d{2})/)?.[1];
+  const realEnd = endTime && start[2] && endTime > start[2] && !/^23:(50|59)$/.test(endTime) ? endTime : null;
   const description = ev.description ? truncate(cleanText(ev.description).replace(/https?:\/\/\S+/g, "").trim(), 600) : null;
   return {
     venue,
@@ -95,7 +104,7 @@ function parseDetail(url: string, html: string, today: string): { venue: string;
       description,
       date: start[1],
       time: start[2] ?? null,
-      end_time: ev.endDate?.match(/T(\d{2}:\d{2})/)?.[1] ?? null,
+      end_time: realEnd,
       detail_url: url,
       image_url: ev.image ?? null,
       language: "es",
@@ -103,8 +112,8 @@ function parseDetail(url: string, html: string, today: string): { venue: string;
       price_max: price > 0 ? price : null,
       venue_room: venue,
       city: "valencia",
-      lat: coords?.lat ?? null,
-      lon: coords?.lon ?? null,
+      lat: null,
+      lon: null,
       raw_category: "jazz",
       labels: musicLabel("jazz", 0.9),
     },

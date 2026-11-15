@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { absolute, addDaysIso, clean, EXHIBITION_LABEL, eventLabels, fetchText, OPEN_ENDED_DAYS, parseDateSpan, VALENCIA } from "./_valencia";
+import { absolute, addDaysIso, clean, EXHIBITION_LABEL, eventLabels, expectFound, fetchText, OPEN_ENDED_DAYS, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Museo Nacional de Cerámica y Artes Suntuarias "González Martí" (Palacio del
@@ -25,7 +25,7 @@ export async function scrapeMuseoNacionalCeramica(): Promise<VenueScrapeResult> 
     [exhibitionList, true],
     [activityList, false],
   ] as const) {
-    for (const path of detailPaths(list, exhibition)) {
+    for (const path of expectFound(detailPaths(list, exhibition), `cultura.gob.es/mnceramica ${exhibition ? "exposiciones" : "actividades"}`)) {
       const event = await parseDetail(absolute(BASE, path), exhibition, today);
       if (event) events.push(event);
     }
@@ -61,8 +61,8 @@ async function parseDetail(url: string, exhibition: boolean, today: string): Pro
     detail_url: url,
     venue_room: text.match(/Sala de exposiciones temporales [IV]+|Sal[oó]n de baile/)?.[0] ?? null,
     labels: exhibition ? [EXHIBITION_LABEL] : eventLabels(title, raw),
-    lat: 39.4721,
-    lon: -0.3774,
+    lat: 39.4725,
+    lon: -0.3747,
     ...VALENCIA,
   };
 }

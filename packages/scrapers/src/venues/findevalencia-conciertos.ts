@@ -18,16 +18,17 @@ interface VenueConfig {
 
 /**
  * Venues deliberately absent: Palau de la Música and Les Arts (own scrapers),
- * rock/pop clubs, Roig Arena (pop arena; a title keyword like "orquesta" would
- * mislabel salsa/pop acts as classical), and jazz venues covered by jazz-valencia.
+ * Capella de la Sapiència / Rector Peset / Jardí Botànic (covered by the
+ * Universitat de València scraper), rock/pop clubs, Roig Arena (pop arena; a
+ * title keyword like "orquesta" would mislabel salsa/pop acts as classical),
+ * and jazz venues covered by jazz-valencia. Mixed-programme theatres use
+ * `fallback: null`, so only titles that prove an in-scope genre are kept.
  */
 const VENUES: VenueConfig[] = [
   { slug: "ateneo-mercantil-valencia", name: "Ateneo Mercantil de Valencia", match: /Ateneo Mercantil/i, lat: 39.4708, lon: -0.376, fallback: null },
   { slug: "teatro-olympia-valencia", name: "Teatro Olympia", match: /Teatro Olympia/i, lat: 39.4708, lon: -0.378, fallback: null },
-  { slug: "col-legi-major-rector-peset", name: "Col·legi Major Rector Peset", match: /Rector Peset/i, lat: 39.4755, lon: -0.3796, fallback: "chamber" },
-  { slug: "capella-de-la-sapiencia-valencia", name: "Capella de la Sapiència (La Nau)", match: /Capella de la Sapi[eè]ncia/i, lat: 39.4746, lon: -0.3763, fallback: "classical" },
+  { slug: "teatro-flumen-valencia", name: "Teatro Flumen", match: /Teatro Flumen/i, lat: 39.4828, lon: -0.3853, fallback: null },
   { slug: "muvim-valencia", name: "MuVIM", match: /^MuVIM$/i, lat: 39.4701, lon: -0.3828, fallback: "classical" },
-  { slug: "jardi-botanic-auditori-valencia", name: "Auditori del Jardí Botànic", match: /Jard[ií] Bot[aà]nic/i, lat: 39.4769, lon: -0.3867, fallback: "classical" },
   { slug: "ivam-valencia", name: "IVAM", match: /IVAM/i, lat: 39.4796, lon: -0.3829, fallback: "world" },
   { slug: "caixaforum-valencia", name: "CaixaForum València", match: /CaixaForum/i, lat: 39.454, lon: -0.3496, fallback: "classical" },
 ];
@@ -35,6 +36,7 @@ const VENUES: VenueConfig[] = [
 interface ListEvent {
   name: string;
   startDate: string;
+  endDate?: string;
   url?: string;
   location?: { name?: string };
 }
@@ -67,17 +69,19 @@ export async function scrapeFindeValenciaConciertos(): Promise<VenueScrapeResult
     if (!venue || !it.url) continue;
     const when = toMadrid(it.startDate);
     if (!when || when.date < today) continue;
-    const title = cleanText(it.name).replace(/\s+en (?:el |la )?(?:València|Valencia|Roig Arena.*)$/i, "").trim();
+    const title = cleanText(it.name).replace(/\s+en (?:el |la )?(?:Teatro Olympia|Ateneo Mercantil.*|València|Valencia|Roig Arena.*)$/i, "").trim();
     const genre = genreFromText(title, venue.fallback);
     if (!genre) continue;
     const id = it.url.replace(/\/$/, "").split("/").pop() ?? it.url;
     if (seen.has(`${venue.slug}|${id}`)) continue;
     seen.add(`${venue.slug}|${id}`);
 
+    const end = it.endDate ? toMadrid(it.endDate) : null;
     const ev: CanonicalScrapedEvent = {
       source_event_id: `${id}-${when.date}`,
       title,
       date: when.date,
+      end_date: end && end.date > when.date ? end.date : null,
       time: when.time,
       detail_url: it.url,
       language: "es",

@@ -135,7 +135,13 @@ async function fetchCalendarCards(): Promise<CalendarCard[]> {
     }),
   );
   await Promise.all(tasks);
-  return cards;
+  // Months resolve in response order; sort so the dedup downstream keeps the same card every run.
+  return cards.sort(
+    (a, b) =>
+      a.date.localeCompare(b.date) ||
+      (a.time ?? "").localeCompare(b.time ?? "") ||
+      a.eventId.localeCompare(b.eventId, undefined, { numeric: true }),
+  );
 }
 
 /** Months with no scheduled events return 404; treat that as an empty month rather than failing the run. */

@@ -1,6 +1,6 @@
 import { todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
-import { absolute, clean, EXHIBITION_LABEL, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
+import { absolute, clean, EXHIBITION_LABEL, expectFound, fetchText, parseDateSpan, VALENCIA } from "./_valencia";
 
 /**
  * Fundación Bancaja, Valencia. `/exposiciones/` renders the current
@@ -15,7 +15,7 @@ export async function scrapeFundacionBancaja(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const html = await fetchText(`${BASE}/exposiciones/`);
   const events: CanonicalScrapedEvent[] = [];
-  for (const card of html.split('<div class="listado-item">').slice(1)) {
+  for (const card of expectFound(html.split('<div class="listado-item">').slice(1), "fundacionbancaja.es/exposiciones")) {
     const link = card.match(/<div class="item-content">\s*<a href="([^"]+)">([\s\S]*?)<\/a>/);
     const place = clean(card.match(/<div class="item-fechas">[\s\S]*?<\/div>([\s\S]*?)<\/div>/)?.[1] ?? "");
     const span = parseDateSpan(clean(card.match(/<div class="item-fechas">([\s\S]*?)<\/div>/)?.[1] ?? ""), today);
@@ -31,8 +31,8 @@ export async function scrapeFundacionBancaja(): Promise<VenueScrapeResult> {
       detail_url: absolute(BASE, link[1]),
       image_url: img ? absolute(BASE, img) : null,
       labels: [EXHIBITION_LABEL],
-      lat: 39.4736,
-      lon: -0.3792,
+      lat: 39.4735,
+      lon: -0.3702,
       ...VALENCIA,
     });
   }

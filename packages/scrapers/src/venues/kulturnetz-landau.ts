@@ -49,26 +49,33 @@ const KNOWN_LANDAU_AREA_TOWNS = [
 
 export async function scrapeKulturnetzLandau(): Promise<VenueScrapeResult> {
   const cats = Object.keys(KULTURNETZ_CATEGORY_MAP);
-  const seen = new Map<string, ParsedCard>();
 
-  await Promise.all(
-    cats.map(async (cat) => {
+  // One event URL appears on several category pages, and the first page to claim it
+  // decides its category. Fetch in parallel but merge in the fixed category order,
+  // never in response order, so two runs on the same upstream data agree.
+  const pages = await Promise.all(
+    cats.map(async (cat): Promise<ParsedCard[]> => {
       const url = `${BASE}/veranstaltungen/${cat}/`;
       try {
         const res = await fetch(url, { headers: { "User-Agent": UA } });
         if (!res.ok) {
           console.warn(`kulturnetz-landau ${cat}: HTTP ${res.status}`);
-          return;
+          return [];
         }
-        const html = await res.text();
-        for (const ev of parseListing(html, cat)) {
-          if (!seen.has(ev.url)) seen.set(ev.url, ev);
-        }
+        return parseListing(await res.text(), cat);
       } catch (err) {
         console.warn(`kulturnetz-landau ${cat}: ${(err as Error).message}`);
+        return [];
       }
     }),
   );
+
+  const seen = new Map<string, ParsedCard>();
+  for (const page of pages) {
+    for (const ev of page) {
+      if (!seen.has(ev.url)) seen.set(ev.url, ev);
+    }
+  }
 
   const events: CanonicalScrapedEvent[] = [];
   for (const card of seen.values()) {

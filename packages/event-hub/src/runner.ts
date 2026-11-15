@@ -1,4 +1,4 @@
-import { classifyEvent, eventTypeToLabel } from "@museumsufer/classify";
+import { classifyEvent, dropNonProgrammeLabels, eventTypeToLabel } from "@museumsufer/classify";
 import type { DeeplConfig } from "@museumsufer/core/deepl";
 import { fnv1a } from "@museumsufer/core/hash";
 import type { CanonicalScrapedEvent, ProxyConfig, ScrapedLabel, ScraperContext } from "@museumsufer/scrapers";
@@ -241,7 +241,9 @@ function mergeEvent(
 ): CanonicalEvent {
   const scraperLabels: Label[] = scraped.labels.map((l) => ({ ...l }));
   const keywordLabels = keywordPass(scraped, scraperLabels);
-  const finalLabels = mergeLabels(scraperLabels, keywordLabels);
+  // Safety net for scrapers that hardcode a programme label: a quiz or bingo night
+  // must not surface as a concert, screening or play whatever the source says.
+  const finalLabels = dropNonProgrammeLabels(scraped.title, mergeLabels(scraperLabels, keywordLabels));
 
   const base = existing ?? { first_seen_at: today };
 

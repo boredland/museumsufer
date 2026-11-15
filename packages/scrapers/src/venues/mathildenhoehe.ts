@@ -1,118 +1,116 @@
-import { decodeEntities, normalizeUrl, stripHtml, todayIso } from "@museumsufer/core";
+import { decodeEntities, normalizeUrl, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
-const BASE = "https://www.mathildenhoehe.eu";
-const EXHIBITIONS_URL = `${BASE}/ausstellungen/aktuell/`;
+// The institute moved from mathildenhoehe.eu (now an empty SilverStripe shell
+// that always claims "no exhibitions") to this site.
+const BASE = "https://www.mathildenhoehe.de";
+const EXHIBITIONS_URL = `${BASE}/ausstellungen/aktuell`;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
 const LAT = 49.8773;
 const LON = 8.666;
 const CITY = "darmstadt";
 
-export async function scrapeMathildenhoehe(): Promise<VenueScrapeResult> {
-  const html = await fetch(EXHIBITIONS_URL, {
-    headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
-  }).then((r) => {
-    if (!r.ok) throw new Error(`Mathildenhöhe exhibitions fetch failed: ${r.status}`);
-    return r.text();
-  });
+const CARD_RE =
+  /<div class="col-12 exhibitionLoopContainer">\s*<a href="([^"]+)"[\s\S]*?<img[^>]*src="([^"]+)"[\s\S]*?<h2[^>]*>([\s\S]*?)<\/h2>([\s\S]*?)<\/div>\s*<\/div>/g;
+const H3_RE = /<h3[^>]*>([\s\S]*?)<\/h3>/g;
+const LAUFZEIT_RE = /Laufzeit:\s*([^<]+)/i;
 
-  // The site currently states explicitly that no exhibitions are listed in this category.
-  // We still parse the page so the scraper becomes active automatically once entries appear.
-  const exhibitions = parseExhibitions(html);
+const MONTHS_DE: Record<string, number> = {
+  januar: 1,
+  februar: 2,
+  märz: 3,
+  april: 4,
+  mai: 5,
+  juni: 6,
+  juli: 7,
+  august: 8,
+  september: 9,
+  oktober: 10,
+  november: 11,
+  dezember: 12,
+};
+
+async function fetchHtml(url: string): Promise<string> {
+  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" } });
+  if (!res.ok) throw new Error(`mathildenhoehe fetch failed: ${url} → ${res.status}`);
+  return res.text();
+}
+
+export async function scrapeMathildenhoehe(): Promise<VenueScrapeResult> {
+  const html = await fetchHtml(EXHIBITIONS_URL);
+
+  const cards = [...html.matchAll(CARD_RE)];
+  // /aktuell always carries the permanent Dauerausstellung, so zero cards means
+  // the markup changed, not that the institute has nothing on.
+  if (cards.length === 0) throw new Error("mathildenhoehe: no exhibitionLoopContainer cards on /ausstellungen/aktuell");
+
+  const seen = new Set<string>();
+  const events = await Promise.all(
+    cards.map(async ([, href, img, rawTitle, tail]) => {
+      const title = stripHtml(rawTitle);
+      const detailUrl = normalizeUrl(decodeEntities(href), BASE);
+      const kind = [...tail.matchAll(H3_RE)].map((h) => stripHtml(h[1]));
+      const permanent = kind.some((k) => /dauerausstellung/i.test(k));
+      const slug = new URL(detailUrl ?? BASE).pathname.split("/").filter(Boolean).pop();
+      if (!slug || !title) throw new Error(`mathildenhoehe: exhibition card without slug/title: ${rawTitle}`);
+      const id = `mathildenhoehe|exhibition|${slug}`;
+      if (seen.has(id)) return null;
+      seen.add(id);
+
+      let start: string | null = null;
+      let end: string | null = null;
+      if (!permanent) {
+        const detail = await fetchHtml(detailUrl as string);
+        const range = parseLaufzeit(LAUFZEIT_RE.exec(stripHtml(detail.replace(/<br\s*\/?>/gi, "\n")))?.[1] ?? null);
+        if (!range) throw new Error(`mathildenhoehe: no parseable "Laufzeit:" on ${detailUrl}`);
+        ({ start, end } = range);
+      }
+
+      const event: CanonicalScrapedEvent = {
+        source_event_id: id,
+        title,
+        subtitle: kind.filter((k) => !/dauerausstellung/i.test(k)).join(" · ") || null,
+        description: null,
+        // Permanent exhibitions pin to the epoch, as _museums-frankfurt does, so
+        // they stay "running" without polluting upcoming-window queries.
+        date: start ?? "1970-01-01",
+        time: null,
+        end_date: end,
+        end_time: null,
+        detail_url: detailUrl,
+        ticket_url: null,
+        image_url: normalizeUrl(decodeEntities(img), BASE),
+        city: CITY,
+        lat: LAT,
+        lon: LON,
+        labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
+      };
+      return event;
+    }),
+  );
 
   return {
     source_slug: "mathildenhoehe",
     display_name: "Institut Mathildenhöhe",
-    events: exhibitions.sort((a, b) => a.date.localeCompare(b.date) || (a.time ?? "").localeCompare(b.time ?? "")),
+    events: events.filter((e): e is CanonicalScrapedEvent => e !== null).sort((a, b) => a.date.localeCompare(b.date)),
   };
 }
 
-function parseExhibitions(html: string): CanonicalScrapedEvent[] {
-  const today = todayIso();
-  const events: CanonicalScrapedEvent[] = [];
-
-  // SilverStripe renders each exhibition as an <article> inside .inner-left.
-  // When empty, the page contains the marker sentence below.
-  if (html.includes("Es sind derzeit keine Ausstellungen in dieser Kategorie eingetragen")) {
-    return events;
-  }
-
-  const articleRe = /<article[^>]*>[\s\S]*?<\/article>/gi;
-  const seen = new Set<string>();
-
-  for (const articleMatch of html.matchAll(articleRe)) {
-    const article = articleMatch[0];
-    const title = cleanText(article.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i)?.[1] ?? null);
-    if (!title) continue;
-
-    const href = decodeEntities(article.match(/<a\s+[^>]*href="([^"]+)"/i)?.[1] ?? "");
-    const detailUrl = href ? normalizeUrl(href, BASE) : null;
-
-    const imgMatch = article.match(/<img[^>]*src="([^"]+)"/i);
-    const imageUrl = imgMatch ? normalizeUrl(decodeEntities(imgMatch[1]), BASE) : null;
-
-    const slug = detailUrl ? deriveSlug(detailUrl, title) : title.toLowerCase().replace(/\s+/g, "-");
-    const id = `mathildenhoehe|exhibition|${slug}`;
-    if (seen.has(id)) continue;
-    seen.add(id);
-
-    const dateText = cleanText(article.match(/<strong>([\s\S]*?)<\/strong>/i)?.[1] ?? null);
-    const { start, end } = parseExhibitionDate(dateText);
-
-    events.push({
-      source_event_id: id,
-      title,
-      subtitle: null,
-      description: null,
-      date: start ?? today,
-      time: null,
-      end_date: end,
-      end_time: null,
-      detail_url: detailUrl,
-      ticket_url: null,
-      image_url: imageUrl,
-      city: CITY,
-      lat: LAT,
-      lon: LON,
-      labels: [{ label: "museum:ausstellung", confidence: 0.95, classifier: "scraper-hardcoded" }],
-    });
-  }
-
-  return events;
-}
-
-function parseExhibitionDate(text: string | null): { start: string | null; end: string | null } {
-  if (!text) return { start: null, end: null };
-  const clean = text.toLowerCase();
-
-  const rangeMatch = clean.match(/(\d{1,2})\.(\d{1,2})\.\s*(?:bis|[-–])\s*(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (rangeMatch) {
-    const start = `${rangeMatch[5]}-${rangeMatch[2].padStart(2, "0")}-${rangeMatch[1].padStart(2, "0")}`;
-    const end = `${rangeMatch[5]}-${rangeMatch[4].padStart(2, "0")}-${rangeMatch[3].padStart(2, "0")}`;
-    return { start, end };
-  }
-
-  const singleMatch = clean.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (singleMatch) {
-    const iso = `${singleMatch[3]}-${singleMatch[2].padStart(2, "0")}-${singleMatch[1].padStart(2, "0")}`;
-    return { start: iso, end: iso };
-  }
-
-  return { start: null, end: null };
-}
-
-function deriveSlug(href: string, title: string): string {
-  try {
-    const path = new URL(href).pathname;
-    const last = path.split("/").filter(Boolean).pop();
-    return last && last !== "html" ? last : title.toLowerCase().replace(/\s+/g, "-");
-  } catch {
-    return title.toLowerCase().replace(/\s+/g, "-");
-  }
-}
-
-function cleanText(raw: string | null): string | null {
-  if (!raw) return null;
-  return stripHtml(decodeEntities(raw)).replace(/\s+/g, " ").trim();
+/** "6. Juni 2026 – 31. Januar 2027" (start month/year may be omitted: "6.–31. Juli 2026"). */
+function parseLaufzeit(text: string | null): { start: string; end: string } | null {
+  if (!text) return null;
+  const m = text
+    .toLowerCase()
+    .match(
+      /(\d{1,2})\.\s*(?:([a-zä]+)\s*)?(?:(\d{4})\s*)?[-–]\s*(\d{1,2})\.\s*([a-zä]+)\s*(\d{4})/,
+    );
+  if (!m) return null;
+  const endMonth = MONTHS_DE[m[5]];
+  const startMonth = m[2] ? MONTHS_DE[m[2]] : endMonth;
+  if (!endMonth || !startMonth) return null;
+  const endYear = m[6];
+  const startYear = m[3] ?? endYear;
+  const iso = (y: string, mo: number, d: string) => `${y}-${String(mo).padStart(2, "0")}-${d.padStart(2, "0")}`;
+  return { start: iso(startYear, startMonth, m[1]), end: iso(endYear, endMonth, m[4]) };
 }

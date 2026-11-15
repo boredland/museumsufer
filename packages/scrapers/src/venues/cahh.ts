@@ -5,6 +5,7 @@ import {
   addDaysIso,
   clean,
   EXHIBITION_LABEL,
+  expectFound,
   eventLabels,
   fetchText,
   iso,
@@ -22,7 +23,7 @@ import {
  * right after its title.
  */
 const BASE = "https://www.cahh.es";
-const GEO = { lat: 39.4766, lon: -0.3763 };
+const GEO = { lat: 39.4740, lon: -0.3733 };
 const DAYS_RE = /(\d{1,2}(?:\s*(?:,|y)\s*\d{1,2})*)\s+de\s+([A-Za-zñ]+)/;
 
 export async function scrapeCahh(): Promise<VenueScrapeResult> {
@@ -30,7 +31,7 @@ export async function scrapeCahh(): Promise<VenueScrapeResult> {
   const [list, exhibitions] = await Promise.all([fetchText(`${BASE}/actividades/`), fetchText(`${BASE}/exposiciones/`)]);
   const events: CanonicalScrapedEvent[] = [];
 
-  const urls = [...new Set([...list.matchAll(/href="(https:\/\/www\.cahh\.es\/actividades\/[^"]+)"/g)].map((m) => m[1]))];
+  const urls = expectFound([...new Set([...list.matchAll(/href="(https:\/\/www\.cahh\.es\/actividades\/[^"]+)"/g)].map((m) => m[1]))], "cahh.es/actividades");
   for (const url of urls) {
     const html = await fetchText(url);
     const text = clean(html.slice(html.indexOf("ENTRADAS") + 8, html.indexOf("Duración")));
@@ -40,7 +41,7 @@ export async function scrapeCahh(): Promise<VenueScrapeResult> {
     if (!head || !month || head.index === undefined) continue;
     const title = text.slice(0, head.index).trim();
     const time = text.match(/(\d{1,2}):(\d{2})\s*h/);
-    const priceText = clean(html.slice(html.indexOf("Duración"), html.indexOf("Duración") + 120));
+    const priceText = clean(html.slice(html.indexOf("Duración"), html.indexOf("Duración") + 1200)).slice(0, 80);
     const price = /GRATUITO/i.test(priceText) ? 0 : Number(priceText.match(/(\d+(?:[.,]\d+)?)\s*€/)?.[1]?.replace(",", ".") ?? NaN);
     const image = html.match(/og:image" content="([^"]+)"/)?.[1];
     for (const day of head[1].match(/\d{1,2}/g) ?? []) {

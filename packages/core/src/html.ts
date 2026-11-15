@@ -81,12 +81,30 @@ const NAMED_ENTITIES: Record<string, string> = {
   Aring: "Å",
   aelig: "æ",
   AElig: "Æ",
+  Euml: "Ë",
+  euml: "ë",
+  Iuml: "Ï",
+  iuml: "ï",
+  yuml: "ÿ",
+  Scaron: "Š",
+  scaron: "š",
+  Zcaron: "Ž",
+  zcaron: "ž",
+  iexcl: "¡",
+  iquest: "¿",
+  ordf: "ª",
+  ordm: "º",
 };
+
+/** `fromCodePoint` throws above U+10FFFF; a malformed entity must stay literal, not crash a scraper. */
+function fromCodePointSafe(code: number, original: string): string {
+  return Number.isInteger(code) && code >= 0 && code <= 0x10ffff ? String.fromCodePoint(code) : original;
+}
 
 export function decodeEntities(text: string): string {
   return text
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(parseInt(n, 10)))
-    .replace(/&#x([0-9a-fA-F]+);/g, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&#(\d+);/g, (m, n) => fromCodePointSafe(parseInt(n, 10), m))
+    .replace(/&#x([0-9a-fA-F]+);/g, (m, n) => fromCodePointSafe(parseInt(n, 16), m))
     .replace(/&([a-zA-Z]+);/g, (m, name) => NAMED_ENTITIES[name] ?? m);
 }
 

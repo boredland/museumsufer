@@ -14,7 +14,8 @@ export const MUSIC_GENRES: readonly MusicGenre[] = [
  * experimental → chamber → classical. First match wins. Case-insensitive
  * substring match against the combined title + subtitle + description.
  */
-const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: readonly string[] }> = [
+/** String needles match as substrings; regex needles guard stems that collide with unrelated words. */
+const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: ReadonlyArray<string | RegExp> }> = [
   {
     genre: "sacred",
     needles: [
@@ -25,7 +26,7 @@ const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: readonly string[] }>
       "orgel",
       "vesper",
       "motette",
-      "passion",
+      /passion(?!at)/,
       "oratorium",
       "gospel",
       "gottesdienst",
@@ -39,10 +40,15 @@ const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: readonly string[] }>
     ],
   },
   {
+    // Must precede jazz: "Streichquartett" / "Klaviertrio" contain the jazz needles "quartett" / "trio".
+    genre: "chamber",
+    needles: [/streich(?:quartett|trio)/, /klavier(?:quartett|trio)/],
+  },
+  {
     genre: "jazz",
     needles: [
       "jazz",
-      "bebop",
+      /\bbebop/,
       "swing",
       "fusion",
       "bigband",
@@ -56,7 +62,8 @@ const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: readonly string[] }>
   },
   {
     genre: "world",
-    needles: ["weltmusik", "flamenco", "folk", "folklore", "klezmer", "latin", "tango", "fado", "roma"],
+    // `roma` as a bare substring hit "Roman", "Romeo & Julia", "Romantik".
+    needles: ["weltmusik", "flamenco", "folk", "folklore", "klezmer", "latin", "tango", "fado", /\broma\b/],
   },
   {
     genre: "experimental",
@@ -64,15 +71,7 @@ const KEYWORDS: ReadonlyArray<{ genre: MusicGenre; needles: readonly string[] }>
   },
   {
     genre: "chamber",
-    needles: [
-      "kammerkonzert",
-      "kammermusik",
-      "liederabend",
-      "chanson",
-      "streichquartett",
-      "klaviertrio",
-      "klavierquartett",
-    ],
+    needles: ["kammerkonzert", "kammermusik", "liederabend", "chanson", "streichquartett", "klaviertrio", "klavierquartett"],
   },
   {
     genre: "classical",
@@ -100,7 +99,7 @@ export function classifyMusic(
   if (!haystack) return fallback;
   for (const bucket of KEYWORDS) {
     for (const needle of bucket.needles) {
-      if (haystack.includes(needle)) return bucket.genre;
+      if (typeof needle === "string" ? haystack.includes(needle) : needle.test(haystack)) return bucket.genre;
     }
   }
   return fallback;

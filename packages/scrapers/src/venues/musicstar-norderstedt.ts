@@ -36,6 +36,7 @@ export async function scrapeMusicstarNorderstedt(): Promise<VenueScrapeResult> {
 
     const rawTitle = decodeEntities(parts[0].trim());
     const datePart = parts[1];
+    const time = parseStart(datePart);
 
     // Expand "12. und 13.7.2026" → ["12.7.2026", "13.7.2026"]
     // and "8.7.2026" → ["8.7.2026"]
@@ -56,7 +57,7 @@ export async function scrapeMusicstarNorderstedt(): Promise<VenueScrapeResult> {
         title: rawTitle,
         description: null,
         date,
-        time: "20:00",
+        time,
         detail_url: BASE,
         labels: [{ label: "music:rock", confidence: 0.8, classifier: "scraper-hardcoded" }],
       });
@@ -67,21 +68,25 @@ export async function scrapeMusicstarNorderstedt(): Promise<VenueScrapeResult> {
   return { source_slug: "musicstar-norderstedt", display_name: "Music Star Norderstedt", events };
 }
 
-/** Expand "12. und 13.7.2026" → ["12.7.2026", "13.7.2026"],
- *  "8.7.2026" → ["8.7.2026"],
+/** Start time from "Einlass: 19°° UHR Beginn: 20 Uhr"; the doors time is the fallback. Defaults to 20:00, the club's standing start. */
+function parseStart(raw: string): string {
+  const m = raw.match(/Beginn:?\s*(\d{1,2})(?:[.:°]+(\d{2}))?/i) ?? raw.match(/Einlass:?\s*(\d{1,2})(?:[.:°]+(\d{2}))?/i);
+  if (!m) return "20:00";
+  return `${m[1].padStart(2, "0")}:${m[2] ?? "00"}`;
+}
+
+/** Expand "12. und 13.7.2026" / "18 & 19.11.2026" → one "D.M.YYYY" per day,
  *  "8.7.2026 Einlass: ..." → ["8.7.2026"]. */
 function expandDateStr(raw: string): string[] {
-  const cleaned = raw.replace(/Einlass.*$/i, "").replace(/Beginn.*$/i, "").trim();
-  // "12. und 13.7.2026" or "12. und 13. 7. 2026"
-  const multiMatch = cleaned.match(/^(\d{1,2})\.\s*und\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})$/);
-  if (multiMatch) {
-    const month = multiMatch[3];
-    const year = multiMatch[4];
-    return [`${multiMatch[1]}.${month}.${year}`, `${multiMatch[2]}.${month}.${year}`];
-  }
-  // Single date: "8.7.2026" or "8. 7. 2026"
-  const singleMatch = cleaned.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
-  if (singleMatch) return [`${singleMatch[1]}.${singleMatch[2]}.${singleMatch[3]}`];
+  const cleaned = raw
+    .replace(/Einlass.*$/i, "")
+    .replace(/Beginn.*$/i, "")
+    .replace(/&nbsp;|&amp;/g, (e) => (e === "&amp;" ? "&" : " "))
+    .trim();
+  const multi = cleaned.match(/^(\d{1,2})\.?\s*(?:und|&|\+|\/)\s*(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/i);
+  if (multi) return [`${multi[1]}.${multi[3]}.${multi[4]}`, `${multi[2]}.${multi[3]}.${multi[4]}`];
+  const single = cleaned.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+  if (single) return [`${single[1]}.${single[2]}.${single[3]}`];
   return [];
 }
 
