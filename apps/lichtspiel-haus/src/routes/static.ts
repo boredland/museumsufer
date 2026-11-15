@@ -62,16 +62,18 @@ function llmsFor(city: string): string {
   if (cached) return cached;
   const appUrl = cityUrl("lichtspiel.haus", city);
   const tz = cityMeta(city).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
+  const cityCinemas = CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city));
   const tr = localizeTranslations(
     {
-      homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${CINEMAS.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
+      homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${cityCinemas.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
     } as any,
     city,
     "de",
   );
   const today = todayIso();
   const series = getAllSeries(today, city);
-  const cinemaLines = CINEMAS.slice()
+  const cinemaLines = cityCinemas
+    .slice()
     .sort((a, b) => a.slug.localeCompare(b.slug))
     .map((c) => `- ${c.slug}: ${c.name}`)
     .join("\n");

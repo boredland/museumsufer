@@ -64,10 +64,11 @@ function llmsFor(city: string): string {
   if (cached) return cached;
   const contentLocale = cityContentLocale(city);
   const timeZone = contentLocale === "es" ? "Europe/Madrid" : "Europe/Berlin";
+  const venueCount = VENUES.filter((v) => coordServesCity(v.lat, v.lon, city)).length;
   const intro = localizeCityText(
     contentLocale === "es"
-      ? `Conciertos en Fráncfort del Meno y alrededores — fechas agregadas de ${VENUES.length} salas. Clásica, jazz, música de cámara, música sacra, músicas del mundo y contemporánea. Sin pop ni rock.`
-      : `Konzerte in Frankfurt und Umgebung — aggregierte Termine aus ${VENUES.length} Spielorten. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik. Kein Pop, kein Rock.`,
+      ? `Conciertos en Fráncfort del Meno y alrededores — fechas agregadas de ${venueCount} salas. Clásica, jazz, música de cámara, música sacra, músicas del mundo y contemporánea. Sin pop ni rock.`
+      : `Konzerte in Frankfurt und Umgebung — aggregierte Termine aus ${venueCount} Spielorten. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik. Kein Pop, kein Rock.`,
     city,
     contentLocale,
   );
