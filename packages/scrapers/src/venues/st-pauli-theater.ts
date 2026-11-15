@@ -16,10 +16,11 @@ export async function scrapeStPauliTheater(): Promise<VenueScrapeResult> {
   const nonce = nonceMatch?.[1];
   if (!nonce) throw new Error("Could not find St. Pauli AJAX nonce in page HTML");
 
-  const scMatch = html.match(/class='evo_cal_data'\s+data-sc='([^']+)'/);
+  // The site flipped the attribute quoting (single -> double quotes, JSON entity-encoded); accept both.
+  const scMatch = html.match(/class=['"]evo_cal_data['"]\s+data-sc=(["'])(.*?)\1/s);
   if (!scMatch) throw new Error("Could not find St. Pauli shortcode data in page HTML");
 
-  const sc = JSON.parse(scMatch[1]);
+  const sc = JSON.parse(decodeEntities(scMatch[2]));
   sc.number_of_months = 12;
   sc.event_past_future = "future";
   sc.show_upcoming = 1;
@@ -45,7 +46,11 @@ export async function scrapeStPauliTheater(): Promise<VenueScrapeResult> {
   });
   if (!ajaxRes.ok) throw new Error(`st-pauli ajax fetch failed: ${ajaxRes.status}`);
   const ajaxData = (await ajaxRes.json()) as any;
-  const rawEvents = ajaxData.json || [];
+  const rawEvents = ajaxData.json;
+  if (ajaxData.status !== "GOOD" || !Array.isArray(rawEvents)) {
+    throw new Error(`st-pauli ajax returned unexpected payload (status=${ajaxData.status})`);
+  }
+  if (rawEvents.length === 0) throw new Error("st-pauli ajax returned no events");
 
   // 3. Fetch WP events details in bulk
   const wpEventsRes = await fetch("https://www.st-pauli-theater.de/wp-json/wp/v2/ajde_events?per_page=100", {
@@ -141,6 +146,9 @@ export async function scrapeStPauliTheater(): Promise<VenueScrapeResult> {
       labels: resolveStageLabels({ title, subtitle: cleanSub, defaultLabel: "stage:theater", confidence: 0.9 }),
     });
   }
+
+  events.sort((a, b) => a.source_event_id.localeCompare(b.source_event_id));
+  if (events.length === 0) throw new Error("st-pauli produced no events");
 
   return { source_slug: "st-pauli-theater", display_name: "St. Pauli Theater", events };
 }
