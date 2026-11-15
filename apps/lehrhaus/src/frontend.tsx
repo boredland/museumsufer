@@ -7,6 +7,7 @@ import {
   type CalendarEvent,
   cityHost,
   cityMeta,
+  cityTimeZone,
   cityUrl,
   dateFormatter,
   dateLocale,
@@ -21,6 +22,7 @@ import {
   servesCity,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
+  utcOffsetFor,
   type WebMcpToolDef,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
@@ -289,23 +291,8 @@ function RangeRow({ active, tr, locale }: { active: boolean; tr: Translations; l
   );
 }
 
-function berlinOffsetFor(date: string): string {
-  const [year, month, day] = date.split("-").map(Number);
-  if (!year || !month || !day) return "+01:00";
-  const lastSundayUtc = (y: number, m: number): number => {
-    const last = new Date(Date.UTC(y, m, 0));
-    return last.getUTCDate() - last.getUTCDay();
-  };
-  const dstStart = lastSundayUtc(year, 3);
-  const dstEnd = lastSundayUtc(year, 10);
-  if (month > 3 && month < 10) return "+02:00";
-  if (month < 3 || month > 10) return "+01:00";
-  if (month === 3) return day >= dstStart ? "+02:00" : "+01:00";
-  return day < dstEnd ? "+02:00" : "+01:00";
-}
-
 function buildEventJsonLd(e: DayEvent, city?: string): Record<string, unknown> {
-  const offset = berlinOffsetFor(e.date);
+  const offset = utcOffsetFor(e.date, e.time, cityTimeZone(city ?? e.city ?? "frankfurt"));
   const startTime = e.time ?? "00:00";
   const eventType = e.category === "Diskussion" ? "EducationEvent" : "Event";
   const resolvedCity = city ?? e.city ?? "frankfurt";

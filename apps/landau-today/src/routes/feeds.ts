@@ -2,7 +2,7 @@ import { buildIcsCalendar, buildRssFeed, type IcsEventInput, type RssItem } from
 import { Hono } from "hono";
 import { dateOffset, todayIso } from "../date";
 import { getEventsForRange } from "../queries";
-import { APP_URL, formatDateLong, formatTime } from "../shared";
+import { APP_URL, berlinOffset, formatDateLong, formatTime } from "../shared";
 import type { Env, Event } from "../types";
 
 const app = new Hono<{ Bindings: Env }>();
@@ -50,7 +50,7 @@ function toRssItem(ev: Event): RssItem {
   const title = `${ev.title}${time ? ` (${formatDateLong(ev.date)} ${time})` : ` (${formatDateLong(ev.date)})`}`;
   const link = `${APP_URL}/event/${ev.id}`;
   const desc = `${ev.venue ? `${ev.venue}. ` : ""}${ev.description ?? ""}`.trim();
-  const pubDate = new Date(`${ev.date}T${ev.time ?? "00:00"}:00+02:00`);
+  const pubDate = new Date(`${ev.date}T${ev.time ?? "00:00"}:00${berlinOffset(ev.date, ev.time)}`);
   return { title, link, guid: link, pubDate, category: ev.category, description: desc };
 }
 

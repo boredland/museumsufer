@@ -2,11 +2,13 @@ import {
   buildIcsCalendar,
   buildRssFeed,
   buildUtm,
+  cityTimeZone,
   dateOffset,
   type IcsEventInput,
   type RssItem,
   slugify,
   todayIso,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayEvent, getEventById, getEventsInRange, getSourceBySlug } from "../db";
@@ -112,7 +114,7 @@ function buildRss(events: DayEvent[], city: string): string {
   const appUrl = `https://${domain}`;
   const utm = buildUtm(domain);
   const items: RssItem[] = events.map((e) => {
-    const dateStr = e.time ? `${e.date}T${e.time}:00+02:00` : `${e.date}T00:00:00+02:00`;
+    const dateStr = `${e.date}T${e.time ?? "00:00"}:00${utcOffsetFor(e.date, e.time, cityTimeZone(e.city ?? city))}`;
     const linkSource = e.detail_url ?? e.ticket_url ?? `${appUrl}/api/events/${e.id}`;
     const parts: string[] = [e.source.name, e.category];
     if (e.language && e.language.toLowerCase() !== "de") parts.push(e.language.toUpperCase());

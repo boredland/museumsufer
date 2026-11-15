@@ -3,6 +3,7 @@ import {
   buildHreflangAlternates,
   cityMeta,
   cityName,
+  cityTimeZone,
   dateFormatter,
   digestScheduleLabel,
   type FaqItem,
@@ -10,6 +11,7 @@ import {
   langSwitchItems,
   servesCity,
   THEME_FOUC_SCRIPT,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { CitySwitch } from "@museumsufer/core/cityswitch";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
@@ -565,8 +567,7 @@ export function renderPage(
         fr: `Musées de ${cityName(city, locale, "full")}`,
         es: `Museos de ${cityName(city, locale, "full")}`,
       }[locale];
-  const berlinOffset = getBerlinUtcOffset();
-  const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
+  const eventSchemaJson = initialData ? buildEventSchema(initialData) : "";
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -792,14 +793,6 @@ export function renderPage(
   ) as unknown as HtmlEscapedString;
 }
 
-function getBerlinUtcOffset(): string {
-  const now = new Date();
-  const utc = now.toLocaleString("en-US", { timeZone: "UTC" });
-  const berlin = now.toLocaleString("en-US", { timeZone: "Europe/Berlin" });
-  const diff = (new Date(berlin).getTime() - new Date(utc).getTime()) / 3600000;
-  return `+${String(Math.floor(diff)).padStart(2, "0")}:00`;
-}
-
 function museumLocationNode(slug: string, name: string): Record<string, unknown> {
   const id = `https://museumsufer.app/#museum/${slug}`;
   const geo = MUSEUM_LOCATIONS[slug];
@@ -814,7 +807,7 @@ function museumLocationNode(slug: string, name: string): Record<string, unknown>
   return node;
 }
 
-function buildEventSchema(data: InitialData, tz: string): string {
+function buildEventSchema(data: InitialData): string {
   const schemas: Record<string, unknown>[] = [];
   const emittedMuseums = new Set<string>();
 
@@ -867,17 +860,21 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const museum = (ev.museum_name as string) || "";
       const slug = (ev.museum_slug as string) || "";
       ensureMuseum(slug, museum);
+      const zone = cityTimeZone(getMuseumConfig(slug)?.city);
 
-      const startIso = time ? `${date}T${time}:00${tz}` : `${date}T09:00:00${tz}`;
+      const startIso = time
+        ? `${date}T${time}:00${utcOffsetFor(date, time, zone)}`
+        : `${date}T09:00:00${utcOffsetFor(date, "09:00", zone)}`;
       let endIso: string;
       if (endTime) {
         const ed = endDate || date;
-        endIso = `${ed}T${endTime}:00${tz}`;
+        endIso = `${ed}T${endTime}:00${utcOffsetFor(ed, endTime, zone)}`;
       } else if (time) {
         const h = (parseInt(time.split(":")[0], 10) + 1) % 24;
-        endIso = `${date}T${h.toString().padStart(2, "0")}:${time.split(":")[1]}:00${tz}`;
+        const endClock = `${h.toString().padStart(2, "0")}:${time.split(":")[1]}`;
+        endIso = `${date}T${endClock}:00${utcOffsetFor(date, endClock, zone)}`;
       } else {
-        endIso = `${date}T18:00:00${tz}`;
+        endIso = `${date}T18:00:00${utcOffsetFor(date, "18:00", zone)}`;
       }
 
       const museumConfig = getMuseumConfig(slug);

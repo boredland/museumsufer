@@ -5,12 +5,14 @@ import {
   cityAdj,
   cityHost,
   cityMeta,
+  cityTimeZone,
   cityUrl,
   dateOffset,
   type IcsEventInput,
   type RssItem,
   slugify,
   todayIso,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayPerformance, getPerformanceById, getPerformancesInRange, getTheaterBySlug } from "../db";
@@ -122,7 +124,7 @@ function buildRss(performances: DayPerformance[], city: string): string {
   const appUrl = cityUrl(APEX, city);
   const utm = buildUtm(cityHost(APEX, city));
   const items: RssItem[] = performances.map((p) => {
-    const dateStr = p.time ? `${p.date}T${p.time}:00+02:00` : `${p.date}T00:00:00+02:00`;
+    const dateStr = `${p.date}T${p.time ?? "00:00"}:00${utcOffsetFor(p.date, p.time, cityTimeZone(p.show.city ?? city))}`;
     const linkSource = p.show.detail_url || p.ticket_url;
     const link = linkSource ? utm(linkSource, "rss") : `${appUrl}/api/performance/${p.id}`;
     const descParts: string[] = [];

@@ -3,6 +3,7 @@ import {
   buildRssFeed,
   buildUtm,
   cityHost,
+  cityTimeZone,
   cityUrl,
   dateOffset,
   type IcsEventInput,
@@ -10,6 +11,7 @@ import {
   type RssItem,
   slugify,
   todayIso,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayEvent, getEventById, getEventsInRange, getVenueBySlug } from "../db";
@@ -121,7 +123,7 @@ function buildRss(events: DayEvent[], city: string): string {
   const appUrl = cityUrl(APEX, city);
   const utm = buildUtm(host);
   const items: RssItem[] = events.map((e) => {
-    const dateStr = e.time ? `${e.date}T${e.time}:00+02:00` : `${e.date}T00:00:00+02:00`;
+    const dateStr = `${e.date}T${e.time ?? "00:00"}:00${utcOffsetFor(e.date, e.time, cityTimeZone(e.venue.city))}`;
     const linkSource = e.detail_url ?? e.ticket_url ?? `${appUrl}/api/events/${e.id}`;
     const parts: string[] = [`${e.venue.name}${e.venue_room ? `, ${e.venue_room}` : ""}`];
     if (e.subtitle) parts.push(e.subtitle);

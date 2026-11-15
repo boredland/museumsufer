@@ -8,6 +8,7 @@ import {
   cityHost,
   cityMeta,
   cityName,
+  cityTimeZone,
   cityUrl,
   dateOffset,
   dateParts,
@@ -20,6 +21,7 @@ import {
   servesCity,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
+  utcOffsetFor,
   GERMAN_WEEKDAYS as WEEKDAYS_LONG,
   GERMAN_WEEKDAYS_SHORT as WEEKDAYS_SHORT,
   type WebMcpToolDef,
@@ -1491,8 +1493,11 @@ export function buildHomeJsonLd(
 
 export function buildPerformanceJsonLd(p: DayPerformance): Record<string, unknown> {
   const appUrl = cityUrl(APEX, p.show.city ?? "frankfurt");
-  const startDate = p.time ? `${p.date}T${p.time}:00+02:00` : p.date;
-  const endDate = p.end_time ? `${p.end_date ?? p.date}T${p.end_time}:00+02:00` : undefined;
+  const zone = cityTimeZone(p.show.city ?? "frankfurt");
+  const startDate = p.time ? `${p.date}T${p.time}:00${utcOffsetFor(p.date, p.time, zone)}` : p.date;
+  const endDate = p.end_time
+    ? `${p.end_date ?? p.date}T${p.end_time}:00${utcOffsetFor(p.end_date ?? p.date, p.end_time, zone)}`
+    : undefined;
   // Offer is only emitted when complete (priceCurrency without price
   // is invalid per schema.org). priceValidUntil = the performance
   // date itself; tickets stop being relevant once the show plays.

@@ -12,7 +12,7 @@ import { CATEGORIES, CATEGORY_BY_SLUG } from "./categories";
 import { ChipRow, DateStrip, DayHeadline, EventList } from "./components";
 import { todayIso } from "./date";
 import { DEFAULT_LOCALE, type FaqEntry, type Locale, SUPPORTED_LOCALES, type Translations } from "./i18n";
-import { APP_URL, formatDateLong, jsonLdSafe } from "./shared";
+import { APP_URL, berlinOffset, formatDateLong, jsonLdSafe } from "./shared";
 import type { Event } from "./types";
 
 // Always emit `?lang=<locale>` so an explicit user choice survives
@@ -373,8 +373,12 @@ function buildJsonLd(events: Event[]): string {
       "@type": categoryToEventType(ev.category),
       "@id": `${APP_URL}/event/${ev.id}#event`,
       name: ev.title,
-      startDate: ev.time ? `${ev.date}T${ev.time}:00+02:00` : ev.date,
-      endDate: ev.end_date ? (ev.end_time ? `${ev.end_date}T${ev.end_time}:00+02:00` : ev.end_date) : undefined,
+      startDate: ev.time ? `${ev.date}T${ev.time}:00${berlinOffset(ev.date, ev.time)}` : ev.date,
+      endDate: ev.end_date
+        ? ev.end_time
+          ? `${ev.end_date}T${ev.end_time}:00${berlinOffset(ev.end_date, ev.end_time)}`
+          : ev.end_date
+        : undefined,
       eventStatus: "https://schema.org/EventScheduled",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       location: ev.venue

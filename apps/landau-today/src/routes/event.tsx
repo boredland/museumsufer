@@ -11,6 +11,7 @@ import { imageProxyUrl } from "../image-proxy";
 import { getEventById } from "../queries";
 import {
   APP_URL,
+  berlinOffset,
   buildGoogleMapsUrl,
   buildVrnUrl,
   formatDateLong,
@@ -288,8 +289,12 @@ function renderEventPage(ev: Event, locale: Locale, tr: Translations): HtmlEscap
     "@context": "https://schema.org",
     "@type": "Event",
     name: ev.title,
-    startDate: ev.time ? `${ev.date}T${ev.time}:00+02:00` : ev.date,
-    endDate: ev.end_date ? (ev.end_time ? `${ev.end_date}T${ev.end_time}:00+02:00` : ev.end_date) : undefined,
+    startDate: ev.time ? `${ev.date}T${ev.time}:00${berlinOffset(ev.date, ev.time)}` : ev.date,
+    endDate: ev.end_date
+      ? ev.end_time
+        ? `${ev.end_date}T${ev.end_time}:00${berlinOffset(ev.end_date, ev.end_time)}`
+        : ev.end_date
+      : undefined,
     location: ev.venue
       ? {
           "@type": "Place",

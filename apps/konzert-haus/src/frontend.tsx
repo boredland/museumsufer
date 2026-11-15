@@ -5,6 +5,7 @@ import {
   buildUtm,
   buildWebMcpScript,
   type CalendarEvent,
+  cityTimeZone,
   cityUrl,
   coordServesCity,
   dateFormatter,
@@ -19,6 +20,7 @@ import {
   museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
+  utcOffsetFor,
   type WebMcpToolDef,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
@@ -304,27 +306,8 @@ function DateStrip({
   );
 }
 
-/**
- * Germany observes CEST (+02:00) between the last Sunday of March and the
- * last Sunday of October, CET (+01:00) otherwise.
- */
-function berlinOffsetFor(date: string): string {
-  const [year, month, day] = date.split("-").map(Number);
-  if (!year || !month || !day) return "+01:00";
-  const lastSundayUtc = (y: number, m: number): number => {
-    const last = new Date(Date.UTC(y, m, 0));
-    return last.getUTCDate() - last.getUTCDay();
-  };
-  const dstStart = lastSundayUtc(year, 3);
-  const dstEnd = lastSundayUtc(year, 10);
-  if (month > 3 && month < 10) return "+02:00";
-  if (month < 3 || month > 10) return "+01:00";
-  if (month === 3) return day >= dstStart ? "+02:00" : "+01:00";
-  return day < dstEnd ? "+02:00" : "+01:00";
-}
-
 function buildEventJsonLd(e: DayEvent, appUrl: string): Record<string, unknown> {
-  const offset = berlinOffsetFor(e.date);
+  const offset = utcOffsetFor(e.date, e.time, cityTimeZone(e.venue.city));
   const startTime = e.time ?? "00:00";
   const venueIri = `${appUrl}/spielort/${e.venue.slug}#venue`;
   const jsonLd: Record<string, unknown> = {

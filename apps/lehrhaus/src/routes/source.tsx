@@ -1,4 +1,12 @@
-import { cityMeta, cityUrl, dateOffset, parsePostalAddress, todayIso } from "@museumsufer/core";
+import {
+  cityMeta,
+  cityTimeZone,
+  cityUrl,
+  dateOffset,
+  parsePostalAddress,
+  todayIso,
+  utcOffsetFor,
+} from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
 import { raw } from "hono/html";
@@ -74,7 +82,7 @@ app.get("/quelle/:slug", (c) => {
       "@type": "Event",
       "@id": `${appUrl}/#event/${e.id}`,
       name: e.title,
-      startDate: e.time ? `${e.date}T${e.time}:00+02:00` : e.date,
+      startDate: e.time ? `${e.date}T${e.time}:00${utcOffsetFor(e.date, e.time, cityTimeZone(e.city))}` : e.date,
       organizer: { "@id": sourceIri },
     })),
   };

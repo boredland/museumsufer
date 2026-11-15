@@ -2,7 +2,7 @@
  * Small grab-bag of view helpers + escape utilities. The bigger shared
  * primitives (date math, hash, html stripping) live in @museumsufer/core.
  */
-import { escapeHtml } from "@museumsufer/core";
+import { escapeHtml, utcOffsetFor } from "@museumsufer/core";
 import type { Locale } from "./i18n";
 
 export const APP_URL = "https://landau.today";
@@ -10,6 +10,12 @@ export const USER_AGENT = "landau.today/1.0 (+https://landau.today)";
 
 export const escHtml = escapeHtml;
 export { jsonLdSafe } from "@museumsufer/core";
+
+/** Landau events are all in Germany, so Berlin time. The offset follows the event's date, so winter
+ *  events get +01:00 (a fixed +02:00 stamped them an hour late all winter). */
+export function berlinOffset(date: string, time?: string | null): string {
+  return utcOffsetFor(date, time, "Europe/Berlin");
+}
 
 const LOCALE_TAGS: Record<Locale, string> = { de: "de-DE", fr: "fr-FR" };
 
