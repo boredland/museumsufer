@@ -1,6 +1,7 @@
 import {
   buildFaqPageSchema,
   buildHreflangAlternates,
+  cityMeta,
   cityName,
   dateFormatter,
   digestScheduleLabel,
@@ -92,7 +93,7 @@ function buildHreflangsForCanonical(canonicalUrl: string): Array<{ hreflang: str
   });
 }
 
-const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR" };
+const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR", es: "es_ES" };
 
 export function renderHtmlHead(options: HtmlHeadOptions) {
   const {
@@ -160,6 +161,11 @@ const PASS_URLS: Record<Locale, { card: string; ticket: string }> = {
   fr: {
     card: "fr/tickets/tickets-permanentes/museumsufercard/",
     ticket: "fr/tickets/tickets-permanentes/museumsufer-ticket/",
+  },
+  // museumsufer.de has no Spanish pages; the English ones read closest.
+  es: {
+    card: "en/admission-tickets/season-tickets/museumsufercard/",
+    ticket: "en/admission-tickets/season-tickets/museumsuferticket/",
   },
 };
 
@@ -493,7 +499,12 @@ function museumFaqFor(city: string): { count: number; byLocale: Record<FaqLocale
   const names = ranked.map((v) => v.name);
   const faq = {
     count: ranked.length,
-    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
+    byLocale: {
+      de: joinNames(names, "de"),
+      en: joinNames(names, "en"),
+      fr: joinNames(names, "fr"),
+      es: joinNames(names, "es"),
+    },
   };
   museumFaqCache.set(city, faq);
   return faq;
@@ -541,16 +552,15 @@ export function renderPage(
   const appUrl = isFrankfurt ? "https://museumsufer.app" : `https://${city}.ins.museum`;
   const brand = isFrankfurt ? "Museumsufer Frankfurt" : `${cityName(city, locale, "short")} · ins.museum`;
   const museumsListName = isFrankfurt
-    ? locale === "fr"
-      ? "Musées du Museumsufer"
-      : locale === "en"
-        ? "Museumsufer museums"
-        : "Museumsufer-Museen"
-    : locale === "fr"
-      ? `Musées de ${cityName(city, locale, "full")}`
-      : locale === "en"
-        ? `${cityName(city, locale, "short")} museums`
-        : `Museen in ${cityName(city, locale, "full")}`;
+    ? { de: "Museumsufer-Museen", en: "Museumsufer museums", fr: "Musées du Museumsufer", es: "Museos del Museumsufer" }[
+        locale
+      ]
+    : {
+        de: `Museen in ${cityName(city, locale, "full")}`,
+        en: `${cityName(city, locale, "short")} museums`,
+        fr: `Musées de ${cityName(city, locale, "full")}`,
+        es: `Museos de ${cityName(city, locale, "full")}`,
+      }[locale];
   const berlinOffset = getBerlinUtcOffset();
   const eventSchemaJson = initialData ? buildEventSchema(initialData, berlinOffset) : "";
   const personSchema = {
@@ -581,7 +591,7 @@ export function renderPage(
     description: tr.metaLong,
     applicationCategory: "EntertainmentApplication",
     operatingSystem: "All",
-    inLanguage: ["de", "en", "fr"],
+    inLanguage: SUPPORTED_LOCALES,
     offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
     publisher: { "@id": `${appUrl}/#org` },
   };
@@ -592,7 +602,7 @@ export function renderPage(
     url: `${appUrl}/`,
     description: tr.metaLong,
     dateModified: todayIso(),
-    inLanguage: ["de", "en", "fr"],
+    inLanguage: SUPPORTED_LOCALES,
     publisher: { "@id": `${appUrl}/#org` },
     // Google's current SearchAction spec wants `target` as a bare
     // URL-template string. The legacy `{ @type: "EntryPoint" }`
@@ -793,8 +803,9 @@ function museumLocationNode(slug: string, name: string): Record<string, unknown>
   const node: Record<string, unknown> = { "@type": "Museum", "@id": id, name };
   if (config?.website) node.url = config.website;
   if (geo) {
+    const meta = cityMeta(config?.city);
     node.geo = { "@type": "GeoCoordinates", latitude: geo.lat, longitude: geo.lng };
-    node.address = { "@type": "PostalAddress", addressLocality: "Frankfurt am Main", addressCountry: "DE" };
+    node.address = { "@type": "PostalAddress", addressLocality: meta.name, addressCountry: meta.country };
   }
   return node;
 }
@@ -821,7 +832,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const exSchema: Record<string, unknown> = {
         "@type": "ExhibitionEvent",
         name: ex.title,
-        description: (ex.description as string) || `${ex.title} — ${museum}, Frankfurt am Main`,
+        description: (ex.description as string) || `${ex.title} — ${museum}, ${cityMeta(museumConfig?.city).name}`,
         url: exUrl,
         eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
         eventStatus: "https://schema.org/EventScheduled",
@@ -872,7 +883,7 @@ function buildEventSchema(data: InitialData, tz: string): string {
       const schema: Record<string, unknown> = {
         "@type": "Event",
         name: ev.title,
-        description: (ev.description as string) || `${ev.title} — ${museum}, Frankfurt am Main`,
+        description: (ev.description as string) || `${ev.title} — ${museum}, ${cityMeta(museumConfig?.city).name}`,
         url: evUrl,
         startDate: startIso,
         endDate: endIso,

@@ -9,7 +9,7 @@ import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityOf, EVENTS } from "@museumsufer/event-hub";
 import { type ParsedExhibition, type ParsedMuseum, scrape } from "../src/scraper";
 import type { Event, Exhibition, Museum, ScrapeData } from "../src/types";
-import { translateTexts } from "./translate";
+import { collectLivingTexts, translateTexts } from "./translate";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
@@ -202,20 +202,6 @@ function buildScrapeData(input: {
 
   const supportedCities = Object.keys(CITIES).filter((c) => input.museums.some((m) => servesCity(m.city, c)));
   return { museums, exhibitions, events, translations: [], supportedCities };
-}
-
-function collectLivingTexts(data: ScrapeData): Set<string> {
-  const texts = new Set<string>();
-  for (const m of data.museums) if (m.description) texts.add(m.description);
-  for (const ex of data.exhibitions) {
-    if (ex.title) texts.add(ex.title);
-    if (ex.description) texts.add(ex.description);
-  }
-  for (const ev of data.events) {
-    if (ev.title) texts.add(ev.title);
-    if (ev.description) texts.add(ev.description);
-  }
-  return texts;
 }
 
 function normalizeForDedup(title: string): string {

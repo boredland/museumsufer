@@ -92,7 +92,7 @@ function renderHome(c: Context<AppEnv>, date: string) {
   const events = getEventsForDate(date, { city, genre });
   const dateStrip = getDatesWithEvents(today, dateOffset(60), { city });
   if (wantsMarkdown(c.req.raw)) {
-    return c.body(renderDayMarkdown(date, events), {
+    return c.body(renderDayMarkdown(date, events, city), {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=600, s-maxage=1800",

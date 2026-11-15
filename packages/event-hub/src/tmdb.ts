@@ -27,6 +27,10 @@ import type { CanonicalEvent } from "./types";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
 
+/** Per-run cap on last-resort DE→ES DeepL calls; the proxy 429s after ~80-100
+ *  requests per run and EN/FR + museum translations share that budget. */
+const DEEPL_ES_BUDGET = 20;
+
 interface TmdbMovieResult {
   id: number;
   poster_path: string | null;
@@ -273,16 +277,19 @@ async function searchTmdbTv(title: string, year: number | undefined, apiKey: str
   return data.results?.[0] ?? null;
 }
 
-async function fetchEnglishDetails(
+type LocalizedDetails = { title?: string; overview?: string };
+
+async function fetchLocalizedDetails(
   kind: "movie" | "tv",
   id: number,
   apiKey: string,
-): Promise<{ title?: string; overview?: string }> {
-  const params = new URLSearchParams({ api_key: apiKey, language: "en-US" });
+  language: "en-US" | "es-ES",
+): Promise<LocalizedDetails> {
+  const params = new URLSearchParams({ api_key: apiKey, language });
   const res = await retryFetch(
     `${TMDB_BASE}/${kind}/${id}?${params}`,
     { headers: { Accept: "application/json" } },
-    { label: `tmdb ${kind} ${id} details` },
+    { label: `tmdb ${kind} ${id} details ${language}` },
   );
   if (!res.ok) return {};
   const data = (await res.json()) as { title?: string | null; name?: string | null; overview?: string | null };
@@ -326,11 +333,12 @@ async function toEntry(
   apiKey: string,
 ): Promise<TmdbCacheEntry | null> {
   if (!hit) return null;
-  // Run the en-US detail call + the external_ids call in parallel —
-  // they're independent and we want both. Either may fail without
-  // sinking the entry.
-  const [en, imdb_id] = await Promise.all([
-    fetchEnglishDetails(kind, hit.id, apiKey).catch((): { title?: string; overview?: string } => ({})),
+  // Run the en-US + es-ES detail calls and the external_ids call in
+  // parallel — they're independent and we want all three. Any may fail
+  // without sinking the entry.
+  const [en, es, imdb_id] = await Promise.all([
+    fetchLocalizedDetails(kind, hit.id, apiKey, "en-US").catch((): LocalizedDetails => ({})),
+    fetchLocalizedDetails(kind, hit.id, apiKey, "es-ES").catch((): LocalizedDetails | null => null),
     fetchImdbId(kind, hit.id, apiKey).catch(() => undefined),
   ]);
   return {
@@ -340,6 +348,9 @@ async function toEntry(
     title_en: en.title,
     overview: hit.overview?.trim() || undefined,
     overview_en: en.overview,
+    // "" = TMDb answered but has no Spanish overview; it keeps the entry out of
+    // the needsRefresh loop. undefined (call failed) is retried next run.
+    overview_es: es === null ? undefined : (es.overview ?? ""),
     kind,
     genre_ids: hit.genre_ids?.length ? hit.genre_ids : undefined,
     vote_average: typeof hit.vote_average === "number" ? hit.vote_average : undefined,
@@ -418,6 +429,7 @@ export async function enrichFilmPosters(
         cached.title_en === undefined ||
         cached.overview === undefined ||
         cached.overview_en === undefined ||
+        cached.overview_es === undefined ||
         cached.genre_ids === undefined ||
         cached.vote_count === undefined ||
         cached.imdb_id === undefined);
@@ -437,6 +449,12 @@ export async function enrichFilmPosters(
     queue.add(async () => {
       try {
         const fresh = await fetchTmdb(p.title, p.year, apiKey);
+        const previous = opts.cache[p.key];
+        // A refresh rebuilds the entry from TMDb, which would drop a DeepL-filled
+        // Spanish overview for the same German text and re-spend the budget.
+        if (fresh && !fresh.overview_es && previous?.overview_es && previous.overview === fresh.overview) {
+          fresh.overview_es = previous.overview_es;
+        }
         opts.cache[p.key] = fresh;
         liveCount++;
         if (p.refresh) refreshedCount++;
@@ -454,6 +472,7 @@ export async function enrichFilmPosters(
   // titles and operas. The result lands in the committed cache, so each
   // overview is translated once.
   let translated = 0;
+  let deeplEnFailed = false;
   if (opts.deepl) {
     const needsTranslation: Array<{ entry: TmdbCacheEntry; text: string }> = [];
     for (const entry of Object.values(opts.cache)) {
@@ -465,12 +484,35 @@ export async function enrichFilmPosters(
         translated++;
       } catch (e) {
         log(`tmdb: deepl failed — ${e instanceof Error ? e.message : String(e)}`);
+        deeplEnFailed = true;
         break;
       }
     }
     if (needsTranslation.length > 0) {
       log(`tmdb: deepl filled overview_en for ${translated}/${needsTranslation.length} entries`);
     }
+  }
+
+  // Pass 2b-es: last-resort DeepL DE→ES, only where TMDb answered with no
+  // Spanish overview ("") but a German one exists. Runs after the EN pass and
+  // is hard-capped, so the shared proxy's ~80-100 requests/run stay available
+  // to EN/FR and the museum translations; a failed EN pass skips it entirely.
+  if (opts.deepl && !deeplEnFailed) {
+    let translatedEs = 0;
+    let pendingEs = 0;
+    for (const entry of Object.values(opts.cache)) {
+      if (!entry?.overview || entry.overview_es !== "") continue;
+      pendingEs++;
+      if (translatedEs >= DEEPL_ES_BUDGET) continue;
+      try {
+        entry.overview_es = await translateText(opts.deepl, entry.overview, "ES");
+        translatedEs++;
+      } catch (e) {
+        log(`tmdb: deepl (es) failed — ${e instanceof Error ? e.message : String(e)}`);
+        break;
+      }
+    }
+    if (pendingEs > 0) log(`tmdb: deepl filled overview_es for ${translatedEs}/${pendingEs} entries`);
   }
 
   // Pass 2c: OMDb pivot for the ratings TMDb doesn't carry — Rotten
@@ -546,6 +588,7 @@ export async function enrichFilmPosters(
     if (entry.poster && !ev.image_url) ev.image_url = `${POSTER_BASE}${entry.poster}`;
     if (entry.overview) ev.description = entry.overview;
     if (entry.overview_en) ev.description_en = entry.overview_en;
+    if (entry.overview_es) ev.description_es = entry.overview_es;
     if (entry.title) ev.title_de = entry.title;
     if (entry.title_en) ev.title_en = entry.title_en;
     if (entry.genre_ids?.length) ev.tmdb_genre_ids = entry.genre_ids;

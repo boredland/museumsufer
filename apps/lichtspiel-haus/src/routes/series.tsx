@@ -50,7 +50,11 @@ app.get("/reihe/:slug", (c) => {
     location: {
       "@type": "Place",
       name: cinemaNames.join(", "),
-      address: { "@type": "PostalAddress", addressLocality: cityName(city, locale, "full"), addressCountry: "DE" },
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: cityName(city, locale, "full"),
+        addressCountry: cityMeta(city).country,
+      },
     },
     subEvent: screenings.slice(0, 20).map((s) => ({
       "@type": "ScreeningEvent",

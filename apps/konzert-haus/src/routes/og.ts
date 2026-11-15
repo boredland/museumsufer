@@ -1,6 +1,7 @@
-import { buildOgSvg, cityMeta, fitOgTitleSize } from "@museumsufer/core";
+import { buildOgSvg, cityMeta, dateLocale, fitOgTitleSize } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getEventById } from "../db";
+import { cityContentLocale } from "../i18n";
 import type { Env } from "../types";
 
 const PALETTE = { paper: "#F7F0E7", ink: "#1A1210", accent: "#9E7A38" };
@@ -39,7 +40,7 @@ function buildSvg(title: string, venueName: string, date: string, time: string |
       { text: title, y: 300 + titleSize / 4, font: "display", size: titleSize, weight: 500, tracking: -1 },
       { text: venueName, y: 450, font: "display", size: 30, italic: true, opacity: 0.62 },
       {
-        text: formatDate(date, time),
+        text: formatDate(date, time, city),
         y: 540,
         font: "mono",
         size: 22,
@@ -50,9 +51,11 @@ function buildSvg(title: string, venueName: string, date: string, time: string |
   });
 }
 
-function formatDate(date: string, time: string | null): string {
+function formatDate(date: string, time: string | null, city: string): string {
   const d = new Date(`${date}T12:00:00Z`);
-  const label = d.toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  // The OG card carries no UI locale, so follow the venue country's language.
+  const tag = dateLocale(cityContentLocale(city));
+  const label = d.toLocaleDateString(tag, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   return time ? `${label} · ${time}` : label;
 }
 

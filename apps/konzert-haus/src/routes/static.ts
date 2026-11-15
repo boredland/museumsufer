@@ -11,6 +11,7 @@ import {
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { VENUES } from "../concert-config";
+import { cityContentLocale } from "../i18n";
 import { type Env, GENRES } from "../types";
 
 const APP_URL = "https://frankfurt.konzert.haus";
@@ -22,21 +23,28 @@ function appUrlFor(city: string): string {
   return cityUrl(APEX, city);
 }
 
-const MANIFEST_BASE_DESCRIPTION =
-  "Konzerte in Frankfurt und Umgebung — Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik, Neue Musik.";
+const MANIFEST_BASE_DESCRIPTION = {
+  de: "Konzerte in Frankfurt und Umgebung — Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik, Neue Musik.",
+  es: "Conciertos en Fráncfort del Meno y alrededores — música clásica, jazz, de cámara, sacra, del mundo y contemporánea.",
+} as const;
 
 const manifestCache = new Map<string, string>();
 function manifestFor(city: string): string {
   const cached = manifestCache.get(city);
   if (cached) return cached;
+  const contentLocale = cityContentLocale(city);
   const manifest = buildManifest({
     name: "konzert.haus",
     shortName: "konzert.haus",
-    // Manifest is German-only (lang: "de"); localize the city name accordingly.
-    description: localizeCityText(MANIFEST_BASE_DESCRIPTION, city, "de"),
+    // Manifest carries one language per city (country-driven), not per request.
+    description: localizeCityText(
+      contentLocale === "es" ? MANIFEST_BASE_DESCRIPTION.es : MANIFEST_BASE_DESCRIPTION.de,
+      city,
+      contentLocale,
+    ),
     themeColor: "#F7F0E7",
     backgroundColor: "#F7F0E7",
-    lang: "de",
+    lang: contentLocale,
     icons: [
       { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
@@ -54,10 +62,14 @@ const llmsCache = new Map<string, string>();
 function llmsFor(city: string): string {
   const cached = llmsCache.get(city);
   if (cached) return cached;
+  const contentLocale = cityContentLocale(city);
+  const timeZone = contentLocale === "es" ? "Europe/Madrid" : "Europe/Berlin";
   const intro = localizeCityText(
-    `Konzerte in Frankfurt und Umgebung — aggregierte Termine aus ${VENUES.length} Spielorten. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik. Kein Pop, kein Rock.`,
+    contentLocale === "es"
+      ? `Conciertos en Fráncfort del Meno y alrededores — fechas agregadas de ${VENUES.length} salas. Clásica, jazz, música de cámara, música sacra, músicas del mundo y contemporánea. Sin pop ni rock.`
+      : `Konzerte in Frankfurt und Umgebung — aggregierte Termine aus ${VENUES.length} Spielorten. Klassik, Jazz, Kammermusik, Kirchenmusik, Weltmusik und Neue Musik. Kein Pop, kein Rock.`,
     city,
-    "de",
+    contentLocale,
   );
   const txt = `# konzert.haus
 
@@ -73,7 +85,7 @@ Base URL: ${appUrlFor(city)}
 ### Events
 
 GET /api/day?date=YYYY-MM-DD&venue={slug}&genre={genre}&city={city}
-Returns { date, count, events } for one day. Date defaults to today (Europe/Berlin).
+Returns { date, count, events } for one day. Date defaults to today (${timeZone}).
 
 GET /api/events?date=YYYY-MM-DD&from=YYYY-MM-DD&to=YYYY-MM-DD&venue={slug}&genre={genre}&city={city}
 Returns events with title, subtitle, performers, date, time, venue, venue_room, genre, price, ticket_url.
@@ -94,7 +106,7 @@ GET /genre/{slug}/feed.ics — single genre
 
 ## Notes
 
-- Content is in German. Dates: ISO 8601 (YYYY-MM-DD); times: HH:MM Europe/Berlin.
+- Content is in ${contentLocale === "es" ? "Spanish" : "German"}. Dates: ISO 8601 (YYYY-MM-DD); times: HH:MM ${timeZone}.
 - Genres: classical, jazz, sacred, world, experimental, chamber.
 - Data refreshes hourly via a GitHub Action.
 `;

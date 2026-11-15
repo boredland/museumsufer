@@ -7,8 +7,8 @@ import {
   localizeCityText,
 } from "@museumsufer/core";
 
-export type Locale = Extract<CoreLocale, "de" | "en">;
-export const SUPPORTED_LOCALES: Locale[] = ["de", "en"];
+export type Locale = Extract<CoreLocale, "de" | "en" | "es">;
+export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "es"];
 export const DEFAULT_LOCALE: Locale = "de";
 
 export function detectLocale(request: Request): Locale {
@@ -491,7 +491,171 @@ const en: Translations = {
   synopsisAttribution: "Synopsis: TMDb.",
 };
 
-const TRANSLATIONS: Record<Locale, Translations> = { de, en };
+const es: Translations = {
+  tagline: "Lo que se proyecta hoy en las pantallas de Fráncfort.",
+  dateStripLabel: "Días de proyección",
+  todayProgrammeTitle: "Sesiones de hoy",
+  emptyTitle: "Hoy no hay sesiones anunciadas.",
+  emptyTodayAfterPast: "Hoy ya no quedan más sesiones.",
+  emptyHint: "Vuelva a consultar mañana o cambie la fecha de arriba.",
+  pastNote: (n) => `${n} sesión${n === 1 ? "" : "es"} de hoy ya ha${n === 1 ? "" : "n"} empezado — oculta${n === 1 ? "" : "s"}.`,
+  creditsLabel: "Con",
+  moreLabel: "Más",
+  empty: "Vuelva a consultar mañana o cambie la fecha de arriba.",
+  ticketsAction: "Entradas",
+  freeEntry: "Entrada gratuita",
+  toCalendar: "Añadir al calendario",
+  reportScreening: "Avisar de un error en esta sesión",
+  themeToggle: "Cambiar la luz",
+  weekOverview: "Resumen semanal",
+  reportProblem: "Avisar de un problema",
+  imprint: "Aviso legal",
+  formatLabel: "Formato",
+  versionLabel: "Versión",
+  seriesKicker: "Ciclo",
+  seriesAll: "Todos los ciclos",
+  soldOut: "Agotado",
+  fewLeft: "Quedan pocas entradas",
+  digestKicker: "Resumen por notificación",
+  digestCueText: "Por la mañana, las películas que se proyectan hoy.",
+  digestTitle: "Suscribirse a las sesiones",
+  digestIntro:
+    "Notificaciones push directas al dispositivo, sin correo ni cuenta. Se pueden cancelar en cualquier momento.",
+  digestIosHint:
+    "<strong>iPhone:</strong> pulsar «Compartir» y «Añadir a pantalla de inicio». Después hay que abrir la web desde el icono: solo así funcionan las notificaciones push.",
+  digestUnsupported:
+    "El navegador no admite notificaciones push. Pruebe con Safari (macOS), Chrome, Firefox o Edge.",
+  digestUnsubAll: "Cancelar todas",
+  digestSave: "Guardar",
+  digestUnsubscribeBtn: "Cancelar suscripción",
+  digestPermissionDenied: "Las notificaciones están bloqueadas. Permítalas en los ajustes del navegador.",
+  digestSubscribe: "Suscribirse",
+  digestSchedules: "Horarios del resumen",
+  digestMorning: "Cada mañana",
+  digestAfternoon: "Cada tarde",
+  digestSunday: "Resumen del domingo",
+  digestMorningSub: "Las películas de hoy.",
+  digestAfternoonSub: "Lo que aún se proyecta esta noche.",
+  digestSundaySub: "Resumen de la semana que empieza.",
+  digestFilterLabel: "Limitar a determinados cines",
+  digestFilterHint: "vacío = todos",
+  digestSaving: "Guardando…",
+  digestSaved: "Guardado.",
+  digestUnsubscribing: "Cancelando suscripción…",
+  digestUnsubscribed: "Suscripción cancelada.",
+  digestError: "No se pudo guardar.",
+  digestClose: "Cerrar",
+  contactTitle: "Comentarios y correcciones",
+  contactBody: "¿Hora incorrecta, sesión que falta, errata? Cualquier aviso es bienvenido.",
+  contactCategoryLabel: "Categoría",
+  contactEmailPlaceholder: "su@correo.es",
+  contactIntro: "¿Qué falla?",
+  contactCategoryGeneral: "General — comentarios / funciones",
+  contactCategoryScreening: "Sesión — datos incorrectos",
+  contactCategoryCinema: "Cine — falta o corrección",
+  contactCategoryBrowser: "Navegador",
+  contactRegarding: "Asunto",
+  contactMessage: "Mensaje",
+  contactEmail: "Correo electrónico (opcional, para responderle)",
+  contactSend: "Enviar",
+  contactSending: "Enviando…",
+  contactSent: "Gracias: lo revisaremos.",
+  contactErr: "No se pudo enviar.",
+  homeTitle: "frankfurt.lichtspiel.haus — Cartelera de cine de hoy en Fráncfort del Meno",
+  homeDescription:
+    "Cine de autor, cine de repertorio, ciclos y festivales: cartelera diaria actualizada de Fráncfort y la región Rin-Meno.",
+  endTimePrefix: "hasta las",
+  cinemaKicker: "Sala",
+  emptyCinema: "Todavía no hay programación anunciada.",
+  emptySeries: (series) => `Ahora mismo no hay sesiones anunciadas del ciclo «${series}».`,
+  icalSubscribe: "Suscribirse por iCal",
+  jsonLink: "JSON",
+  websiteLink: "Web",
+  cinemaDescription: (cinema, count) =>
+    `Sesiones en ${cinema}. ${count} ${count === 1 ? "pase" : "pases"} en los próximos 60 días.`,
+  seriesDescription: (series, count) =>
+    `Ciclo de cine «${series}» — ${count} ${count === 1 ? "sesión" : "sesiones"} en los próximos 60 días.`,
+  seriesLead: ({ name, count, firstDate, lastDate, cinemas }) => {
+    const fmt = (d: string) => {
+      const dt = new Date(`${d}T12:00:00Z`);
+      return dt.toLocaleDateString("es-ES", { day: "numeric", month: "long", timeZone: "UTC" });
+    };
+    const at =
+      cinemas.length === 1
+        ? `en ${cinemas[0]}`
+        : `en ${cinemas.slice(0, -1).join(", ")} y ${cinemas[cinemas.length - 1]}`;
+    return `El ciclo «${name}» se proyecta del ${fmt(firstDate)} al ${fmt(lastDate)} ${at}, con ${count} ${count === 1 ? "sesión" : "sesiones"}.`;
+  },
+  cinemasIndexKicker: "Directorio",
+  cinemasIndexTitle: "Cines en Fráncfort y alrededores",
+  cinemasIndexLead:
+    "Cine de autor, de repertorio y de barrio: todas las salas de la región Rin-Meno con su programación de próximas sesiones.",
+  backToCinemasIndex: "Volver al directorio de cines",
+  upcomingShows: (count) => `${count} ${count === 1 ? "pase" : "pases"} en 14 días`,
+  filmKicker: "Sesión",
+  searchLabel: "Buscar",
+  searchPlaceholder: "Buscar películas, directores, cines …",
+  searchEmpty: "Sin resultados",
+  markSeen: "Marcar como vista",
+  unmarkSeen: "Quitar marca",
+  seenHiddenLead: (n) => `${n} película${n === 1 ? " ya vista oculta" : "s ya vistas ocultas"}`,
+  seenReveal: "Mostrar",
+  seenHide: "Volver a ocultar",
+  backToProgramme: "Volver a la cartelera",
+  backToSeriesIndex: "Todos los ciclos de cine",
+  langSwitchAria: "Idioma",
+  siblingTemplate: "¿Nada que encaje? Quizá {first}, {second} o {third}.",
+  siblingTheaterLabel: "una obra de teatro",
+  siblingMuseumLabel: "una visita a un museo",
+  siblingKonzertLabel: "un concierto",
+  askAiPromptFilm: (title, cinema, date) =>
+    `Quiero saber más sobre «${title}», que se proyecta en ${cinema} el ${date}. ¿De qué trata la película, cómo fue recibida y qué conviene saber antes de ir al cine? Fuente: https://frankfurt.lichtspiel.haus`,
+  askAiPromptCinema: (cinema) =>
+    `¿Qué se proyecta en ${cinema}, en Fráncfort, durante las próximas semanas? Se agradece una respuesta agrupada por ciclos o sesiones especiales. Fuente: https://frankfurt.lichtspiel.haus`,
+  askAiLabel: "Preguntar a una IA",
+  askAiPrompt: (date) =>
+    `¿Qué películas se proyectan el ${date} en Fráncfort y alrededores? Fuente: https://frankfurt.lichtspiel.haus`,
+  askAiAria: "Preguntar a una IA por la cartelera de cine de hoy",
+  faqKicker: "Preguntas frecuentes",
+  faqItems: [
+    {
+      q: "¿Qué cines aparecen aquí?",
+      a: "Actualmente, {n} salas y ciclos de cine en Fráncfort y alrededores: {venues}.",
+    },
+    {
+      q: "¿Cómo de actual es la cartelera?",
+      a: "Los datos se obtienen varias veces al día directamente de las webs de los cines. Las cancelaciones, los avisos de entradas agotadas y los cambios de programación suelen reflejarse en menos de una hora.",
+    },
+    {
+      q: "¿Se pueden comprar entradas aquí?",
+      a: "No: el botón de entradas de cada sesión lleva directamente a la página de reservas del propio cine. Esta web no vende entradas ni cobra comisión.",
+    },
+    {
+      q: "¿Qué significan OmU, OmeU, DF, OV, DCP, 35mm?",
+      a: "Versión lingüística: OmU = versión original con subtítulos en alemán, OmeU = versión original con subtítulos en inglés, DF = versión doblada al alemán, OV = versión original sin subtítulos, stumm = cine mudo (a menudo con acompañamiento en directo). Formato de proyección: DCP = Digital Cinema Package, el estándar digital de las salas actuales; 35mm / 16mm / 70mm = copias analógicas en película física.",
+    },
+    {
+      q: "¿Qué pasa con las sesiones que ya han empezado?",
+      a: "En la vista de hoy, las sesiones se ocultan 30 minutos después de su inicio, de modo que solo quedan horas a las que aún se puede llegar. Una nota breve bajo la lista indica cuántas han empezado ya.",
+    },
+    {
+      q: "¿Por qué esta web?",
+      a: "Fráncfort tiene una densidad de cines poco común —el DFF Filmmuseum, el Astor, tres salas de cine de autor, la Pupille en el Westend, el Programmkino Rex en Darmstadt, el Murnau en Wiesbaden—, pero ninguna cartelera conjunta. Esta web reúne todas las salas en una única vista diaria con buscador.",
+    },
+    {
+      q: "¿Cómo funcionan las notificaciones push?",
+      a: "Mediante el botón «Resumen por notificación» o el enlace del pie de página. Hay tres franjas: por la mañana (07:00), por la tarde (17:00) y un resumen semanal el domingo (09:00). Opcionalmente se pueden limitar a determinados cines. Es anónimo y se puede cancelar en cualquier momento. En iOS, la web debe añadirse antes a la pantalla de inicio como aplicación web.",
+    },
+  ],
+  tmdbAttributionLead: "Carteles y sinopsis vía ",
+  tmdbAttributionTail: ". Este producto utiliza la API de TMDB, pero no está respaldado ni certificado por TMDB.",
+  omdbAttributionLead: "Valoraciones (Rotten Tomatoes, IMDb) vía ",
+  omdbAttributionTail: ".",
+  synopsisFallbackNotice: "Sinopsis en alemán — no hay traducción al español disponible.",
+  synopsisAttribution: "Sinopsis: TMDb.",
+};
+
+const TRANSLATIONS: Record<Locale, Translations> = { de, en, es };
 
 export function getTranslations(locale: Locale): Translations {
   return TRANSLATIONS[locale];
@@ -504,6 +668,10 @@ const APEX = "lichtspiel.haus";
 const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
   de: [["Rhein-Main-Region", "Metropolregion"]],
   en: [["Rhine-Main region", "metropolitan region"]],
+  es: [
+    ["de la región Rin-Meno", "del área metropolitana"],
+    ["y la región Rin-Meno", "y su área metropolitana"],
+  ],
 };
 
 /**
@@ -515,12 +683,40 @@ const WHY_FAQ_ANSWER: Record<string, Record<Locale, string>> = {
   hamburg: {
     de: "Hamburg hat eine lebendige Programmkino-Szene — das Abaton, das kommunale Metropolis, das 3001, die Zeise-Kinos, das Studio-Kino und das Savoy — aber kein gemeinsames Programmheft. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht.",
     en: "Hamburg has a lively repertory-cinema scene — the Abaton, the municipal Metropolis, the 3001, the Zeise cinemas, the Studio-Kino and the Savoy — but no shared programme. This site lays every house onto one searchable day view.",
+    es: "Hamburgo tiene una animada escena de cine de autor y de repertorio —el Abaton, el Metropolis municipal, el 3001, los cines Zeise, el Studio-Kino y el Savoy—, pero ninguna cartelera conjunta. Esta web reúne todas las salas en una única vista diaria con buscador.",
+  },
+  valencia: {
+    de: "Valencia hat eine lebendige Kinoszene — die Filmoteca de València, die Cines Babel, die Cines Lys, das Cinestudio d'Or, die ABC-Kinos (Park, El Saler, Gran Túria), die Cines MN4 und das Ocine Aqua — aber kein gemeinsames Programmheft. Diese Seite legt alle Häuser auf eine durchsuchbare Tagesansicht.",
+    en: "Valencia has a lively cinema scene — the Filmoteca de València, the Cines Babel, the Cines Lys, the Cinestudio d'Or, the ABC cinemas (Park, El Saler, Gran Túria), the Cines MN4 and the Ocine Aqua — but no shared programme. This site lays every house onto one searchable day view.",
+    es: "Valencia tiene una escena cinematográfica muy viva —la Filmoteca de València, los Cines Babel, los Cines Lys, el Cinestudio d'Or, los cines ABC (Park, El Saler, Gran Turia), los Cines MN4 y el Ocine Aqua—, pero ninguna cartelera conjunta. Esta web reúne todas las salas en una única vista diaria con buscador.",
+  },
+};
+
+/**
+ * City-specific answer to the "what do OmU, OmeU, DF… mean" FAQ. The base copy
+ * explains German subtitle labels, which Spanish cinemas never print; they use
+ * VOSE / VO / doblada.
+ */
+const LANGUAGE_FAQ_ANSWER: Record<string, Record<Locale, { q: string; a: string }>> = {
+  valencia: {
+    de: {
+      q: "Was bedeuten VOSE, VO, doblada, ATMOS, DCP, 35mm?",
+      a: "Sprachfassung in Valencia: VOSE = Originalfassung mit spanischen Untertiteln, VO = Originalfassung ohne Untertitel, doblada / castellano = ins Spanische synchronisiert. Vorführformat: ATMOS = Dolby-Atmos-Ton, DCP = digitales Kinopaket, der heutige Standard; 35mm / 16mm / 70mm = analoge Filmkopie.",
+    },
+    en: {
+      q: "What do VOSE, VO, doblada, ATMOS, DCP, 35mm mean?",
+      a: "Language version in Valencia: VOSE = original audio with Spanish subtitles, VO = original version with no subtitles, doblada / castellano = dubbed into Spanish. Projection format: ATMOS = Dolby Atmos sound, DCP = Digital Cinema Package, today's digital standard; 35mm / 16mm / 70mm = analogue film prints.",
+    },
+    es: {
+      q: "¿Qué significan VOSE, VO, doblada, ATMOS, DCP, 35mm?",
+      a: "Versión lingüística: VOSE = versión original subtitulada en español, VO = versión original sin subtítulos, doblada / castellano = doblada al español. Formato de proyección: ATMOS = sonido Dolby Atmos, DCP = Digital Cinema Package, el estándar digital actual; 35mm / 16mm / 70mm = copias analógicas en película.",
+    },
   },
 };
 
 /** Whether a FAQ item is the "Why this site?" entry (Frankfurt-venue copy). */
 function isWhyFaq(q: string): boolean {
-  return q === "Warum diese Seite?" || q === "Why this site?";
+  return q === "Warum diese Seite?" || q === "Why this site?" || q === "¿Por qué esta web?";
 }
 
 /**
@@ -532,6 +728,7 @@ export function localizeTranslations(tr: Translations, city: string, locale: Loc
   if (cityMeta(city).slug === DEFAULT_CITY) return tr;
   const s = (t: string): string => localizeCityText(t, city, locale, APEX, REGION_SUB[locale]);
   const whyAnswer = WHY_FAQ_ANSWER[cityMeta(city).slug]?.[locale];
+  const languageAnswer = LANGUAGE_FAQ_ANSWER[cityMeta(city).slug]?.[locale];
   return {
     ...tr,
     tagline: s(tr.tagline),
@@ -542,11 +739,17 @@ export function localizeTranslations(tr: Translations, city: string, locale: Loc
     askAiPrompt: (date) => s(tr.askAiPrompt(date)),
     askAiPromptFilm: (title, cinema, date) => s(tr.askAiPromptFilm(title, cinema, date)),
     askAiPromptCinema: (cinema) => s(tr.askAiPromptCinema(cinema)),
-    faqItems: tr.faqItems.map((item) => ({
-      q: s(item.q),
-      // The "why this site" answer names individual cinemas; use the
-      // city-specific copy when available rather than name-substituting.
-      a: isWhyFaq(item.q) && whyAnswer ? whyAnswer : s(item.a),
-    })),
+    faqItems: tr.faqItems.map((item) => {
+      const isLanguageFaq =
+        item.q.startsWith("Was bedeuten OmU") ||
+        item.q.startsWith("What do OmU") ||
+        item.q.startsWith("¿Qué significan OmU");
+      // The "why this site" and language-glossary answers name Frankfurt
+      // cinemas / German labels; use the city-specific copy when available
+      // rather than name-substituting.
+      if (isLanguageFaq && languageAnswer) return languageAnswer;
+      const a = isWhyFaq(item.q) && whyAnswer ? whyAnswer : s(item.a);
+      return { q: s(item.q), a };
+    }),
   };
 }

@@ -37,7 +37,8 @@ function parseFilters(json: string | null): KhFilters | null {
 
 /**
  * Pick the schedule a cron tick is for, or null if it's a duplicate firing
- * that doesn't match the local hour in Europe/Berlin (covers CET/CEST).
+ * that doesn't match the local hour in Europe/Berlin (covers CET/CEST). Valencia
+ * (Europe/Madrid) shares Berlin's UTC offset year-round, so one hour check serves every city.
  */
 export function scheduleForNow(now: Date): Schedule | null {
   const h = berlinHour(now);

@@ -56,6 +56,9 @@ export interface CanonicalEvent {
    *  rendering pick this for en visitors and fall back to `description`
    *  (the German overview) otherwise. */
   description_en?: string;
+  /** Spanish synopsis, DeepL-translated from the German overview. Absent
+   *  without a DeepL key; apps fall back to `description` with a notice. */
+  description_es?: string;
   /** TMDb genre ids — fixed namespace shared across movies and TV. Front-
    *  ends own the id-to-localised-name mapping so the canonical record
    *  stays small (~3 ints per event vs ~30 chars). */

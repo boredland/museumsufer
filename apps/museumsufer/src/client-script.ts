@@ -14,7 +14,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
       type: "object",
       properties: {
         date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
-        lang: { type: "string", enum: ["de", "en", "fr"], description: "Language. Defaults to de." },
+        lang: { type: "string", enum: ["de", "en", "fr", "es"], description: "Language. Defaults to de." },
       },
     },
     executeBody: `var params = new URLSearchParams();
@@ -30,7 +30,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
       type: "object",
       properties: {
         date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
-        lang: { type: "string", enum: ["de", "en", "fr"], description: "Language. Defaults to de." },
+        lang: { type: "string", enum: ["de", "en", "fr", "es"], description: "Language. Defaults to de." },
       },
     },
     executeBody: `var params = new URLSearchParams();
@@ -51,7 +51,7 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
       type: "object",
       properties: {
         date: { type: "string", description: "ISO date (YYYY-MM-DD). Defaults to today." },
-        lang: { type: "string", enum: ["de", "en", "fr"], description: "Language. Defaults to de." },
+        lang: { type: "string", enum: ["de", "en", "fr", "es"], description: "Language. Defaults to de." },
       },
     },
     executeBody: `var params = new URLSearchParams();

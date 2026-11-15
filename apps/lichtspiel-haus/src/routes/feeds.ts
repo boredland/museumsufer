@@ -141,12 +141,17 @@ function buildRss(
   appUrl: string,
   host: string,
 ): string {
+  // Feeds carry no ?lang negotiation; the city's own language is the default.
+  const lang = cityMeta(city).country === "ES" ? "es" : "de";
   const tr = localizeTranslations(
     {
-      homeDescription: "Kinoprogramm in Frankfurt und Umgebung — die nächsten 14 Tage",
+      homeDescription:
+        lang === "es"
+          ? "Cartelera de cine en Fráncfort y alrededores — los próximos 14 días"
+          : "Kinoprogramm in Frankfurt und Umgebung — die nächsten 14 Tage",
     } as any,
     city,
-    "de",
+    lang,
   );
   const items: RssItem[] = screenings.map((s) => {
     const dateStr = s.time ? `${s.date}T${s.time}:00+02:00` : `${s.date}T00:00:00+02:00`;
@@ -159,7 +164,7 @@ function buildRss(
       parts.push(s.price_max && s.price_max !== s.price_min ? `${s.price_min}–${s.price_max} €` : `${s.price_min} €`);
     }
     return {
-      title: s.title + (s.time ? ` — ${s.time} Uhr` : ""),
+      title: s.title + (s.time ? (lang === "es" ? ` — ${s.time} h` : ` — ${s.time} Uhr`) : ""),
       link: utm(linkSource, "rss"),
       guid: `screening-${s.id}@${host}`,
       pubDate: new Date(dateStr),
@@ -172,7 +177,7 @@ function buildRss(
     link: appUrl,
     selfLink: `${appUrl}/feed.rss`,
     description: tr.homeDescription,
-    language: "de",
+    language: lang,
     items,
   });
 }

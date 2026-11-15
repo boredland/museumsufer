@@ -1,4 +1,5 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { citiesIn } from "@museumsufer/core/cities";
 import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { hostKeyedCache } from "@museumsufer/core/host-cache";
 import { type Context, Hono } from "hono";
@@ -56,7 +57,8 @@ app.use(
 );
 
 // Apex (lehr.salon) → nearest city's subdomain (geo); `<city>.lehr.salon` sets c.var.city.
-app.use("*", cityMiddleware({ apex: "lehr.salon", apexBehavior: "geo" }));
+// German cities only: this vertical has no Valencia domain.
+app.use("*", cityMiddleware({ apex: "lehr.salon", apexBehavior: "geo", cities: citiesIn("DE") }));
 
 app.use("*", async (c, next) => {
   await next();

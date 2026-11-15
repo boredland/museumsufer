@@ -115,15 +115,15 @@ function renderHome(c: Context<AppEnv>, date: string) {
     ? getScreeningsInRange(date, endOfRange(date, range), { city, cinema, series })
     : getScreeningsForDate(date, { city, cinema, series });
   const dateStrip = getDatesWithScreenings(today, dateOffset(60), { city, cinema, series });
+  const locale = detectLocale(c.req.raw);
   if (wantsMarkdown(c.req.raw)) {
-    return c.body(renderDayMarkdown(date, screenings), {
+    return c.body(renderDayMarkdown(date, screenings, locale, city), {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=600, s-maxage=1800",
       },
     });
   }
-  const locale = detectLocale(c.req.raw);
   const tr = localizeTranslations(getTranslations(locale), city, locale);
   return c.html(
     renderPage({
@@ -200,6 +200,8 @@ export const HostCache = hostCache.HostCache;
 export default {
   fetch: hostCache.fetch,
   async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    // Hours are Berlin wall-clock for every city: Valencia shares Berlin's UTC
+    // offset and DST switch dates, so one check serves both.
     const schedule = scheduleForNow(new Date());
     if (!schedule) return;
     ctx.waitUntil(dispatchDigest(env, schedule));

@@ -32,6 +32,7 @@
     { "pattern": "wuppertal.ins.museum", "custom_domain": true },
     { "pattern": "solingen.ins.museum", "custom_domain": true },
     { "pattern": "remscheid.ins.museum", "custom_domain": true },
+    { "pattern": "valencia.ins.museum", "custom_domain": true },
     { "pattern": "ins.museum", "custom_domain": true }
   ],
   // Scraping moved to .github/workflows/scrape.yml (museums job) — the

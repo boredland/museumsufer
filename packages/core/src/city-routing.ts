@@ -18,6 +18,12 @@ export interface CityMiddlewareOptions {
    *    geolocation (cf.latitude/longitude, then cf.city), defaulting otherwise.
    */
   readonly apexBehavior?: "redirect" | "geo";
+  /**
+   * Cities this vertical has a custom domain for. Restricts the geo redirect
+   * so far-away visitors never land on a host that does not exist. Defaults
+   * to every city.
+   */
+  readonly cities?: readonly CitySlug[];
 }
 
 type CityVars = { Variables: { city: string } };
@@ -54,7 +60,7 @@ export function cityMiddleware(opts: CityMiddlewareOptions): MiddlewareHandler<C
     if (host === apex) {
       const url = new URL(c.req.url);
       const geo = apexBehavior === "geo";
-      const target = geo ? geoCity(c, defaultCity) : defaultCity;
+      const target = geo ? geoCity(c, defaultCity, opts.cities) : defaultCity;
       return c.redirect(`https://${target}.${apex}${url.pathname}${url.search}`, geo ? 302 : 301);
     }
 
@@ -66,11 +72,11 @@ export function cityMiddleware(opts: CityMiddlewareOptions): MiddlewareHandler<C
 }
 
 /** Nearest city from Cloudflare edge geolocation, defaulting when absent. */
-function geoCity(c: { req: { raw: Request } }, fallback: CitySlug): CitySlug {
+function geoCity(c: { req: { raw: Request } }, fallback: CitySlug, cities?: readonly CitySlug[]): CitySlug {
   const cf = (c.req.raw as unknown as { cf?: Record<string, unknown> }).cf;
   if (cf?.latitude && cf?.longitude) {
-    return nearestCity(Number(cf.latitude), Number(cf.longitude));
+    return nearestCity(Number(cf.latitude), Number(cf.longitude), cities);
   }
   const cfCity = typeof cf?.city === "string" ? cf.city.toLowerCase() : "";
-  return cfCity in CITIES ? (cfCity as CitySlug) : fallback;
+  return cfCity in CITIES && (!cities || cities.includes(cfCity as CitySlug)) ? (cfCity as CitySlug) : fallback;
 }

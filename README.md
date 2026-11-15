@@ -6,7 +6,7 @@ Five of the six are multi-city culture verticals (museums, theater, concerts, le
 
 ## Cities
 
-Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt**, **Hamburg**, **Darmstadt**, **Heidelberg**, **Mainz**, **Wiesbaden**, **Saarbrücken**, **Wuppertal**, **Solingen** and **Remscheid**.
+Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) — currently **Frankfurt**, **Hamburg**, **Darmstadt**, **Heidelberg**, **Mainz**, **Wiesbaden**, **Saarbrücken**, **Wuppertal**, **Solingen**, **Remscheid** and **Valencia** (Spain).
 
 - **Hosts** — each city is served at `<city>.<apex>` (e.g. `frankfurt.konzert.haus` / `hamburg.konzert.haus`). The bare apex (`konzert.haus`) 302-redirects to the nearest city by Cloudflare edge geolocation (`cityMiddleware({ apexBehavior: "geo" })` in `packages/core/src/city-routing.ts`). `museumsufer.app` is an SEO-primary alias host pinned to Frankfurt (resolved without a redirect).
 - **Switcher** — the masthead `CitySwitch` (`packages/core/src/cityswitch.tsx`) lists only the cities a vertical actually has data for (`supportedCities`, derived per bundle), and degrades to a plain locality label when a vertical covers a single city.
@@ -14,13 +14,15 @@ Cities live in one source of truth — `packages/core/src/cities.ts` (`CITIES`) 
 
 Hamburg coverage is rolling out vertical by vertical — live in museums, theater and lectures; concerts and cinema are wired for both cities and fill in as programming lands. The **Darmstadt + Heidelberg** cluster (upper-Rhine / Bergstraße) is wired across all five verticals — theaters, concerts, lectures, cinema and museums — via declarative-city routing plus reused ticketing adapters (Reservix, ztix, Kinoheld, Kinopolis, Bilettix/Eventim webshops) and bespoke venue/museum scrapers.
 
+**Valencia** is the first non-German city: cinema (`valencia.lichtspiel.haus`), museums (`valencia.ins.museum`) and concerts (`valencia.konzert.haus`) only; theater and lectures have no Valencia domain, so their derive steps and apex geo-redirect (`cityMiddleware({ cities })`) exclude it. The three Valencia verticals add a Spanish UI locale (`es`, selectable on every city). Spanish-source venue text is translated ES→DE/EN/FR in the museum derive step; the TMDb overview comes from TMDb `es-ES` with a capped DeepL fallback. Spanish venues publish no German-style labels, so every Valencia scraper sets its own `scraper-hardcoded` labels instead of relying on the German-only classifier. Event times stay Europe/Berlin wall-clock logic: Madrid shares Berlin's UTC offset and DST dates.
+
 **Roadmap.** Hamburg proved the machinery is city-agnostic — the city model, geo-routing, per-city custom domains and the masthead switcher carry any number of cities, so a new one is mostly data + scrapers, not architecture. A backlog of [`city-expansion`](https://github.com/boredland/museumsufer/labels/city-expansion) discovery tickets now maps **every German city over 150k** — Berlin, Munich, Cologne, the Rhine-Ruhr, Saxony, and the northern, central and south-western hubs — into per-vertical venue inventories (with proposed geofence + reuse notes) for staged, vertical-by-vertical rollout.
 
 ## Apps
 
 ### [`apps/museumsufer`](apps/museumsufer) → [museumsufer.app](https://museumsufer.app) · `<city>.ins.museum`
 
-Daily exhibitions and events for ~40 Frankfurt Museumsufer museums, now extending to Hamburg (Hamburger Kunsthalle, Museum für Kunst und Gewerbe, Deichtorhallen, SHMH houses, …). Aggregates from museumsufer.de + per-museum APIs (15+ deterministic parsers in `api-scrapers.ts`: Tribe Events, TYPO3 calendarize, schema.org Event microdata, WP REST + ACF, RSS, Kirby CMS, …). DeepL EN/FR translation runs in the same scrape pipeline; the cache rides in the bundle. Image proxy with edge caching, distance sorting via RMV, fuzzy search, PWA.
+Daily exhibitions and events for ~40 Frankfurt Museumsufer museums, now extending to Hamburg (Hamburger Kunsthalle, Museum für Kunst und Gewerbe, Deichtorhallen, SHMH houses, …) and Valencia (IVAM, MuVIM, Centre del Carme, …). Aggregates from museumsufer.de + per-museum APIs (15+ deterministic parsers in `api-scrapers.ts`: Tribe Events, TYPO3 calendarize, schema.org Event microdata, WP REST + ACF, RSS, Kirby CMS, …). DeepL translation (DE→EN/FR/ES, ES→DE/EN/FR for Valencia) runs in the same scrape pipeline; the cache rides in the bundle. Image proxy with edge caching, distance sorting via RMV, fuzzy search, PWA.
 
 - Scrape: hourly via the shared `scrape.yml` (museums derive; `museumsufer.de` is fetched directly and runs `continue-on-error`)
 - D1: `likes` + `push_subscriptions` (request-time user writes)

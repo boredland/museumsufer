@@ -6,7 +6,7 @@
  * Detection order: ?lang URL param → Accept-Language header → fallback.
  * The default locale is always `de` across the monorepo.
  */
-export const SUPPORTED_LOCALE_VALUES = ["de", "en", "fr"] as const;
+export const SUPPORTED_LOCALE_VALUES = ["de", "en", "fr", "es"] as const;
 
 /** Union of every locale any app supports. Per-app subsets narrow at parse time. */
 export type Locale = (typeof SUPPORTED_LOCALE_VALUES)[number];
@@ -15,6 +15,7 @@ const LOCALE_DATE_FORMATS: Record<Locale, string> = {
   de: "de-DE",
   en: "en-GB",
   fr: "fr-FR",
+  es: "es-ES",
 };
 
 export function dateLocale(locale: Locale): string {

@@ -35,6 +35,7 @@ const NAV_LABEL: Record<Locale, string> = {
   de: "Stadt wählen",
   en: "Choose city",
   fr: "Choisir la ville",
+  es: "Elegir ciudad",
 };
 
 /** Up to this many cities read cleanly inline; beyond it we collapse to a menu. */

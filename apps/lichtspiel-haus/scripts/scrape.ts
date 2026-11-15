@@ -57,6 +57,7 @@ async function main(): Promise<void> {
       subtitle: ev.subtitle,
       description: ev.description,
       description_en: ev.description_en,
+      description_es: ev.description_es,
       date: ev.date,
       time: ev.time,
       end_time: ev.end_time,
@@ -155,8 +156,13 @@ const VERSION_PATTERNS: Array<[RegExp, Version]> = [
   [/\bOmeU\b/, "OmeU"],
   [/\bOmU\b/, "OmU"],
   [/\bO\s*m\s*U\b/, "OmU"],
+  // Spanish listings: VOSE = original audio, Spanish subtitles. Matched before
+  // the bare OV/VO rules so "VOSE" never degrades to "VO".
+  [/\bV\.?O\.?S\.?E\b/i, "VOSE"],
   [/\b(DF|Dt\.\s*Fassung|deutsche\s*Fassung)\b/i, "DF"],
   [/\bOV\b/, "OV"],
+  // Bare "VO" in Spanish listings = original version without subtitles.
+  [/(?:^|\s|·)VO(?:\s|·|$)/, "OV"],
 ];
 
 function pickVersion(ev: CanonicalEvent): Version | undefined {

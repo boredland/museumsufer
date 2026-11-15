@@ -26,11 +26,15 @@ integration redeploys. Every read path filters the in-memory bundle.
 - **Museum directory** — a frozen snapshot in `src/frozen-museum-meta.ts`
   (captured from the live bundle, ~2026-05-25) plus manual additions in
   `src/museum-config.ts`. **museumsufer.de is no longer scraped.**
-- **Translation** — DE→EN/FR via the DeepL proxy runs in the derive step
+- **Translation** — DeepL via the proxy runs in the derive step
   (`scripts/translate.ts`, `translateTexts()`), after the bundle is built so
   only texts that reach it are translated; the cache rides in the committed
-  bundle. At request time the worker only *reads* the pre-computed
-  translations (`src/translate.ts`).
+  bundle. German museums' texts go DE→EN/FR/ES, Spanish ones (Valencia; source
+  language derived from the museum's city in `src/source-lang.ts`) go
+  ES→DE/EN/FR. The proxy quota is spent shortest-first across all targets, so
+  titles land before descriptions. A page in a text's own language shows the
+  original with no badge. At request time the worker only *reads* the
+  pre-computed translations (`src/translate.ts`).
 - **The actual museum scrapers** live in the monorepo's `packages/scrapers/`,
   not in this app — see "Museum API parsers" below.
 
@@ -136,7 +140,7 @@ wrangler d1 execute museumsufer-db --remote --file=./migrations/NNNN_name.sql
 
 ## Frontend features
 
-- i18n DE/EN/FR (Accept-Language + `?lang=` override), DeepL badge on translated text
+- i18n DE/EN/FR/ES (Accept-Language + `?lang=` override), DeepL badge on translated text
 - uFuzzy search (Ctrl/⌘-K + visible bar)
 - Distance sorting ("In der Nähe") via `POST /api/transit` (RMV `mgate.exe`) + haversine fallback
 - Per-event/exhibition `.ics`, subscribable `/feed.ics` + `/feed.xml`

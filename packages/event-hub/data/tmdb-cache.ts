@@ -7,6 +7,7 @@ export interface TmdbCacheEntry {
   title_en?: string;
   overview?: string;
   overview_en?: string;
+  overview_es?: string;
   kind?: "movie" | "tv";
   genre_ids?: number[];
   vote_average?: number;

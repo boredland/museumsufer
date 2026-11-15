@@ -35,6 +35,7 @@ app.get("/spielort/:slug", (c) => {
   const currentPath = `/spielort/${slug}`;
   const venueIri = `${appUrl}/spielort/${slug}#venue`;
   const address = parsePostalAddress(venue.address, {
+    country: cityMeta(city).country,
     fallback: { addressLocality: cityName(city, locale, "full") },
   });
   const sameAs: string[] = [];

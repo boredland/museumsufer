@@ -38,7 +38,7 @@ const dayQuery = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
-  lang: z.enum(["de", "en", "fr"]).optional(),
+  lang: z.enum(["de", "en", "fr", "es"]).optional(),
   sort: z.string().optional(),
   range: z.coerce.number().int().min(2).max(14).optional(),
 });
@@ -265,7 +265,7 @@ app.get("/api/events", async (c) => {
   const city = c.get("city") ?? "frankfurt";
   const events = proxyImages(await getEventsForDate(date, city));
   const translated = await translateFields(c.env, events, ["title", "description"] as (keyof Event)[], lang);
-  return c.json(markTranslated(events, translated, lang), {
+  return c.json(markTranslated(events, translated), {
     headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },
   });
 });
@@ -276,7 +276,7 @@ app.get("/api/exhibitions", async (c) => {
   const city = c.get("city") ?? "frankfurt";
   const exhibitions = proxyImages(await getExhibitionsForDate(date, city));
   const translated = await translateFields(c.env, exhibitions, ["title"] as (keyof Exhibition)[], lang);
-  return c.json(markTranslated(exhibitions, translated, lang), {
+  return c.json(markTranslated(exhibitions, translated), {
     headers: { "Cache-Control": "public, max-age=3600, s-maxage=21600, stale-while-revalidate=21600" },
   });
 });
@@ -305,8 +305,8 @@ app.get("/api/day", async (c) => {
   return c.json(
     {
       date,
-      exhibitions: markTranslated(exhibitions, trExh, lang),
-      events: markTranslated(events, trEv, lang),
+      exhibitions: markTranslated(exhibitions, trExh),
+      events: markTranslated(events, trEv),
     },
     {
       headers: { "Cache-Control": "public, max-age=1800, s-maxage=3600, stale-while-revalidate=3600" },

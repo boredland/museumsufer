@@ -83,7 +83,6 @@ export async function fetchDayData(
   ]);
   const exhibitions = proxyImages(rawExhibitions);
   const events = proxyImages(rawEvents);
-  if (locale === "de") return { date, exhibitions, events };
   const [trExh, trEv] = await Promise.all([
     translateFields(env, exhibitions, ["title"] as (keyof Exhibition)[], locale),
     translateFields(env, events, ["title", "description"] as (keyof Event)[], locale),
@@ -185,8 +184,7 @@ export function buildIcs(events: (Event & { museum_name: string })[], city = "fr
   });
 }
 
-export function markTranslated<T>(originals: T[], translated: T[], lang: string): T[] {
-  if (lang === "de") return originals;
+export function markTranslated<T>(originals: T[], translated: T[]): T[] {
   return translated.map((item, i) => {
     const orig = originals[i] as Record<string, unknown>;
     const cur = item as Record<string, unknown>;

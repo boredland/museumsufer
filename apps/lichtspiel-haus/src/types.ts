@@ -11,9 +11,9 @@ export interface Env extends FeedbackEnv, PushEnv {
 export type Language = "de" | "en" | "fr" | "es" | "it" | "ja" | "ko" | "zh" | "ru" | "other";
 
 /** Audience-facing version: how the audience will hear/read the film tonight. */
-export type Version = "OmU" | "OmeU" | "DF" | "OV" | "stumm";
+export type Version = "OmU" | "OmeU" | "VOSE" | "DF" | "OV" | "stumm";
 
-export const VERSIONS: readonly Version[] = ["OmU", "OmeU", "DF", "OV", "stumm"] as const;
+export const VERSIONS: readonly Version[] = ["OmU", "OmeU", "VOSE", "DF", "OV", "stumm"] as const;
 
 export function parseVersion(value: string | undefined | null): Version | null {
   if (!value) return null;
@@ -26,7 +26,7 @@ export function parseVersion(value: string | undefined | null): Version | null {
  *  removed — never a title that merely ends in parentheses ("The Party (DF)"
  *  loses the chrome but "(500) Days of Summer" is untouched). */
 export function stripVersionChrome(title: string): string {
-  return title.replace(/\s*\((?:Om[a-zäöü]*U|OV|DF|stumm)\)\s*$/i, "").trim();
+  return title.replace(/\s*\((?:Om[a-zäöü]*U|VOSE|OV|DF|stumm)\)\s*$/i, "").trim();
 }
 
 /** Projection format. DCP is the modern default; 35mm/16mm/digital are the
@@ -65,6 +65,9 @@ export interface Screening {
   /** English-language synopsis from TMDb. Picked by the front-end when the
    *  visitor's locale is `en`; otherwise the German `description` wins. */
   description_en?: string;
+  /** Spanish synopsis (DeepL from the German TMDb overview). Picked when the
+   *  visitor's locale is `es`; falls back to the German `description`. */
+  description_es?: string;
   /** TMDb-canonical German title — preferred over `title` for display
    *  when present, since the cinema's listing often carries series
    *  chrome ("Kino4Kids „Zirkuskind"" → just "Zirkuskind"). */

@@ -30,7 +30,7 @@ const spec = {
           {
             name: "lang",
             in: "query",
-            schema: { type: "string", enum: ["de", "en", "fr"] },
+            schema: { type: "string", enum: ["de", "en", "fr", "es"] },
             description: "Response language (defaults to de)",
           },
         ],
@@ -57,7 +57,7 @@ const spec = {
           {
             name: "lang",
             in: "query",
-            schema: { type: "string", enum: ["de", "en", "fr"] },
+            schema: { type: "string", enum: ["de", "en", "fr", "es"] },
             description: "Response language (defaults to de)",
           },
         ],
@@ -86,7 +86,7 @@ const spec = {
           {
             name: "lang",
             in: "query",
-            schema: { type: "string", enum: ["de", "en", "fr"] },
+            schema: { type: "string", enum: ["de", "en", "fr", "es"] },
             description: "Response language (defaults to de)",
           },
         ],

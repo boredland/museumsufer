@@ -13,6 +13,7 @@ import {
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayEvent, getEventById, getEventsInRange, getVenueBySlug } from "../db";
+import { cityContentLocale } from "../i18n";
 import { type Env, parseGenre } from "../types";
 
 const APEX = "konzert.haus";
@@ -115,6 +116,7 @@ function buildIcs(events: DayEvent[], calName: string, city: string): string {
 }
 
 function buildRss(events: DayEvent[], city: string): string {
+  const locale = cityContentLocale(city);
   const host = cityHost(APEX, city);
   const appUrl = cityUrl(APEX, city);
   const utm = buildUtm(host);
@@ -127,7 +129,7 @@ function buildRss(events: DayEvent[], city: string): string {
       parts.push(e.price_max && e.price_max !== e.price_min ? `${e.price_min}–${e.price_max} €` : `${e.price_min} €`);
     }
     return {
-      title: e.title + (e.time ? ` — ${e.time} Uhr` : ""),
+      title: e.title + (e.time ? (locale === "es" ? ` — ${e.time} h` : ` — ${e.time} Uhr`) : ""),
       link: utm(linkSource, "rss"),
       guid: `event-${e.id}@${host}`,
       pubDate: new Date(dateStr),
@@ -139,8 +141,14 @@ function buildRss(events: DayEvent[], city: string): string {
     title: "konzert.haus",
     link: appUrl,
     selfLink: `${appUrl}/feed.rss`,
-    description: localizeCityText("Konzerte in Frankfurt und Umgebung — die nächsten 14 Tage", city, "de"),
-    language: "de",
+    description: localizeCityText(
+      locale === "es"
+        ? "Conciertos en Fráncfort del Meno y alrededores — los próximos 14 días"
+        : "Konzerte in Frankfurt und Umgebung — die nächsten 14 Tage",
+      city,
+      locale,
+    ),
+    language: locale,
     items,
   });
 }

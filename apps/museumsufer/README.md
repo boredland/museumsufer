@@ -12,7 +12,7 @@ GitHub Action (.github/workflows/scrape.yml)
   ↓ runs the hub scrape (packages/event-hub) once, then
   ↓ `bun apps/museumsufer/scripts/scrape.ts` derives this app's slice:
   ↓   keeps hub EVENTS in the Frankfurt bbox carrying a `museum:*` label,
-  ↓   merges the frozen museum directory, runs DeepL DE→EN/FR
+  ↓   merges the frozen museum directory, runs DeepL (DE→EN/FR/ES, ES→DE/EN/FR)
   ↓ writes apps/museumsufer/src/scrape-data.ts (typed module)
   ↓ commits + pushes if content actually changed
 Cloudflare git integration
@@ -34,8 +34,8 @@ only remaining D1 table is `likes` (request-time user writes).
 
 - ~40 museums + events + exhibitions, refreshed daily
 - Events/exhibitions derived from the central event hub (`packages/event-hub`); museum directory from a frozen snapshot + manual config
-- DeepL DE→EN/FR translation runs in the derive step; the cache rides in the bundle
-- Frontend with i18n (DE/EN/FR), fuzzy search, distance sorting, calendar downloads
+- DeepL translation (German museums DE→EN/FR/ES, Spanish ones ES→DE/EN/FR) runs in the derive step; the cache rides in the bundle
+- Frontend with i18n (DE/EN/FR/ES), fuzzy search, distance sorting, calendar downloads
 - RSS (`/feed.xml`) and ICS (`/feed.ics`) feeds
 - Image proxy with edge caching
 - Installable as a PWA with offline support

@@ -18,8 +18,11 @@ app.get("/kino/:slug", (c) => {
 
   const screenings = getScreeningsInRange(todayIso(), dateOffset(60), { cinema: slug });
 
+  const locale = detectLocale(c.req.raw);
+  const city = c.get("city") ?? "frankfurt";
+
   if (wantsMarkdown(c.req.raw)) {
-    return c.body(renderCinemaMarkdown(cinema, screenings), {
+    return c.body(renderCinemaMarkdown(cinema, screenings, locale, city), {
       headers: {
         "Content-Type": "text/markdown; charset=utf-8",
         "Cache-Control": "public, max-age=600, s-maxage=1800",
@@ -27,8 +30,6 @@ app.get("/kino/:slug", (c) => {
     });
   }
 
-  const locale = detectLocale(c.req.raw);
-  const city = c.get("city") ?? "frankfurt";
   const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/kino/${slug}`;
   const appUrl = cityUrl("lichtspiel.haus", city);
@@ -48,7 +49,7 @@ app.get("/kino/:slug", (c) => {
       streetAddress: addrMatch?.[1] ?? cinema.address ?? undefined,
       postalCode: addrMatch?.[2],
       addressLocality: addrMatch?.[3] ?? addressLocality,
-      addressCountry: "DE",
+      addressCountry: cityMeta(cinema.city).country,
     },
     geo: { "@type": "GeoCoordinates", latitude: cinema.lat, longitude: cinema.lon },
     sameAs: cinema.website_url,
@@ -201,7 +202,7 @@ app.get("/kinos", (c) => {
           streetAddress: addrMatch?.[1] ?? cinema.address ?? undefined,
           postalCode: addrMatch?.[2],
           addressLocality: addrMatch?.[3] ?? cinema.city.charAt(0).toUpperCase() + cinema.city.slice(1),
-          addressCountry: "DE",
+          addressCountry: cityMeta(cinema.city).country,
         },
         geo: { "@type": "GeoCoordinates", latitude: cinema.lat, longitude: cinema.lon },
         sameAs: cinema.website_url,

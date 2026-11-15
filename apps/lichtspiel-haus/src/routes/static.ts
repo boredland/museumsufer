@@ -23,13 +23,18 @@ const manifestCache = new Map<string, string>();
 function manifestFor(city: string): string {
   const cached = manifestCache.get(city);
   if (cached) return cached;
+  // Spanish cities get a Spanish install description; German is the default
+  // for every German city.
+  const lang = cityMeta(city).country === "ES" ? "es" : "de";
   const tr = localizeTranslations(
     {
       homeDescription:
-        "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
+        lang === "es"
+          ? "Cartelera de cine en Fráncfort y alrededores: cine de autor, de repertorio, ciclos y festivales."
+          : "Kinoprogramm in Frankfurt und Umgebung — Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.",
     } as any,
     city,
-    "de",
+    lang,
   );
   const manifest = buildManifest({
     name: "lichtspiel.haus",
@@ -37,7 +42,7 @@ function manifestFor(city: string): string {
     description: tr.homeDescription,
     themeColor: "#0E0B07",
     backgroundColor: "#0E0B07",
-    lang: "de",
+    lang,
     icons: [
       { src: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
@@ -56,6 +61,7 @@ function llmsFor(city: string): string {
   const cached = llmsCache.get(city);
   if (cached) return cached;
   const appUrl = cityUrl("lichtspiel.haus", city);
+  const tz = cityMeta(city).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
   const tr = localizeTranslations(
     {
       homeDescription: `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${CINEMAS.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,
@@ -84,10 +90,10 @@ Base URL: ${appUrl}
 ### Screenings
 
 GET /api/day?date=YYYY-MM-DD&cinema={slug}&series={slug}&city={city}
-Returns { date, count, screenings } for one day. Date defaults to today (Europe/Berlin).
+Returns { date, count, screenings } for one day. Date defaults to today in the city's local time (${tz}).
 
 GET /api/screenings?date=YYYY-MM-DD&from=YYYY-MM-DD&to=YYYY-MM-DD&cinema={slug}&series={slug}&city={city}
-Returns screenings with title, subtitle, credits, date, time, cinema, venue_room, version (OmU/OmeU/DF/OV/stumm), format (35mm/DCP/16mm/70mm), language, series, price, ticket_url.
+Returns screenings with title, subtitle, credits, date, time, cinema, venue_room, version (OmU/OmeU/VOSE/DF/OV/stumm), format (35mm/DCP/16mm/70mm), language, series, price, ticket_url.
 
 GET /api/screenings/{id}
 Single screening by stable FNV-1a hash ID.
@@ -122,8 +128,8 @@ ${seriesLines || "(none active)"}
 
 ## Notes
 
-- Content is in German (English available via ?lang=en). Dates: ISO 8601 (YYYY-MM-DD); times: HH:MM Europe/Berlin.
-- Versions: OmU = original w/ German subtitles, OmeU = original w/ English subtitles, DF = German-dubbed, OV = original, stumm = silent.
+- Content is in German (English via ?lang=en, Spanish via ?lang=es). Dates: ISO 8601 (YYYY-MM-DD); times: HH:MM local time of the city (${tz}).
+- Versions: OmU = original w/ German subtitles, OmeU = original w/ English subtitles, VOSE = original w/ Spanish subtitles, DF = German-dubbed, OV = original, stumm = silent.
 - Data refreshes multiple times daily via a GitHub Action.
 `;
   llmsCache.set(city, txt);

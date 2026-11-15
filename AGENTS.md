@@ -77,10 +77,13 @@ that committed file.
 
 ## Translation (DeepL proxy)
 
-DE→EN/FR goes through a self-hosted proxy fronting real DeepL
-(`packages/core/src/deepl.ts`, `translateText()`). `POST $DEEPL_URL/translate`
-with `Authorization: Bearer $DEEPL_TOKEN` and
-`{ text, source_lang: "DE", target_lang }`; the translation is in `data`. One
+Translation goes through a self-hosted proxy fronting real DeepL
+(`packages/core/src/deepl.ts`, `translateText(config, text, targetLang, sourceLang = "DE")`).
+`POST $DEEPL_URL/translate` with `Authorization: Bearer $DEEPL_TOKEN` and
+`{ text, source_lang, target_lang }`; the translation is in `data`. The source
+language is per text, never a constant: German venues are `DE`, Valencia venues
+are `ES` (`sourceLangForCity()` in `apps/museumsufer/src/source-lang.ts`), so
+do not "simplify" it back to `DE`. One
 string per request — an array body 400s. Codes are bare uppercase (`EN`, `FR`;
 `EN-US` 400s). It's one small proxy shared with other projects: the client
 spaces calls 250 ms apart, and the proxy still 429s after roughly 80–100
@@ -88,8 +91,12 @@ requests per run. The translator stops at the first persistent 429 and keeps
 what it got, so a large backlog fills in over several scheduled runs.
 
 Callers: the museumsufer derive step (`apps/museumsufer/scripts/translate.ts`)
-and the TMDb `overview_en` fallback (`packages/event-hub/src/tmdb.ts`). Both
-write to committed caches, so a rerun on unchanged text makes no calls.
+translates DE→EN/FR/ES for German cities and ES→DE/EN/FR for Valencia, spending
+the quota shortest-first across all targets. The TMDb fallback
+(`packages/event-hub/src/tmdb.ts`) fills `overview_en` from German text, and
+`overview_es` from TMDb's own `es-ES` overview first, with DeepL DE→ES only as
+a last resort capped at `DEEPL_ES_BUDGET` (20) per run so it never crowds out
+EN/FR. All write to committed caches, so a rerun on unchanged text makes no calls.
 
 **Auth — `DEEPL_URL` + `DEEPL_TOKEN`**, stored as an **Actions variable**
 (dev) and an **Actions secret** (CI), same as the proxies above. Never hardcode

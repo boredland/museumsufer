@@ -11,6 +11,7 @@ import {
   REMSCHEID_BBOX,
   SAARBRUECKEN_BBOX,
   SOLINGEN_BBOX,
+  VALENCIA_BBOX,
   WUPPERTAL_BBOX,
 } from "@museumsufer/core/cities";
 import { MUSEUMS } from "./_museums/config";
@@ -309,6 +310,39 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "bergisch-zentrum-fur-verfolgte-kunste": [51.2035, 7.0736],
   "bergisch-deutsches-klingenmuseum": [51.2097, 7.0724],
   "bergisch-lvr-industriemuseum-solingen-gesenkschmiede-hendrichs": [51.1708, 7.0379],
+  // ─── Valencia ───────────────────────────────────────────────────
+  "cines-babel-valencia": [39.4697, -0.3572],
+  "cines-lys-valencia": [39.4686, -0.3749],
+  "abc-park-valencia": [39.4688, -0.3738],
+  "abc-el-saler-valencia": [39.4536, -0.3538],
+  "abc-gran-turia-valencia": [39.4645, -0.4148],
+  "cinestudio-dor-valencia": [39.4641, -0.367],
+  "cines-mn4-valencia": [39.4115, -0.3826],
+  "filmoteca-valencia": [39.471, -0.3763],
+  "ocine-aqua-valencia": [39.4566, -0.3459],
+  "palau-de-la-musica-valencia": [39.4662, -0.3605],
+  "palau-de-les-arts-valencia": [39.458, -0.3559],
+  ivam: [39.4796, -0.3829],
+  muvim: [39.4701, -0.3828],
+  "centre-del-carme": [39.4786, -0.3812],
+  "bombas-gens": [39.4896, -0.3917],
+  "fundacion-bancaja": [39.4736, -0.3792],
+  "museo-nacional-ceramica": [39.4721, -0.3774],
+  "jardi-botanic-valencia": [39.4769, -0.3867],
+  "jazz-valencia-loom": [39.4611, -0.3676],
+  "jazz-valencia-la-vitti": [39.4758, -0.3508],
+  "jazz-valencia-cim-benimaclet": [39.4853, -0.3603],
+  "jazz-valencia-la-rambleta": [39.4474, -0.3925],
+  "ateneo-mercantil-valencia": [39.4708, -0.376],
+  "teatro-olympia-valencia": [39.4708, -0.378],
+  "col-legi-major-rector-peset": [39.4755, -0.3796],
+  "capella-de-la-sapiencia-valencia": [39.4746, -0.3763],
+  "muvim-valencia": [39.4701, -0.3828],
+  "jardi-botanic-auditori-valencia": [39.4769, -0.3867],
+  "ivam-valencia": [39.4796, -0.3829],
+  "caixaforum-valencia": [39.454, -0.3496],
+  cahh: [39.4766, -0.3763],
+  "museo-de-la-seda": [39.4731, -0.3788],
 };
 
 /** Resolve default coordinates for a hub source_slug. Falls through to the
@@ -339,6 +373,7 @@ export {
   REMSCHEID_BBOX,
   SAARBRUECKEN_BBOX,
   SOLINGEN_BBOX,
+  VALENCIA_BBOX,
   WUPPERTAL_BBOX,
 };
 
@@ -359,6 +394,7 @@ export function withinGeofence(lat: number, lon: number): boolean {
     inBbox(lat, lon, WUPPERTAL_BBOX) ||
     inBbox(lat, lon, SOLINGEN_BBOX) ||
     inBbox(lat, lon, REMSCHEID_BBOX) ||
-    inBbox(lat, lon, SAARBRUECKEN_BBOX)
+    inBbox(lat, lon, SAARBRUECKEN_BBOX) ||
+    inBbox(lat, lon, VALENCIA_BBOX)
   );
 }

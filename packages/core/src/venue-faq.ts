@@ -1,9 +1,10 @@
-export type FaqLocale = "de" | "en" | "fr";
+export type FaqLocale = "de" | "en" | "fr" | "es";
 
 const CONNECTOR: Record<FaqLocale, string> = {
   de: " und ",
   en: " and ",
   fr: " et ",
+  es: " y ",
 };
 
 /** Count events per venue slug and return venue names sorted by event count

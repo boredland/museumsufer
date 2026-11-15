@@ -184,7 +184,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
         "@type": "PostalAddress",
         addressLocality: cityFull,
         addressRegion: meta.region,
-        addressCountry: "DE",
+        addressCountry: meta.country,
       },
       geo: { "@type": "GeoCoordinates", latitude: lat, longitude: lng },
       hasMap: `https://www.google.com/maps?q=${lat},${lng}`,
@@ -270,16 +270,17 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
             {cleanImageUrl(primaryMuseum.image_url) && (
               // Hero image is the LCP element -- drop lazy + set
               // fetchpriority so the browser pulls it on the critical
-              // path. Alt text is locale-aware so EN/FR visitors don't
+              // path. Alt text is locale-aware so non-German visitors don't
               // see German alt copy.
               <img
                 src={cleanImageUrl(primaryMuseum.image_url)}
                 alt={
-                  locale === "fr"
-                    ? `Façade de ${museumName} à ${cityFull}`
-                    : locale === "en"
-                      ? `${museumName} facade in ${cityFull}`
-                      : `${museumName} Fassade in ${cityFull}`
+                  {
+                    de: `${museumName} Fassade in ${cityFull}`,
+                    en: `${museumName} facade in ${cityFull}`,
+                    fr: `Façade de ${museumName} à ${cityFull}`,
+                    es: `Fachada de ${museumName} en ${cityFull}`,
+                  }[locale]
                 }
                 loading="eager"
                 fetchpriority="high"
@@ -463,22 +464,19 @@ app.get("/museum/:slug", async (c) => {
     return c.notFound();
   }
 
-  if (locale !== "de") {
-    museums = await translateFields(c.env, museums, ["description"] as (keyof MuseumRow)[], locale);
-  }
+  museums = await translateFields(c.env, museums, ["description"] as (keyof MuseumRow)[], locale);
 
   const museumIds = museums.map((m) => m.id);
   const rawExhibitions: ExhibitionRow[] = getExhibitionsForMuseum(museumIds, today);
   const rawEvents: EventRow[] = getEventsForMuseum(museumIds, today, end30);
 
-  const exhibitions =
-    locale === "de"
-      ? rawExhibitions
-      : await translateFields(c.env, rawExhibitions, ["title", "description"] as (keyof Exhibition)[], locale);
-  const events =
-    locale === "de"
-      ? rawEvents
-      : await translateFields(c.env, rawEvents, ["title", "description"] as (keyof Event)[], locale);
+  const exhibitions = await translateFields(
+    c.env,
+    rawExhibitions,
+    ["title", "description"] as (keyof Exhibition)[],
+    locale,
+  );
+  const events = await translateFields(c.env, rawEvents, ["title", "description"] as (keyof Event)[], locale);
 
   const config = MUSEUMS[slug];
   const reqUrl = new URL(c.req.url);

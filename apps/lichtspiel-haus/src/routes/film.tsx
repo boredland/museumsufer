@@ -4,6 +4,7 @@ import {
   cityMeta,
   cityName,
   cityUrl,
+  dateLocale,
   formatLocalisedDateLong,
   parsePostalAddress,
 } from "@museumsufer/core";
@@ -12,7 +13,7 @@ import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getScreeningById } from "../db";
 import { Footer, Head, Masthead, PosterCard, ScoreBadges } from "../frontend";
-import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
+import { detectLocale, getTranslations, type Locale, localizeTranslations } from "../i18n";
 import { type Env, stripVersionChrome } from "../types";
 
 const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
@@ -29,12 +30,12 @@ function buildScreeningSummary(opts: {
   city: string;
   version: string | null | undefined;
   format: string | null | undefined;
-  locale: "de" | "en";
+  locale: Locale;
 }): string {
   const tags = [opts.version, opts.format].filter(Boolean).join(", ");
   const tagSuffix = tags ? ` (${tags})` : "";
   const dateObj = new Date(`${opts.date}T12:00:00Z`);
-  const dateStr = dateObj.toLocaleDateString(opts.locale === "en" ? "en-GB" : "de-DE", {
+  const dateStr = dateObj.toLocaleDateString(dateLocale(opts.locale), {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -43,6 +44,10 @@ function buildScreeningSummary(opts: {
   if (opts.locale === "en") {
     const when = opts.time ? `on ${dateStr} at ${opts.time}` : `on ${dateStr}`;
     return `${opts.title}${tagSuffix} screens ${when} at ${opts.cinemaName} in ${opts.city}.`;
+  }
+  if (opts.locale === "es") {
+    const when = opts.time ? `el ${dateStr} a las ${opts.time}` : `el ${dateStr}`;
+    return `${opts.title}${tagSuffix} se proyecta ${when} en ${opts.cinemaName}, en ${opts.city}.`;
   }
   const when = opts.time ? `am ${dateStr} um ${opts.time} Uhr` : `am ${dateStr}`;
   return `${opts.title}${tagSuffix} läuft ${when} im ${opts.cinemaName} in ${opts.city}.`;
@@ -62,24 +67,25 @@ app.get("/film/:id{[0-9]+}", (c) => {
   const locale = detectLocale(c.req.raw);
   const tr = localizeTranslations(getTranslations(locale), city, locale);
   const currentPath = `/film/${id}`;
-  const dateLabel = formatLocalisedDateLong(screening.date, locale === "en" ? "en-US" : "de-DE");
+  const dateLabel = formatLocalisedDateLong(screening.date, dateLocale(locale));
   // Prefer TMDb's canonical localised title over the cinema's listing
-  // title (which usually carries series chrome). Fall back through the
-  // German TMDb title, then the venue's title.
+  // title (which usually carries series chrome). Spanish has no TMDb title
+  // in the bundle, so it shares the English (international) one.
   const displayTitle =
-    locale === "en"
-      ? (screening.title_en ?? screening.title_de ?? stripVersionChrome(screening.title))
-      : (screening.title_de ?? stripVersionChrome(screening.title));
-  // English visitors get the TMDb English overview when available; falls
-  // back to the cinema's (German) description so we never render an empty
-  // synopsis just because TMDb missed.
-  const englishSynopsisAvailable = !!screening.description_en;
-  const synopsis = locale === "en" ? (screening.description_en ?? screening.description) : screening.description;
-  // When the EN visitor falls through to the DE description we render
+    locale === "de"
+      ? (screening.title_de ?? stripVersionChrome(screening.title))
+      : (screening.title_en ?? screening.title_de ?? stripVersionChrome(screening.title));
+  // Non-German visitors get the translated TMDb overview when available;
+  // falls back to the cinema's (German) description so we never render an
+  // empty synopsis just because TMDb or DeepL missed.
+  const translatedSynopsis =
+    locale === "en" ? screening.description_en : locale === "es" ? screening.description_es : undefined;
+  const synopsis = translatedSynopsis ?? screening.description;
+  // When a non-German visitor falls through to the DE description we render
   // it in <span lang="de"> with a notice so assistive tech and search
   // crawlers see that the synopsis is in a different language than
   // the page's html lang attribute.
-  const synopsisIsForeign = locale === "en" && !englishSynopsisAvailable && !!screening.description;
+  const synopsisIsForeign = locale !== "de" && !translatedSynopsis && !!screening.description;
   // TMDb attribution is required by the API terms when we surface
   // their description text. Show it adjacent to the synopsis on the
   // page where the text appears, not only in the global footer.

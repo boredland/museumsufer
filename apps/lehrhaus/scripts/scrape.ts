@@ -3,7 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bundleSection } from "@museumsufer/core/bundle-writer";
-import { CITIES, citiesOf } from "@museumsufer/core/cities";
+import { CITIES, citiesIn, citiesOf } from "@museumsufer/core/cities";
 import { todayIso } from "@museumsufer/core/date";
 import { fnv1aInt } from "@museumsufer/core/hash";
 import { type CanonicalEvent, cityOf, displayNameFor, EVENTS } from "@museumsufer/event-hub";
@@ -13,6 +13,9 @@ import type { Category, LehrhausEvent, LehrhausSource, ScrapeData } from "../src
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
+// This vertical has no Valencia domain; a Valencia event would surface it in
+// the switcher as a dead link.
+const SERVED_CITIES: ReadonlySet<string> = new Set(citiesIn("DE"));
 
 await main();
 
@@ -25,7 +28,7 @@ async function main(): Promise<void> {
   for (const ev of EVENTS) {
     if (ev.date < today) continue;
     const city = cityOf(ev);
-    if (!city) continue;
+    if (!city || !SERVED_CITIES.has(city)) continue;
     const category = pickCategory(ev);
     if (!category) continue;
     // Only cities with events this vertical shows: the switcher links every

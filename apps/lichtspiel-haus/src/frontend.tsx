@@ -6,6 +6,7 @@ import {
   buildWebMcpScript,
   type CalendarEvent,
   cityHost,
+  cityMeta,
   cityUrl,
   coordServesCity,
   dateFormatter,
@@ -91,7 +92,7 @@ export interface HeadOptions {
   appUrl?: string;
 }
 
-const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB" };
+const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", es: "es_ES" };
 
 export function Head(opts: HeadOptions) {
   const base = opts.appUrl ?? APP_URL;
@@ -323,6 +324,8 @@ function DateStrip({
   );
 }
 
+// Valencia shares Berlin's UTC offset and DST switch dates (both CET/CEST), so
+// one offset table serves every city.
 function berlinOffsetFor(date: string): string {
   const [year, month, day] = date.split("-").map(Number);
   if (!year || !month || !day) return "+01:00";
@@ -359,7 +362,7 @@ function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
         "@type": "PostalAddress",
         streetAddress: s.cinema.address,
         addressLocality: capitalize(s.cinema.city),
-        addressCountry: "DE",
+        addressCountry: cityMeta(s.cinema.city).country,
       },
     },
     url: `${appUrl}/film/${s.id}`,
@@ -574,14 +577,21 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   // cinema's listing title, which often carries series chrome like
   // "Kino4Kids „Zirkuskind"" or "Schamlos Harmlos: Love Me Tender". The
   // venue's title remains available as `s.title` for the report dialog.
+  // Spanish visitors have no TMDb-Spanish title in the bundle; the English
+  // (international) title reads closer to what they know than the German one.
   const displayTitle =
+    opts.locale === "de"
+      ? (s.title_de ?? stripVersionChrome(s.title))
+      : (s.title_en ?? s.title_de ?? stripVersionChrome(s.title));
+  // Non-German visitors prefer the translated TMDb overview, with a soft
+  // fallback to the German cinema description so a row never renders
+  // without a synopsis just because TMDb or DeepL missed.
+  const description =
     opts.locale === "en"
-      ? (s.title_en ?? s.title_de ?? stripVersionChrome(s.title))
-      : (s.title_de ?? stripVersionChrome(s.title));
-  // English visitors prefer the TMDb English overview when present, with
-  // a soft fallback to the German cinema description so we never render
-  // a row with no synopsis just because TMDb missed.
-  const description = opts.locale === "en" ? (s.description_en ?? s.description) : s.description;
+      ? (s.description_en ?? s.description)
+      : opts.locale === "es"
+        ? (s.description_es ?? s.description)
+        : s.description;
   const showDescription = description && description !== s.subtitle;
   const showCredits = s.credits && s.credits !== s.subtitle;
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
@@ -1574,7 +1584,10 @@ function cinemaFaqFor(city: string): { count: number; byLocale: Record<Locale, s
     nameBySlug,
   );
   const names = ranked.map((v) => v.name);
-  const faq = { count: ranked.length, byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en") } };
+  const faq = {
+    count: ranked.length,
+    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), es: joinNames(names, "es") },
+  };
   cinemaFaqCache.set(city, faq);
   return faq;
 }
@@ -1684,7 +1697,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
     "@id": `${appUrl}/#website`,
     url: appUrl,
     name: "lichtspiel.haus",
-    inLanguage: ["de", "en"],
+    inLanguage: SUPPORTED_LOCALES,
     publisher: { "@type": "Organization", name: "lichtspiel.haus" },
     potentialAction: {
       "@type": "SearchAction",
@@ -1741,7 +1754,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
 }
 
 function niceDateFor(date: string, locale: Locale): string {
-  return formatLocalisedDateLong(date, locale === "en" ? "en-GB" : "de-DE");
+  return formatLocalisedDateLong(date, dateLocale(locale));
 }
 
 export { getAllSeries };

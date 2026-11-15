@@ -1,8 +1,8 @@
 import { type Locale as CoreLocale, detectLocale as coreDetect, dateLocale } from "@museumsufer/core";
 import { cityName } from "@museumsufer/core/cities";
 
-export type Locale = Extract<CoreLocale, "de" | "en" | "fr">;
-export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
+export type Locale = Extract<CoreLocale, "de" | "en" | "fr" | "es">;
+export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr", "es"];
 export const DEFAULT_LOCALE: Locale = "de";
 
 export function detectLocale(request: Request): Locale {
@@ -144,13 +144,13 @@ const de: Translations = {
     "Die Museumsufercard ist ein Jahrespass, der freien Eintritt in alle teilnehmenden Museen bietet. Daneben gibt es das Museumsuferticket für zwei aufeinanderfolgende Tage. Beide sind über museumsufer.de erhältlich.",
   faq3Q: "Wie oft wird der Veranstaltungskalender aktualisiert?",
   faq3A:
-    "Die Daten werden täglich um 6 Uhr morgens automatisch von den Webseiten der teilnehmenden Museen gesammelt. Übersetzungen ins Englische und Französische erfolgen über DeepL.",
+    "Die Daten werden täglich um 6 Uhr morgens automatisch von den Webseiten der teilnehmenden Museen gesammelt. Übersetzungen ins Englische, Französische und Spanische erfolgen über DeepL.",
   faq4Q: "Ist die App kostenlos?",
   faq4A:
     "Ja, museumsufer.app ist vollständig kostenlos, ohne Registrierung und ohne App-Store. Die Seite funktioniert als Progressive Web App direkt im Browser.",
   faq5Q: "In welchen Sprachen ist die Seite verfügbar?",
   faq5A:
-    "Die App ist auf Deutsch, Englisch und Französisch verfügbar. Veranstaltungstitel und Beschreibungen werden automatisch übersetzt.",
+    "Die App ist auf Deutsch, Englisch, Französisch und Spanisch verfügbar. Veranstaltungstitel und Beschreibungen werden automatisch übersetzt.",
   faq6Q: "Warum diese App?",
   faq6A:
     "Frankfurt hat über 40 Museen — und die verdienen einen besseren Überblick als den, den sie haben. Diese App bündelt die Ausstellungen und Veranstaltungen aller Museen auf einer schnellen, durchsuchbaren Seite. Kein App-Store, kein Konto, kein Aufwand.",
@@ -334,13 +334,13 @@ const en: Translations = {
     "The Museumsufercard is an annual pass that grants free admission to all participating museums. There is also a Museumsuferticket for two consecutive days. Both are available via museumsufer.de.",
   faq3Q: "How often is the event calendar updated?",
   faq3A:
-    "Data is collected automatically from participating museum websites every day at 6 a.m. Translations into English and French are provided by DeepL.",
+    "Data is collected automatically from participating museum websites every day at 6 a.m. Translations into English, French and Spanish are provided by DeepL.",
   faq4Q: "Is the app free to use?",
   faq4A:
     "Yes, museumsufer.app is completely free, with no registration and no app store required. The site works as a Progressive Web App directly in the browser.",
   faq5Q: "Which languages does the site support?",
   faq5A:
-    "The app is available in German, English and French. Event titles and descriptions are translated automatically.",
+    "The app is available in German, English, French and Spanish. Event titles and descriptions are translated automatically.",
   faq6Q: "Why this app?",
   faq6A:
     "Frankfurt has over 40 museums — and they deserve a better overview than the one they got. This app pulls exhibitions and events from every museum into one fast, searchable page. No app store, no account, no fuss.",
@@ -522,13 +522,13 @@ const fr: Translations = {
     "La Museumsufercard est un pass annuel offrant l'entrée gratuite dans tous les musées participants. Il existe également un Museumsuferticket pour deux jours consécutifs. Les deux sont disponibles sur museumsufer.de.",
   faq3Q: "À quelle fréquence le calendrier des événements est-il mis à jour ?",
   faq3A:
-    "Les données sont collectées automatiquement chaque jour à 6 heures du matin à partir des sites des musées participants. Les traductions en anglais et en français sont fournies par DeepL.",
+    "Les données sont collectées automatiquement chaque jour à 6 heures du matin à partir des sites des musées participants. Les traductions en anglais, en français et en espagnol sont fournies par DeepL.",
   faq4Q: "L'application est-elle gratuite ?",
   faq4A:
     "Oui, museumsufer.app est entièrement gratuite, sans inscription et sans téléchargement. Le site fonctionne comme une Progressive Web App directement dans le navigateur.",
   faq5Q: "Dans quelles langues le site est-il disponible ?",
   faq5A:
-    "L'application est disponible en allemand, en anglais et en français. Les titres et descriptions des événements sont traduits automatiquement.",
+    "L'application est disponible en allemand, en anglais, en français et en espagnol. Les titres et descriptions des événements sont traduits automatiquement.",
   faq6Q: "Pourquoi cette application ?",
   faq6A:
     "Francfort compte plus de 40 musées — et ils méritent une meilleure vue d'ensemble que celle qu'ils ont. Cette application rassemble les expositions et les événements de chaque musée en une seule page rapide et consultable. Pas de magasin d'applications, pas de compte, pas d'ennuis.",
@@ -581,7 +581,198 @@ const fr: Translations = {
   digestUnsubscribing: "Désabonnement…",
 };
 
-const ALL: Record<Locale, Translations> = { de, en, fr };
+const es: Translations = {
+  langSwitchAria: "Idioma",
+  clearSearch: "Borrar búsqueda",
+  digestKicker: "Resumen push",
+  digestCueAria: "Suscribirse a las notificaciones push de eventos",
+  digestCueText: "Descubre cada mañana qué hay hoy a orillas del río.",
+  subtitle: "qué hay hoy en el Museumsufer",
+  today: "Hoy",
+  tomorrow: "Mañana",
+  saturday: "Sábado",
+  sunday: "Domingo",
+  pickDate: "Elegir fecha",
+  dateNav: "Fecha",
+  skipLink: "Ir al contenido",
+  loading: "Cargando",
+  upcoming: "Próximos 14 días",
+  upcomingDays: "Próximos {n} días",
+  events: "Eventos",
+  eventsDescription: "Programados para hoy, con hora fija",
+  exhibitions: "Exposiciones",
+  exhibitionsDescription: "En curso, se pueden visitar en cualquier momento del horario de apertura",
+  noEvents: "No hay eventos este día.",
+  noExhibitions: "No se han encontrado exposiciones.",
+  loadError: "Error al cargar.",
+  calendar: "Calendario",
+  calendarAria: "Añadir al calendario",
+  githubAria: "Ver el código fuente en GitHub",
+  meta: "Exposiciones y eventos actuales en el Museumsufer de Fráncfort",
+  pageTitle: "museumsufer.app — Exposiciones y eventos de hoy en Fráncfort del Meno",
+  metaLong:
+    "Todas las exposiciones y eventos del Museumsufer de Fráncfort de un vistazo. Calendario, precios, cómo llegar y mucho más para 40 museos.",
+  llmTip: "Pregunta a una IA",
+  llmPrompt:
+    "¿Qué hay hoy en el Museumsufer de Fráncfort y qué exposiciones terminan pronto (última oportunidad)? Fuente: https://museumsufer.app",
+  llmCopied: "¡Copiado!",
+  apiDocs: "API",
+  missingEvent: "¿Falta un evento?",
+  subscribeCal: "Suscribirse al calendario",
+  rssFeed: "Feed RSS",
+  endingSoon: "Termina pronto",
+  lastDays: "Últimos días",
+  visited: "Visitado",
+  alreadyVisited: "Ya visitado",
+  details: "Detalles",
+  moreLabel: "Más",
+  copyPrompt: "Copiar",
+  nearMe: "Cerca de mí",
+  minWalk: "min",
+  navigate: "Cómo llegar",
+  addToCalendar: "Añadir al calendario",
+  markVisited: "Marcar como visitado",
+  unmarkVisited: "Quitar la marca de visitado",
+  search: "Buscar",
+  searchPlaceholder: "Buscar museos, exposiciones o eventos...",
+  noResults: "Sin resultados.",
+  passPromo: "Descubre los 39 museos",
+  passCard: "Pase anual",
+  passTicket: "Pase de 2 días",
+  museums: "Museos",
+  museumsDescription: "Todos los museos que seguimos, también los que no entran en la Museumsufercard",
+  reachable: "Llegas a tiempo",
+  tight: "Justo",
+  started: "Ya ha empezado",
+  permanentCollection: "Colección permanente",
+  notMuseumsufer: "No incluido en la Museumsufercard",
+  switchTheme: "Cambiar tema",
+  themeDark: "Oscuro",
+  themeLight: "Claro",
+  daysSingular: "día",
+  daysPlural: "días",
+  privacyNote: "Privacidad",
+  privacyText:
+    "Si activas la ordenación por distancia, tu ubicación se redondea a una cuadrícula (~200 m) y se envía a la API de RMV para estimar los tiempos de viaje; tu posición exacta nunca se almacena ni se comparte. No se recogen datos personales.",
+  whyTitle: "¿Por qué esta aplicación?",
+  whyText:
+    "Fráncfort tiene más de 40 museos, y merecen una visión de conjunto mejor que la que tienen. Esta aplicación reúne las exposiciones y los eventos de todos los museos en una página rápida y con buscador. Sin tienda de aplicaciones, sin cuenta, sin complicaciones.",
+  imprint: "Aviso legal",
+  imprintTitle: "Aviso legal — Museumsufer Frankfurt",
+  imprintHeading: "Aviso legal",
+  imprintTmgHeading: "Datos conforme al § 5 TMG",
+  imprintContactHeading: "Contacto",
+  imprintResponsibleHeading: "Responsable del contenido",
+  imprintDataSourceHeading: "Fuentes de datos",
+  imprintDataSourceText:
+    "El contenido se recopila automáticamente cada día de las páginas web de los ~40 museos participantes. Las traducciones las realiza DeepL. Este sitio no tiene ninguna vinculación oficial con la Concejalía de Cultura de la ciudad de Fráncfort ni con la iniciativa Museumsufer.",
+  imprintDisclaimerHeading: "Exención de responsabilidad",
+  imprintDisclaimerText:
+    "A pesar de un tratamiento cuidadoso, algunas fechas, precios o descripciones pueden estar desactualizados o incompletos. Para información vinculante, consulta directamente con el museo correspondiente.",
+  back: "Volver",
+  byline: "Creado por Jonas Strassel",
+  contact: "Contacto",
+  contactTitle: "¿En qué puedo ayudarte?",
+  contactCategoryLabel: "¿De qué se trata?",
+  contactCategoryEvent: "Evento que falta o es incorrecto",
+  contactCategoryInstitution: "Museo que falta o es incorrecto",
+  contactCategoryFeedback: "Comentarios generales",
+  contactEmailLabel: "Correo electrónico",
+  contactEmailPlaceholder: "tu@correo.es",
+  contactMessageLabel: "Mensaje",
+  contactMessagePlaceholder: "¿Qué quieres contarnos?",
+  contactRegarding: "Asunto",
+  contactSubmit: "Enviar",
+  contactSubmitting: "Enviando…",
+  contactSuccess: "¡Gracias! Tu mensaje se ha enviado.",
+  contactError: "No se pudo enviar. Inténtalo de nuevo más tarde.",
+  contactClose: "Cerrar",
+  reportLabel: "Informar de un problema",
+  shareLabel: "Compartir",
+  shareCopied: "Enlace copiado",
+  contactEmail: "feedback@ins.museum",
+  aiDisclosure: "Datos recopilados a diario de las páginas web de los museos · Traducciones de DeepL",
+  museumBackToAll: "← Todos los museos",
+  museumOpeningHours: "Horario de apertura",
+  museumWebsite: "Ir a la web oficial",
+  museumExhibitions: "Exposiciones actuales",
+  museumEvents: "Eventos",
+  museumEventsWindow: "Próximos 30 días",
+  museumNoExhibitions: "No hay exposiciones en curso.",
+  museumNoEvents: "No hay eventos en los próximos 30 días.",
+  museumAlsoKnownAs: "También conocido como",
+  aboutHeading: "¿Qué es el Museumsufer de Fráncfort?",
+  introText:
+    "El Museumsufer de Fráncfort (la «orilla de los museos») reúne unos 40 museos a ambas orillas del Meno, entre el Eiserner Steg y el Friedensbrücke: uno de los distritos museísticos más densos de Europa. Grandes instituciones como el Städel Museum, el Museo de Historia Natural Senckenberg, la Schirn Kunsthalle, el Liebieghaus y el Historisches Museum Frankfurt están a pocos minutos a pie unas de otras. La oferta abarca desde los maestros antiguos y las ciencias naturales hasta el cine, la fotografía contemporánea y las artes aplicadas. Esta aplicación recopila a diario las exposiciones y los eventos actuales, no solo de los museos oficiales del Museumsufer, sino también de otros museos y salas de exposiciones de Fráncfort. Todo en una única página con buscador, con precios, exportación al calendario y conexiones de transporte público a través de RMV.",
+  faqTitle: "Preguntas frecuentes",
+  faq1Q: "¿Qué museos se incluyen?",
+  faq1A: "Actualmente {n} museos de Fráncfort y Offenbach con programación activa: {venues}.",
+  faq2Q: "¿Qué es la Museumsufercard?",
+  faq2A:
+    "La Museumsufercard es un pase anual que da entrada gratuita a todos los museos participantes. También existe el Museumsuferticket, válido durante dos días consecutivos. Ambos se pueden adquirir en museumsufer.de.",
+  faq3Q: "¿Con qué frecuencia se actualiza el calendario de eventos?",
+  faq3A:
+    "Los datos se recopilan automáticamente cada día a las 6 de la mañana de las páginas web de los museos participantes. Las traducciones al inglés, francés y español las realiza DeepL.",
+  faq4Q: "¿La aplicación es gratuita?",
+  faq4A:
+    "Sí, museumsufer.app es totalmente gratuita, sin registro y sin tienda de aplicaciones. El sitio funciona como una aplicación web progresiva (PWA) directamente en el navegador.",
+  faq5Q: "¿En qué idiomas está disponible el sitio?",
+  faq5A:
+    "La aplicación está disponible en alemán, inglés, francés y español. Los títulos y las descripciones de los eventos se traducen automáticamente.",
+  faq6Q: "¿Por qué esta aplicación?",
+  faq6A:
+    "Fráncfort tiene más de 40 museos, y merecen una visión de conjunto mejor que la que tienen. Esta aplicación reúne las exposiciones y los eventos de todos los museos en una página rápida y con buscador. Sin tienda de aplicaciones, sin cuenta, sin complicaciones.",
+  faq7Q: "¿Cómo trata la aplicación mis datos?",
+  faq7A:
+    "Si activas la ordenación por distancia, tu ubicación se redondea a una cuadrícula (~200 m) y se envía a la API de RMV para estimar los tiempos de viaje; tu posición exacta nunca se almacena ni se comparte. No se recogen datos personales.",
+  faq8Q: "¿Cómo funcionan las notificaciones push?",
+  faq8A:
+    "Puedes suscribirte a las notificaciones push con el botón «Resumen push» o con el enlace del pie de página. Hay tres franjas horarias: por la mañana (07:00), por la tarde (17:00) y un resumen semanal los domingos (09:00). Opcionalmente, las notificaciones se pueden limitar a determinados museos. La suscripción es anónima (sin cuenta ni correo electrónico) y se puede cancelar en cualquier momento. En iOS, primero hay que añadir el sitio a la pantalla de inicio como aplicación web.",
+  categoryFilm: "Cine",
+  categoryFuehrung: "Visita guiada",
+  categoryWorkshop: "Taller",
+  categoryVortrag: "Conferencia",
+  categoryFamilie: "Familia",
+  categoryVernissage: "Inauguración",
+  categoryKonzert: "Concierto",
+  soldOut: "Agotado",
+  fewLeft: "Quedan pocas plazas",
+  siblingTemplate: "¿Nada que te convenza? ¿Qué tal {first}, {second}, {third} o {fourth}?",
+  siblingTheaterLabel: "una obra de teatro",
+  siblingKonzertLabel: "un concierto",
+  siblingLehrLabel: "una conferencia",
+  siblingCinemaLabel: "una ida al cine",
+  digestOpen: "Suscribirse",
+  digestTitle: "Suscríbete a exposiciones y eventos",
+  digestIntro:
+    "Notificaciones push directamente en tu dispositivo, sin correo electrónico ni cuenta. Puedes darte de baja cuando quieras.",
+  digestSchedMorning: "Cada mañana",
+  digestSchedMorningTime: "07:00",
+  digestSchedMorningDesc: "Exposiciones y eventos de hoy",
+  digestSchedAfternoon: "Cada tarde",
+  digestSchedAfternoonTime: "16:00",
+  digestSchedAfternoonDesc: "¿Qué hay esta noche?",
+  digestSchedWeekly: "Resumen del domingo",
+  digestSchedWeeklyTime: "Dom 09:00",
+  digestSchedWeeklyDesc: "La semana que viene",
+  digestIosHint:
+    "En iPhone/iPad: pulsa «Compartir» y luego «Añadir a pantalla de inicio». Después abre la página desde el nuevo icono: las notificaciones push solo funcionan en modo independiente.",
+  digestUnsupported:
+    "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
+  digestSubscribe: "Suscribirse",
+  digestSave: "Guardar",
+  digestUnsubAll: "Darse de baja de todo",
+  digestFilterLabel: "Limitar a categorías",
+  digestFilterHint: "vacío = todas",
+  digestUnsub: "Darse de baja",
+  digestPermDenied: "Las notificaciones están bloqueadas. Permítelas en los ajustes del navegador.",
+  digestSuccess: "Guardado.",
+  digestError: "No se pudo guardar.",
+  digestSaving: "Guardando…",
+  digestUnsubscribing: "Dándote de baja…",
+};
+
+const ALL: Record<Locale, Translations> = { de, en, fr, es };
 
 export function getTranslations(locale: Locale): Translations {
   return ALL[locale];
@@ -639,6 +830,27 @@ function genericOverrides(locale: Locale, name: string, host: string): Translati
       imprintTitle: `Mentions légales — ${host}`,
       imprintDataSourceText:
         "Le contenu est collecté automatiquement chaque jour à partir des sites des musées participants. Les traductions sont fournies par DeepL. Ce site n'est officiellement affilié à aucune des institutions listées.",
+    };
+  }
+  if (locale === "es") {
+    return {
+      digestCueText: "Descubre cada mañana qué hay hoy en los museos.",
+      subtitle: `qué hay hoy en los museos de ${name}`,
+      meta: `Exposiciones y eventos actuales en los museos de ${name}`,
+      pageTitle: `${host} — exposiciones y eventos de hoy en ${name}`,
+      metaLong: `Todas las exposiciones y eventos de los museos de ${name} de un vistazo. Calendario, precios, cómo llegar y mucho más.`,
+      llmPrompt: `¿Qué hay hoy en los museos de ${name} y qué exposiciones terminan pronto? Fuente: ${url}`,
+      aboutHeading: `Sobre ${host}`,
+      introText: `${host} reúne las exposiciones y los eventos actuales de los museos de ${name} en una única página con buscador, actualizada a diario, con precios, exportación al calendario y detalles. Sin tienda de aplicaciones, sin cuenta.`,
+      whyText: `${name} tiene muchos museos, y merecen una visión de conjunto mejor que la que tienen. Esta aplicación reúne las exposiciones y los eventos de todos los museos en una página rápida y con buscador. Sin tienda de aplicaciones, sin cuenta, sin complicaciones.`,
+      faq1A: `Actualmente {n} museos de ${name} con programación activa: {venues}.`,
+      faq2Q: "¿Qué tipos de eventos se incluyen?",
+      faq2A:
+        "Exposiciones temporales, visitas guiadas, talleres, conferencias y programas para familias de los museos incluidos, actualizados a diario.",
+      faq6A: `${name} tiene muchos museos, y merecen una visión de conjunto mejor que la que tienen. Esta aplicación reúne las exposiciones y los eventos en una página rápida y con buscador. Sin tienda de aplicaciones, sin cuenta, sin complicaciones.`,
+      imprintTitle: `Aviso legal — ${host}`,
+      imprintDataSourceText:
+        "El contenido se recopila automáticamente cada día de las páginas web de los museos participantes. Las traducciones las realiza DeepL. Este sitio no tiene ninguna vinculación oficial con las instituciones incluidas.",
     };
   }
   return {

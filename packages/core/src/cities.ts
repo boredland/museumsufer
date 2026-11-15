@@ -113,6 +113,16 @@ export const SAARBRUECKEN_BBOX: Bbox = {
   minLon: 6.8,
   maxLon: 7.15,
 };
+
+/** Valencia city + the near horta (Paterna, Torrent edge) and Almàssera to the
+ *  north. Sagunt and the southern Albufera lie outside it. Far outside every
+ *  German box, so the bbox alone is unambiguous. */
+export const VALENCIA_BBOX: Bbox = {
+  minLat: 39.38,
+  maxLat: 39.58,
+  minLon: -0.5,
+  maxLon: -0.25,
+};
 export type CitySlug =
   | "frankfurt"
   | "hamburg"
@@ -123,7 +133,8 @@ export type CitySlug =
   | "wuppertal"
   | "solingen"
   | "remscheid"
-  | "saarbruecken";
+  | "saarbruecken"
+  | "valencia";
 
 export interface CityMeta {
   /** URL subdomain prefix and the value stored on bundled events. */
@@ -141,6 +152,8 @@ export interface CityMeta {
   readonly i18nName: Readonly<Record<Locale, { full: string; short: string }>>;
   /** Administrative region (schema.org addressRegion). */
   readonly region: string;
+  /** ISO 3166-1 alpha-2 country code (schema.org addressCountry). */
+  readonly country: "DE" | "ES";
   /** Wikidata Q-id for the city (sameAs links). */
   readonly wikidata: string;
   /** Centroid for nearest-city geo routing on apex hits. */
@@ -164,8 +177,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Frankfurt am Main", short: "Frankfurt" },
       en: { full: "Frankfurt am Main", short: "Frankfurt" },
       fr: { full: "Francfort-sur-le-Main", short: "Francfort" },
+      es: { full: "Fráncfort del Meno", short: "Fráncfort" },
     },
     region: "Hessen",
+    country: "DE",
     wikidata: "Q1794",
     centroid: { lat: 50.11, lon: 8.68 },
     bbox: FRANKFURT_BBOX,
@@ -179,8 +194,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Hamburg", short: "Hamburg" },
       en: { full: "Hamburg", short: "Hamburg" },
       fr: { full: "Hambourg", short: "Hambourg" },
+      es: { full: "Hamburgo", short: "Hamburgo" },
     },
     region: "Hamburg",
+    country: "DE",
     wikidata: "Q1055",
     centroid: { lat: 53.55, lon: 9.99 },
     bbox: HAMBURG_BBOX,
@@ -194,8 +211,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Darmstadt", short: "Darmstadt" },
       en: { full: "Darmstadt", short: "Darmstadt" },
       fr: { full: "Darmstadt", short: "Darmstadt" },
+      es: { full: "Darmstadt", short: "Darmstadt" },
     },
     region: "Hessen",
+    country: "DE",
     wikidata: "Q2973",
     centroid: { lat: 49.8667, lon: 8.65 },
     bbox: DARMSTADT_BBOX,
@@ -209,8 +228,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Heidelberg", short: "Heidelberg" },
       en: { full: "Heidelberg", short: "Heidelberg" },
       fr: { full: "Heidelberg", short: "Heidelberg" },
+      es: { full: "Heidelberg", short: "Heidelberg" },
     },
     region: "Baden-Württemberg",
+    country: "DE",
     wikidata: "Q2966",
     centroid: { lat: 49.4122, lon: 8.71 },
     bbox: HEIDELBERG_BBOX,
@@ -224,8 +245,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Mainz", short: "Mainz" },
       en: { full: "Mainz", short: "Mainz" },
       fr: { full: "Mayence", short: "Mayence" },
+      es: { full: "Maguncia", short: "Maguncia" },
     },
     region: "Rheinland-Pfalz",
+    country: "DE",
     wikidata: "Q1720",
     centroid: { lat: 50.0, lon: 8.27 },
     bbox: RHEINMAIN_WEST_BBOX,
@@ -239,8 +262,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Wiesbaden", short: "Wiesbaden" },
       en: { full: "Wiesbaden", short: "Wiesbaden" },
       fr: { full: "Wiesbaden", short: "Wiesbaden" },
+      es: { full: "Wiesbaden", short: "Wiesbaden" },
     },
     region: "Hessen",
+    country: "DE",
     wikidata: "Q1721",
     centroid: { lat: 50.0825, lon: 8.24 },
     bbox: RHEINMAIN_WEST_BBOX,
@@ -254,8 +279,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Wuppertal", short: "Wuppertal" },
       en: { full: "Wuppertal", short: "Wuppertal" },
       fr: { full: "Wuppertal", short: "Wuppertal" },
+      es: { full: "Wuppertal", short: "Wuppertal" },
     },
     region: "Nordrhein-Westfalen",
+    country: "DE",
     wikidata: "Q2107",
     centroid: { lat: 51.256, lon: 7.15 },
     bbox: WUPPERTAL_BBOX,
@@ -269,8 +296,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Solingen", short: "Solingen" },
       en: { full: "Solingen", short: "Solingen" },
       fr: { full: "Solingen", short: "Solingen" },
+      es: { full: "Solingen", short: "Solingen" },
     },
     region: "Nordrhein-Westfalen",
+    country: "DE",
     wikidata: "Q2942",
     centroid: { lat: 51.171, lon: 7.085 },
     bbox: SOLINGEN_BBOX,
@@ -284,8 +313,10 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Remscheid", short: "Remscheid" },
       en: { full: "Remscheid", short: "Remscheid" },
       fr: { full: "Remscheid", short: "Remscheid" },
+      es: { full: "Remscheid", short: "Remscheid" },
     },
     region: "Nordrhein-Westfalen",
+    country: "DE",
     wikidata: "Q3097",
     centroid: { lat: 51.178, lon: 7.193 },
     bbox: REMSCHEID_BBOX,
@@ -299,11 +330,30 @@ export const CITIES: Readonly<Record<CitySlug, CityMeta>> = {
       de: { full: "Saarbrücken", short: "Saarbrücken" },
       en: { full: "Saarbrücken", short: "Saarbrücken" },
       fr: { full: "Sarrebruck", short: "Sarrebruck" },
+      es: { full: "Saarbrücken", short: "Saarbrücken" },
     },
     region: "Saarland",
+    country: "DE",
     wikidata: "Q1724",
     centroid: { lat: 49.2333, lon: 7.0 },
     bbox: SAARBRUECKEN_BBOX,
+  },
+  valencia: {
+    slug: "valencia",
+    name: "Valencia",
+    short: "Valencia",
+    adj: { de: "Valencianer", en: "Valencia's" },
+    i18nName: {
+      de: { full: "Valencia", short: "Valencia" },
+      en: { full: "Valencia", short: "Valencia" },
+      fr: { full: "Valence", short: "Valence" },
+      es: { full: "Valencia", short: "Valencia" },
+    },
+    region: "Comunitat Valenciana",
+    country: "ES",
+    wikidata: "Q8818",
+    centroid: { lat: 39.4699, lon: -0.3763 },
+    bbox: VALENCIA_BBOX,
   },
 };
 
@@ -388,13 +438,24 @@ export function museumUrl(slug: string | undefined): string {
   return cityMeta(slug).slug === DEFAULT_CITY ? "https://museumsufer.app" : cityUrl("ins.museum", slug);
 }
 
+/** Slugs of every city in `country`. Verticals without a Valencia domain use
+ *  this to keep their geo apex redirect inside the cities they serve. */
+export function citiesIn(country: CityMeta["country"]): CitySlug[] {
+  return Object.values(CITIES)
+    .filter((m) => m.country === country)
+    .map((m) => m.slug);
+}
+
 /** Pick the nearest city to a coordinate by squared centroid distance.
  *  Used for geo-routing apex hits (degrees are fine at these latitudes
- *  for a simple "which is closer" comparison). */
-export function nearestCity(lat: number, lon: number): CitySlug {
-  let best: CitySlug = DEFAULT_CITY;
+ *  for a simple "which is closer" comparison). `candidates` restricts the
+ *  pool to the cities a vertical actually serves, so an apex hit never
+ *  redirects to a host with no DNS. */
+export function nearestCity(lat: number, lon: number, candidates?: readonly CitySlug[]): CitySlug {
+  let best: CitySlug = candidates?.[0] ?? DEFAULT_CITY;
   let bestDist = Number.POSITIVE_INFINITY;
   for (const meta of Object.values(CITIES)) {
+    if (candidates && !candidates.includes(meta.slug)) continue;
     const d = (lat - meta.centroid.lat) ** 2 + (lon - meta.centroid.lon) ** 2;
     if (d < bestDist) {
       bestDist = d;

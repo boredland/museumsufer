@@ -2,9 +2,20 @@ import { buildApiCatalog, buildManifest, buildRobotsTxt, cityName, cityScreensho
 import { Hono } from "hono";
 import { CLIENT_SCRIPT } from "../client-script";
 import { todayIso } from "../date";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "../i18n";
 import { MUSEUMS } from "../museum-config";
 import { SERVICE_WORKER_JS } from "../service-worker";
 import type { Env } from "../types";
+
+/** One `<xhtml:link>` per supported locale plus x-default; the default
+ *  locale lives on the bare path, the others behind `?lang=`. */
+function hreflangLinks(url: string): string {
+  const links = SUPPORTED_LOCALES.map(
+    (l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${l === DEFAULT_LOCALE ? url : `${url}?lang=${l}`}"/>`,
+  );
+  links.push(`    <xhtml:link rel="alternate" hreflang="x-default" href="${url}"/>`);
+  return links.join("\n");
+}
 
 export const CLIENT_BUNDLE_VERSION = fnv1a(CLIENT_SCRIPT);
 export const CLIENT_BUNDLE_HREF = `/client-${CLIENT_BUNDLE_VERSION}.js`;
@@ -106,7 +117,7 @@ Returns: name, slug, museumsufer_url, website_url
 - Events are available for the next 7 days with the most detail (images, prices, deep links)
 - Exhibitions are available for any date (they span weeks/months)
 - Data refreshes daily at 06:00 UTC via a GitHub Action that regenerates the bundled scrape data and redeploys the worker
-- Translations available via ?lang=en or ?lang=fr query parameter on the API
+- Translations available via the ?lang=${SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE).join(", ?lang=")} query parameter on the API
 `;
   llmsCache.set(city, txt);
   return txt;
@@ -170,15 +181,12 @@ app.get("/sitemap.xml", (c) => {
       (slug) => `  <url>
     <loc>${appUrl}/museum/${slug}</loc>
     <lastmod>${today}</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="${appUrl}/museum/${slug}"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${appUrl}/museum/${slug}?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="${appUrl}/museum/${slug}?lang=fr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${appUrl}/museum/${slug}"/>
+${hreflangLinks(`${appUrl}/museum/${slug}`)}
   </url>`,
     )
     .join("\n");
 
-  // Promoting /?lang=en + /?lang=fr to their own <url> blocks was an
+  // Promoting the ?lang= variants to their own <url> blocks was an
   // anti-pattern -- the hreflang relationship is already expressed
   // inside the / entry, so the locale-variant URLs were competing
   // duplicates per the audit. /impressum is dropped from the sitemap
@@ -189,10 +197,7 @@ app.get("/sitemap.xml", (c) => {
   <url>
     <loc>${appUrl}/</loc>
     <lastmod>${today}</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="${appUrl}/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="${appUrl}/?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="fr" href="${appUrl}/?lang=fr"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="${appUrl}/"/>
+${hreflangLinks(`${appUrl}/`)}
   </url>
 ${museumUrls}
 </urlset>`;

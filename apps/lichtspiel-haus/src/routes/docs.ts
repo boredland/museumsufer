@@ -35,7 +35,7 @@ const spec = {
             name: "date",
             in: "query",
             schema: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
-            description: "ISO date (defaults to today in Europe/Berlin)",
+            description: "ISO date (defaults to today in the city's local time: Europe/Berlin or Europe/Madrid)",
           },
           { name: "cinema", in: "query", schema: { type: "string" }, description: "Cinema slug" },
           { name: "series", in: "query", schema: { type: "string" }, description: "Series slug" },

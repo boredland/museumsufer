@@ -26,15 +26,22 @@ async function waitForSlot(): Promise<void> {
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
 }
 
-/** Translate German `text` into `targetLang` (uppercase DeepL code: EN, FR, …). */
-export async function translateText(config: DeeplConfig, text: string, targetLang: string): Promise<string> {
+/** Translate `text` from `sourceLang` into `targetLang` (bare uppercase DeepL
+ *  codes: DE, ES, EN, FR, …). Source defaults to German, the language of every
+ *  scraped German venue; Valencia venues publish Spanish. */
+export async function translateText(
+  config: DeeplConfig,
+  text: string,
+  targetLang: string,
+  sourceLang = "DE",
+): Promise<string> {
   await waitForSlot();
   const res = await retryFetch(
     `${config.url.replace(/\/+$/, "")}/translate`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${config.token}` },
-      body: JSON.stringify({ text, source_lang: "DE", target_lang: targetLang }),
+      body: JSON.stringify({ text, source_lang: sourceLang, target_lang: targetLang }),
     },
     { label: "deepl" },
   );

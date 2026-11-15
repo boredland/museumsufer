@@ -7,8 +7,8 @@ import {
   localizeCityText,
 } from "@museumsufer/core";
 
-export type Locale = Extract<CoreLocale, "de" | "en" | "fr">;
-export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr"];
+export type Locale = Extract<CoreLocale, "de" | "en" | "fr" | "es">;
+export const SUPPORTED_LOCALES: Locale[] = ["de", "en", "fr", "es"];
 export const DEFAULT_LOCALE: Locale = "de";
 
 export function detectLocale(request: Request): Locale {
@@ -527,7 +527,143 @@ const fr: Translations = {
   ],
 };
 
-const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr };
+const es: Translations = {
+  tagline: "Lo que suena hoy en Fráncfort del Meno y alrededores.",
+  genre: "Género",
+  genreAll: "Todos",
+  genreClassical: "Clásica",
+  genreJazz: "Jazz",
+  genreSacred: "Música sacra",
+  genreWorld: "Músicas del mundo",
+  genreExperimental: "Música contemporánea",
+  genreChamber: "Música de cámara",
+  dateStripLabel: "Días de conciertos",
+  todayProgrammeTitle: "Conciertos de esta noche",
+  emptyTitle: "Hoy no hay conciertos anunciados.",
+  emptyTodayAfterPast: "Hoy ya no quedan más conciertos.",
+  emptyHint: "Vuelve mañana o cambia la fecha de arriba.",
+  pastNote: (n) =>
+    `${n} concierto${n === 1 ? "" : "s"} ya ${n === 1 ? "ha empezado" : "han empezado"} hoy — oculto${n === 1 ? "" : "s"}.`,
+  castLabel: "Con",
+  empty: "Vuelve mañana o cambia la fecha de arriba.",
+  ticketsAction: "Entradas",
+  freeEntry: "Entrada libre",
+  toCalendar: "Añadir al calendario",
+  reportConcert: "Informar de un error en este concierto",
+  themeToggle: "Cambiar el tema de color",
+  weekOverview: "Resumen semanal",
+  reportProblem: "Informar de un problema",
+  imprint: "Aviso legal",
+  digestKicker: "Resumen push",
+  digestCueText: "Descubre cada mañana lo que suena hoy.",
+  digestTitle: "Suscribirse a los conciertos",
+  digestIntro:
+    "Notificaciones push directamente en tu dispositivo — sin correo electrónico ni cuenta. Puedes cancelar cuando quieras.",
+  digestIosHint:
+    "<strong>iPhone:</strong> toca «Compartir» y después «Añadir a la pantalla de inicio». Abre la web desde el icono: solo así funcionan las notificaciones push.",
+  digestUnsupported:
+    "Tu navegador no admite notificaciones push. Prueba con Safari (macOS), Chrome, Firefox o Edge.",
+  digestUnsubAll: "Cancelar todas las suscripciones",
+  digestSave: "Guardar",
+  digestUnsubscribeBtn: "Cancelar suscripción",
+  digestPermissionDenied: "Las notificaciones se han bloqueado. Permítelas en los ajustes del navegador.",
+  digestSubscribe: "Suscribirse",
+  digestSchedules: "Horarios del resumen",
+  digestMorning: "Cada mañana",
+  digestAfternoon: "Cada tarde",
+  digestSunday: "Resumen del domingo",
+  digestMorningSub: "El programa de hoy.",
+  digestAfternoonSub: "Lo que aún suena esta noche.",
+  digestSundaySub: "La semana que viene de un vistazo.",
+  digestFilterLabel: "Limitar a géneros",
+  digestFilterHint: "vacío = todos",
+  digestSaving: "Guardando…",
+  digestSaved: "Guardado.",
+  digestUnsubscribing: "Cancelando suscripción…",
+  digestUnsubscribed: "Suscripción cancelada.",
+  digestError: "No se pudo guardar.",
+  digestClose: "Cerrar",
+  contactTitle: "Comentarios y correcciones",
+  contactBody: "¿Hora incorrecta, concierto que falta, errata? Toda sugerencia es bienvenida.",
+  contactCategoryLabel: "Categoría",
+  contactEmailPlaceholder: "tu@email.es",
+  contactIntro: "¿Qué no está bien?",
+  contactCategoryGeneral: "General — comentarios / funciones",
+  contactCategoryConcert: "Concierto — datos incorrectos",
+  contactCategoryVenue: "Sala — falta o corrección",
+  contactCategoryBrowser: "Navegador",
+  contactRegarding: "Asunto",
+  contactMessage: "Mensaje",
+  contactEmail: "Correo electrónico (opcional, para responderte)",
+  contactSend: "Enviar",
+  contactSending: "Enviando…",
+  contactSent: "Gracias — le echaremos un vistazo.",
+  contactErr: "No se pudo enviar.",
+  homeTitle: "frankfurt.konzert.haus — Conciertos de hoy en Fráncfort del Meno",
+  homeDescription:
+    "Música clásica, jazz, de cámara, sacra y contemporánea — programa diario de Fráncfort y de la región Rin-Meno.",
+  endTimePrefix: "hasta las",
+  venueKicker: "Sala",
+  genreKicker: "Género",
+  emptyGenre: (genre) => `Por ahora no hay conciertos de ${genre.toLowerCase()} anunciados.`,
+  emptyVenue: "Todavía no hay programa anunciado.",
+  icalSubscribe: "Suscribirse por iCal",
+  jsonLink: "JSON",
+  websiteLink: "Web",
+  venueDescription: (venue, count) =>
+    `Conciertos en ${venue}. ${count} ${count === 1 ? "cita" : "citas"} en los próximos 60 días.`,
+  genreDescription: (genre, count) =>
+    `Conciertos de ${genre.toLowerCase()} en Fráncfort y alrededores. ${count} ${count === 1 ? "cita" : "citas"} en los próximos 60 días.`,
+  langSwitchAria: "Idioma",
+  siblingTemplate: "¿Nada que te convenza? ¿Qué tal {first}, {second}, {third} o {fourth}?",
+  siblingTheaterLabel: "una obra de teatro",
+  siblingMuseumLabel: "una visita a un museo",
+  siblingLehrLabel: "una conferencia",
+  siblingCinemaLabel: "una sesión de cine",
+  askAiLabel: "Pregunta a una IA",
+  askAiPrompt: (date) =>
+    `¿Qué hay en Fráncfort del Meno y la región el ${date}? Fuente: https://frankfurt.konzert.haus`,
+  askAiPromptVenue: (venue) =>
+    `¿Qué hay previsto en ${venue} en Fráncfort del Meno en las próximas semanas? Agrupa por concierto, por favor. Fuente: https://frankfurt.konzert.haus`,
+  askAiPromptGenre: (genre) =>
+    `¿Qué conciertos de ${genre} hay próximamente en Fráncfort del Meno y la región Rin-Meno? Fuente: https://frankfurt.konzert.haus`,
+  askAiAria: "Pregunta a una IA por el programa de conciertos de hoy",
+  spielortIndexTitle: "Salas",
+  genreIndexTitle: "Géneros",
+  faqKicker: "Preguntas frecuentes",
+  faqItems: [
+    {
+      q: "¿Qué salas se incluyen?",
+      a: "Actualmente {n} salas y ciclos en Fráncfort del Meno y alrededores: {venues}.",
+    },
+    {
+      q: "¿Cómo de actualizado está el programa?",
+      a: "Los datos se recogen cada hora, entre las 09:00 y las 21:00 (hora local), directamente de las webs de las salas. Las cancelaciones, los agotados y los cambios de programa suelen aparecer en menos de una hora.",
+    },
+    {
+      q: "¿Puedo comprar entradas aquí?",
+      a: "No — el botón Entradas de cada concierto enlaza directamente con la página de reservas de la sala o de la venta anticipada. Este sitio no vende entradas ni cobra comisión.",
+    },
+    {
+      q: "¿Qué géneros se incluyen?",
+      a: "Música clásica, jazz, música de cámara, música sacra, músicas del mundo y música contemporánea o experimental. El pop, el rock y el Schlager quedan fuera a propósito: otras plataformas los cubren mejor.",
+    },
+    {
+      q: "¿Qué pasa con los conciertos que ya han empezado?",
+      a: "En la vista de hoy, los conciertos se ocultan 30 minutos después de su hora de inicio, de modo que solo se ven los que aún se pueden alcanzar. Una pequeña nota al final indica cuántos ya han comenzado.",
+    },
+    {
+      q: "¿Por qué este sitio?",
+      a: "Fráncfort del Meno tiene una escena clásica e improvisada de una densidad poco habitual, pero ningún programa común. Este sitio reúne todas las salas en una vista diaria con buscador: un calendario de conciertos para toda la ciudad.",
+    },
+    {
+      q: "¿Cómo funcionan las notificaciones push?",
+      a: "Puedes suscribirte con el botón «Resumen push» o con el enlace del pie de página. Hay tres franjas: por la mañana (07:00), por la tarde (17:00) y un resumen semanal el domingo (09:00). Opcionalmente, las notificaciones se pueden limitar a determinados géneros. El registro es anónimo — sin cuenta ni correo electrónico — y se puede cancelar en cualquier momento. En iOS, primero hay que añadir el sitio a la pantalla de inicio como aplicación web.",
+    },
+  ],
+};
+
+const TRANSLATIONS: Record<Locale, Translations> = { de, en, fr, es };
 
 export function getTranslations(locale: Locale): Translations {
   return TRANSLATIONS[locale];
@@ -542,6 +678,10 @@ const REGION_SUB: Record<Locale, ReadonlyArray<readonly [string, string]>> = {
   de: [["Rhein-Main-Region", "Metropolregion"]],
   en: [["Rhine-Main region", "metropolitan region"]],
   fr: [["région Rhin-Main", "région métropolitaine"]],
+  es: [
+    ["de la región Rin-Meno", "del área metropolitana"],
+    ["la región Rin-Meno", "el área metropolitana"],
+  ],
 };
 
 /**
@@ -563,4 +703,10 @@ export function localizeTranslations(tr: Translations, city: string, locale: Loc
     askAiPromptGenre: (genre) => s(tr.askAiPromptGenre(genre)),
     faqItems: tr.faqItems.map((item) => ({ q: s(item.q), a: s(item.a) })),
   };
+}
+
+/** Language for surfaces that carry no UI locale (manifest, feeds, llms.txt,
+ *  markdown, OG cards): follow the city's country rather than the request. */
+export function cityContentLocale(city: string | undefined): Locale {
+  return cityMeta(city).country === "ES" ? "es" : DEFAULT_LOCALE;
 }

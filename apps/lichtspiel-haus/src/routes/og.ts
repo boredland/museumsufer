@@ -1,7 +1,16 @@
-import { buildOgSvg, cityHost, cityMeta, cityName, cityUrl, fitOgTitleSize } from "@museumsufer/core";
+import {
+  buildOgSvg,
+  cityHost,
+  cityMeta,
+  cityName,
+  cityUrl,
+  dateLocale,
+  detectLocale,
+  fitOgTitleSize,
+} from "@museumsufer/core";
 import { Hono } from "hono";
 import { getScreeningById } from "../db";
-import { localizeTranslations } from "../i18n";
+import { localizeTranslations, SUPPORTED_LOCALES } from "../i18n";
 import type { Env } from "../types";
 
 // Dark "auditorium" palette mirroring the site's dark mode — the OG image
@@ -20,6 +29,9 @@ app.get("/og/:id{[0-9]+}/image.svg", (c) => {
   const screening = getScreeningById(id);
   if (!screening) return c.notFound();
   const city = c.get("city") ?? "frankfurt";
+  // Crawlers fetch this URL without a ?lang, so the city's own language is
+  // the default: a Valencia card must not carry a German date.
+  const locale = detectLocale(c.req.raw, SUPPORTED_LOCALES, cityMeta(city).country === "ES" ? "es" : "de");
   return c.body(
     buildSvg(
       screening.title,
@@ -28,6 +40,7 @@ app.get("/og/:id{[0-9]+}/image.svg", (c) => {
       screening.time ?? null,
       screening.version ?? null,
       city,
+      dateLocale(locale),
     ),
     {
       headers: { "Content-Type": "image/svg+xml", "Cache-Control": "public, max-age=86400, s-maxage=604800" },
@@ -42,9 +55,10 @@ function buildSvg(
   time: string | null,
   version: string | null,
   city: string,
+  dateTag: string,
 ): string {
   const titleSize = fitOgTitleSize(title);
-  const dateRow = formatDate(date, time);
+  const dateRow = formatDate(date, time, dateTag);
   const versionRow = version ? `${dateRow}  ·  ${version}` : dateRow;
   return buildOgSvg({
     palette: PALETTE,
@@ -73,9 +87,9 @@ function buildSvg(
   });
 }
 
-function formatDate(date: string, time: string | null): string {
+function formatDate(date: string, time: string | null, dateTag: string): string {
   const d = new Date(`${date}T12:00:00Z`);
-  const label = d.toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+  const label = d.toLocaleDateString(dateTag, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   return time ? `${label} · ${time}` : label;
 }
 

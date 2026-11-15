@@ -35,6 +35,8 @@ function parseFilters(json: string | null): PushFilters | null {
 }
 
 export function scheduleForNow(now: Date): Schedule | null {
+  // Valencia shares Berlin's UTC offset and DST switch dates (both CET/CEST),
+  // so the Berlin hour is also the Valencia wall-clock hour.
   const h = berlinHour(now);
   const wd = berlinWeekday(now);
   if (wd === 0 && h === 9) return "weekly";

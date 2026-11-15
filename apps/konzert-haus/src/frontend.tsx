@@ -108,7 +108,7 @@ export interface HeadOptions {
   appUrl?: string;
 }
 
-const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR" };
+const OG_LOCALE: Record<Locale, string> = { de: "de_DE", en: "en_GB", fr: "fr_FR", es: "es_ES" };
 
 export function Head(opts: HeadOptions) {
   const base = opts.appUrl ?? APP_URL;
@@ -1096,7 +1096,7 @@ function venueFaqFor(city: string): { count: number; byLocale: Record<Locale, st
   const names = ranked.map((v) => v.name);
   const faq = {
     count: ranked.length,
-    byLocale: { de: joinNames(names, "de"), en: joinNames(names, "en"), fr: joinNames(names, "fr") },
+    byLocale: Object.fromEntries(SUPPORTED_LOCALES.map((l) => [l, joinNames(names, l)])) as Record<Locale, string>,
   };
   venueFaqCache.set(city, faq);
   return faq;
@@ -1150,7 +1150,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
     "@id": `${appUrl}/#website`,
     url: appUrl,
     name: "konzert.haus",
-    inLanguage: ["de", "en", "fr"],
+    inLanguage: SUPPORTED_LOCALES,
     publisher: { "@type": "Organization", name: "konzert.haus" },
     potentialAction: {
       "@type": "SearchAction",
@@ -1198,5 +1198,5 @@ export function renderPage(props: PageProps): HtmlEscapedString {
 }
 
 function niceDateFor(date: string, locale: Locale): string {
-  return formatLocalisedDateLong(date, locale === "fr" ? "fr-FR" : locale === "en" ? "en-GB" : "de-DE");
+  return formatLocalisedDateLong(date, dateLocale(locale));
 }

@@ -724,6 +724,72 @@ export const MUSEUMS: Record<string, MuseumConfig> = {
     lat: 51.1936,
     lng: 7.2597,
   },
+
+  // ── Valencia ──────────────────────────────────────────────────────────
+  // Spanish-language sources; slugs match the venue scrapers' source_slug.
+  ivam: {
+    name: "IVAM – Institut Valencià d'Art Modern",
+    city: "valencia",
+    website: "https://ivam.es",
+    lat: 39.4796,
+    lng: -0.3829,
+  },
+  muvim: {
+    name: "MuVIM – Museu Valencià de la Il·lustració i de la Modernitat",
+    city: "valencia",
+    website: "http://www.muvim.es",
+    lat: 39.4701,
+    lng: -0.3828,
+  },
+  "centre-del-carme": {
+    name: "Centre del Carme Cultura Contemporània",
+    city: "valencia",
+    website: "https://www.consorcimuseus.gva.es",
+    lat: 39.4786,
+    lng: -0.3812,
+  },
+  "bombas-gens": {
+    name: "Bombas Gens Centre d'Arts Digitals",
+    city: "valencia",
+    website: "https://bombasgens.com",
+    lat: 39.4896,
+    lng: -0.3917,
+  },
+  "fundacion-bancaja": {
+    name: "Fundación Bancaja",
+    city: "valencia",
+    website: "https://www.fundacionbancaja.es",
+    lat: 39.4736,
+    lng: -0.3792,
+  },
+  "museo-nacional-ceramica": {
+    name: "Museo Nacional de Cerámica González Martí",
+    city: "valencia",
+    website: "https://www.cultura.gob.es/mnceramica",
+    lat: 39.4721,
+    lng: -0.3774,
+  },
+  "jardi-botanic-valencia": {
+    name: "Jardí Botànic de la Universitat de València",
+    city: "valencia",
+    website: "https://jardibotanic.org",
+    lat: 39.4769,
+    lng: -0.3867,
+  },
+  cahh: {
+    name: "Centro de Arte Hortensia Herrero",
+    city: "valencia",
+    website: "https://www.cahh.es",
+    lat: 39.4766,
+    lng: -0.3763,
+  },
+  "museo-de-la-seda": {
+    name: "Museo de la Seda de Valencia",
+    city: "valencia",
+    website: "https://www.museodelasedavalencia.com",
+    lat: 39.4731,
+    lng: -0.3788,
+  },
 };
 
 export function getMuseumConfig(slug: string): MuseumConfig | undefined {

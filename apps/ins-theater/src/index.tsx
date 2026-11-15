@@ -1,4 +1,5 @@
 import { dateOffset, securityHeaders, todayIso } from "@museumsufer/core";
+import { citiesIn } from "@museumsufer/core/cities";
 import { cityMiddleware } from "@museumsufer/core/city-routing";
 import { hostKeyedCache } from "@museumsufer/core/host-cache";
 import { Hono } from "hono";
@@ -54,7 +55,8 @@ app.use(
 );
 
 // Apex (ins.theater) → nearest city's subdomain (geo); `<city>.ins.theater` sets c.var.city.
-app.use("*", cityMiddleware({ apex: "ins.theater", apexBehavior: "geo" }));
+// German cities only: this vertical has no Valencia domain.
+app.use("*", cityMiddleware({ apex: "ins.theater", apexBehavior: "geo", cities: citiesIn("DE") }));
 
 // Theater-specific response headers: X-Robots-Tag on data API, Link header
 // pointing at the API discovery surfaces.

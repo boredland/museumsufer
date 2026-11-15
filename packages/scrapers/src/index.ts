@@ -97,6 +97,22 @@ import { scrapeFabrik } from "./venues/fabrik";
 import { scrapeFesHessen } from "./venues/fes-hessen";
 import { scrapeFgzStreitclub } from "./venues/fgz-streitclub";
 import { scrapeFilmforumHoechst } from "./venues/filmforum-hoechst";
+import { scrapeFilmotecaValencia } from "./venues/filmoteca-valencia";
+import { scrapeOcineAquaValencia } from "./venues/ocine-aqua-valencia";
+import { scrapeReservaentradasValencia } from "./venues/_reservaentradas-valencia";
+import { scrapePalauDeLaMusicaValencia } from "./venues/palau-de-la-musica-valencia";
+import { scrapePalauDeLesArtsValencia } from "./venues/palau-de-les-arts-valencia";
+import { scrapeBombasGens } from "./venues/bombas-gens";
+import { scrapeCentreDelCarme } from "./venues/centre-del-carme";
+import { scrapeFundacionBancaja } from "./venues/fundacion-bancaja";
+import { scrapeIvam } from "./venues/ivam";
+import { scrapeJardiBotanic } from "./venues/jardi-botanic-valencia";
+import { scrapeMuseoNacionalCeramica } from "./venues/museo-nacional-ceramica";
+import { scrapeMuvim } from "./venues/muvim";
+import { scrapeFindeValenciaConciertos } from "./venues/findevalencia-conciertos";
+import { scrapeJazzValencia } from "./venues/jazz-valencia";
+import { scrapeCahh } from "./venues/cahh";
+import { scrapeMuseoDeLaSeda } from "./venues/museo-de-la-seda";
 import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeFirstStageTheater } from "./venues/first-stage-theater";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
@@ -334,6 +350,22 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
   { slug: "fes-hessen", run: (_ctx: ScraperContext) => scrapeFesHessen() },
   { slug: "fgz-streitclub", run: (_ctx: ScraperContext) => scrapeFgzStreitclub() },
   { slug: "filmforum-hoechst", run: (_ctx: ScraperContext) => scrapeFilmforumHoechst() },
+  { slug: "filmoteca-valencia", run: (_ctx: ScraperContext) => scrapeFilmotecaValencia() },
+  { slug: "ocine-aqua-valencia", run: (_ctx: ScraperContext) => scrapeOcineAquaValencia() },
+  { slug: "reservaentradas-valencia", run: (_ctx: ScraperContext) => scrapeReservaentradasValencia() },
+  { slug: "palau-de-la-musica-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLaMusicaValencia() },
+  { slug: "palau-de-les-arts-valencia", run: (_ctx: ScraperContext) => scrapePalauDeLesArtsValencia() },
+  { slug: "ivam", run: (_ctx: ScraperContext) => scrapeIvam() },
+  { slug: "muvim", run: (_ctx: ScraperContext) => scrapeMuvim() },
+  { slug: "centre-del-carme", run: (_ctx: ScraperContext) => scrapeCentreDelCarme() },
+  { slug: "bombas-gens", run: (_ctx: ScraperContext) => scrapeBombasGens() },
+  { slug: "fundacion-bancaja", run: (_ctx: ScraperContext) => scrapeFundacionBancaja() },
+  { slug: "museo-nacional-ceramica", run: (_ctx: ScraperContext) => scrapeMuseoNacionalCeramica() },
+  { slug: "jardi-botanic-valencia", run: (_ctx: ScraperContext) => scrapeJardiBotanic() },
+  { slug: "jazz-valencia", run: (_ctx: ScraperContext) => scrapeJazzValencia() },
+  { slug: "findevalencia-conciertos", run: (_ctx: ScraperContext) => scrapeFindeValenciaConciertos() },
+  { slug: "cahh", run: (_ctx: ScraperContext) => scrapeCahh() },
+  { slug: "museo-de-la-seda", run: (_ctx: ScraperContext) => scrapeMuseoDeLaSeda() },
   { slug: "filmkreis-darmstadt", run: (_ctx: ScraperContext) => scrapeFilmkreisDarmstadt() },
   { slug: "first-stage-theater", run: (ctx: ScraperContext) => scrapeFirstStageTheater(ctx) },
   {
