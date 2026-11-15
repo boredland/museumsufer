@@ -80,7 +80,11 @@ export async function runHub(previous: EventHubData, opts: RunOptions = {}): Pro
   const log: Logger = opts.log ?? (() => undefined);
   const today = now.toISOString().slice(0, 10);
   const ctx: ScraperContext = { proxy: opts.proxy ?? null };
-  const previousById = new Map(previous.events.map((e) => [e.id, e]));
+  // Events carried over from earlier runs keep the labels they were stored with, so a guard
+  // added later never reaches rows the scrapers no longer emit. Re-apply it to every one.
+  const previousById = new Map(
+    previous.events.map((e) => [e.id, { ...e, labels: dropNonProgrammeLabels(e.title, e.labels) }]),
+  );
   const merged = new Map<string, CanonicalEvent>(previousById);
   const seenThisRun = new Set<string>();
   // Seed venue names from the previous run so a transient scrape failure

@@ -1,3 +1,4 @@
+import { classifyMusic } from "@museumsufer/classify";
 import { decodeEntities, normalizeUrl, slugify, stripHtml } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
@@ -100,7 +101,15 @@ export async function scrapeEnsembleResonanz(): Promise<VenueScrapeResult> {
       price_max: null,
       lat,
       lon,
-      labels: [],
+      // A chamber orchestra's calendar is all concerts; without a label the hub's keyword
+      // fallback guesses at 0.6 and konzert-haus's confidence floor would drop real concerts.
+      labels: [
+        {
+          label: `music:${classifyMusic(title, venueText, null, "classical")}`,
+          confidence: 0.8,
+          classifier: "scraper-hardcoded",
+        },
+      ],
     });
   }
 

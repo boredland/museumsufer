@@ -151,10 +151,14 @@ ${entries}
 `;
 }
 
+/** Keyword guesses from the hub's fallback classifier sit at 0.6 and mislabel non-concerts
+ *  ("Weiberfaasenacht", "CD & Schallplattenbörse"); every real scraper label is 0.7 or higher. */
+const MIN_GENRE_CONFIDENCE = 0.7;
+
 function pickGenre(ev: CanonicalEvent): Genre | null {
   let best: { genre: Genre; confidence: number } | null = null;
   for (const l of ev.labels) {
-    if (!l.label.startsWith("music:")) continue;
+    if (!l.label.startsWith("music:") || l.confidence < MIN_GENRE_CONFIDENCE) continue;
     const tail = l.label.slice("music:".length);
     if (!(GENRES as readonly string[]).includes(tail)) continue;
     const genre = tail as Genre;
