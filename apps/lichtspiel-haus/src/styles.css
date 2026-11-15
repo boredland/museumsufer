@@ -932,6 +932,11 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
 }
 .showing__cinema:hover { color: var(--brass-bright); border-color: var(--brass-bright); }
 .showing__tags { color: var(--celluloid-quiet); }
+.showing__end { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.showing__price { font-family: var(--display); font-weight: 500; font-size: 1rem; color: var(--celluloid); }
+.showing__price .dash { color: var(--celluloid-quiet); margin: 0 0.12em; }
+.showing__price .cur { color: var(--celluloid-quiet); margin-left: 0.08em; font-size: 0.9em; }
+.showing__price--free { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 0.9rem; color: var(--celluloid-soft); }
 .showing__actions {
   display: inline-flex;
   flex-wrap: wrap;

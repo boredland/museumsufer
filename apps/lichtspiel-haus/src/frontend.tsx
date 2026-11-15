@@ -1594,12 +1594,16 @@ function WeekFilmCard({
   const showDescription = description && description !== first.subtitle;
   const genres = first.tmdb_genre_ids?.length ? genreNames(first.tmdb_genre_ids, locale) : [];
   const filmHref = `/film/${first.id}${langSuffix(locale)}`;
+  // Credits can differ between a film's showings (a Q&A guest at one screening), so a card shows the
+  // first non-empty one but search sees all of them.
+  const creditTexts = [...new Set(fd.showings.map((s) => s.credits).filter((c): c is string => !!c))];
+  const credits = creditTexts.find((c) => c !== first.subtitle) ?? null;
   const searchHay = [
     displayTitle,
     first.title,
     first.title_en,
     first.subtitle,
-    first.credits,
+    ...creditTexts,
     first.series?.name,
     ...genres,
     ...fd.showings.flatMap((s) => [s.cinema.name, s.cinema.short_name, s.version, s.format]),
@@ -1639,6 +1643,12 @@ function WeekFilmCard({
         {first.series ? (
           <p class="prog-entry__series">
             <a href={`/reihe/${first.series.slug}${langSuffix(locale)}`}>{first.series.name}</a>
+          </p>
+        ) : null}
+        {credits ? (
+          <p class="prog-entry__cast">
+            <span class="prog-entry__cast-label">{tr.creditsLabel}</span>
+            <span class="prog-entry__cast-text">{credits}</span>
           </p>
         ) : null}
       </header>
@@ -1684,6 +1694,7 @@ function ShowingChip({
   const screeningUtm = buildUtm(cityHost("lichtspiel.haus", s.cinema.city));
   const isFree =
     (s.price_min === 0 && (s.price_max == null || s.price_max === 0)) || (s.price_min == null && s.price_max === 0);
+  const hasPrice = (s.price_min != null && s.price_min > 0) || (s.price_max != null && s.price_max > 0);
   const room = s.venue_room && s.venue_room !== s.cinema.name ? s.venue_room : null;
   const tags = [s.version, s.format].filter(Boolean).join(" · ");
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
@@ -1692,6 +1703,7 @@ function ShowingChip({
       <time class="showing__time" dateTime={s.time ? `${s.date}T${s.time}` : s.date}>
         {s.time ?? "—"}
       </time>
+      {s.end_time ? <span class="showing__end">{`${tr.endTimePrefix} ${s.end_time}`}</span> : null}
       <a class="showing__cinema" href={`/kino/${s.cinema_slug}${langSuffix(locale)}`}>
         {s.cinema.short_name ?? s.cinema.name}
       </a>
@@ -1700,6 +1712,13 @@ function ShowingChip({
         <span class={`prog-entry__avail prog-entry__avail--${s.availability.replace("_", "-")}`}>
           {s.availability === "sold_out" ? tr.soldOut : tr.fewLeft}
         </span>
+      ) : null}
+      {hasPrice ? (
+        <span class="showing__price">
+          <PriceRange min={s.price_min} max={s.price_max} />
+        </span>
+      ) : isFree ? (
+        <span class="showing__price showing__price--free">{tr.freeEntry}</span>
       ) : null}
       <span class="showing__actions">
         <button
