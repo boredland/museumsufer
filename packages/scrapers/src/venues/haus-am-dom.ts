@@ -84,6 +84,9 @@ export async function scrapeHausAmDom(proxy: ProxyConfig | null = null): Promise
     if (!foundNew) break;
   }
 
+  // ~100 published pages; an empty walk means the listing markup changed, which must not read as "no events".
+  if (cards.length === 0) throw new Error("haus-am-dom: no event cards found on /programm");
+
   const queue = new PQueue({ concurrency: DETAIL_CONCURRENCY });
   const results = await Promise.all(
     cards.map(({ url, date }) => queue.add(() => fetchDetail(url, date, proxy, budget))),
