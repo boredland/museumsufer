@@ -10,6 +10,14 @@ const TARGETS: Record<SourceLang, readonly string[]> = {
   es: ["DE", "EN", "FR"],
 };
 
+/** Translations bought per run. The shared proxy answers 429 after ~80-100 requests
+ *  and `retryFetch` absorbs those with backoff, so an unbounded loop does not stop at
+ *  the quota, it crawls: one run spent 19 minutes here and hit the CI job's timeout,
+ *  skipping every other derive and the commit. A count (never a time budget) keeps the
+ *  output deterministic; the shortest-first order means titles land first and the
+ *  backlog drains over successive runs. */
+const MAX_TRANSLATIONS_PER_RUN = 80;
+
 type Translate = (config: DeeplConfig, text: string, targetLang: string, sourceLang: string) => Promise<string>;
 
 /** Every text that reaches the bundle, mapped to the language it is written
@@ -75,6 +83,9 @@ export async function translateTexts(opts: {
   // the page shows, and one description costs as much as dozens of them. A
   // per-target loop would let the first target eat the whole budget.
   jobs.sort((a, b) => a.text.length - b.text.length || a.hash.localeCompare(b.hash) || a.target.localeCompare(b.target));
+  const deferred = Math.max(0, jobs.length - MAX_TRANSLATIONS_PER_RUN);
+  jobs.length = Math.min(jobs.length, MAX_TRANSLATIONS_PER_RUN);
+  if (deferred > 0) logOk("deepl", "-", `${deferred} translations deferred to later runs (cap ${MAX_TRANSLATIONS_PER_RUN}/run)`);
 
   const total = new Map<string, number>();
   const done = new Map<string, number>();

@@ -31,6 +31,12 @@ const POSTER_BASE = "https://image.tmdb.org/t/p/w500";
  *  requests per run and EN/FR + museum translations share that budget. */
 const DEEPL_ES_BUDGET = 20;
 
+/** DeepL DE→EN overview fallbacks bought per run. Like the museum translations, an
+ *  unbounded loop through the shared proxy does not stop at its ~80-100 request quota,
+ *  it crawls on 429 backoff and can exhaust the CI job's timeout. A count keeps the
+ *  output deterministic; the backlog drains over successive runs. */
+const DEEPL_EN_BUDGET = 60;
+
 interface TmdbMovieResult {
   id: number;
   poster_path: string | null;
@@ -479,6 +485,7 @@ export async function enrichFilmPosters(
       if (entry?.overview && !entry.overview_en) needsTranslation.push({ entry, text: entry.overview });
     }
     for (const { entry, text } of needsTranslation) {
+      if (translated >= DEEPL_EN_BUDGET) break;
       try {
         entry.overview_en = await translateText(opts.deepl, text, "EN");
         translated++;
