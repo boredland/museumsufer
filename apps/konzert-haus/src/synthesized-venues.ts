@@ -983,16 +983,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "english-theatre-hamburg",
-    name: "English Theatre of Hamburg",
-    address: "",
-    lat: 53.5693,
-    lon: 10.0286,
-    city: "hamburg",
-    website_url: "https://englishtheatre-shop.comfortticket.de",
-    default_genre: "classical",
-  },
-  {
     slug: "enjoy-jazz",
     name: "Enjoy Jazz",
     address: "",
@@ -1171,6 +1161,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "frankfurt",
     website_url: "https://www.hugenottenhalle.de",
     default_genre: "classical",
+  },
+  {
+    slug: "internationales-theater",
+    name: "Internationales Theater Frankfurt",
+    address: "",
+    lat: 50.1135,
+    lon: 8.6976,
+    city: "frankfurt",
+    website_url: "https://fit-frankfurt.de",
+    default_genre: "jazz",
   },
   {
     slug: "ivam-valencia",

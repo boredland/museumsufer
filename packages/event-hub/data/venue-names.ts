@@ -423,6 +423,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "forschungskolleg-humanwissenschaften": "Forschungskolleg Humanwissenschaften (Bad Homburg)",
   "fotografie-forum-frankfurt": "Fotografie Forum Frankfurt",
   "frankfurt-uas": "Frankfurt University of Applied Sciences",
+  "frankfurt-uas-coe": "Frankfurt UAS - Centre of Excellence",
   "frankfurter-buergerstiftung": "Frankfurter Bürgerstiftung im Holzhausenschlösschen",
   "frankfurter-feldbahnmuseum": "Frankfurter Feldbahnmuseum",
   "frankfurter-goethe-haus": "Frankfurter Goethe-Haus / Freies Deutsches Hochstift",

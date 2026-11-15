@@ -13,6 +13,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "alte-oper",
+    name: "Alte Oper Frankfurt",
+    address: "",
+    lat: 50.1158,
+    lon: 8.6713,
+    city: "frankfurt",
+    website_url: "https://www.alteoper.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-bandfabrik",
     name: "Bandfabrik",
     address: "",
