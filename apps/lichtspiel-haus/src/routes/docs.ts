@@ -11,7 +11,7 @@ const spec = {
   info: {
     title: "lichtspiel.haus API",
     description:
-      "Public API for cinema screenings in Frankfurt and the Rhein-Main region. Arthouse, programmkino, repertoire, festivals and film series. Underlying data refreshes multiple times daily via a GitHub Action.",
+      "Public API for cinema screenings. Each city has its own subdomain (<city>.lichtspiel.haus) and every endpoint defaults to the city of the host you call. Arthouse, programmkino, repertoire, festivals and film series. Underlying data refreshes multiple times daily via a GitHub Action.",
     version: "1.0.0",
     contact: { url: "https://github.com/boredland/museumsufer" },
     license: { name: "MIT", url: "https://github.com/boredland/museumsufer/blob/main/LICENSE" },
@@ -28,7 +28,7 @@ const spec = {
       get: {
         tags: ["Screenings"],
         summary: "Screenings for a date",
-        description: "Returns `{date, count, screenings}` for the given day. Optional filters: cinema, series, city.",
+        description: "Returns `{date, count, screenings}` for the given day. Defaults to the host's city. Optional filters: cinema, series, city.",
         operationId: "getDay",
         parameters: [
           {
@@ -39,7 +39,7 @@ const spec = {
           },
           { name: "cinema", in: "query", schema: { type: "string" }, description: "Cinema slug" },
           { name: "series", in: "query", schema: { type: "string" }, description: "Series slug" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key" },
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
         ],
         responses: { "200": { description: "Day screenings" } },
       },
@@ -48,7 +48,7 @@ const spec = {
       get: {
         tags: ["Screenings"],
         summary: "Screening search",
-        description: "Filter by date, range, cinema, series, or city.",
+        description: "Filter by date, range, cinema, series, or city. Defaults to the host's city.",
         operationId: "getScreenings",
         parameters: [
           { name: "date", in: "query", schema: { type: "string" }, description: "Single ISO date" },
@@ -56,7 +56,7 @@ const spec = {
           { name: "to", in: "query", schema: { type: "string" }, description: "Range end (defaults today+60)" },
           { name: "cinema", in: "query", schema: { type: "string" }, description: "Cinema slug" },
           { name: "series", in: "query", schema: { type: "string" }, description: "Series slug" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key" },
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
         ],
         responses: { "200": { description: "Screening list" } },
       },
@@ -91,7 +91,11 @@ const spec = {
       get: {
         tags: ["Series"],
         summary: "Film series directory",
+        description: "Series with screenings in the host's city. Pass `city` to override.",
         operationId: "getSeries",
+        parameters: [
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
+        ],
         responses: { "200": { description: "Series list" } },
       },
     },

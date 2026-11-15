@@ -1,15 +1,16 @@
+import { cityUrl } from "@museumsufer/core";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import type { Env } from "../types";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const spec = {
   openapi: "3.1.0",
   info: {
     title: "konzert.haus API",
     description:
-      "Public API for concert events in Frankfurt and the Rhein-Main region. Classical, jazz, sacred, world, experimental and chamber music — no pop or rock. Underlying data refreshes hourly via a GitHub Action.",
+      "Public API for concert events. Each city has its own subdomain (<city>.konzert.haus) and every endpoint defaults to the city of the host you call. Classical, jazz, sacred, world, experimental and chamber music — no pop or rock. Underlying data refreshes hourly via a GitHub Action.",
     version: "1.0.0",
     contact: { url: "https://github.com/boredland/museumsufer" },
     license: { name: "MIT", url: "https://github.com/boredland/museumsufer/blob/main/LICENSE" },
@@ -25,7 +26,7 @@ const spec = {
       get: {
         tags: ["Events"],
         summary: "Events for a date",
-        description: "Returns `{date, count, events}` for the given day. Optional filters: venue, genre, city.",
+        description: "Returns `{date, count, events}` for the given day. Defaults to the host's city. Optional filters: venue, genre, city.",
         operationId: "getDay",
         parameters: [
           {
@@ -36,7 +37,7 @@ const spec = {
           },
           { name: "venue", in: "query", schema: { type: "string" }, description: "Venue slug" },
           { name: "genre", in: "query", schema: { type: "string" }, description: "Genre key" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key" },
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
         ],
         responses: { "200": { description: "Day events" } },
       },
@@ -45,7 +46,7 @@ const spec = {
       get: {
         tags: ["Events"],
         summary: "Event search",
-        description: "Filter by date, range, venue, genre, or city.",
+        description: "Filter by date, range, venue, genre, or city. Defaults to the host's city.",
         operationId: "getEvents",
         parameters: [
           { name: "date", in: "query", schema: { type: "string" }, description: "Single ISO date" },
@@ -53,7 +54,7 @@ const spec = {
           { name: "to", in: "query", schema: { type: "string" }, description: "Range end (defaults today+60)" },
           { name: "venue", in: "query", schema: { type: "string" }, description: "Venue slug" },
           { name: "genre", in: "query", schema: { type: "string" }, description: "Genre key" },
-          { name: "city", in: "query", schema: { type: "string" }, description: "City key" },
+          { name: "city", in: "query", schema: { type: "string" }, description: "City key (defaults to the host's city)" },
         ],
         responses: { "200": { description: "Event list" } },
       },
@@ -106,7 +107,13 @@ const spec = {
   },
 };
 
-app.get("/openapi.json", (c) => c.json(spec, { headers: { "Cache-Control": "public, max-age=86400" } }));
+app.get("/openapi.json", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.json(
+    { ...spec, servers: [{ url: cityUrl("konzert.haus", city) }] },
+    { headers: { "Cache-Control": "public, max-age=86400" } },
+  );
+});
 
 app.get(
   "/",
