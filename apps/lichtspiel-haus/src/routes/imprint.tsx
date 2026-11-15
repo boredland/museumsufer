@@ -1,4 +1,4 @@
-import { buildImprintSections, cityHost, cityMeta, cityName, cityUrl } from "@museumsufer/core";
+import { buildImprintSections, cityUrl } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { Footer, Head, Masthead } from "../frontend";

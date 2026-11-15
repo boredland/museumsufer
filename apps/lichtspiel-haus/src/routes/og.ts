@@ -1,16 +1,7 @@
-import {
-  buildOgSvg,
-  cityHost,
-  cityMeta,
-  cityName,
-  cityUrl,
-  dateLocale,
-  detectLocale,
-  fitOgTitleSize,
-} from "@museumsufer/core";
+import { buildOgSvg, cityMeta, dateLocale, detectLocale, fitOgTitleSize } from "@museumsufer/core";
 import { Hono } from "hono";
 import { getScreeningById } from "../db";
-import { localizeTranslations, SUPPORTED_LOCALES } from "../i18n";
+import { SUPPORTED_LOCALES } from "../i18n";
 import type { Env } from "../types";
 
 // Dark "auditorium" palette mirroring the site's dark mode — the OG image
