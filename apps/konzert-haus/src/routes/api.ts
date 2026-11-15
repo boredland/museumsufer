@@ -17,7 +17,7 @@ app.get("/api/day", (c) => {
   const date = c.req.query("date") ?? todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
   const venue = c.req.query("venue") ?? null;
-  const city = c.req.query("city") ?? null;
+  const city = c.req.query("city") ?? c.get("city") ?? null;
   const genre = parseGenre(c.req.query("genre"));
   const events = getEventsForDate(date, { venue, city, genre });
   return c.json({ date, count: events.length, events }, { headers: DAY_HEADERS });
@@ -29,7 +29,7 @@ app.get("/api/events", (c) => {
   const from = c.req.query("from") ?? today;
   const to = c.req.query("to") ?? dateOffset(60);
   const venue = c.req.query("venue") ?? null;
-  const city = c.req.query("city") ?? null;
+  const city = c.req.query("city") ?? c.get("city") ?? null;
   const genre = parseGenre(c.req.query("genre"));
 
   if (date) {

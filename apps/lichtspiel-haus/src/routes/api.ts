@@ -24,7 +24,7 @@ app.get("/api/day", (c) => {
   const date = c.req.query("date") ?? todayIso();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return c.json({ error: "invalid date" }, 400);
   const cinema = c.req.query("cinema") ?? null;
-  const city = c.req.query("city") ?? null;
+  const city = c.req.query("city") ?? c.get("city") ?? null;
   const series = c.req.query("series") ?? null;
   const screenings = getScreeningsForDate(date, { cinema, city, series });
   return c.json({ date, count: screenings.length, screenings }, { headers: DAY_HEADERS });
@@ -36,7 +36,7 @@ app.get("/api/screenings", (c) => {
   const from = c.req.query("from") ?? today;
   const to = c.req.query("to") ?? dateOffset(60);
   const cinema = c.req.query("cinema") ?? null;
-  const city = c.req.query("city") ?? null;
+  const city = c.req.query("city") ?? c.get("city") ?? null;
   const series = c.req.query("series") ?? null;
 
   if (date) {
