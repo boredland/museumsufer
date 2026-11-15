@@ -1050,9 +1050,9 @@ export function ProgrammePartial({
         <p class="programme__line" />
         <p class="programme__weekday">{weekdayLong}</p>
         <h2 class="programme__date">
-          <span class="programme__day">{dp.day}.</span>
-          <span class="programme__month">{monthLong}</span>
-          <span class="programme__year">{dp.year}</span>
+          <span class="programme__day">{locale === "de" ? `${dp.day}.` : dp.day}</span>
+          <span class="programme__month">{locale === "es" ? `de ${monthLong}` : monthLong}</span>
+          <span class="programme__year">{locale === "es" ? `de ${dp.year}` : dp.year}</span>
         </h2>
       </header>
       {visible.length === 0 ? (
@@ -1060,7 +1060,7 @@ export function ProgrammePartial({
           <p class="empty__mark" aria-hidden="true">
             ‖
           </p>
-          <p class="empty__direction">Generalpause</p>
+          <p class="empty__direction">{tr.emptyDirection}</p>
           <p class="empty__line">{hidden > 0 ? tr.emptyTodayAfterPast : tr.emptyTitle}</p>
           <p class="empty__hint">{tr.emptyHint}</p>
         </div>

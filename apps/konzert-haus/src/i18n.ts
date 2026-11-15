@@ -30,6 +30,8 @@ export interface Translations {
   dateStripLabel: string;
   todayProgrammeTitle: string;
   emptyTitle: string;
+  /** Italic score direction above the empty-day message. */
+  emptyDirection: string;
   emptyTodayAfterPast: string;
   emptyHint: string;
   pastNote: (n: number) => string;
@@ -139,6 +141,7 @@ const de: Translations = {
   dateStripLabel: "Konzerttage",
   todayProgrammeTitle: "Heutige Konzerte",
   emptyTitle: "Heute keine Konzerte gemeldet.",
+  emptyDirection: "Generalpause",
   emptyTodayAfterPast: "Heute keine kommenden Konzerte mehr.",
   emptyHint: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   pastNote: (n) => `${n} Konzert${n === 1 ? "" : "e"} heute bereits begonnen — verborgen.`,
@@ -273,6 +276,7 @@ const en: Translations = {
   dateStripLabel: "Concert days",
   todayProgrammeTitle: "Tonight's concerts",
   emptyTitle: "No concerts announced today.",
+  emptyDirection: "Grand pause",
   emptyTodayAfterPast: "No more upcoming concerts today.",
   emptyHint: "Check back tomorrow or change the date above.",
   pastNote: (n) => `${n} concert${n === 1 ? "" : "s"} already started today — hidden.`,
@@ -406,6 +410,7 @@ const fr: Translations = {
   dateStripLabel: "Jours de concert",
   todayProgrammeTitle: "Concerts de ce soir",
   emptyTitle: "Aucun concert annoncé aujourd'hui.",
+  emptyDirection: "Grande pause",
   emptyTodayAfterPast: "Plus de concerts à venir aujourd'hui.",
   emptyHint: "Repasse demain ou choisis une autre date ci-dessus.",
   pastNote: (n) =>
@@ -540,6 +545,7 @@ const es: Translations = {
   dateStripLabel: "Días de conciertos",
   todayProgrammeTitle: "Conciertos de esta noche",
   emptyTitle: "Hoy no hay conciertos anunciados.",
+  emptyDirection: "Pausa general",
   emptyTodayAfterPast: "Hoy ya no quedan más conciertos.",
   emptyHint: "Vuelve mañana o cambia la fecha de arriba.",
   pastNote: (n) =>
