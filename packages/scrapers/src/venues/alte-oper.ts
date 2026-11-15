@@ -1,6 +1,6 @@
-import { classifyMusic } from "@museumsufer/classify";
+import { classifyMusic, classifyTalk, type MusicGenre } from "@museumsufer/classify";
 import { dateOffset, decodeEntities, stripHtml, todayIso, truncate } from "@museumsufer/core";
-import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
+import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
 const BASE = "https://www.alteoper.de";
 const API = `${BASE}/de/api/events/`;
@@ -25,6 +25,8 @@ interface AofEvent {
   single_price: boolean | number;
   lowest_price: number | null;
   is_past: boolean;
+  genres: Array<{ name: string }>;
+  event_types: Array<{ name: string }>;
 }
 
 interface AofResponse {
@@ -33,11 +35,91 @@ interface AofResponse {
   results: AofEvent[];
 }
 
+/** Genres that mark a performance as a concert; "Entertainment" alone does not (it also covers cabaret and shows). */
+const MUSIC_GENRES = [
+  "Klassik",
+  "Orchester",
+  "Klavier",
+  "Kammermusik",
+  "Alte Musik",
+  "Vokal",
+  "Neue Musik",
+  "Jazz",
+  "Rock, Pop, Singer Songwriter",
+  "Weltmusik",
+  "Film & Musik",
+];
+
+/**
+ * The venue's own `genres` / `event_types` decide the namespace: the hall
+ * books readings, cabaret, tours and congresses next to concerts, so a blanket
+ * `music:*` mislabels them. The keyword genre only refines events the venue
+ * itself files as music.
+ */
+function resolveLabels(
+  title: string,
+  subtitle: string | null,
+  headline: string | null,
+  genres: readonly string[],
+  eventTypes: readonly string[],
+): ScrapedLabel[] {
+  const upstream = (label: string, confidence = 0.9): ScrapedLabel => ({
+    label,
+    confidence,
+    classifier: "upstream-category",
+  });
+
+  if (genres.includes("Kongresse & Events")) return [upstream("event:venue", 0.5)];
+  // A tour is not a concert, but a Gesprächskonzert is filed as one even when it is also tagged Führung.
+  if (eventTypes.includes("Führung") && !eventTypes.includes("Gesprächskonzert")) {
+    return [upstream("event:venue", 0.5)];
+  }
+  if (genres.includes("Lesung")) return [upstream(`talk:${classifyTalk(title, subtitle).toLowerCase()}`)];
+
+  const hasMusicGenre = genres.some((g) => MUSIC_GENRES.includes(g));
+  if (genres.includes("Kabarett & Comedy")) {
+    const cabaret = upstream("stage:kabarett");
+    return hasMusicGenre ? [cabaret, musicLabel(title, subtitle, headline, genres)] : [cabaret];
+  }
+  // The venue files a gospel concert under "Shows & Musicals"; sacred repertoire is still a concert.
+  if (
+    genres.includes("Shows & Musicals") &&
+    !genres.includes("Klassik") &&
+    classifyMusic(title, subtitle, headline, "classical") !== "sacred"
+  ) {
+    return [upstream("stage:musical")];
+  }
+
+  return [musicLabel(title, subtitle, headline, genres)];
+}
+
+function musicLabel(
+  title: string,
+  subtitle: string | null,
+  headline: string | null,
+  genres: readonly string[],
+): ScrapedLabel {
+  // Venue genre first: keyword needles read "Leonkoro Quartett" or "Rock the Ballet" as jazz.
+  const fromGenre: MusicGenre | null = genres.includes("Jazz")
+    ? "jazz"
+    : genres.includes("Kammermusik")
+      ? "chamber"
+      : genres.includes("Neue Musik")
+        ? "experimental"
+        : genres.includes("Weltmusik")
+          ? "world"
+          : null;
+  if (fromGenre) return { label: `music:${fromGenre}`, confidence: 0.9, classifier: "upstream-category" };
+  return {
+    label: `music:${classifyMusic(title, subtitle, headline, "classical")}`,
+    confidence: 0.9,
+    classifier: "scraper-hardcoded",
+  };
+}
+
 /**
  * Alte Oper publishes the entire programme through a paginated JSON endpoint
- * keyed off `from_date`. Every event here is a music programme item — the
- * `music:` label is hardcoded to the venue and the genre comes from a keyword
- * pass with classical as the safe fallback.
+ * keyed off `from_date`.
  */
 export async function scrapeAlteOper(): Promise<VenueScrapeResult> {
   const today = todayIso();
@@ -82,7 +164,9 @@ export async function scrapeAlteOper(): Promise<VenueScrapeResult> {
       if (seen.has(dedup)) continue;
       seen.add(dedup);
 
-      const genre = classifyMusic(title, finalSubtitle, headline, "classical");
+      if (!Array.isArray(raw.genres) || !Array.isArray(raw.event_types)) {
+        throw new Error(`alte-oper: event ${raw.id} lacks genres/event_types — API changed`);
+      }
 
       events.push({
         source_event_id: dedup,
@@ -99,7 +183,13 @@ export async function scrapeAlteOper(): Promise<VenueScrapeResult> {
         price_max: null,
         performers,
         venue_room: room || null,
-        labels: [{ label: `music:${genre}`, confidence: 0.9, classifier: "scraper-hardcoded" }],
+        labels: resolveLabels(
+          title,
+          finalSubtitle,
+          headline,
+          raw.genres.map((g) => g.name),
+          raw.event_types.map((t) => t.name),
+        ),
       });
     }
     if (pastHorizon) break;

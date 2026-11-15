@@ -1,4 +1,4 @@
-import { classifyDance, classifyMusic, classifyTalk, detectTalkLanguage, looksLikeMusic } from "@museumsufer/classify";
+import { classifyDance, classifyMusic, detectTalkLanguage } from "@museumsufer/classify";
 import { berlinNow, decodeEntities, normalizeUrl, nullIfMidnight, stripHtml, todayIso } from "@museumsufer/core";
 import type { CanonicalScrapedEvent, ScrapedLabel, VenueScrapeResult } from "../types";
 
@@ -129,36 +129,36 @@ function parseEntry(article: string, date: string): CanonicalScrapedEvent | null
   };
 }
 
+/**
+ * The venue's own category chips decide the namespace. Free text in title or
+ * subtitle must not: a dance piece "to the Music of …" is not a concert, and a
+ * "Lesung" chip is a reading even when no keyword in the title says so.
+ */
 function labelsFromTags(tags: readonly string[], title: string, subtitle: string | null): ScrapedLabel[] {
-  const haystack = `${tags.join(" ")} ${title} ${subtitle ?? ""}`.toLowerCase();
+  const tagText = tags.join(" ").toLowerCase();
+  const haystack = `${tagText} ${title} ${subtitle ?? ""}`.toLowerCase();
   const labels: ScrapedLabel[] = [];
+  const tagLabel = (label: string, confidence: number): ScrapedLabel => ({ label, confidence, classifier: "upstream-tag" });
 
-  if (/konzert|musik/.test(haystack) || looksLikeMusic(title, subtitle)) {
-    labels.push({
-      label: `music:${classifyMusic(title, subtitle, null, "experimental")}`,
-      confidence: 0.95,
-      classifier: "upstream-tag",
-    });
+  // Participation formats ("Mitmachen · Workshop", "Workshop · Tanz") are not performances.
+  if (/workshop/.test(tagText)) return [tagLabel("talk:workshop", 0.8)];
+
+  if (/konzert|musik/.test(tagText)) {
+    labels.push(tagLabel(`music:${classifyMusic(title, subtitle, null, "experimental")}`, 0.95));
   }
-  if (/lesung|buchpräsentation|buchvorstellung|diskurs|diskussion|gespräch|podium|debatte/.test(haystack)) {
-    labels.push({
-      label: `talk:${classifyTalk(title, subtitle).toLowerCase()}`,
-      confidence: 0.95,
-      classifier: "upstream-tag",
-    });
+  if (/lesung/.test(tagText)) {
+    labels.push(tagLabel("talk:lesung", 0.95));
+  } else if (/diskurs|diskussion|gespräch|podium|debatte/.test(tagText)) {
+    labels.push(tagLabel("talk:diskussion", 0.95));
   }
-  if (/tanz|performance/.test(haystack)) {
-    labels.push({
-      label: `dance:${classifyDance(title, subtitle, null, "contemporary")}`,
-      confidence: 0.9,
-      classifier: "upstream-tag",
-    });
+  if (/tanz|performance/.test(tagText)) {
+    labels.push(tagLabel(`dance:${classifyDance(title, subtitle, null, "contemporary")}`, 0.9));
   }
-  if (/theater|schauspiel/.test(haystack)) {
-    labels.push({ label: "stage:theater", confidence: 0.9, classifier: "upstream-tag" });
+  if (/theater|schauspiel/.test(tagText)) {
+    labels.push(tagLabel("stage:theater", 0.9));
   }
   if (/familie|kinder/.test(haystack)) {
-    labels.push({ label: "museum:familie", confidence: 0.85, classifier: "upstream-tag" });
+    labels.push(tagLabel("museum:familie", 0.85));
   }
   return labels;
 }

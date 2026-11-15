@@ -55,8 +55,10 @@ export async function scrapeStaatstheaterWiesbaden(): Promise<VenueScrapeResult>
     const stageMatch = block.match(/<span\s+class="performance__stage">([^<]+)<\/span>/);
     const venueRoom = stageMatch ? decodeEntities(stageMatch[1].trim().replace(/:$/, "")) : null;
 
-    const catMatch = block.match(/<span\s+class="performance__category">([^<]+)<\/span>/);
-    const rawCategory = catMatch ? decodeEntities(catMatch[1].trim().replace(/:$/, "")) : null;
+    const categories = [...block.matchAll(/<span\s+class="performance__category">([^<]+)<\/span>/g)].map((m) =>
+      decodeEntities(m[1].trim().replace(/:$/, "")),
+    );
+    const rawCategory = categories[0] ?? null;
 
     const subtitleMatch = block.match(/<div\s+class="performance__authorcomposer">([^<]+)<\/div>/);
     const subtitle = subtitleMatch ? decodeEntities(subtitleMatch[1].trim()) : null;
@@ -66,9 +68,6 @@ export async function scrapeStaatstheaterWiesbaden(): Promise<VenueScrapeResult>
 
     const detailUrlMatch = block.match(/<h4\s+class="performance__title">\s*<a\s+href="([^"]+)"/);
     const detailUrl = detailUrlMatch ? `${BASE}${detailUrlMatch[1]}` : null;
-
-    const colorMatch = block.match(/performance--layoutscheme-set\d-(\w+)/);
-    const genreColor = colorMatch ? colorMatch[1] : null;
 
     if (seen.has(perfId)) continue;
     seen.add(perfId);
@@ -85,7 +84,7 @@ export async function scrapeStaatstheaterWiesbaden(): Promise<VenueScrapeResult>
       detail_url: detailUrl,
       venue_room: venueRoom,
       raw_category: rawCategory,
-      labels: buildLabels(title, rawCategory, genreColor),
+      labels: buildLabels(title, rawCategory, categories),
     });
   }
 
@@ -96,17 +95,21 @@ export async function scrapeStaatstheaterWiesbaden(): Promise<VenueScrapeResult>
   };
 }
 
+// The schedule's `layoutscheme-*-yellow` is the calendar's default colour for nearly
+// every entry, so it says nothing about the audience; the stage-category chips do.
+const JUNGES_THEATER_CATEGORIES: Record<string, true> = { JUST: true, "Junges Staatsmusical": true };
+
 function buildLabels(
   title: string,
   category: string | null,
-  color: string | null,
+  categories: readonly string[],
 ): Array<{ label: string; confidence: number; classifier: "scraper-hardcoded" }> {
   const labels: Array<{ label: string; confidence: number; classifier: "scraper-hardcoded" }> = [
     { label: "stage:theater", confidence: 0.95, classifier: "scraper-hardcoded" },
   ];
   const t = title.toLowerCase();
 
-  if (color === "yellow" || category === "JUST") {
+  if (categories.some((c) => JUNGES_THEATER_CATEGORIES[c])) {
     labels.push({ label: "stage:junges-theater", confidence: 0.8, classifier: "scraper-hardcoded" });
   }
   if (category === "Oper" || t.includes("oper")) {
