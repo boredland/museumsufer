@@ -48,6 +48,18 @@ const ALLOWED_HOSTS = new Set([
   // World Design Capital 2026 serves filmscreening stills from its
   // Payload media endpoint on the apex host.
   "wdc2026.org",
+  // Valencia: reservaentradas.com serves each cinema's posters from its own subdomain, and the
+  // Filmoteca (IVC) from ivc.gva.es. Without these the poster card falls back to the text-only
+  // placeholder for ~1,100 screenings even though the images are real JPEGs.
+  "cinesbabel.reservaentradas.com",
+  "cineslys.reservaentradas.com",
+  "cinesmn4.reservaentradas.com",
+  "abcpark.reservaentradas.com",
+  "abcelsaler.reservaentradas.com",
+  "abcgranturia.reservaentradas.com",
+  "cinestudiodor.reservaentradas.com",
+  "centreculturalbenetusserelmoli.reservaentradas.com",
+  "ivc.gva.es",
 ]);
 
 // Off-list hosts get `undefined` (not the raw URL) so PosterCard
