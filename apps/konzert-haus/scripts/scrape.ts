@@ -16,6 +16,11 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const today = todayIso();
 
+/** Keyword guesses from the hub's fallback classifier sit at 0.6 and mislabel non-concerts
+ *  ("Weiberfaasenacht", "CD & Schallplattenbörse"); every real scraper label is 0.7 or higher.
+ *  Declared above `await main()`: a `const` below it is still uninitialised when main runs. */
+const MIN_GENRE_CONFIDENCE = 0.7;
+
 await main();
 
 async function main(): Promise<void> {
@@ -150,10 +155,6 @@ ${entries}
 ];
 `;
 }
-
-/** Keyword guesses from the hub's fallback classifier sit at 0.6 and mislabel non-concerts
- *  ("Weiberfaasenacht", "CD & Schallplattenbörse"); every real scraper label is 0.7 or higher. */
-const MIN_GENRE_CONFIDENCE = 0.7;
 
 function pickGenre(ev: CanonicalEvent): Genre | null {
   let best: { genre: Genre; confidence: number } | null = null;
