@@ -80,8 +80,7 @@ export const CURATED_CINEMAS: CinemaConfig[] = [
     lon: 8.679,
     city: "frankfurt",
     website_url: "https://www.cinestar.de/kino-frankfurt-main-metropolis",
-    tagline:
-      "Multiplex am Eschenheimer Turm. Wegen Brandschaden geschlossen, Wiedereröffnung frühestens Ende Januar 2027.",
+    tagline: "Multiplex am Eschenheimer Turm mit Originalfassungen und Opernübertragungen.",
   },
   {
     slug: "dff-deutsches-filminstitut-filmmuseum",
