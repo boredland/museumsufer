@@ -888,6 +888,15 @@ body.lh-show-seen .prog-entry--seen .prog-entry__work { text-decoration: line-th
   border-color: var(--brass-bright);
 }
 
+/* Week view: a day with more screenings than the cap ends in one link to that day's full list. */
+.day-more {
+  list-style: none;
+  padding: 1.25rem 0 1.5rem;
+  text-align: center;
+  border-bottom: 0.5px solid var(--rule);
+}
+.day-more .range-pill { display: inline-block; }
+
 /* Week-view header line — single-line range label in place of the big
  * day-of-month numeral the day view uses. */
 .programme__range {

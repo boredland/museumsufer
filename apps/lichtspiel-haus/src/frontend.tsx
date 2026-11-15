@@ -837,12 +837,15 @@ export function DateGroupedScreenings({
   tr,
   hideCinema,
   appUrl,
+  hiddenByDay,
 }: {
   screenings: DayScreening[];
   locale: Locale;
   tr: Translations;
   hideCinema?: boolean;
   appUrl?: string;
+  /** Days the week view cut short, with how many screenings each lost. */
+  hiddenByDay?: ReadonlyMap<string, number>;
 }) {
   if (screenings.length === 0) return null;
   const dl = dateLocale(locale);
@@ -853,6 +856,8 @@ export function DateGroupedScreenings({
       {screenings.map((s, i) => {
         const prev = i > 0 ? screenings[i - 1].date : null;
         const isNewDay = s.date !== prev;
+        const endsDay = i === screenings.length - 1 || screenings[i + 1].date !== s.date;
+        const hidden = endsDay ? (hiddenByDay?.get(s.date) ?? 0) : 0;
         return (
           <>
             {isNewDay ? (
@@ -861,6 +866,19 @@ export function DateGroupedScreenings({
               </li>
             ) : null}
             <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl }} tr={tr} />
+            {hidden > 0 ? (
+              <li class="day-more" key={`more-${s.date}`}>
+                <a
+                  class="range-pill"
+                  href={`/tag/${s.date}${langSuffix(locale)}`}
+                  hx-get={`/partial/content?date=${s.date}${langSuffix(locale, "&")}`}
+                  hx-target="#programme-content"
+                  hx-push-url={`/tag/${s.date}${langSuffix(locale)}`}
+                >
+                  {tr.dayMore(hidden)}
+                </a>
+              </li>
+            ) : null}
           </>
         );
       })}
@@ -1178,6 +1196,14 @@ if ('serviceWorker' in navigator) {
       if (!input || !input.value.trim()) return;
       var weekPill = document.querySelector('.range-pill[data-range="7"]');
       if (!weekPill || weekPill.classList.contains('range-pill--active')) return;
+      // Search matches rows in the DOM, and the week view caps each day. Ask for the uncapped week
+      // once, then put the pill's URL back so a normal click on it stays capped.
+      var base = weekPill.getAttribute('hx-get') || '';
+      weekPill.setAttribute('hx-get', base + '&all=1');
+      document.body.addEventListener('htmx:beforeRequest', function restore(){
+        weekPill.setAttribute('hx-get', base);
+        document.body.removeEventListener('htmx:beforeRequest', restore);
+      });
       weekPill.click();
     }
     document.addEventListener('input', function(e){
@@ -1469,6 +1495,33 @@ function filterPastForToday(date: string, screenings: DayScreening[]): DayScreen
   });
 }
 
+/** The week view lists every screening of every day on one page. Frankfurt tops out near 70 a
+ *  day, but Valencia's multiplexes run ~370 a day, which made the 7-day page 16 MB of HTML.
+ *  A day over the cap keeps evenly spaced rows of its time-sorted list, so the sample still runs
+ *  from the first matinee to the last night show across most cinemas (keeping the first N would
+ *  end every day at teatime). It then ends in a link to the uncapped single-day view. */
+const WEEK_VIEW_DAY_CAP = 60;
+
+function capPerDay(screenings: DayScreening[], cap: number) {
+  const byDay = new Map<string, DayScreening[]>();
+  for (const s of screenings) {
+    const list = byDay.get(s.date);
+    if (list) list.push(s);
+    else byDay.set(s.date, [s]);
+  }
+  const shown: DayScreening[] = [];
+  const hiddenByDay = new Map<string, number>();
+  for (const [date, list] of byDay) {
+    if (list.length <= cap) {
+      shown.push(...list);
+      continue;
+    }
+    for (let i = 0; i < cap; i++) shown.push(list[Math.floor((i * list.length) / cap)]);
+    hiddenByDay.set(date, list.length - cap);
+  }
+  return { shown, hiddenByDay };
+}
+
 export function ProgrammePartial({
   date,
   screenings,
@@ -1477,6 +1530,7 @@ export function ProgrammePartial({
   range = null,
   city,
   appUrl,
+  uncapped = false,
 }: {
   date: string;
   screenings: DayScreening[];
@@ -1485,6 +1539,8 @@ export function ProgrammePartial({
   range?: number | null;
   city: string;
   appUrl?: string;
+  /** Skip the per-day cap; the search box asks for this so it can match every row. */
+  uncapped?: boolean;
 }) {
   const dp = dateParts(date);
   const dateObj = new Date(`${date}T12:00:00Z`);
@@ -1495,6 +1551,7 @@ export function ProgrammePartial({
   // earlier screenings — they're still future from tomorrow onward) and
   // render via the shared date-grouped helper.
   if (range) {
+    const capped = capPerDay(screenings, uncapped ? Number.POSITIVE_INFINITY : WEEK_VIEW_DAY_CAP);
     const endIso = (() => {
       const d = new Date(`${date}T00:00:00Z`);
       d.setUTCDate(d.getUTCDate() + range - 1);
@@ -1525,7 +1582,13 @@ export function ProgrammePartial({
             <p class="empty__hint">{tr.emptyHint}</p>
           </div>
         ) : (
-          <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} appUrl={appUrl} />
+          <DateGroupedScreenings
+            screenings={capped.shown}
+            locale={locale}
+            tr={tr}
+            appUrl={appUrl}
+            hiddenByDay={capped.hiddenByDay}
+          />
         )}
         <SiblingStrap tr={tr} city={city} />
       </>
@@ -1624,6 +1687,7 @@ export function renderProgrammePartial(
   city: string = "frankfurt",
   range: number | null = null,
   appUrl?: string,
+  uncapped = false,
 ): HtmlEscapedString {
   return (
     <ProgrammePartial
@@ -1634,6 +1698,7 @@ export function renderProgrammePartial(
       city={city}
       range={range}
       appUrl={appUrl}
+      uncapped={uncapped}
     />
   ) as unknown as HtmlEscapedString;
 }
