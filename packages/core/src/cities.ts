@@ -446,6 +446,13 @@ export function citiesIn(country: CityMeta["country"]): CitySlug[] {
     .map((m) => m.slug);
 }
 
+/** IANA zone a city's local times are in. Valencia (Europe/Madrid) and the German cities
+ *  (Europe/Berlin) currently share UTC offset and DST dates, but the labels differ and calendar
+ *  apps show the zone name, so derive it from the city instead of hardcoding Berlin. */
+export function cityTimeZone(slug: string | undefined): "Europe/Berlin" | "Europe/Madrid" {
+  return cityMeta(slug).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
+}
+
 /** Pick the nearest city to a coordinate by squared centroid distance.
  *  Used for geo-routing apex hits (degrees are fine at these latitudes
  *  for a simple "which is closer" comparison). `candidates` restricts the

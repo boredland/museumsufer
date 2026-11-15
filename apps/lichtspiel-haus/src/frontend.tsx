@@ -6,6 +6,7 @@ import {
   buildWebMcpScript,
   cityHost,
   cityMeta,
+  cityTimeZone,
   cityUrl,
   coordServesCity,
   dateFormatter,
@@ -20,6 +21,7 @@ import {
   museumUrl,
   TURNSTILE_LAZY_LOAD_SCRIPT,
   todayIso,
+  utcOffsetFor,
   type WebMcpToolDef,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
@@ -323,29 +325,25 @@ function DateStrip({
   );
 }
 
-// Valencia shares Berlin's UTC offset and DST switch dates (both CET/CEST), so
-// one offset table serves every city.
-function berlinOffsetFor(date: string): string {
-  const [year, month, day] = date.split("-").map(Number);
-  if (!year || !month || !day) return "+01:00";
-  const lastSundayUtc = (y: number, m: number): number => {
-    const last = new Date(Date.UTC(y, m, 0));
-    return last.getUTCDate() - last.getUTCDay();
-  };
-  const dstStart = lastSundayUtc(year, 3);
-  const dstEnd = lastSundayUtc(year, 10);
-  if (month > 3 && month < 10) return "+02:00";
-  if (month < 3 || month > 10) return "+01:00";
-  if (month === 3) return day >= dstStart ? "+02:00" : "+01:00";
-  return day < dstEnd ? "+02:00" : "+01:00";
-}
-
 function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
 
-function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
-  const offset = berlinOffsetFor(s.date);
+/** The synopsis in the page's language: the translated TMDb overview when there is one, else the
+ *  cinema's own (German or Spanish) text, so a row never loses its description. Shared by the
+ *  visible row and its JSON-LD so crawlers read what visitors read. */
+export function screeningDescription(s: DayScreening, locale: Locale): string | null {
+  const text =
+    locale === "en"
+      ? (s.description_en ?? s.description)
+      : locale === "es"
+        ? (s.description_es ?? s.description)
+        : s.description;
+  return text ?? null;
+}
+
+function buildScreeningJsonLd(s: DayScreening, locale: Locale): Record<string, unknown> {
+  const offset = utcOffsetFor(s.date, s.time, cityTimeZone(s.cinema.city));
   const startTime = s.time ?? "00:00";
   // A screening's canonical host follows its cinema's city.
   const appUrl = cityUrl("lichtspiel.haus", s.cinema.city);
@@ -366,7 +364,7 @@ function buildScreeningJsonLd(s: DayScreening): Record<string, unknown> {
     },
     url: `${appUrl}/film/${s.id}`,
   };
-  const description = s.description ?? s.subtitle ?? s.credits;
+  const description = screeningDescription(s, locale) ?? s.subtitle ?? s.credits;
   if (description) jsonLd.description = description;
   if (s.end_time && s.time) jsonLd.endDate = `${s.date}T${s.end_time}:00${offset}`;
   if (s.format) jsonLd.videoFormat = s.format;
@@ -588,12 +586,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   // Non-German visitors prefer the translated TMDb overview, with a soft
   // fallback to the German cinema description so a row never renders
   // without a synopsis just because TMDb or DeepL missed.
-  const description =
-    opts.locale === "en"
-      ? (s.description_en ?? s.description)
-      : opts.locale === "es"
-        ? (s.description_es ?? s.description)
-        : s.description;
+  const description = screeningDescription(s, opts.locale);
   const showDescription = description && description !== s.subtitle;
   const showCredits = s.credits && s.credits !== s.subtitle;
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
@@ -637,7 +630,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
         <script
           type="application/ld+json"
           data-id={String(s.id)}
-          dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s)) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s, opts.locale)) }}
         />
       )}
       <a class="prog-entry__poster-link" href={filmHref} aria-label={displayTitle}>

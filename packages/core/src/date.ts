@@ -32,6 +32,13 @@ export function berlinHourMinute(): { hour: number; minute: number } {
   return { hour: now.hour(), minute: now.minute() };
 }
 
+/** UTC offset ("+01:00" / "+02:00") in force in `timeZone` at the given local date and time, for
+ *  schema.org / RSS timestamps. Evaluated at `time` (noon when absent) so the two switch days
+ *  resolve correctly. */
+export function utcOffsetFor(date: string, time: string | null | undefined, timeZone: string): string {
+  return dayjs.tz(`${date} ${time ?? "12:00"}`, timeZone).format("Z");
+}
+
 const BERLIN_HOUR_FMT = new Intl.DateTimeFormat("de-DE", {
   timeZone: "Europe/Berlin",
   hour: "numeric",

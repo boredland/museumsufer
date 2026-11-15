@@ -3,6 +3,7 @@ import {
   buildManifest,
   buildRobotsTxt,
   cityScreenshots,
+  cityTimeZone,
   cityUrl,
   coordServesCity,
   dateOffset,
@@ -63,7 +64,7 @@ function llmsFor(city: string): string {
   const cached = llmsCache.get(city);
   if (cached) return cached;
   const contentLocale = cityContentLocale(city);
-  const timeZone = contentLocale === "es" ? "Europe/Madrid" : "Europe/Berlin";
+  const timeZone = cityTimeZone(city);
   const venueCount = VENUES.filter((v) => coordServesCity(v.lat, v.lon, city)).length;
   const intro = localizeCityText(
     contentLocale === "es"

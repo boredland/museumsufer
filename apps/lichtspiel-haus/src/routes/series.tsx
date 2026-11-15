@@ -1,4 +1,4 @@
-import { cityMeta, cityName, cityUrl, todayIso } from "@museumsufer/core";
+import { cityMeta, cityName, cityTimeZone, cityUrl, todayIso, utcOffsetFor } from "@museumsufer/core";
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getAllSeries, getSeriesScreenings } from "../db";
@@ -60,7 +60,7 @@ app.get("/reihe/:slug", (c) => {
       "@type": "ScreeningEvent",
       "@id": `${appUrl}/film/${s.id}#screening`,
       name: s.title,
-      startDate: s.time ? `${s.date}T${s.time}:00+02:00` : s.date,
+      startDate: s.time ? `${s.date}T${s.time}:00${utcOffsetFor(s.date, s.time, cityTimeZone(s.cinema.city))}` : s.date,
       url: `${appUrl}/film/${s.id}`,
       location: { "@type": "MovieTheater", name: s.cinema.name },
     })),

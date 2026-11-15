@@ -1,12 +1,12 @@
 import {
   buildUtm,
   cityHost,
-  cityMeta,
-  cityName,
+  cityTimeZone,
   cityUrl,
   dateLocale,
   formatLocalisedDateLong,
   parsePostalAddress,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
 import { Hono } from "hono";
@@ -133,10 +133,14 @@ app.get("/film/:id{[0-9]+}", (c) => {
     "@type": "ScreeningEvent",
     "@id": `${appUrl}/film/${id}#screening`,
     name: displayTitle,
-    description: screening.description ?? screening.subtitle ?? undefined,
+    description: synopsis ?? screening.subtitle ?? undefined,
     inLanguage: locale,
-    startDate: screening.time ? `${screening.date}T${screening.time}:00+02:00` : screening.date,
-    endDate: screening.end_time ? `${screening.date}T${screening.end_time}:00+02:00` : undefined,
+    startDate: screening.time
+      ? `${screening.date}T${screening.time}:00${utcOffsetFor(screening.date, screening.time, cityTimeZone(screening.cinema.city))}`
+      : screening.date,
+    endDate: screening.end_time
+      ? `${screening.date}T${screening.end_time}:00${utcOffsetFor(screening.date, screening.end_time, cityTimeZone(screening.cinema.city))}`
+      : undefined,
     image: screening.image_url ?? undefined,
     workPresented: {
       "@type": "Movie",
@@ -195,7 +199,7 @@ app.get("/film/:id{[0-9]+}", (c) => {
         <head>
           <Head
             title={`${displayTitle} — ${screening.cinema.name} — lichtspiel.haus`}
-            description={screening.description ?? screening.subtitle ?? `${displayTitle} im ${screening.cinema.name}`}
+            description={synopsis ?? screening.subtitle ?? `${displayTitle} im ${screening.cinema.name}`}
             canonical={`${appUrl}/film/${id}?lang=${locale}`}
             locale={locale}
             currentPath={currentPath}

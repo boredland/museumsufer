@@ -2,10 +2,9 @@ import {
   buildApiCatalog,
   buildManifest,
   buildRobotsTxt,
-  cityHost,
   cityMeta,
-  cityName,
   cityScreenshots,
+  cityTimeZone,
   cityUrl,
   coordServesCity,
   dateOffset,
@@ -58,7 +57,7 @@ function llmsFor(city: string): string {
   const cached = llmsCache.get(city);
   if (cached) return cached;
   const appUrl = cityUrl("lichtspiel.haus", city);
-  const tz = cityMeta(city).country === "ES" ? "Europe/Madrid" : "Europe/Berlin";
+  const tz = cityTimeZone(city);
   const cityCinemas = CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city));
   const homeDescription = localizeText(
     `Kinoprogramm in Frankfurt und Umgebung — aggregierte Vorstellungen aus ${cityCinemas.length} Spielstätten. Arthouse, Programmkino, Repertoire, Filmreihen, Festivals.`,

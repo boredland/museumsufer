@@ -13,7 +13,12 @@ export interface CalendarEvent {
   location?: string;
   description: string | null;
   detail_url: string | null;
+  /** IANA zone `time` is expressed in. Defaults to Europe/Berlin, the zone the German apps use. */
+  timeZone?: string;
 }
+
+const DEFAULT_TIME_ZONE = "Europe/Berlin";
+const tz = (ev: CalendarEvent): string => ev.timeZone ?? DEFAULT_TIME_ZONE;
 
 function endHour(time: string): string {
   const h = (parseInt(time.split(":")[0], 10) + 1) % 24;
@@ -46,7 +51,7 @@ export function buildGoogleCalendarUrl(ev: CalendarEvent): string {
     location: ev.location || "",
     details: eventDesc(ev),
   });
-  if (ev.time) params.set("ctz", "Europe/Berlin");
+  if (ev.time) params.set("ctz", tz(ev));
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
@@ -119,7 +124,7 @@ export interface IcsEventInput extends CalendarEvent {
 }
 
 /** Emit a single VEVENT block (no surrounding VCALENDAR). All-day events
- *  use VALUE=DATE; timed events use TZID=Europe/Berlin which the calling
+ *  use VALUE=DATE; timed events use TZID=<ev.timeZone, default Europe/Berlin> which the calling
  *  feed must declare in its VTIMEZONE block (or rely on consumer
  *  fallback — most do). */
 export function buildIcsVevent(ev: IcsEventInput): string {
@@ -130,12 +135,12 @@ export function buildIcsVevent(ev: IcsEventInput): string {
     "BEGIN:VEVENT",
     `UID:${ev.uid}`,
     `DTSTAMP:${stamp}`,
-    ev.time ? `DTSTART;TZID=Europe/Berlin:${dt(ev.date, ev.time)}` : `DTSTART;VALUE=DATE:${dt(ev.date)}`,
+    ev.time ? `DTSTART;TZID=${tz(ev)}:${dt(ev.date, ev.time)}` : `DTSTART;VALUE=DATE:${dt(ev.date)}`,
   ];
   if (ev.end_date || ev.end_time) {
     lines.push(
       ev.end_time
-        ? `DTEND;TZID=Europe/Berlin:${dt(ev.end_date ?? ev.date, ev.end_time)}`
+        ? `DTEND;TZID=${tz(ev)}:${dt(ev.end_date ?? ev.date, ev.end_time)}`
         : `DTEND;VALUE=DATE:${dt(ev.end_date ?? ev.date)}`,
     );
   } else if (ev.time && (ev.defaultDurationHours ?? 0) > 0) {
@@ -143,7 +148,7 @@ export function buildIcsVevent(ev: IcsEventInput): string {
     const [h, m] = ev.time.split(":").map(Number);
     const endH = (h + dur) % 24;
     const endTime = `${String(endH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-    lines.push(`DTEND;TZID=Europe/Berlin:${dt(ev.date, endTime)}`);
+    lines.push(`DTEND;TZID=${tz(ev)}:${dt(ev.date, endTime)}`);
   }
   if (ev.status) lines.push(`STATUS:${ev.status}`);
   lines.push(`SUMMARY:${icsEsc(ev.title)}`);

@@ -8,6 +8,7 @@ import {
   type CalendarEvent,
   cityHost,
   cityMeta,
+  cityTimeZone,
   cityUrl,
   dateOffset,
   type IcsEventInput,
@@ -15,6 +16,7 @@ import {
   slugify,
   todayIso,
   type UtmTagger,
+  utcOffsetFor,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayScreening, getCinemaBySlug, getScreeningById, getScreeningsInRange, getSeriesScreenings } from "../db";
@@ -125,6 +127,7 @@ function screeningCalendarEvent(s: DayScreening, utm: UtmTagger): CalendarEvent 
     end_time: s.end_time ?? null,
     end_date: null,
     title: s.title,
+    timeZone: cityTimeZone(s.cinema.city),
     location: [s.cinema.name, venueRoom && venueRoom !== s.cinema.name ? venueRoom : null].filter(Boolean).join(", "),
     description: s.subtitle ?? null,
     detail_url: src ? utm(src, "calendar") : null,
@@ -148,6 +151,7 @@ function toIcsInput(s: DayScreening, utm: ReturnType<typeof buildUtm>, appUrl: s
     end_time: s.end_time ?? null,
     end_date: null,
     title: [s.title, s.subtitle].filter(Boolean).join(" — "),
+    timeZone: cityTimeZone(s.cinema.city),
     location: s.venue_room ? `${s.cinema.name} — ${s.venue_room}` : s.cinema.name,
     description: descLines.length ? descLines.join("\n") : null,
     detail_url: null,
@@ -188,7 +192,7 @@ function buildRss(
     lang,
   );
   const items: RssItem[] = screenings.map((s) => {
-    const dateStr = s.time ? `${s.date}T${s.time}:00+02:00` : `${s.date}T00:00:00+02:00`;
+    const dateStr = `${s.date}T${s.time ?? "00:00"}:00${utcOffsetFor(s.date, s.time, cityTimeZone(s.cinema.city))}`;
     const linkSource = s.detail_url ?? s.ticket_url ?? `${appUrl}/film/${s.id}`;
     const parts: string[] = [`${s.cinema.name}${s.venue_room ? `, ${s.venue_room}` : ""}`];
     if (s.subtitle) parts.push(s.subtitle);
