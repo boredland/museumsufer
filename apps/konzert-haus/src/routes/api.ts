@@ -1,4 +1,4 @@
-import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
+import { coordServesCity, dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { VENUES } from "../concert-config";
 import { getEventById, getEventsForDate, getEventsInRange, getVenueBySlug } from "../db";
@@ -7,7 +7,7 @@ import { type Env, parseGenre } from "../types";
 const FEEDBACK_FROM = "no-reply@konzert.haus";
 const FEEDBACK_TO = "feedback@konzert.haus";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const DAY_HEADERS = {
   "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
@@ -56,10 +56,11 @@ app.get("/api/events/:id{[0-9]+}", (c) => {
   return c.json({ event }, { headers: DAY_HEADERS });
 });
 
-app.get("/api/venues", (c) =>
-  c.json(
+app.get("/api/venues", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.json(
     {
-      venues: VENUES.map((v) => ({
+      venues: VENUES.filter((v) => coordServesCity(v.lat, v.lon, city)).map((v) => ({
         slug: v.slug,
         name: v.name,
         short_name: v.short_name,
@@ -74,8 +75,8 @@ app.get("/api/venues", (c) =>
       })),
     },
     { headers: { "Cache-Control": "public, max-age=86400" } },
-  ),
-);
+  );
+});
 
 app.get("/api/venues/:slug{[^.]+}", (c) => {
   const slug = c.req.param("slug");

@@ -883,9 +883,9 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   },
   {
     name: "list_venue_slugs",
-    description: "List the slug + display name of every venue configured on konzert.haus (no network call).",
+    description: "List the slug + display name of every venue on the current city's konzert.haus.",
     inputSchema: { type: "object", properties: {} },
-    executeBody: `return Promise.resolve(${JSON.stringify(VENUES.map((v) => ({ slug: v.slug, name: v.name })))});`,
+    executeBody: `return fetch('/api/venues').then(function(r) { return r.json(); }).then(function(d) { return d.venues.map(function(v) { return { slug: v.slug, name: v.name }; }); });`,
   },
   {
     name: "list_genres",

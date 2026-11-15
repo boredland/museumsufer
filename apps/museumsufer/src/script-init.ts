@@ -1,10 +1,11 @@
 import { todayIso } from "./date";
-import { dateLocale, getTranslations, type Locale, SUPPORTED_LOCALES } from "./i18n";
+import { dateLocale, getTranslations, type Locale, localizeTranslations, SUPPORTED_LOCALES } from "./i18n";
 import { getMuseumLocations } from "./museum-config";
 
 /** Options for script initialization on pages that use CLIENT_SCRIPT */
 interface ScriptInitOptions {
   locale: Locale;
+  city: string;
   initialDate?: string | null;
 }
 
@@ -23,8 +24,8 @@ const MUSEUM_GEO_JSON = JSON.stringify(
  * the bundle picks them up as bare references.
  */
 export function generateScriptInit(options: ScriptInitOptions): string {
-  const { locale, initialDate = null } = options;
-  const tr = getTranslations(locale);
+  const { locale, city, initialDate = null } = options;
+  const tr = localizeTranslations(getTranslations(locale), city, locale);
   const trJson = JSON.stringify(tr);
   const dlJson = JSON.stringify(dateLocale(locale));
   const localesJson = JSON.stringify(SUPPORTED_LOCALES);

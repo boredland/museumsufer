@@ -6,6 +6,9 @@ const BASE = "https://www.ensembleresonanz.com";
 const CAL_URL = `${BASE}/termine-und-tickets?date=all&filter=all`;
 const UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 
+/** Venue text of a Hamburg date: the home hall, the two big houses, HfMT's Jazzhall, or an explicit "Hamburg". */
+const HAMBURG_VENUE_RE = /resonanzraum|elbphilharmonie|laeiszhalle|jazzhall|hamburg|kampnagel|groß borstel/;
+
 export async function scrapeEnsembleResonanz(): Promise<VenueScrapeResult> {
   const res = await fetch(CAL_URL, {
     headers: { "User-Agent": UA, "Accept-Language": "de-DE,de;q=0.9" },
@@ -68,19 +71,20 @@ export async function scrapeEnsembleResonanz(): Promise<VenueScrapeResult> {
     const ticketMatch = item.match(/href="([^"]+)"[^>]*class="btn[^"]*"/i);
     const ticket_url = ticketMatch ? normalizeUrl(decodeEntities(ticketMatch[1]), BASE) : null;
 
-    // Coordinate resolution based on venue text
-    let lat = 53.5564; // default to resonanzraum
+    // The calendar mixes home concerts with tour dates (Essen, Wien, Den Haag, ...). Every
+    // non-Hamburg venue would otherwise inherit the resonanzraum coordinates and surface on
+    // hamburg.konzert.haus, so tour dates are skipped. A card with no venue line (the urban
+    // string club nights) is a home-hall event.
+    const venueLower = venueText.toLowerCase();
+    if (venueLower && !HAMBURG_VENUE_RE.test(venueLower)) continue;
+    let lat = 53.5564; // resonanzraum St. Pauli
     let lon = 9.97;
-    if (venueText.toLowerCase().includes("elbphilharmonie")) {
+    if (venueLower.includes("elbphilharmonie")) {
       lat = 53.5414;
       lon = 9.9842;
-    } else if (venueText.toLowerCase().includes("laeiszhalle")) {
+    } else if (venueLower.includes("laeiszhalle")) {
       lat = 53.5561;
       lon = 9.9811;
-    } else if (venueText.toLowerCase().includes("mannheim")) {
-      // outside geofence, will be dropped
-      lat = 49.4875;
-      lon = 8.466;
     }
 
     const showIdMatch = detailUrl.match(/([a-zA-Z0-9-]+)-\d{4}-\d{2}-\d{2}\/?$/);

@@ -780,7 +780,7 @@ export function renderPage(
           <DigestDialog tr={tr} />
 
           <script
-            dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale, initialDate: initialData?.date }) }}
+            dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale, city, initialDate: initialData?.date }) }}
           />
         </body>
       </html>

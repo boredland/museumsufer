@@ -411,7 +411,7 @@ function MuseumPage({ locale, museums, config, exhibitions, events, slug, curren
 
           <ContactDialog tr={tr} />
 
-          <script dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale }) }} />
+          <script dangerouslySetInnerHTML={{ __html: generateScriptInit({ locale, city }) }} />
         </body>
       </html>
     </>

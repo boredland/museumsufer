@@ -1,4 +1,4 @@
-import { dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
+import { coordServesCity, dateOffset, handleContactRequest, todayIso } from "@museumsufer/core";
 import { Hono } from "hono";
 import { CINEMAS } from "../cinema-config";
 import {
@@ -14,7 +14,7 @@ import type { Env } from "../types";
 const FEEDBACK_FROM = "no-reply@lichtspiel.haus";
 const FEEDBACK_TO = "feedback@lichtspiel.haus";
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: { city: string } }>();
 
 const DAY_HEADERS = {
   "Cache-Control": "public, max-age=600, s-maxage=1800, stale-while-revalidate=3600",
@@ -63,10 +63,11 @@ app.get("/api/screenings/:id{[0-9]+}", (c) => {
   return c.json({ screening }, { headers: DAY_HEADERS });
 });
 
-app.get("/api/cinemas", (c) =>
-  c.json(
+app.get("/api/cinemas", (c) => {
+  const city = c.get("city") ?? "frankfurt";
+  return c.json(
     {
-      cinemas: CINEMAS.map((v) => ({
+      cinemas: CINEMAS.filter((v) => coordServesCity(v.lat, v.lon, city)).map((v) => ({
         slug: v.slug,
         name: v.name,
         short_name: v.short_name,
@@ -80,8 +81,8 @@ app.get("/api/cinemas", (c) =>
       })),
     },
     { headers: { "Cache-Control": "public, max-age=86400" } },
-  ),
-);
+  );
+});
 
 app.get("/api/cinemas/:slug{[^.]+}", (c) => {
   const slug = c.req.param("slug");

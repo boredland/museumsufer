@@ -904,7 +904,7 @@ function DigestCue({ tr, locale }: { tr: Translations; locale: Locale }) {
   );
 }
 
-function DigestDialog({ tr }: { tr: Translations }) {
+function DigestDialog({ tr, city }: { tr: Translations; city: string }) {
   return (
     <SharedDigestDialog
       schedules={[
@@ -912,7 +912,10 @@ function DigestDialog({ tr }: { tr: Translations }) {
         { value: "afternoon", label: tr.digestAfternoon, time: "16:00", desc: tr.digestAfternoonSub },
         { value: "weekly", label: tr.digestSunday, time: "So 09:00", desc: tr.digestSundaySub },
       ]}
-      filterChips={CINEMAS.map((c) => ({ value: c.slug, label: c.short_name ?? c.name }))}
+      filterChips={CINEMAS.filter((c) => coordServesCity(c.lat, c.lon, city)).map((c) => ({
+        value: c.slug,
+        label: c.short_name ?? c.name,
+      }))}
       filterName="filter-cinema"
       tr={{
         title: tr.digestTitle,
@@ -1298,9 +1301,9 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
   },
   {
     name: "list_cinema_slugs",
-    description: "List slug + display name of every cinema configured on lichtspiel.haus (no network call).",
+    description: "List slug + display name of every cinema on the current city's lichtspiel.haus.",
     inputSchema: { type: "object", properties: {} },
-    executeBody: `return Promise.resolve(${JSON.stringify(CINEMAS.map((v) => ({ slug: v.slug, name: v.name })))});`,
+    executeBody: `return fetch('/api/cinemas').then(function(r) { return r.json(); }).then(function(d) { return d.cinemas.map(function(v) { return { slug: v.slug, name: v.name }; }); });`,
   },
   {
     name: "list_series",
@@ -1745,7 +1748,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <Faq tr={tr} locale={locale} city={city} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
-          <DigestDialog tr={tr} />
+          <DigestDialog tr={tr} city={city} />
           <ClientBehaviors tr={tr} />
         </body>
       </html>
