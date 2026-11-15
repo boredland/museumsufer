@@ -2,7 +2,7 @@ import { cityHost, cityMeta, cityName, cityUrl, todayIso } from "@museumsufer/co
 import { Hono } from "hono";
 import { raw } from "hono/html";
 import { getAllSeries, getSeriesScreenings } from "../db";
-import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
+import { CalendarMenu, DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import type { Env } from "../types";
 
@@ -123,6 +123,7 @@ app.get("/reihe/:slug", (c) => {
             <DateGroupedScreenings screenings={screenings} locale={locale} tr={tr} />
           </main>
           <Footer tr={tr} locale={locale} />
+          <CalendarMenu tr={tr} />
         </body>
       </html>
     </>,

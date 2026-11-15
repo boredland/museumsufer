@@ -1,10 +1,13 @@
+/** Appends UTM parameters to one outbound URL; `content` names the placement (e.g. "calendar"). */
+export type UtmTagger = (url: string, content: string) => string;
+
 /**
  * Tag outbound URLs with UTM parameters so partner sites can attribute
  * referral traffic. Returns the original URL unchanged if it isn't a valid
  * absolute URL (e.g. a `mailto:` or relative href slipped through).
  */
-export function buildUtm(source: string) {
-  return (url: string, content: string): string => {
+export function buildUtm(source: string): UtmTagger {
+  return (url, content) => {
     try {
       const u = new URL(url);
       u.searchParams.set("utm_source", source);

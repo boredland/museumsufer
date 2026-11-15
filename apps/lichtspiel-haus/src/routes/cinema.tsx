@@ -4,7 +4,7 @@ import { Hono } from "hono";
 import { raw } from "hono/html";
 import { CINEMAS } from "../cinema-config";
 import { getCinemaBySlug, getScreeningsInRange } from "../db";
-import { DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
+import { CalendarMenu, DateGroupedScreenings, Footer, Head, Masthead } from "../frontend";
 import { detectLocale, getTranslations, localizeTranslations } from "../i18n";
 import { renderCinemaMarkdown, wantsMarkdown } from "../markdown";
 import type { Env } from "../types";
@@ -148,6 +148,7 @@ app.get("/kino/:slug", (c) => {
             )}
           </main>
           <Footer tr={tr} locale={locale} />
+          <CalendarMenu tr={tr} />
         </body>
       </html>
     </>,

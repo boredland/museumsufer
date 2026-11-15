@@ -1,7 +1,11 @@
 import {
+  buildGoogleCalendarUrl,
   buildIcsCalendar,
+  buildOutlookCalendarUrl,
   buildRssFeed,
   buildUtm,
+  buildYahooCalendarUrl,
+  type CalendarEvent,
   cityHost,
   cityMeta,
   cityName,
@@ -11,6 +15,7 @@ import {
   type RssItem,
   slugify,
   todayIso,
+  type UtmTagger,
 } from "@museumsufer/core";
 import { Hono } from "hono";
 import { type DayScreening, getCinemaBySlug, getScreeningById, getScreeningsInRange, getSeriesScreenings } from "../db";
@@ -92,7 +97,41 @@ app.get("/film/:id{[0-9]+}/feed.ics", (c) => {
   });
 });
 
+const CALENDAR_URL_BUILDERS = {
+  google: buildGoogleCalendarUrl,
+  outlook: buildOutlookCalendarUrl,
+  yahoo: buildYahooCalendarUrl,
+} as const;
+
+/** "Add to calendar" target for one screening. The week page used to inline all four links in a
+ *  popover on every row (~2.9 KB x 1,958 rows on Valencia); it now ships one shared menu whose
+ *  links point here, and this route redirects to the same core URL builder output. */
+app.get("/film/:id{[0-9]+}/cal/:vendor{google|outlook|yahoo}", (c) => {
+  const screening = getScreeningById(parseInt(c.req.param("id"), 10));
+  if (!screening) return c.notFound();
+  // Same host the row used for its UTM tags: the screening's cinema's city, not the request's.
+  const localUtm = buildUtm(cityHost("lichtspiel.haus", screening.cinema.city));
+  const vendor = c.req.param("vendor") as keyof typeof CALENDAR_URL_BUILDERS;
+  return c.redirect(CALENDAR_URL_BUILDERS[vendor](screeningCalendarEvent(screening, localUtm)), 302);
+});
+
 export default app;
+
+/** The same event the week-page row used to build for its inline calendar menu, so the links are unchanged. */
+function screeningCalendarEvent(s: DayScreening, utm: UtmTagger): CalendarEvent {
+  const venueRoom = s.venue_room ?? null;
+  const src = s.detail_url ?? s.ticket_url ?? null;
+  return {
+    date: s.date,
+    time: s.time ?? null,
+    end_time: s.end_time ?? null,
+    end_date: null,
+    title: s.title,
+    location: [s.cinema.name, venueRoom && venueRoom !== s.cinema.name ? venueRoom : null].filter(Boolean).join(", "),
+    description: s.subtitle ?? null,
+    detail_url: src ? utm(src, "calendar") : null,
+  };
+}
 
 function toIcsInput(s: DayScreening, utm: ReturnType<typeof buildUtm>, appUrl: string, host: string): IcsEventInput {
   const descLines: string[] = [];

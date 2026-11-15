@@ -4,7 +4,6 @@ import {
   buildHreflangAlternates,
   buildUtm,
   buildWebMcpScript,
-  type CalendarEvent,
   cityHost,
   cityMeta,
   cityUrl,
@@ -24,7 +23,7 @@ import {
   type WebMcpToolDef,
 } from "@museumsufer/core";
 import { AskAi as SharedAskAi } from "@museumsufer/core/ask-ai";
-import { CalendarPopover, POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
+import { POPOVER_POSITIONING_SCRIPT } from "@museumsufer/core/calendar-popover";
 import { CitySwitch } from "@museumsufer/core/cityswitch";
 import { ClampedText } from "@museumsufer/core/clamped-text";
 import { ContactDialog as SharedContactDialog } from "@museumsufer/core/contact-dialog";
@@ -396,6 +395,9 @@ export interface ScreeningRowOptions {
    *  English TMDb overview (when present) or the German cinema description. */
   locale: Locale;
   appUrl?: string;
+  /** Skip the row's ScreeningEvent JSON-LD. The week overview lists up to ~2,000 rows that all have a
+   *  /film/:id page carrying the same structured data; repeating ~1.2 KB of it per row was 15% of the page. */
+  omitJsonLd?: boolean;
 }
 
 function PriceRange({ min, max }: { min?: number | null; max?: number | null }) {
@@ -597,19 +599,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
   const reportRegarding = `${s.title} — ${s.cinema.name}, ${s.date}${s.time ? ` ${s.time}` : ""}`;
   const reportContext = `${appUrl}/film/${s.id}`;
   const filmHref = `/film/${s.id}${langSuffix(opts.locale)}`;
-  const calendarEvent: CalendarEvent = {
-    date: s.date,
-    time: s.time ?? null,
-    end_time: s.end_time ?? null,
-    end_date: null,
-    title: s.title,
-    location: [s.cinema.name, venueRoom && venueRoom !== s.cinema.name ? venueRoom : null].filter(Boolean).join(", "),
-    description: s.subtitle ?? null,
-    detail_url: (() => {
-      const src = s.detail_url ?? s.ticket_url ?? null;
-      return src ? screeningUtm(src, "calendar") : null;
-    })(),
-  };
+  const calendarTarget = `/film/${s.id}`;
 
   const badges: string[] = [];
   if (s.version) badges.push(s.version);
@@ -643,11 +633,13 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
       data-search={searchHay}
       data-seen-key={s.seen_key ?? ""}
     >
-      <script
-        type="application/ld+json"
-        data-id={String(s.id)}
-        dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s)) }}
-      />
+      {opts.omitJsonLd ? null : (
+        <script
+          type="application/ld+json"
+          data-id={String(s.id)}
+          dangerouslySetInnerHTML={{ __html: jsonLdSafe(buildScreeningJsonLd(s)) }}
+        />
+      )}
       <a class="prog-entry__poster-link" href={filmHref} aria-label={displayTitle}>
         <PosterCard title={displayTitle} imageUrl={s.image_url} />
       </a>
@@ -761,13 +753,18 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
           </>
         ) : null}
         <span class="prog-entry__actions">
-          <CalendarPopover
-            event={calendarEvent}
-            popoverId={`cal-${s.id}`}
-            icsHref={`/film/${s.id}/feed.ics`}
-            buttonClass="icon-btn"
-            labels={{ addToCalendar: tr.toCalendar }}
-          />
+          <button
+            type="button"
+            class="icon-btn"
+            data-popover-target="cal-shared"
+            data-cal-target={calendarTarget}
+            popovertarget="cal-shared"
+            aria-haspopup="menu"
+            aria-label={tr.toCalendar}
+            title={tr.toCalendar}
+          >
+            <SvgIcon id="i-cal" />
+          </button>
           <button
             type="button"
             class="icon-btn"
@@ -776,18 +773,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
             aria-label={tr.reportScreening}
             title={tr.reportScreening}
           >
-            <svg
-              viewBox="0 0 16 16"
-              width="13"
-              height="13"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.4"
-            >
-              <circle cx="8" cy="8" r="6.5" />
-              <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
-            </svg>
+            <SvgIcon id="i-report" />
           </button>
           {s.seen_key ? (
             <button
@@ -798,18 +784,7 @@ export function Screening({ s, opts, tr }: { s: DayScreening; opts: ScreeningRow
               aria-label={tr.markSeen}
               title={tr.markSeen}
             >
-              <svg
-                viewBox="0 0 16 16"
-                width="13"
-                height="13"
-                aria-hidden="true"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.6"
-              >
-                <title>{tr.markSeen}</title>
-                <path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+              <SvgIcon id="i-check" />
             </button>
           ) : null}
           {s.ticket_url && !isFree ? (
@@ -838,6 +813,7 @@ export function DateGroupedScreenings({
   hideCinema,
   appUrl,
   hiddenByDay,
+  omitJsonLd,
 }: {
   screenings: DayScreening[];
   locale: Locale;
@@ -846,6 +822,8 @@ export function DateGroupedScreenings({
   appUrl?: string;
   /** Days the week view cut short, with how many screenings each lost. */
   hiddenByDay?: ReadonlyMap<string, number>;
+  /** Passed to every row; the week overview sets it. */
+  omitJsonLd?: boolean;
 }) {
   if (screenings.length === 0) return null;
   const dl = dateLocale(locale);
@@ -865,7 +843,7 @@ export function DateGroupedScreenings({
                 <time dateTime={s.date}>{dayHeader.format(new Date(`${s.date}T12:00:00Z`))}</time>
               </li>
             ) : null}
-            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl }} tr={tr} />
+            <Screening key={s.id} s={s} opts={{ index: i, hideCinema, locale, appUrl, omitJsonLd }} tr={tr} />
             {hidden > 0 ? (
               <li class="day-more" key={`more-${s.date}`}>
                 <a
@@ -1369,6 +1347,114 @@ const WEBMCP_TOOLS: WebMcpToolDef[] = [
 ];
 
 const WEBMCP_SCRIPT = buildWebMcpScript(WEBMCP_TOOLS);
+/** Icons used on every screening row, drawn once in a hidden sprite and referenced with <use>.
+ *  Inlining the path on each row put ~1.7 KB of identical SVG on all 1,958 Valencia rows. */
+export function SvgIcon({ id }: { id: string }) {
+  return (
+    <svg class="icon" width="13" height="13" aria-hidden="true">
+      <use href={`#${id}`} />
+    </svg>
+  );
+}
+
+export function IconSprite() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="display:none">
+      <symbol id="i-cal" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="2.5" y="3.5" width="11" height="10" rx="1.5" />
+        <path d="M2.5 6h11M5.5 2v3M10.5 2v3M5 9h2M9 9h2M5 11h2" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-report" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="8" cy="8" r="6.5" />
+        <path d="M8 4.5v4M8 11h.01" stroke-linecap="round" />
+      </symbol>
+      <symbol id="i-check" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M3 8.5l3.2 3.2L13 5" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-gcal" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.5 4.5h-3V3a1 1 0 1 0-2 0v1.5h-5V3a1 1 0 1 0-2 0v1.5h-3A1.5 1.5 0 0 0 3 6v13.5A1.5 1.5 0 0 0 4.5 21h15a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5zM19 19H5V10h14v9zM5 8.5V6.5h14v2H5z" />
+      </symbol>
+      <symbol id="i-outlook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="3" y="6" width="13" height="12" rx="1.5" />
+        <path d="M9.5 9.5a2.5 3 0 1 1 0 5 2.5 3 0 1 1 0-5z" />
+        <path d="M16 10l4-1.5v7L16 14" stroke-linejoin="round" />
+      </symbol>
+      <symbol id="i-yahoo" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 5h4l3 5 3-5h4l-5 8v6h-4v-6L3 5z" />
+      </symbol>
+      <symbol
+        id="i-download"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M8 2v9M4.5 7.5L8 11l3.5-3.5" />
+        <path d="M3 13h10" />
+      </symbol>
+    </svg>
+  );
+}
+
+/** The single "add to calendar" menu every row's calendar button opens, plus the icon sprite the
+ *  rows reference and the few lines of script that fill its links. Mount once on every page that
+ *  renders screening rows (home, cinema, series): those pages do not all load the home page's
+ *  ClientBehaviors, so the script travels with the menu. The links point at /film/:id/cal/<vendor>,
+ *  which redirects to the core URL builders. */
+export function CalendarMenu({ tr }: { tr: Translations }) {
+  const icon = (id: string, size: number) => (
+    <span class="nav-popover__icon" aria-hidden="true">
+      <svg width={size} height={size} role="presentation">
+        <title>{id}</title>
+        <use href={`#${id}`} />
+      </svg>
+    </span>
+  );
+  return (
+    <>
+      <IconSprite />
+      <div id="cal-shared" popover="auto" role="menu" class="nav-popover" aria-label={tr.toCalendar}>
+        {/* biome-ignore-start lint/a11y/useValidAnchor: href is set by the client from the trigger's data-cal-target */}
+        <a href="#" data-cal="google" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          {icon("i-gcal", 14)} Google Calendar
+        </a>
+        <a href="#" data-cal="outlook" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          {icon("i-outlook", 14)} Outlook
+        </a>
+        <a href="#" data-cal="yahoo" target="_blank" rel="noopener" role="menuitem" class="nav-popover__link">
+          {icon("i-yahoo", 14)} Yahoo
+        </a>
+        <a href="#" data-cal="ics" download role="menuitem" class="nav-popover__link">
+          {icon("i-download", 13)} .ics (Apple, Proton, …)
+        </a>
+        {/* biome-ignore-end lint/a11y/useValidAnchor: href is set by the client from the trigger's data-cal-target */}
+      </div>
+      <script dangerouslySetInnerHTML={{ __html: `${POPOVER_POSITIONING_SCRIPT}\n${CALENDAR_MENU_SCRIPT}` }} />
+    </>
+  );
+}
+
+/** Fills the shared calendar menu from whichever button opened it. Referenced by CalendarMenu at render
+ *  time, so it only needs to exist by then, not above it. */
+const CALENDAR_MENU_SCRIPT = `
+(function(){
+  var last = null;
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[popovertarget="cal-shared"]');
+    if (b) last = b;
+  }, true);
+  document.addEventListener('beforetoggle', function(e){
+    if (e.newState !== 'open' || e.target.id !== 'cal-shared' || !last) return;
+    var t = last.getAttribute('data-cal-target');
+    e.target.querySelectorAll('a[data-cal]').forEach(function(a){
+      var v = a.getAttribute('data-cal');
+      a.setAttribute('href', v === 'ics' ? t + '/feed.ics' : t + '/cal/' + v);
+    });
+  }, true);
+})();
+`.trim();
 
 function ClientBehaviors({ tr }: { tr: Translations }) {
   const clientScript = buildClientScript({
@@ -1393,7 +1479,7 @@ function ClientBehaviors({ tr }: { tr: Translations }) {
   return (
     <script
       dangerouslySetInnerHTML={{
-        __html: `${clientScript}\n${POPOVER_POSITIONING_SCRIPT}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${WEBMCP_SCRIPT}`,
+        __html: `${clientScript}\n${HTMX_LIFECYCLE_SCRIPT}\n${TURNSTILE_LAZY_LOAD_SCRIPT}\n${WEBMCP_SCRIPT}`,
       }}
     />
   );
@@ -1616,6 +1702,7 @@ export function ProgrammePartial({
             tr={tr}
             appUrl={appUrl}
             hiddenByDay={capped.hiddenByDay}
+            omitJsonLd
           />
         )}
         <SiblingStrap tr={tr} city={city} />
@@ -1841,6 +1928,7 @@ export function renderPage(props: PageProps): HtmlEscapedString {
           <Faq tr={tr} locale={locale} city={city} />
           <Footer tr={tr} locale={locale} />
           <ContactDialog turnstileSiteKey={turnstileSiteKey} tr={tr} />
+          <CalendarMenu tr={tr} />
           <DigestDialog tr={tr} city={city} />
           <ClientBehaviors tr={tr} />
         </body>
