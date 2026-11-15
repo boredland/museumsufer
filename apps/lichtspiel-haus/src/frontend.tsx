@@ -1520,7 +1520,7 @@ export function ProgrammePartial({
             <p class="empty__mark" aria-hidden="true">
               ‖
             </p>
-            <p class="empty__direction">Saal dunkel</p>
+            <p class="empty__direction">{tr.emptyDirection}</p>
             <p class="empty__line">{tr.emptyTitle}</p>
             <p class="empty__hint">{tr.emptyHint}</p>
           </div>
@@ -1549,7 +1549,7 @@ export function ProgrammePartial({
           <p class="empty__mark" aria-hidden="true">
             ‖
           </p>
-          <p class="empty__direction">Saal dunkel</p>
+          <p class="empty__direction">{tr.emptyDirection}</p>
           <p class="empty__line">{hidden > 0 ? tr.emptyTodayAfterPast : tr.emptyTitle}</p>
           <p class="empty__hint">{tr.emptyHint}</p>
         </div>

@@ -22,6 +22,8 @@ export interface Translations {
   dateStripLabel: string;
   todayProgrammeTitle: string;
   emptyTitle: string;
+  /** Italic stage direction above the empty-day message, like a script's "(lights down)". */
+  emptyDirection: string;
   emptyTodayAfterPast: string;
   emptyHint: string;
   pastNote: (n: number) => string;
@@ -171,6 +173,7 @@ const de: Translations = {
   dateStripLabel: "Spieltage",
   todayProgrammeTitle: "Heutige Vorstellungen",
   emptyTitle: "Heute keine Vorstellungen gemeldet.",
+  emptyDirection: "Saal dunkel",
   emptyTodayAfterPast: "Heute keine kommenden Vorstellungen mehr.",
   emptyHint: "Schau morgen wieder vorbei oder wechsle das Datum oben.",
   pastNote: (n) => `${n} Vorstellung${n === 1 ? "" : "en"} heute bereits begonnen — verborgen.`,
@@ -334,6 +337,7 @@ const en: Translations = {
   dateStripLabel: "Showing days",
   todayProgrammeTitle: "Today's screenings",
   emptyTitle: "No screenings announced today.",
+  emptyDirection: "House dark",
   emptyTodayAfterPast: "No more upcoming screenings today.",
   emptyHint: "Check back tomorrow or change the date above.",
   pastNote: (n) => `${n} screening${n === 1 ? "" : "s"} already started today — hidden.`,
@@ -496,6 +500,7 @@ const es: Translations = {
   dateStripLabel: "Días de proyección",
   todayProgrammeTitle: "Sesiones de hoy",
   emptyTitle: "Hoy no hay sesiones anunciadas.",
+  emptyDirection: "Sala a oscuras",
   emptyTodayAfterPast: "Hoy ya no quedan más sesiones.",
   emptyHint: "Vuelva a consultar mañana o cambie la fecha de arriba.",
   pastNote: (n) => `${n} sesión${n === 1 ? "" : "es"} de hoy ya ha${n === 1 ? "" : "n"} empezado — oculta${n === 1 ? "" : "s"}.`,
