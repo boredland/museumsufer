@@ -125,6 +125,7 @@ import { scrapeFilmkreisDarmstadt } from "./venues/filmkreis-darmstadt";
 import { scrapeFirstStageTheater } from "./venues/first-stage-theater";
 import { scrapeForschungskollegHumanwissenschaften } from "./venues/forschungskolleg-humanwissenschaften";
 import { scrapeFrankfurtUas } from "./venues/frankfurt-uas";
+import { scrapeFrankfurtUasCoe } from "./venues/frankfurt-uas-coe";
 import { scrapeFrankfurterSparkasse } from "./venues/frankfurter-sparkasse";
 import { scrapeFreiluftkinoFrankfurt } from "./venues/freiluftkino-frankfurt";
 import { scrapeFundusTheater } from "./venues/fundus-theater";
@@ -387,6 +388,7 @@ export const VENUE_SCRAPERS: ReadonlyArray<{ slug: string; run: VenueScraper }> 
     run: (_ctx: ScraperContext) => scrapeForschungskollegHumanwissenschaften(),
   },
   { slug: "frankfurt-uas", run: (_ctx: ScraperContext) => scrapeFrankfurtUas() },
+  { slug: "frankfurt-uas-coe", run: (_ctx: ScraperContext) => scrapeFrankfurtUasCoe() },
   { slug: "frankfurter-sparkasse", run: (_ctx: ScraperContext) => scrapeFrankfurterSparkasse() },
   { slug: "freiluftkino-frankfurt", run: (_ctx: ScraperContext) => scrapeFreiluftkinoFrankfurt() },
   { slug: "fundus-theater", run: (_ctx: ScraperContext) => scrapeFundusTheater() },

@@ -184,6 +184,7 @@ export const VENUE_COORDS: Readonly<Record<string, readonly [number, number]>> =
   "fgz-streitclub": [50.1108, 8.6622],
   "forschungskolleg-humanwissenschaften": [50.2273, 8.6088],
   "frankfurt-uas": [50.1247, 8.692],
+  "frankfurt-uas-coe": [50.1305335, 8.6923331],
   "frankfurter-sparkasse": [50.1112, 8.675],
   // Open-air cinema; exact site varies, central Frankfurt is good enough for routing.
   "freiluftkino-frankfurt": [50.1109, 8.6821],
