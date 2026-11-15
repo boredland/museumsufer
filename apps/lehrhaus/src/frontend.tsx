@@ -905,7 +905,7 @@ function DayGroup({
   return (
     <section class="day-group">
       <header class="day-group__head">
-        <span class="day-group__day">{dp.day}.</span>
+        <span class="day-group__day">{locale === "de" ? `${dp.day}.` : dp.day}</span>
         <span class="day-group__month">{monthShort}</span>
         <span class="day-group__sep" aria-hidden="true">
           ·
@@ -1003,7 +1003,7 @@ export function ProgrammePartial({
         <p class="programme__line" />
         <p class="programme__weekday">{weekdayLong}</p>
         <h2 class="programme__date">
-          <span class="programme__day">{dp.day}.</span>
+          <span class="programme__day">{locale === "de" ? `${dp.day}.` : dp.day}</span>
           <span class="programme__month">{monthLong}</span>
           <span class="programme__year">{dp.year}</span>
         </h2>
