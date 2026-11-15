@@ -1186,29 +1186,32 @@ if ('serviceWorker' in navigator) {
       updateSeenBanner();
     }
     window.__lhApplySearch = applySearch;
-    // When the user starts typing while still on the day view, jump to
-    // the 7-day view so the search has more rows to match. We click
-    // the inactive week pill -- which is just an htmx-wired anchor --
-    // and the existing afterSwap handler re-runs applySearch() once
-    // the new rows are in the DOM.
-    function maybePromoteToWeekView(){
+    // The week view caps each day, but search only matches rows that are in the DOM. So the first
+    // time a query is typed on a capped page, fetch the uncapped week (all=1). htmx reads a verb's
+    // URL once at init, so editing the pill's hx-get does nothing; htmx:configRequest runs on every
+    // request and can add the parameter. From the day view the week pill does the swap; on an
+    // already-capped week there is no pill to click, so ask htmx directly.
+    var wantAll = false, fetchingAll = false;
+    document.body.addEventListener('htmx:configRequest', function(e){
+      if (wantAll && e.detail && e.detail.verb === 'get') { e.detail.parameters['all'] = '1'; wantAll = false; }
+    });
+    document.body.addEventListener('htmx:afterSwap', function(e){
+      if (e.detail && e.detail.target && e.detail.target.id === 'programme-content') fetchingAll = false;
+    });
+    function ensureSearchable(){
       var input = document.querySelector('.js-search');
-      if (!input || !input.value.trim()) return;
+      if (!input || !input.value.trim() || fetchingAll) return;
       var weekPill = document.querySelector('.range-pill[data-range="7"]');
-      if (!weekPill || weekPill.classList.contains('range-pill--active')) return;
-      // Search matches rows in the DOM, and the week view caps each day. Ask for the uncapped week
-      // once, then put the pill's URL back so a normal click on it stays capped.
-      var base = weekPill.getAttribute('hx-get') || '';
-      weekPill.setAttribute('hx-get', base + '&all=1');
-      document.body.addEventListener('htmx:beforeRequest', function restore(){
-        weekPill.setAttribute('hx-get', base);
-        document.body.removeEventListener('htmx:beforeRequest', restore);
-      });
-      weekPill.click();
+      if (!weekPill) return;
+      var active = weekPill.classList.contains('range-pill--active');
+      if (active && !document.querySelector('.day-more')) return;
+      fetchingAll = true; wantAll = true;
+      if (!active) { weekPill.click(); return; }
+      htmx.ajax('GET', weekPill.getAttribute('hx-get'), { target: '#programme-content', swap: 'innerHTML' });
     }
     document.addEventListener('input', function(e){
       if (e.target && e.target.classList && e.target.classList.contains('js-search')) {
-        maybePromoteToWeekView();
+        ensureSearchable();
         applySearch();
       }
     });
