@@ -1,5 +1,6 @@
 import { todayIso } from "@museumsufer/core/date";
 import { stripHtml } from "@museumsufer/core/html";
+import { retryFetch } from "@museumsufer/core/retry-fetch";
 import type { CanonicalScrapedEvent, VenueScrapeResult } from "../types";
 
 const BASE = "https://filmforum-hoechst.com";
@@ -28,7 +29,8 @@ interface TribeResponse {
 export async function scrapeFilmforumHoechst(): Promise<VenueScrapeResult> {
   const today = todayIso();
   const url = `${BASE}/wp-json/tribe/events/v1/events?per_page=50&start_date=${today}`;
-  const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } });
+  // One transient 500 cost this scraper a whole run (its events then ride the 14-day stale window).
+  const res = await retryFetch(url, { headers: { "User-Agent": UA, Accept: "application/json" } }, { label: "filmforum-hoechst" });
   if (!res.ok) throw new Error(`filmforum-hoechst fetch failed: ${res.status}`);
   const data = (await res.json()) as TribeResponse;
   const tribeEvents = data.events ?? [];
