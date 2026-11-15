@@ -78,11 +78,21 @@ export async function translateTexts(opts: {
       if (!merged.has(`${hash}|${target.toLowerCase()}`)) jobs.push({ hash, text, source, target });
     }
   }
-  // The proxy's quota runs out mid-run and the rest waits for the next one,
-  // so spend it shortest-first across every target at once: titles are what
-  // the page shows, and one description costs as much as dozens of them. A
-  // per-target loop would let the first target eat the whole budget.
-  jobs.sort((a, b) => a.text.length - b.text.length || a.hash.localeCompare(b.hash) || a.target.localeCompare(b.target));
+  // The proxy's quota runs out mid-run and the rest waits for the next one, so the
+  // order decides what readers see first. Spanish-source text goes ahead of German:
+  // Valencia is the new city and its texts are unreadable to every other locale until
+  // translated, while the German backlog (mostly DE->ES for a locale just added) only
+  // fills in a language that already has a fallback. Within each group, shortest first
+  // across every target at once: titles are what the page shows, and one description
+  // costs as much as dozens of them. A per-target loop would let one target eat the budget.
+  const sourceRank = (s: SourceLang): number => (s === "es" ? 0 : 1);
+  jobs.sort(
+    (a, b) =>
+      sourceRank(a.source) - sourceRank(b.source) ||
+      a.text.length - b.text.length ||
+      a.hash.localeCompare(b.hash) ||
+      a.target.localeCompare(b.target),
+  );
   const deferred = Math.max(0, jobs.length - MAX_TRANSLATIONS_PER_RUN);
   jobs.length = Math.min(jobs.length, MAX_TRANSLATIONS_PER_RUN);
   if (deferred > 0) logOk("deepl", "-", `${deferred} translations deferred to later runs (cap ${MAX_TRANSLATIONS_PER_RUN}/run)`);
