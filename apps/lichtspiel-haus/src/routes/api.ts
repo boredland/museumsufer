@@ -92,22 +92,24 @@ app.get("/api/cinemas/:slug{[^.]+}", (c) => {
   return c.json({ cinema, screenings }, { headers: DAY_HEADERS });
 });
 
-app.get("/api/series", (c) =>
-  c.json(
+app.get("/api/series", (c) => {
+  const city = c.req.query("city") ?? c.get("city") ?? null;
+  return c.json(
     {
-      series: getAllSeries(todayIso()).map((s) => ({
+      series: getAllSeries(todayIso(), city).map((s) => ({
         ...s,
         detail_url: `/reihe/${s.slug}`,
         ics_url: `/reihe/${s.slug}/feed.ics`,
       })),
     },
     { headers: { "Cache-Control": "public, max-age=3600" } },
-  ),
-);
+  );
+});
 
 app.get("/api/series/:slug{[^.]+}", (c) => {
   const slug = c.req.param("slug");
-  const screenings = getSeriesScreenings(slug, todayIso());
+  const city = c.req.query("city") ?? c.get("city") ?? null;
+  const screenings = getSeriesScreenings(slug, todayIso(), city);
   if (screenings.length === 0) return c.json({ error: "not found" }, 404);
   const name = screenings[0].series?.name ?? slug;
   return c.json({ slug, name, screenings }, { headers: DAY_HEADERS });
