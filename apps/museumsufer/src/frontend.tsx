@@ -397,15 +397,18 @@ function AskAI({ tr }: { tr: Record<string, string> }) {
   );
 }
 
-const CATEGORY_CHIPS = [
-  { value: "Film", label: "Film" },
-  { value: "Führung", label: "Führung" },
-  { value: "Workshop", label: "Workshop" },
-  { value: "Vortrag", label: "Vortrag" },
-  { value: "Familie", label: "Familie" },
-  { value: "Konzert", label: "Konzert" },
-  { value: "Vernissage", label: "Vernissage" },
-];
+/** Filter values stay German (they match the stored event category); only the label follows the locale. */
+function categoryChips(tr: Record<string, string>) {
+  return [
+    { value: "Film", label: tr.categoryFilm },
+    { value: "Führung", label: tr.categoryFuehrung },
+    { value: "Workshop", label: tr.categoryWorkshop },
+    { value: "Vortrag", label: tr.categoryVortrag },
+    { value: "Familie", label: tr.categoryFamilie },
+    { value: "Konzert", label: tr.categoryKonzert },
+    { value: "Vernissage", label: tr.categoryVernissage },
+  ];
+}
 
 /** Digest subscription dialog — Web Push opt-in with schedule picker */
 export function DigestDialog({ tr }: { tr: Record<string, string> }) {
@@ -431,7 +434,7 @@ export function DigestDialog({ tr }: { tr: Record<string, string> }) {
           desc: tr.digestSchedWeeklyDesc,
         },
       ]}
-      filterChips={CATEGORY_CHIPS}
+      filterChips={categoryChips(tr)}
       filterName="filter-category"
       tr={{
         title: tr.digestTitle,
