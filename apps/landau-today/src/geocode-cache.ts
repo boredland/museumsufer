@@ -718,6 +718,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "weingut bernhart|schweigen-rechtenbach": [49.051024, 7.954504],
   "weingut bruno schreieck|maikammer": [49.305216, 8.131629],
   "weingut bus|insheim": [49.153931, 8.13828],
+  "weingut dengler-seyler|maikammer": [49.305216, 8.131629],
   "weingut doktores töpfer|annweiler am trifels": [49.202202, 7.963012],
   "weingut doll|gleiszellen-gleishorbach": [49.125855, 8.006483],
   "weingut doppler-hertel|essingen": [49.234633, 8.175085],
