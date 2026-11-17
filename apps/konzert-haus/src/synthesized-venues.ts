@@ -910,7 +910,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: -0.3763,
     city: "valencia",
     website_url: "https://www.uv.es",
-    default_genre: "classical",
+    default_genre: "chamber",
   },
   {
     slug: "centralkomitee",
