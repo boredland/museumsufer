@@ -494,6 +494,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "praxis neumayer für physiotherapie|edenkoben": [49.282236, 8.128436],
   "projekt werkstatt - pfälzischer verein für soziale rechtspflege südpfalz e.v.|landau": [49.198283, 8.112344],
   "prot kirchengemeinde annweiler|annweiler am trifels": [49.202725, 7.968226],
+  "prot. kirchengemeinde edenkoben|edenkoben": [49.282236, 8.128436],
   "prot. kirchengemeinde|maikammer": [49.305216, 8.131629],
   "prot. kirche|freimersheim": [49.2683, 8.223612],
   "prot. pfarramt gimmeldingen- königsbach|neustadt an der weinstraße": [49.353606, 8.136025],

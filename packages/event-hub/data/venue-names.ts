@@ -739,6 +739,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "wdc2026-burgerhaus-mainhausen": "Bürgerhaus Mainhausen",
   "wdc2026-burgerzentrum-neue-schule": "Bürgerzentrum Neue Schule",
   "wdc2026-buttelborn-nachbarschaftstreff": "Büttelborn Nachbarschaftstreff",
+  "wdc2026-cafe-1": "Cafe 1",
   "wdc2026-cafe-rabe": "Café Rabe",
   "wdc2026-caligari-filmbuhne": "Caligari FilmBühne",
   "wdc2026-carlo-schmid-platz": "Carlo-Schmid-Platz",

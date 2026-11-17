@@ -153,6 +153,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "bergisch-ev-stadtkirche-ohligs",
+    name: "Ev. Stadtkirche Ohligs",
+    address: "",
+    lat: 51.171,
+    lon: 7.085,
+    city: "solingen",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-farberei",
     name: "Färberei",
     address: "",
@@ -455,6 +465,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
   {
     slug: "bergisch-tanzsportzentrum-grun-gold-casino",
     name: "Tanzsportzentrum Grün-Gold Casino",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
+    slug: "bergisch-tanztheater-wuppertal-pina-bausch",
+    name: "Tanztheater Wuppertal Pina Bausch",
     address: "",
     lat: 51.256,
     lon: 7.15,
