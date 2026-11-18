@@ -253,16 +253,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "bergisch-kirche-der-ev-stiftung-tannenhof",
-    name: "Kirche der Ev. Stiftung Tannenhof",
-    address: "",
-    lat: 51.178,
-    lon: 7.193,
-    city: "remscheid",
-    website_url: "https://www.wuppertal-live.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "bergisch-klosterkirche-lennep",
     name: "Klosterkirche Lennep",
     address: "",

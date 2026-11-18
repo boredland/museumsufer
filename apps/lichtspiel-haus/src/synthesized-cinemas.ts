@@ -450,7 +450,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.556,
     lon: 9.957,
     city: "hamburg",
-    website_url: "https://www.studio-kino.de",
+    website_url: "https://www.kinoheld.de",
   },
   {
     slug: "taunale-oberursel",

@@ -473,16 +473,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "sacred",
   },
   {
-    slug: "bergisch-kirche-der-ev-stiftung-tannenhof",
-    name: "Kirche der Ev. Stiftung Tannenhof",
-    address: "",
-    lat: 51.178,
-    lon: 7.193,
-    city: "remscheid",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "classical",
-  },
-  {
     slug: "bergisch-klosterkirche-beyenburg",
     name: "Klosterkirche Beyenburg",
     address: "",
@@ -920,7 +910,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: -0.3763,
     city: "valencia",
     website_url: "https://www.uv.es",
-    default_genre: "chamber",
+    default_genre: "classical",
   },
   {
     slug: "centralkomitee",
