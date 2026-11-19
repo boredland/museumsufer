@@ -138,6 +138,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-tanz-station-barmer-bahnhof",
+    name: "Tanz Station - Barmer Bahnhof",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "bergisch-wtt-schauspiel-remscheid",
     name: "WTT / Schauspiel Remscheid",
     address: "",
@@ -163,6 +172,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lon: 9.812,
     city: "hamburg",
     website_url: "https://www.kinoheld.de",
+  },
+  {
+    slug: "boell-hessen",
+    name: "Heinrich-Böll-Stiftung Hessen",
+    address: "",
+    lat: 50.1056,
+    lon: 8.6517,
+    city: "frankfurt",
+    website_url: "https://www.boell-hessen.de",
   },
   {
     slug: "botschaft-der-wildtiere",
