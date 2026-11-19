@@ -296,6 +296,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "katharinenkapelle|landau": [49.199235, 8.112627],
   "katharinenkapelle|landau in der pfalz": [49.199235, 8.112627],
   "katholische kirche st. kosmas und damian|maikammer": [49.305216, 8.131629],
+  "katholische kirche st. ludwig|edenkoben": [49.282236, 8.128436],
   "katholische kirche st. stephanus|albersweiler": [49.218951, 8.029965],
   "katholische kirche st.sebastian|schweigen-rechtenbach": [49.054561, 7.956034],
   "katholische kirche|göcklingen": [49.1611, 8.0396],

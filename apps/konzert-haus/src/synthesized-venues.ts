@@ -843,16 +843,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "experimental",
   },
   {
-    slug: "bergisch-wohnzimmer-das-cow-club-vereinsheim",
-    name: "Wohnzimmer - Das Cow Club Vereinsheim",
-    address: "",
-    lat: 51.171,
-    lon: 7.085,
-    city: "solingen",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "experimental",
-  },
-  {
     slug: "bergisch-wuppertal-diverse-orte",
     name: "Wuppertal (diverse Orte)",
     address: "",
@@ -1351,6 +1341,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     city: "hamburg",
     website_url: "https://shop-komoedie.comfortticket.de",
     default_genre: "classical",
+  },
+  {
+    slug: "lichtwark-theater",
+    name: "LichtwarkTheater",
+    address: "",
+    lat: 53.4851,
+    lon: 10.2285,
+    city: "hamburg",
+    website_url: "https://staeitsch-shop.comfortticket.de",
+    default_genre: "chamber",
   },
   {
     slug: "literaturhaus-darmstadt",
