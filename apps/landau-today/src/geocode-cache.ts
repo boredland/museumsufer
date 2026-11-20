@@ -162,6 +162,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "eiswerkstatt|schweigen-rechtenbach": [49.054561, 7.956034],
   "elias-grünebaum-platz|landau in der pfalz": [49.194832, 8.115795],
   "elmar-weiller-festhalle|herxheim": [49.144613, 8.216157],
+  "erlebnisweinhaus schowalter|kapellen-drusweiler": [49.10314, 8.031469],
   "erras restaurant|kirrweiler": [49.303726, 8.155927],
   "evangelische kirche dernbach|dernbach": [50.456539, 7.788509],
   "evangelische martinskirche leinsweiler|leinsweiler": [49.182507, 8.020491],

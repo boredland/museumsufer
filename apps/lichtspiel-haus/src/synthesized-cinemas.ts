@@ -165,6 +165,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
+    slug: "bergisch-yoga-simha",
+    name: "Yoga Simha",
+    address: "",
+    lat: 51.171,
+    lon: 7.085,
+    city: "solingen",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
     slug: "blankeneser-kino",
     name: "Blankeneser Kino",
     address: "",
