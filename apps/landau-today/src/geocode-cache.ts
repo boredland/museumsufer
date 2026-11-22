@@ -367,6 +367,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "le petit atelier|landau in der pfalz": [49.198283, 8.112344],
   "lederstrump-brunnen, edenkoben|edenkoben": [49.282236, 8.128436],
   "leinsweiler hof hotel-betriebs-gmbh|leinsweiler": [49.182507, 8.020491],
+  "lessingstraße|bad bergzabern": [49.097957, 7.996562],
   "lgs skatepark|landau in der pfalz": [49.198283, 8.112344],
   "linkes zentrum \"kätche brunner\"|landau in der pfalz": [49.198283, 8.112344],
   "liva cafe|landau/pfalz": [49.196234, 8.111915],

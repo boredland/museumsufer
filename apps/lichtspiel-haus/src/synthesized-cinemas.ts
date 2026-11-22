@@ -423,7 +423,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.553,
     lon: 9.991,
     city: "hamburg",
-    website_url: "https://www.das-passage.de",
+    website_url: "https://www.passagekino.de",
   },
   {
     slug: "rex-filmtheater-wuppertal",
