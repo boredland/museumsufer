@@ -793,6 +793,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "lichtwark-theater",
+    name: "LichtwarkTheater",
+    address: "",
+    lat: 53.4851,
+    lon: 10.2285,
+    city: "hamburg",
+    website_url: "https://staeitsch-shop.comfortticket.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "literaturhaus-darmstadt",
     name: "Literaturhaus Darmstadt",
     address: "",

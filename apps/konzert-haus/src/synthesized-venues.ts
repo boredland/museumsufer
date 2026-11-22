@@ -1520,7 +1520,7 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: -0.378,
     city: "valencia",
     website_url: "https://findevalencia.es",
-    default_genre: "sacred",
+    default_genre: "jazz",
   },
   {
     slug: "thalia-theater",
