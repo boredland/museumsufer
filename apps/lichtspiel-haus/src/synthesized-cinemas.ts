@@ -21,15 +21,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
-    slug: "archaeologisches-museum-frankfurt",
-    name: "Archäologisches Museum Frankfurt",
-    address: "",
-    lat: 50.1073,
-    lon: 8.6832,
-    city: "frankfurt",
-    website_url: "https://www.archaeologisches-museum-frankfurt.de",
-  },
-  {
     slug: "astor-hafencity",
     name: "ASTOR Film Lounge HafenCity",
     address: "",
@@ -432,7 +423,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 53.553,
     lon: 9.991,
     city: "hamburg",
-    website_url: "https://www.passagekino.de",
+    website_url: "https://www.das-passage.de",
   },
   {
     slug: "rex-filmtheater-wuppertal",
