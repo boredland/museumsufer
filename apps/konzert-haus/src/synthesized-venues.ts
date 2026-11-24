@@ -573,6 +573,16 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
+    slug: "bergisch-kunstraum-eckart",
+    name: "Kunstraum Eckart",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+    default_genre: "experimental",
+  },
+  {
     slug: "bergisch-larena-eventlounge",
     name: "laréna Eventlounge",
     address: "",
