@@ -263,6 +263,16 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
+    slug: "bergisch-jugendkunstschule",
+    name: "Jugendkunstschule",
+    address: "",
+    lat: 51.178,
+    lon: 7.193,
+    city: "remscheid",
+    website_url: "https://www.wuppertal-live.de",
+    ticketing_provider: null,
+  },
+  {
     slug: "bergisch-k4-theater-fur-menschlichkeit",
     name: "K4 Theater für Menschlichkeit",
     address: "",
