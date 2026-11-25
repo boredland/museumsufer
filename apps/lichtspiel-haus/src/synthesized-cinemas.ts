@@ -102,15 +102,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-medienprojekt-wuppertal",
-    name: "Medienprojekt Wuppertal",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-stadtbibliothek-solingen",
     name: "Stadtbibliothek Solingen",
     address: "",

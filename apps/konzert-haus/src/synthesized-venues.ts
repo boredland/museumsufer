@@ -733,16 +733,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "bergisch-solips-wuppertal",
-    name: "Solips Wuppertal",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-    default_genre: "classical",
-  },
-  {
     slug: "bergisch-sophienkirche",
     name: "Sophienkirche",
     address: "",
@@ -1340,16 +1330,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     lon: 8.6918,
     city: "heidelberg",
     website_url: "https://karlstorbahnhof.reservix.de",
-    default_genre: "classical",
-  },
-  {
-    slug: "kellertheater-hamburg",
-    name: "Kellertheater Hamburg",
-    address: "",
-    lat: 53.5548,
-    lon: 9.9793,
-    city: "hamburg",
-    website_url: "https://kellertheater.de",
     default_genre: "classical",
   },
   {
