@@ -329,6 +329,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-theater-am-engelsgarten": "Theater am Engelsgarten",
   "bergisch-theater-und-konzerthaus-solingen": "Theater und Konzerthaus Solingen",
   "bergisch-thomaskirche": "Thomaskirche",
+  "bergisch-thw-wuppertal": "THW Wuppertal",
   "bergisch-tic-theater-in-wuppertal-spielstatte-atelier": "TiC-Theater in Wuppertal - Spielstätte Atelier",
   "bergisch-tic-theater-wuppertal": "TiC-Theater Wuppertal",
   "bergisch-toelleturm": "Toelleturm",

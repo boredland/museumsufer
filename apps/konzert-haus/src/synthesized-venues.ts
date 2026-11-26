@@ -1473,16 +1473,6 @@ export const SYNTHESIZED_VENUES: VenueConfig[] = [
     default_genre: "classical",
   },
   {
-    slug: "saarlandmuseum",
-    name: "Saarlandmuseum",
-    address: "",
-    lat: 49.2303,
-    lon: 6.9984,
-    city: "saarbruecken",
-    website_url: "https://www.kulturbesitz.de",
-    default_genre: "classical",
-  },
-  {
     slug: "schauspiel-frankfurt",
     name: "Schauspiel Frankfurt",
     address: "",

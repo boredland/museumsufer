@@ -643,16 +643,6 @@ export const SYNTHESIZED_THEATERS: TheaterConfig[] = [
     ticketing_provider: null,
   },
   {
-    slug: "drp-saarbruecken",
-    name: "Deutsche Radio Philharmonie",
-    address: "",
-    lat: 49.241,
-    lon: 7.024,
-    city: "saarbruecken",
-    website_url: "https://drp-orchester.reservix.de",
-    ticketing_provider: null,
-  },
-  {
     slug: "enjoy-jazz",
     name: "Enjoy Jazz",
     address: "",
