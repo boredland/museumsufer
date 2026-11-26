@@ -21,6 +21,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.kinoheld.de",
   },
   {
+    slug: "archaeologisches-museum-frankfurt",
+    name: "Archäologisches Museum Frankfurt",
+    address: "",
+    lat: 50.1073,
+    lon: 8.6832,
+    city: "frankfurt",
+    website_url: "https://www.archaeologisches-museum-frankfurt.de",
+  },
+  {
     slug: "astor-hafencity",
     name: "ASTOR Film Lounge HafenCity",
     address: "",
@@ -59,6 +68,15 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   {
     slug: "bergisch-burgerbahnhof-vohwinkel",
     name: "BürgerBahnhof Vohwinkel",
+    address: "",
+    lat: 51.256,
+    lon: 7.15,
+    city: "wuppertal",
+    website_url: "https://www.wuppertal-live.de",
+  },
+  {
+    slug: "bergisch-chili-royal",
+    name: "Chili Royal",
     address: "",
     lat: 51.256,
     lon: 7.15,

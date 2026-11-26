@@ -297,6 +297,7 @@ export const VENUE_NAMES: Readonly<Record<string, string>> = {
   "bergisch-st-joseph-ohligs": "St. Joseph - Ohligs",
   "bergisch-st-maria-himmelfahrt-grafrath": "St. Mariä Himmelfahrt - Gräfrath",
   "bergisch-st-raphael": "St. Raphael",
+  "bergisch-st-reinoldi-kapelle-rupelrath": "St. Reinoldi Kapelle Rupelrath",
   "bergisch-st-suitbertus-remscheid": "St. Suitbertus Remscheid",
   "bergisch-st-suitbertus-wuppertal": "St. Suitbertus Wuppertal",
   "bergisch-stadtbibliothek-solingen": "Stadtbibliothek Solingen",

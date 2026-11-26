@@ -265,6 +265,7 @@ export const GEOCODE_CACHE: Record<string, [number, number]> = {
   "hotel-ristorante la corona|maikammer": [49.305216, 8.131629],
   "i-punkt kirrweiler|kirrweiler": [49.302004, 8.165108],
   "i-punkt|edenkoben": [49.281923, 8.127323],
+  "im dachgeschoss|landau in der pfalz": [49.198283, 8.112344],
   "im hinterhof des jostwegs 8-10|landau in der pfalz": [49.198283, 8.112344],
   "interessengemeinschaft gräfenhausen|annweiler-gräfenhausen": [49.215485, 7.964367],
   "jki - institut für rebzüchtung|siebeldingen": [49.209861, 8.050691],
