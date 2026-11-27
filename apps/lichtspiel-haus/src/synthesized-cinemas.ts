@@ -66,15 +66,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     website_url: "https://www.wuppertal-live.de",
   },
   {
-    slug: "bergisch-burgerbahnhof-vohwinkel",
-    name: "BürgerBahnhof Vohwinkel",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
     slug: "bergisch-chili-royal",
     name: "Chili Royal",
     address: "",
@@ -86,15 +77,6 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
   {
     slug: "bergisch-cinemaxx-wuppertal",
     name: "CinemaxX Wuppertal",
-    address: "",
-    lat: 51.256,
-    lon: 7.15,
-    city: "wuppertal",
-    website_url: "https://www.wuppertal-live.de",
-  },
-  {
-    slug: "bergisch-farberei",
-    name: "Färberei",
     address: "",
     lat: 51.256,
     lon: 7.15,
@@ -297,7 +279,7 @@ export const SYNTHESIZED_CINEMAS: CinemaConfig[] = [
     lat: 50.1092,
     lon: 8.6819,
     city: "frankfurt",
-    website_url: "https://historisches-museum-frankfurt.de",
+    website_url: "https://filmforum-hoechst.com",
   },
   {
     slug: "hugenottenhalle",
